@@ -3,15 +3,23 @@ StillMe Backend API
 Learning AI system with RAG foundation - FastAPI backend with RAG (Retrieval-Augmented Generation) capabilities
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request, Query, Path
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 from typing import Optional, Dict, Any, List
 import os
 import logging
 import asyncio
 import httpx
 from datetime import datetime
+
+# Import validated models
+from backend.api.models import (
+    ChatRequest, ChatResponse,
+    LearningRequest, LearningResponse,
+    RAGQueryRequest, RAGQueryResponse,
+    PaginationParams, ValidationErrorResponse
+)
 
 # Import authentication
 from backend.api.auth import require_api_key
@@ -24,6 +32,8 @@ from backend.services.learning_scheduler import LearningScheduler
 from backend.services.self_diagnosis import SelfDiagnosisAgent
 from backend.services.content_curator import ContentCurator
 from backend.services.rss_fetch_history import RSSFetchHistory
+from backend.api.rate_limiter import limiter, get_rate_limit_key_func, RateLimitExceeded
+from backend.api.security_middleware import get_security_middleware
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -65,6 +75,52 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Specific methods instead of "*"
     allow_headers=["Content-Type", "Authorization", "X-API-Key"],  # Specific headers instead of "*"
 )
+
+# Security middleware (HTTPS enforcement, HSTS headers, etc.)
+security_middleware_list = get_security_middleware()
+for middleware_class in security_middleware_list:
+    app.add_middleware(middleware_class)
+
+# Rate limiting middleware
+app.state.limiter = limiter
+
+# Custom rate limit error handler
+@app.exception_handler(RateLimitExceeded)
+async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Custom handler for rate limit exceeded"""
+    from backend.api.rate_limiter import get_remote_address
+    logger.warning(f"Rate limit exceeded for {get_remote_address(request)}")
+    raise HTTPException(
+        status_code=429,
+        detail={
+            "error": "rate_limit_exceeded",
+            "message": f"Rate limit exceeded: {exc.detail}. Please try again later.",
+            "retry_after": 60
+        },
+        headers={"Retry-After": "60"}
+    )
+
+# Validation error handler
+@app.exception_handler(ValidationError)
+async def validation_error_handler(request: Request, exc: ValidationError):
+    """Custom handler for validation errors"""
+    logger.warning(f"Validation error: {exc.errors()}")
+    
+    # Format validation errors
+    field_errors = []
+    for error in exc.errors():
+        field_errors.append({
+            "field": ".".join(str(loc) for loc in error["loc"]),
+            "message": error["msg"],
+            "type": error["type"]
+        })
+    
+    return ValidationErrorResponse(
+        error="validation_error",
+        message="Input validation failed",
+        details={"errors": exc.errors()},
+        field_errors=field_errors
+    ).dict(), 422
 
 # Initialize RAG components
 # Track initialization errors for better diagnostics
@@ -188,35 +244,7 @@ except Exception as e:
         # from the initial declaration, unless they were set before the exception
 
 # Pydantic models
-class ChatRequest(BaseModel):
-    message: str
-    user_id: Optional[str] = "default"
-    use_rag: bool = True
-    context_limit: int = 3
-
-class ChatResponse(BaseModel):
-    response: str
-    context_used: Optional[Dict[str, Any]] = None
-    accuracy_score: Optional[float] = None
-    learning_session_id: Optional[int] = None
-    knowledge_alert: Optional[Dict[str, Any]] = None  # Important knowledge suggestion
-    timing: Optional[Dict[str, str]] = None  # Timing breakdown for performance analysis
-
-class LearningRequest(BaseModel):
-    content: str
-    source: str
-    content_type: str = "knowledge"
-    metadata: Optional[Dict[str, Any]] = None
-
-class LearningResponse(BaseModel):
-    success: bool
-    knowledge_id: Optional[int] = None
-    message: str
-
-class RAGQueryRequest(BaseModel):
-    query: str
-    knowledge_limit: int = 3
-    conversation_limit: int = 2
+# Models are now imported from backend.api.models (see imports above)
 
 # API Routes
 @app.get("/")
@@ -238,7 +266,8 @@ async def root():
     }
 
 @app.get("/health")
-async def health_check():
+@limiter.limit("100/minute")  # Health check: 100 requests per minute
+async def health_check(request: Request):
     """Health check endpoint"""
     rag_status = "enabled" if rag_retrieval else "disabled"
     return {
@@ -273,7 +302,8 @@ async def shutdown_event():
     logger.info("🛑 FastAPI application shutting down")
 
 @app.post("/api/chat/rag", response_model=ChatResponse)
-async def chat_with_rag(request: ChatRequest):
+@limiter.limit("10/minute", key_func=get_rate_limit_key_func)  # Chat: 10 requests per minute
+async def chat_with_rag(http_request: Request, request: ChatRequest):
     """Chat with RAG-enhanced responses"""
     import time
     start_time = time.time()
@@ -762,7 +792,10 @@ async def get_learning_metrics():
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/learning/retained")
-async def get_retained_knowledge(limit: int = 100):
+async def get_retained_knowledge(
+    limit: int = Query(default=100, ge=1, le=1000, description="Maximum number of items to return"),
+    min_score: Optional[float] = Query(default=None, ge=0.0, le=1.0, description="Minimum retention score")
+):
     """Get retained knowledge items with full details for audit log
     
     Returns:
@@ -776,7 +809,12 @@ async def get_retained_knowledge(limit: int = 100):
         if not knowledge_retention:
             raise HTTPException(status_code=503, detail="Knowledge retention not available")
         
+        # Apply min_score filter if provided
         knowledge = knowledge_retention.get_retained_knowledge(limit=limit)
+        
+        # Filter by min_score if provided
+        if min_score is not None:
+            knowledge = [item for item in knowledge if item.get("retention_score", 0.0) >= min_score]
         
         # Enhance with vector IDs and content snippets from RAG
         enhanced_items = []
@@ -829,7 +867,8 @@ async def get_retained_knowledge(limit: int = 100):
 
 # RAG-specific endpoints
 @app.post("/api/rag/add_knowledge")
-async def add_knowledge_rag(request: LearningRequest):
+@limiter.limit("20/hour", key_func=get_rate_limit_key_func)  # RAG add: 20 requests per hour (expensive)
+async def add_knowledge_rag(http_request: Request, request: LearningRequest):
     """Add knowledge to RAG vector database"""
     try:
         if not rag_retrieval:
@@ -884,14 +923,11 @@ async def query_rag(request: RAGQueryRequest):
             conversation_limit=request.conversation_limit
         )
         
-        context_text = rag_retrieval.build_prompt_context(context)
-        
-        return {
-            "status": "Context retrieved",
-            "context": context_text,
-            "raw_results": context,
-            "total_context_docs": context.get("total_context_docs", 0)
-        }
+        return RAGQueryResponse(
+            knowledge_docs=context.get("knowledge_docs", []),
+            conversation_docs=context.get("conversation_docs", []),
+            total_context_docs=context.get("total_context_docs", 0)
+        )
         
     except Exception as e:
         logger.error(f"RAG query error: {e}")
@@ -1069,7 +1105,12 @@ async def get_accuracy_metrics():
 
 # RSS Learning Pipeline endpoints
 @app.post("/api/learning/rss/fetch")
-async def fetch_rss_content(max_items: int = 5, auto_add: bool = False):
+@limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # RSS fetch: 5 requests per hour (can be expensive)
+async def fetch_rss_content(
+    http_request: Request,
+    max_items: int = Query(default=5, ge=1, le=50, description="Maximum items per feed"),
+    auto_add: bool = Query(default=False, description="Automatically add to RAG")
+):
     """Fetch content from RSS feeds with detailed status tracking
     
     Args:

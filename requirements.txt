@@ -44,6 +44,9 @@ orjson==3.9.10
 chromadb==0.4.22
 sentence-transformers>=2.7.0  # Updated to support newer huggingface_hub
 
+# Security & Rate Limiting
+slowapi==0.1.9
+
 # Development & Testing
 pytest==7.4.3
 pytest-asyncio==0.21.1
