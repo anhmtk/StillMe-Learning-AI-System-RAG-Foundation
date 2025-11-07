@@ -100,27 +100,50 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
         headers={"Retry-After": "60"}
     )
 
+# Import standardized error handlers
+from backend.api.error_handlers import (
+    handle_validation_error,
+    handle_not_found_error,
+    handle_service_unavailable,
+    handle_internal_server_error,
+    handle_generic_http_exception,
+    create_error_response,
+    ERROR_CODES
+)
+from backend.api.error_tracking import error_tracker
+
 # Validation error handler
 @app.exception_handler(ValidationError)
 async def validation_error_handler(request: Request, exc: ValidationError):
     """Custom handler for validation errors"""
-    logger.warning(f"Validation error: {exc.errors()}")
-    
-    # Format validation errors
-    field_errors = []
-    for error in exc.errors():
-        field_errors.append({
-            "field": ".".join(str(loc) for loc in error["loc"]),
-            "message": error["msg"],
-            "type": error["type"]
-        })
-    
-    return ValidationErrorResponse(
-        error="validation_error",
-        message="Input validation failed",
-        details={"errors": exc.errors()},
-        field_errors=field_errors
-    ).dict(), 422
+    return handle_validation_error(request, exc)
+
+# HTTP Exception handler
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Custom handler for HTTP exceptions"""
+    # Route to specific handlers based on status code
+    if exc.status_code == 404:
+        return handle_not_found_error(request, exc)
+    elif exc.status_code == 503:
+        return handle_service_unavailable(request, exc)
+    else:
+        return handle_generic_http_exception(request, exc)
+
+# Generic exception handler (catches all unhandled exceptions)
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    """Handle all unhandled exceptions"""
+    # Track error
+    error_tracker.capture_exception(
+        exc,
+        context={
+            "path": request.url.path,
+            "method": request.method,
+            "query_params": dict(request.query_params)
+        }
+    )
+    return handle_internal_server_error(request, exc)
 
 # Initialize RAG components
 # Track initialization errors for better diagnostics
