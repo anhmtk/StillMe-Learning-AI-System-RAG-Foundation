@@ -190,9 +190,16 @@ streamlit run dashboard.py --server.port 8501
 ### 📋 **Planned/In Development (Next 30-60 days):**
 - **⏰ Automated Scheduler**: ✅ **IMPLEMENTED** - Background task auto-fetches RSS every 4 hours
 - **🧪 Test Coverage**: Basic tests added, expanding to critical paths (target: 40%+ coverage)
-- **🔐 Security Hardening**: Rate limiting, authentication - planned after scheduler
+  - ✅ Validator chain tests
+  - ✅ RAG system tests
+  - ⚠️ **NEEDED**: RSS fetcher, learning scheduler, content curator tests
+- **🔐 Security Hardening**: 🔴 **CRITICAL PRIORITY** - Rate limiting, input validation, SQL injection protection
+  - ⚠️ **Current**: API key auth exists, but missing rate limiting
+  - ⚠️ **Current**: Input validation chưa comprehensive
+  - ⚠️ **NEEDED**: Rate limiting middleware, comprehensive validation, HTTPS enforcement
 - **👥 Community Voting**: Secure voting system designed, awaiting implementation
 - **🛡️ Ethical Filtering**: Framework exists, needs integration
+- **📊 Data Transparency Dashboard**: ✅ **IMPLEMENTED** - RSS fetch history & retained knowledge audit log
 
 ### 🚀 **v0.5+ (SPICE Architecture - Framework Ready):**
 - **🎯 SPICE Engine**: Self-Play In Corpus Environments framework implemented
@@ -1104,6 +1111,57 @@ If you're in a developing nation working on:
 ---
 
 > **"The future of AI shouldn't be decided in Silicon Valley boardrooms. It should be built in communities, nations, and open source projects where transparency, ethics, and local values matter."**
+
+## ⚠️ Known Limitations & Areas for Improvement
+
+### **Current Limitations (Honest Assessment):**
+
+**Security:**
+- ⚠️ Rate limiting chưa implemented (cần cho production)
+- ⚠️ Input validation chưa comprehensive (cần audit)
+- ⚠️ SQL injection protection cần review (đang dùng parameterized queries nhưng cần audit)
+- ⚠️ HTTPS enforcement chưa có (cần cho production)
+
+**Testing:**
+- ⚠️ Test coverage hiện tại ~20-30% (target: 40%+)
+- ⚠️ Thiếu integration tests cho RSS pipeline
+- ⚠️ Thiếu tests cho learning scheduler và content curator
+
+**Scalability:**
+- ⚠️ SQLite database sẽ bottleneck khi scale (cần migrate PostgreSQL)
+- ⚠️ Single-threaded scheduler (cần distributed task queue)
+- ⚠️ ChromaDB memory-based (cần persistence strategy cho scale)
+
+**Advanced Features:**
+- ⚠️ SPICE Engine có framework nhưng nhiều TODO (chưa complete)
+- ⚠️ Ethical filtering framework exists nhưng chưa integrated
+- ⚠️ Community voting designed nhưng chưa implemented
+
+### **Improvement Roadmap:**
+
+Xem chi tiết trong [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md)
+
+**IMMEDIATE (1-2 tuần):**
+1. Security hardening (rate limiting, input validation, SQL injection protection)
+2. Test coverage expansion (RSS fetcher, scheduler, curator)
+3. Error handling standardization
+
+**SHORT-TERM (1-3 tháng):**
+4. Database migration planning (SQLite → PostgreSQL)
+5. Performance optimization (Redis caching, query optimization)
+6. Monitoring & observability (health checks, metrics, logging)
+
+**MEDIUM-TERM (3-6 tháng):**
+7. Scalability architecture (PostgreSQL, Celery, load balancer)
+8. Advanced features completion (SPICE, ethical filtering, voting)
+
+### **Professional Assessments:**
+
+- **Technical Assessment**: Xem [`docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md`](docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md)
+- **Investment Analysis**: Xem đánh giá từ VC Analyst trong professional assessment
+- **Research Evaluation**: Xem đánh giá từ AI Researcher trong professional assessment
+
+---
 
 ## 📄 License
 
