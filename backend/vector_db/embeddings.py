@@ -43,12 +43,24 @@ class EmbeddingService:
     def _get_cache_path(self) -> Union[str, None]:
         """
         Get cache path for HuggingFace models.
-        Prioritizes persistent volume path if available.
+        Prioritizes model cache from Docker image (SENTENCE_TRANSFORMERS_HOME),
+        then persistent volume path, then custom cache path.
         
         Returns:
             Cache path string or None to use default
         """
-        # Check for Railway persistent volume path (from railway.json: /app/hf_cache)
+        # Priority 1: Use cache from Docker image (set in Dockerfile)
+        # This ensures model is loaded from image, not re-downloaded
+        image_cache = os.getenv("SENTENCE_TRANSFORMERS_HOME")
+        if image_cache:
+            cache_dir = Path(image_cache)
+            if cache_dir.exists():
+                logger.info(f"Using model cache from Docker image: {cache_dir}")
+                return str(cache_dir)
+            else:
+                logger.warning(f"Image cache path does not exist: {cache_dir}, falling back to other options")
+        
+        # Priority 2: Check for Railway persistent volume path (from railway.json: /app/hf_cache)
         persistent_cache = os.getenv("PERSISTENT_CACHE_PATH")
         if persistent_cache:
             # If path ends with /hf_cache, use it directly, otherwise append /huggingface
@@ -57,20 +69,37 @@ class EmbeddingService:
             else:
                 cache_dir = Path(persistent_cache) / "huggingface"
             cache_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Using persistent volume cache: {cache_dir}")
             return str(cache_dir)
         
-        # Check for custom cache path
+        # Priority 3: Check for custom cache path
         custom_cache = os.getenv("HF_CACHE_PATH")
         if custom_cache:
             cache_dir = Path(custom_cache)
             cache_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Using custom cache path: {cache_dir}")
             return str(cache_dir)
+        
+        # Priority 4: Use TRANSFORMERS_CACHE or HF_HOME if set (from Dockerfile ENV)
+        transformers_cache = os.getenv("TRANSFORMERS_CACHE")
+        if transformers_cache:
+            cache_dir = Path(transformers_cache)
+            if cache_dir.exists():
+                logger.info(f"Using TRANSFORMERS_CACHE: {cache_dir}")
+                return str(cache_dir)
+        
+        hf_home = os.getenv("HF_HOME")
+        if hf_home:
+            cache_dir = Path(hf_home)
+            if cache_dir.exists():
+                logger.info(f"Using HF_HOME: {cache_dir}")
+                return str(cache_dir)
         
         # Default: use system cache (ephemeral on Railway)
         # This will be /root/.cache/huggingface/ on Railway (ephemeral)
         logger.warning(
             "No persistent cache path configured. Model will be re-downloaded on restart. "
-            "Set PERSISTENT_CACHE_PATH=/app/hf_cache or HF_CACHE_PATH environment variable."
+            "Set SENTENCE_TRANSFORMERS_HOME=/app/.model_cache or PERSISTENT_CACHE_PATH=/app/hf_cache environment variable."
         )
         return None
     
