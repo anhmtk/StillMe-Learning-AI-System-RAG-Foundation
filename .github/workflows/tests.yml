@@ -115,7 +115,7 @@ jobs:
         with:
           files: junit.xml
           check_name: "Test Results (Python ${{ matrix.python-version }})"
-          comment_mode: create new
+          comment_mode: always
           report_individual_runs: true
 
   coverage:
