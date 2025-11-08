@@ -120,6 +120,75 @@ jobs:
           report_individual_runs: true
         continue-on-error: true
 
+  smoke-test:
+    name: Smoke Test (Health & Ready Endpoints)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest httpx
+      
+      - name: Start server in background
+        run: |
+          export PORT=8000
+          python start_backend.py &
+          SERVER_PID=$!
+          echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
+          # Wait for server to start
+          sleep 10
+        env:
+          ENVIRONMENT: test
+          PYTHONPATH: ${{ github.workspace }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY || 'test_key' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || 'test_key' }}
+      
+      - name: Test /health endpoint (liveness)
+        run: |
+          for i in {1..30}; do
+            if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+              echo "✅ /health endpoint returned 200 OK"
+              curl -i http://localhost:8000/health
+              exit 0
+            fi
+            echo "Waiting for /health endpoint... ($i/30)"
+            sleep 2
+          done
+          echo "❌ /health endpoint did not return 200 after 60 seconds"
+          exit 1
+      
+      - name: Test /ready endpoint (readiness)
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/ready)
+          echo "Response code: $response"
+          if [ "$response" = "200" ] || [ "$response" = "503" ]; then
+            echo "✅ /ready endpoint returned $response (expected 200 or 503)"
+            curl -i http://localhost:8000/ready
+          else
+            echo "❌ /ready endpoint returned unexpected status: $response"
+            exit 1
+          fi
+      
+      - name: Stop server
+        if: always()
+        run: |
+          if [ -n "$SERVER_PID" ]; then
+            kill $SERVER_PID || true
+          fi
+          pkill -f "python start_backend.py" || true
+
   coverage:
     name: Coverage Report
     runs-on: ubuntu-latest
