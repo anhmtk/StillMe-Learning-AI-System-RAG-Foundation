@@ -53,10 +53,22 @@ async def health_check(request: Request):
     Liveness probe endpoint for Railway/Docker health probes.
     Returns 200 if service is running (even with minor issues).
     No rate limiting - must always be available for monitoring.
+    
+    This endpoint is designed to be lightweight and always return 200,
+    even during RAG component initialization, to prevent Railway from
+    killing the container during startup.
     """
+    # Always return 200 - this endpoint only checks if the service is running
+    # Use /ready endpoint for detailed readiness checks
     try:
-        rag_retrieval = get_rag_retrieval()
-        rag_status = "enabled" if rag_retrieval else "disabled"
+        # Try to get RAG status if available, but don't fail if not ready yet
+        try:
+            rag_retrieval = get_rag_retrieval()
+            rag_status = "enabled" if rag_retrieval else "disabled"
+        except Exception:
+            # RAG components may still be initializing - that's OK for liveness
+            rag_status = "initializing"
+        
         return {
             "status": "healthy",
             "rag_status": rag_status,
