@@ -7,6 +7,15 @@ from .chat_models import ChatRequest, ChatResponse
 from .learning_models import LearningRequest, LearningResponse
 from .rag_models import RAGQueryRequest, RAGQueryResponse
 from .common_models import PaginationParams, ValidationErrorResponse
+from .tier_models import (
+    TierStatsResponse,
+    TierAuditResponse,
+    TierAuditRecord,
+    TierPromoteRequest,
+    TierDemoteRequest,
+    ForgettingMetric,
+    ForgettingTrendsResponse
+)
 
 __all__ = [
     "ChatRequest",
@@ -17,5 +26,12 @@ __all__ = [
     "RAGQueryResponse",
     "PaginationParams",
     "ValidationErrorResponse",
+    "TierStatsResponse",
+    "TierAuditResponse",
+    "TierAuditRecord",
+    "TierPromoteRequest",
+    "TierDemoteRequest",
+    "ForgettingMetric",
+    "ForgettingTrendsResponse",
 ]
 
