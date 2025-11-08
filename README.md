@@ -863,6 +863,11 @@ NOTIFY_ERRORS=true
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
+**Quick Start for Adding New AI Models:**
+- See [CONTRIBUTING.md#adding-support-for-new-ai-models](CONTRIBUTING.md#-adding-support-for-new-ai-models) for step-by-step guide
+- All models automatically get language matching via `build_system_prompt_with_language()`
+- Just create one function and add one line to the router!
+
 ### **Areas for Contribution**
 - **UI/UX Improvements**: Dashboard enhancements, mobile responsiveness
 - **Learning Sources**: Add new RSS feeds and API integrations
