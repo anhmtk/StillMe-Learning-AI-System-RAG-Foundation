@@ -1229,20 +1229,20 @@ async def fetch_rss_content(
                 # Try to add to RAG
                 vector_id = None
                 try:
-                    success = rag_retrieval.add_learning_content(
-                        content=content,
-                        source=entry['source'],
-                        content_type="knowledge",
-                        metadata={
-                            "link": entry['link'],
-                            "published": entry['published'],
+                success = rag_retrieval.add_learning_content(
+                    content=content,
+                    source=entry['source'],
+                    content_type="knowledge",
+                    metadata={
+                        "link": entry['link'],
+                        "published": entry['published'],
                             "type": "rss_feed",
                             "title": entry.get('title', '')[:200]
-                        }
-                    )
+                    }
+                )
                     
-                    if success:
-                        added_count += 1
+                if success:
+                    added_count += 1
                         status = "Added to RAG"
                         # Try to get vector ID (may not be available immediately)
                         vector_id = f"knowledge_{entry.get('link', '')[:8]}"
@@ -1505,7 +1505,7 @@ async def run_scheduler_now():
                                 summary=rejected.get("summary", ""),
                                 status=status,
                                 status_reason=reason
-                            )
+                    )
                     
                     # Use filtered entries for further processing
                     all_entries = filtered_entries
@@ -1773,14 +1773,14 @@ async def update_source_quality(source: str, quality_score: float):
 
 # Smart router endpoint - automatically selects best model
 @app.post("/api/chat/smart_router", response_model=ChatResponse)
-async def chat_smart_router(request: ChatRequest):
+async def chat_smart_router(request: Request, chat_request: ChatRequest):
     """
     Smart router that automatically selects the best chat endpoint.
     This is the main endpoint used by the dashboard.
     """
     try:
         # Use the RAG-enhanced chat endpoint as default
-        return await chat_with_rag(request)
+        return await chat_with_rag(request, chat_request)
     except HTTPException:
         # Re-raise HTTP exceptions (they have proper status codes)
         raise
