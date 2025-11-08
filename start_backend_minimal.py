@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Wrapper script to start FastAPI backend with Railway PORT environment variable."""
+"""
+Minimal startup script for Railway - starts FastAPI with immediate /health endpoint
+This ensures service is available even during RAG initialization
+"""
 import os
 import sys
 import logging
