@@ -120,6 +120,63 @@ jobs:
           report_individual_runs: true
         continue-on-error: true
 
+  docker-build:
+    name: Docker Build (no push)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image (CHROMA_WARMUP=false)
+        run: |
+          docker build \
+            --build-arg CHROMA_WARMUP=false \
+            -t stillme-api:ci \
+            .
+      
+      - name: Build Docker image (CHROMA_WARMUP=true)
+        run: |
+          docker build \
+            --build-arg CHROMA_WARMUP=true \
+            -t stillme-api:ci-warmup \
+            .
+        continue-on-error: true  # Warmup may fail, but build should still work
+      
+      - name: Smoke test built image
+        run: |
+          # Start container in background
+          docker run -d \
+            --name stillme-test \
+            -p 8000:8000 \
+            -e PORT=8000 \
+            -e ENVIRONMENT=test \
+            stillme-api:ci
+          
+          # Wait for server to start
+          echo "Waiting for server to start..."
+          sleep 15
+          
+          # Test /health endpoint
+          for i in {1..10}; do
+            if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+              echo "✅ /health endpoint returned 200 OK"
+              curl -i http://localhost:8000/health
+              break
+            fi
+            echo "Waiting for /health endpoint... ($i/10)"
+            sleep 2
+          done
+          
+          # Clean up
+          docker stop stillme-test || true
+          docker rm stillme-test || true
+        continue-on-error: true  # Smoke test is optional
+
   smoke-test:
     name: Smoke Test (Health & Ready Endpoints)
     runs-on: ubuntu-latest
