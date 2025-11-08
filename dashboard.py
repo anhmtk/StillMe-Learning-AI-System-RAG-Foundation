@@ -7,8 +7,6 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
 
 # Import floating chat widget
 try:
@@ -298,7 +296,7 @@ def page_overview():
                 st.warning("💡 Backend is reachable at `/api/status`, but `/api/learning/scheduler/status` returned empty response.")
                 st.info("This may indicate the scheduler endpoint has an issue. Check backend logs.")
             elif test_r.status_code == 502:
-                st.error(f"❌ **502 Bad Gateway** - Backend service is not responding.")
+                st.error("❌ **502 Bad Gateway** - Backend service is not responding.")
                 st.markdown("""
                 **502 Bad Gateway means the backend service is down or crashed.**
                 
@@ -398,7 +396,7 @@ def page_overview():
         init_error = scheduler_status.get("initialization_error")
         status_type = scheduler_status.get("status", "unknown")
         
-        st.warning(f"⚠️ **Learning scheduler is not available**")
+        st.warning("⚠️ **Learning scheduler is not available**")
         
         # Show detailed error if available
         if init_error:
@@ -936,7 +934,7 @@ def page_validation():
                             st.write(f"**Access Count:** {item.get('access_count', 0)}")
                         st.markdown("**Retained Content Snippet (5-10 sentences):**")
                         st.text_area("", item.get("retained_content_snippet", "N/A"), height=150, key=f"snippet_{idx}", disabled=True)
-                        if st.checkbox(f"View full content", key=f"full_{idx}"):
+                        if st.checkbox("View full content", key=f"full_{idx}"):
                             st.text_area("Full Content", item.get("full_content", "N/A"), height=200, key=f"full_content_{idx}", disabled=True)
             else:
                 st.info("No items match the filter.")

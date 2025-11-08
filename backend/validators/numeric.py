@@ -4,7 +4,7 @@ NumericUnitsBasic validator - Detects numbers and suggests citations
 
 import re
 from typing import List
-from .base import Validator, ValidationResult
+from .base import ValidationResult
 import logging
 
 logger = logging.getLogger(__name__)

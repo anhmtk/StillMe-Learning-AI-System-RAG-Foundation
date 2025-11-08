@@ -3,8 +3,8 @@ RAG API request and response models with comprehensive validation
 """
 
 from pydantic import BaseModel, Field, validator
-from typing import Optional, Dict, Any, List
-from .common_models import sanitize_string, validate_non_empty_string
+from typing import Dict, Any, List
+from .common_models import sanitize_string
 
 
 class RAGQueryRequest(BaseModel):

@@ -4,10 +4,9 @@ Implements tiered memory architecture (L0-L3) with promotion/demotion logic
 """
 
 import sqlite3
-import json
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional
+from datetime import datetime
 from pathlib import Path
 import os
 

@@ -3,28 +3,26 @@ StillMe Backend API
 Learning AI system with RAG foundation - FastAPI backend with RAG (Retrieval-Augmented Generation) capabilities
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Request, Query, Path
+from fastapi import FastAPI, HTTPException, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 from typing import Optional, Dict, Any, List
 import os
 import logging
-import asyncio
 import httpx
 from datetime import datetime
 
 # Import validated models
-from backend.api.models import (
-    ChatRequest, ChatResponse,
-    LearningRequest, LearningResponse,
-    RAGQueryRequest, RAGQueryResponse,
-    PaginationParams, ValidationErrorResponse,
-    TierStatsResponse, TierAuditResponse, TierPromoteRequest, TierDemoteRequest,
-    ForgettingTrendsResponse
-)
+from backend.api.models import ChatResponse
 
-# Import authentication
-from backend.api.auth import require_api_key
+# Import chat helpers
+from backend.api.utils import (
+    detect_language,
+    build_system_prompt_with_language,
+    call_deepseek_api,
+    call_openai_api,
+    generate_ai_response
+)
 
 # Import RAG components
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
@@ -38,6 +36,16 @@ from backend.services.rss_fetch_history import RSSFetchHistory
 from backend.services.source_integration import SourceIntegration
 from backend.api.rate_limiter import limiter, get_rate_limit_key_func, RateLimitExceeded
 from backend.api.security_middleware import get_security_middleware
+
+# Import standardized error handlers
+from backend.api.error_handlers import (
+    handle_validation_error,
+    handle_not_found_error,
+    handle_service_unavailable,
+    handle_internal_server_error,
+    handle_generic_http_exception
+)
+from backend.api.error_tracking import error_tracker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -103,18 +111,6 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
         },
         headers={"Retry-After": "60"}
     )
-
-# Import standardized error handlers
-from backend.api.error_handlers import (
-    handle_validation_error,
-    handle_not_found_error,
-    handle_service_unavailable,
-    handle_internal_server_error,
-    handle_generic_http_exception,
-    create_error_response,
-    ERROR_CODES
-)
-from backend.api.error_tracking import error_tracker
 
 # Validation error handler
 @app.exception_handler(ValidationError)
@@ -195,7 +191,7 @@ try:
                             logger.info("Closing old ChromaDB client connection...")
                             # ChromaDB PersistentClient doesn't have explicit close, but we can try to delete reference
                             del chroma_client_ref
-                    except:
+                    except Exception:
                         pass
                 
                 # Force garbage collection to ensure old client is freed
@@ -260,7 +256,7 @@ except Exception as e:
     logger.error(f"❌ Failed to initialize RAG components: {e}", exc_info=True)
     
     # Log which components were successfully initialized before the error
-    logger.error(f"📊 Components status at error time:")
+    logger.error("📊 Components status at error time:")
     logger.error(f"  - ChromaDB: {'✓' if chroma_client else '✗'}")
     logger.error(f"  - Embedding Service: {'✓' if embedding_service else '✗'}")
     logger.error(f"  - RAG Retrieval: {'✓' if rag_retrieval else '✗'}")
@@ -287,7 +283,7 @@ except Exception as e:
 # Pydantic models
 # Models are now imported from backend.api.models (see imports above)
 
-# Include routers
+# Include routers (imported at top level to avoid E402)
 from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
 app.include_router(chat_router.router, prefix="/api/chat", tags=["chat"])
 app.include_router(rag_router.router, prefix="/api/rag", tags=["rag"])
@@ -305,7 +301,7 @@ async def startup_event():
     logger.info("🌐 Uvicorn server is ready to accept connections")
     
     # Log RAG components status
-    logger.info(f"📊 RAG Components Status:")
+    logger.info("📊 RAG Components Status:")
     logger.info(f"  - ChromaDB: {'✓' if chroma_client else '✗'}")
     logger.info(f"  - Embedding Service: {'✓' if embedding_service else '✗'}")
     logger.info(f"  - RAG Retrieval: {'✓' if rag_retrieval else '✗'}")
@@ -324,488 +320,6 @@ async def shutdown_event():
     logger.info("🛑 FastAPI application shutting down")
 
 # Chat endpoints moved to router - see backend/api/routers/chat_router.py
-# @app.post("/api/chat/rag", response_model=ChatResponse)
-# @limiter.limit("10/minute", key_func=get_rate_limit_key_func)  # Chat: 10 requests per minute
-# async def chat_with_rag(request: Request, chat_request: ChatRequest):
-    """Chat with RAG-enhanced responses"""
-    import time
-    start_time = time.time()
-    timing_logs = {}
-    
-    # Initialize latency variables (will be set during processing)
-    rag_retrieval_latency = 0.0
-    llm_inference_latency = 0.0
-    
-    try:
-        # Special Retrieval Rule: Detect StillMe-related queries
-        is_stillme_query = False
-        if rag_retrieval and chat_request.use_rag:
-            try:
-                from backend.core.stillme_detector import detect_stillme_query, get_foundational_query_variants
-                is_stillme_query, matched_keywords = detect_stillme_query(chat_request.message)
-                if is_stillme_query:
-                    logger.info(f"StillMe query detected! Matched keywords: {matched_keywords}")
-            except ImportError:
-                logger.warning("StillMe detector not available, skipping special retrieval rule")
-            except Exception as detector_error:
-                logger.warning(f"StillMe detector error: {detector_error}")
-        
-        # Get RAG context if enabled
-        # RAG_Retrieval_Latency: Time from ChromaDB query start to result received
-        context = None
-        rag_retrieval_start = time.time()
-        if rag_retrieval and chat_request.use_rag:
-            # If StillMe query detected, prioritize foundational knowledge
-            if is_stillme_query:
-                # Try multiple query variants to ensure we get StillMe foundational knowledge
-                query_variants = get_foundational_query_variants(chat_request.message)
-                all_knowledge_docs = []
-                
-                for variant in query_variants[:3]:  # Try first 3 variants
-                    variant_context = rag_retrieval.retrieve_context(
-                        query=variant,
-                        knowledge_limit=chat_request.context_limit,
-                        conversation_limit=0,  # Don't need conversation for foundational queries
-                        prioritize_foundational=True
-                    )
-                    # Merge results, avoiding duplicates
-                    existing_ids = {doc.get("id") for doc in all_knowledge_docs}
-                    for doc in variant_context.get("knowledge_docs", []):
-                        if doc.get("id") not in existing_ids:
-                            all_knowledge_docs.append(doc)
-                
-                # If we still don't have results, do normal retrieval
-                if not all_knowledge_docs:
-                    logger.warning("No foundational knowledge found, falling back to normal retrieval")
-                    context = rag_retrieval.retrieve_context(
-                        query=chat_request.message,
-                        knowledge_limit=chat_request.context_limit,
-                        conversation_limit=2,
-                        prioritize_foundational=True
-                    )
-                else:
-                    # Use merged results
-                    context = {
-                        "knowledge_docs": all_knowledge_docs[:chat_request.context_limit],
-                        "conversation_docs": [],
-                        "total_context_docs": len(all_knowledge_docs[:chat_request.context_limit])
-                    }
-                    logger.info(f"Retrieved {len(context['knowledge_docs'])} StillMe foundational knowledge documents")
-            else:
-                # Normal retrieval for non-StillMe queries
-                # Optimized: conversation_limit reduced from 2 to 1 for latency
-                context = rag_retrieval.retrieve_context(
-                    query=chat_request.message,
-                    knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
-                    conversation_limit=1  # Optimized: reduced from 2 to 1
-                )
-        
-        rag_retrieval_end = time.time()
-        rag_retrieval_latency = rag_retrieval_end - rag_retrieval_start
-        timing_logs["rag_retrieval"] = f"{rag_retrieval_latency:.2f}s"
-        logger.info(f"⏱️ RAG retrieval took {rag_retrieval_latency:.2f}s")
-        
-        # Generate response using AI (simplified for demo)
-        enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
-        enable_tone_align = os.getenv("ENABLE_TONE_ALIGN", "true").lower() == "true"
-        
-        if context and context["total_context_docs"] > 0:
-            # Use context to enhance response
-            context_text = rag_retrieval.build_prompt_context(context)
-            
-            # Build base prompt with citation instructions
-            citation_instruction = ""
-            if enable_validators:
-                # Count knowledge docs for citation numbering
-                num_knowledge = len(context.get("knowledge_docs", []))
-                if num_knowledge > 0:
-                    citation_instruction = f"\n\nIMPORTANT: When referencing information from the context above, include citations in the format [1], [2], etc. where the number corresponds to the context item number. For example, if you reference the first context item, use [1]."
-            
-            # Detect language FIRST - before building prompt
-            detected_lang = detect_language(chat_request.message)
-            lang_detect_time = time.time() - start_time
-            timing_logs["language_detection"] = f"{lang_detect_time:.3f}s"
-            logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s) for question: '{chat_request.message[:100]}...'")
-            
-            # Language names mapping
-            language_names = {
-                'vi': 'Vietnamese (Tiếng Việt)',
-                'zh': 'Chinese (中文)',
-                'de': 'German (Deutsch)',
-                'fr': 'French (Français)',
-                'es': 'Spanish (Español)',
-                'ja': 'Japanese (日本語)',
-                'en': 'English'
-            }
-            
-            detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
-            
-            # CRITICAL: Put language instruction FIRST and make it VERY STRONG
-            # This must override any language bias from context
-            if detected_lang != 'en':
-                language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
-
-THE USER'S QUESTION IS WRITTEN IN {detected_lang_name.upper()}.
-
-YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name.upper()}. 
-
-DO NOT RESPOND IN VIETNAMESE, ENGLISH, OR ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {detected_lang_name.upper()}.
-
-THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
-
-FAILURE TO RESPOND IN {detected_lang_name.upper()} IS A CRITICAL ERROR.
-
-IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN {detected_lang_name.upper()} ONLY.
-
-"""
-            else:
-                language_instruction = """🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
-
-THE USER'S QUESTION IS WRITTEN IN ENGLISH.
-
-YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
-
-DO NOT RESPOND IN VIETNAMESE, SPANISH, OR ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
-
-THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
-
-IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
-
-"""
-            
-            # Special instruction for StillMe queries
-            stillme_instruction = ""
-            if is_stillme_query:
-                stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a Learning AI system with RAG foundation that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database, (3) Continuous knowledge updates through RSS feeds, (4) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
-            
-            # Build prompt with language instruction FIRST (before context)
-            # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
-            # ZERO TOLERANCE: Must translate if needed
-            base_prompt = f"""{language_instruction}
-
-⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
-
-The user's question is in {detected_lang_name.upper()}. 
-
-YOU MUST respond in {detected_lang_name.upper()} ONLY.
-
-IF YOUR BASE MODEL WANTS TO RESPOND IN A DIFFERENT LANGUAGE, YOU MUST TRANSLATE THE ENTIRE RESPONSE TO {detected_lang_name.upper()} BEFORE RETURNING IT.
-
-UNDER NO CIRCUMSTANCES return a response in any language other than {detected_lang_name.upper()}.
-
-Context: {context_text}
-{citation_instruction}
-{stillme_instruction}
-
-User Question (in {detected_lang_name.upper()}): {chat_request.message}
-
-⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
-
-RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. IGNORE THE LANGUAGE OF THE CONTEXT ABOVE.
-
-Please provide a helpful response based on the context above. Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE MODEL WANTS TO USE A DIFFERENT LANGUAGE.
-"""
-            
-            prompt_build_time = time.time() - start_time
-            timing_logs["prompt_building"] = f"{prompt_build_time:.3f}s"
-            
-            # Inject StillMe identity if validators enabled
-            if enable_validators:
-                from backend.identity.injector import inject_identity
-                enhanced_prompt = inject_identity(base_prompt)
-            else:
-                enhanced_prompt = base_prompt
-            
-            # Generate AI response with timing
-            # LLM_Inference_Latency: Time from API call start to response received
-            llm_inference_start = time.time()
-            raw_response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
-            llm_inference_end = time.time()
-            llm_inference_latency = llm_inference_end - llm_inference_start
-            timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
-            logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
-            
-            # Validate response if enabled
-            if enable_validators:
-                try:
-                    validation_start = time.time()
-                    from backend.validators.chain import ValidatorChain
-                    from backend.validators.citation import CitationRequired
-                    from backend.validators.evidence_overlap import EvidenceOverlap
-                    from backend.validators.numeric import NumericUnitsBasic
-                    from backend.validators.ethics_adapter import EthicsAdapter
-                    
-                    # Build context docs list for validation
-                    ctx_docs = [
-                        doc["content"] for doc in context["knowledge_docs"]
-                    ] + [
-                        doc["content"] for doc in context["conversation_docs"]
-                    ]
-                    
-                    # Create validator chain
-                    # Note: EvidenceOverlap threshold lowered to 0.01 to prevent false positives
-                    # when LLM translates/summarizes content (reducing vocabulary overlap)
-                    chain = ValidatorChain([
-                        CitationRequired(),
-                        EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
-                        NumericUnitsBasic(),
-                        EthicsAdapter(guard_callable=None)  # TODO: wire existing ethics guard if available
-                    ])
-                    
-                    # Run validation
-                    validation_result = chain.run(raw_response, ctx_docs)
-                    validation_time = time.time() - validation_start
-                    timing_logs["validation"] = f"{validation_time:.2f}s"
-                    logger.info(f"⏱️ Validation took {validation_time:.2f}s")
-                    
-                    # Record metrics
-                    try:
-                        from backend.validators.metrics import get_metrics
-                        metrics = get_metrics()
-                        # Extract overlap score from reasons if available
-                        overlap_score = 0.0
-                        for reason in validation_result.reasons:
-                            if reason.startswith("low_overlap:"):
-                                try:
-                                    overlap_score = float(reason.split(":")[1])
-                                except (ValueError, IndexError):
-                                    pass
-                        metrics.record_validation(
-                            passed=validation_result.passed,
-                            reasons=validation_result.reasons,
-                            overlap_score=overlap_score
-                        )
-                    except Exception as metrics_error:
-                        logger.warning(f"Failed to record metrics: {metrics_error}")
-                    
-                    if not validation_result.passed:
-                        # Use patched answer if available, otherwise return 422
-                        if validation_result.patched_answer:
-                            response = validation_result.patched_answer
-                            logger.info(f"Validation failed but using patched answer. Reasons: {validation_result.reasons}")
-                        else:
-                            logger.warning(f"Validation failed: {validation_result.reasons}")
-                            raise HTTPException(
-                                status_code=422,
-                                detail={
-                                    "error": "validation_failed",
-                                    "reasons": validation_result.reasons,
-                                    "original_response_preview": raw_response[:200] if raw_response else ""
-                                }
-                            )
-                    else:
-                        response = validation_result.patched_answer or raw_response
-                        logger.debug(f"Validation passed. Reasons: {validation_result.reasons}")
-                except HTTPException:
-                    raise
-                except Exception as validation_error:
-                    logger.error(f"Validation error: {validation_error}, falling back to raw response")
-                    response = raw_response
-            else:
-                response = raw_response
-        else:
-            # Fallback to regular AI response (no RAG context)
-            # Detect language FIRST
-            detected_lang = detect_language(chat_request.message)
-            logger.info(f"🌐 Detected language (non-RAG): {detected_lang}")
-            
-            # Language names mapping
-            language_names = {
-                'vi': 'Vietnamese (Tiếng Việt)',
-                'zh': 'Chinese (中文)',
-                'de': 'German (Deutsch)',
-                'fr': 'French (Français)',
-                'es': 'Spanish (Español)',
-                'ja': 'Japanese (日本語)',
-                'ko': 'Korean (한국어)',
-                'ar': 'Arabic (العربية)',
-                'en': 'English'
-            }
-            
-            detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
-            
-            # Strong language instruction - put FIRST
-            if detected_lang != 'en':
-                language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
-
-THE USER'S QUESTION IS WRITTEN IN {detected_lang_name.upper()}.
-
-YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name.upper()}. 
-
-DO NOT RESPOND IN VIETNAMESE, ENGLISH, OR ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {detected_lang_name.upper()}.
-
-THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
-
-"""
-                base_prompt = f"""{language_instruction}
-
-User Question: {chat_request.message}
-
-Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
-"""
-            else:
-                base_prompt = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
-
-THE USER'S QUESTION IS WRITTEN IN ENGLISH.
-
-YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
-
-DO NOT RESPOND IN VIETNAMESE, SPANISH, OR ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
-
-THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
-
-User Question: {chat_request.message}
-
-Remember: RESPOND IN ENGLISH ONLY."""
-            
-            if enable_validators:
-                from backend.identity.injector import inject_identity
-                enhanced_prompt = inject_identity(base_prompt)
-            else:
-                enhanced_prompt = base_prompt
-            
-            # LLM_Inference_Latency: Time from API call start to response received
-            llm_inference_start = time.time()
-            response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
-            llm_inference_end = time.time()
-            llm_inference_latency = llm_inference_end - llm_inference_start
-            timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
-            logger.info(f"⏱️ LLM inference (non-RAG) took {llm_inference_latency:.2f}s")
-        
-        # Score the response
-        accuracy_score = None
-        if accuracy_scorer:
-            accuracy_score = accuracy_scorer.score_response(
-                question=chat_request.message,
-                actual_answer=response,
-                scoring_method="semantic_similarity"
-            )
-        
-        # Record learning session
-        learning_session_id = None
-        if knowledge_retention:
-            learning_session_id = knowledge_retention.record_learning_session(
-                session_type="chat",
-                content_learned=f"Q: {chat_request.message}\nA: {response}",
-                accuracy_score=accuracy_score or 0.5,
-                metadata={"user_id": chat_request.user_id}
-            )
-        
-        # Align tone if enabled
-        if enable_tone_align:
-            try:
-                tone_start = time.time()
-                from backend.tone.aligner import align_tone
-                response = align_tone(response)
-                tone_time = time.time() - tone_start
-                timing_logs["tone_alignment"] = f"{tone_time:.2f}s"
-                logger.info(f"⏱️ Tone alignment took {tone_time:.2f}s")
-            except Exception as tone_error:
-                logger.error(f"Tone alignment error: {tone_error}, using original response")
-                # Continue with original response on error
-        
-        # Calculate total response latency
-        # Total_Response_Latency: Time from request received to response returned
-        total_response_end = time.time()
-        total_response_latency = total_response_end - start_time
-        
-        # Format latency metrics log as specified by user
-        # BẮT BUỘC HIỂN THỊ LOG: In ra ngay lập tức sau câu trả lời
-        latency_metrics_text = f"""--- LATENCY METRICS ---
-RAG_Retrieval_Latency: {rag_retrieval_latency:.2f} giây
-LLM_Inference_Latency: {llm_inference_latency:.2f} giây
-Total_Response_Latency: {total_response_latency:.2f} giây
------------------------"""
-        
-        logger.info(latency_metrics_text)
-        
-        # Add latency metrics to timing_logs for API response
-        timing_logs["rag_retrieval_latency"] = f"{rag_retrieval_latency:.2f}s"
-        timing_logs["llm_inference_latency"] = f"{llm_inference_latency:.2f}s"
-        timing_logs["total_response_latency"] = f"{total_response_latency:.2f}s"
-        timing_logs["total"] = f"{total_response_latency:.2f}s"
-        # Add formatted latency metrics text for frontend display
-        timing_logs["latency_metrics_formatted"] = latency_metrics_text
-        logger.info(f"📊 Timing breakdown: {timing_logs}")
-        
-        # Store conversation in vector DB
-        if rag_retrieval:
-            rag_retrieval.add_learning_content(
-                content=f"Q: {chat_request.message}\nA: {response}",
-                source="user_chat",
-                content_type="conversation",
-                metadata={
-                    "user_id": chat_request.user_id,
-                    "timestamp": datetime.now().isoformat(),
-                    "accuracy_score": accuracy_score
-                }
-            )
-        
-        # Knowledge Alert: Retrieve important knowledge related to query
-        knowledge_alert = None
-        if rag_retrieval:
-            try:
-                important_knowledge = rag_retrieval.retrieve_important_knowledge(
-                    query=chat_request.message,
-                    limit=1,
-                    min_importance=0.7
-                )
-                
-                if important_knowledge:
-                    doc = important_knowledge[0]
-                    metadata = doc.get("metadata", {})
-                    knowledge_alert = {
-                        "title": metadata.get("title", "Important Knowledge"),
-                        "source": metadata.get("source", "Unknown"),
-                        "importance_score": metadata.get("importance_score", 0.7),
-                        "content_preview": doc.get("content", "")[:200] + "..." if len(doc.get("content", "")) > 200 else doc.get("content", "")
-                    }
-                    logger.info(f"Knowledge alert generated: {knowledge_alert.get('title', 'Unknown')}")
-            except Exception as alert_error:
-                logger.warning(f"Knowledge alert error: {alert_error}")
-        
-        return ChatResponse(
-            response=response,
-            context_used=context,
-            accuracy_score=accuracy_score,
-            learning_session_id=learning_session_id,
-            knowledge_alert=knowledge_alert,
-            timing=timing_logs,
-            latency_metrics=latency_metrics_text  # BẮT BUỘC HIỂN THỊ LOG trong response cho frontend
-        )
-        
-    except HTTPException:
-        # Re-raise HTTP exceptions (they have proper status codes)
-        raise
-    except Exception as e:
-        # Log detailed error with context (without sensitive message content)
-        logger.error(f"Chat error: {e}", exc_info=True)
-        # Security: Don't log full message content (may contain sensitive info)
-        # Only log message length and metadata
-        logger.error(
-            f"Request details: message_length={len(chat_request.message)}, "
-            f"user_id={chat_request.user_id}, use_rag={chat_request.use_rag}"
-        )
-        
-        # Check if it's a specific error we can handle
-        error_str = str(e).lower()
-        if "rag" in error_str and "not available" in error_str:
-            raise HTTPException(status_code=503, detail="RAG system is not available. Please check backend initialization.")
-        elif "embedding" in error_str or "model" in error_str:
-            raise HTTPException(status_code=503, detail="Embedding service is not available. Please check backend logs.")
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Chat error: {str(e)}. Please check backend logs for details."
-            )
 
 # Learning endpoints moved to backend/api/routers/learning_router.py
 
@@ -1639,353 +1153,9 @@ async def update_source_quality(source: str, quality_score: float):
 
 # Chat endpoints moved to backend/api/routers/chat_router.py
 
-# Helper functions
-async def generate_ai_response(prompt: str, detected_lang: str = 'en') -> str:
-    """Generate AI response with automatic model selection
-    
-    This function routes to different AI providers based on available API keys.
-    To add support for new models (Claude, Gemini, Ollama, local, etc.):
-    1. Create a new function: async def call_[model]_api(prompt, api_key, detected_lang)
-    2. Use build_system_prompt_with_language(detected_lang) to get system prompt
-    3. Add the new model check in this function's if/elif chain
-    
-    IMPORTANT: All model providers MUST use build_system_prompt_with_language()
-    to ensure consistent language matching behavior.
-    
-    Args:
-        prompt: User prompt
-        detected_lang: Detected language code (for system prompt)
-        
-    Returns:
-        AI-generated response string
-    """
-    try:
-        # Check for API keys (priority order: DeepSeek > OpenAI > others)
-        deepseek_key = os.getenv("DEEPSEEK_API_KEY")
-        openai_key = os.getenv("OPENAI_API_KEY")
-        # TODO: Add support for other models:
-        # anthropic_key = os.getenv("ANTHROPIC_API_KEY")  # Claude
-        # google_key = os.getenv("GOOGLE_API_KEY")  # Gemini
-        # ollama_url = os.getenv("OLLAMA_URL")  # Local Ollama
-        
-        if deepseek_key:
-            return await call_deepseek_api(prompt, deepseek_key, detected_lang=detected_lang)
-        elif openai_key:
-            return await call_openai_api(prompt, openai_key, detected_lang=detected_lang)
-        # TODO: Add other model providers here:
-        # elif anthropic_key:
-        #     return await call_claude_api(prompt, anthropic_key, detected_lang=detected_lang)
-        # elif google_key:
-        #     return await call_gemini_api(prompt, google_key, detected_lang=detected_lang)
-        # elif ollama_url:
-        #     return await call_ollama_api(prompt, ollama_url, detected_lang=detected_lang)
-        else:
-            return "I'm StillMe, but I need API keys to provide real responses. Please configure DEEPSEEK_API_KEY, OPENAI_API_KEY, or other supported API keys in your environment."
-            
-    except Exception as e:
-        logger.error(f"AI response error: {e}")
-        return f"I encountered an error: {str(e)}"
+# Helper functions are now in backend/api/utils/chat_helpers.py
 
-def build_system_prompt_with_language_legacy(detected_lang: str = 'en') -> str:
-    """
-    Build system prompt with strong language matching instruction.
-    This ensures output language always matches input language.
-    
-    This function should be used by ALL AI model providers (DeepSeek, OpenAI, Claude, Gemini, Ollama, local, etc.)
-    to ensure consistent language matching behavior across all models.
-    
-    Args:
-        detected_lang: Detected language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'en')
-        
-    Returns:
-        System prompt string with language instruction
-    """
-    language_names = {
-        'vi': 'Vietnamese (Tiếng Việt)',
-        'zh': 'Chinese (中文)',
-        'de': 'German (Deutsch)',
-        'fr': 'French (Français)',
-        'es': 'Spanish (Español)',
-        'ja': 'Japanese (日本語)',
-        'ko': 'Korean (한국어)',
-        'ar': 'Arabic (العربية)',
-        'en': 'English'
-    }
-    detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
-    
-    # CRITICAL: Always match input language with output language
-    # ZERO TOLERANCE: Must translate if base model wants to respond in different language
-    if detected_lang != 'en':
-        system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
-
-🚨🚨🚨 ZERO TOLERANCE LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
-
-The user's question is written in {detected_lang_name}.
-
-YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name}.
-
-DO NOT use Vietnamese, English, Spanish, German, French, or ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD of your response MUST be in {detected_lang_name}.
-
-⚠️⚠️⚠️ CRITICAL TRANSLATION REQUIREMENT ⚠️⚠️⚠️
-
-If your base model wants to respond in a different language (e.g., Vietnamese, English, Spanish), 
-YOU MUST TRANSLATE THE ENTIRE RESPONSE TO {detected_lang_name} BEFORE RETURNING IT.
-
-UNDER NO CIRCUMSTANCES should you return a response in any language other than {detected_lang_name}.
-
-This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
-
-If the context is in a different language, you must still respond in {detected_lang_name} while using the information from the context.
-
-⚠️ REMINDER: RESPOND IN {detected_lang_name} ONLY. TRANSLATE IF NECESSARY. ⚠️
-
-FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
-    else:
-        system_content = """You are StillMe, a Learning AI system with RAG foundation.
-
-🚨🚨🚨 ZERO TOLERANCE LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
-
-The user's question is written in English.
-
-YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
-
-DO NOT use Vietnamese, Spanish, German, French, or ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD of your response MUST be in English.
-
-⚠️⚠️⚠️ CRITICAL TRANSLATION REQUIREMENT ⚠️⚠️⚠️
-
-If your base model wants to respond in a different language (e.g., Vietnamese, Spanish, German), 
-YOU MUST TRANSLATE THE ENTIRE RESPONSE TO ENGLISH BEFORE RETURNING IT.
-
-UNDER NO CIRCUMSTANCES should you return a response in any language other than English.
-
-This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
-
-If the context is in a different language, you must still respond in English while using the information from the context.
-
-⚠️ REMINDER: RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY. ⚠️
-
-FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
-    
-    return system_content
-
-
-def detect_language_legacy(text: str) -> str:
-    """
-    Enhanced language detection using langdetect library with fallback to rule-based detection.
-    Supports: vi, zh, de, fr, es, ja, ko, ar, en
-    
-    Returns: Language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'en') or 'en' as default
-    """
-    if not text or len(text.strip()) == 0:
-        return 'en'
-    
-    # Try langdetect first (more accurate for most languages)
-    try:
-        from langdetect import detect, LangDetectException
-        detected = detect(text)
-        
-        # Map langdetect codes to our internal codes
-        lang_map = {
-            'vi': 'vi',  # Vietnamese
-            'zh-cn': 'zh', 'zh-tw': 'zh',  # Chinese
-            'de': 'de',  # German
-            'fr': 'fr',  # French
-            'es': 'es',  # Spanish
-            'ja': 'ja',  # Japanese
-            'ko': 'ko',  # Korean
-            'ar': 'ar',  # Arabic
-            'en': 'en'   # English
-        }
-        
-        # Handle Chinese variants
-        if detected.startswith('zh'):
-            return 'zh'
-        
-        if detected in lang_map:
-            logger.info(f"🌐 langdetect detected: {detected} -> {lang_map[detected]}")
-            return lang_map[detected]
-            
-    except (LangDetectException, ImportError) as e:
-        logger.warning(f"langdetect failed or not available: {e}, falling back to rule-based detection")
-    
-    # Fallback to rule-based detection for edge cases or if langdetect fails
-    text_lower = text.lower()
-    
-    # Arabic - Check for Arabic characters
-    arabic_ranges = [
-        (0x0600, 0x06FF),  # Arabic
-        (0x0750, 0x077F),  # Arabic Supplement
-        (0x08A0, 0x08FF),  # Arabic Extended-A
-    ]
-    has_arabic = any(any(start <= ord(char) <= end for start, end in arabic_ranges) for char in text)
-    if has_arabic:
-        return 'ar'
-    
-    # Korean - Check for Hangul
-    korean_ranges = [
-        (0xAC00, 0xD7AF),  # Hangul Syllables
-        (0x1100, 0x11FF),  # Hangul Jamo
-    ]
-    has_korean = any(any(start <= ord(char) <= end for start, end in korean_ranges) for char in text)
-    if has_korean:
-        return 'ko'
-    
-    # Chinese (Simplified/Traditional) - Check for Chinese characters
-    chinese_chars = set('的一是在不了有和人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实加量都两体制机当使点从业本去把性好应开它合还因由其些然前外天政四日那社义事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道命此变条只没结解问意建月公无系军很情者最立代想已通并提直题党程展五果料象员革位入常文总次品式活设及管特件长求老头基资边流路级少图山统接知较将组见计别她手角期根论运农指几九区强放决西被干做必战先回则任取据处队南给色光门即保治北造百规热领七海口东导器压志世金增争济阶油思术极交受联什认六共权收证改清己美再采转更单风切打白教速花带安场身车例真务具万每目至达走积示议声报斗完类八离华名确才科张信马节话米整空元况今集温传土许步群广石记需段研界拉林律叫且究观越织装影算低持音众书布复容儿须际商非验连断深难近矿千周委素技备半办青省列习响约支般史感劳便团往酸历市克何除消构府称太准精值号率族维划选标写存候毛亲快效斯院查江型眼王按格养易置派层片始却专状育厂京识适属圆包火住调满县局照参红细引听该铁价严龙飞')
-    has_chinese = any(char in chinese_chars for char in text)
-    if has_chinese:
-        return 'zh'
-    
-    # Vietnamese - Check for Vietnamese characters
-    vietnamese_chars = set('àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ')
-    has_vietnamese = any(char in vietnamese_chars for char in text_lower)
-    vietnamese_indicators = ['là', 'của', 'và', 'với', 'cho', 'từ', 'trong', 'này', 'đó', 'bạn', 'mình', 'tôi', 'có', 'không', 'được', 'như', 'thế', 'nào', 'gì', 'ai', 'đâu', 'sao']
-    has_vietnamese_words = any(word in text_lower for word in vietnamese_indicators)
-    if has_vietnamese or has_vietnamese_words:
-        return 'vi'
-    
-    # German - Check for German-specific characters and common words
-    german_chars = set('äöüßÄÖÜ')
-    has_german_chars = any(char in german_chars for char in text)
-    german_indicators = ['der', 'die', 'das', 'und', 'ist', 'für', 'auf', 'mit', 'sind', 'zu', 'ein', 'eine', 'von', 'zu', 'den', 'dem', 'des', 'was', 'wie', 'wo', 'wer', 'wann', 'warum']
-    has_german_words = any(word in text_lower for word in german_indicators)
-    if has_german_chars or has_german_words:
-        return 'de'
-    
-    # French - Check for French-specific characters and common words
-    french_chars = set('àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ')
-    has_french_chars = any(char in french_chars for char in text)
-    french_indicators = ['le', 'la', 'les', 'de', 'du', 'des', 'et', 'est', 'un', 'une', 'dans', 'pour', 'avec', 'sur', 'par', 'que', 'qui', 'quoi', 'comment', 'où', 'quand', 'pourquoi']
-    has_french_words = any(word in text_lower for word in french_indicators)
-    if has_french_chars or has_french_words:
-        return 'fr'
-    
-    # Spanish - Check for Spanish-specific characters and common words
-    spanish_chars = set('áéíóúñüÁÉÍÓÚÑÜ¿¡')
-    has_spanish_chars = any(char in spanish_chars for char in text)
-    spanish_indicators = ['el', 'la', 'los', 'las', 'de', 'del', 'y', 'es', 'un', 'una', 'en', 'por', 'para', 'con', 'que', 'qué', 'cómo', 'dónde', 'cuándo', 'por qué']
-    has_spanish_words = any(word in text_lower for word in spanish_indicators)
-    if has_spanish_chars or has_spanish_words:
-        return 'es'
-    
-    # Japanese - Check for Hiragana, Katakana, Kanji
-    japanese_ranges = [
-        (0x3040, 0x309F),  # Hiragana
-        (0x30A0, 0x30FF),  # Katakana
-        (0x4E00, 0x9FAF),  # CJK Unified Ideographs (Kanji)
-    ]
-    has_japanese = any(any(start <= ord(char) <= end for start, end in japanese_ranges) for char in text)
-    if has_japanese:
-        return 'ja'
-    
-    # Default to English
-    return 'en'
-
-async def call_deepseek_api_legacy(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
-    """Call DeepSeek API
-    
-    Args:
-        prompt: User prompt
-        api_key: DeepSeek API key
-        detected_lang: Detected language code
-    """
-    try:
-        # Use centralized system prompt builder for consistent language matching
-        system_content = build_system_prompt_with_language(detected_lang)
-        
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                "https://api.deepseek.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "deepseek-chat",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": system_content
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ],
-                    "max_tokens": 2000,
-                    "temperature": 0.7
-                }
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "choices" in data and len(data["choices"]) > 0:
-                    return data["choices"][0]["message"]["content"]
-                else:
-                    return "DeepSeek API returned unexpected response format"
-            else:
-                return f"DeepSeek API error: {response.status_code}"
-                
-    except Exception as e:
-        logger.error(f"DeepSeek API error: {e}")
-        return f"DeepSeek API error: {str(e)}"
-
-async def call_openai_api_legacy(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
-    """Call OpenAI API
-    
-    IMPORTANT: This function uses build_system_prompt_with_language() to ensure
-    output language matches input language. When adding support for other models
-    (Claude, Gemini, Ollama, local, etc.), use the same pattern.
-    
-    Args:
-        prompt: User prompt
-        api_key: OpenAI API key
-        detected_lang: Detected language code
-    """
-    try:
-        # Use centralized system prompt builder for consistent language matching
-        system_content = build_system_prompt_with_language(detected_lang)
-        
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            response = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "gpt-3.5-turbo",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": system_content
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ],
-                    "max_tokens": 2000,
-                    "temperature": 0.7
-                }
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                if "choices" in data and len(data["choices"]) > 0:
-                    return data["choices"][0]["message"]["content"]
-                else:
-                    return "OpenAI API returned unexpected response format"
-            else:
-                return f"OpenAI API error: {response.status_code}"
-                
-    except Exception as e:
-        logger.error(f"OpenAI API error: {e}")
-        return f"OpenAI API error: {str(e)}"
+# Legacy functions removed - use backend.api.utils instead
 
 # ============================================================================
 # SPICE (Self-Play In Corpus Environments) API Endpoints
