@@ -288,12 +288,14 @@ except Exception as e:
 # Models are now imported from backend.api.models (see imports above)
 
 # Include routers
-from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router
+from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
+
 app.include_router(chat_router.router, prefix="/api/chat", tags=["chat"])
 app.include_router(rag_router.router, prefix="/api/rag", tags=["rag"])
 app.include_router(tiers_router.router, prefix="/api/v1/tiers", tags=["tiers"])
 app.include_router(spice_router.router, prefix="/api/spice", tags=["spice"])
 app.include_router(learning_router.router, prefix="/api/learning", tags=["learning"])
+app.include_router(system_router.router, tags=["system"])
 
 # API Routes
 @app.get("/")
@@ -313,17 +315,9 @@ async def root():
         "rag_initialization_error": _initialization_error if _initialization_error else None,
         "timestamp": datetime.now().isoformat()
     }
+ main
 
-@app.get("/health")
-@limiter.limit("100/minute")  # Health check: 100 requests per minute
-async def health_check(request: Request):
-    """Health check endpoint"""
-    rag_status = "enabled" if rag_retrieval else "disabled"
-    return {
-        "status": "healthy",
-        "rag_status": rag_status,
-        "timestamp": datetime.now().isoformat()
-    }
+# System endpoints moved to backend/api/routers/system_router.py
 
 @app.on_event("startup")
 async def startup_event():
@@ -837,6 +831,13 @@ Total_Response_Latency: {total_response_latency:.2f} giây
 # Learning endpoints moved to backend/api/routers/learning_router.py
 
 # Continuum Memory APIs (v1) - Tier Management moved to backend/api/routers/tiers_router.py
+<<<<<<< HEAD
+=======
+
+ refactor/routerization
+# System endpoints (root, health, status, validators/metrics) moved to backend/api/routers/system_router.py
+# Accuracy metrics endpoint moved to backend/api/routers/learning_router.py
+>>>>>>> 9e884814c0982f26a2491631260aa82ef016a918
 
 @app.get("/api/status")
 async def get_status():
@@ -904,6 +905,7 @@ async def get_accuracy_metrics():
             "average_accuracy": 0.0,
             "trend": "N/A"
         }}
+ main
 
 # Multi-Source Learning Pipeline endpoints
 @limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # Multi-source fetch: 5 requests per hour
