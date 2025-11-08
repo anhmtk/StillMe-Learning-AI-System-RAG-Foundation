@@ -288,39 +288,13 @@ except Exception as e:
 # Models are now imported from backend.api.models (see imports above)
 
 # Include routers
- refactor/routerization
 from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
-
-from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router
- main
 app.include_router(chat_router.router, prefix="/api/chat", tags=["chat"])
 app.include_router(rag_router.router, prefix="/api/rag", tags=["rag"])
 app.include_router(tiers_router.router, prefix="/api/v1/tiers", tags=["tiers"])
 app.include_router(spice_router.router, prefix="/api/spice", tags=["spice"])
 app.include_router(learning_router.router, prefix="/api/learning", tags=["learning"])
- refactor/routerization
 app.include_router(system_router.router, tags=["system"])
-
-
-# API Routes
-@app.get("/")
-async def root():
-    """Root endpoint"""
-    # Debug: Log RAG status for troubleshooting
-    rag_status = rag_retrieval is not None
-    if not rag_status:
-        logger.warning(f"⚠️ RAG retrieval is None! Initialization error: {_initialization_error}")
-    else:
-        logger.debug(f"✓ RAG retrieval is available: {type(rag_retrieval).__name__}")
-    
-    return {
-        "message": "StillMe API v0.4.0",
-        "status": "running",
-        "rag_enabled": rag_status,
-        "rag_initialization_error": _initialization_error if _initialization_error else None,
-        "timestamp": datetime.now().isoformat()
-    }
- main
 
 # System endpoints moved to backend/api/routers/system_router.py
 
@@ -837,77 +811,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
 
 # Continuum Memory APIs (v1) - Tier Management moved to backend/api/routers/tiers_router.py
 
- refactor/routerization
 # System endpoints (root, health, status, validators/metrics) moved to backend/api/routers/system_router.py
 # Accuracy metrics endpoint moved to backend/api/routers/learning_router.py
-
-@app.get("/api/status")
-async def get_status():
-    """Get system status"""
-    try:
-        status = {
-            "stage": "Infant",
-            "sessions_completed": 0,
-            "milestone_sessions": 100,
-            "system_age_days": 0
-        }
-        
-        # Try to get from database if available
-        # For now, return default status
-        
-        return status
-        
-    except Exception as e:
-        logger.error(f"Status error: {e}")
-        return {
-            "stage": "Unknown",
-            "sessions_completed": 0,
-            "milestone_sessions": 100,
-            "system_age_days": 0
-        }
-
-@app.get("/api/validators/metrics")
-async def get_validation_metrics():
-    """Get validation metrics"""
-    try:
-        from backend.validators.metrics import get_metrics
-        metrics = get_metrics()
-        return {"metrics": metrics.get_metrics()}
-    except Exception as e:
-        logger.error(f"Validation metrics error: {e}")
-        return {
-            "metrics": {
-                "total_validations": 0,
-                "pass_rate": 0.0,
-                "passed_count": 0,
-                "failed_count": 0,
-                "avg_overlap_score": 0.0,
-                "reasons_histogram": {},
-                "recent_logs": []
-            }
-        }
-
-async def get_accuracy_metrics():
-    """Get accuracy metrics"""
-    try:
-        if not accuracy_scorer:
-            return {"metrics": {
-                "total_responses": 0,
-                "average_accuracy": 0.0,
-                "trend": "N/A"
-            }}
-        
-        metrics = accuracy_scorer.get_accuracy_metrics()
-        return {"metrics": metrics}
-        
-    except Exception as e:
-        logger.error(f"Accuracy metrics error: {e}")
-        return {"metrics": {
-            "total_responses": 0,
-            "average_accuracy": 0.0,
-            "trend": "N/A"
-        }}
- main
 
 # Multi-Source Learning Pipeline endpoints
 @limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # Multi-source fetch: 5 requests per hour

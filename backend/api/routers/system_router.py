@@ -4,6 +4,7 @@ Handles root, health check, system status, and validation metrics
 """
 
 from fastapi import APIRouter, Request
+from backend.api.rate_limiter import limiter
 import logging
 from datetime import datetime
 
@@ -41,29 +42,16 @@ async def root():
     }
 
 @router.get("/health")
+@limiter.limit("100/minute")  # Health check: 100 requests per minute
 async def health_check(request: Request):
-    """
-    Health check endpoint for Railway/Docker health probes.
-    No rate limiting - must always be available for monitoring.
-    """
-    try:
-        rag_retrieval = get_rag_retrieval()
-        rag_status = "enabled" if rag_retrieval else "disabled"
-        return {
-            "status": "healthy",
-            "rag_status": rag_status,
-            "timestamp": datetime.now().isoformat()
-        }
-    except Exception as e:
-        # Health check should always return 200, even if there are minor issues
-        # This ensures Railway/Docker doesn't kill the container
-        logger.warning(f"Health check warning: {e}")
-        return {
-            "status": "healthy",
-            "rag_status": "unknown",
-            "timestamp": datetime.now().isoformat(),
-            "warning": str(e)
-        }
+    """Health check endpoint"""
+    rag_retrieval = get_rag_retrieval()
+    rag_status = "enabled" if rag_retrieval else "disabled"
+    return {
+        "status": "healthy",
+        "rag_status": rag_status,
+        "timestamp": datetime.now().isoformat()
+    }
 
 @router.get("/api/status")
 async def get_status():
