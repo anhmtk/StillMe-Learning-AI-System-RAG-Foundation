@@ -49,6 +49,11 @@ data/
 *.sqlite3
 chroma_db/
 
+# Internal documentation (not for public repo)
+docs/PROFESSIONAL_CODE_REVIEW.md
+docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md
+docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md
+
 # Temporary/junk files with encoding issues
 responsive*
 tatus*
