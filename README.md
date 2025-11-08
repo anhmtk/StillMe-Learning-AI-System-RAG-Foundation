@@ -270,6 +270,8 @@ graph TB
 ### 🚧 **MVP Ready (Manual Use):**
 - **📰 RSS Learning Pipeline**: ✅ Basic RSS fetcher working - manual trigger via API
 - **🔌 RSS API Endpoints**: ✅ `/api/learning/rss/fetch` - fetch and optionally auto-add to RAG
+- **📚 Multi-Source API Endpoints**: ✅ `/api/learning/sources/fetch` - fetch from RSS + arXiv + CrossRef + Wikipedia
+- **🧠 Continuum Memory API**: ✅ `/api/v1/tiers/stats`, `/api/v1/tiers/audit`, `/api/v1/tiers/forgetting-trends` - Memory health metrics
 
 ### 📋 **Planned/In Development (Next 30-60 days):**
 - **⏰ Automated Scheduler**: ✅ **IMPLEMENTED** - Background task auto-fetches RSS every 4 hours
@@ -708,19 +710,30 @@ StillMe is **open source** and **needs your help**. We're building a movement th
 
 > **"I'm not a senior engineer - I'm a founder with a vision. StillMe proves that ideas + AI tools can create something meaningful. Now it needs your expertise to become something great."**
 
-StillMe learns from diverse, trusted sources:
+StillMe learns from diverse, trusted sources with intelligent pre-filtering:
 
-### **RSS Feeds**
+### **RSS Feeds** (Always Enabled)
 - Hacker News, Reddit, GitHub
-- TechCrunch, ArXiv, Stack Overflow
-- Medium, Academic sources
-- News outlets, Subreddits
+- TechCrunch, Stack Overflow
+- Medium, News outlets, Subreddits
 
-### **Public APIs**
+### **Academic Sources** (NEW - Feature Flags: `ENABLE_ARXIV`, `ENABLE_CROSSREF`)
+- **arXiv**: Research papers (AI, ML, NLP) - Rate limited (3s delay), CC BY-NC-SA license
+- **CrossRef**: Academic metadata - Rate limited (1s delay), CC0 metadata license
+
+### **Encyclopedia Sources** (NEW - Feature Flag: `ENABLE_WIKIPEDIA`)
+- **Wikipedia**: Articles and summaries - Rate limited (0.5s delay), CC BY-SA 3.0 license
+
+### **Public APIs** (Planned)
 - NewsAPI, GNews
 - Weather, Finance data
 - Translation services
 - Image understanding APIs
+
+**🔧 Configuration**: Enable/disable sources via environment variables:
+- `ENABLE_ARXIV=true` (default: true)
+- `ENABLE_CROSSREF=true` (default: true)
+- `ENABLE_WIKIPEDIA=true` (default: true)
 
 ## 🛡️ Ethical Safety Filter
 
