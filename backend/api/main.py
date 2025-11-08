@@ -393,10 +393,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     logger.info(f"Retrieved {len(context['knowledge_docs'])} StillMe foundational knowledge documents")
             else:
                 # Normal retrieval for non-StillMe queries
+                # Optimized: conversation_limit reduced from 2 to 1 for latency
                 context = rag_retrieval.retrieve_context(
                     query=chat_request.message,
-                    knowledge_limit=chat_request.context_limit,
-                    conversation_limit=2
+                    knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
+                    conversation_limit=1  # Optimized: reduced from 2 to 1
                 )
         
         rag_retrieval_end = time.time()
