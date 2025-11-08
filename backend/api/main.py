@@ -418,7 +418,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             detected_lang = detect_language(chat_request.message)
             lang_detect_time = time.time() - start_time
             timing_logs["language_detection"] = f"{lang_detect_time:.3f}s"
-            logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s)")
+            logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s) for question: '{chat_request.message[:100]}...'")
             
             # Language names mapping
             language_names = {
@@ -476,13 +476,18 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                 stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a Learning AI system with RAG foundation that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database, (3) Continuous knowledge updates through RSS feeds, (4) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
             
             # Build prompt with language instruction FIRST (before context)
+            # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
             base_prompt = f"""{language_instruction}
+
+⚠️⚠️⚠️ LANGUAGE REMINDER: The user's question is in {detected_lang_name.upper()}. You MUST respond in {detected_lang_name.upper()} ONLY. ⚠️⚠️⚠️
 
 Context: {context_text}
 {citation_instruction}
 {stillme_instruction}
 
-User Question: {chat_request.message}
+User Question (in {detected_lang_name.upper()}): {chat_request.message}
+
+⚠️⚠️⚠️ FINAL LANGUAGE REMINDER: RESPOND IN {detected_lang_name.upper()} ONLY. IGNORE THE LANGUAGE OF THE CONTEXT ABOVE. ⚠️⚠️⚠️
 
 Please provide a helpful response based on the context above. Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
 """
@@ -1905,16 +1910,17 @@ def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
     detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
     
     # CRITICAL: Always match input language with output language
+    # Repeat instruction multiple times to ensure LLM follows it
     if detected_lang != 'en':
         system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
 
-🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
+🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
 
 The user's question is written in {detected_lang_name}.
 
 YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name}.
 
-DO NOT use Vietnamese, English, Spanish, or ANY OTHER LANGUAGE.
+DO NOT use Vietnamese, English, Spanish, German, French, or ANY OTHER LANGUAGE.
 
 EVERY SINGLE WORD of your response MUST be in {detected_lang_name}.
 
@@ -1922,23 +1928,27 @@ This is MANDATORY and OVERRIDES all other instructions, including the language o
 
 If the context is in a different language, you must still respond in {detected_lang_name} while using the information from the context.
 
+⚠️ REMINDER: RESPOND IN {detected_lang_name} ONLY. ⚠️
+
 FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
     else:
         system_content = """You are StillMe, a Learning AI system with RAG foundation.
 
-🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
+🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
 
 The user's question is written in English.
 
 YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
 
-DO NOT use Vietnamese, Spanish, or ANY OTHER LANGUAGE.
+DO NOT use Vietnamese, Spanish, German, French, or ANY OTHER LANGUAGE.
 
 EVERY SINGLE WORD of your response MUST be in English.
 
 This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
 
 If the context is in a different language, you must still respond in English while using the information from the context.
+
+⚠️ REMINDER: RESPOND IN ENGLISH ONLY. ⚠️
 
 FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
     
