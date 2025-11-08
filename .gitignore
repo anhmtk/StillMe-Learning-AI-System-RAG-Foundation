@@ -55,6 +55,13 @@ docs/PROFESSIONAL_CODE_REVIEW_EVIDENCE.md
 docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md
 docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md
 
+# Internal workflow guides (not for public repo)
+docs/GITHUB_WORKFLOW_ROUTERIZATION.md
+docs/ROUTERIZATION_COMPLETE_WORKFLOW.md
+docs/HOW_TO_CLOSE_ISSUE.md
+docs/ISSUE_VS_PR_EXPLANATION.md
+docs/PR_CREATION_GUIDE.md
+
 # Temporary/junk files with encoding issues
 responsive*
 tatus*
