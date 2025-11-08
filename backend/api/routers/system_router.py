@@ -57,16 +57,25 @@ async def health_check(request: Request):
     This endpoint is designed to be lightweight and always return 200,
     even during RAG component initialization, to prevent Railway from
     killing the container during startup.
+    
+    IMPORTANT: This endpoint must return 200 IMMEDIATELY, even before
+    FastAPI app is fully initialized, to prevent Railway from marking
+    deployment as failed during startup.
     """
     # Always return 200 - this endpoint only checks if the service is running
     # Use /ready endpoint for detailed readiness checks
+    # This endpoint should NEVER fail - it's the first thing Railway checks
+    
+    # Minimal response - don't try to access RAG components if they're not ready
+    # This ensures we return 200 even during module import/initialization
     try:
         # Try to get RAG status if available, but don't fail if not ready yet
         try:
             rag_retrieval = get_rag_retrieval()
             rag_status = "enabled" if rag_retrieval else "disabled"
-        except Exception:
+        except (ImportError, AttributeError, Exception):
             # RAG components may still be initializing - that's OK for liveness
+            # Don't log this as it's expected during startup
             rag_status = "initializing"
         
         return {
@@ -75,8 +84,9 @@ async def health_check(request: Request):
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
-        # Health check should always return 200, even if there are minor issues
+        # Health check should ALWAYS return 200, even if there are errors
         # This ensures Railway/Docker doesn't kill the container
+        # Only log if it's an unexpected error (not during initialization)
         logger.warning(f"Health check warning: {e}")
         return {
             "status": "healthy",
