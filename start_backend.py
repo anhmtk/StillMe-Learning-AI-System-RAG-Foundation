@@ -60,34 +60,10 @@ try:
     from backend.api.main import app
     logger.info("✓ FastAPI app imported successfully")
     sys.stdout.flush()
-
-    refactor/routerization
-
-    
- refactor/routerization
-
-main
 except ImportError as e:
     logger.error(f"❌ ImportError: Failed to import module: {e}")
     logger.error(f"   Module: {e.name if hasattr(e, 'name') else 'unknown'}")
     logger.error(f"   Path: {e.path if hasattr(e, 'path') else 'unknown'}")
-
-    refactor/routerization
-
-    
-    sys.stdout.flush()
-    import traceback
-    logger.error(f"   Traceback: {traceback.format_exc()}")
-    sys.stdout.flush()
-
-except Exception as e:
-    logger.error(f"❌ Failed to import FastAPI app: {e}", exc_info=True)
-    logger.error("This may be due to RAG initialization errors")
-
-except Exception as e:
-    logger.error(f"❌ Failed to import FastAPI app: {e}", exc_info=True)
-    logger.error("This may be due to RAG initialization errors")
- main
     sys.stdout.flush()
     import traceback
     logger.error(f"   Traceback: {traceback.format_exc()}")
@@ -99,18 +75,6 @@ except Exception as e:
     import traceback
     logger.error(f"   Traceback: {traceback.format_exc()}")
     logger.error("This may be due to RAG initialization errors")
- refactor/routerization
-
- main
- main
-    sys.exit(1)
-except Exception as e:
-    logger.error(f"❌ Failed to import FastAPI app: {e}")
-    logger.error(f"   Error type: {type(e).__name__}")
-    import traceback
-    logger.error(f"   Traceback: {traceback.format_exc()}")
-    logger.error("This may be due to RAG initialization errors")
- main
     sys.stdout.flush()
     # Don't exit - let uvicorn try to start anyway
     # The /health endpoint should still work even if RAG fails
@@ -123,14 +87,11 @@ logger.info(f"Starting uvicorn server on 0.0.0.0:{port_int}...")
 logger.info("=" * 60)
 sys.stdout.flush()
 
- refactor/routerization
 # Log that health endpoint is ready
 logger.info("✅ App started - Health endpoint /health is ready")
 logger.info("✅ Readiness endpoint /ready available (may return 503 until dependencies ready)")
 sys.stdout.flush()
 
-
- main
 try:
     uvicorn.run(
         app,

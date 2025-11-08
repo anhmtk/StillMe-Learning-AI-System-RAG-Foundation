@@ -43,12 +43,28 @@ ENV HF_HOME=/app/.model_cache
 # This ensures model is available in image and doesn't need to be downloaded at runtime
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/app/.model_cache')"
 
+ refactor/routerization
+# Copy scripts directory first (for chroma_warmup.py)
+# This allows us to use the warmup script before copying all application code
+COPY scripts/chroma_warmup.py /app/scripts/chroma_warmup.py
+
+
+ main
 # Pre-download ChromaDB ONNX model during build stage (optional, controlled by CHROMA_WARMUP env)
 # ChromaDB automatically downloads ONNX models to ~/.cache/chroma/onnx_models/
 # By setting HOME=/app, it will use /app/.cache/chroma/onnx_models/
 # This prevents re-downloading ONNX models on every container start
 # Note: ChromaDB may only download ONNX model when actually needed (during real queries)
 # If model is not pre-downloaded here, it will download on first use but then be cached
+ refactor/routerization
+# Using separate script to avoid heredoc syntax issues and make it more maintainable
+# This step never fails the build (|| true ensures it continues even on error)
+ARG CHROMA_WARMUP=false
+RUN if [ "$CHROMA_WARMUP" = "true" ]; then \
+      python /app/scripts/chroma_warmup.py || true; \
+    else \
+      echo "ChromaDB warmup disabled (CHROMA_WARMUP=false)"; \
+
 # Using heredoc to avoid shell quoting issues and SyntaxError
 # This step never fails the build (|| true ensures it continues even on error)
 ARG CHROMA_WARMUP=true
@@ -73,6 +89,7 @@ except Exception as e: \
 PY \
     else \
     echo "ChromaDB warmup disabled (CHROMA_WARMUP=false)"; \
+ main
     fi
 
 # Copy application code (including .streamlit config)
