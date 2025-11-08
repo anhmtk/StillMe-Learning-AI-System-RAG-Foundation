@@ -454,7 +454,21 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN {detected_lang_name.upper(
 
 """
             else:
-                language_instruction = "\n\nIMPORTANT: Respond in English with clear and detailed explanations. Do NOT use Vietnamese or any other language.\n\n"
+                language_instruction = """🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+
+THE USER'S QUESTION IS WRITTEN IN ENGLISH.
+
+YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
+
+DO NOT RESPOND IN VIETNAMESE, SPANISH, OR ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
+
+THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
+
+IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
+
+"""
             
             # Special instruction for StillMe queries
             stillme_instruction = ""
@@ -1910,10 +1924,43 @@ async def call_deepseek_api(prompt: str, api_key: str, detected_lang: str = 'en'
         }
         detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
         
+        # CRITICAL: Always match input language with output language
         if detected_lang != 'en':
-            system_content = f"You are StillMe, a Learning AI system with RAG foundation. CRITICAL LANGUAGE REQUIREMENT: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use Vietnamese, English, or any other language. Every single word must be in {detected_lang_name}. This is mandatory and overrides all other instructions."
+            system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
+
+🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
+
+The user's question is written in {detected_lang_name}.
+
+YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name}.
+
+DO NOT use Vietnamese, English, Spanish, or ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD of your response MUST be in {detected_lang_name}.
+
+This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
+
+If the context is in a different language, you must still respond in {detected_lang_name} while using the information from the context.
+
+FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
         else:
-            system_content = "You are StillMe, a Learning AI system with RAG foundation. Provide helpful, accurate responses in English. Do NOT use Vietnamese or any other language."
+            system_content = """You are StillMe, a Learning AI system with RAG foundation.
+
+🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
+
+The user's question is written in English.
+
+YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
+
+DO NOT use Vietnamese, Spanish, or ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD of your response MUST be in English.
+
+This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
+
+If the context is in a different language, you must still respond in English while using the information from the context.
+
+FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
@@ -1973,10 +2020,43 @@ async def call_openai_api(prompt: str, api_key: str, detected_lang: str = 'en') 
         }
         detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
         
+        # CRITICAL: Always match input language with output language
         if detected_lang != 'en':
-            system_content = f"You are StillMe, a Learning AI system with RAG foundation. CRITICAL LANGUAGE REQUIREMENT: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use Vietnamese, English, or any other language. Every single word must be in {detected_lang_name}. This is mandatory and overrides all other instructions."
+            system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
+
+🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
+
+The user's question is written in {detected_lang_name}.
+
+YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name}.
+
+DO NOT use Vietnamese, English, Spanish, or ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD of your response MUST be in {detected_lang_name}.
+
+This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
+
+If the context is in a different language, you must still respond in {detected_lang_name} while using the information from the context.
+
+FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
         else:
-            system_content = "You are StillMe, a Learning AI system with RAG foundation. Provide helpful, accurate responses in English. Do NOT use Vietnamese or any other language."
+            system_content = """You are StillMe, a Learning AI system with RAG foundation.
+
+🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
+
+The user's question is written in English.
+
+YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
+
+DO NOT use Vietnamese, Spanish, or ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD of your response MUST be in English.
+
+This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
+
+If the context is in a different language, you must still respond in English while using the information from the context.
+
+FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
