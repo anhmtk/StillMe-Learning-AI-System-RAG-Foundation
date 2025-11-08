@@ -7,6 +7,8 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
 
 # Import floating chat widget
 try:
@@ -945,7 +947,9 @@ def page_validation():
 def sidebar(page_for_chat: str | None = None):
     st.sidebar.header("Dashboard")
     page = st.sidebar.selectbox(
-        "Choose a page:", ["Overview", "RAG", "Learning", "Validation", "Community"]
+        "Select Page",
+        ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health"],
+        key="page_selector"
     )
 
     st.sidebar.success("Backend Connected")
@@ -1211,6 +1215,9 @@ def main():
         page_validation()
     elif page == "Community":
         page_community()
+    elif page == "Memory Health":
+        from dashboard_memory_health import page_memory_health
+        page_memory_health()
 
     # Tiny auto-refresh toggle for live demos
     with st.sidebar.expander("Auto Refresh"):

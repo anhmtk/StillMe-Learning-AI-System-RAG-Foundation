@@ -18,7 +18,9 @@ from backend.api.models import (
     ChatRequest, ChatResponse,
     LearningRequest, LearningResponse,
     RAGQueryRequest, RAGQueryResponse,
-    PaginationParams, ValidationErrorResponse
+    PaginationParams, ValidationErrorResponse,
+    TierStatsResponse, TierAuditResponse, TierPromoteRequest, TierDemoteRequest,
+    ForgettingTrendsResponse
 )
 
 # Import authentication
@@ -27,6 +29,7 @@ from backend.api.auth import require_api_key
 # Import RAG components
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
 from backend.learning import KnowledgeRetention, AccuracyScorer
+from backend.learning.continuum_memory import ContinuumMemory
 from backend.services.rss_fetcher import RSSFetcher
 from backend.services.learning_scheduler import LearningScheduler
 from backend.services.self_diagnosis import SelfDiagnosisAgent
@@ -158,6 +161,7 @@ learning_scheduler = None
 self_diagnosis = None
 content_curator = None
 rss_fetch_history = None
+continuum_memory = None
 
 try:
     logger.info("Initializing RAG components...")
@@ -234,6 +238,13 @@ try:
     
     rss_fetch_history = RSSFetchHistory()
     logger.info("✓ RSS fetch history initialized")
+    
+    # Initialize Continuum Memory (if enabled)
+    continuum_memory = ContinuumMemory()
+    if continuum_memory and os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true":
+        logger.info("✓ Continuum Memory initialized")
+    else:
+        logger.info("⊘ Continuum Memory disabled (ENABLE_CONTINUUM_MEMORY=false)")
     
     logger.info("✅ All RAG components initialized successfully")
     logger.info("🎉 StillMe backend is ready!")
