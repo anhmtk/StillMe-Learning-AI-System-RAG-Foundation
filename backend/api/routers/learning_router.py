@@ -1,0 +1,1181 @@
+"""
+Learning Router for StillMe API
+Handles all learning-related endpoints (knowledge retention, RSS, scheduler, self-diagnosis, curator)
+"""
+
+from fastapi import APIRouter, Request, HTTPException, Depends, Query
+from backend.api.models import LearningRequest, LearningResponse
+from backend.api.rate_limiter import limiter, get_rate_limit_key_func
+from backend.api.auth import require_api_key
+from typing import Optional, Dict, Any, List
+import logging
+import os
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+router = APIRouter()
+
+# Import global services from main (temporary - will refactor to dependency injection later)
+# These are initialized in main.py before routers are included
+def get_knowledge_retention():
+    """Get knowledge retention service from main module"""
+    import backend.api.main as main_module
+    return main_module.knowledge_retention
+
+def get_rag_retrieval():
+    """Get RAG retrieval service from main module"""
+    import backend.api.main as main_module
+    return main_module.rag_retrieval
+
+def get_chroma_client():
+    """Get ChromaDB client from main module"""
+    import backend.api.main as main_module
+    return main_module.chroma_client
+
+def get_accuracy_scorer():
+    """Get accuracy scorer service from main module"""
+    import backend.api.main as main_module
+    return main_module.accuracy_scorer
+
+def get_content_curator():
+    """Get content curator service from main module"""
+    import backend.api.main as main_module
+    return main_module.content_curator
+
+def get_rss_fetcher():
+    """Get RSS fetcher service from main module"""
+    import backend.api.main as main_module
+    return main_module.rss_fetcher
+
+def get_learning_scheduler():
+    """Get learning scheduler service from main module"""
+    import backend.api.main as main_module
+    return main_module.learning_scheduler
+
+def get_self_diagnosis():
+    """Get self-diagnosis agent service from main module"""
+    import backend.api.main as main_module
+    return main_module.self_diagnosis
+
+def get_rss_fetch_history():
+    """Get RSS fetch history service from main module"""
+    import backend.api.main as main_module
+    return main_module.rss_fetch_history
+
+def get_source_integration():
+    """Get source integration service from main module"""
+    import backend.api.main as main_module
+    return main_module.source_integration
+
+def get_initialization_error():
+    """Get initialization error from main module"""
+    import backend.api.main as main_module
+    return getattr(main_module, '_initialization_error', None)
+
+# ============================================================================
+# Basic Learning Endpoints
+# ============================================================================
+
+@router.post("/add", response_model=LearningResponse)
+async def add_learning_content(request: LearningRequest):
+    """Add learning content to the system"""
+    try:
+        knowledge_retention = get_knowledge_retention()
+        rag_retrieval = get_rag_retrieval()
+        content_curator = get_content_curator()
+        
+        # Add to knowledge retention system
+        knowledge_id = None
+        if knowledge_retention:
+            knowledge_id = knowledge_retention.add_knowledge(
+                content=request.content,
+                source=request.source,
+                knowledge_type=request.content_type,
+                metadata=request.metadata
+            )
+        
+        # Add to vector database
+        if rag_retrieval:
+            # Calculate importance score for knowledge alert system
+            importance_score = 0.5
+            if content_curator:
+                content_dict = {
+                    "title": request.metadata.get("title", "") if request.metadata else "",
+                    "summary": request.content[:500] if len(request.content) > 500 else request.content,
+                    "source": request.source
+                }
+                importance_score = content_curator.calculate_importance_score(content_dict)
+            
+            # Merge importance_score into metadata
+            enhanced_metadata = request.metadata or {}
+            enhanced_metadata["importance_score"] = importance_score
+            if not enhanced_metadata.get("title"):
+                content_lines = request.content.split("\n")
+                if content_lines:
+                    enhanced_metadata["title"] = content_lines[0][:200]
+            
+            success = rag_retrieval.add_learning_content(
+                content=request.content,
+                source=request.source,
+                content_type=request.content_type,
+                metadata=enhanced_metadata
+            )
+            if not success:
+                return LearningResponse(
+                    success=False,
+                    message="Failed to add to vector database"
+                )
+        
+        return LearningResponse(
+            success=True,
+            knowledge_id=knowledge_id,
+            message="Learning content added successfully"
+        )
+        
+    except Exception as e:
+        logger.error(f"Learning error: {e}")
+        return LearningResponse(
+            success=False,
+            message=f"Error: {str(e)}"
+        )
+
+@router.get("/metrics")
+async def get_learning_metrics():
+    """Get learning and accuracy metrics"""
+    try:
+        knowledge_retention = get_knowledge_retention()
+        accuracy_scorer = get_accuracy_scorer()
+        chroma_client = get_chroma_client()
+        
+        metrics = {}
+        
+        # Get retention metrics
+        if knowledge_retention:
+            metrics["retention"] = knowledge_retention.calculate_retention_metrics()
+        
+        # Get accuracy metrics
+        if accuracy_scorer:
+            metrics["accuracy"] = accuracy_scorer.get_accuracy_metrics()
+        
+        # Get vector DB stats
+        if chroma_client:
+            metrics["vector_db"] = chroma_client.get_collection_stats()
+        
+        return metrics
+        
+    except Exception as e:
+        logger.error(f"Metrics error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/retained")
+async def get_retained_knowledge(
+    limit: int = Query(default=100, ge=1, le=1000, description="Maximum number of items to return"),
+    min_score: Optional[float] = Query(default=None, ge=0.0, le=1.0, description="Minimum retention score")
+):
+    """Get retained knowledge items with full details for audit log
+    
+    Returns:
+        List of retained knowledge items with:
+        - Timestamp Added
+        - Source URL (Link)
+        - Retained Content Snippet (5-10 sentences)
+        - Vector ID (Debug)
+    """
+    try:
+        knowledge_retention = get_knowledge_retention()
+        rag_retrieval = get_rag_retrieval()
+        chroma_client = get_chroma_client()
+        
+        if not knowledge_retention:
+            raise HTTPException(status_code=503, detail="Knowledge retention not available")
+        
+        # Apply min_score filter if provided
+        knowledge = knowledge_retention.get_retained_knowledge(limit=limit)
+        
+        # Filter by min_score if provided
+        if min_score is not None:
+            knowledge = [item for item in knowledge if item.get("retention_score", 0.0) >= min_score]
+        
+        # Enhance with vector IDs and content snippets from RAG
+        enhanced_items = []
+        for item in knowledge:
+            source = item.get("source", "")
+            metadata = item.get("metadata", {})
+            link = metadata.get("link", source)
+            
+            # Get content snippet (5-10 sentences)
+            content = item.get("content", "")
+            sentences = content.split(". ")
+            snippet = ". ".join(sentences[:10])  # First 10 sentences
+            if len(sentences) > 10:
+                snippet += "..."
+            
+            # Try to get vector ID from RAG if available
+            vector_id = None
+            if rag_retrieval and chroma_client:
+                try:
+                    # Try to find the document in ChromaDB by source/link
+                    # This is approximate - we'll use metadata to match
+                    vector_id = metadata.get("id") or metadata.get("doc_id")
+                    if not vector_id and link:
+                        # Try to construct ID from link
+                        vector_id = f"knowledge_{link[:20].replace('/', '_').replace(':', '_')}"
+                except Exception:
+                    pass
+            
+            enhanced_item = {
+                "id": item.get("id"),
+                "timestamp_added": item.get("created_at") or item.get("last_accessed"),
+                "source_url": link,
+                "retained_content_snippet": snippet,
+                "vector_id": vector_id or f"knowledge_{item.get('id', 'unknown')}",
+                "full_content": content,  # Include full content for reference
+                "retention_score": item.get("retention_score", 0.0),
+                "access_count": item.get("access_count", 0),
+                "metadata": metadata
+            }
+            enhanced_items.append(enhanced_item)
+        
+        return {
+            "knowledge_items": enhanced_items,
+            "total": len(enhanced_items)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Retained knowledge error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/accuracy_metrics")
+async def get_accuracy_metrics():
+    """Get accuracy metrics"""
+    try:
+        accuracy_scorer = get_accuracy_scorer()
+        
+        if not accuracy_scorer:
+            return {"metrics": {
+                "total_responses": 0,
+                "average_accuracy": 0.0,
+                "trend": "N/A"
+            }}
+        
+        metrics = accuracy_scorer.get_accuracy_metrics()
+        return {"metrics": metrics}
+        
+    except Exception as e:
+        logger.error(f"Accuracy metrics error: {e}")
+        return {"metrics": {
+            "total_responses": 0,
+            "average_accuracy": 0.0,
+            "trend": "N/A"
+        }}
+
+# ============================================================================
+# Multi-Source Learning Pipeline Endpoints
+# ============================================================================
+
+@router.post("/sources/fetch")
+@limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # Multi-source fetch: 5 requests per hour
+async def fetch_all_sources(
+    request: Request,
+    max_items_per_source: int = Query(default=5, ge=1, le=20, description="Maximum items per source"),
+    auto_add: bool = Query(default=False, description="Automatically add to RAG"),
+    use_pre_filter: bool = Query(default=True, description="Apply pre-filter before adding to RAG")
+):
+    """Fetch content from all enabled sources (RSS, arXiv, CrossRef, Wikipedia) with detailed status tracking
+    
+    Args:
+        max_items_per_source: Maximum items per source
+        auto_add: If True, automatically add to RAG vector DB
+        use_pre_filter: If True, apply pre-filter before adding
+    """
+    try:
+        source_integration = get_source_integration()
+        rss_fetch_history = get_rss_fetch_history()
+        rag_retrieval = get_rag_retrieval()
+        
+        if not source_integration:
+            raise HTTPException(status_code=503, detail="Source integration not available")
+        
+        # Create fetch cycle for tracking
+        cycle_id = None
+        if rss_fetch_history:
+            cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=0)  # Manual fetch = cycle 0
+        
+        # Fetch from all sources
+        entries = source_integration.fetch_all_sources(
+            max_items_per_source=max_items_per_source,
+            use_pre_filter=use_pre_filter
+        )
+        
+        # Track each entry with status (similar to RSS fetch)
+        tracked_entries = []
+        added_count = 0
+        
+        if auto_add and rag_retrieval:
+            # Process entries (pre-filter already applied if use_pre_filter=True)
+            for entry in entries:
+                content = f"{entry.get('title', '')}\n{entry.get('summary', entry.get('content', ''))}"
+                
+                # Check for duplicates
+                is_duplicate = False
+                if rag_retrieval:
+                    try:
+                        existing = rag_retrieval.retrieve_context(
+                            query=entry.get('title', ''),
+                            knowledge_limit=1,
+                            conversation_limit=0
+                        )
+                        if existing.get("knowledge_docs"):
+                            existing_doc = existing["knowledge_docs"][0]
+                            existing_metadata = existing_doc.get("metadata", {})
+                            existing_link = existing_metadata.get("link", "")
+                            if existing_link == entry.get("link", "") or existing_link == entry.get("source_url", ""):
+                                is_duplicate = True
+                    except Exception:
+                        pass
+                
+                if is_duplicate:
+                    status = "Filtered: Duplicate"
+                    reason = "Content already exists in RAG"
+                    if rss_fetch_history and cycle_id:
+                        rss_fetch_history.add_fetch_item(
+                            cycle_id=cycle_id,
+                            title=entry.get("title", ""),
+                            source_url=entry.get("source_url", entry.get("source", "")),
+                            link=entry.get("link", ""),
+                            summary=entry.get("summary", ""),
+                            status=status,
+                            status_reason=reason
+                        )
+                    tracked_entries.append({**entry, "status": status, "status_reason": reason})
+                    continue
+                
+                # Try to add to RAG
+                vector_id = None
+                try:
+                    success = rag_retrieval.add_learning_content(
+                        content=content,
+                        source=entry.get("source", "unknown"),
+                        content_type="knowledge",
+                        metadata={
+                            "link": entry.get("link", ""),
+                            "source_url": entry.get("source_url", ""),
+                            "published": entry.get("published", datetime.now().isoformat()),
+                            "type": entry.get("metadata", {}).get("source_type", "unknown"),
+                            "title": entry.get("title", "")[:200],
+                            "license": entry.get("metadata", {}).get("license", "Unknown")
+                        }
+                    )
+                    
+                    if success:
+                        added_count += 1
+                        status = "Added to RAG"
+                        vector_id = f"knowledge_{entry.get('link', entry.get('source_url', ''))[:8]}"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source_url", entry.get("source", "")),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                vector_id=vector_id,
+                                added_to_rag_at=datetime.now().isoformat()
+                            )
+                        tracked_entries.append({**entry, "status": status, "vector_id": vector_id})
+                    else:
+                        status = "Filtered: Low Score"
+                        reason = "Failed to add to RAG"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source_url", entry.get("source", "")),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                status_reason=reason
+                            )
+                        tracked_entries.append({**entry, "status": status, "status_reason": reason})
+                except Exception as add_error:
+                    status = "Filtered: Low Score"
+                    reason = f"Error adding to RAG: {str(add_error)[:100]}"
+                    if rss_fetch_history and cycle_id:
+                        rss_fetch_history.add_fetch_item(
+                            cycle_id=cycle_id,
+                            title=entry.get("title", ""),
+                            source_url=entry.get("source_url", entry.get("source", "")),
+                            link=entry.get("link", ""),
+                            summary=entry.get("summary", ""),
+                            status=status,
+                            status_reason=reason
+                        )
+                    tracked_entries.append({**entry, "status": status, "status_reason": reason})
+        else:
+            # If not auto_add, just track as fetched
+            for entry in entries:
+                status = "Fetched (not added)"
+                if rss_fetch_history and cycle_id:
+                    rss_fetch_history.add_fetch_item(
+                        cycle_id=cycle_id,
+                        title=entry.get("title", ""),
+                        source_url=entry.get("source_url", entry.get("source", "")),
+                        link=entry.get("link", ""),
+                        summary=entry.get("summary", ""),
+                        status=status
+                    )
+                tracked_entries.append({**entry, "status": status})
+        
+        # Complete cycle
+        if rss_fetch_history and cycle_id:
+            rss_fetch_history.complete_fetch_cycle(cycle_id)
+        
+        return {
+            "status": "success",
+            "entries_fetched": len(entries),
+            "entries_added": added_count,
+            "entries_filtered": len(tracked_entries) - added_count,
+            "entries": tracked_entries[:50],  # Limit response size
+            "cycle_id": cycle_id
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Multi-source fetch error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/sources/stats")
+async def get_source_stats():
+    """Get statistics for all enabled sources"""
+    try:
+        source_integration = get_source_integration()
+        
+        if not source_integration:
+            return {"status": "not_available"}
+        
+        stats = source_integration.get_source_stats()
+        return {
+            "status": "ok",
+            **stats
+        }
+    except Exception as e:
+        logger.error(f"Source stats error: {e}")
+        return {"status": "error", "message": str(e)}
+
+# ============================================================================
+# RSS Learning Pipeline Endpoints (kept for backward compatibility)
+# ============================================================================
+
+@router.post("/rss/fetch")
+@limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # RSS fetch: 5 requests per hour (can be expensive)
+async def fetch_rss_content(
+    request: Request,
+    max_items: int = Query(default=5, ge=1, le=50, description="Maximum items per feed"),
+    auto_add: bool = Query(default=False, description="Automatically add to RAG")
+):
+    """Fetch content from RSS feeds with detailed status tracking
+    
+    Args:
+        max_items: Maximum items per feed
+        auto_add: If True, automatically add to RAG vector DB
+    """
+    try:
+        rss_fetcher = get_rss_fetcher()
+        rss_fetch_history = get_rss_fetch_history()
+        rag_retrieval = get_rag_retrieval()
+        content_curator = get_content_curator()
+        
+        if not rss_fetcher:
+            raise HTTPException(status_code=503, detail="RSS fetcher not available")
+        
+        # Create fetch cycle for tracking
+        cycle_id = None
+        if rss_fetch_history:
+            cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=0)  # Manual fetch = cycle 0
+        
+        entries = rss_fetcher.fetch_feeds(max_items_per_feed=max_items)
+        
+        # Track each entry with status
+        tracked_entries = []
+        added_count = 0
+        
+        if auto_add and rag_retrieval:
+            # Pre-filter if content curator available
+            if content_curator:
+                filtered_entries, rejected_entries = content_curator.pre_filter_content(entries)
+                
+                # Track rejected entries (Low Score)
+                for rejected in rejected_entries:
+                    status = "Filtered: Low Score"
+                    reason = rejected.get("rejection_reason", "Low quality/Short content")
+                    if rss_fetch_history and cycle_id:
+                        rss_fetch_history.add_fetch_item(
+                            cycle_id=cycle_id,
+                            title=rejected.get("title", ""),
+                            source_url=rejected.get("source", ""),
+                            link=rejected.get("link", ""),
+                            summary=rejected.get("summary", ""),
+                            status=status,
+                            status_reason=reason
+                        )
+                    tracked_entries.append({
+                        **rejected,
+                        "status": status,
+                        "status_reason": reason
+                    })
+                
+                entries = filtered_entries
+            
+            # Process filtered entries
+            for entry in entries:
+                content = f"{entry['title']}\n{entry['summary']}"
+                
+                # Check for duplicates (simple check - could be enhanced with semantic similarity)
+                is_duplicate = False
+                if rag_retrieval:
+                    try:
+                        # Try to find similar content in RAG
+                        existing = rag_retrieval.retrieve_context(
+                            query=entry['title'],
+                            knowledge_limit=1,
+                            conversation_limit=0
+                        )
+                        if existing.get("knowledge_docs"):
+                            # Check if title matches closely
+                            existing_doc = existing["knowledge_docs"][0]
+                            existing_metadata = existing_doc.get("metadata", {})
+                            existing_link = existing_metadata.get("link", "")
+                            if existing_link == entry.get("link", ""):
+                                is_duplicate = True
+                    except Exception:
+                        pass  # If check fails, assume not duplicate
+                
+                if is_duplicate:
+                    status = "Filtered: Duplicate"
+                    reason = "Content already exists in RAG"
+                    if rss_fetch_history and cycle_id:
+                        rss_fetch_history.add_fetch_item(
+                            cycle_id=cycle_id,
+                            title=entry.get("title", ""),
+                            source_url=entry.get("source", ""),
+                            link=entry.get("link", ""),
+                            summary=entry.get("summary", ""),
+                            status=status,
+                            status_reason=reason
+                        )
+                    tracked_entries.append({
+                        **entry,
+                        "status": status,
+                        "status_reason": reason
+                    })
+                    continue
+                
+                # Try to add to RAG
+                vector_id = None
+                try:
+                    success = rag_retrieval.add_learning_content(
+                        content=content,
+                        source=entry['source'],
+                        content_type="knowledge",
+                        metadata={
+                            "link": entry['link'],
+                            "published": entry['published'],
+                            "type": "rss_feed",
+                            "title": entry.get('title', '')[:200]
+                        }
+                    )
+                    
+                    if success:
+                        added_count += 1
+                        status = "Added to RAG"
+                        # Try to get vector ID (may not be available immediately)
+                        vector_id = f"knowledge_{entry.get('link', '')[:8]}"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source", ""),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                vector_id=vector_id,
+                                added_to_rag_at=datetime.now().isoformat()
+                            )
+                        tracked_entries.append({
+                            **entry,
+                            "status": status,
+                            "vector_id": vector_id
+                        })
+                    else:
+                        status = "Filtered: Low Score"
+                        reason = "Failed to add to RAG"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source", ""),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                status_reason=reason
+                            )
+                        tracked_entries.append({
+                            **entry,
+                            "status": status,
+                            "status_reason": reason
+                        })
+                except Exception as add_error:
+                    status = "Filtered: Low Score"
+                    reason = f"Error adding to RAG: {str(add_error)[:100]}"
+                    if rss_fetch_history and cycle_id:
+                        rss_fetch_history.add_fetch_item(
+                            cycle_id=cycle_id,
+                            title=entry.get("title", ""),
+                            source_url=entry.get("source", ""),
+                            link=entry.get("link", ""),
+                            summary=entry.get("summary", ""),
+                            status=status,
+                            status_reason=reason
+                        )
+                    tracked_entries.append({
+                        **entry,
+                        "status": status,
+                        "status_reason": reason
+                    })
+        else:
+            # If not auto_add, just track as fetched
+            for entry in entries:
+                status = "Fetched (not added)"
+                if rss_fetch_history and cycle_id:
+                    rss_fetch_history.add_fetch_item(
+                        cycle_id=cycle_id,
+                        title=entry.get("title", ""),
+                        source_url=entry.get("source", ""),
+                        link=entry.get("link", ""),
+                        summary=entry.get("summary", ""),
+                        status=status
+                    )
+                tracked_entries.append({
+                    **entry,
+                    "status": status
+                })
+        
+        # Complete cycle
+        if rss_fetch_history and cycle_id:
+            rss_fetch_history.complete_fetch_cycle(cycle_id)
+        
+        return {
+            "status": "success",
+            "entries_fetched": len(entries),
+            "entries_added": added_count if auto_add else 0,
+            "entries": tracked_entries[:10]  # Return first 10 for preview
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"RSS fetch error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/rss/fetch-history")
+async def get_rss_fetch_history(limit: int = 100):
+    """Get latest RSS fetch items with detailed status from the most recent cycle
+    
+    Args:
+        limit: Maximum number of items to return
+        
+    Returns:
+        List of fetch items with status (Source URL, Title, Fetch Timestamp, STATUS)
+    """
+    try:
+        rss_fetch_history = get_rss_fetch_history()
+        
+        if not rss_fetch_history:
+            raise HTTPException(status_code=503, detail="RSS fetch history not available")
+        
+        items = rss_fetch_history.get_latest_fetch_items(limit=limit)
+        return {
+            "items": items,
+            "total": len(items)
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"RSS fetch history error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/rss/stats")
+async def get_rss_stats():
+    """Get RSS pipeline statistics"""
+    try:
+        rss_fetcher = get_rss_fetcher()
+        
+        if not rss_fetcher:
+            return {"feeds_configured": 0, "status": "not_available"}
+        
+        return {
+            "feeds_configured": len(rss_fetcher.feeds),
+            "status": "ready",
+            "feeds": rss_fetcher.feeds
+        }
+    except Exception as e:
+        logger.error(f"RSS stats error: {e}")
+        return {"feeds_configured": 0, "status": "error"}
+
+# ============================================================================
+# Automated Scheduler Endpoints
+# ============================================================================
+
+@router.post("/scheduler/start", dependencies=[Depends(require_api_key)])
+async def start_scheduler():
+    """
+    Start automated learning scheduler
+    
+    Security: This endpoint requires API key authentication via X-API-Key header.
+    """
+    try:
+        learning_scheduler = get_learning_scheduler()
+        
+        if not learning_scheduler:
+            raise HTTPException(status_code=503, detail="Scheduler not available")
+        
+        if learning_scheduler.is_running:
+            return {"status": "already_running", "message": "Scheduler is already running"}
+        
+        await learning_scheduler.start()
+        return {
+            "status": "started",
+            "message": "Scheduler started successfully",
+            "interval_hours": learning_scheduler.interval_hours,
+            "next_run": learning_scheduler.next_run_time.isoformat() if learning_scheduler.next_run_time else None
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Start scheduler error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/scheduler/stop", dependencies=[Depends(require_api_key)])
+async def stop_scheduler():
+    """
+    Stop automated learning scheduler
+    
+    Security: This endpoint requires API key authentication via X-API-Key header.
+    """
+    try:
+        learning_scheduler = get_learning_scheduler()
+        
+        if not learning_scheduler:
+            raise HTTPException(status_code=503, detail="Scheduler not available")
+        
+        if not learning_scheduler.is_running:
+            return {"status": "not_running", "message": "Scheduler is not running"}
+        
+        await learning_scheduler.stop()
+        return {
+            "status": "stopped",
+            "message": "Scheduler stopped successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Stop scheduler error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/scheduler/status")
+async def get_scheduler_status():
+    """Get scheduler status"""
+    try:
+        learning_scheduler = get_learning_scheduler()
+        _initialization_error = get_initialization_error()
+        
+        # Debug logging
+        logger.info(f"get_scheduler_status called. learning_scheduler is None: {learning_scheduler is None}")
+        logger.info(f"_initialization_error: {_initialization_error}")
+        
+        if not learning_scheduler:
+            # Provide more detailed error message
+            error_msg = "Scheduler not initialized"
+            if _initialization_error:
+                error_msg = f"Scheduler not initialized: {_initialization_error}"
+            logger.warning(f"Returning not_available status: {error_msg}")
+            return {
+                "status": "not_available",
+                "message": error_msg,
+                "initialization_error": _initialization_error if _initialization_error else None
+            }
+        
+        # Get status from scheduler
+        status = learning_scheduler.get_status()
+        logger.info(f"Scheduler status retrieved successfully: {status}")
+        
+        return {
+            "status": "ok",
+            **status
+        }
+    except Exception as e:
+        logger.error(f"Scheduler status error: {e}", exc_info=True)
+        return {"status": "error", "message": str(e)}
+
+@router.post("/scheduler/run-now")
+async def run_scheduler_now():
+    """Manually trigger a learning cycle immediately with detailed status tracking"""
+    try:
+        learning_scheduler = get_learning_scheduler()
+        rss_fetch_history = get_rss_fetch_history()
+        rag_retrieval = get_rag_retrieval()
+        source_integration = get_source_integration()
+        content_curator = get_content_curator()
+        self_diagnosis = get_self_diagnosis()
+        
+        if not learning_scheduler:
+            raise HTTPException(status_code=503, detail="Scheduler not available")
+        
+        result = await learning_scheduler.run_learning_cycle()
+        cycle_number = result.get("cycle_number", 0)
+        
+        # Create fetch cycle for tracking
+        cycle_id = None
+        if rss_fetch_history:
+            cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=cycle_number)
+        
+        # If auto_add_to_rag is enabled, add to RAG
+        if learning_scheduler.auto_add_to_rag and rag_retrieval:
+            # Use entries from the learning cycle result (already fetched)
+            # Don't fetch again - use the entries that were already fetched in run_learning_cycle
+            entries_to_add = []
+            filtered_count = 0
+            
+            # Fetch from all sources using SourceIntegration
+            try:
+                # Use SourceIntegration to fetch from all enabled sources
+                if source_integration:
+                    all_entries = source_integration.fetch_all_sources(
+                        max_items_per_source=5,
+                        use_pre_filter=False  # We'll apply pre-filter manually to track rejected items
+                    )
+                    logger.info(f"Fetched {len(all_entries)} entries from all sources (RSS + arXiv + CrossRef + Wikipedia)")
+                else:
+                    # Fallback to RSS only
+                    all_entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+                    logger.info(f"Fetched {len(all_entries)} entries from RSS (SourceIntegration not available)")
+                
+                # STEP 1: Pre-Filter (BEFORE embedding) to reduce costs
+                if content_curator:
+                    filtered_entries, rejected_entries = content_curator.pre_filter_content(all_entries)
+                    filtered_count = len(rejected_entries)
+                    logger.info(
+                        f"Pre-Filter: {len(filtered_entries)}/{len(all_entries)} passed. "
+                        f"Rejected {filtered_count} items (saving embedding costs)"
+                    )
+                    
+                    # Track rejected entries (Low Score)
+                    for rejected in rejected_entries:
+                        status = "Filtered: Low Score"
+                        reason = rejected.get("rejection_reason", "Low quality/Short content")
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=rejected.get("title", ""),
+                                source_url=rejected.get("source", ""),
+                                link=rejected.get("link", ""),
+                                summary=rejected.get("summary", ""),
+                                status=status,
+                                status_reason=reason
+                            )
+                    
+                    # Use filtered entries for further processing
+                    all_entries = filtered_entries
+                else:
+                    logger.warning("Content curator not available, skipping pre-filter (may increase costs)")
+                
+                # STEP 2: Prioritize content if curator and self_diagnosis available
+                if content_curator and self_diagnosis:
+                    # Get knowledge gaps to prioritize
+                    recent_gaps = []  # Could be from query history
+                    prioritized = content_curator.prioritize_learning_content(
+                        all_entries,
+                        knowledge_gaps=recent_gaps
+                    )
+                    # Take top entries (up to 5, but can be fewer if prioritized list is shorter)
+                    entries_to_add = prioritized[:min(5, len(prioritized))]
+                    logger.info(f"Content curator prioritized {len(entries_to_add)} entries from {len(all_entries)} total")
+                else:
+                    # If no curator, add all entries (or limit to reasonable number)
+                    entries_to_add = all_entries[:min(10, len(all_entries))]
+                    logger.info(f"No content curator, adding {len(entries_to_add)} entries directly")
+                
+            except Exception as e:
+                logger.error(f"Error preparing entries for RAG: {e}")
+                entries_to_add = []
+            
+            added_count = 0
+            for entry in entries_to_add:
+                try:
+                    content = f"{entry.get('title', '')}\n{entry.get('summary', '')}"
+                    if not content.strip():
+                        logger.warning(f"Skipping empty entry: {entry.get('title', 'No title')}")
+                        continue
+                    
+                    # Check for duplicates
+                    is_duplicate = False
+                    try:
+                        existing = rag_retrieval.retrieve_context(
+                            query=entry.get('title', ''),
+                            knowledge_limit=1,
+                            conversation_limit=0
+                        )
+                        if existing.get("knowledge_docs"):
+                            existing_doc = existing["knowledge_docs"][0]
+                            existing_metadata = existing_doc.get("metadata", {})
+                            existing_link = existing_metadata.get("link", "")
+                            if existing_link == entry.get("link", ""):
+                                is_duplicate = True
+                    except Exception:
+                        pass
+                    
+                    if is_duplicate:
+                        status = "Filtered: Duplicate"
+                        reason = "Content already exists in RAG"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source", ""),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                status_reason=reason
+                            )
+                        continue
+                    
+                    # Calculate importance score for knowledge alert system
+                    importance_score = 0.5
+                    if content_curator:
+                        importance_score = content_curator.calculate_importance_score(entry)
+                    
+                    vector_id = None
+                    success = rag_retrieval.add_learning_content(
+                        content=content,
+                        source=entry.get('source', 'rss'),
+                        content_type="knowledge",
+                        metadata={
+                            "link": entry.get('link', ''),
+                            "published": entry.get('published', ''),
+                            "type": "rss_feed",
+                            "scheduler_cycle": result.get("cycle_number", 0),
+                            "priority_score": entry.get("priority_score", 0.5),
+                            "importance_score": importance_score,
+                            "title": entry.get('title', '')[:200]  # Store title for knowledge alert
+                        }
+                    )
+                    if success:
+                        added_count += 1
+                        status = "Added to RAG"
+                        vector_id = f"knowledge_{entry.get('link', '')[:8]}"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source", ""),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                vector_id=vector_id,
+                                added_to_rag_at=datetime.now().isoformat()
+                            )
+                        logger.info(f"Added entry to RAG: {entry.get('title', 'No title')[:50]}")
+                    else:
+                        status = "Filtered: Low Score"
+                        reason = "Failed to add to RAG"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source", ""),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                status_reason=reason
+                            )
+                        logger.warning(f"Failed to add entry to RAG: {entry.get('title', 'No title')[:50]}")
+                except Exception as e:
+                    status = "Filtered: Low Score"
+                    reason = f"Error adding to RAG: {str(e)[:100]}"
+                    if rss_fetch_history and cycle_id:
+                        rss_fetch_history.add_fetch_item(
+                            cycle_id=cycle_id,
+                            title=entry.get("title", ""),
+                            source_url=entry.get("source", ""),
+                            link=entry.get("link", ""),
+                            summary=entry.get("summary", ""),
+                            status=status,
+                            status_reason=reason
+                        )
+                    logger.error(f"Error adding entry to RAG: {e}")
+                    continue
+            
+            result["entries_added_to_rag"] = added_count
+            result["entries_filtered"] = filtered_count
+            
+            # Complete cycle
+            if rss_fetch_history and cycle_id:
+                rss_fetch_history.complete_fetch_cycle(cycle_id)
+            
+            logger.info(
+                f"Learning cycle: Fetched {result.get('entries_fetched', 0)} entries, "
+                f"Filtered {filtered_count} (Low quality/Short), "
+                f"Added {added_count} to RAG"
+            )
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Run scheduler now error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# Self-Diagnosis & Content Curation Endpoints
+# ============================================================================
+
+@router.post("/self-diagnosis/check-gap")
+async def check_knowledge_gap(query: str, threshold: float = 0.5):
+    """Check if there's a knowledge gap for a query"""
+    try:
+        self_diagnosis = get_self_diagnosis()
+        
+        if not self_diagnosis:
+            raise HTTPException(status_code=503, detail="Self-diagnosis not available")
+        
+        result = self_diagnosis.identify_knowledge_gaps(query, threshold)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Knowledge gap check error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/self-diagnosis/analyze-coverage")
+async def analyze_coverage(topics: List[str]):
+    """Analyze knowledge coverage across multiple topics"""
+    try:
+        self_diagnosis = get_self_diagnosis()
+        
+        if not self_diagnosis:
+            raise HTTPException(status_code=503, detail="Self-diagnosis not available")
+        
+        result = self_diagnosis.analyze_knowledge_coverage(topics)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Coverage analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/self-diagnosis/suggest-focus")
+async def suggest_learning_focus(recent_queries: Optional[List[str]] = None, limit: int = 5):
+    """Suggest learning focus based on knowledge gaps"""
+    try:
+        self_diagnosis = get_self_diagnosis()
+        
+        if not self_diagnosis:
+            return {"suggestions": [], "reason": "Self-diagnosis not available"}
+        
+        # If no queries provided, return empty
+        if not recent_queries:
+            recent_queries = []
+        
+        suggestions = self_diagnosis.suggest_learning_focus(recent_queries, limit)
+        return {
+            "suggestions": suggestions,
+            "count": len(suggestions)
+        }
+    except Exception as e:
+        logger.error(f"Learning focus suggestion error: {e}")
+        return {"suggestions": [], "error": str(e)}
+
+@router.post("/curator/prioritize")
+async def prioritize_content(content_list: List[Dict[str, Any]]):
+    """Prioritize learning content"""
+    try:
+        content_curator = get_content_curator()
+        self_diagnosis = get_self_diagnosis()
+        
+        if not content_curator:
+            raise HTTPException(status_code=503, detail="Content curator not available")
+        
+        # Get knowledge gaps from self-diagnosis
+        knowledge_gaps = []
+        if self_diagnosis and content_list:
+            # Extract topics from content
+            topics = [item.get("title", "")[:50] for item in content_list[:10]]
+            coverage = self_diagnosis.analyze_knowledge_coverage(topics)
+            knowledge_gaps = coverage.get("gap_topics", [])
+        
+        prioritized = content_curator.prioritize_learning_content(
+            content_list,
+            knowledge_gaps=knowledge_gaps
+        )
+        return {
+            "prioritized_content": prioritized,
+            "total_items": len(prioritized)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Content prioritization error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/curator/stats")
+async def get_curation_stats():
+    """Get content curation statistics"""
+    try:
+        content_curator = get_content_curator()
+        
+        if not content_curator:
+            return {"status": "not_available"}
+        
+        stats = content_curator.get_curation_stats()
+        return {
+            "status": "ok",
+            **stats
+        }
+    except Exception as e:
+        logger.error(f"Curation stats error: {e}")
+        return {"status": "error", "message": str(e)}
+
+@router.post("/curator/update-source-quality", dependencies=[Depends(require_api_key)])
+async def update_source_quality(source: str, quality_score: float):
+    """
+    Update quality score for a source
+    
+    Security: This endpoint requires API key authentication via X-API-Key header.
+    """
+    try:
+        content_curator = get_content_curator()
+        
+        if not content_curator:
+            raise HTTPException(status_code=503, detail="Content curator not available")
+        
+        if not 0.0 <= quality_score <= 1.0:
+            raise HTTPException(status_code=400, detail="Quality score must be between 0.0 and 1.0")
+        
+        content_curator.update_source_quality(source, quality_score)
+        return {
+            "status": "updated",
+            "source": source,
+            "quality_score": quality_score
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Update source quality error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
