@@ -8,12 +8,14 @@ from .learning_router import router as learning_router
 from .rag_router import router as rag_router
 from .tiers_router import router as tiers_router
 from .spice_router import router as spice_router
+from .system_router import router as system_router
 
 __all__ = [
     "chat_router",
     "learning_router",
     "rag_router",
     "tiers_router",
-    "spice_router"
+    "spice_router",
+    "system_router"
 ]
 
