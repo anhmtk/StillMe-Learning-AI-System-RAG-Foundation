@@ -130,25 +130,22 @@ class ContinuumMemory:
         """
         Calculate surprise score for a knowledge item.
         
+        DEPRECATED: Use PromotionManager.calculate_surprise_score() for real computation.
+        This method is kept for backward compatibility but delegates to PromotionManager.
+        
         Formula (normalized to 0.0-1.0):
         surprise_score = 0.3 * rarity_score + 
                         0.3 * novelty_score + 
                         0.2 * retrieval_frequency + 
                         0.2 * validator_overlap
         
-        Where:
-        - rarity_score: Uniqueness of keywords (0.0-1.0)
-        - novelty_score: Cosine distance from centroid of existing knowledge (0.0-1.0)
-        - retrieval_frequency: Normalized retrieval count in last 7 days (0.0-1.0)
-        - validator_overlap: Evidence overlap from validator chain (0.0-1.0)
-        
         Args:
             item_id: Knowledge item ID
             content: Content text (for keyword extraction if needed)
-            rarity_score: Keyword rarity score (0.0-1.0)
-            novelty_score: OOD/novelty score (0.0-1.0)
-            retrieval_frequency: Normalized retrieval frequency (0.0-1.0)
-            validator_overlap: Validator evidence overlap (0.0-1.0)
+            rarity_score: Keyword rarity score (0.0-1.0) - ignored if PromotionManager available
+            novelty_score: OOD/novelty score (0.0-1.0) - ignored if PromotionManager available
+            retrieval_frequency: Normalized retrieval frequency (0.0-1.0) - ignored if PromotionManager available
+            validator_overlap: Validator evidence overlap (0.0-1.0) - ignored if PromotionManager available
             
         Returns:
             Surprise score (0.0-1.0)
@@ -156,13 +153,22 @@ class ContinuumMemory:
         if not ENABLE_CONTINUUM_MEMORY:
             return 0.0
         
-        # PR-1: Mock computation (will be real in PR-2)
-        # For now, return a mock value based on simple heuristics
-        mock_score = min(1.0, (rarity_score * 0.3 + novelty_score * 0.3 + 
-                               retrieval_frequency * 0.2 + validator_overlap * 0.2))
-        
-        logger.debug(f"Surprise score (mock) for {item_id}: {mock_score:.3f}")
-        return mock_score
+        # PR-2: Use PromotionManager for real computation if available
+        try:
+            from backend.learning.promotion_manager import PromotionManager
+            promotion_manager = PromotionManager(self.db_path)
+            return promotion_manager.calculate_surprise_score(
+                item_id=item_id,
+                content=content,
+                content_embedding=None,  # Will be computed if needed
+                existing_keywords=None,  # Will be queried if needed
+                centroid_embeddings=None  # Will be computed if needed
+            )
+        except Exception as e:
+            logger.warning(f"PromotionManager not available, using fallback: {e}")
+            # Fallback to simple weighted sum
+            return min(1.0, (rarity_score * 0.3 + novelty_score * 0.3 + 
+                            retrieval_frequency * 0.2 + validator_overlap * 0.2))
     
     def get_tier_stats(self) -> Dict[str, Any]:
         """Get statistics for each tier
