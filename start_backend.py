@@ -85,6 +85,7 @@ try:
     logger.info("✓ FastAPI app imported successfully")
  refactor/routerization
     sys.stdout.flush()
+ refactor/routerization
 except ImportError as e:
     logger.error(f"❌ ImportError: Failed to import module: {e}")
     logger.error(f"   Module: {e.name if hasattr(e, 'name') else 'unknown'}")
@@ -97,6 +98,16 @@ except ImportError as e:
 except Exception as e:
     logger.error(f"❌ Failed to import FastAPI app: {e}", exc_info=True)
     logger.error("This may be due to RAG initialization errors")
+
+except Exception as e:
+    logger.error(f"❌ Failed to import FastAPI app: {e}", exc_info=True)
+    logger.error("This may be due to RAG initialization errors")
+    sys.stdout.flush()
+
+except Exception as e:
+    logger.error(f"❌ Failed to import FastAPI app: {e}", exc_info=True)
+    logger.error("This may be due to RAG initialization errors")
+ main
  main
     sys.exit(1)
 except Exception as e:
