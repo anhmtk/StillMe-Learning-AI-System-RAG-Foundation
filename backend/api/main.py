@@ -35,6 +35,7 @@ from backend.services.learning_scheduler import LearningScheduler
 from backend.services.self_diagnosis import SelfDiagnosisAgent
 from backend.services.content_curator import ContentCurator
 from backend.services.rss_fetch_history import RSSFetchHistory
+from backend.services.source_integration import SourceIntegration
 from backend.api.rate_limiter import limiter, get_rate_limit_key_func, RateLimitExceeded
 from backend.api.security_middleware import get_security_middleware
 
@@ -162,6 +163,7 @@ self_diagnosis = None
 content_curator = None
 rss_fetch_history = None
 continuum_memory = None
+source_integration = None
 
 try:
     logger.info("Initializing RAG components...")
@@ -239,6 +241,10 @@ try:
     
     rss_fetch_history = RSSFetchHistory()
     logger.info("✓ RSS fetch history initialized")
+    
+    # Initialize Source Integration (arXiv, CrossRef, Wikipedia)
+    source_integration = SourceIntegration(content_curator=content_curator)
+    logger.info("✓ Source Integration initialized")
     
     # Initialize Continuum Memory (if enabled)
     continuum_memory = ContinuumMemory()
@@ -1214,7 +1220,192 @@ async def get_accuracy_metrics():
             "trend": "N/A"
         }}
 
-# RSS Learning Pipeline endpoints
+# Multi-Source Learning Pipeline endpoints
+@app.post("/api/learning/sources/fetch")
+@limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # Multi-source fetch: 5 requests per hour
+async def fetch_all_sources(
+    request: Request,
+    max_items_per_source: int = Query(default=5, ge=1, le=20, description="Maximum items per source"),
+    auto_add: bool = Query(default=False, description="Automatically add to RAG"),
+    use_pre_filter: bool = Query(default=True, description="Apply pre-filter before adding to RAG")
+):
+    """Fetch content from all enabled sources (RSS, arXiv, CrossRef, Wikipedia) with detailed status tracking
+    
+    Args:
+        max_items_per_source: Maximum items per source
+        auto_add: If True, automatically add to RAG vector DB
+        use_pre_filter: If True, apply pre-filter before adding
+    """
+    try:
+        if not source_integration:
+            raise HTTPException(status_code=503, detail="Source integration not available")
+        
+        # Create fetch cycle for tracking
+        cycle_id = None
+        if rss_fetch_history:
+            cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=0)  # Manual fetch = cycle 0
+        
+        # Fetch from all sources
+        entries = source_integration.fetch_all_sources(
+            max_items_per_source=max_items_per_source,
+            use_pre_filter=use_pre_filter
+        )
+        
+        # Track each entry with status (similar to RSS fetch)
+        tracked_entries = []
+        added_count = 0
+        
+        if auto_add and rag_retrieval:
+            # Process entries (pre-filter already applied if use_pre_filter=True)
+            for entry in entries:
+                content = f"{entry.get('title', '')}\n{entry.get('summary', entry.get('content', ''))}"
+                
+                # Check for duplicates
+                is_duplicate = False
+                if rag_retrieval:
+                    try:
+                        existing = rag_retrieval.retrieve_context(
+                            query=entry.get('title', ''),
+                            knowledge_limit=1,
+                            conversation_limit=0
+                        )
+                        if existing.get("knowledge_docs"):
+                            existing_doc = existing["knowledge_docs"][0]
+                            existing_metadata = existing_doc.get("metadata", {})
+                            existing_link = existing_metadata.get("link", "")
+                            if existing_link == entry.get("link", "") or existing_link == entry.get("source_url", ""):
+                                is_duplicate = True
+                    except Exception:
+                        pass
+                
+                if is_duplicate:
+                    status = "Filtered: Duplicate"
+                    reason = "Content already exists in RAG"
+                    if rss_fetch_history and cycle_id:
+                        rss_fetch_history.add_fetch_item(
+                            cycle_id=cycle_id,
+                            title=entry.get("title", ""),
+                            source_url=entry.get("source_url", entry.get("source", "")),
+                            link=entry.get("link", ""),
+                            summary=entry.get("summary", ""),
+                            status=status,
+                            status_reason=reason
+                        )
+                    tracked_entries.append({**entry, "status": status, "status_reason": reason})
+                    continue
+                
+                # Try to add to RAG
+                vector_id = None
+                try:
+                    success = rag_retrieval.add_learning_content(
+                        content=content,
+                        source=entry.get("source", "unknown"),
+                        content_type="knowledge",
+                        metadata={
+                            "link": entry.get("link", ""),
+                            "source_url": entry.get("source_url", ""),
+                            "published": entry.get("published", datetime.now().isoformat()),
+                            "type": entry.get("metadata", {}).get("source_type", "unknown"),
+                            "title": entry.get("title", "")[:200],
+                            "license": entry.get("metadata", {}).get("license", "Unknown")
+                        }
+                    )
+                    
+                    if success:
+                        added_count += 1
+                        status = "Added to RAG"
+                        vector_id = f"knowledge_{entry.get('link', entry.get('source_url', ''))[:8]}"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source_url", entry.get("source", "")),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                vector_id=vector_id,
+                                added_to_rag_at=datetime.now().isoformat()
+                            )
+                        tracked_entries.append({**entry, "status": status, "vector_id": vector_id})
+                    else:
+                        status = "Filtered: Low Score"
+                        reason = "Failed to add to RAG"
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=entry.get("title", ""),
+                                source_url=entry.get("source_url", entry.get("source", "")),
+                                link=entry.get("link", ""),
+                                summary=entry.get("summary", ""),
+                                status=status,
+                                status_reason=reason
+                            )
+                        tracked_entries.append({**entry, "status": status, "status_reason": reason})
+                except Exception as add_error:
+                    status = "Filtered: Low Score"
+                    reason = f"Error adding to RAG: {str(add_error)[:100]}"
+                    if rss_fetch_history and cycle_id:
+                        rss_fetch_history.add_fetch_item(
+                            cycle_id=cycle_id,
+                            title=entry.get("title", ""),
+                            source_url=entry.get("source_url", entry.get("source", "")),
+                            link=entry.get("link", ""),
+                            summary=entry.get("summary", ""),
+                            status=status,
+                            status_reason=reason
+                        )
+                    tracked_entries.append({**entry, "status": status, "status_reason": reason})
+        else:
+            # If not auto_add, just track as fetched
+            for entry in entries:
+                status = "Fetched (not added)"
+                if rss_fetch_history and cycle_id:
+                    rss_fetch_history.add_fetch_item(
+                        cycle_id=cycle_id,
+                        title=entry.get("title", ""),
+                        source_url=entry.get("source_url", entry.get("source", "")),
+                        link=entry.get("link", ""),
+                        summary=entry.get("summary", ""),
+                        status=status
+                    )
+                tracked_entries.append({**entry, "status": status})
+        
+        # Complete cycle
+        if rss_fetch_history and cycle_id:
+            rss_fetch_history.complete_fetch_cycle(cycle_id)
+        
+        return {
+            "status": "success",
+            "entries_fetched": len(entries),
+            "entries_added": added_count,
+            "entries_filtered": len(tracked_entries) - added_count,
+            "entries": tracked_entries[:50],  # Limit response size
+            "cycle_id": cycle_id
+        }
+        
+    except Exception as e:
+        logger.error(f"Multi-source fetch error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/learning/sources/stats")
+async def get_source_stats():
+    """Get statistics for all enabled sources"""
+    try:
+        if not source_integration:
+            return {"status": "not_available"}
+        
+        stats = source_integration.get_source_stats()
+        return {
+            "status": "ok",
+            **stats
+        }
+    except Exception as e:
+        logger.error(f"Source stats error: {e}")
+        return {"status": "error", "message": str(e)}
+
+
+# RSS Learning Pipeline endpoints (kept for backward compatibility)
 @app.post("/api/learning/rss/fetch")
 @limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # RSS fetch: 5 requests per hour (can be expensive)
 async def fetch_rss_content(
@@ -1562,14 +1753,19 @@ async def run_scheduler_now():
             entries_to_add = []
             filtered_count = 0
             
-            # Try to get entries from the RSS fetcher's last fetch
-            # If that's not available, fetch again (but this should be rare)
+            # Fetch from all sources using SourceIntegration
             try:
-                # Get entries that were fetched in this cycle
-                # The run_learning_cycle already fetched entries, but we need to access them
-                # For now, we'll fetch again but this should be optimized later
-                all_entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
-                logger.info(f"Fetched {len(all_entries)} entries for RAG addition")
+                # Use SourceIntegration to fetch from all enabled sources
+                if source_integration:
+                    all_entries = source_integration.fetch_all_sources(
+                        max_items_per_source=5,
+                        use_pre_filter=False  # We'll apply pre-filter manually to track rejected items
+                    )
+                    logger.info(f"Fetched {len(all_entries)} entries from all sources (RSS + arXiv + CrossRef + Wikipedia)")
+                else:
+                    # Fallback to RSS only
+                    all_entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+                    logger.info(f"Fetched {len(all_entries)} entries from RSS (SourceIntegration not available)")
                 
                 # STEP 1: Pre-Filter (BEFORE embedding) to reduce costs
                 if content_curator:

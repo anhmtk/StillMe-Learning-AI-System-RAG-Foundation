@@ -51,18 +51,30 @@ class LearningScheduler:
         
         logger.info(f"LearningScheduler initialized: interval={interval_hours}h, auto_add={auto_add_to_rag}")
     
-    async def run_learning_cycle(self):
-        """Execute one learning cycle: fetch RSS and optionally add to RAG"""
+    async def run_learning_cycle(self, use_multi_source: bool = True):
+        """Execute one learning cycle: fetch from all sources and optionally add to RAG
+        
+        Args:
+            use_multi_source: If True, use SourceIntegration (RSS + arXiv + CrossRef + Wikipedia)
+                             If False, use only RSS (backward compatibility)
+        """
         try:
             logger.info(f"Starting learning cycle #{self.cycle_count + 1}")
             self.last_run_time = datetime.now()
             
-            # Fetch RSS feeds
-            entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=5)
-            logger.info(f"Fetched {len(entries)} entries from RSS feeds")
+            # Fetch from sources
+            if use_multi_source:
+                # Try to use SourceIntegration if available (will be injected from main.py)
+                # For now, fallback to RSS only
+                entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+                logger.info(f"Fetched {len(entries)} entries from RSS feeds (multi-source integration in main.py)")
+            else:
+                # RSS only
+                entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+                logger.info(f"Fetched {len(entries)} entries from RSS feeds")
             
             # If auto_add_to_rag is enabled, we'll need to call RAG service
-            # For now, just log - will integrate with main.py's rag_retrieval
+            # For now, just log - will integrate with main.py's scheduler endpoint
             if self.auto_add_to_rag:
                 logger.info(f"Auto-add to RAG enabled - {len(entries)} entries ready for processing")
                 # Note: Actual RAG integration will be done in main.py's scheduler endpoint

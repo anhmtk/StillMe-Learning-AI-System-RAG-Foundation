@@ -15,6 +15,7 @@ MINIMUM_CONTENT_LENGTH = 150  # Minimum characters (reduced from 500 to allow sh
 KEYWORD_SCORING_THRESHOLD = 0.5  # Minimum keyword score to pass filter
 
 # Important keywords for StillMe's mission (weighted)
+# Enhanced with keywords for new sources (arXiv, CrossRef, Wikipedia)
 IMPORTANT_KEYWORDS = {
     # High priority (weight: 1.0)
     "đạo đức": 1.0, "ethics": 1.0, "ethical": 1.0,
@@ -23,14 +24,21 @@ IMPORTANT_KEYWORDS = {
     "rag": 1.0, "retrieval-augmented": 1.0,
     "spice": 1.0, "self-play": 1.0, "self-evolving": 1.0,
     "stillme": 1.0,
+    # Research & Academic (for arXiv, CrossRef)
+    "llm eval": 1.0, "llm evaluation": 1.0, "evaluation": 1.0,
+    "safety": 1.0, "security": 1.0,
+    "citation": 1.0, "citation graph": 1.0,
     # Medium priority (weight: 0.7)
     "machine learning": 0.7, "deep learning": 0.7, "neural network": 0.7,
     "artificial intelligence": 0.7, "ai system": 0.7,
     "vector database": 0.7, "embedding": 0.7,
     "open source": 0.7, "open-source": 0.7,
+    "research": 0.7, "paper": 0.7, "publication": 0.7,
+    "arxiv": 0.7, "crossref": 0.7,
     # Lower priority (weight: 0.5)
     "algorithm": 0.5, "model": 0.5, "training": 0.5,
-    "data": 0.5, "dataset": 0.5
+    "data": 0.5, "dataset": 0.5,
+    "method": 0.5, "approach": 0.5, "framework": 0.5
 }
 
 class ContentCurator:
