@@ -262,13 +262,8 @@ graph TB
   - `rag_router.py` - RAG endpoints (4 endpoints)
   - `tiers_router.py` - Continuum Memory tier management (5 endpoints)
   - `spice_router.py` - SPICE framework endpoints (6 endpoints)
- refactor/routerization
   - `system_router.py` - System endpoints: root, health, ready, status, validators/metrics (5 endpoints)
   - **Total**: 43 endpoints organized into 6 routers
-
-  - `system_router.py` - System endpoints: root, health, status, validators/metrics (4 endpoints)
-  - **Total**: 42 endpoints organized into 6 routers
- main
   - **Benefits**: Better code organization, easier maintenance, OSS-friendly structure
 - **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours + Multi-timescale scheduler (hourly/daily/weekly/monthly)
 - **🔍 Self-Diagnosis**: Knowledge gap detection and learning focus suggestions
@@ -903,21 +898,42 @@ NOTIFY_ERRORS=true
 
 ## 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup guide.
 
-**Quick Start for Adding New AI Models:**
+### 🚧 Current Status & Contribution Opportunities
+
+**MVP Stage** - Built by solo founder with AI assistance. Some areas need improvement:
+
+- ✅ **Working**: Core RAG, Validator Chain, Learning Pipeline, Modular Routers
+- 🚧 **In Progress**: SPICE Framework (framework ready, implementation needed)
+- 📋 **Planned**: PostgreSQL migration, Observability stack, Advanced features
+- 🎯 **Good First Issues**: Type hints, Dependency Injection refactor, Documentation improvements
+
+**Contributions Welcome!** We're actively looking for contributors to help improve StillMe.
+
+### **Quick Start for Adding New AI Models:**
 - See [CONTRIBUTING.md#adding-support-for-new-ai-models](CONTRIBUTING.md#-adding-support-for-new-ai-models) for step-by-step guide
 - All models automatically get language matching via `build_system_prompt_with_language()`
 - Just create one function and add one line to the router!
 
 ### **Areas for Contribution**
-- **UI/UX Improvements**: Dashboard enhancements, mobile responsiveness
-- **Learning Sources**: Add new RSS feeds and API integrations
-- **Ethical Filtering**: Improve safety algorithms and rules
-- **Documentation**: API docs, tutorials, guides
-- **Testing**: Unit tests, integration tests, performance tests
-- **Evolution Metrics**: Help implement accuracy tracking, retention metrics
-- **Docker & DevOps**: Improve deployment, CI/CD pipelines
+
+**Good First Issues** (Great for newcomers):
+- Add type hints to functions
+- Refactor to dependency injection (FastAPI `Depends()`)
+- Improve documentation
+- Add unit tests for existing features
+
+**Help Wanted** (Community contributions welcome):
+- Complete SPICE implementation
+- PostgreSQL migration execution
+- Add observability (Prometheus metrics, structured logging)
+- Integration tests for critical paths
+
+**Advanced** (Requires expertise):
+- Performance optimization (Redis caching, query optimization)
+- Scalability architecture improvements
+- Security enhancements
 
 ### **Community Resources**
 
