@@ -51,6 +51,18 @@ class TestRouterSmoke:
         assert "status" in data
         assert data["status"] == "healthy"
     
+    def test_ready_endpoint(self, client):
+        """Smoke test: Readiness check endpoint"""
+        response = client.get("/ready")
+        # May return 200 (all checks pass) or 503 (some checks fail)
+        assert response.status_code in [200, 503]
+        data = response.json()
+        assert "status" in data
+        assert "checks" in data
+        assert "check_details" in data
+        assert "timestamp" in data
+        assert data["status"] in ["ready", "not_ready"]
+    
     def test_status_endpoint(self, client):
         """Smoke test: System status endpoint"""
         response = client.get("/api/status")
@@ -152,6 +164,7 @@ class TestRouterSmoke:
         paths = data["paths"]
         assert "/" in paths  # Root
         assert "/health" in paths  # Health
+        assert "/ready" in paths  # Readiness
         assert "/api/status" in paths  # Status
         assert "/api/validators/metrics" in paths  # Validators metrics
         assert "/api/chat/rag" in paths  # Chat router
