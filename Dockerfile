@@ -43,29 +43,37 @@ ENV HF_HOME=/app/.model_cache
 # This ensures model is available in image and doesn't need to be downloaded at runtime
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/app/.model_cache')"
 
-# Pre-download ChromaDB ONNX model during build stage
+# Pre-download ChromaDB ONNX model during build stage (optional, controlled by CHROMA_WARMUP env)
 # ChromaDB automatically downloads ONNX models to ~/.cache/chroma/onnx_models/
 # By setting HOME=/app, it will use /app/.cache/chroma/onnx_models/
 # This prevents re-downloading ONNX models on every container start
 # Note: ChromaDB may only download ONNX model when actually needed (during real queries)
 # If model is not pre-downloaded here, it will download on first use but then be cached
-RUN python -c "\
+# Using heredoc to avoid shell quoting issues and SyntaxError
+# This step never fails the build (|| true ensures it continues even on error)
+ARG CHROMA_WARMUP=true
+RUN if [ "$CHROMA_WARMUP" = "true" ]; then \
+    python - <<'PY' || true; \
 import chromadb; \
 import os; \
-# Ensure cache directory exists \
-os.makedirs('/app/.cache/chroma', exist_ok=True); \
-client = chromadb.Client(); \
-collection = client.create_collection('_preload_onnx'); \
-# Add a dummy document \
-collection.add(ids=['dummy'], documents=['dummy text'], embeddings=[[0.1]*384]); \
-# Query to potentially trigger ONNX model loading (if ChromaDB needs it) \
 try: \
-    results = collection.query(query_embeddings=[[0.1]*384], n_results=1); \
-    print('ChromaDB query executed - ONNX model may be cached'); \
+    os.makedirs('/app/.cache/chroma', exist_ok=True); \
+    client = chromadb.Client(); \
+    collection = client.create_collection('_preload_onnx'); \
+    collection.add(ids=['d'], documents=['d'], embeddings=[[0.1]*384]); \
+    try: \
+        results = collection.query(query_embeddings=[[0.1]*384], n_results=1); \
+        print('ChromaDB query executed - ONNX model may be cached'); \
+    except Exception as e: \
+        print(f'Query executed (ONNX may download on first real use): {e}'); \
+    client.delete_collection('_preload_onnx'); \
+    print('ChromaDB ONNX warmup done'); \
 except Exception as e: \
-    print(f'Query executed (ONNX may download on first real use): {e}'); \
-client.delete_collection('_preload_onnx'); \
-print('ChromaDB ONNX pre-download step completed')" || echo "ChromaDB ONNX model pre-download attempted"
+    print('Chroma warmup skipped:', e); \
+PY \
+    else \
+    echo "ChromaDB warmup disabled (CHROMA_WARMUP=false)"; \
+    fi
 
 # Copy application code (including .streamlit config)
 COPY . .
