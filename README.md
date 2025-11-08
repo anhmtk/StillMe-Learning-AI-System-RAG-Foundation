@@ -262,6 +262,8 @@ graph TB
   - `rag_router.py` - RAG endpoints (4 endpoints)
   - `tiers_router.py` - Continuum Memory tier management (5 endpoints)
   - `spice_router.py` - SPICE framework endpoints (6 endpoints)
+  - `system_router.py` - System endpoints: root, health, status, validators/metrics (4 endpoints)
+  - **Total**: 42 endpoints organized into 6 routers
   - **Benefits**: Better code organization, easier maintenance, OSS-friendly structure
 - **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours + Multi-timescale scheduler (hourly/daily/weekly/monthly)
 - **🔍 Self-Diagnosis**: Knowledge gap detection and learning focus suggestions
