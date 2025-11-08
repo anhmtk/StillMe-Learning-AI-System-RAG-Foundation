@@ -256,6 +256,13 @@ graph TB
 - **📊 Accuracy Scoring**: Response quality measurement
 - **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, validation panel, memory health, and chat
 - **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`) + Validation API (`/api/validators/metrics`) + SPICE API (`/api/spice/*`) + Continuum Memory API (`/api/v1/tiers/*`)
+- **📦 Modular Router Architecture** (NEW): Refactored monolithic `main.py` (2817 lines) into modular routers for better maintainability:
+  - `chat_router.py` - Chat endpoints (4 endpoints)
+  - `learning_router.py` - Learning endpoints (19 endpoints)
+  - `rag_router.py` - RAG endpoints (4 endpoints)
+  - `tiers_router.py` - Continuum Memory tier management (5 endpoints)
+  - `spice_router.py` - SPICE framework endpoints (6 endpoints)
+  - **Benefits**: Better code organization, easier maintenance, OSS-friendly structure
 - **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours + Multi-timescale scheduler (hourly/daily/weekly/monthly)
 - **🔍 Self-Diagnosis**: Knowledge gap detection and learning focus suggestions
 - **📝 Content Curator**: Intelligent content prioritization and RSS source optimization with **Pre-Filter** for cost optimization
