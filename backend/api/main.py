@@ -1229,20 +1229,20 @@ async def fetch_rss_content(
                 # Try to add to RAG
                 vector_id = None
                 try:
-                success = rag_retrieval.add_learning_content(
-                    content=content,
-                    source=entry['source'],
-                    content_type="knowledge",
-                    metadata={
-                        "link": entry['link'],
-                        "published": entry['published'],
+                    success = rag_retrieval.add_learning_content(
+                        content=content,
+                        source=entry['source'],
+                        content_type="knowledge",
+                        metadata={
+                            "link": entry['link'],
+                            "published": entry['published'],
                             "type": "rss_feed",
                             "title": entry.get('title', '')[:200]
-                    }
-                )
+                        }
+                    )
                     
-                if success:
-                    added_count += 1
+                    if success:
+                        added_count += 1
                         status = "Added to RAG"
                         # Try to get vector ID (may not be available immediately)
                         vector_id = f"knowledge_{entry.get('link', '')[:8]}"
