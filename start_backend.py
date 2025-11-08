@@ -87,14 +87,11 @@ logger.info(f"Starting uvicorn server on 0.0.0.0:{port_int}...")
 logger.info("=" * 60)
 sys.stdout.flush()
 
- refactor/routerization
 # Log that health endpoint is ready
 logger.info("✅ App started - Health endpoint /health is ready")
 logger.info("✅ Readiness endpoint /ready available (may return 503 until dependencies ready)")
 sys.stdout.flush()
 
-
- main
 try:
     uvicorn.run(
         app,
