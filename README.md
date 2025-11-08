@@ -40,16 +40,19 @@ While major AI companies build closed systems with proprietary algorithms, Still
 - ✅ **Knowledge Retention**: Learning metrics tracking system
 - ✅ **Accuracy Scoring**: Response quality measurement
 - ✅ **Dashboard**: Interactive UI with RAG interface, validation metrics, and learning metrics
+- ✅ **Continuum Memory System** (NEW): Tiered memory architecture (L0-L3) with promotion/demotion, multi-timescale scheduler, and forgetting metrics
+- ✅ **Multi-Source Learning** (NEW): Integrated fetching from RSS, arXiv, CrossRef, and Wikipedia with pre-filtering
 
 **Vision:** Evolve through developmental stages (Infant → Child → Adolescent → Adult) with community governance, automated learning pipelines, and complete transparency.
 
 ### 🎯 Core Concept
 
 - **🧬 Evolutionary Learning**: AI progresses through stages (Infant → Child → Adolescent → Adult)
-- **📚 Multi-Source Learning**: RSS feeds + Public APIs integration
+- **📚 Multi-Source Learning**: RSS feeds + arXiv + CrossRef + Wikipedia with intelligent pre-filtering
+- **🧠 Continuum Memory**: Tiered memory system (L0-L3) with surprise-based promotion/demotion and forgetting metrics
 - **🌐 Real-time Data**: Live data from multiple trusted sources with transparency
 - **🛡️ Ethical Filtering**: Comprehensive ethical content filtering with complete transparency
-- **📊 Transparent Dashboard**: Complete visibility into all learning sources and data
+- **📊 Transparent Dashboard**: Complete visibility into all learning sources, memory health, and tier statistics
 - **💬 Interactive Chat**: Communicate with your evolving AI assistant
 
 ## 🛡️ Our Uncompromising Commitment
@@ -251,13 +254,15 @@ graph TB
 - **🎨 Tone Alignment**: Normalizes response tone to StillMe style
 - **🧠 Knowledge Retention**: Learning metrics tracking system
 - **📊 Accuracy Scoring**: Response quality measurement
-- **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, validation panel, and chat
-- **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`) + Validation API (`/api/validators/metrics`) + SPICE API (`/api/spice/*`)
-- **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours
+- **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, validation panel, memory health, and chat
+- **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`) + Validation API (`/api/validators/metrics`) + SPICE API (`/api/spice/*`) + Continuum Memory API (`/api/v1/tiers/*`)
+- **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours + Multi-timescale scheduler (hourly/daily/weekly/monthly)
 - **🔍 Self-Diagnosis**: Knowledge gap detection and learning focus suggestions
 - **📝 Content Curator**: Intelligent content prioritization and RSS source optimization with **Pre-Filter** for cost optimization
-- **💰 Pre-Filter System**: Filters content BEFORE embedding (min 500 chars, keyword scoring) - reduces costs by 30-50%
+- **💰 Pre-Filter System**: Filters content BEFORE embedding (min 150 chars, keyword scoring) - reduces costs by 30-50%
 - **💡 Knowledge Alert**: Proactive knowledge suggestions in chat when StillMe learns important content (SPICE, ethics, RAG, etc.)
+- **🧠 Continuum Memory System** (NEW): Tiered memory architecture (L0-L3) with surprise-based promotion/demotion, multi-timescale scheduler, and forgetting metrics
+- **📚 Multi-Source Learning** (NEW): Integrated fetching from RSS, arXiv, CrossRef, and Wikipedia with intelligent pre-filtering
 - **🎯 SPICE Framework**: Self-Play In Corpus Environments architecture (v0.5+)
 - **🌐 Multilingual Support**: Automatic language detection and response in user's language (Vietnamese, English, and more)
 - **🚀 Public Deployment Ready**: Config files included (`railway.json`, `render.yaml`) - 1-click deploy
@@ -1078,11 +1083,39 @@ See details in [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IM
 - **Investment Analysis**: See assessment from VC Analyst in professional assessment
 - **Research Evaluation**: See assessment from AI Researcher in professional assessment
 
-### **Research & Academic Resources:**
+### **📚 Documentation Structure - Modular & Focused**
 
-- **Research Notes**: See [`docs/RESEARCH_NOTES.md`](docs/RESEARCH_NOTES.md) for evaluation framework, metrics, baselines, datasets, and academic citations
-- **Architecture Details**: See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for detailed system architecture
-- **Philosophy & Vision**: See [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) for StillMe's mission and ethical principles
+StillMe's documentation is **intentionally modular** - each file focuses on a specific topic to avoid overwhelming readers. This structure allows you to quickly find what you need:
+
+**Why This Structure?**
+- ✅ **Focused Content**: Each document covers one specific topic in depth
+- ✅ **Easy Navigation**: Find exactly what you need without scrolling through unrelated content
+- ✅ **Professional Standard**: Follows best practices for open-source projects
+- ✅ **Maintainable**: Updates to one topic don't require editing a massive file
+
+**📖 Core Documentation Files:**
+
+| Document | Purpose | Audience |
+|---------|---------|----------|
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | **System Architecture** - Component details, data flow, API architecture, deployment | Developers, System Architects |
+| [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) | **Philosophy & Vision** - StillMe's mission, ethical principles, transparency experiment | Everyone, Researchers, Community |
+| [`docs/RESEARCH_NOTES.md`](docs/RESEARCH_NOTES.md) | **Research Framework** - Evaluation metrics, baselines, datasets, academic citations | Researchers, Academics |
+| [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md) | **Improvement Roadmap** - Technical debt, planned features, priorities | Developers, Contributors |
+
+**🔍 Additional Documentation:**
+
+- **API Documentation**: See [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md) for complete API reference
+- **Deployment Guide**: See [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) for deployment instructions
+- **Development Guide**: See [`docs/DEVELOPMENT_GUIDE.md`](docs/DEVELOPMENT_GUIDE.md) for contributing guidelines
+- **SPICE Architecture**: See [`docs/SPICE_ARCHITECTURE.md`](docs/SPICE_ARCHITECTURE.md) for SPICE framework details
+
+**💡 Quick Navigation:**
+- **Want to understand StillMe's vision?** → [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md)
+- **Need technical architecture details?** → [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- **Looking for research metrics?** → [`docs/RESEARCH_NOTES.md`](docs/RESEARCH_NOTES.md)
+- **Planning to contribute?** → [`docs/DEVELOPMENT_GUIDE.md`](docs/DEVELOPMENT_GUIDE.md)
+
+> **📝 Note**: The main `README.md` provides a high-level overview and quick start. For detailed information on any specific topic, refer to the corresponding documentation file in `docs/`.
 
 ---
 
