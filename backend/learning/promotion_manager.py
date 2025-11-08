@@ -106,7 +106,13 @@ class PromotionManager:
             return 0.5
         
         try:
-            import numpy as np
+            # numpy is optional - only needed for novelty score calculation
+            # If not available, return default score
+            try:
+                import numpy as np
+            except ImportError:
+                logger.warning("numpy not available, using default novelty score")
+                return 0.5
             
             # Compute average centroid
             centroid = np.mean(centroid_embeddings, axis=0)
