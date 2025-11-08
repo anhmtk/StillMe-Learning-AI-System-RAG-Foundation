@@ -483,9 +483,18 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
             
             # Build prompt with language instruction FIRST (before context)
             # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
+            # ZERO TOLERANCE: Must translate if needed
             base_prompt = f"""{language_instruction}
 
-⚠️⚠️⚠️ LANGUAGE REMINDER: The user's question is in {detected_lang_name.upper()}. You MUST respond in {detected_lang_name.upper()} ONLY. ⚠️⚠️⚠️
+⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
+
+The user's question is in {detected_lang_name.upper()}. 
+
+YOU MUST respond in {detected_lang_name.upper()} ONLY.
+
+IF YOUR BASE MODEL WANTS TO RESPOND IN A DIFFERENT LANGUAGE, YOU MUST TRANSLATE THE ENTIRE RESPONSE TO {detected_lang_name.upper()} BEFORE RETURNING IT.
+
+UNDER NO CIRCUMSTANCES return a response in any language other than {detected_lang_name.upper()}.
 
 Context: {context_text}
 {citation_instruction}
@@ -493,9 +502,11 @@ Context: {context_text}
 
 User Question (in {detected_lang_name.upper()}): {chat_request.message}
 
-⚠️⚠️⚠️ FINAL LANGUAGE REMINDER: RESPOND IN {detected_lang_name.upper()} ONLY. IGNORE THE LANGUAGE OF THE CONTEXT ABOVE. ⚠️⚠️⚠️
+⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
 
-Please provide a helpful response based on the context above. Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
+RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. IGNORE THE LANGUAGE OF THE CONTEXT ABOVE.
+
+Please provide a helpful response based on the context above. Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE MODEL WANTS TO USE A DIFFERENT LANGUAGE.
 """
             
             prompt_build_time = time.time() - start_time
@@ -706,19 +717,22 @@ Remember: RESPOND IN ENGLISH ONLY."""
         total_response_latency = total_response_end - start_time
         
         # Format latency metrics log as specified by user
-        rag_latency = rag_retrieval_latency if 'rag_retrieval_latency' in locals() else 0.0
-        llm_latency = llm_inference_latency if 'llm_inference_latency' in locals() else 0.0
+        # BẮT BUỘC HIỂN THỊ LOG: In ra ngay lập tức sau câu trả lời
+        latency_metrics_text = f"""--- LATENCY METRICS ---
+RAG_Retrieval_Latency: {rag_retrieval_latency:.2f} giây
+LLM_Inference_Latency: {llm_inference_latency:.2f} giây
+Total_Response_Latency: {total_response_latency:.2f} giây
+-----------------------"""
         
-        logger.info("--- LATENCY METRICS ---")
-        logger.info(f"RAG_Retrieval_Latency: {rag_latency:.2f} giây")
-        logger.info(f"LLM_Inference_Latency: {llm_latency:.2f} giây")
-        logger.info(f"Total_Response_Latency: {total_response_latency:.2f} giây")
-        logger.info("-----------------------")
+        logger.info(latency_metrics_text)
         
-        timing_logs["rag_retrieval_latency"] = f"{rag_latency:.2f}s"
-        timing_logs["llm_inference_latency"] = f"{llm_latency:.2f}s"
+        # Add latency metrics to timing_logs for API response
+        timing_logs["rag_retrieval_latency"] = f"{rag_retrieval_latency:.2f}s"
+        timing_logs["llm_inference_latency"] = f"{llm_inference_latency:.2f}s"
         timing_logs["total_response_latency"] = f"{total_response_latency:.2f}s"
         timing_logs["total"] = f"{total_response_latency:.2f}s"
+        # Add formatted latency metrics text for frontend display
+        timing_logs["latency_metrics_formatted"] = latency_metrics_text
         logger.info(f"📊 Timing breakdown: {timing_logs}")
         
         # Store conversation in vector DB
@@ -763,7 +777,8 @@ Remember: RESPOND IN ENGLISH ONLY."""
             accuracy_score=accuracy_score,
             learning_session_id=learning_session_id,
             knowledge_alert=knowledge_alert,
-            timing=timing_logs
+            timing=timing_logs,
+            latency_metrics=latency_metrics_text  # BẮT BUỘC HIỂN THỊ LOG trong response cho frontend
         )
         
     except HTTPException:
@@ -1939,11 +1954,11 @@ def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
     detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
     
     # CRITICAL: Always match input language with output language
-    # Repeat instruction multiple times to ensure LLM follows it
+    # ZERO TOLERANCE: Must translate if base model wants to respond in different language
     if detected_lang != 'en':
         system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
 
-🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
+🚨🚨🚨 ZERO TOLERANCE LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
 
 The user's question is written in {detected_lang_name}.
 
@@ -1953,17 +1968,24 @@ DO NOT use Vietnamese, English, Spanish, German, French, or ANY OTHER LANGUAGE.
 
 EVERY SINGLE WORD of your response MUST be in {detected_lang_name}.
 
+⚠️⚠️⚠️ CRITICAL TRANSLATION REQUIREMENT ⚠️⚠️⚠️
+
+If your base model wants to respond in a different language (e.g., Vietnamese, English, Spanish), 
+YOU MUST TRANSLATE THE ENTIRE RESPONSE TO {detected_lang_name} BEFORE RETURNING IT.
+
+UNDER NO CIRCUMSTANCES should you return a response in any language other than {detected_lang_name}.
+
 This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
 
 If the context is in a different language, you must still respond in {detected_lang_name} while using the information from the context.
 
-⚠️ REMINDER: RESPOND IN {detected_lang_name} ONLY. ⚠️
+⚠️ REMINDER: RESPOND IN {detected_lang_name} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
     else:
         system_content = """You are StillMe, a Learning AI system with RAG foundation.
 
-🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
+🚨🚨🚨 ZERO TOLERANCE LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
 
 The user's question is written in English.
 
@@ -1973,11 +1995,18 @@ DO NOT use Vietnamese, Spanish, German, French, or ANY OTHER LANGUAGE.
 
 EVERY SINGLE WORD of your response MUST be in English.
 
+⚠️⚠️⚠️ CRITICAL TRANSLATION REQUIREMENT ⚠️⚠️⚠️
+
+If your base model wants to respond in a different language (e.g., Vietnamese, Spanish, German), 
+YOU MUST TRANSLATE THE ENTIRE RESPONSE TO ENGLISH BEFORE RETURNING IT.
+
+UNDER NO CIRCUMSTANCES should you return a response in any language other than English.
+
 This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
 
 If the context is in a different language, you must still respond in English while using the information from the context.
 
-⚠️ REMINDER: RESPOND IN ENGLISH ONLY. ⚠️
+⚠️ REMINDER: RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
     
