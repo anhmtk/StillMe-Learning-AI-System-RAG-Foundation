@@ -623,7 +623,21 @@ User Question: {chat_request.message}
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
 """
             else:
-                base_prompt = f"{chat_request.message}\n\nIMPORTANT: Respond in English with clear and detailed explanations. Do NOT use Vietnamese or any other language."
+                base_prompt = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+
+THE USER'S QUESTION IS WRITTEN IN ENGLISH.
+
+YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
+
+DO NOT RESPOND IN VIETNAMESE, SPANISH, OR ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
+
+THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
+
+User Question: {chat_request.message}
+
+Remember: RESPOND IN ENGLISH ONLY."""
             
             if enable_validators:
                 from backend.identity.injector import inject_identity
