@@ -53,14 +53,33 @@ logger.info("The /health endpoint will be available immediately")
 sys.stdout.flush()
 
 try:
+    logger.info("Step 1: Starting import of backend.api.main...")
+    sys.stdout.flush()
+    
+    # Import with detailed error handling
     from backend.api.main import app
     logger.info("✓ FastAPI app imported successfully")
     sys.stdout.flush()
-except Exception as e:
-    logger.error(f"❌ Failed to import FastAPI app: {e}", exc_info=True)
-    logger.error("This may be due to RAG initialization errors")
+except ImportError as e:
+    logger.error(f"❌ ImportError: Failed to import module: {e}")
+    logger.error(f"   Module: {e.name if hasattr(e, 'name') else 'unknown'}")
+    logger.error(f"   Path: {e.path if hasattr(e, 'path') else 'unknown'}")
+    sys.stdout.flush()
+    import traceback
+    logger.error(f"   Traceback: {traceback.format_exc()}")
     sys.stdout.flush()
     sys.exit(1)
+except Exception as e:
+    logger.error(f"❌ Failed to import FastAPI app: {e}")
+    logger.error(f"   Error type: {type(e).__name__}")
+    import traceback
+    logger.error(f"   Traceback: {traceback.format_exc()}")
+    logger.error("This may be due to RAG initialization errors")
+    sys.stdout.flush()
+    # Don't exit - let uvicorn try to start anyway
+    # The /health endpoint should still work even if RAG fails
+    logger.warning("⚠️ Continuing despite import error - /health endpoint may still work")
+    sys.stdout.flush()
 
 # Start uvicorn
 logger.info("=" * 60)
