@@ -287,6 +287,14 @@ except Exception as e:
 # Pydantic models
 # Models are now imported from backend.api.models (see imports above)
 
+# Include routers
+from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router
+app.include_router(chat_router.router, prefix="/api/chat", tags=["chat"])
+app.include_router(rag_router.router, prefix="/api/rag", tags=["rag"])
+app.include_router(tiers_router.router, prefix="/api/v1/tiers", tags=["tiers"])
+app.include_router(spice_router.router, prefix="/api/spice", tags=["spice"])
+app.include_router(learning_router.router, prefix="/api/learning", tags=["learning"])
+
 # API Routes
 @app.get("/")
 async def root():
@@ -342,9 +350,10 @@ async def shutdown_event():
     """Log when FastAPI/uvicorn server is shutting down"""
     logger.info("🛑 FastAPI application shutting down")
 
-@app.post("/api/chat/rag", response_model=ChatResponse)
-@limiter.limit("10/minute", key_func=get_rate_limit_key_func)  # Chat: 10 requests per minute
-async def chat_with_rag(request: Request, chat_request: ChatRequest):
+# Chat endpoints moved to router - see backend/api/routers/chat_router.py
+# @app.post("/api/chat/rag", response_model=ChatResponse)
+# @limiter.limit("10/minute", key_func=get_rate_limit_key_func)  # Chat: 10 requests per minute
+# async def chat_with_rag(request: Request, chat_request: ChatRequest):
     """Chat with RAG-enhanced responses"""
     import time
     start_time = time.time()
@@ -825,332 +834,9 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 detail=f"Chat error: {str(e)}. Please check backend logs for details."
             )
 
-@app.post("/api/learning/add", response_model=LearningResponse)
-async def add_learning_content(request: LearningRequest):
-    """Add learning content to the system"""
-    try:
-        # Add to knowledge retention system
-        knowledge_id = None
-        if knowledge_retention:
-            knowledge_id = knowledge_retention.add_knowledge(
-                content=request.content,
-                source=request.source,
-                knowledge_type=request.content_type,
-                metadata=request.metadata
-            )
-        
-        # Add to vector database
-        if rag_retrieval:
-            # Calculate importance score for knowledge alert system
-            importance_score = 0.5
-            if content_curator:
-                content_dict = {
-                    "title": request.metadata.get("title", "") if request.metadata else "",
-                    "summary": request.content[:500] if len(request.content) > 500 else request.content,
-                    "source": request.source
-                }
-                importance_score = content_curator.calculate_importance_score(content_dict)
-            
-            # Merge importance_score into metadata
-            enhanced_metadata = request.metadata or {}
-            enhanced_metadata["importance_score"] = importance_score
-            if not enhanced_metadata.get("title"):
-                content_lines = request.content.split("\n")
-                if content_lines:
-                    enhanced_metadata["title"] = content_lines[0][:200]
-            
-            success = rag_retrieval.add_learning_content(
-                content=request.content,
-                source=request.source,
-                content_type=request.content_type,
-                metadata=enhanced_metadata
-            )
-            if not success:
-                return LearningResponse(
-                    success=False,
-                    message="Failed to add to vector database"
-                )
-        
-        return LearningResponse(
-            success=True,
-            knowledge_id=knowledge_id,
-            message="Learning content added successfully"
-        )
-        
-    except Exception as e:
-        logger.error(f"Learning error: {e}")
-        return LearningResponse(
-            success=False,
-            message=f"Error: {str(e)}"
-        )
+# Learning endpoints moved to backend/api/routers/learning_router.py
 
-@app.get("/api/learning/metrics")
-async def get_learning_metrics():
-    """Get learning and accuracy metrics"""
-    try:
-        metrics = {}
-        
-        # Get retention metrics
-        if knowledge_retention:
-            metrics["retention"] = knowledge_retention.calculate_retention_metrics()
-        
-        # Get accuracy metrics
-        if accuracy_scorer:
-            metrics["accuracy"] = accuracy_scorer.get_accuracy_metrics()
-        
-        # Get vector DB stats
-        if chroma_client:
-            metrics["vector_db"] = chroma_client.get_collection_stats()
-        
-        return metrics
-        
-    except Exception as e:
-        logger.error(f"Metrics error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/learning/retained")
-async def get_retained_knowledge(
-    limit: int = Query(default=100, ge=1, le=1000, description="Maximum number of items to return"),
-    min_score: Optional[float] = Query(default=None, ge=0.0, le=1.0, description="Minimum retention score")
-):
-    """Get retained knowledge items with full details for audit log
-    
-    Returns:
-        List of retained knowledge items with:
-        - Timestamp Added
-        - Source URL (Link)
-        - Retained Content Snippet (5-10 sentences)
-        - Vector ID (Debug)
-    """
-    try:
-        if not knowledge_retention:
-            raise HTTPException(status_code=503, detail="Knowledge retention not available")
-        
-        # Apply min_score filter if provided
-        knowledge = knowledge_retention.get_retained_knowledge(limit=limit)
-        
-        # Filter by min_score if provided
-        if min_score is not None:
-            knowledge = [item for item in knowledge if item.get("retention_score", 0.0) >= min_score]
-        
-        # Enhance with vector IDs and content snippets from RAG
-        enhanced_items = []
-        for item in knowledge:
-            source = item.get("source", "")
-            metadata = item.get("metadata", {})
-            link = metadata.get("link", source)
-            
-            # Get content snippet (5-10 sentences)
-            content = item.get("content", "")
-            sentences = content.split(". ")
-            snippet = ". ".join(sentences[:10])  # First 10 sentences
-            if len(sentences) > 10:
-                snippet += "..."
-            
-            # Try to get vector ID from RAG if available
-            vector_id = None
-            if rag_retrieval and chroma_client:
-                try:
-                    # Try to find the document in ChromaDB by source/link
-                    # This is approximate - we'll use metadata to match
-                    vector_id = metadata.get("id") or metadata.get("doc_id")
-                    if not vector_id and link:
-                        # Try to construct ID from link
-                        vector_id = f"knowledge_{link[:20].replace('/', '_').replace(':', '_')}"
-                except Exception:
-                    pass
-            
-            enhanced_item = {
-                "id": item.get("id"),
-                "timestamp_added": item.get("created_at") or item.get("last_accessed"),
-                "source_url": link,
-                "retained_content_snippet": snippet,
-                "vector_id": vector_id or f"knowledge_{item.get('id', 'unknown')}",
-                "full_content": content,  # Include full content for reference
-                "retention_score": item.get("retention_score", 0.0),
-                "access_count": item.get("access_count", 0),
-                "metadata": metadata
-            }
-            enhanced_items.append(enhanced_item)
-        
-        return {
-            "knowledge_items": enhanced_items,
-            "total": len(enhanced_items)
-        }
-        
-    except Exception as e:
-        logger.error(f"Retained knowledge error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# RAG-specific endpoints
-@app.post("/api/rag/add_knowledge")
-@limiter.limit("20/hour", key_func=get_rate_limit_key_func)  # RAG add: 20 requests per hour (expensive)
-async def add_knowledge_rag(request: Request, learning_request: LearningRequest):
-    """Add knowledge to RAG vector database"""
-    try:
-        if not rag_retrieval:
-            raise HTTPException(status_code=503, detail="RAG system not available")
-        
-        # Calculate importance score for knowledge alert system
-        importance_score = 0.5
-        if content_curator:
-            # Create a content dict for importance calculation
-            content_dict = {
-                "title": learning_request.metadata.get("title", "") if learning_request.metadata else "",
-                "summary": learning_request.content[:500] if len(learning_request.content) > 500 else learning_request.content,
-                "source": learning_request.source
-            }
-            importance_score = content_curator.calculate_importance_score(content_dict)
-        
-        # Merge importance_score into metadata
-        enhanced_metadata = learning_request.metadata or {}
-        enhanced_metadata["importance_score"] = importance_score
-        if not enhanced_metadata.get("title"):
-            # Extract title from content if not provided
-            content_lines = learning_request.content.split("\n")
-            if content_lines:
-                enhanced_metadata["title"] = content_lines[0][:200]
-        
-        success = rag_retrieval.add_learning_content(
-            content=learning_request.content,
-            source=learning_request.source,
-            content_type=learning_request.content_type,
-            metadata=enhanced_metadata
-        )
-        
-        if success:
-            return {"status": "Knowledge added successfully", "content_type": learning_request.content_type}
-        else:
-            raise HTTPException(status_code=500, detail="Failed to add knowledge to vector DB")
-            
-    except Exception as e:
-        logger.error(f"RAG add knowledge error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/rag/query")
-async def query_rag(request: RAGQueryRequest):
-    """Query RAG system for relevant context"""
-    try:
-        if not rag_retrieval:
-            raise HTTPException(status_code=503, detail="RAG system not available")
-        
-        context = rag_retrieval.retrieve_context(
-            query=request.query,
-            knowledge_limit=request.knowledge_limit,
-            conversation_limit=request.conversation_limit
-        )
-        
-        return RAGQueryResponse(
-            knowledge_docs=context.get("knowledge_docs", []),
-            conversation_docs=context.get("conversation_docs", []),
-            total_context_docs=context.get("total_context_docs", 0)
-        )
-        
-    except Exception as e:
-        logger.error(f"RAG query error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/rag/stats")
-async def get_rag_stats():
-    """Get RAG system statistics"""
-    try:
-        if not chroma_client:
-            raise HTTPException(status_code=503, detail="Vector DB not available")
-        
-        stats = chroma_client.get_collection_stats()
-        return {"stats": stats}
-        
-    except Exception as e:
-        logger.error(f"RAG stats error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/rag/reset-database", dependencies=[Depends(require_api_key)])
-async def reset_rag_database():
-    """
-    Reset ChromaDB database (deletes all data and recreates collections)
-    
-    Security: This endpoint requires API key authentication via X-API-Key header.
-    """
-    import shutil
-    import os
-    
-    try:
-        persist_dir = "data/vector_db"
-        
-        # If chroma_client is None, we need to delete the directory directly
-        if not chroma_client:
-            logger.warning("ChromaClient not initialized, attempting to delete vector_db directory...")
-            if os.path.exists(persist_dir):
-                try:
-                    shutil.rmtree(persist_dir)
-                    logger.info(f"Deleted {persist_dir} directory")
-                    os.makedirs(persist_dir, exist_ok=True)
-                    logger.info(f"Recreated {persist_dir} directory")
-                except Exception as dir_error:
-                    logger.error(f"Failed to delete directory: {dir_error}")
-                    raise HTTPException(
-                        status_code=500, 
-                        detail=f"Cannot delete vector_db directory: {dir_error}. You may need to restart backend service."
-                    )
-            else:
-                logger.info(f"Directory {persist_dir} does not exist, creating it...")
-                os.makedirs(persist_dir, exist_ok=True)
-            
-            return {
-                "status": "success",
-                "message": "Vector database directory deleted. Please restart the backend service to reinitialize."
-            }
-        
-        # If chroma_client exists, try to reset via client
-        try:
-            # Delete existing collections
-            try:
-                chroma_client.client.delete_collection("stillme_knowledge")
-            except Exception:
-                pass
-            
-            try:
-                chroma_client.client.delete_collection("stillme_conversations")
-            except Exception:
-                pass
-            
-            # Recreate collections
-            chroma_client.knowledge_collection = chroma_client.client.create_collection(
-                name="stillme_knowledge",
-                metadata={"description": "Knowledge base for StillMe learning"}
-            )
-            chroma_client.conversation_collection = chroma_client.client.create_collection(
-                name="stillme_conversations",
-                metadata={"description": "Conversation history for context"}
-            )
-            
-            logger.info("✅ ChromaDB database reset successfully via API")
-            return {
-                "status": "success",
-                "message": "Database reset successfully. All collections recreated."
-            }
-        except Exception as client_error:
-            # If client reset fails, try deleting directory
-            logger.warning(f"Client reset failed: {client_error}, trying directory deletion...")
-            if os.path.exists(persist_dir):
-                try:
-                    shutil.rmtree(persist_dir)
-                    os.makedirs(persist_dir, exist_ok=True)
-                    logger.info("Deleted and recreated vector_db directory")
-                    return {
-                        "status": "success",
-                        "message": "Vector database directory deleted. Please restart the backend service to reinitialize."
-                    }
-                except Exception as dir_error:
-                    raise HTTPException(status_code=500, detail=f"Failed to reset: {dir_error}")
-            else:
-                raise
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Database reset error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# Continuum Memory APIs (v1) - Tier Management moved to backend/api/routers/tiers_router.py
 
 @app.get("/api/status")
 async def get_status():
@@ -1198,7 +884,6 @@ async def get_validation_metrics():
             }
         }
 
-@app.get("/api/learning/accuracy_metrics")
 async def get_accuracy_metrics():
     """Get accuracy metrics"""
     try:
@@ -1221,7 +906,6 @@ async def get_accuracy_metrics():
         }}
 
 # Multi-Source Learning Pipeline endpoints
-@app.post("/api/learning/sources/fetch")
 @limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # Multi-source fetch: 5 requests per hour
 async def fetch_all_sources(
     request: Request,
@@ -1388,7 +1072,6 @@ async def fetch_all_sources(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/api/learning/sources/stats")
 async def get_source_stats():
     """Get statistics for all enabled sources"""
     try:
@@ -1406,7 +1089,6 @@ async def get_source_stats():
 
 
 # RSS Learning Pipeline endpoints (kept for backward compatibility)
-@app.post("/api/learning/rss/fetch")
 @limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # RSS fetch: 5 requests per hour (can be expensive)
 async def fetch_rss_content(
     request: Request,
@@ -1610,7 +1292,6 @@ async def fetch_rss_content(
         logger.error(f"RSS fetch error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/learning/rss/fetch-history")
 async def get_rss_fetch_history(limit: int = 100):
     """Get latest RSS fetch items with detailed status from the most recent cycle
     
@@ -1634,7 +1315,6 @@ async def get_rss_fetch_history(limit: int = 100):
         logger.error(f"RSS fetch history error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/learning/rss/stats")
 async def get_rss_stats():
     """Get RSS pipeline statistics"""
     try:
@@ -1651,7 +1331,6 @@ async def get_rss_stats():
         return {"feeds_configured": 0, "status": "error"}
 
 # Automated Scheduler endpoints
-@app.post("/api/learning/scheduler/start", dependencies=[Depends(require_api_key)])
 async def start_scheduler():
     """
     Start automated learning scheduler
@@ -1676,7 +1355,6 @@ async def start_scheduler():
         logger.error(f"Start scheduler error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/learning/scheduler/stop", dependencies=[Depends(require_api_key)])
 async def stop_scheduler():
     """
     Stop automated learning scheduler
@@ -1699,7 +1377,6 @@ async def stop_scheduler():
         logger.error(f"Stop scheduler error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/learning/scheduler/status")
 async def get_scheduler_status():
     """Get scheduler status"""
     try:
@@ -1731,7 +1408,6 @@ async def get_scheduler_status():
         logger.error(f"Scheduler status error: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 
-@app.post("/api/learning/scheduler/run-now")
 async def run_scheduler_now():
     """Manually trigger a learning cycle immediately with detailed status tracking"""
     try:
@@ -1942,7 +1618,6 @@ async def run_scheduler_now():
         raise HTTPException(status_code=500, detail=str(e))
 
 # Self-Diagnosis & Content Curation endpoints
-@app.post("/api/learning/self-diagnosis/check-gap")
 async def check_knowledge_gap(query: str, threshold: float = 0.5):
     """Check if there's a knowledge gap for a query"""
     try:
@@ -1955,7 +1630,6 @@ async def check_knowledge_gap(query: str, threshold: float = 0.5):
         logger.error(f"Knowledge gap check error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/learning/self-diagnosis/analyze-coverage")
 async def analyze_coverage(topics: List[str]):
     """Analyze knowledge coverage across multiple topics"""
     try:
@@ -1968,7 +1642,6 @@ async def analyze_coverage(topics: List[str]):
         logger.error(f"Coverage analysis error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/learning/self-diagnosis/suggest-focus")
 async def suggest_learning_focus(recent_queries: Optional[List[str]] = None, limit: int = 5):
     """Suggest learning focus based on knowledge gaps"""
     try:
@@ -1988,7 +1661,6 @@ async def suggest_learning_focus(recent_queries: Optional[List[str]] = None, lim
         logger.error(f"Learning focus suggestion error: {e}")
         return {"suggestions": [], "error": str(e)}
 
-@app.post("/api/learning/curator/prioritize")
 async def prioritize_content(content_list: List[Dict[str, Any]]):
     """Prioritize learning content"""
     try:
@@ -2015,7 +1687,6 @@ async def prioritize_content(content_list: List[Dict[str, Any]]):
         logger.error(f"Content prioritization error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/learning/curator/stats")
 async def get_curation_stats():
     """Get content curation statistics"""
     try:
@@ -2031,7 +1702,6 @@ async def get_curation_stats():
         logger.error(f"Curation stats error: {e}")
         return {"status": "error", "message": str(e)}
 
-@app.post("/api/learning/curator/update-source-quality", dependencies=[Depends(require_api_key)])
 async def update_source_quality(source: str, quality_score: float):
     """
     Update quality score for a source
@@ -2055,242 +1725,10 @@ async def update_source_quality(source: str, quality_score: float):
         logger.error(f"Update source quality error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ============================================================================
-# Continuum Memory APIs (v1) - Tier Management
-# ============================================================================
-
-@app.get("/api/v1/tiers/stats", response_model=TierStatsResponse)
-async def get_tier_stats():
-    """
-    Get statistics for each tier (L0-L3)
-    
-    Returns tier counts, promotion/demotion counts (last 7 days)
-    PR-2: Uses real data from ContinuumMemory
-    """
-    try:
-        if not continuum_memory or not os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true":
-            # Return empty stats if disabled
-            return TierStatsResponse(
-                L0=0, L1=0, L2=0, L3=0, total=0, promoted_7d=0, demoted_7d=0
-            )
-        
-        stats = continuum_memory.get_tier_stats()
-        return TierStatsResponse(**stats)
-        
-    except Exception as e:
-        logger.error(f"Error getting tier stats: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# Continuum Memory APIs (v1) - Tier Management moved to backend/api/routers/tiers_router.py
 
 
-@app.get("/api/v1/tiers/audit", response_model=TierAuditResponse)
-async def get_tier_audit(
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records"),
-    item_id: Optional[str] = Query(None, description="Filter by item ID")
-):
-    """
-    Get audit log of promotion/demotion events
-    
-    PR-2: Uses real data from ContinuumMemory
-    """
-    try:
-        if not continuum_memory or not os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true":
-            return TierAuditResponse(records=[], total=0)
-        
-        audit_log = continuum_memory.get_audit_log(limit=limit, item_id=item_id)
-        from backend.api.models.tier_models import TierAuditRecord
-        records = [TierAuditRecord(**record) for record in audit_log]
-        return TierAuditResponse(records=records, total=len(records))
-        
-    except Exception as e:
-        logger.error(f"Error getting tier audit: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/api/v1/tiers/promote/{item_id}", dependencies=[Depends(require_api_key)])
-async def promote_item_api(item_id: str, request: Optional[TierPromoteRequest] = None):
-    """
-    Promote a knowledge item to higher tier (admin only)
-    
-    PR-2: Real implementation using PromotionManager
-    """
-    try:
-        if not continuum_memory or not os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true":
-            raise HTTPException(status_code=503, detail="Continuum Memory is disabled")
-        
-        from backend.learning.promotion_manager import PromotionManager
-        promotion_manager = PromotionManager()
-        
-        # Get current tier and metrics
-        import sqlite3
-        conn = sqlite3.connect(continuum_memory.db_path)
-        cursor = conn.cursor()
-        cursor.execute("SELECT tier, surprise_score, retrieval_count_7d, validator_overlap FROM tier_metrics WHERE item_id = ?", (item_id,))
-        result = cursor.fetchone()
-        
-        if not result:
-            conn.close()
-            raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
-        
-        current_tier = result[0]
-        surprise_score = result[1] or 0.0
-        retrieval_count_7d = result[2] or 0
-        validator_overlap = result[3] or 0.0
-        conn.close()
-        
-        # Determine target tier
-        if current_tier == "L0":
-            target_tier = "L1"
-        elif current_tier == "L1":
-            target_tier = "L2"
-        elif current_tier == "L2":
-            target_tier = "L3"
-        else:
-            raise HTTPException(status_code=400, detail=f"Cannot promote from {current_tier}")
-        
-        reason = request.reason if request and request.reason else f"Manual promotion from {current_tier} to {target_tier}"
-        
-        success = promotion_manager.promote_item(
-            item_id, current_tier, target_tier, reason,
-            surprise_score, retrieval_count_7d, validator_overlap
-        )
-        
-        if success:
-            return {
-                "status": "success",
-                "message": f"Promoted {item_id} from {current_tier} to {target_tier}",
-                "item_id": item_id,
-                "from_tier": current_tier,
-                "to_tier": target_tier
-            }
-        else:
-            raise HTTPException(status_code=500, detail="Failed to promote item")
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error promoting item: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/api/v1/tiers/demote/{item_id}", dependencies=[Depends(require_api_key)])
-async def demote_item_api(item_id: str, request: Optional[TierDemoteRequest] = None):
-    """
-    Demote a knowledge item to lower tier (admin only)
-    
-    PR-2: Real implementation using PromotionManager
-    """
-    try:
-        if not continuum_memory or not os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true":
-            raise HTTPException(status_code=503, detail="Continuum Memory is disabled")
-        
-        from backend.learning.promotion_manager import PromotionManager
-        promotion_manager = PromotionManager()
-        
-        # Get current tier and metrics
-        import sqlite3
-        conn = sqlite3.connect(continuum_memory.db_path)
-        cursor = conn.cursor()
-        cursor.execute("SELECT tier, surprise_score, retrieval_count_7d, validator_overlap FROM tier_metrics WHERE item_id = ?", (item_id,))
-        result = cursor.fetchone()
-        
-        if not result:
-            conn.close()
-            raise HTTPException(status_code=404, detail=f"Item {item_id} not found")
-        
-        current_tier = result[0]
-        surprise_score = result[1] or 0.0
-        retrieval_count_7d = result[2] or 0
-        validator_overlap = result[3] or 0.0
-        conn.close()
-        
-        # Determine target tier
-        if current_tier == "L3":
-            target_tier = "L2"
-        elif current_tier == "L2":
-            target_tier = "L1"
-        elif current_tier == "L1":
-            target_tier = "L0"
-        else:
-            raise HTTPException(status_code=400, detail=f"Cannot demote from {current_tier}")
-        
-        reason = request.reason if request and request.reason else f"Manual demotion from {current_tier} to {target_tier}"
-        
-        success = promotion_manager.demote_item(
-            item_id, current_tier, target_tier, reason,
-            surprise_score, retrieval_count_7d, validator_overlap
-        )
-        
-        if success:
-            return {
-                "status": "success",
-                "message": f"Demoted {item_id} from {current_tier} to {target_tier}",
-                "item_id": item_id,
-                "from_tier": current_tier,
-                "to_tier": target_tier
-            }
-        else:
-            raise HTTPException(status_code=500, detail="Failed to demote item")
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error demoting item: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.get("/api/v1/tiers/forgetting-trends", response_model=ForgettingTrendsResponse)
-async def get_forgetting_trends(
-    days: int = Query(30, ge=1, le=365, description="Number of days to look back")
-):
-    """
-    Get forgetting trends (Recall@k degradation) over time
-    
-    PR-2: Uses real data from ContinuumMemory
-    """
-    try:
-        if not continuum_memory or not os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true":
-            return ForgettingTrendsResponse(trends=[], days=days)
-        
-        trends = continuum_memory.get_forgetting_trends(days=days)
-        return ForgettingTrendsResponse(trends=trends, days=days)
-        
-    except Exception as e:
-        logger.error(f"Error getting forgetting trends: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# Smart router endpoint - automatically selects best model
-@app.post("/api/chat/smart_router", response_model=ChatResponse)
-async def chat_smart_router(request: Request, chat_request: ChatRequest):
-    """
-    Smart router that automatically selects the best chat endpoint.
-    This is the main endpoint used by the dashboard.
-    """
-    try:
-        # Use the RAG-enhanced chat endpoint as default
-        return await chat_with_rag(request, chat_request)
-    except HTTPException:
-        # Re-raise HTTP exceptions (they have proper status codes)
-        raise
-    except Exception as e:
-        # Log detailed error for debugging
-        logger.error(f"Smart router error: {e}", exc_info=True)
-        # Return a more helpful error message
-        raise HTTPException(
-            status_code=500,
-            detail=f"Internal server error: {str(e)}. Please check backend logs for details."
-        )
-
-# Legacy endpoints for backward compatibility
-@app.post("/api/chat/openai")
-async def chat_openai(request: ChatRequest):
-    """Legacy OpenAI chat endpoint"""
-    return await chat_with_rag(request)
-
-@app.post("/api/chat/deepseek")
-async def chat_deepseek(request: ChatRequest):
-    """Legacy DeepSeek chat endpoint"""
-    return await chat_with_rag(request)
+# Chat endpoints moved to backend/api/routers/chat_router.py
 
 # Helper functions
 async def generate_ai_response(prompt: str, detected_lang: str = 'en') -> str:
@@ -2339,7 +1777,7 @@ async def generate_ai_response(prompt: str, detected_lang: str = 'en') -> str:
         logger.error(f"AI response error: {e}")
         return f"I encountered an error: {str(e)}"
 
-def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
+def build_system_prompt_with_language_legacy(detected_lang: str = 'en') -> str:
     """
     Build system prompt with strong language matching instruction.
     This ensures output language always matches input language.
@@ -2426,7 +1864,7 @@ FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
     return system_content
 
 
-def detect_language(text: str) -> str:
+def detect_language_legacy(text: str) -> str:
     """
     Enhanced language detection using langdetect library with fallback to rule-based detection.
     Supports: vi, zh, de, fr, es, ja, ko, ar, en
@@ -2538,7 +1976,7 @@ def detect_language(text: str) -> str:
     # Default to English
     return 'en'
 
-async def call_deepseek_api(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
+async def call_deepseek_api_legacy(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
     """Call DeepSeek API
     
     Args:
@@ -2587,7 +2025,7 @@ async def call_deepseek_api(prompt: str, api_key: str, detected_lang: str = 'en'
         logger.error(f"DeepSeek API error: {e}")
         return f"DeepSeek API error: {str(e)}"
 
-async def call_openai_api(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
+async def call_openai_api_legacy(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
     """Call OpenAI API
     
     IMPORTANT: This function uses build_system_prompt_with_language() to ensure
@@ -2647,170 +2085,7 @@ async def call_openai_api(prompt: str, api_key: str, detected_lang: str = 'en') 
 # TODO: Initialize SPICE Engine (after RAG components are ready)
 # spice_engine = None
 
-@app.post("/api/spice/run-cycle")
-async def run_spice_cycle(
-    corpus_query: Optional[str] = None,
-    num_challenges: int = 5,
-    focus_ethical: bool = False
-):
-    """
-    Run one SPICE self-play cycle
-    
-    Args:
-        corpus_query: Optional query to focus on specific corpus area
-        num_challenges: Number of challenges to generate
-        focus_ethical: If True, focus on ethical reasoning challenges
-        
-    Returns:
-        Cycle results and metrics
-    """
-    try:
-        # TODO: Implement SPICE cycle
-        # if not spice_engine:
-        #     raise HTTPException(status_code=503, detail="SPICE engine not available")
-        # 
-        # result = await spice_engine.run_self_play_cycle(
-        #     corpus_query=corpus_query,
-        #     num_challenges=num_challenges,
-        #     focus_ethical=focus_ethical
-        # )
-        # return result
-        
-        return {
-            "status": "not_implemented",
-            "message": "SPICE engine is in framework phase. Implementation coming soon.",
-            "framework_ready": True
-        }
-    except Exception as e:
-        logger.error(f"SPICE cycle error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/spice/status")
-async def get_spice_status():
-    """Get SPICE engine status"""
-    try:
-        # TODO: Return actual SPICE status
-        return {
-            "status": "framework_ready",
-            "challenger": "initialized",
-            "reasoner": "initialized",
-            "engine": "not_initialized",
-            "message": "SPICE framework is ready. Implementation pending."
-        }
-    except Exception as e:
-        logger.error(f"SPICE status error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/spice/metrics")
-async def get_spice_metrics():
-    """Get SPICE engine metrics"""
-    try:
-        # TODO: Return actual SPICE metrics
-        # if not spice_engine:
-        #     return {"status": "not_available"}
-        # return spice_engine.get_metrics()
-        
-        return {
-            "status": "not_implemented",
-            "message": "SPICE metrics will be available after implementation"
-        }
-    except Exception as e:
-        logger.error(f"SPICE metrics error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/spice/challenger/generate")
-async def generate_challenges(
-    corpus_query: str,
-    num_questions: int = 5,
-    focus_type: Optional[str] = None
-):
-    """
-    Generate challenges using Challenger
-    
-    Args:
-        corpus_query: Query to retrieve relevant documents
-        num_questions: Number of questions to generate
-        focus_type: Optional focus type ("ethical", "mathematical", etc.)
-    """
-    try:
-        # TODO: Implement challenge generation
-        # if not spice_engine or not spice_engine.challenger:
-        #     raise HTTPException(status_code=503, detail="Challenger not available")
-        # 
-        # challenges = await spice_engine.challenger.generate_challenges(
-        #     corpus_query=corpus_query,
-        #     num_questions=num_questions,
-        #     focus_type=focus_type
-        # )
-        # return {"challenges": challenges}
-        
-        return {
-            "status": "not_implemented",
-            "message": "Challenger framework ready. Question generation implementation pending."
-        }
-    except Exception as e:
-        logger.error(f"Challenge generation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/spice/challenger/ethical")
-async def generate_ethical_challenges(num_questions: int = 3):
-    """
-    Generate ethical reasoning challenges
-    
-    Focus areas:
-    - Transparency
-    - Open Governance
-    - Bias Mitigation
-    - Counter-movement values
-    """
-    try:
-        # TODO: Implement ethical challenge generation
-        # if not spice_engine or not spice_engine.challenger:
-        #     raise HTTPException(status_code=503, detail="Challenger not available")
-        # 
-        # challenges = await spice_engine.challenger.generate_ethical_challenges(
-        #     num_questions=num_questions
-        # )
-        # return {"challenges": challenges}
-        
-        return {
-            "status": "not_implemented",
-            "message": "Ethical challenge generation will be prioritized in Phase 2",
-            "focus_areas": [
-                "Transparency: How should StillMe disclose its reasoning process?",
-                "Open Governance: What information should be publicly accessible?",
-                "Bias Mitigation: How to detect and reduce bias in responses?",
-                "Counter-movement: What makes StillMe different from black-box AI?"
-            ]
-        }
-    except Exception as e:
-        logger.error(f"Ethical challenge generation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/spice/reasoner/answer")
-async def answer_challenge(challenge_question: Dict[str, Any]):
-    """
-    Reasoner attempts to answer a challenge question
-    
-    Args:
-        challenge_question: ChallengeQuestion object (JSON)
-    """
-    try:
-        # TODO: Implement answer generation
-        # if not spice_engine or not spice_engine.reasoner:
-        #     raise HTTPException(status_code=503, detail="Reasoner not available")
-        # 
-        # challenge = ChallengeQuestion(**challenge_question)
-        # response = await spice_engine.reasoner.answer_challenge(challenge)
-        # return {"response": response}
-        
-        return {
-            "status": "not_implemented",
-            "message": "Reasoner framework ready. Answer generation implementation pending."
-        }
-    except Exception as e:
-        logger.error(f"Answer generation error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+# SPICE endpoints moved to backend/api/routers/spice_router.py
 
 if __name__ == "__main__":
     import uvicorn
