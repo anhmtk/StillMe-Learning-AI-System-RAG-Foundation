@@ -3,12 +3,19 @@ System Router - Core endpoints for API health, status, and metrics
 Handles root, health check, system status, and validation metrics
 """
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 import logging
+import os
+import sqlite3
+import asyncio
 from datetime import datetime
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Feature flag for health/ready endpoints
+ENABLE_HEALTH_READY = os.getenv("ENABLE_HEALTH_READY", "true").lower() == "true"
 
 # Import global services from main (temporary - will refactor to dependency injection later)
 def get_rag_retrieval():
@@ -43,7 +50,8 @@ async def root():
 @router.get("/health")
 async def health_check(request: Request):
     """
-    Health check endpoint for Railway/Docker health probes.
+    Liveness probe endpoint for Railway/Docker health probes.
+    Returns 200 if service is running (even with minor issues).
     No rate limiting - must always be available for monitoring.
     """
     try:
@@ -64,6 +72,125 @@ async def health_check(request: Request):
             "timestamp": datetime.now().isoformat(),
             "warning": str(e)
         }
+
+@router.get("/ready")
+async def readiness_check(request: Request):
+    """
+    Readiness probe endpoint for Kubernetes/Docker readiness checks.
+    Returns 200 when all checks pass, 503 if any check fails.
+    Checks: SQLite database, ChromaDB, Embedding service.
+    No rate limiting - must always be available for monitoring.
+    """
+    if not ENABLE_HEALTH_READY:
+        return {
+            "status": "ready",
+            "checks": {},
+            "message": "Health/ready endpoints disabled via ENABLE_HEALTH_READY=false",
+            "timestamp": datetime.now().isoformat()
+        }
+    
+    checks: Dict[str, bool] = {
+        "database": False,
+        "vector_db": False,
+        "embeddings": False
+    }
+    
+    check_details: Dict[str, Any] = {}
+    
+    # Check 1: SQLite database connectivity
+    try:
+        db_paths = [
+            "data/knowledge_retention.db",
+            "data/continuum_memory.db",
+            "data/rss_fetch_history.db",
+            "data/accuracy_scores.db"
+        ]
+        
+        db_check_passed = False
+        for db_path in db_paths:
+            try:
+                conn = sqlite3.connect(db_path, timeout=1.0)
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+                conn.close()
+                db_check_passed = True
+                break
+            except Exception as db_error:
+                logger.debug(f"Database check failed for {db_path}: {db_error}")
+                continue
+        
+        checks["database"] = db_check_passed
+        check_details["database"] = {
+            "status": "ok" if db_check_passed else "failed",
+            "message": "At least one database accessible" if db_check_passed else "All databases failed"
+        }
+    except Exception as e:
+        logger.warning(f"Database readiness check error: {e}")
+        check_details["database"] = {"status": "error", "message": str(e)}
+    
+    # Check 2: ChromaDB heartbeat
+    try:
+        rag_retrieval = get_rag_retrieval()
+        if rag_retrieval and rag_retrieval.chroma_client:
+            # Try to access ChromaDB client
+            client = rag_retrieval.chroma_client.client
+            # ChromaDB PersistentClient doesn't have explicit heartbeat, but we can check if client exists
+            if client is not None:
+                checks["vector_db"] = True
+                check_details["vector_db"] = {"status": "ok", "message": "ChromaDB client available"}
+            else:
+                check_details["vector_db"] = {"status": "failed", "message": "ChromaDB client is None"}
+        else:
+            check_details["vector_db"] = {"status": "failed", "message": "RAG retrieval or ChromaDB client not initialized"}
+    except Exception as e:
+        logger.warning(f"ChromaDB readiness check error: {e}")
+        check_details["vector_db"] = {"status": "error", "message": str(e)}
+    
+    # Check 3: Embedding service
+    try:
+        rag_retrieval = get_rag_retrieval()
+        if rag_retrieval and rag_retrieval.embedding_service:
+            # Try encoding a test string with timeout
+            test_text = "test"
+            try:
+                # Run encoding in executor to avoid blocking
+                loop = asyncio.get_event_loop()
+                embedding = await asyncio.wait_for(
+                    loop.run_in_executor(None, rag_retrieval.embedding_service.encode_text, test_text),
+                    timeout=2.0
+                )
+                if embedding is not None and len(embedding) > 0:
+                    checks["embeddings"] = True
+                    check_details["embeddings"] = {"status": "ok", "message": f"Embedding service working (dim={len(embedding)})"}
+                else:
+                    check_details["embeddings"] = {"status": "failed", "message": "Embedding returned empty result"}
+            except asyncio.TimeoutError:
+                check_details["embeddings"] = {"status": "timeout", "message": "Embedding service timeout (>2s)"}
+            except Exception as embed_error:
+                check_details["embeddings"] = {"status": "error", "message": str(embed_error)}
+        else:
+            check_details["embeddings"] = {"status": "failed", "message": "RAG retrieval or embedding service not initialized"}
+    except Exception as e:
+        logger.warning(f"Embedding service readiness check error: {e}")
+        check_details["embeddings"] = {"status": "error", "message": str(e)}
+    
+    # Determine overall readiness
+    all_ready = all(checks.values())
+    status_code = 200 if all_ready else 503
+    
+    response = {
+        "status": "ready" if all_ready else "not_ready",
+        "checks": checks,
+        "check_details": check_details,
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    if not all_ready:
+        logger.warning(f"Readiness check failed: {checks}")
+        raise HTTPException(status_code=status_code, detail=response)
+    
+    return response
 
 @router.get("/api/status")
 async def get_status():
