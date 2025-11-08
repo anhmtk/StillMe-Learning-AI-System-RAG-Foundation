@@ -2,24 +2,141 @@
 
 Thank you for your interest in contributing to StillMe! This guide will help you get started.
 
+## 🚀 Development Setup
+
+### Prerequisites
+- Python 3.11 or 3.12
+- Git
+- (Optional) Docker for containerized development
+
+### Step 1: Fork and Clone
+```bash
+# Fork the repository on GitHub, then:
+git clone https://github.com/YOUR_USERNAME/StillMe-Learning-AI-System-RAG-Foundation.git
+cd StillMe-Learning-AI-System-RAG-Foundation
+```
+
+### Step 2: Create Virtual Environment
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate (Windows)
+venv\Scripts\activate
+
+# Activate (Linux/Mac)
+source venv/bin/activate
+```
+
+### Step 3: Install Dependencies
+```bash
+# Install project dependencies
+pip install -r requirements.txt
+
+# Install development tools (optional but recommended)
+pip install ruff mypy pytest pytest-cov pytest-asyncio
+```
+
+### Step 4: Setup Environment Variables
+```bash
+# Copy example env file
+cp env.example .env
+
+# Edit .env and add your API keys (at minimum, one of):
+# DEEPSEEK_API_KEY=your_key_here
+# OPENAI_API_KEY=your_key_here
+```
+
+### Step 5: Run Tests Locally
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run with coverage
+pytest tests/ --cov=backend --cov-report=html
+
+# Run specific test file
+pytest tests/test_router_smoke.py -v
+```
+
+### Step 6: Run Linting Locally
+```bash
+# Check code style with Ruff
+ruff check .
+
+# Auto-fix issues
+ruff check . --fix
+
+# Check formatting
+ruff format --check .
+
+# Auto-format
+ruff format .
+```
+
+### Step 7: Start Development Server
+```bash
+# Start backend API
+python start_backend.py
+
+# Or with uvicorn directly
+uvicorn backend.api.main:app --reload --port 8000
+
+# Start dashboard (in another terminal)
+streamlit run dashboard.py
+```
+
 ## 🤝 How to Contribute
 
 ### Reporting Bugs
 - Open an issue on GitHub with a clear description
 - Include steps to reproduce
 - Provide error logs if available
+- Use the bug report template if available
 
 ### Suggesting Features
 - Open a discussion or issue
 - Explain the use case and benefits
 - Be open to feedback and iteration
+- Check existing issues/discussions first
 
 ### Code Contributions
-- Fork the repository
-- Create a feature branch
-- Make your changes
-- Add tests if applicable
-- Submit a pull request
+
+1. **Fork the repository** on GitHub
+2. **Create a feature branch** from `main`:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. **Make your changes** following code style guidelines
+4. **Run tests and linting** before committing:
+   ```bash
+   pytest tests/ -v
+   ruff check .
+   ```
+5. **Commit with clear messages**:
+   ```bash
+   git commit -m "feat: Add new feature description"
+   ```
+6. **Push to your fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+7. **Submit a pull request** to `main` branch
+8. **Ensure CI checks pass** (tests, linting)
+
+### Good First Issues
+
+Looking for a place to start? Check issues labeled:
+- `good-first-issue` - Great for newcomers
+- `help-wanted` - Community contributions welcome
+- `documentation` - Improve docs
+
+Common contribution areas:
+- Add type hints to functions
+- Refactor to dependency injection
+- Complete SPICE implementation
+- Add integration tests
+- Improve documentation
 
 ## 🚀 Adding Support for New AI Models
 
@@ -138,17 +255,60 @@ if anthropic_key:
 
 ## 📝 Code Style
 
-- Follow PEP 8 Python style guide
-- Use type hints
-- Add docstrings to functions
-- Write clear, descriptive variable names
+- **Follow PEP 8** Python style guide
+- **Use type hints** for function parameters and return types
+- **Add docstrings** to all public functions and classes
+- **Write clear, descriptive variable names**
+- **Run Ruff** before committing: `ruff check . --fix`
+
+### Type Hints Example
+```python
+from typing import Optional, List, Dict, Any
+
+async def process_data(
+    items: List[str],
+    config: Optional[Dict[str, Any]] = None
+) -> Dict[str, int]:
+    """Process items and return statistics."""
+    # Implementation
+    return {"count": len(items)}
+```
 
 ## 🧪 Testing
 
-- Add unit tests for new features
-- Test error handling
-- Verify language matching works
-- Test with different input languages
+- **Add unit tests** for new features in `tests/` directory
+- **Test error handling** and edge cases
+- **Verify language matching** works correctly
+- **Test with different input languages** (English, Vietnamese, etc.)
+- **Aim for 80%+ coverage** for new code
+
+### Test Structure
+```python
+# tests/test_your_feature.py
+import pytest
+from backend.your_module import your_function
+
+def test_your_function_success():
+    """Test successful case."""
+    result = your_function("input")
+    assert result == "expected_output"
+
+def test_your_function_error():
+    """Test error handling."""
+    with pytest.raises(ValueError):
+        your_function("invalid_input")
+```
+
+## ✅ Pre-Commit Checklist
+
+Before submitting a PR, ensure:
+- [ ] All tests pass: `pytest tests/ -v`
+- [ ] Linting passes: `ruff check .`
+- [ ] Code is formatted: `ruff format .`
+- [ ] Type hints added (where applicable)
+- [ ] Docstrings added for public functions
+- [ ] README/docs updated if needed
+- [ ] No `# type: ignore` comments (unless absolutely necessary)
 
 ## 📚 Questions?
 
