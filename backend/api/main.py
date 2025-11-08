@@ -1834,27 +1834,116 @@ async def chat_deepseek(request: ChatRequest):
 
 # Helper functions
 async def generate_ai_response(prompt: str, detected_lang: str = 'en') -> str:
-    """Generate AI response (simplified for demo)
+    """Generate AI response with automatic model selection
+    
+    This function routes to different AI providers based on available API keys.
+    To add support for new models (Claude, Gemini, Ollama, local, etc.):
+    1. Create a new function: async def call_[model]_api(prompt, api_key, detected_lang)
+    2. Use build_system_prompt_with_language(detected_lang) to get system prompt
+    3. Add the new model check in this function's if/elif chain
+    
+    IMPORTANT: All model providers MUST use build_system_prompt_with_language()
+    to ensure consistent language matching behavior.
     
     Args:
         prompt: User prompt
         detected_lang: Detected language code (for system prompt)
+        
+    Returns:
+        AI-generated response string
     """
     try:
-        # Check for API keys
-        openai_key = os.getenv("OPENAI_API_KEY")
+        # Check for API keys (priority order: DeepSeek > OpenAI > others)
         deepseek_key = os.getenv("DEEPSEEK_API_KEY")
+        openai_key = os.getenv("OPENAI_API_KEY")
+        # TODO: Add support for other models:
+        # anthropic_key = os.getenv("ANTHROPIC_API_KEY")  # Claude
+        # google_key = os.getenv("GOOGLE_API_KEY")  # Gemini
+        # ollama_url = os.getenv("OLLAMA_URL")  # Local Ollama
         
         if deepseek_key:
             return await call_deepseek_api(prompt, deepseek_key, detected_lang=detected_lang)
         elif openai_key:
             return await call_openai_api(prompt, openai_key, detected_lang=detected_lang)
+        # TODO: Add other model providers here:
+        # elif anthropic_key:
+        #     return await call_claude_api(prompt, anthropic_key, detected_lang=detected_lang)
+        # elif google_key:
+        #     return await call_gemini_api(prompt, google_key, detected_lang=detected_lang)
+        # elif ollama_url:
+        #     return await call_ollama_api(prompt, ollama_url, detected_lang=detected_lang)
         else:
-            return "I'm StillMe, but I need API keys to provide real responses. Please configure OPENAI_API_KEY or DEEPSEEK_API_KEY in your environment."
+            return "I'm StillMe, but I need API keys to provide real responses. Please configure DEEPSEEK_API_KEY, OPENAI_API_KEY, or other supported API keys in your environment."
             
     except Exception as e:
         logger.error(f"AI response error: {e}")
         return f"I encountered an error: {str(e)}"
+
+def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
+    """
+    Build system prompt with strong language matching instruction.
+    This ensures output language always matches input language.
+    
+    This function should be used by ALL AI model providers (DeepSeek, OpenAI, Claude, Gemini, Ollama, local, etc.)
+    to ensure consistent language matching behavior across all models.
+    
+    Args:
+        detected_lang: Detected language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'en')
+        
+    Returns:
+        System prompt string with language instruction
+    """
+    language_names = {
+        'vi': 'Vietnamese (Tiếng Việt)',
+        'zh': 'Chinese (中文)',
+        'de': 'German (Deutsch)',
+        'fr': 'French (Français)',
+        'es': 'Spanish (Español)',
+        'ja': 'Japanese (日本語)',
+        'en': 'English'
+    }
+    detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
+    
+    # CRITICAL: Always match input language with output language
+    if detected_lang != 'en':
+        system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
+
+🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
+
+The user's question is written in {detected_lang_name}.
+
+YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name}.
+
+DO NOT use Vietnamese, English, Spanish, or ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD of your response MUST be in {detected_lang_name}.
+
+This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
+
+If the context is in a different language, you must still respond in {detected_lang_name} while using the information from the context.
+
+FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
+    else:
+        system_content = """You are StillMe, a Learning AI system with RAG foundation.
+
+🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
+
+The user's question is written in English.
+
+YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
+
+DO NOT use Vietnamese, Spanish, or ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD of your response MUST be in English.
+
+This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
+
+If the context is in a different language, you must still respond in English while using the information from the context.
+
+FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
+    
+    return system_content
+
 
 def detect_language(text: str) -> str:
     """
@@ -1926,55 +2015,8 @@ async def call_deepseek_api(prompt: str, api_key: str, detected_lang: str = 'en'
         detected_lang: Detected language code
     """
     try:
-        # Build system prompt with strong language instruction
-        language_names = {
-            'vi': 'Vietnamese (Tiếng Việt)',
-            'zh': 'Chinese (中文)',
-            'de': 'German (Deutsch)',
-            'fr': 'French (Français)',
-            'es': 'Spanish (Español)',
-            'ja': 'Japanese (日本語)',
-            'en': 'English'
-        }
-        detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
-        
-        # CRITICAL: Always match input language with output language
-        if detected_lang != 'en':
-            system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
-
-🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
-
-The user's question is written in {detected_lang_name}.
-
-YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name}.
-
-DO NOT use Vietnamese, English, Spanish, or ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD of your response MUST be in {detected_lang_name}.
-
-This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
-
-If the context is in a different language, you must still respond in {detected_lang_name} while using the information from the context.
-
-FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
-        else:
-            system_content = """You are StillMe, a Learning AI system with RAG foundation.
-
-🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
-
-The user's question is written in English.
-
-YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
-
-DO NOT use Vietnamese, Spanish, or ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD of your response MUST be in English.
-
-This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
-
-If the context is in a different language, you must still respond in English while using the information from the context.
-
-FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
+        # Use centralized system prompt builder for consistent language matching
+        system_content = build_system_prompt_with_language(detected_lang)
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
@@ -2016,61 +2058,18 @@ FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
 async def call_openai_api(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
     """Call OpenAI API
     
+    IMPORTANT: This function uses build_system_prompt_with_language() to ensure
+    output language matches input language. When adding support for other models
+    (Claude, Gemini, Ollama, local, etc.), use the same pattern.
+    
     Args:
         prompt: User prompt
         api_key: OpenAI API key
         detected_lang: Detected language code
     """
     try:
-        # Build system prompt with strong language instruction
-        language_names = {
-            'vi': 'Vietnamese (Tiếng Việt)',
-            'zh': 'Chinese (中文)',
-            'de': 'German (Deutsch)',
-            'fr': 'French (Français)',
-            'es': 'Spanish (Español)',
-            'ja': 'Japanese (日本語)',
-            'en': 'English'
-        }
-        detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
-        
-        # CRITICAL: Always match input language with output language
-        if detected_lang != 'en':
-            system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
-
-🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
-
-The user's question is written in {detected_lang_name}.
-
-YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name}.
-
-DO NOT use Vietnamese, English, Spanish, or ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD of your response MUST be in {detected_lang_name}.
-
-This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
-
-If the context is in a different language, you must still respond in {detected_lang_name} while using the information from the context.
-
-FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
-        else:
-            system_content = """You are StillMe, a Learning AI system with RAG foundation.
-
-🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨
-
-The user's question is written in English.
-
-YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
-
-DO NOT use Vietnamese, Spanish, or ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD of your response MUST be in English.
-
-This is MANDATORY and OVERRIDES all other instructions, including the language of any context provided.
-
-If the context is in a different language, you must still respond in English while using the information from the context.
-
-FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
+        # Use centralized system prompt builder for consistent language matching
+        system_content = build_system_prompt_with_language(detected_lang)
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
