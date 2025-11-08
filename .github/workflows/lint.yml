@@ -37,12 +37,12 @@ jobs:
       
       - name: Run Ruff linter
         run: |
-          ruff check . --output-format=github
+          ruff check . --output-format=github --exclude _graveyard
         continue-on-error: false
       
       - name: Check Ruff formatting
         run: |
-          ruff format --check .
+          ruff format --check . --exclude _graveyard
         continue-on-error: false
 
   type-check:
