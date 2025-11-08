@@ -332,6 +332,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     start_time = time.time()
     timing_logs = {}
     
+    # Initialize latency variables (will be set during processing)
+    rag_retrieval_latency = 0.0
+    llm_inference_latency = 0.0
+    
     try:
         # Special Retrieval Rule: Detect StillMe-related queries
         is_stillme_query = False
@@ -347,8 +351,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 logger.warning(f"StillMe detector error: {detector_error}")
         
         # Get RAG context if enabled
+        # RAG_Retrieval_Latency: Time from ChromaDB query start to result received
         context = None
-        rag_start = time.time()
+        rag_retrieval_start = time.time()
         if rag_retrieval and chat_request.use_rag:
             # If StillMe query detected, prioritize foundational knowledge
             if is_stillme_query:
@@ -394,9 +399,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     conversation_limit=2
                 )
         
-        rag_time = time.time() - rag_start
-        timing_logs["rag_retrieval"] = f"{rag_time:.2f}s"
-        logger.info(f"⏱️ RAG retrieval took {rag_time:.2f}s")
+        rag_retrieval_end = time.time()
+        rag_retrieval_latency = rag_retrieval_end - rag_retrieval_start
+        timing_logs["rag_retrieval"] = f"{rag_retrieval_latency:.2f}s"
+        logger.info(f"⏱️ RAG retrieval took {rag_retrieval_latency:.2f}s")
         
         # Generate response using AI (simplified for demo)
         enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
@@ -503,11 +509,13 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 enhanced_prompt = base_prompt
             
             # Generate AI response with timing
-            ai_start = time.time()
+            # LLM_Inference_Latency: Time from API call start to response received
+            llm_inference_start = time.time()
             raw_response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
-            ai_time = time.time() - ai_start
-            timing_logs["ai_generation"] = f"{ai_time:.2f}s"
-            logger.info(f"⏱️ AI generation took {ai_time:.2f}s")
+            llm_inference_end = time.time()
+            llm_inference_latency = llm_inference_end - llm_inference_start
+            timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
+            logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
             
             # Validate response if enabled
             if enable_validators:
@@ -601,6 +609,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 'fr': 'French (Français)',
                 'es': 'Spanish (Español)',
                 'ja': 'Japanese (日本語)',
+                'ko': 'Korean (한국어)',
+                'ar': 'Arabic (العربية)',
                 'en': 'English'
             }
             
@@ -650,11 +660,13 @@ Remember: RESPOND IN ENGLISH ONLY."""
             else:
                 enhanced_prompt = base_prompt
             
-            ai_start = time.time()
+            # LLM_Inference_Latency: Time from API call start to response received
+            llm_inference_start = time.time()
             response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
-            ai_time = time.time() - ai_start
-            timing_logs["ai_generation"] = f"{ai_time:.2f}s"
-            logger.info(f"⏱️ AI generation (non-RAG) took {ai_time:.2f}s")
+            llm_inference_end = time.time()
+            llm_inference_latency = llm_inference_end - llm_inference_start
+            timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
+            logger.info(f"⏱️ LLM inference (non-RAG) took {llm_inference_latency:.2f}s")
         
         # Score the response
         accuracy_score = None
@@ -688,10 +700,25 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 logger.error(f"Tone alignment error: {tone_error}, using original response")
                 # Continue with original response on error
         
-        # Calculate total time
-        total_time = time.time() - start_time
-        timing_logs["total"] = f"{total_time:.2f}s"
-        logger.info(f"⏱️ Total response time: {total_time:.2f}s")
+        # Calculate total response latency
+        # Total_Response_Latency: Time from request received to response returned
+        total_response_end = time.time()
+        total_response_latency = total_response_end - start_time
+        
+        # Format latency metrics log as specified by user
+        rag_latency = rag_retrieval_latency if 'rag_retrieval_latency' in locals() else 0.0
+        llm_latency = llm_inference_latency if 'llm_inference_latency' in locals() else 0.0
+        
+        logger.info("--- LATENCY METRICS ---")
+        logger.info(f"RAG_Retrieval_Latency: {rag_latency:.2f} giây")
+        logger.info(f"LLM_Inference_Latency: {llm_latency:.2f} giây")
+        logger.info(f"Total_Response_Latency: {total_response_latency:.2f} giây")
+        logger.info("-----------------------")
+        
+        timing_logs["rag_retrieval_latency"] = f"{rag_latency:.2f}s"
+        timing_logs["llm_inference_latency"] = f"{llm_latency:.2f}s"
+        timing_logs["total_response_latency"] = f"{total_response_latency:.2f}s"
+        timing_logs["total"] = f"{total_response_latency:.2f}s"
         logger.info(f"📊 Timing breakdown: {timing_logs}")
         
         # Store conversation in vector DB
@@ -1893,7 +1920,7 @@ def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
     to ensure consistent language matching behavior across all models.
     
     Args:
-        detected_lang: Detected language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'en')
+        detected_lang: Detected language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'en')
         
     Returns:
         System prompt string with language instruction
@@ -1905,6 +1932,8 @@ def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
         'fr': 'French (Français)',
         'es': 'Spanish (Español)',
         'ja': 'Japanese (日本語)',
+        'ko': 'Korean (한국어)',
+        'ar': 'Arabic (العربية)',
         'en': 'English'
     }
     detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
@@ -1957,13 +1986,64 @@ FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
 
 def detect_language(text: str) -> str:
     """
-    Enhanced language detection - supports multiple languages
-    Returns: Language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'en') or 'en' as default
+    Enhanced language detection using langdetect library with fallback to rule-based detection.
+    Supports: vi, zh, de, fr, es, ja, ko, ar, en
+    
+    Returns: Language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'en') or 'en' as default
     """
     if not text or len(text.strip()) == 0:
         return 'en'
     
+    # Try langdetect first (more accurate for most languages)
+    try:
+        from langdetect import detect, LangDetectException
+        detected = detect(text)
+        
+        # Map langdetect codes to our internal codes
+        lang_map = {
+            'vi': 'vi',  # Vietnamese
+            'zh-cn': 'zh', 'zh-tw': 'zh',  # Chinese
+            'de': 'de',  # German
+            'fr': 'fr',  # French
+            'es': 'es',  # Spanish
+            'ja': 'ja',  # Japanese
+            'ko': 'ko',  # Korean
+            'ar': 'ar',  # Arabic
+            'en': 'en'   # English
+        }
+        
+        # Handle Chinese variants
+        if detected.startswith('zh'):
+            return 'zh'
+        
+        if detected in lang_map:
+            logger.info(f"🌐 langdetect detected: {detected} -> {lang_map[detected]}")
+            return lang_map[detected]
+            
+    except (LangDetectException, ImportError) as e:
+        logger.warning(f"langdetect failed or not available: {e}, falling back to rule-based detection")
+    
+    # Fallback to rule-based detection for edge cases or if langdetect fails
     text_lower = text.lower()
+    
+    # Arabic - Check for Arabic characters
+    arabic_ranges = [
+        (0x0600, 0x06FF),  # Arabic
+        (0x0750, 0x077F),  # Arabic Supplement
+        (0x08A0, 0x08FF),  # Arabic Extended-A
+    ]
+    has_arabic = any(any(start <= ord(char) <= end for start, end in arabic_ranges) for char in text)
+    if has_arabic:
+        return 'ar'
+    
+    # Korean - Check for Hangul
+    korean_ranges = [
+        (0xAC00, 0xD7AF),  # Hangul Syllables
+        (0x1100, 0x11FF),  # Hangul Jamo
+    ]
+    has_korean = any(any(start <= ord(char) <= end for start, end in korean_ranges) for char in text)
+    if has_korean:
+        return 'ko'
     
     # Chinese (Simplified/Traditional) - Check for Chinese characters
     chinese_chars = set('的一是在不了有和人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实加量都两体制机当使点从业本去把性好应开它合还因由其些然前外天政四日那社义事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道命此变条只没结解问意建月公无系军很情者最立代想已通并提直题党程展五果料象员革位入常文总次品式活设及管特件长求老头基资边流路级少图山统接知较将组见计别她手角期根论运农指几九区强放决西被干做必战先回则任取据处队南给色光门即保治北造百规热领七海口东导器压志世金增争济阶油思术极交受联什认六共权收证改清己美再采转更单风切打白教速花带安场身车例真务具万每目至达走积示议声报斗完类八离华名确才科张信马节话米整空元况今集温传土许步群广石记需段研界拉林律叫且究观越织装影算低持音众书布复容儿须际商非验连断深难近矿千周委素技备半办青省列习响约支般史感劳便团往酸历市克何除消构府称太准精值号率族维划选标写存候毛亲快效斯院查江型眼王按格养易置派层片始却专状育厂京识适属圆包火住调满县局照参红细引听该铁价严龙飞')
