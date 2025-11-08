@@ -232,7 +232,7 @@ class ContentCurator:
                 days_old = (datetime.now(pub_date.tzinfo) - pub_date).days
                 if days_old < 7:
                     score += 0.1  # Boost for recent content
-            except:
+            except Exception:
                 pass
         
         return min(1.0, score)  # Cap at 1.0

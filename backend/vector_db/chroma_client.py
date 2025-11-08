@@ -27,7 +27,6 @@ class ChromaClient:
         self.reset_on_error = reset_on_error
         
         # Check if database exists and needs reset
-        original_directory = persist_directory
         if reset_on_error:
             # Delete directory completely
             if os.path.exists(persist_directory):
@@ -98,7 +97,7 @@ class ChromaClient:
                         logger.warning(f"Collection exists, deleting first: {create_error}")
                         try:
                             self.client.delete_collection("stillme_knowledge")
-                        except:
+                        except Exception:
                             pass
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
@@ -120,7 +119,7 @@ class ChromaClient:
                         logger.warning(f"Collection exists, deleting first: {create_error}")
                         try:
                             self.client.delete_collection("stillme_conversations")
-                        except:
+                        except Exception:
                             pass
                         self.conversation_collection = self.client.create_collection(
                             name="stillme_conversations",
@@ -163,11 +162,11 @@ class ChromaClient:
                         # Delete and recreate collections
                         try:
                             self.client.delete_collection("stillme_knowledge")
-                        except:
+                        except Exception:
                             pass
                         try:
                             self.client.delete_collection("stillme_conversations")
-                        except:
+                        except Exception:
                             pass
                         
                         # Recreate collections

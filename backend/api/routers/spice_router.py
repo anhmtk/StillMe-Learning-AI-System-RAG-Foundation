@@ -3,7 +3,7 @@ SPICE Router for StillMe API
 Handles all SPICE (Self-Play for Iterative Challenge Enhancement) endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from typing import Optional, Dict, Any
 import logging
 

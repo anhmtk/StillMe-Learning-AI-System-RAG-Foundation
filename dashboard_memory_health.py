@@ -5,13 +5,10 @@ Displays tier statistics, promotion/demotion audit, and forgetting trends
 
 import streamlit as st
 import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
-from typing import Dict, Any, List
 from datetime import datetime, timedelta
 
 # Import from main dashboard
-from dashboard import get_json, API_BASE
+from dashboard import get_json
 
 
 def page_memory_health():

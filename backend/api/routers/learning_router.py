@@ -9,7 +9,6 @@ from backend.api.rate_limiter import limiter, get_rate_limit_key_func
 from backend.api.auth import require_api_key
 from typing import Optional, Dict, Any, List
 import logging
-import os
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -58,7 +57,7 @@ def get_self_diagnosis():
     import backend.api.main as main_module
     return main_module.self_diagnosis
 
-def get_rss_fetch_history():
+def _get_rss_fetch_history_service():
     """Get RSS fetch history service from main module"""
     import backend.api.main as main_module
     return main_module.rss_fetch_history
@@ -293,7 +292,7 @@ async def fetch_all_sources(
     """
     try:
         source_integration = get_source_integration()
-        rss_fetch_history = get_rss_fetch_history()
+        rss_fetch_history = _get_rss_fetch_history_service()
         rag_retrieval = get_rag_retrieval()
         
         if not source_integration:
@@ -485,7 +484,7 @@ async def fetch_rss_content(
     """
     try:
         rss_fetcher = get_rss_fetcher()
-        rss_fetch_history = get_rss_fetch_history()
+        rss_fetch_history = _get_rss_fetch_history_service()
         rag_retrieval = get_rag_retrieval()
         content_curator = get_content_curator()
         
@@ -692,7 +691,7 @@ async def get_rss_fetch_history(limit: int = 100):
         List of fetch items with status (Source URL, Title, Fetch Timestamp, STATUS)
     """
     try:
-        rss_fetch_history = get_rss_fetch_history()
+        rss_fetch_history = _get_rss_fetch_history_service()
         
         if not rss_fetch_history:
             raise HTTPException(status_code=503, detail="RSS fetch history not available")
@@ -827,7 +826,7 @@ async def run_scheduler_now():
     """Manually trigger a learning cycle immediately with detailed status tracking"""
     try:
         learning_scheduler = get_learning_scheduler()
-        rss_fetch_history = get_rss_fetch_history()
+        rss_fetch_history = _get_rss_fetch_history_service()
         rag_retrieval = get_rag_retrieval()
         source_integration = get_source_integration()
         content_curator = get_content_curator()

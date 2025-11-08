@@ -76,7 +76,7 @@ class RSSFetchHistory:
                 else:
                     # Other operational errors - don't retry
                     raise
-            except Exception as e:
+            except Exception:
                 # Other errors - don't retry
                 raise
         

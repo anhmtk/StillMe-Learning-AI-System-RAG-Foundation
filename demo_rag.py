@@ -7,7 +7,6 @@ Demonstrates Vector DB and Meta-Learning capabilities
 import asyncio
 import sys
 import os
-from datetime import datetime
 
 # Add backend to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))

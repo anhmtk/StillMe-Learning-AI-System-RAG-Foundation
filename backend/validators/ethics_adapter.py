@@ -3,7 +3,7 @@ EthicsAdapter - Wraps existing ethics guard if available
 """
 
 from typing import List, Optional, Callable, Tuple
-from .base import Validator, ValidationResult
+from .base import ValidationResult
 import logging
 
 logger = logging.getLogger(__name__)

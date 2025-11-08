@@ -5,7 +5,6 @@ Integrates multiple data sources (RSS, arXiv, CrossRef, Wikipedia) into unified 
 
 import logging
 from typing import List, Dict, Any, Optional
-from datetime import datetime
 import os
 
 from backend.services.rss_fetcher import RSSFetcher
