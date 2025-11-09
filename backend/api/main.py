@@ -76,6 +76,10 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "X-API-Key"],  # Specific headers instead of "*"
 )
 
+# Request tracking middleware (for metrics collection)
+from backend.api.request_tracking_middleware import RequestTrackingMiddleware
+app.add_middleware(RequestTrackingMiddleware)
+
 # Security middleware (HTTPS enforcement, HSTS headers, etc.)
 security_middleware_list = get_security_middleware()
 for middleware_class in security_middleware_list:
@@ -264,6 +268,27 @@ def _initialize_rag_components():
         logger.info("✅ All RAG components initialized successfully")
         logger.info("🎉 StillMe backend is ready!")
         _rag_initialization_complete = True
+        
+        # Update metrics collector with component health
+        try:
+            from backend.api.metrics_collector import get_metrics_collector
+            metrics_collector = get_metrics_collector()
+            metrics_collector.set_component_health("rag_initialized", rag_retrieval is not None)
+            metrics_collector.set_component_health("chromadb_available", chroma_client is not None)
+            metrics_collector.set_component_health("embedding_service_ready", embedding_service is not None)
+            metrics_collector.set_component_health("knowledge_retention_ready", knowledge_retention is not None)
+            
+            # Update knowledge items count if available
+            if knowledge_retention:
+                try:
+                    retention_metrics = knowledge_retention.calculate_retention_metrics()
+                    if retention_metrics:
+                        total_items = retention_metrics.get('total_items', 0)
+                        metrics_collector.set_knowledge_items_total(total_items)
+                except Exception:
+                    pass
+        except Exception as metrics_error:
+            logger.debug(f"Could not update metrics collector: {metrics_error}")
     except Exception as e:
         _initialization_error = str(e)
         logger.error(f"❌ Failed to initialize RAG components: {e}", exc_info=True)
@@ -294,6 +319,17 @@ def _initialize_rag_components():
             rag_retrieval = None
             knowledge_retention = None
             accuracy_scorer = None
+            
+            # Update metrics collector with component health (all failed)
+            try:
+                from backend.api.metrics_collector import get_metrics_collector
+                metrics_collector = get_metrics_collector()
+                metrics_collector.set_component_health("rag_initialized", False)
+                metrics_collector.set_component_health("chromadb_available", False)
+                metrics_collector.set_component_health("embedding_service_ready", False)
+                metrics_collector.set_component_health("knowledge_retention_ready", False)
+            except Exception:
+                pass
             
         else:
             # For non-schema errors, also allow service to continue

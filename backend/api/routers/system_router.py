@@ -3,7 +3,7 @@ System Router - Core endpoints for API health, status, and metrics
 Handles root, health check, system status, and validation metrics
 """
 
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, Response
 import logging
 import os
 import sqlite3
@@ -241,4 +241,125 @@ async def get_validation_metrics():
                 "recent_logs": []
             }
         }
+
+@router.get("/metrics")
+async def prometheus_metrics():
+    """
+    Prometheus-compatible metrics endpoint.
+    Returns metrics in Prometheus text format for monitoring tools.
+    
+    This endpoint exposes system metrics in standard Prometheus format,
+    allowing integration with monitoring tools like Prometheus, Grafana, etc.
+    """
+    try:
+        from backend.api.metrics_collector import get_metrics_collector
+        from backend.validators.metrics import get_metrics as get_validation_metrics
+        from backend.learning import KnowledgeRetention
+        
+        metrics_collector = get_metrics_collector()
+        metrics_data = metrics_collector.get_metrics()
+        
+        lines = []
+        
+        # RAG Component Health Metrics
+        lines.append("# HELP stillme_rag_initialized Whether RAG components are initialized (1=yes, 0=no)")
+        lines.append("# TYPE stillme_rag_initialized gauge")
+        lines.append(f"stillme_rag_initialized {metrics_data['component_health'].get('rag_initialized', 0)}")
+        
+        lines.append("# HELP stillme_chromadb_available Whether ChromaDB is available (1=yes, 0=no)")
+        lines.append("# TYPE stillme_chromadb_available gauge")
+        lines.append(f"stillme_chromadb_available {metrics_data['component_health'].get('chromadb_available', 0)}")
+        
+        lines.append("# HELP stillme_embedding_service_ready Whether embedding service is ready (1=yes, 0=no)")
+        lines.append("# TYPE stillme_embedding_service_ready gauge")
+        lines.append(f"stillme_embedding_service_ready {metrics_data['component_health'].get('embedding_service_ready', 0)}")
+        
+        lines.append("# HELP stillme_knowledge_retention_ready Whether knowledge retention is ready (1=yes, 0=no)")
+        lines.append("# TYPE stillme_knowledge_retention_ready gauge")
+        lines.append(f"stillme_knowledge_retention_ready {metrics_data['component_health'].get('knowledge_retention_ready', 0)}")
+        
+        # Request Metrics
+        total_requests = sum(metrics_data['request_counters'].values())
+        lines.append("# HELP stillme_requests_total Total number of HTTP requests")
+        lines.append("# TYPE stillme_requests_total counter")
+        lines.append(f"stillme_requests_total {total_requests}")
+        
+        # Request counters by endpoint
+        for key, count in metrics_data['request_counters'].items():
+            method, endpoint = key.split(':', 1) if ':' in key else ('UNKNOWN', key)
+            lines.append(f'stillme_requests_total{{method="{method}",endpoint="{endpoint}"}} {count}')
+        
+        # Error Metrics
+        total_errors = sum(metrics_data['error_counters'].values())
+        lines.append("# HELP stillme_requests_errors_total Total number of HTTP errors")
+        lines.append("# TYPE stillme_requests_errors_total counter")
+        lines.append(f"stillme_requests_errors_total {total_errors}")
+        
+        # Error counters by endpoint and status
+        for key, count in metrics_data['error_counters'].items():
+            parts = key.split(':')
+            if len(parts) >= 3:
+                method, endpoint, status = parts[0], parts[1], parts[2]
+                lines.append(f'stillme_requests_errors_total{{method="{method}",endpoint="{endpoint}",status="{status}"}} {count}')
+        
+        # Learning Metrics
+        lines.append("# HELP stillme_knowledge_items_total Total number of knowledge items in the system")
+        lines.append("# TYPE stillme_knowledge_items_total gauge")
+        lines.append(f"stillme_knowledge_items_total {metrics_data['knowledge_items_total']}")
+        
+        # Validation Metrics
+        try:
+            validation_metrics = get_validation_metrics()
+            val_data = validation_metrics.get_metrics()
+            
+            lines.append("# HELP stillme_validations_total Total number of validations performed")
+            lines.append("# TYPE stillme_validations_total counter")
+            lines.append(f"stillme_validations_total {val_data.get('total_validations', 0)}")
+            
+            lines.append("# HELP stillme_validations_passed_total Total number of passed validations")
+            lines.append("# TYPE stillme_validations_passed_total counter")
+            lines.append(f"stillme_validations_passed_total {val_data.get('passed_count', 0)}")
+            
+            lines.append("# HELP stillme_validations_failed_total Total number of failed validations")
+            lines.append("# TYPE stillme_validations_failed_total counter")
+            lines.append(f"stillme_validations_failed_total {val_data.get('failed_count', 0)}")
+            
+            lines.append("# HELP stillme_validation_pass_rate Validation pass rate (0.0 to 1.0)")
+            lines.append("# TYPE stillme_validation_pass_rate gauge")
+            lines.append(f"stillme_validation_pass_rate {val_data.get('pass_rate', 0.0)}")
+            
+            lines.append("# HELP stillme_validation_overlap_score_avg Average evidence overlap score")
+            lines.append("# TYPE stillme_validation_overlap_score_avg gauge")
+            lines.append(f"stillme_validation_overlap_score_avg {val_data.get('avg_overlap_score', 0.0)}")
+        except Exception as val_error:
+            logger.debug(f"Could not get validation metrics: {val_error}")
+        
+        # Knowledge Retention Metrics (if available)
+        try:
+            knowledge_retention = get_knowledge_retention()
+            if knowledge_retention:
+                retention_metrics = knowledge_retention.calculate_retention_metrics()
+                if retention_metrics:
+                    total_items = retention_metrics.get('total_items', 0)
+                    lines.append("# HELP stillme_knowledge_retention_items_total Total items in knowledge retention")
+                    lines.append("# TYPE stillme_knowledge_retention_items_total gauge")
+                    lines.append(f"stillme_knowledge_retention_items_total {total_items}")
+        except Exception as kr_error:
+            logger.debug(f"Could not get knowledge retention metrics: {kr_error}")
+        
+        metrics_text = "\n".join(lines) + "\n"
+        return Response(content=metrics_text, media_type="text/plain")
+        
+    except Exception as e:
+        logger.error(f"Error generating Prometheus metrics: {e}", exc_info=True)
+        return Response(
+            content="# Error generating metrics\n",
+            media_type="text/plain",
+            status_code=500
+        )
+
+def get_knowledge_retention():
+    """Get knowledge retention service from main module"""
+    import backend.api.main as main_module
+    return main_module.knowledge_retention
 
