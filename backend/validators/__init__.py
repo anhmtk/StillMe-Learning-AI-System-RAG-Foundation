@@ -10,6 +10,8 @@ from .evidence_overlap import EvidenceOverlap
 from .numeric import NumericUnitsBasic
 from .schema_format import SchemaFormat
 from .ethics_adapter import EthicsAdapter
+from .confidence import ConfidenceValidator
+from .fallback_handler import FallbackHandler
 
 __all__ = [
     "Validator",
@@ -20,5 +22,7 @@ __all__ = [
     "NumericUnitsBasic",
     "SchemaFormat",
     "EthicsAdapter",
+    "ConfidenceValidator",
+    "FallbackHandler",
 ]
 

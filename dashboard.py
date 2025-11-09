@@ -1010,6 +1010,62 @@ def sidebar(page_for_chat: str | None = None):
                         unsafe_allow_html=True
                     )
                     
+                    # Display confidence score and validation info for assistant messages
+                    if m["role"] == "assistant":
+                        confidence_score = m.get("confidence_score")
+                        validation_info = m.get("validation_info")
+                        learning_suggestions = m.get("learning_suggestions")
+                        
+                        # Create expandable section for metadata
+                        if confidence_score is not None or validation_info or learning_suggestions:
+                            with st.expander("📊 Response Metadata", expanded=False):
+                                # Confidence Score
+                                if confidence_score is not None:
+                                    # Color based on confidence level
+                                    if confidence_score >= 0.7:
+                                        conf_color = "#4CAF50"  # Green
+                                        conf_emoji = "🟢"
+                                    elif confidence_score >= 0.4:
+                                        conf_color = "#FF9800"  # Orange
+                                        conf_emoji = "🟡"
+                                    else:
+                                        conf_color = "#F44336"  # Red
+                                        conf_emoji = "🔴"
+                                    
+                                    st.markdown(
+                                        f'{conf_emoji} **Confidence Score:** '
+                                        f'<span style="color: {conf_color}; font-weight: bold;">{confidence_score:.2f}</span> '
+                                        f'({confidence_score*100:.0f}%)',
+                                        unsafe_allow_html=True
+                                    )
+                                
+                                # Validation Info
+                                if validation_info:
+                                    st.markdown("**Validation Status:**")
+                                    passed = validation_info.get("passed", False)
+                                    reasons = validation_info.get("reasons", [])
+                                    used_fallback = validation_info.get("used_fallback", False)
+                                    context_docs_count = validation_info.get("context_docs_count", 0)
+                                    
+                                    if passed:
+                                        st.success(f"✅ Validation Passed")
+                                    else:
+                                        st.warning(f"⚠️ Validation Failed")
+                                    
+                                    if used_fallback:
+                                        st.info("🛡️ **Safe Fallback Answer Used** - Original response was replaced with a safe fallback to prevent hallucination.")
+                                    
+                                    if reasons:
+                                        st.markdown(f"**Reasons:** {', '.join(reasons)}")
+                                    
+                                    st.caption(f"Context Documents: {context_docs_count}")
+                                
+                                # Learning Suggestions
+                                if learning_suggestions:
+                                    st.markdown("**💡 Learning Suggestions:**")
+                                    for suggestion in learning_suggestions:
+                                        st.info(f"• {suggestion}")
+                    
                     # Show knowledge alert after StillMe's response
                     if m["role"] == "assistant" and "knowledge_alert" in m:
                         alert = m["knowledge_alert"]
@@ -1097,6 +1153,11 @@ def sidebar(page_for_chat: str | None = None):
                 if isinstance(reply, dict):
                     reply = reply.get("detail", str(reply))
                 
+                # Extract confidence score and validation info
+                confidence_score = data.get("confidence_score")
+                validation_info = data.get("validation_info")
+                learning_suggestions = data.get("learning_suggestions")
+                
                 # Check for knowledge alert
                 knowledge_alert = data.get("knowledge_alert")
                 if knowledge_alert:
@@ -1182,6 +1243,13 @@ def sidebar(page_for_chat: str | None = None):
             message_entry = {"role": "assistant", "content": reply}
             if knowledge_alert:
                 message_entry["knowledge_alert"] = knowledge_alert
+            # Store confidence and validation info for display
+            if confidence_score is not None:
+                message_entry["confidence_score"] = confidence_score
+            if validation_info:
+                message_entry["validation_info"] = validation_info
+            if learning_suggestions:
+                message_entry["learning_suggestions"] = learning_suggestions
             st.session_state.chat_history.append(message_entry)
             
             # Clear knowledge alert from session state after adding to history
