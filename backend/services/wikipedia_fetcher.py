@@ -182,8 +182,9 @@ class WikipediaFetcher:
         articles = []
         
         try:
-            # Use REST v1 search API (fixed endpoint)
-            # https://en.wikipedia.org/w/rest.php/v1/search/page?q=<q>&limit=<n>
+            # Try REST API v1 search endpoint first
+            # Documentation: https://www.mediawiki.org/wiki/API:REST_API
+            # Endpoint: /w/rest.php/v1/search/page
             search_url = f"https://{self.language}.wikipedia.org/w/rest.php/v1/search/page"
             params = {
                 "q": query,
@@ -191,12 +192,48 @@ class WikipediaFetcher:
             }
             
             response = self._fetch_with_retry(search_url, params)
-            if not response:
-                return articles
             
-            # Handle 404 - don't retry
-            if response.status_code == 404:
-                logger.warning(f"Wikipedia search returned 404 for query: {query}")
+            # Handle 404 or other errors - try alternative endpoint
+            if not response or response.status_code == 404:
+                logger.warning(
+                    f"Wikipedia REST v1 search returned {response.status_code if response else 'None'} "
+                    f"for query: {query}. Trying alternative search method..."
+                )
+                
+                # Fallback: Use MediaWiki Action API search
+                # Documentation: https://www.mediawiki.org/wiki/API:Search
+                fallback_url = f"https://{self.language}.wikipedia.org/w/api.php"
+                fallback_params = {
+                    "action": "query",
+                    "list": "search",
+                    "srsearch": query,
+                    "srlimit": min(max_results, WIKIPEDIA_MAX_RESULTS),
+                    "format": "json",
+                    "formatversion": "2"
+                }
+                
+                fallback_response = self._fetch_with_retry(fallback_url, fallback_params)
+                if fallback_response and fallback_response.status_code == 200:
+                    fallback_data = fallback_response.json()
+                    search_results = fallback_data.get("query", {}).get("search", [])
+                    
+                    # Convert MediaWiki format to our format
+                    for result in search_results[:max_results]:
+                        title = result.get("title", "")
+                        if title:
+                            article = self.fetch_article(title)
+                            if article:
+                                articles.append(article)
+                    
+                    logger.info(f"Found {len(articles)} Wikipedia articles using fallback API for query: {query}")
+                    return articles
+                else:
+                    logger.error(f"Wikipedia fallback search also failed for query: {query}")
+                    return articles
+            
+            # Parse REST v1 response
+            if response.status_code != 200:
+                logger.error(f"Wikipedia search returned {response.status_code} for query: {query}")
                 return articles
             
             data = response.json()
