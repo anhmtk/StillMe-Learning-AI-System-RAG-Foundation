@@ -3,7 +3,6 @@ Integration Tests for Full RSS → RAG Pipeline
 Tests the complete flow: RSS fetch → filter → duplicate check → add to RAG → history tracking
 """
 
-import pytest
 import tempfile
 import os
 from unittest.mock import Mock, MagicMock, patch, AsyncMock

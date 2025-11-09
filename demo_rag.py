@@ -57,7 +57,7 @@ async def demo_rag_system():
         
         for item in sample_knowledge:
             # Add to knowledge retention
-            knowledge_id = knowledge_retention.add_knowledge(
+            knowledge_retention.add_knowledge(
                 content=item["content"],
                 source=item["source"],
                 knowledge_type=item["type"],

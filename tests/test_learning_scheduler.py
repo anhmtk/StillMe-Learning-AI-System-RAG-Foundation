@@ -3,8 +3,7 @@ Tests for Learning Scheduler Service
 Tests scheduler start/stop, learning cycles, error recovery, and interval configuration
 """
 
-import pytest
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta
 import asyncio
 from backend.services.learning_scheduler import LearningScheduler
