@@ -373,21 +373,29 @@ def page_overview():
         with col_run_now:
             if st.button("🚀 Run Now", use_container_width=True):
                 try:
-                    with st.spinner("Running learning cycle..."):
-                        r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=120)
-                        if r.status_code == 200:
-                            data = r.json()
-                            entries = data.get("entries_fetched", 0)
-                            filtered = data.get("entries_filtered", 0)
-                            added = data.get("entries_added_to_rag", 0)
-                            
-                            if filtered > 0:
-                                st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, Filtered {filtered} (Low quality/Short), Added {added} to RAG."
-                            else:
-                                st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, added {added} to RAG."
-                            st.rerun()
+                    # Non-blocking: returns 202 immediately
+                    r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=10)
+                    if r.status_code == 202:
+                        data = r.json()
+                        job_id = data.get("job_id")
+                        st.session_state["last_action"] = f"✅ Learning cycle started! Job ID: {job_id[:8]}... Use job status endpoint to check progress."
+                        st.rerun()
+                    elif r.status_code == 200:
+                        # Sync mode (for tests)
+                        data = r.json()
+                        entries = data.get("entries_fetched", 0)
+                        filtered = data.get("entries_filtered", 0)
+                        added = data.get("entries_added_to_rag", 0)
+                        
+                        if filtered > 0:
+                            st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, Filtered {filtered} (Low quality/Short), Added {added} to RAG."
                         else:
-                            st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
+                            st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, added {added} to RAG."
+                        st.rerun()
+                    else:
+                        st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
+                except requests.exceptions.Timeout:
+                    st.session_state["last_error"] = "❌ Request timed out. Backend may be slow."
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed: {e}"
     else:
@@ -1065,6 +1073,12 @@ def sidebar(page_for_chat: str | None = None):
                                     st.markdown("**💡 Learning Suggestions:**")
                                     for suggestion in learning_suggestions:
                                         st.info(f"• {suggestion}")
+                                
+                                # Latency Metrics
+                                latency_metrics = m.get("latency_metrics")
+                                if latency_metrics:
+                                    st.markdown("**⏱️ Latency Metrics:**")
+                                    st.code(latency_metrics, language="text")
                     
                     # Show knowledge alert after StillMe's response
                     if m["role"] == "assistant" and "knowledge_alert" in m:
@@ -1157,6 +1171,7 @@ def sidebar(page_for_chat: str | None = None):
                 confidence_score = data.get("confidence_score")
                 validation_info = data.get("validation_info")
                 learning_suggestions = data.get("learning_suggestions")
+                latency_metrics = data.get("latency_metrics")  # Extract latency metrics
                 
                 # Check for knowledge alert
                 knowledge_alert = data.get("knowledge_alert")
@@ -1250,6 +1265,8 @@ def sidebar(page_for_chat: str | None = None):
                 message_entry["validation_info"] = validation_info
             if learning_suggestions:
                 message_entry["learning_suggestions"] = learning_suggestions
+            if latency_metrics:
+                message_entry["latency_metrics"] = latency_metrics
             st.session_state.chat_history.append(message_entry)
             
             # Clear knowledge alert from session state after adding to history

@@ -1,0 +1,185 @@
+"""
+Background task implementation for non-blocking learning cycles
+Extracted from learning_router.py for better organization
+"""
+
+import logging
+from datetime import datetime
+from typing import Dict, Any
+from backend.api.job_queue import get_job_queue, JobStatus
+
+logger = logging.getLogger(__name__)
+
+
+async def run_learning_cycle_background(job_id: str):
+    """
+    Background task to run learning cycle.
+    Updates job status and progress as it runs.
+    """
+    job_queue = get_job_queue()
+    job = job_queue.get_job(job_id)
+    
+    if not job:
+        logger.error(f"Job {job_id} not found")
+        return
+    
+    try:
+        job.started_at = datetime.now()
+        job.update_progress("fetching", entries_fetched=0)
+        job.add_log("Starting learning cycle...")
+        
+        # Import from main module to avoid circular imports
+        import backend.api.main as main_module
+        
+        learning_scheduler = main_module.learning_scheduler
+        rss_fetch_history = main_module.rss_fetch_history
+        rag_retrieval = main_module.rag_retrieval
+        source_integration = main_module.source_integration
+        content_curator = main_module.content_curator
+        self_diagnosis = main_module.self_diagnosis
+        
+        if not learning_scheduler:
+            raise Exception("Scheduler not available")
+        
+        # Phase 1: Fetching
+        job.update_progress("fetching", entries_fetched=0)
+        job.add_log("Fetching entries from all sources...")
+        result = await learning_scheduler.run_learning_cycle()
+        cycle_number = result.get("cycle_number", 0)
+        
+        job.update_progress("fetching", entries_fetched=result.get("entries_fetched", 0))
+        job.add_log(f"Fetched {result.get('entries_fetched', 0)} entries")
+        
+        # Create fetch cycle for tracking
+        cycle_id = None
+        if rss_fetch_history:
+            cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=cycle_number)
+        
+        # Phase 2: Pre-filter
+        if learning_scheduler.auto_add_to_rag and rag_retrieval:
+            job.update_progress("prefilter", entries_filtered=0)
+            job.add_log("Applying pre-filter to reduce costs...")
+            
+            entries_to_add = []
+            filtered_count = 0
+            
+            try:
+                if source_integration:
+                    all_entries = source_integration.fetch_all_sources(
+                        max_items_per_source=5,
+                        use_pre_filter=False
+                    )
+                    job.add_log(f"Fetched {len(all_entries)} entries from all sources")
+                else:
+                    all_entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+                    job.add_log(f"Fetched {len(all_entries)} entries from RSS")
+                
+                # Pre-filter
+                if content_curator:
+                    filtered_entries, rejected_entries = content_curator.pre_filter_content(all_entries)
+                    filtered_count = len(rejected_entries)
+                    job.update_progress("prefilter", entries_filtered=filtered_count)
+                    job.add_log(f"Pre-filter: {len(filtered_entries)}/{len(all_entries)} passed")
+                    all_entries = filtered_entries
+                
+                # Prioritize
+                if content_curator and self_diagnosis:
+                    recent_gaps = []
+                    prioritized = content_curator.prioritize_learning_content(all_entries, knowledge_gaps=recent_gaps)
+                    entries_to_add = prioritized[:min(5, len(prioritized))]
+                else:
+                    entries_to_add = all_entries[:min(10, len(all_entries))]
+                
+            except Exception as e:
+                logger.error(f"Error preparing entries for RAG: {e}")
+                job.add_log(f"Error preparing entries: {str(e)}")
+                entries_to_add = []
+            
+            # Phase 3: Embedding and adding to RAG
+            added_count = 0
+            total_entries = len(entries_to_add)
+            
+            for idx, entry in enumerate(entries_to_add):
+                try:
+                    job.update_progress(
+                        "embedding",
+                        entries_added=added_count,
+                        current_item=entry.get('title', '')[:50]
+                    )
+                    job.add_log(f"Processing entry {idx + 1}/{total_entries}: {entry.get('title', '')[:50]}")
+                    
+                    content = f"{entry.get('title', '')}\n{entry.get('summary', '')}"
+                    if not content.strip():
+                        continue
+                    
+                    # Check duplicates
+                    is_duplicate = False
+                    try:
+                        existing = rag_retrieval.retrieve_context(
+                            query=entry.get('title', ''),
+                            knowledge_limit=1,
+                            conversation_limit=0
+                        )
+                        if existing.get("knowledge_docs"):
+                            existing_doc = existing["knowledge_docs"][0]
+                            existing_metadata = existing_doc.get("metadata", {})
+                            if existing_metadata.get("link", "") == entry.get("link", ""):
+                                is_duplicate = True
+                    except Exception:
+                        pass
+                    
+                    if is_duplicate:
+                        continue
+                    
+                    # Add to RAG
+                    job.update_progress("adding_to_rag", entries_added=added_count)
+                    importance_score = 0.5
+                    if content_curator:
+                        importance_score = content_curator.calculate_importance_score(entry)
+                    
+                    success = rag_retrieval.add_learning_content(
+                        content=content,
+                        source=entry.get('source', 'rss'),
+                        content_type="knowledge",
+                        metadata={
+                            "link": entry.get('link', ''),
+                            "published": entry.get('published', ''),
+                            "type": "rss_feed",
+                            "scheduler_cycle": cycle_number,
+                            "priority_score": entry.get("priority_score", 0.5),
+                            "importance_score": importance_score,
+                            "title": entry.get('title', '')[:200]
+                        }
+                    )
+                    
+                    if success:
+                        added_count += 1
+                        job.update_progress("adding_to_rag", entries_added=added_count)
+                    
+                except Exception as e:
+                    logger.error(f"Error adding entry to RAG: {e}")
+                    job.add_log(f"Error adding entry: {str(e)[:100]}")
+                    continue
+            
+            result["entries_added_to_rag"] = added_count
+            result["entries_filtered"] = filtered_count
+            
+            if rss_fetch_history and cycle_id:
+                rss_fetch_history.complete_fetch_cycle(cycle_id)
+            
+            job.add_log(f"Completed: Added {added_count} entries to RAG")
+        
+        # Mark as done
+        job.status = JobStatus.DONE
+        job.completed_at = datetime.now()
+        job.result = result
+        job.update_progress("done", entries_added=result.get("entries_added_to_rag", 0))
+        job.add_log("Learning cycle completed successfully")
+        
+    except Exception as e:
+        logger.error(f"Background learning cycle error: {e}", exc_info=True)
+        job.status = JobStatus.ERROR
+        job.completed_at = datetime.now()
+        job.error = str(e)
+        job.add_log(f"Error: {str(e)}")
+

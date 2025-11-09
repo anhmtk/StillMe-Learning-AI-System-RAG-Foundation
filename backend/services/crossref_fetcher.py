@@ -54,7 +54,7 @@ class CrossrefFetcher:
         for attempt in range(CROSSREF_MAX_RETRIES):
             try:
                 self._rate_limit()
-                response = requests.get(url, params=params, headers=headers, timeout=30)
+                response = requests.get(url, params=params, headers=headers, timeout=300)  # Increased timeout for long operations
                 response.raise_for_status()
                 return response
             except requests.exceptions.RequestException as e:

@@ -63,10 +63,21 @@ else:
         "http://127.0.0.1:8501",
         "http://127.0.0.1:3000",
     ]
-    logger.warning(
-        "⚠️ CORS_ALLOWED_ORIGINS not set. Using default localhost origins only. "
-        "Set CORS_ALLOWED_ORIGINS environment variable for production."
-    )
+    env = os.getenv("ENV", "development").lower()
+    is_production = env == "production"
+    
+    if is_production:
+        logger.warning(
+            "⚠️ PRODUCTION WARNING: CORS_ALLOWED_ORIGINS not set! "
+            "This is a security risk in production. "
+            "Set CORS_ALLOWED_ORIGINS environment variable with comma-separated list of allowed origins. "
+            "Example: CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com"
+        )
+    else:
+        logger.warning(
+            "⚠️ CORS_ALLOWED_ORIGINS not set. Using default localhost origins only. "
+            "Set CORS_ALLOWED_ORIGINS environment variable for production."
+        )
 
 # Security: Only allow credentials if origins are restricted (not "*")
 allow_creds = "*" not in cors_origins
@@ -175,7 +186,17 @@ def _initialize_rag_components():
         logger.info("Initializing RAG components...")
         
         # Check for FORCE_DB_RESET_ON_STARTUP environment variable
-        force_reset = os.getenv("FORCE_DB_RESET_ON_STARTUP", "false").lower() == "true"
+        # PRODUCTION SAFETY: Force disable in production to prevent data loss
+        env = os.getenv("ENV", "development").lower()
+        is_production = env == "production"
+        
+        if is_production:
+            # Override FORCE_DB_RESET_ON_STARTUP in production
+            force_reset = False
+            if os.getenv("FORCE_DB_RESET_ON_STARTUP", "false").lower() == "true":
+                logger.warning("⚠️ FORCE_DB_RESET_ON_STARTUP is set but ENV=production - forcing to false for safety")
+        else:
+            force_reset = os.getenv("FORCE_DB_RESET_ON_STARTUP", "false").lower() == "true"
         
         # For Dashboard service, always use reset_on_error=True to handle schema mismatches automatically
         # This is safe because Dashboard is typically a read-only service or can rebuild its database

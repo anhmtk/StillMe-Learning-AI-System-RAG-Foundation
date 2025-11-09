@@ -111,11 +111,21 @@ def get_security_middleware():
     middleware.append(SecurityHeadersMiddleware)
     
     # Add HTTPS redirect middleware if enforcement is enabled
+    env = os.getenv("ENV", "development").lower()
+    is_production = env == "production"
+    
     if ENFORCE_HTTPS:
         middleware.append(HTTPSRedirectMiddleware)
         logger.info("✅ HTTPS enforcement enabled - HTTP requests will be redirected to HTTPS")
     else:
-        logger.info("⚠️ HTTPS enforcement disabled - set ENFORCE_HTTPS=true to enable")
+        if is_production:
+            logger.warning(
+                "⚠️ PRODUCTION WARNING: ENFORCE_HTTPS=false in production! "
+                "This is a security risk. Set ENFORCE_HTTPS=true to enable HTTPS enforcement. "
+                "HTTPS enforcement redirects all HTTP requests to HTTPS and adds HSTS headers."
+            )
+        else:
+            logger.info("⚠️ HTTPS enforcement disabled - set ENFORCE_HTTPS=true to enable")
     
     return middleware
 

@@ -822,21 +822,61 @@ async def get_scheduler_status():
         return {"status": "error", "message": str(e)}
 
 @router.post("/scheduler/run-now")
-async def run_scheduler_now():
-    """Manually trigger a learning cycle immediately with detailed status tracking"""
+async def run_scheduler_now(request: Request, sync: bool = Query(False, description="Run synchronously (for tests)")):
+    """
+    Manually trigger a learning cycle immediately with detailed status tracking.
+    
+    By default, returns 202 Accepted immediately and runs in background.
+    Use ?sync=true for synchronous execution (for tests).
+    """
     try:
         learning_scheduler = get_learning_scheduler()
-        rss_fetch_history = _get_rss_fetch_history_service()
-        rag_retrieval = get_rag_retrieval()
-        source_integration = get_source_integration()
-        content_curator = get_content_curator()
-        self_diagnosis = get_self_diagnosis()
         
         if not learning_scheduler:
             raise HTTPException(status_code=503, detail="Scheduler not available")
         
-        result = await learning_scheduler.run_learning_cycle()
-        cycle_number = result.get("cycle_number", 0)
+        # For sync mode (tests), run synchronously
+        if sync:
+            return await _run_learning_cycle_sync()
+        
+        # Non-blocking mode: create job and return immediately
+        job_queue = get_job_queue()
+        job_id = job_queue.create_job()
+        
+        # Start background task
+        from backend.api.routers.learning_router_background import run_learning_cycle_background
+        asyncio.create_task(run_learning_cycle_background(job_id))
+        
+        from fastapi import Response
+        import json
+        return Response(
+            content=json.dumps({
+                "status": "accepted",
+                "job_id": job_id,
+                "message": "Learning cycle started in background. Use GET /api/learning/scheduler/job-status/{job_id} to check progress."
+            }),
+            media_type="application/json",
+            status_code=status.HTTP_202_ACCEPTED
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Run scheduler now error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+async def _run_learning_cycle_sync():
+    """Synchronous learning cycle execution (for tests)"""
+    learning_scheduler = get_learning_scheduler()
+    rss_fetch_history = _get_rss_fetch_history_service()
+    rag_retrieval = get_rag_retrieval()
+    source_integration = get_source_integration()
+    content_curator = get_content_curator()
+    self_diagnosis = get_self_diagnosis()
+    
+    result = await learning_scheduler.run_learning_cycle()
+    cycle_number = result.get("cycle_number", 0)
         
         # Create fetch cycle for tracking
         cycle_id = None
@@ -1033,11 +1073,54 @@ async def run_scheduler_now():
             )
         
         return result
+
+
+@router.get("/scheduler/job-status/{job_id}")
+async def get_job_status(job_id: str):
+    """
+    Get status of a learning cycle job.
+    
+    Returns job status, progress, and result (when completed).
+    """
+    try:
+        job_queue = get_job_queue()
+        job = job_queue.get_job(job_id)
+        
+        if not job:
+            raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+        
+        return job.to_dict()
         
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Run scheduler now error: {e}")
+        logger.error(f"Get job status error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/scheduler/job-logs/{job_id}")
+async def get_job_logs(job_id: str):
+    """
+    Get logs for a learning cycle job.
+    
+    Returns all log messages for the job.
+    """
+    try:
+        job_queue = get_job_queue()
+        job = job_queue.get_job(job_id)
+        
+        if not job:
+            raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+        
+        return {
+            "job_id": job_id,
+            "logs": job.logs
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get job logs error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================

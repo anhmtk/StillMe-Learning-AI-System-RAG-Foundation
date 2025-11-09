@@ -62,8 +62,33 @@ class WikipediaFetcher:
             try:
                 self._rate_limit()
                 response = requests.get(url, params=params, headers=headers, timeout=30)
+                
+                # Handle 404 - don't retry
+                if response.status_code == 404:
+                    logger.warning(f"Wikipedia API returned 404 for {url}")
+                    return response
+                
+                # Handle 429 (rate limit) and 5xx - retry with backoff
+                if response.status_code == 429 or response.status_code >= 500:
+                    if attempt < WIKIPEDIA_MAX_RETRIES - 1:
+                        delay = WIKIPEDIA_RETRY_DELAY * (2 ** attempt)
+                        logger.warning(f"Wikipedia API returned {response.status_code} (attempt {attempt + 1}/{WIKIPEDIA_MAX_RETRIES}). Retrying in {delay}s...")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        logger.error(f"Wikipedia API request failed after {WIKIPEDIA_MAX_RETRIES} attempts: {response.status_code}")
+                        return None
+                
                 response.raise_for_status()
                 return response
+            except requests.exceptions.Timeout as e:
+                if attempt < WIKIPEDIA_MAX_RETRIES - 1:
+                    delay = WIKIPEDIA_RETRY_DELAY * (2 ** attempt)
+                    logger.warning(f"Wikipedia API timeout (attempt {attempt + 1}/{WIKIPEDIA_MAX_RETRIES}). Retrying in {delay}s...")
+                    time.sleep(delay)
+                else:
+                    logger.error(f"Wikipedia API request timed out after {WIKIPEDIA_MAX_RETRIES} attempts: {e}")
+                    return None
             except requests.exceptions.RequestException as e:
                 if attempt < WIKIPEDIA_MAX_RETRIES - 1:
                     delay = WIKIPEDIA_RETRY_DELAY * (2 ** attempt)
@@ -157,21 +182,31 @@ class WikipediaFetcher:
         articles = []
         
         try:
-            # Use search API
-            search_url = f"{self.api_base}/page/search/{query}"
-            params = {"limit": min(max_results, WIKIPEDIA_MAX_RESULTS)}
+            # Use REST v1 search API (fixed endpoint)
+            # https://en.wikipedia.org/w/rest.php/v1/search/page?q=<q>&limit=<n>
+            search_url = f"https://{self.language}.wikipedia.org/w/rest.php/v1/search/page"
+            params = {
+                "q": query,
+                "limit": min(max_results, WIKIPEDIA_MAX_RESULTS)
+            }
             
             response = self._fetch_with_retry(search_url, params)
             if not response:
                 return articles
             
+            # Handle 404 - don't retry
+            if response.status_code == 404:
+                logger.warning(f"Wikipedia search returned 404 for query: {query}")
+                return articles
+            
             data = response.json()
             
-            # Extract search results
+            # Extract search results from REST v1 format
             pages = data.get("pages", [])
             
             for page in pages[:max_results]:
-                title = page.get("key", "")
+                # REST v1 returns title directly
+                title = page.get("title", "")
                 if title:
                     article = self.fetch_article(title)
                     if article:
