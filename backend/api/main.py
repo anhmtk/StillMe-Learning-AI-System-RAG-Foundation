@@ -287,12 +287,14 @@ def _initialize_rag_components():
 
 # Pydantic models
 # Models are now imported from backend.api.models (see imports above)
-app.include_router(chat_router.router, prefix="/api/chat", tags=["chat"])
-app.include_router(rag_router.router, prefix="/api/rag", tags=["rag"])
-app.include_router(tiers_router.router, prefix="/api/v1/tiers", tags=["tiers"])
-app.include_router(spice_router.router, prefix="/api/spice", tags=["spice"])
-app.include_router(learning_router.router, prefix="/api/learning", tags=["learning"])
-app.include_router(system_router.router, tags=["system"])
+
+# Include routers - routers are already APIRouter objects from __init__.py
+app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
+app.include_router(rag_router, prefix="/api/rag", tags=["rag"])
+app.include_router(tiers_router, prefix="/api/v1/tiers", tags=["tiers"])
+app.include_router(spice_router, prefix="/api/spice", tags=["spice"])
+app.include_router(learning_router, prefix="/api/learning", tags=["learning"])
+app.include_router(system_router, tags=["system"])
 
 # System endpoints moved to backend/api/routers/system_router.py
 
