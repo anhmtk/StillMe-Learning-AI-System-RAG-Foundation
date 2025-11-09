@@ -4,7 +4,7 @@ Tests pre-filtering, prioritization, keyword scoring, and source quality trackin
 """
 
 import pytest
-from backend.services.content_curator import ContentCurator, MINIMUM_CONTENT_LENGTH, KEYWORD_SCORING_THRESHOLD
+from backend.services.content_curator import ContentCurator, MINIMUM_CONTENT_LENGTH
 
 
 class TestContentCurator:

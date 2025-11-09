@@ -2,7 +2,6 @@
 Smoke tests for health and readiness endpoints.
 These tests verify that /health (liveness) and /ready (readiness) endpoints work correctly.
 """
-import pytest
 from fastapi.testclient import TestClient
 from backend.api.main import app
 

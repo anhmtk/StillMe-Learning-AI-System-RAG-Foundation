@@ -3,7 +3,6 @@ Tests for RSS Fetcher Service
 Tests RSS feed fetching, error handling, and edge cases
 """
 
-import pytest
 from unittest.mock import patch, MagicMock
 from backend.services.rss_fetcher import RSSFetcher
 

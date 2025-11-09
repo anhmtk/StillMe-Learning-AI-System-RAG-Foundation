@@ -4,7 +4,6 @@ Tracks all RSS fetch operations with detailed status for transparency
 """
 
 import sqlite3
-import json
 import logging
 import time
 from typing import List, Dict, Any, Optional

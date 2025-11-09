@@ -192,7 +192,7 @@ class TestKnowledgeRetention:
     def test_retention_score_calculation(self, retention):
         """Test retention score calculation logic"""
         # Add knowledge
-        knowledge_id = retention.add_knowledge(
+        retention.add_knowledge(
             content="Test knowledge",
             source="https://example.com/article",
             confidence_score=0.9
@@ -207,7 +207,7 @@ class TestKnowledgeRetention:
     def test_access_count_tracking(self, retention):
         """Test access count is tracked"""
         # Add knowledge
-        knowledge_id = retention.add_knowledge(
+        retention.add_knowledge(
             content="Test knowledge",
             source="https://example.com/article"
         )
@@ -272,7 +272,7 @@ class TestKnowledgeRetention:
     def test_database_operations_isolation(self, retention):
         """Test that database operations are isolated"""
         # Add knowledge
-        knowledge_id1 = retention.add_knowledge(
+        retention.add_knowledge(
             content="Knowledge 1",
             source="https://example.com/1"
         )

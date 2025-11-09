@@ -9,20 +9,7 @@ from pydantic import ValidationError
 from typing import Optional, Dict, Any, List
 import os
 import logging
-import httpx
 from datetime import datetime
-
-# Import validated models
-from backend.api.models import ChatResponse
-
-# Import chat helpers
-from backend.api.utils import (
-    detect_language,
-    build_system_prompt_with_language,
-    call_deepseek_api,
-    call_openai_api,
-    generate_ai_response
-)
 
 # Import RAG components
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
@@ -46,6 +33,9 @@ from backend.api.error_handlers import (
     handle_generic_http_exception
 )
 from backend.api.error_tracking import error_tracker
+
+# Import routers
+from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -282,9 +272,6 @@ except Exception as e:
 
 # Pydantic models
 # Models are now imported from backend.api.models (see imports above)
-
-# Include routers (imported at top level to avoid E402)
-from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
 app.include_router(chat_router.router, prefix="/api/chat", tags=["chat"])
 app.include_router(rag_router.router, prefix="/api/rag", tags=["rag"])
 app.include_router(tiers_router.router, prefix="/api/v1/tiers", tags=["tiers"])

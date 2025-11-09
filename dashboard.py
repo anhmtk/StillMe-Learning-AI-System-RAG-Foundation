@@ -121,7 +121,7 @@ def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]
         import logging
         try:
             status_code = r.status_code
-        except:
+        except Exception:
             status_code = "unknown"
         logging.error(f"HTTP error fetching {url}: Status {status_code} - {e}")
         
@@ -155,7 +155,7 @@ def page_overview():
     with col_logo:
         try:
             st.image("assets/logo.png", width=80)
-        except:
+        except Exception:
             st.markdown("🧠")  # Fallback emoji
     with col_title:
         st.markdown("# StillMe")
@@ -256,7 +256,7 @@ def page_overview():
                             st.error(f"❌ Chat endpoint returned: {test_r.status_code}")
                             try:
                                 st.json(test_r.json())
-                            except:
+                            except Exception:
                                 st.code(test_r.text[:200])
                     except requests.exceptions.Timeout:
                         st.warning("⏱️ **Timeout after 2 minutes** - This usually means:")
@@ -763,14 +763,15 @@ def page_community():
             if source_url and description:
                 try:
                     # For now, store in a simple way (can be enhanced with proper database later)
-                    proposal_data = {
-                        "type": proposal_type,
-                        "url": source_url,
-                        "description": description,
-                        "proposer": your_name or "Anonymous",
-                        "timestamp": datetime.now().isoformat(),
-                        "status": "pending"
-                    }
+                    # TODO: Store proposal_data when backend supports it
+                    # proposal_data = {
+                    #     "type": proposal_type,
+                    #     "url": source_url,
+                    #     "description": description,
+                    #     "proposer": your_name or "Anonymous",
+                    #     "timestamp": datetime.now().isoformat(),
+                    #     "status": "pending"
+                    # }
                     
                     # Try to add via RAG API as a proposal (if backend supports it)
                     # Or display success and store suggestion
@@ -1128,7 +1129,7 @@ def sidebar(page_for_chat: str | None = None):
                     try:
                         error_data = e.response.json()
                         error_detail = error_data.get('detail', 'Service unavailable')
-                    except:
+                    except Exception:
                         error_detail = str(e)
                     reply = f"❌ **503 Service Unavailable** - {error_detail}"
                     status_placeholder.error("❌ Service Unavailable")
@@ -1138,7 +1139,7 @@ def sidebar(page_for_chat: str | None = None):
                     try:
                         error_data = e.response.json()
                         error_detail = error_data.get('detail', str(e))
-                    except:
+                    except Exception:
                         error_detail = str(e)
                     reply = f"❌ **Error {status_code}** - {error_detail}"
                     status_placeholder.error(f"❌ HTTP {status_code}")

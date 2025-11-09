@@ -5,6 +5,7 @@ Displays tier statistics, promotion/demotion audit, and forgetting trends
 
 import streamlit as st
 import plotly.graph_objects as go
+import pandas as pd
 from datetime import datetime, timedelta
 
 # Import from main dashboard

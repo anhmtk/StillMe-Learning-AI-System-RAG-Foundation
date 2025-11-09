@@ -6,7 +6,7 @@ Includes Pre-Filter mechanism to reduce costs by filtering before embedding
 
 from typing import List, Dict, Any, Optional, Tuple
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

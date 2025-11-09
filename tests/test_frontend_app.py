@@ -51,8 +51,9 @@ class TestStreamlitIntegration:
                  patch('streamlit.sidebar'), \
                  patch('streamlit.main'):
                 
-                from frontend.app import app
                 # If we can import without errors, structure is likely correct
+                # Note: frontend.app.app is imported but not used - this is intentional for structure validation
+                import frontend.app  # noqa: F401
                 assert True
         except ImportError:
             pytest.skip("Streamlit app not available")

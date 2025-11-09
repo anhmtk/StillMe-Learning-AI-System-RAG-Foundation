@@ -7,6 +7,8 @@ import pytest
 import os
 import sys
 from pathlib import Path
+from fastapi.testclient import TestClient
+from unittest.mock import patch
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -17,9 +19,6 @@ if str(project_root) not in sys.path:
 os.environ.setdefault("ENVIRONMENT", "test")
 os.environ.setdefault("DEEPSEEK_API_KEY", "test_key")
 os.environ.setdefault("OPENAI_API_KEY", "test_key")
-
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 
 try:
     from backend.api.main import app

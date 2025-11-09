@@ -2,7 +2,6 @@
 Tests for evidence overlap validator
 """
 
-import pytest
 from backend.validators.evidence_overlap import EvidenceOverlap, ngram_overlap
 
 
