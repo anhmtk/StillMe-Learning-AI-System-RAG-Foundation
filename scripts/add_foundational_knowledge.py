@@ -119,6 +119,11 @@ def add_foundational_knowledge():
         logger.info("Adding foundational StillMe knowledge to RAG...")
         
         # Add foundational knowledge with special metadata - CRITICAL FOUNDATION tag
+        # Note: ChromaDB metadata must be str, int, float, bool, or None (not lists)
+        # Convert tags list to comma-separated string
+        tags_list = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db"]
+        tags_string = ",".join(tags_list)
+        
         success = rag_retrieval.add_learning_content(
             content=FOUNDATIONAL_KNOWLEDGE,
             source="CRITICAL_FOUNDATION",
@@ -128,7 +133,7 @@ def add_foundational_knowledge():
                 "foundational": "stillme",
                 "type": "foundational",
                 "source": "CRITICAL_FOUNDATION",  # Critical tag for priority retrieval
-                "tags": ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db"],
+                "tags": tags_string,  # Comma-separated string (ChromaDB doesn't support lists)
                 "importance_score": 1.0,  # Maximum importance
                 "description": "CRITICAL: Core knowledge about StillMe's RAG-based continuous learning mechanism - MUST be retrieved when answering about StillMe"
             }
@@ -150,6 +155,14 @@ def add_foundational_knowledge():
 
 
 if __name__ == "__main__":
+    # Fix encoding for Windows console
+    import sys
+    if sys.platform == "win32":
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+        except Exception:
+            pass  # Fallback if reconfigure fails
+    
     print("=" * 60)
     print("StillMe Foundational Knowledge Setup")
     print("=" * 60)
@@ -163,7 +176,7 @@ if __name__ == "__main__":
     
     if success:
         print()
-        print("✅ Setup complete!")
+        print("Setup complete!")
         print()
         print("Next steps:")
         print("1. Test by asking: 'What is StillMe?' or 'How does StillMe learn?'")
@@ -171,6 +184,6 @@ if __name__ == "__main__":
         print("3. Check that responses mention continuous learning and RAG capabilities")
     else:
         print()
-        print("❌ Setup failed. Check logs above for details.")
+        print("Setup failed. Check logs above for details.")
         sys.exit(1)
 
