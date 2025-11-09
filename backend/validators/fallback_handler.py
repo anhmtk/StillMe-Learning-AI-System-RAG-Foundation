@@ -2,11 +2,31 @@
 FallbackHandler - Provides safe fallback answers when validation fails
 """
 
+import html
 import logging
 from typing import List, Optional
 from .base import ValidationResult
 
 logger = logging.getLogger(__name__)
+
+
+def _sanitize_for_display(text: str, max_length: int = 50) -> str:
+    """
+    Sanitize text for safe display in fallback messages
+    
+    Args:
+        text: Text to sanitize
+        max_length: Maximum length to truncate
+        
+    Returns:
+        Sanitized and truncated text
+    """
+    # Escape HTML to prevent XSS
+    sanitized = html.escape(text)
+    # Truncate to max_length
+    if len(sanitized) > max_length:
+        sanitized = sanitized[:max_length] + "..."
+    return sanitized
 
 
 class FallbackHandler:
@@ -64,8 +84,11 @@ class FallbackHandler:
         Returns:
             Safe fallback answer in appropriate language
         """
+        # Sanitize user question to prevent XSS
+        safe_question = _sanitize_for_display(user_question, max_length=50)
+        
         if detected_lang == 'vi':
-            return f"""Tôi xin lỗi. Dựa trên thông tin tôi tìm kiếm, hiện tại StillMe không có dữ liệu đủ tin cậy để trả lời câu hỏi của bạn về "{user_question[:50]}...".
+            return f"""Tôi xin lỗi. Dựa trên thông tin tôi tìm kiếm, hiện tại StillMe không có dữ liệu đủ tin cậy để trả lời câu hỏi của bạn về "{safe_question}".
 
 StillMe là hệ thống học tập liên tục, tự động cập nhật kiến thức từ RSS feeds, arXiv, và các nguồn tin cậy khác mỗi 4 giờ (6 lần mỗi ngày). 
 
@@ -77,7 +100,7 @@ Bạn có thể:
 Tôi muốn trả lời chính xác dựa trên kiến thức đã được xác minh, thay vì đoán mò. Cảm ơn bạn đã hiểu."""
         
         elif detected_lang == 'zh':
-            return f"""抱歉。根据我搜索的信息，目前 StillMe 没有足够可靠的数据来回答您关于"{user_question[:50]}..."的问题。
+            return f"""抱歉。根据我搜索的信息，目前 StillMe 没有足够可靠的数据来回答您关于"{safe_question}"的问题。
 
 StillMe 是一个持续学习系统，每 4 小时（每天 6 次）自动从 RSS 源、arXiv 和其他可信来源更新知识。
 
@@ -89,7 +112,7 @@ StillMe 是一个持续学习系统，每 4 小时（每天 6 次）自动从 RS
 我希望基于已验证的知识准确回答，而不是猜测。感谢您的理解。"""
         
         else:  # Default to English
-            return f"""I apologize. Based on my search, StillMe currently doesn't have sufficiently reliable data to answer your question about "{user_question[:50]}...".
+            return f"""I apologize. Based on my search, StillMe currently doesn't have sufficiently reliable data to answer your question about "{safe_question}".
 
 StillMe is a continuous learning system that automatically updates knowledge from RSS feeds, arXiv, and other trusted sources every 4 hours (6 times per day).
 
