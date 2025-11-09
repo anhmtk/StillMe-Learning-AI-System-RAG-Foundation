@@ -3,7 +3,7 @@ EvidenceOverlap validator - Checks if answer overlaps with RAG context
 """
 
 from typing import List
-from .base import Validator, ValidationResult
+from .base import ValidationResult
 import logging
 import os
 

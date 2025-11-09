@@ -3,7 +3,7 @@ Security Middleware for StillMe API
 Includes HTTPS enforcement, HSTS headers, and other security headers
 """
 
-from fastapi import Request, Response
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import RedirectResponse
 import logging

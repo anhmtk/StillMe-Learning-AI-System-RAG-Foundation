@@ -8,7 +8,7 @@ import asyncio
 import logging
 import os
 from datetime import datetime, timedelta
-from typing import Optional, Callable, Dict, Any
+from typing import Optional
 from backend.services.rss_fetcher import RSSFetcher
 
 logger = logging.getLogger(__name__)

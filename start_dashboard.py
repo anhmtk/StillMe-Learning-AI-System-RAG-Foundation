@@ -21,7 +21,7 @@ print("=" * 60, flush=True)
 print("StillMe Dashboard - Starting Streamlit Server", flush=True)
 print("=" * 60, flush=True)
 print(f"Port: {port_int}", flush=True)
-print(f"Host: 0.0.0.0", flush=True)
+print("Host: 0.0.0.0", flush=True)
 print(f"API_BASE: {os.getenv('STILLME_API_BASE', 'NOT SET')}", flush=True)
 print("=" * 60, flush=True)
 
