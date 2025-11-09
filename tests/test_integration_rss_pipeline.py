@@ -5,7 +5,8 @@ Tests the complete flow: RSS fetch → filter → duplicate check → add to RAG
 
 import tempfile
 import os
-from unittest.mock import Mock, MagicMock, patch, AsyncMock
+import pytest
+from unittest.mock import Mock, MagicMock, patch
 from backend.services.rss_fetcher import RSSFetcher
 from backend.services.content_curator import ContentCurator
 from backend.services.rss_fetch_history import RSSFetchHistory
