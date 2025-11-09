@@ -155,18 +155,81 @@ rss_fetch_history = None
 continuum_memory = None
 source_integration = None
 
+ refactor/routerization
 def _initialize_rag_components():
     """Initialize RAG components - called lazily during startup"""
     global _initialization_error, _rag_initialization_started, _rag_initialization_complete
     global chroma_client, embedding_service, rag_retrieval, knowledge_retention, accuracy_scorer
     global rss_fetcher, learning_scheduler, self_diagnosis, content_curator, rss_fetch_history
     global continuum_memory, source_integration
+
+try:
+    logger.info("Initializing RAG components...")
+    
+    # Check for FORCE_DB_RESET_ON_STARTUP environment variable
+    force_reset = os.getenv("FORCE_DB_RESET_ON_STARTUP", "false").lower() == "true"
+    if force_reset:
+        logger.warning("🔄 FORCE_DB_RESET_ON_STARTUP=True detected - will reset ChromaDB database")
+        chroma_client = ChromaClient(reset_on_error=True)
+        logger.info("✓ ChromaDB client initialized (forced reset)")
+    else:
+        # Try with reset_on_error=False first (preserve data)
+        # If schema error, will try with reset_on_error=True (which deletes directory first)
+        chroma_client_ref = None
+        try:
+            chroma_client = ChromaClient(reset_on_error=False)
+            logger.info("✓ ChromaDB client initialized")
+        except (RuntimeError, Exception) as e:
+            error_str = str(e).lower()
+            if "schema mismatch" in error_str or "no such column" in error_str or "topic" in error_str:
+                logger.warning("⚠️ Schema mismatch detected!")
+                logger.warning("Attempting to reset database by deleting directory...")
+                
+                # Store reference to old client if exists (for cleanup)
+                if chroma_client_ref:
+                    try:
+                        # Try to close/disconnect old client
+                        if hasattr(chroma_client_ref, 'client'):
+                            logger.info("Closing old ChromaDB client connection...")
+                            # ChromaDB PersistentClient doesn't have explicit close, but we can try to delete reference
+                            del chroma_client_ref
+                    except Exception:
+                        pass
+                
+                # Force garbage collection to ensure old client is freed
+                import gc
+                gc.collect()
+                logger.info("Garbage collected old client references")
+                
+                # Try resetting database - this will delete the directory before creating client
+                chroma_client = ChromaClient(reset_on_error=True)
+                logger.info("✓ ChromaDB client initialized (after directory reset)")
+                logger.warning("⚠️ IMPORTANT: If errors persist, please RESTART the backend service on Railway to clear process cache.")
+            else:
+                raise
+    
+    embedding_service = EmbeddingService()
+    logger.info("✓ Embedding service initialized")
+    
+    rag_retrieval = RAGRetrieval(chroma_client, embedding_service)
+    logger.info("✓ RAG retrieval initialized")
+    
+    knowledge_retention = KnowledgeRetention()
+    logger.info("✓ Knowledge retention initialized")
+    
+    accuracy_scorer = AccuracyScorer()
+    logger.info("✓ Accuracy scorer initialized")
+    
+    rss_fetcher = RSSFetcher()
+    logger.info("✓ RSS fetcher initialized")
+ main
     
     if _rag_initialization_started:
         return  # Already started or completed
     
     _rag_initialization_started = True
     
+ refactor/routerization
     try:
         logger.info("Initializing RAG components...")
         
@@ -211,6 +274,38 @@ def _initialize_rag_components():
                     logger.warning("⚠️ IMPORTANT: If errors persist, please RESTART the backend service on Railway to clear process cache.")
                 else:
                     raise
+
+    # Initialize Source Integration (arXiv, CrossRef, Wikipedia)
+    source_integration = SourceIntegration(content_curator=content_curator)
+    logger.info("✓ Source Integration initialized")
+    
+    # Initialize Continuum Memory (if enabled)
+    continuum_memory = ContinuumMemory()
+    if continuum_memory and os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true":
+        logger.info("✓ Continuum Memory initialized")
+    else:
+        logger.info("⊘ Continuum Memory disabled (ENABLE_CONTINUUM_MEMORY=false)")
+    
+    logger.info("✅ All RAG components initialized successfully")
+    logger.info("🎉 StillMe backend is ready!")
+except Exception as e:
+    _initialization_error = str(e)
+    logger.error(f"❌ Failed to initialize RAG components: {e}", exc_info=True)
+    
+    # Log which components were successfully initialized before the error
+    logger.error("📊 Components status at error time:")
+    logger.error(f"  - ChromaDB: {'✓' if chroma_client else '✗'}")
+    logger.error(f"  - Embedding Service: {'✓' if embedding_service else '✗'}")
+    logger.error(f"  - RAG Retrieval: {'✓' if rag_retrieval else '✗'}")
+    logger.error(f"  - Knowledge Retention: {'✓' if knowledge_retention else '✗'}")
+    logger.error(f"  - Accuracy Scorer: {'✓' if accuracy_scorer else '✗'}")
+    
+    if "schema mismatch" in str(e).lower() or "no such column" in str(e).lower() or "topic" in str(e).lower():
+        logger.error("⚠️ CRITICAL: Schema mismatch detected!")
+        logger.error("⚠️ This usually means ChromaDB database has old schema.")
+        logger.error("⚠️ ACTION REQUIRED: Please RESTART the backend service on Railway.")
+        logger.error("⚠️ On restart, the code will automatically reset the database.")
+ main
         
         embedding_service = EmbeddingService()
         logger.info("✓ Embedding service initialized")
@@ -306,6 +401,7 @@ async def startup_event():
     logger.info("📋 /health endpoint is available immediately")
     logger.info("⏳ Starting RAG components initialization in background...")
     
+ refactor/routerization
     # Initialize RAG components lazily (non-blocking)
     # This allows /health endpoint to work immediately
     import asyncio
@@ -321,6 +417,15 @@ async def startup_event():
     logger.info(f"  - RAG Retrieval: {'✓' if rag_retrieval else '⏳ Initializing...'}")
     logger.info(f"  - Knowledge Retention: {'✓' if knowledge_retention else '⏳ Initializing...'}")
     logger.info(f"  - Accuracy Scorer: {'✓' if accuracy_scorer else '⏳ Initializing...'}")
+
+    # Log RAG components status
+    logger.info("📊 RAG Components Status:")
+    logger.info(f"  - ChromaDB: {'✓' if chroma_client else '✗'}")
+    logger.info(f"  - Embedding Service: {'✓' if embedding_service else '✗'}")
+    logger.info(f"  - RAG Retrieval: {'✓' if rag_retrieval else '✗'}")
+    logger.info(f"  - Knowledge Retention: {'✓' if knowledge_retention else '✗'}")
+    logger.info(f"  - Accuracy Scorer: {'✓' if accuracy_scorer else '✗'}")
+ main
     
     if _initialization_error:
         logger.warning(f"⚠️ Service started with initialization errors: {_initialization_error}")
