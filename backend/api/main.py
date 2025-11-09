@@ -279,19 +279,27 @@ def _initialize_rag_components():
         if "schema mismatch" in str(e).lower() or "no such column" in str(e).lower() or "topic" in str(e).lower():
             logger.error("⚠️ CRITICAL: Schema mismatch detected!")
             logger.error("⚠️ This usually means ChromaDB database has old schema.")
-            logger.error("⚠️ ACTION REQUIRED: Please RESTART the backend service on Railway.")
-            logger.error("⚠️ On restart, the code will automatically reset the database.")
+            logger.error("⚠️ ACTION REQUIRED: Set FORCE_DB_RESET_ON_STARTUP=true on Railway and RESTART service.")
+            logger.error("⚠️ Or manually delete data/vector_db directory on Railway and restart.")
+            logger.error("⚠️ Service will continue running but RAG features will be unavailable.")
             
-            # If RAG components were already initialized, don't reset them
-            # They might still work for some operations
-            if rag_retrieval is not None:
-                logger.warning("⚠️ RAG retrieval was initialized before error - keeping it available")
-                logger.warning("⚠️ Some operations may fail, but basic RAG might still work")
+            # IMPORTANT: Don't raise exception - allow service to start
+            # Health endpoint should still work, just RAG features won't be available
+            logger.warning("⚠️ Continuing service startup without RAG components...")
+            logger.warning("⚠️ /health endpoint will still work, but /api/chat and /api/rag endpoints will fail")
+            
+            # Set components to None to indicate they're not available
+            chroma_client = None
+            embedding_service = None
+            rag_retrieval = None
+            knowledge_retention = None
+            accuracy_scorer = None
+            
         else:
-            # For non-schema errors, reset components to None
-            logger.warning("⚠️ Resetting RAG components to None due to initialization error")
-            # Note: We don't explicitly set to None here because they're already None
-            # from the initial declaration, unless they were set before the exception
+            # For non-schema errors, also allow service to continue
+            logger.warning("⚠️ RAG components initialization failed, but service will continue")
+            logger.warning("⚠️ /health endpoint will still work")
+            # Note: Components are already None from initial declaration
 
 # Pydantic models
 # Models are now imported from backend.api.models (see imports above)
