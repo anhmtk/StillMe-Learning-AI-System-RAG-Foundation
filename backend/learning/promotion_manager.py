@@ -5,7 +5,7 @@ Handles promotion/demotion of knowledge items between tiers based on surprise sc
 
 import sqlite3
 import logging
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from datetime import datetime
 import os
 import re

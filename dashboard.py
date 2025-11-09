@@ -1,6 +1,5 @@
 import os
 import time
-from datetime import datetime
 from typing import Any, Dict
 
 import requests
@@ -753,11 +752,12 @@ def page_community():
             help="Explain the value and relevance of this source"
         )
         
-        your_name = st.text_input(
-            "Your Name (Optional)",
-            placeholder="Leave blank for anonymous",
-            help="Optional: Your name or GitHub username"
-        )
+        # TODO: Store proposer name when backend supports it
+        # your_name = st.text_input(
+        #     "Your Name (Optional)",
+        #     placeholder="Leave blank for anonymous",
+        #     help="Optional: Your name or GitHub username"
+        # )
         
         if st.button("💡 Submit Proposal", type="primary", use_container_width=True):
             if source_url and description:
@@ -1119,7 +1119,7 @@ def sidebar(page_for_chat: str | None = None):
                     try:
                         error_data = e.response.json()
                         error_detail = error_data.get('detail', str(e))
-                    except:
+                    except Exception:
                         error_detail = str(e)
                     reply = f"❌ **422 Unprocessable Entity** - Request format error: {error_detail}"
                     status_placeholder.error("❌ 422 Error")
