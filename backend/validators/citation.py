@@ -4,7 +4,7 @@ CitationRequired validator - Ensures answers include citations
 
 import re
 from typing import List
-from .base import Validator, ValidationResult
+from .base import ValidationResult
 import logging
 
 logger = logging.getLogger(__name__)

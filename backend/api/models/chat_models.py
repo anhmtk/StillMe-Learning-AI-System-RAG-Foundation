@@ -5,7 +5,7 @@ Chat API request and response models with comprehensive validation
 from pydantic import BaseModel, Field, validator
 from typing import Optional, Dict, Any
 import re
-from .common_models import sanitize_string, validate_non_empty_string
+from .common_models import sanitize_string
 
 
 class ChatRequest(BaseModel):

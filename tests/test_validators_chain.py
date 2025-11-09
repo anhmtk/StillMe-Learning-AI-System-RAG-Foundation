@@ -2,7 +2,6 @@
 Tests for validator chain
 """
 
-import pytest
 from backend.validators.chain import ValidatorChain
 from backend.validators.citation import CitationRequired
 from backend.validators.evidence_overlap import EvidenceOverlap

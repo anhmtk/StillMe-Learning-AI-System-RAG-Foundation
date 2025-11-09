@@ -6,7 +6,7 @@ Includes Pre-Filter mechanism to reduce costs by filtering before embedding
 
 from typing import List, Dict, Any, Optional, Tuple
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -232,7 +232,7 @@ class ContentCurator:
                 days_old = (datetime.now(pub_date.tzinfo) - pub_date).days
                 if days_old < 7:
                     score += 0.1  # Boost for recent content
-            except:
+            except Exception:
                 pass
         
         return min(1.0, score)  # Cap at 1.0

@@ -6,6 +6,10 @@ Handles all chat-related endpoints
 from fastapi import APIRouter, Request, HTTPException
 from backend.api.models import ChatRequest, ChatResponse
 from backend.api.rate_limiter import limiter, get_rate_limit_key_func
+from backend.api.utils.chat_helpers import (
+    generate_ai_response,
+    detect_language
+)
 import logging
 import os
 from datetime import datetime
@@ -13,12 +17,6 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-# Import helper functions from shared utilities
-from backend.api.utils.chat_helpers import (
-    generate_ai_response,
-    detect_language
-)
 
 # Import global services from main (temporary - will refactor to dependency injection later)
 # These are initialized in main.py before routers are included
@@ -138,7 +136,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 # Count knowledge docs for citation numbering
                 num_knowledge = len(context.get("knowledge_docs", []))
                 if num_knowledge > 0:
-                    citation_instruction = f"\n\nIMPORTANT: When referencing information from the context above, include citations in the format [1], [2], etc. where the number corresponds to the context item number. For example, if you reference the first context item, use [1]."
+                    citation_instruction = "\n\nIMPORTANT: When referencing information from the context above, include citations in the format [1], [2], etc. where the number corresponds to the context item number. For example, if you reference the first context item, use [1]."
             
             # Detect language FIRST - before building prompt
             detected_lang = detect_language(chat_request.message)
@@ -555,7 +553,6 @@ async def chat_smart_router(request: Request, chat_request: ChatRequest):
 @router.post("/openai")
 async def chat_openai(request: ChatRequest):
     """Legacy OpenAI chat endpoint"""
-    from fastapi import Request
     # Create a dummy Request object for chat_with_rag
     # Note: This is a workaround - in production, we should refactor to not require Request
     class DummyRequest:
@@ -567,7 +564,6 @@ async def chat_openai(request: ChatRequest):
 @router.post("/deepseek")
 async def chat_deepseek(request: ChatRequest):
     """Legacy DeepSeek chat endpoint"""
-    from fastapi import Request
     # Create a dummy Request object for chat_with_rag
     class DummyRequest:
         pass

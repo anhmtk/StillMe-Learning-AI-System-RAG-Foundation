@@ -121,6 +121,9 @@ jobs:
         continue-on-error: true
 
  refactor/routerization
+
+ refactor/routerization
+ main
   docker-build:
     name: Docker Build (no push)
     runs-on: ubuntu-latest
@@ -178,7 +181,10 @@ jobs:
           docker rm stillme-test || true
         continue-on-error: true  # Smoke test is optional
 
+ refactor/routerization
 
+
+ main
  main
   smoke-test:
     name: Smoke Test (Health & Ready Endpoints)

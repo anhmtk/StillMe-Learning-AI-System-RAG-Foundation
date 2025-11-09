@@ -3,7 +3,6 @@ Basic tests for RAG system
 Critical path testing only
 """
 
-import pytest
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
 
 def test_chroma_client_init():

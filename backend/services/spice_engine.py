@@ -9,7 +9,7 @@ Architecture:
 """
 
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 from dataclasses import dataclass
 
@@ -86,11 +86,12 @@ class Challenger:
         logger.info(f"Generating {num_questions} challenges from corpus query: {corpus_query}")
         
         # Placeholder: Retrieve documents from corpus
-        context = self.rag_retrieval.retrieve_context(
-            query=corpus_query,
-            knowledge_limit=10,
-            conversation_limit=0
-        )
+        # TODO: Use retrieved context to generate challenges
+        # context = self.rag_retrieval.retrieve_context(
+        #     query=corpus_query,
+        #     knowledge_limit=10,
+        #     conversation_limit=0
+        # )
         
         challenges = []
         # TODO: Use LLM to generate questions from context

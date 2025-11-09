@@ -7,8 +7,6 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
-import plotly.express as px
-import pandas as pd
 
 # Import floating chat widget
 try:
@@ -123,7 +121,7 @@ def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]
         import logging
         try:
             status_code = r.status_code
-        except:
+        except Exception:
             status_code = "unknown"
         logging.error(f"HTTP error fetching {url}: Status {status_code} - {e}")
         
@@ -157,7 +155,7 @@ def page_overview():
     with col_logo:
         try:
             st.image("assets/logo.png", width=80)
-        except:
+        except Exception:
             st.markdown("🧠")  # Fallback emoji
     with col_title:
         st.markdown("# StillMe")
@@ -258,7 +256,7 @@ def page_overview():
                             st.error(f"❌ Chat endpoint returned: {test_r.status_code}")
                             try:
                                 st.json(test_r.json())
-                            except:
+                            except Exception:
                                 st.code(test_r.text[:200])
                     except requests.exceptions.Timeout:
                         st.warning("⏱️ **Timeout after 2 minutes** - This usually means:")
@@ -298,7 +296,7 @@ def page_overview():
                 st.warning("💡 Backend is reachable at `/api/status`, but `/api/learning/scheduler/status` returned empty response.")
                 st.info("This may indicate the scheduler endpoint has an issue. Check backend logs.")
             elif test_r.status_code == 502:
-                st.error(f"❌ **502 Bad Gateway** - Backend service is not responding.")
+                st.error("❌ **502 Bad Gateway** - Backend service is not responding.")
                 st.markdown("""
                 **502 Bad Gateway means the backend service is down or crashed.**
                 
@@ -398,7 +396,7 @@ def page_overview():
         init_error = scheduler_status.get("initialization_error")
         status_type = scheduler_status.get("status", "unknown")
         
-        st.warning(f"⚠️ **Learning scheduler is not available**")
+        st.warning("⚠️ **Learning scheduler is not available**")
         
         # Show detailed error if available
         if init_error:
@@ -765,14 +763,15 @@ def page_community():
             if source_url and description:
                 try:
                     # For now, store in a simple way (can be enhanced with proper database later)
-                    proposal_data = {
-                        "type": proposal_type,
-                        "url": source_url,
-                        "description": description,
-                        "proposer": your_name or "Anonymous",
-                        "timestamp": datetime.now().isoformat(),
-                        "status": "pending"
-                    }
+                    # TODO: Store proposal_data when backend supports it
+                    # proposal_data = {
+                    #     "type": proposal_type,
+                    #     "url": source_url,
+                    #     "description": description,
+                    #     "proposer": your_name or "Anonymous",
+                    #     "timestamp": datetime.now().isoformat(),
+                    #     "status": "pending"
+                    # }
                     
                     # Try to add via RAG API as a proposal (if backend supports it)
                     # Or display success and store suggestion
@@ -936,7 +935,7 @@ def page_validation():
                             st.write(f"**Access Count:** {item.get('access_count', 0)}")
                         st.markdown("**Retained Content Snippet (5-10 sentences):**")
                         st.text_area("", item.get("retained_content_snippet", "N/A"), height=150, key=f"snippet_{idx}", disabled=True)
-                        if st.checkbox(f"View full content", key=f"full_{idx}"):
+                        if st.checkbox("View full content", key=f"full_{idx}"):
                             st.text_area("Full Content", item.get("full_content", "N/A"), height=200, key=f"full_content_{idx}", disabled=True)
             else:
                 st.info("No items match the filter.")
@@ -1130,7 +1129,7 @@ def sidebar(page_for_chat: str | None = None):
                     try:
                         error_data = e.response.json()
                         error_detail = error_data.get('detail', 'Service unavailable')
-                    except:
+                    except Exception:
                         error_detail = str(e)
                     reply = f"❌ **503 Service Unavailable** - {error_detail}"
                     status_placeholder.error("❌ Service Unavailable")
@@ -1140,7 +1139,7 @@ def sidebar(page_for_chat: str | None = None):
                     try:
                         error_data = e.response.json()
                         error_detail = error_data.get('detail', str(e))
-                    except:
+                    except Exception:
                         error_detail = str(e)
                     reply = f"❌ **Error {status_code}** - {error_detail}"
                     status_placeholder.error(f"❌ HTTP {status_code}")

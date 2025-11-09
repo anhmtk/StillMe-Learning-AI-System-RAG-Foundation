@@ -5,8 +5,7 @@ Provides per-IP and per-API-key rate limiting to prevent abuse
 
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-from fastapi import Request, HTTPException
+from fastapi import Request
 from typing import Optional
 import os
 import logging
