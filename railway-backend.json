@@ -14,6 +14,11 @@
       "name": "stillme-hf-cache",
       "mountPath": "/app/hf_cache",
       "sizeGB": 1
+    },
+    {
+      "name": "stillme-chroma-cache",
+      "mountPath": "/app/.cache/chroma",
+      "sizeGB": 1
     }
   ]
 }
