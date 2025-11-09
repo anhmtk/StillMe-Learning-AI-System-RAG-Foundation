@@ -9,7 +9,8 @@ import pytest
 # Skip entire test file - legacy module no longer exists
 pytest.skip("Legacy test - stillme_entry module no longer exists", allow_module_level=True)
 
-from stillme_entry import generate
+# Legacy import - module no longer exists
+# from stillme_entry import generate
 
 
 def test_jailbreak_vi():
