@@ -323,7 +323,6 @@ class ChromaClient:
                                 self.client.reset()
                         except Exception as reset_warning:
                             logger.warning(f"client.reset() not available or failed (this is OK): {reset_warning}")
-                        
                         # Create fresh collections
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
