@@ -179,7 +179,17 @@ def _initialize_rag_components():
         
         # For Dashboard service, always use reset_on_error=True to handle schema mismatches automatically
         # This is safe because Dashboard is typically a read-only service or can rebuild its database
-        is_dashboard = os.getenv("STREAMLIT_SERVER_PORT") is not None or os.getenv("DASHBOARD_MODE", "false").lower() == "true"
+        # Detect Dashboard service by multiple methods:
+        # 1. Explicit DASHBOARD_MODE env var
+        # 2. STREAMLIT_SERVER_PORT env var (Streamlit sets this)
+        # 3. RAILWAY_SERVICE_NAME contains "dashboard" (Railway sets this)
+        # 4. Check if running as Dashboard by checking service name pattern
+        is_dashboard = (
+            os.getenv("STREAMLIT_SERVER_PORT") is not None or 
+            os.getenv("DASHBOARD_MODE", "false").lower() == "true" or
+            "dashboard" in os.getenv("RAILWAY_SERVICE_NAME", "").lower() or
+            "dashboard" in os.getenv("SERVICE_NAME", "").lower()
+        )
         
         if force_reset or is_dashboard:
             if force_reset:
@@ -217,10 +227,39 @@ def _initialize_rag_components():
                     gc.collect()
                     logger.info("Garbage collected old client references")
                     
-                    # Try resetting database - this will delete the directory before creating client
-                    chroma_client = ChromaClient(reset_on_error=True)
-                    logger.info("✓ ChromaDB client initialized (after directory reset)")
-                    logger.warning("⚠️ IMPORTANT: If errors persist, please RESTART the backend service on Railway to clear process cache.")
+                    # Try resetting database with retry logic (up to 3 attempts)
+                    max_retries = 3
+                    retry_delay = 1.0  # seconds
+                    chroma_client = None
+                    
+                    for attempt in range(1, max_retries + 1):
+                        try:
+                            logger.info(f"🔄 Reset attempt {attempt}/{max_retries}...")
+                            chroma_client = ChromaClient(reset_on_error=True)
+                            logger.info("✓ ChromaDB client initialized (after directory reset)")
+                            break
+                        except Exception as reset_error:
+                            reset_error_str = str(reset_error).lower()
+                            if attempt < max_retries:
+                                logger.warning(f"⚠️ Reset attempt {attempt} failed: {reset_error}")
+                                logger.info(f"⏳ Waiting {retry_delay:.1f}s before retry...")
+                                import time
+                                time.sleep(retry_delay)
+                                # Increase delay for next attempt
+                                retry_delay *= 1.5
+                                # Force GC again before retry
+                                gc.collect()
+                            else:
+                                # Final attempt failed - raise to be caught by outer exception handler
+                                logger.error(f"❌ All {max_retries} reset attempts failed!")
+                                logger.error(f"   Last error: {reset_error}")
+                                raise RuntimeError(
+                                    f"ChromaDB schema mismatch and reset failed after {max_retries} attempts: {reset_error}. "
+                                    "Please manually delete data/vector_db directory on Railway and restart the service."
+                                ) from reset_error
+                    
+                    if chroma_client is None:
+                        logger.warning("⚠️ IMPORTANT: If errors persist, please RESTART the backend service on Railway to clear process cache.")
                 else:
                     raise
         
