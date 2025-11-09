@@ -156,6 +156,7 @@ class ChromaClient:
                         # Close existing client if it exists
                         if hasattr(self, 'client'):
                             try:
+ refactor/routerization
                                 # Try to reset client if method exists
                                 if hasattr(self.client, 'reset'):
                                     try:
@@ -163,10 +164,13 @@ class ChromaClient:
                                         self.client.reset()
                                     except Exception as reset_error:
                                         logger.warning(f"client.reset() failed (may not be available): {reset_error}")
+
+ main
                                 del self.client
                             except Exception:
                                 pass
                         
+ refactor/routerization
                         # Force garbage collection to ensure old client is fully freed
                         import gc
                         gc.collect()
@@ -223,6 +227,30 @@ class ChromaClient:
                                     logger.error(f"❌ Directory still exists after {max_retries} attempts")
                                     raise RuntimeError(f"Failed to delete {persist_directory} after {max_retries} attempts")
                                     
+
+                        # Force delete directory completely (more aggressive approach)
+                        if os.path.exists(persist_directory):
+                            logger.info(f"🗑️ Deleting {persist_directory} directory...")
+                            try:
+                                # Make all files writable first
+                                for root, dirs, files in os.walk(persist_directory, topdown=False):
+                                    for f in files:
+                                        try:
+                                            file_path = os.path.join(root, f)
+                                            os.chmod(file_path, 0o777)
+                                        except Exception:
+                                            pass
+                                    for d in dirs:
+                                        try:
+                                            dir_path = os.path.join(root, d)
+                                            os.chmod(dir_path, 0o777)
+                                        except Exception:
+                                            pass
+                                
+                                # Now delete everything
+                                shutil.rmtree(persist_directory, ignore_errors=True)
+                                logger.info(f"✅ Deleted {persist_directory}")
+ main
                             except Exception as delete_error:
                                 logger.error(f"❌ Failed to delete directory: {delete_error}")
                                 logger.error("💡 MANUAL ACTION REQUIRED: Please delete data/vector_db directory on Railway and restart service")
@@ -231,26 +259,38 @@ class ChromaClient:
                                     "Please manually delete data/vector_db directory on Railway and restart."
                                 ) from delete_error
                         
+ refactor/routerization
                         # Wait for filesystem sync (longer wait for Railway)
                         import time
                         time.sleep(2.0)  # Increased wait time for Railway filesystem sync
+
+                        # Wait for filesystem sync
+                        import time
+                        time.sleep(1.0)  # Increased wait time for Railway filesystem
+ main
                         
                         # Create fresh directory
                         os.makedirs(persist_directory, exist_ok=True)
                         logger.info(f"✅ Created fresh directory: {persist_directory}")
                         
+ refactor/routerization
                         # Wait a bit more before creating client
                         time.sleep(0.5)
                         
                         # Now create fresh client with explicit reset
                         # Use a temporary path first to avoid any caching issues
                         temp_client = chromadb.PersistentClient(
+
+                        # Now create fresh client
+                        self.client = chromadb.PersistentClient(
+ main
                             path=persist_directory,
                             settings=Settings(
                                 anonymized_telemetry=False,
                                 allow_reset=True
                             )
                         )
+ refactor/routerization
                         
                         # Try to reset if method exists (some ChromaDB versions have this)
                         try:
@@ -262,6 +302,9 @@ class ChromaClient:
                         
                         self.client = temp_client
                         
+
+                        
+ main
                         # Create fresh collections
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
