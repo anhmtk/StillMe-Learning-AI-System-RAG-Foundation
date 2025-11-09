@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\middleware\reflex_policy.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0, 10.0, 168.0, 999, 'abuse', 'abuse_penalty', 'abuse_score', 'allow_reflex', 'balanced', 'confidence', 'confidence_min', 'context', 'context_score', 'contribution', 'contributions', 'creative', 'cue_frequency', 'cue_recency_hours', 'decision', 'fallback', 'final_score', 'history', 'history_score', 'mode', 'pattern', 'policy_level', 'raw_score', 'scores', 'session_active', 'strict', 'text', 'thresholds', 'total_score', 'weight', 'weights']

@@ -1,3 +1,0 @@
-"""
-Security tests for AgentDev
-"""

@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\config\agent_dev\config.py
-# hypothesis_version: 6.140.2
-
-['0', '300', '50', '60', '70.0', 'AGENTDEV_FIX_TIMEOUT', 'AGENTDEV_HONEST_MODE', 'AgentDevConfig', 'evidence_required', 'fix_timeout', 'honest_mode', 'max_critical_errors', 'min_quality_score', 'true', 'validation_enabled', 'validation_timeout']

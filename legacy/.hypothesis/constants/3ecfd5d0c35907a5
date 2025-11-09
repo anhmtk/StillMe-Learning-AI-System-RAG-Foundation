@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\automated_scheduler.py
-# hypothesis_version: 6.140.2
-
-[7.0, 300, 3600, '09:00', '10:00', '11:00', ':', '=', 'Asia/Ho_Chi_Minh', 'System Health Check', '__main__', 'analysis', 'case_id', 'coalesce', 'config', 'daily_learning', 'daily_learning_time', 'default', 'error', 'executed', 'failed', 'health_check', 'healthy', 'id', 'job_id', 'job_stats', 'jobs', 'last_run', 'layered_memory', 'max_instances', 'misfire_grace_time', 'monthly_improvement', 'name', 'next_run', 'not_initialized', 'question', 'running', 'score', 'status', 'stopped', 'success', 'trigger', 'unavailable', 'weekly_analysis', 'weekly_analysis_day', '✅ Scheduler started', '🛑 Scheduler stopped']

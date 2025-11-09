@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agent_dev\anomaly.py
-# hypothesis_version: 6.140.2
-
-[0.0, 2.0, 10.0, 100, 'coverage_drop', 'coverage_overall', 'coverage_z_score', 'current', 'drop_percent', 'error_increase', 'high', 'increase_percent', 'lint_errors', 'median', 'medium', 'message', 'pass_rate', 'pass_rate_drop', 'pass_rate_z_score', 'pyright_errors', 'severity', 'type', 'z_score']

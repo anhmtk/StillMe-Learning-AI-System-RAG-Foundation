@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\config\platform\config.py
-# hypothesis_version: 6.140.2
-
-['3000', '4', '8000', '8001', 'DESKTOP_APP_HOST', 'DESKTOP_APP_PORT', 'GATEWAY_HOST', 'GATEWAY_PORT', 'GATEWAY_WORKERS', 'MOBILE_APP_API_URL', 'MOBILE_APP_DEBUG', 'PlatformConfig', 'WEBSOCKET_ENABLED', 'WEBSOCKET_PORT', 'desktop_app_host', 'desktop_app_port', 'false', 'gateway_host', 'gateway_port', 'gateway_workers', 'localhost', 'mobile_app_api_url', 'mobile_app_debug', 'true', 'websocket_enabled', 'websocket_port']

@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agent_dev\core\agentdev.py
-# hypothesis_version: 6.140.2
-
-[1.0, './data/agentdev.db', ':memory:', 'Invalid input', 'cmd', 'command', 'completed', 'compliant', 'description', 'error', 'execute_task', 'failed', 'feedback_error', 'feedback_received', 'mode', 'reason', 'rule', 'safe', 'security', 'slow', 'sqlite:///:memory:', 'status', 'success', 'task', 'task_execution', 'tasks', 'tasks_blocked', 'tasks_fail', 'tasks_pass', 'tasks_started', 'test_before_claim', 'tested', 'unknown', 'user_id', 'violated_rules']

@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\providers\openai.py
-# hypothesis_version: 6.140.2
-
-[0.0, 200, 429, '/v1/chat/completions', '/v1/models', 'Authorization', 'Content-Type', 'application/json', 'choices', 'content', 'created', 'finish_reason', 'frequency_penalty', 'id', 'max_tokens', 'message', 'messages', 'model', 'openai_created', 'openai_response_id', 'presence_penalty', 'role', 'stop', 'system_fingerprint', 'temperature', 'top_p', 'usage', 'user']

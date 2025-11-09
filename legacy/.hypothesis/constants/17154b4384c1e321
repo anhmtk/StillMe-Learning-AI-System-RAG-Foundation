@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\security\__init__.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.8, 100, '2025-10-01T19:00:00Z', 'CRITICAL', 'HIGH', 'MEDIUM', 'NORMAL', 'RateLimiter', 'SecurityAuditLogger', 'SecurityEvent', 'SecurityHeaders', 'SecurityLevel', 'SecurityManager', 'SecurityMonitor', 'WARNING', '_processed', 'active_alerts', 'alert_types', 'avg_risk_score', 'count', 'critical', 'event_type', 'events', 'high', 'high_risk_events', 'last_updated', 'low', 'medium', 'message', 'rate_limit', 'risk_levels', 'risk_score', 'risk_summary', 'security_status', 'severity', 'timestamp', 'total_events', 'type']

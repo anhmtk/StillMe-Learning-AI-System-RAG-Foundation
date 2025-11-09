@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agent_dev\persistence\repo.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 1.0, 100, 'avg', 'count', 'critical', 'high', 'is_active', 'last_used', 'low', 'max', 'medium', 'metric_value', 'min', 'preference_value', 'priority', 'rule_definition', 'success_rate', 'updated_at', 'usage_count']

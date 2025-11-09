@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\core\advanced_security\sandbox_deploy.py
-# hypothesis_version: 6.140.2
-
-[300, 'ERROR', 'Fake', 'SUCCESS', '__class__', '__main__', 'active', 'deployer_type', 'deployment_logs', 'docker_client', 'failed_deployments', 'fake', 'level', 'logs', 'message', 'python:3.9-slim', 'real', 'sandbox_status', 'security-test', 'status', 'timestamp', 'total_deployments']

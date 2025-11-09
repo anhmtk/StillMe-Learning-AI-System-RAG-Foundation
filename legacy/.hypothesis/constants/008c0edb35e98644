@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\clarification_engine.py
-# hypothesis_version: 6.140.2
-
-[0.0, 200, 1000, 'average_latency_ms', 'best_detector', 'category', 'confidence', 'detector', 'detector_results', 'detector_stats', 'error', 'failures', 'features', 'max_latency_ms', 'mode', 'needs_clarification', 'performance', 'performance_ok', 'quick', 'requests', 'successes', 'total_latency_ms', 'total_requests', 'unknown']

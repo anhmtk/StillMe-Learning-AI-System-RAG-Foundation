@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\middleware\pattern_matcher.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.3, 0.7, 0.8, 1.0, 1000000, 'NFC', '\\s+', 'a', 'c', 'e', 'greeting', 'hello', 'help', 'id', 'literal', 'literal_patterns', 'match_time_us', 'matches', 'normalized_text', 'o', 'p', 'pattern', 'pattern_id', 'pattern_score', 'regex', 'regex_patterns', 'span', 'text', 'type', 'utf-8', 'weight', 'x', 'а', 'е', 'о', 'р', 'с', 'х']

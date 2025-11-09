@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\providers\local_llm.py
-# hypothesis_version: 6.140.2
-
-[200, 429, 1000000000, '/api/generate', '/api/tags', 'completion_tokens', 'created_at', 'eval_count', 'eval_duration', 'frequency_penalty', 'load_duration', 'model', 'num_predict', 'options', 'presence_penalty', 'prompt', 'prompt_eval_count', 'prompt_eval_duration', 'prompt_tokens', 'response', 'stop', 'stream', 'temperature', 'top_p', 'total_duration', 'total_tokens']

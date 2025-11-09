@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\api_server.py
-# hypothesis_version: 6.140.2
-
-[1000.0, 500, '/dev-agent', '/dev-agent/bridge', '/health/ai', '/inference', '/process', 'api', 'blocked', 'chat', 'code', 'count_modules', 'fast', 'generate', 'infer', 'latency_ms', 'locale', 'maximum', 'modules', 'no_guard', 'ok', 'process', 'process_input', 'prompt', 'ready', 'real', 'reason', 'respond', 'safe', 'safety', 'safety_mode', 'status', 'text', 'vi']

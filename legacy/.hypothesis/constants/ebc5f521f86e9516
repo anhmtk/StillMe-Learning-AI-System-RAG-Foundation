@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agent_dev\rules\actions.py
-# hypothesis_version: 6.140.2
-
-['(\\w+): Optional\\[', 'Any', 'Dict', 'List', 'Optional', 'Optional[', 'Path', '\\{([^}]+)\\}', 'async def', 'async def ', 'await ', 'datetime', 'def ', 'from ', 'from sqlalchemy', 'import ', 'import json', 'import os', 'import sqlalchemy', 'import sys', 'is not None', 'json', 'np.bool', 'np.bool_', 'np.complex', 'np.complex128', 'np.float', 'np.float64', 'np.int', 'np.int64', 'os', 'os.path.join', 'os.path.join(\\1, \\2)', 'r', 'sys', 'timedelta', 'utf-8', 'w', '{\\1!r}']

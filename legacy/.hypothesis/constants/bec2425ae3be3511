@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\gateway\logging_mw.py
-# hypothesis_version: 6.140.2
-
-[400, 500, '%(message)s', 'DEBUG', 'ERROR', 'INFO', 'WARNING', 'access', 'body', 'body_size', 'error', 'gateway.middleware', 'headers', 'info', 'log_level', 'method', 'path', 'pii_config', 'query_params', 'request_id', 'request_received', 'response_sent', 'span_id', 'status_code', 'trace_id', 'user_id', 'warning']

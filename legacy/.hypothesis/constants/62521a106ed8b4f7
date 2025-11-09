@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\providers\llm_base.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.5, 0.7, 1.0, 'aclose', 'can_attempt', 'circuit_breaker', 'close', 'closed', 'degraded', 'enabled', 'fail_fast', 'failure_count', 'first_available', 'half-open', 'health', 'healthy', 'open', 'priority', 'round_robin', 'state', 'unhealthy', 'unknown']

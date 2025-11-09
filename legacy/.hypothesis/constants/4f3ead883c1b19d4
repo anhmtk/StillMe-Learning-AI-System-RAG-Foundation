@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\sandbox.py
-# hypothesis_version: 6.140.2
-
-[0.1, 30.0, 100, 512, 'Sandbox not active', 'config', 'echo', 'error', 'execution_time', 'exit_code', 'failed', 'is_active', 'ls', 'output', 'passed', 'python', 'result', 'results', 'sandbox_id', 'status', 'stub', 'success', 'summary', 'test', 'total', 'warnings']

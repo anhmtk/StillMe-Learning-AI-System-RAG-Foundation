@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\monitoring\resource_monitor.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.2, 1.0, 70.0, 80.0, 90.0, 100.0, -100, 100, 1000, 1024, 10000, '/', 'All checks passed', 'No metrics available', '_last_recv_mb', '_last_sent_mb', 'active', 'active_alerts', 'alerts_count', 'averages', 'cpu_high', 'cpu_percent', 'critical', 'current', 'daily_budget', 'daily_remaining', 'daily_usage', 'daily_usage_percent', 'disk_high', 'error', 'export_timestamp', 'high', 'hourly_budget', 'hourly_remaining', 'hourly_usage', 'hourly_usage_percent', 'is_monitoring', 'learning_sessions', 'medium', 'memory_high', 'memory_percent', 'metrics_count', 'metrics_summary', 'monitoring_status', 'recent_metrics', 'response_time', 'samples', 'thresholds', 'timestamp', 'token_budget', 'token_low_daily', 'token_low_hourly', 'tokens', 'total_tracked', 'usage_history_count', 'utf-8', 'w']

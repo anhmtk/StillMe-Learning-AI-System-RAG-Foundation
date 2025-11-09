@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\config\core\config.py
-# hypothesis_version: 6.140.2
-
-['.sandbox', '10', '300', '600', 'CoreConfig', 'DEFAULT_MODEL', 'GIT_EMAIL', 'GIT_USER', 'KEEP_WARM_SEC', 'MAX_CONCURRENT_TASKS', 'MODEL_CHOOSER', 'REPO_ROOT', 'SANDBOX_DIR', 'TASK_TIMEOUT', 'agentdev', 'agentdev@example.com', 'auto', 'default_model', 'gemma2:2b', 'git_email', 'git_user', 'keep_warm_sec', 'max_concurrent_tasks', 'model_chooser', 'repo_root', 'sandbox_dir', 'task_timeout']

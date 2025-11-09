@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\observability\metrics_server.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.5, 1.0, 2.0, 200, 404, 9090, '/health', '/metrics', '0.1', '0.5', '1.0', '2.0', '5.0', 'Available endpoints:', 'Content-type', 'Press Ctrl+C to stop', '__main__', 'application/json', 'detector_hits_total', 'errors_by_type', 'errors_total', 'healthy', 'localhost', 'requests_total', 'status', 'timestamp', 'uptime', 'utf-8']

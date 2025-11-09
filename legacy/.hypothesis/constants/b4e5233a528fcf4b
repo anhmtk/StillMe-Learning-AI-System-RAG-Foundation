@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\reflection_scorer.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0, 100, 'accuracy', 'additionally', 'average_confidence', 'because', 'benefit', 'clarity', 'clear', 'completeness', 'content_length', 'context', 'data', 'error', 'evidence', 'explain', 'fact', 'furthermore', 'help', 'however', 'improve', 'obvious', 'relevance', 'research', 'scores_by_criteria', 'scoring_weights', 'simple', 'solve', 'study', 'therefore', 'timestamp', 'topic', 'total_scores', 'understand', 'useful', 'usefulness']

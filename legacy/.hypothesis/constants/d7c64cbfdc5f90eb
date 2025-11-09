@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\secrecy_filter.py
-# hypothesis_version: 6.140.2
-
-['[CONTENT BLOCKED]', '[ENCRYPTED]', '[REDACTED]', '\\bkey\\s*[:=]\\s*\\w+\\b', 'allow', 'block', 'confidential', 'context', 'critical', 'enabled_rules', 'encrypt', 'error', 'filters_by_action', 'high', 'internal', 'low', 'medium', 'public', 'redact', 'rules_by_action', 'secret', 'target_secrecy_level', 'timestamp', 'top_secret', 'total_filters', 'total_rules']

@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\core\safe_runner.py
-# hypothesis_version: 6.140.2
-
-[30.0, 100, '<script>', 'Safety checks failed', 'approval_required', 'args', 'audit_logging', 'cancelled', 'completed', 'critical', 'error', 'eval(', 'exec(', 'failed', 'failed_runs', 'high', 'javascript:', 'kwargs', 'low', 'medium', 'output_sanitization', 'pending', 'resource_limits', 'rollback_capability', 'run', 'running', 'runs_by_safety_level', 'runs_by_status', 'sandbox_execution', 'success_rate', 'successful_runs', 'timeout', 'timeout_checks', 'timestamp', 'total_runs']

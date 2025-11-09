@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agentdev_tests\conftest.py
-# hypothesis_version: 6.140.2
-
-[0.5, 0.7, 0.8, 100, 200, 'agent_dev', 'agent_dev.core', 'agentdev', 'benefit', 'business_thinking', 'cleanup_manager', 'conflict_resolver', 'core', 'cost', 'cve_count', 'high', 'low', 'medium', 'priority', 'risk_level', 'roi', 'security_thinking', 'severity', 'vulnerabilities']

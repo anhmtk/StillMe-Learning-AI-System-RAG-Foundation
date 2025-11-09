@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\detectors\nested_detector.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 'another_function', 'category', 'code_complexity', 'complexity_score', 'confidence', 'deep', 'deep_function', 'def\\s+\\w+\\s*\\(', 'else', 'end', 'features', 'function_count', 'inner_function', 'needs_clarification', 'nested', 'nested_code_blocks', 'nested_patterns', 'outer_function', 'test_functions', 'test_returns', 'try:\\s*\\n\\s*try:']

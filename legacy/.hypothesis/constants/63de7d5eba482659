@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\control\learning_rollback.py
-# hypothesis_version: 6.140.2
-
-[0.0, 300, '%Y%m%d_%H%M%S', 'artifacts', 'behavior_adjustment', 'can_rollback', 'change_type', 'current_version', 'dependencies', 'description', 'errors', 'failed', 'is_current', 'last_updated', 'not_needed', 'partial', 'pattern_learning', 'preference_update', 'previous_value', 'revert_function', 'rollback_history', 'safe', 'skill_acquisition', 'snapshots', 'state_hash', 'success', 'timestamp', 'update', 'update_type', 'utf-8', 'version_id', 'w']

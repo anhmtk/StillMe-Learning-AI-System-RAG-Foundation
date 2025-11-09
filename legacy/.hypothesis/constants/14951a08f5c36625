@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\common\config.py
-# hypothesis_version: 6.140.2
-
-[0.0, 100, 8000, '.', '1', '2.1.1', 'INFO', 'STILLME_', 'StillMe AI Framework', 'T', 'api', 'auth_required', 'auto_load', 'auto_start', 'backup_count', 'core_settings', 'cors_origins', 'custom_settings', 'description', 'enabled', 'file', 'format', 'framework_name', 'high', 'host', 'json', 'level', 'localhost', 'logging', 'max_module_load_time', 'max_restart_attempts', 'max_retries', 'max_size_mb', 'modules', 'modules_dir', 'on', 'port', 'rate_limit', 'resource_limits', 'restart_on_failure', 'security', 'security_level', 'stillme.log', 'strict_mode', 'timeout', 'timeout_seconds', 'true', 'utf-8', 'version', 'w', 'yes']

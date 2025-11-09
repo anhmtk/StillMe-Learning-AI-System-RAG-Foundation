@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\detectors\sqli_detector.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1.0, '(?i)(--|#)', '(?i)(;.*--)', '(?i)(\\bor\\b\\s+1=1)', '(?i)(admin\\s*--)', '(?i)(admin\\s*/\\*)', '(?i)(delete\\s+from)', '(?i)(drop\\s+table)', '(?i)(exec\\s+\\w+)', '(?i)(insert\\s+into)', '(?i)(sleep\\s*\\()', '(?i)(sp_executesql)', '(?i)(substring\\s*\\()', '(?i)(union\\s+select)', '(?i)(update\\s+set)', '(?i)(where\\s+1=1)', '(?i)(xp_cmdshell)', 'ALTER', 'AND', 'CREATE', 'DELETE', 'DROP', 'DROP TABLE users', 'FROM', 'INSERT', 'OR', 'SELECT', 'UNION', 'UPDATE', 'WHERE', 'category', 'confidence', 'f\\".*\\{.*\\}.*\\"', 'features', 'needs_clarification', 'security_risks', 'sql_keyword_count', 'sqli_detector', 'sqli_matches', 'test_sqli_found', 'total_sqli_matches', 'user_id.*DROP']

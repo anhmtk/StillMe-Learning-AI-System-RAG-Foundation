@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\detectors\image_detector.py
-# hypothesis_version: 6.140.2
-
-[b'\x89PNG', b'\xff\xd8\xff', 0.0, 0.2, 0.3, 0.4, 0.5, 1.0, 100, '=', 'JPEG', 'PNG', 'base64_matches_count', 'category', 'confidence', 'corrupted_image', 'corrupted_indicators', 'error', 'features', 'format', 'has_base64_image', 'image_detector', 'needs_clarification', 'padded_base64', 'test_corrupted_found', 'truncated_base64', 'unknown', 'valid']

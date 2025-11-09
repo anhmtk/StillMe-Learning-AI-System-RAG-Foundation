@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\detectors\unicode_detector.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.2, 0.3, 0.5, 1.0, 127, 880, 1023, 1024, 1279, 1536, 1791, 12352, 12447, 12448, 12543, 19968, 40959, 44032, 55215, 'arabic', 'category', 'chinese', 'confidence', 'cyrillic', 'features', 'greek', 'japanese_hiragana', 'japanese_katakana', 'korean', 'needs_clarification', 'test_unicode_found', 'total_unicode_chars', 'unicode_chars', 'unicode_detector', 'unicode_functions', 'unicode_in_code', 'unicode_ranges', 'unicode_returns', '中文', '函数名', '日本語', '関数名', '한국어', '함수명']

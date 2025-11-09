@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\compat_docker.py
-# hypothesis_version: 6.140.2
-
-['1', '2025-01-01T00:00:00Z', 'DISABLE_DOCKER', 'FakeSandboxDeployer', 'RealDockerDeployer', 'SANDBOX_MODE', 'action', 'actions', 'alpine:latest', 'container_id', 'create_container', 'deployed_at', 'docker', 'engine', 'error', 'failed', 'fake', 'fake-security-image', 'fake_cleanup', 'fake_deploy', 'get_sandbox_deployer', 'image', 'name', 'no_docker_daemon', 'pull_image', 'real_cleanup', 'real_deploy', 'reason', 'result', 'running', 'security-test', 'security_test', 'start_container', 'status', 'true', 'unavailable', 'yes']

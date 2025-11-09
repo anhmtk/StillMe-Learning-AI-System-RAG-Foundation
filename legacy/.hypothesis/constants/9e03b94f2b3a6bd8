@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agent_dev\self_monitoring.py
-# hypothesis_version: 6.140.2
-
-[0.0, 100, 300, '%', '--force-exclude', '--maxfail=1', '--show-missing', '--stats', '--tb=short', '-m', '-q', '.', 'ERROR', 'FAILED', 'PASSED', 'TOTAL', 'a', 'agentdev_run.jsonl', 'check', 'coverage', 'coverage_overall', 'coverage_touched', 'date', 'duration', 'error', 'error_count', 'fail_count', 'fail_rate', 'lint_errors', 'logs', 'output', 'overall', 'pass_count', 'pass_rate', 'pyright', 'pyright_errors', 'pytest', 'report', 'return_code', 'ruff', 'ruff_errors', 'run', 'timestamp', 'total_tests', 'touched', 'utf-8']
