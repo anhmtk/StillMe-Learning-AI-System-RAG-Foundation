@@ -5,6 +5,7 @@ This ensures StillMe can answer questions about itself using RAG, not outdated L
 """
 
 import sys
+import logging
 from pathlib import Path
 
 # Add project root to path
@@ -14,7 +15,6 @@ sys.path.append(str(project_root))
 from backend.vector_db.chroma_client import ChromaClient
 from backend.vector_db.embeddings import EmbeddingService
 from backend.vector_db.rag_retrieval import RAGRetrieval
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

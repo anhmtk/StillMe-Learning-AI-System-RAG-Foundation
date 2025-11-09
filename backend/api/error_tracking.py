@@ -6,7 +6,6 @@ Optional Sentry integration for production error tracking
 import logging
 import os
 from typing import Optional, Dict, Any
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 

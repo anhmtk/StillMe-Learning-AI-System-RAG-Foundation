@@ -2,7 +2,6 @@
 Tests for identity injector
 """
 
-import pytest
 from backend.identity.injector import inject_identity, STILLME_IDENTITY
 
 

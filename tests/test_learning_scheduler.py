@@ -4,7 +4,7 @@ Tests scheduler start/stop, learning cycles, error recovery, and interval config
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
+from unittest.mock import Mock, patch
 from datetime import datetime, timedelta
 import asyncio
 from backend.services.learning_scheduler import LearningScheduler

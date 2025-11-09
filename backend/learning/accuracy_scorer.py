@@ -5,8 +5,7 @@ Measures and tracks learning accuracy and performance
 
 import json
 import sqlite3
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
 import logging
 
 logger = logging.getLogger(__name__)

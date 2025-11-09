@@ -7,6 +7,8 @@ import pytest
 import os
 import sys
 from pathlib import Path
+from fastapi.testclient import TestClient
+from unittest.mock import patch
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -17,9 +19,6 @@ if str(project_root) not in sys.path:
 os.environ.setdefault("ENVIRONMENT", "test")
 os.environ.setdefault("DEEPSEEK_API_KEY", "test_key")
 os.environ.setdefault("OPENAI_API_KEY", "test_key")
-
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 
 try:
     from backend.api.main import app
@@ -50,6 +49,18 @@ class TestRouterSmoke:
         data = response.json()
         assert "status" in data
         assert data["status"] == "healthy"
+    
+    def test_ready_endpoint(self, client):
+        """Smoke test: Readiness check endpoint"""
+        response = client.get("/ready")
+        # May return 200 (all checks pass) or 503 (some checks fail)
+        assert response.status_code in [200, 503]
+        data = response.json()
+        assert "status" in data
+        assert "checks" in data
+        assert "check_details" in data
+        assert "timestamp" in data
+        assert data["status"] in ["ready", "not_ready"]
     
     def test_status_endpoint(self, client):
         """Smoke test: System status endpoint"""
@@ -152,6 +163,7 @@ class TestRouterSmoke:
         paths = data["paths"]
         assert "/" in paths  # Root
         assert "/health" in paths  # Health
+        assert "/ready" in paths  # Readiness
         assert "/api/status" in paths  # Status
         assert "/api/validators/metrics" in paths  # Validators metrics
         assert "/api/chat/rag" in paths  # Chat router

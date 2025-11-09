@@ -5,7 +5,7 @@ Identifies knowledge gaps and suggests learning focus using RAG
 
 from typing import List, Dict, Any, Optional
 import logging
-from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
+from backend.vector_db import RAGRetrieval
 
 logger = logging.getLogger(__name__)
 
