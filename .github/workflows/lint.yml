@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -44,6 +45,20 @@ jobs:
         run: |
           ruff format --check . --exclude _graveyard
         continue-on-error: false
+      
+      - name: Code Review Comments (Optional)
+        if: github.event_name == 'pull_request' && env.ENABLE_CODE_REVIEW_COMMENTS == 'true'
+        env:
+          ENABLE_CODE_REVIEW_COMMENTS: ${{ vars.ENABLE_CODE_REVIEW_COMMENTS || 'false' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_WORKSPACE: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m backend.code_review.main
+        continue-on-error: true
 
   type-check:
     name: Type Check (Optional)
