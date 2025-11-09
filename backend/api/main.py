@@ -170,8 +170,16 @@ def _initialize_rag_components():
         
         # Check for FORCE_DB_RESET_ON_STARTUP environment variable
         force_reset = os.getenv("FORCE_DB_RESET_ON_STARTUP", "false").lower() == "true"
-        if force_reset:
-            logger.warning("🔄 FORCE_DB_RESET_ON_STARTUP=True detected - will reset ChromaDB database")
+        
+        # For Dashboard service, always use reset_on_error=True to handle schema mismatches automatically
+        # This is safe because Dashboard is typically a read-only service or can rebuild its database
+        is_dashboard = os.getenv("STREAMLIT_SERVER_PORT") is not None or os.getenv("DASHBOARD_MODE", "false").lower() == "true"
+        
+        if force_reset or is_dashboard:
+            if force_reset:
+                logger.warning("🔄 FORCE_DB_RESET_ON_STARTUP=True detected - will reset ChromaDB database")
+            if is_dashboard:
+                logger.info("📊 Dashboard service detected - will use auto-reset for ChromaDB schema mismatches")
             chroma_client = ChromaClient(reset_on_error=True)
             logger.info("✓ ChromaDB client initialized (forced reset)")
         else:
