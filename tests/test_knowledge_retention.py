@@ -6,7 +6,6 @@ Tests knowledge addition, retrieval, retention score calculation, and database o
 import pytest
 import tempfile
 import os
-import json
 from backend.learning.knowledge_retention import KnowledgeRetention
 
 
