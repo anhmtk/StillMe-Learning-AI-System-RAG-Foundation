@@ -36,6 +36,58 @@ def get_accuracy_scorer():
     import backend.api.main as main_module
     return main_module.accuracy_scorer
 
+def get_self_diagnosis():
+    """Get self diagnosis service from main module"""
+    import backend.api.main as main_module
+    return getattr(main_module, 'self_diagnosis', None)
+
+def _calculate_confidence_score(
+    context_docs_count: int,
+    validation_result=None,
+    context=None
+) -> float:
+    """
+    Calculate confidence score based on context quality and validation results
+    
+    Args:
+        context_docs_count: Number of context documents found
+        validation_result: ValidationResult from validator chain (optional)
+        context: Full context dict (optional)
+        
+    Returns:
+        Confidence score between 0.0 and 1.0
+    """
+    # Base confidence on context availability
+    if context_docs_count == 0:
+        base_confidence = 0.2  # Very low confidence when no context
+    elif context_docs_count == 1:
+        base_confidence = 0.5  # Medium confidence with limited context
+    elif context_docs_count >= 2:
+        base_confidence = 0.8  # High confidence with multiple sources
+    else:
+        base_confidence = 0.3
+    
+    # Adjust based on validation results
+    if validation_result:
+        if validation_result.passed:
+            # Boost confidence if validation passed
+            confidence = min(1.0, base_confidence + 0.1)
+        else:
+            # Reduce confidence if validation failed
+            reasons = validation_result.reasons or []
+            if "missing_uncertainty_no_context" in reasons:
+                confidence = 0.1  # Very low if AI didn't express uncertainty when it should
+            elif "missing_citation" in reasons and context_docs_count > 0:
+                confidence = base_confidence - 0.2  # Reduce if missing citations
+            elif "low_overlap" in reasons:
+                confidence = base_confidence - 0.15  # Reduce if low overlap
+            else:
+                confidence = max(0.0, base_confidence - 0.1)
+    else:
+        confidence = base_confidence
+    
+    return max(0.0, min(1.0, confidence))  # Clamp between 0.0 and 1.0
+
 @router.post("/rag", response_model=ChatResponse)
 @limiter.limit("10/minute", key_func=get_rate_limit_key_func)  # Chat: 10 requests per minute
 async def chat_with_rag(request: Request, chat_request: ChatRequest):
@@ -196,15 +248,52 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
 
 """
             
-            # Special instruction for StillMe queries
-            stillme_instruction = ""
-            if is_stillme_query:
-                stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a Learning AI system with RAG foundation that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database, (3) Continuous knowledge updates through RSS feeds, (4) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
-            
-            # Build prompt with language instruction FIRST (before context)
-            # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
-            # ZERO TOLERANCE: Must translate if needed
-            base_prompt = f"""{language_instruction}
+            # Check if context is empty - if so, use special prompt
+            if context["total_context_docs"] == 0:
+                # NO CONTEXT AVAILABLE - Use special prompt that encourages uncertainty
+                no_context_instruction = f"""
+⚠️ NO CONTEXT AVAILABLE ⚠️
+
+StillMe's RAG system searched the knowledge base but found NO relevant documents for this question.
+
+YOU MUST:
+1. Acknowledge that you don't have this information in your knowledge base
+2. Explain that StillMe learns from RSS feeds, arXiv, and other sources every 4 hours
+3. Offer alternatives: reformulate question, suggest related topics, or wait for future learning
+4. DO NOT use general knowledge or training data - be honest about the gap
+
+Remember: It's better to say "I don't know" than to make up information.
+"""
+                
+                base_prompt = f"""{language_instruction}
+
+⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
+
+The user's question is in {detected_lang_name.upper()}. 
+
+YOU MUST respond in {detected_lang_name.upper()} ONLY.
+
+{no_context_instruction}
+
+User Question (in {detected_lang_name.upper()}): {chat_request.message}
+
+⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
+
+RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
+
+Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE MODEL WANTS TO USE A DIFFERENT LANGUAGE.
+"""
+            else:
+                # Context available - use normal prompt
+                # Special instruction for StillMe queries
+                stillme_instruction = ""
+                if is_stillme_query:
+                    stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a Learning AI system with RAG foundation that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database, (3) Continuous knowledge updates through RSS feeds, (4) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
+                
+                # Build prompt with language instruction FIRST (before context)
+                # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
+                # ZERO TOLERANCE: Must translate if needed
+                base_prompt = f"""{language_instruction}
 
 ⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
 
@@ -249,6 +338,10 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
             
             # Validate response if enabled
+            validation_info = None
+            confidence_score = None
+            used_fallback = False
+            
             if enable_validators:
                 try:
                     validation_start = time.time()
@@ -257,6 +350,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     from backend.validators.evidence_overlap import EvidenceOverlap
                     from backend.validators.numeric import NumericUnitsBasic
                     from backend.validators.ethics_adapter import EthicsAdapter
+                    from backend.validators.confidence import ConfidenceValidator
+                    from backend.validators.fallback_handler import FallbackHandler
                     
                     # Build context docs list for validation
                     ctx_docs = [
@@ -265,13 +360,12 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         doc["content"] for doc in context["conversation_docs"]
                     ]
                     
-                    # Create validator chain
-                    # Note: EvidenceOverlap threshold lowered to 0.01 to prevent false positives
-                    # when LLM translates/summarizes content (reducing vocabulary overlap)
+                    # Create validator chain with ConfidenceValidator
                     chain = ValidatorChain([
                         CitationRequired(),
                         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
+                        ConfidenceValidator(require_uncertainty_when_no_context=True),  # NEW: Check for uncertainty
                         EthicsAdapter(guard_callable=None)  # TODO: wire existing ethics guard if available
                     ])
                     
@@ -280,6 +374,13 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     validation_time = time.time() - validation_start
                     timing_logs["validation"] = f"{validation_time:.2f}s"
                     logger.info(f"⏱️ Validation took {validation_time:.2f}s")
+                    
+                    # Calculate confidence score based on context quality and validation
+                    confidence_score = _calculate_confidence_score(
+                        context_docs_count=len(ctx_docs),
+                        validation_result=validation_result,
+                        context=context
+                    )
                     
                     # Record metrics
                     try:
@@ -296,14 +397,38 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         metrics.record_validation(
                             passed=validation_result.passed,
                             reasons=validation_result.reasons,
-                            overlap_score=overlap_score
+                            overlap_score=overlap_score,
+                            confidence_score=confidence_score,
+                            used_fallback=used_fallback
                         )
                     except Exception as metrics_error:
                         logger.warning(f"Failed to record metrics: {metrics_error}")
                     
+                    # Handle validation failures with FallbackHandler
                     if not validation_result.passed:
-                        # Use patched answer if available, otherwise return 422
-                        if validation_result.patched_answer:
+                        # Check for critical failures that require fallback
+                        critical_failures = [
+                            "missing_uncertainty_no_context",
+                            "missing_citation"
+                        ]
+                        has_critical_failure = any(
+                            reason in validation_result.reasons 
+                            for reason in critical_failures
+                        ) and len(ctx_docs) == 0
+                        
+                        if has_critical_failure:
+                            # Use FallbackHandler to generate safe answer
+                            fallback_handler = FallbackHandler()
+                            response = fallback_handler.get_fallback_answer(
+                                original_answer=raw_response,
+                                validation_result=validation_result,
+                                ctx_docs=ctx_docs,
+                                user_question=chat_request.message,
+                                detected_lang=detected_lang
+                            )
+                            used_fallback = True
+                            logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")
+                        elif validation_result.patched_answer:
                             response = validation_result.patched_answer
                             logger.info(f"Validation failed but using patched answer. Reasons: {validation_result.reasons}")
                         else:
@@ -318,14 +443,32 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             )
                     else:
                         response = validation_result.patched_answer or raw_response
-                        logger.debug(f"Validation passed. Reasons: {validation_result.reasons}")
+                        logger.debug(f"✅ Validation passed. Reasons: {validation_result.reasons}")
+                    
+                    # Build validation info for response
+                    validation_info = {
+                        "passed": validation_result.passed,
+                        "reasons": validation_result.reasons,
+                        "used_fallback": used_fallback,
+                        "confidence_score": confidence_score,
+                        "context_docs_count": len(ctx_docs)
+                    }
+                    
                 except HTTPException:
                     raise
                 except Exception as validation_error:
                     logger.error(f"Validation error: {validation_error}, falling back to raw response")
                     response = raw_response
+                    # Calculate confidence even on error (low confidence)
+                    confidence_score = 0.3 if len(ctx_docs) == 0 else 0.6
             else:
                 response = raw_response
+                # Calculate basic confidence score even without validators
+                confidence_score = _calculate_confidence_score(
+                    context_docs_count=len(context.get("knowledge_docs", [])) + len(context.get("conversation_docs", [])),
+                    validation_result=None,
+                    context=context
+                )
         else:
             # Fallback to regular AI response (no RAG context)
             # Detect language FIRST
@@ -491,10 +634,36 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             except Exception as alert_error:
                 logger.warning(f"Knowledge alert error: {alert_error}")
         
+        # Generate learning suggestions from knowledge gaps if context is empty or low confidence
+        learning_suggestions = None
+        if (confidence_score is not None and confidence_score < 0.5) or (context and context.get("total_context_docs", 0) == 0):
+            try:
+                self_diagnosis = get_self_diagnosis()
+                if self_diagnosis:
+                    gap_result = self_diagnosis.identify_knowledge_gaps(chat_request.message, threshold=0.5)
+                    if gap_result.get("has_gap"):
+                        suggestion = gap_result.get("suggestion")
+                        if suggestion:
+                            learning_suggestions = [suggestion]
+                        else:
+                            # Extract key terms from query for learning suggestions
+                            import re
+                            words = re.findall(r'\b\w+\b', chat_request.message.lower())
+                            # Filter out common words
+                            common_words = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'what', 'how', 'why', 'when', 'where', 'who', 'which', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'to', 'of', 'in', 'on', 'at', 'for', 'with', 'by', 'from', 'as', 'about', 'into', 'through', 'during', 'including', 'against', 'among', 'throughout', 'despite', 'towards', 'upon', 'concerning', 'to', 'of', 'in', 'on', 'at', 'for', 'with', 'by', 'from', 'as', 'about', 'into', 'through', 'during', 'including', 'against', 'among', 'throughout', 'despite', 'towards', 'upon', 'concerning'}
+                            key_terms = [w for w in words if len(w) > 3 and w not in common_words][:3]
+                            if key_terms:
+                                learning_suggestions = [f"Consider learning more about: {', '.join(key_terms)}"]
+            except Exception as suggestion_error:
+                logger.warning(f"Failed to generate learning suggestions: {suggestion_error}")
+        
         return ChatResponse(
             response=response,
             context_used=context,
             accuracy_score=accuracy_score,
+            confidence_score=confidence_score,
+            validation_info=validation_info,
+            learning_suggestions=learning_suggestions,
             learning_session_id=learning_session_id,
             knowledge_alert=knowledge_alert,
             timing=timing_logs,
