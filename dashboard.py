@@ -1023,62 +1023,72 @@ def sidebar(page_for_chat: str | None = None):
                         confidence_score = m.get("confidence_score")
                         validation_info = m.get("validation_info")
                         learning_suggestions = m.get("learning_suggestions")
+                        latency_metrics = m.get("latency_metrics")
                         
-                        # Create expandable section for metadata
-                        if confidence_score is not None or validation_info or learning_suggestions:
-                            with st.expander("📊 Response Metadata", expanded=False):
-                                # Confidence Score
-                                if confidence_score is not None:
-                                    # Color based on confidence level
-                                    if confidence_score >= 0.7:
-                                        conf_color = "#4CAF50"  # Green
-                                        conf_emoji = "🟢"
-                                    elif confidence_score >= 0.4:
-                                        conf_color = "#FF9800"  # Orange
-                                        conf_emoji = "🟡"
-                                    else:
-                                        conf_color = "#F44336"  # Red
-                                        conf_emoji = "🔴"
+                        # Create collapsible section for metadata using HTML details (can't nest expanders)
+                        if confidence_score is not None or validation_info or learning_suggestions or latency_metrics:
+                            metadata_key = f"metadata_{idx}"
+                            show_metadata = st.session_state.get(metadata_key, False)
+                            
+                            # Toggle button for metadata
+                            if st.button("📊 Show Metadata", key=f"toggle_{idx}", use_container_width=True):
+                                st.session_state[metadata_key] = not show_metadata
+                                st.rerun()
+                            
+                            # Display metadata if toggled
+                            if st.session_state.get(metadata_key, False):
+                                with st.container():
+                                    # Confidence Score
+                                    if confidence_score is not None:
+                                        # Color based on confidence level
+                                        if confidence_score >= 0.7:
+                                            conf_color = "#4CAF50"  # Green
+                                            conf_emoji = "🟢"
+                                        elif confidence_score >= 0.4:
+                                            conf_color = "#FF9800"  # Orange
+                                            conf_emoji = "🟡"
+                                        else:
+                                            conf_color = "#F44336"  # Red
+                                            conf_emoji = "🔴"
+                                        
+                                        st.markdown(
+                                            f'{conf_emoji} **Confidence Score:** '
+                                            f'<span style="color: {conf_color}; font-weight: bold;">{confidence_score:.2f}</span> '
+                                            f'({confidence_score*100:.0f}%)',
+                                            unsafe_allow_html=True
+                                        )
                                     
-                                    st.markdown(
-                                        f'{conf_emoji} **Confidence Score:** '
-                                        f'<span style="color: {conf_color}; font-weight: bold;">{confidence_score:.2f}</span> '
-                                        f'({confidence_score*100:.0f}%)',
-                                        unsafe_allow_html=True
-                                    )
-                                
-                                # Validation Info
-                                if validation_info:
-                                    st.markdown("**Validation Status:**")
-                                    passed = validation_info.get("passed", False)
-                                    reasons = validation_info.get("reasons", [])
-                                    used_fallback = validation_info.get("used_fallback", False)
-                                    context_docs_count = validation_info.get("context_docs_count", 0)
+                                    # Validation Info
+                                    if validation_info:
+                                        st.markdown("**Validation Status:**")
+                                        passed = validation_info.get("passed", False)
+                                        reasons = validation_info.get("reasons", [])
+                                        used_fallback = validation_info.get("used_fallback", False)
+                                        context_docs_count = validation_info.get("context_docs_count", 0)
+                                        
+                                        if passed:
+                                            st.success(f"✅ Validation Passed")
+                                        else:
+                                            st.warning(f"⚠️ Validation Failed")
+                                        
+                                        if used_fallback:
+                                            st.info("🛡️ **Safe Fallback Answer Used** - Original response was replaced with a safe fallback to prevent hallucination.")
+                                        
+                                        if reasons:
+                                            st.markdown(f"**Reasons:** {', '.join(reasons)}")
+                                        
+                                        st.caption(f"Context Documents: {context_docs_count}")
                                     
-                                    if passed:
-                                        st.success(f"✅ Validation Passed")
-                                    else:
-                                        st.warning(f"⚠️ Validation Failed")
+                                    # Learning Suggestions
+                                    if learning_suggestions:
+                                        st.markdown("**💡 Learning Suggestions:**")
+                                        for suggestion in learning_suggestions:
+                                            st.info(f"• {suggestion}")
                                     
-                                    if used_fallback:
-                                        st.info("🛡️ **Safe Fallback Answer Used** - Original response was replaced with a safe fallback to prevent hallucination.")
-                                    
-                                    if reasons:
-                                        st.markdown(f"**Reasons:** {', '.join(reasons)}")
-                                    
-                                    st.caption(f"Context Documents: {context_docs_count}")
-                                
-                                # Learning Suggestions
-                                if learning_suggestions:
-                                    st.markdown("**💡 Learning Suggestions:**")
-                                    for suggestion in learning_suggestions:
-                                        st.info(f"• {suggestion}")
-                                
-                                # Latency Metrics
-                                latency_metrics = m.get("latency_metrics")
-                                if latency_metrics:
-                                    st.markdown("**⏱️ Latency Metrics:**")
-                                    st.code(latency_metrics, language="text")
+                                    # Latency Metrics
+                                    if latency_metrics:
+                                        st.markdown("**⏱️ Latency Metrics:**")
+                                        st.code(latency_metrics, language="text")
                     
                     # Show knowledge alert after StillMe's response
                     if m["role"] == "assistant" and "knowledge_alert" in m:
