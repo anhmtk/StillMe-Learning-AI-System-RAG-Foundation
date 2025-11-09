@@ -1,2 +1,0 @@
-plugins
-stillme_core

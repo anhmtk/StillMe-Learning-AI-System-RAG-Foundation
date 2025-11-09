@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\middleware\habit_store.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.5, 1.0, 10.0, 3600, 'HabitStore reset', 'confidence', 'days_since_last', 'decay', 'decay_factor', 'decay_half_life_days', 'enabled', 'export_time', 'first_action', 'first_confidence', 'first_tenant', 'first_user', 'habits', 'habits_opt_in', 'half_life_days', 'hash_cues', 'last_action', 'last_confidence', 'last_tenant', 'last_user', 'metadata', 'min_threshold', 'opt_in', 'privacy', 'privacy_settings', 'quorum', 'quorum_threshold', 'quorum_window_days', 'tenant_id', 'threshold', 'total_habits', 'ttl_days', 'user_id', 'utf-8', 'window_days']

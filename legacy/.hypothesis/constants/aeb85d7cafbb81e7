@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\middleware\observability.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.05, 0.8, 0.95, 0.99, 10.0, 100.0, 100, 1000, 3600, 10000, '%(message)s', 'INFO', 'allow_reflex', 'confidence', 'decision', 'enable_metrics', 'evaluation_ready', 'event', 'f1_score', 'fp_rate', 'fp_rate_threshold', 'json', 'log_format', 'log_level', 'message', 'metrics', 'min_samples_required', 'performance', 'precision', 'precision_threshold', 'processing_time_ms', 'ready_for_production', 'reasoning_decision', 'recall', 'recall_threshold', 'reflex_correct', 'reflex_decision', 'sample_count', 'scores', 'shadow_evaluation', 'shadow_mode', 'tenant_id', 'thresholds', 'timestamp', 'trace_id', 'user_id', 'why_reflex', '⚠️ NOT READY']

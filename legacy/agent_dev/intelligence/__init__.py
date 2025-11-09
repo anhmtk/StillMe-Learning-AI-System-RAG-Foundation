@@ -1,3 +1,0 @@
-"""
-Intelligence module
-"""

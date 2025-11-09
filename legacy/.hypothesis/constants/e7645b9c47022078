@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\router\__init__.py
-# hypothesis_version: 6.140.2
-
-[0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 1.0, 100, 500, 1000, 'FallbackHandler', 'ModelSelector', 'Router', 'analysis', 'analyze', 'anthropic', 'applications', 'architecture', 'claude-3', 'complexity_threshold', 'computing', 'confidence', 'debug', 'design', 'detailed', 'fallback', 'fallback_enabled', 'fallback_providers', 'fallback_used', 'gpt-3.5-turbo', 'gpt-4', 'healthcare', 'implement', 'model', 'models', 'openai', 'optimize', 'prompt', 'provider', 'quantum', 'refactor']

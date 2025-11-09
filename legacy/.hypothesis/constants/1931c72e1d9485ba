@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\common\http.py
-# hypothesis_version: 6.140.2
-
-[1.0, 30.0, 200, 300, 400, 500, 600, '1; mode=block', 'Accept', 'Content-Type', 'DELETE', 'DENY', 'GET', 'HEAD', 'HTTP request error', 'HTTP request timeout', 'HttpRequestBuilder', 'Making HTTP request', 'OPTIONS', 'PATCH', 'POST', 'PUT', 'URL is required', 'User-Agent', 'X-Frame-Options', 'X-XSS-Protection', 'application/json', 'content-type', 'http', 'method', 'nosniff', 'url', 'wb']

@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\health.py
-# hypothesis_version: 6.140.2
-
-[b'test', 0.001, 5.0, 90.0, 100, 200, 500, 503, 1000, 1024, 2048, '.', './data/stillme.db', '/', '/healthz', '/metrics', '/readyz', '0.1.0', '1.0.0', 'Content-Type', 'PRAGMA database_list', 'SELECT 1', 'agentdev', 'alive', 'available_memory_gb', 'completed', 'components', 'core', 'database', 'db_count', 'db_path', 'dead', 'degraded', 'degraded_checks', 'development', 'disk', 'disk_usage_percent', 'environment', 'error', 'failed', 'free_space_gb', 'health check test', 'healthy', 'healthy_checks', 'memory', 'ok', 'path', 'process_memory_mb', 'response_time_ms', 'status', 'stillme_core', 'storage', 'success', 'test_result', 'text/plain', 'timestamp', 'total_checks', 'total_space_gb', 'unhealthy', 'unhealthy_checks', 'uptime', 'uptime_seconds', 'used_style', 'version']

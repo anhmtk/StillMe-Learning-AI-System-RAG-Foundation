@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\config\validate_env.py
-# hypothesis_version: 6.140.2
-
-['\n📊 Summary:', '=', 'API_KEY', 'DEEPSEEK_API_KEY', 'DeepSeek Cloud API', 'GITHUB_TOKEN', 'GNEWS_API_KEY', 'GitHub API token', 'NEWSAPI_KEY', 'News API cho tin tức', 'OLLAMA_URL', 'OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'REDDIT_CLIENT_ID', 'REDDIT_CLIENT_SECRET', 'Reddit API client ID', '__main__', 'all_valid', 'missing_keys', 'placeholder', 'sk-xxx', 'total_required', 'valid_required', 'validation_results', 'warnings', 'xxx', 'your_api_key_here', 'ℹ️ ', '✅', '❌', '🔑 Required API Keys:']

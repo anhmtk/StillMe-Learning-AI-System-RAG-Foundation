@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\common\io.py
-# hypothesis_version: 6.140.2
-
-[4096, '*', '.backup', '.csv', '.json', '.pickle', '.tmp', '.txt', '.yaml', '.yml', 'Directory ensured', 'File backed up', 'Files listed', 'binary', 'csv', 'io', 'json', 'pickle', 'rb', 'txt', 'utf-8', 'w', 'wb', 'yaml', 'yml']

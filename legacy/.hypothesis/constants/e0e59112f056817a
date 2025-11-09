@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\conversational_core_v1.py
-# hypothesis_version: 6.140.2
-
-['active', 'cancelled', 'chat', 'command', 'completed', 'content', 'error', 'feedback', 'paused', 'question', 'role', 'timestamp', 'total_conversations', 'user']

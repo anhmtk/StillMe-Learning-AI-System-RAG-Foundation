@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agent_dev\schemas.py
-# hypothesis_version: 6.140.2
-
-[0.0, 1.0, 100, 1000, 1024, '.md', '.py', '.txt', '/', 'Allow network access', 'C:', 'EnvError', 'Error classification', 'Error message', 'Execution output', 'Execution plan', 'Execution result', 'Execution steps', 'Memory limit in MB', 'Permanent', 'PolicyViolation', 'Timeout in seconds', 'Transient', 'UserError', 'Validation report', 'balanced', 'code_analysis', 'confidence_score', 'cpu_ms', 'creative', 'file_edit', 'max_file_size_kb', 'message', 'refactoring', 'sandbox_path', 'strict', 'type']

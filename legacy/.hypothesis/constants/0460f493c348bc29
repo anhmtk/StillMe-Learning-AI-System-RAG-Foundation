@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agent_dev\validation\validation_system.py
-# hypothesis_version: 6.140.2
-
-[0.1, 0.5, 100, '--force-exclude', '--stats', '-c', '.', '=', 'E', 'E9', 'F', 'Found', 'Found (\\d+) errors?', 'W', '__main__', 'before_data', 'check', 'critical_error', 'critical_errors', 'error:', 'errors_fixed', 'evidence_file', 'execution_time', 'framework.py', 'information:', 'message', 'modules/', 'pyright', 'pyright_details', 'pyright_errors', 'python', 'result', 'ruff', 'ruff_details', 'ruff_errors', 'severity', 'style_suggestion', 'style_suggestions', 'test_passed', 'timestamp', 'total_errors', 'type', 'utf-8', 'w', 'warning', 'warning:', 'warnings', '⏰ Pyright timeout', '⏰ Ruff timeout', '✅ Quick test passed', '📊 KẾT QUẢ VALIDATION', '🔍 Chạy ruff check...', '🧪 Chạy quick test...']

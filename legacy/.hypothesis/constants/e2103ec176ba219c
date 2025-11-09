@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\common\errors.py
-# hypothesis_version: 6.140.2
-
-[1.0, 'API_ERROR', 'AUTHZ_ERROR', 'AUTH_ERROR', 'CONFIG_ERROR', 'MODULE_ERROR', 'NETWORK_ERROR', 'RESOURCE_ERROR', 'SECURITY_ERROR', 'TIMEOUT_ERROR', 'UNKNOWN_ERROR', 'VALIDATION_ERROR', 'config_key', 'context', 'current_usage', 'endpoint', 'error', 'error_code', 'error_counts', 'error_id', 'exception_type', 'failure_count', 'fallback_data', 'field', 'limit', 'message', 'module_name', 'recoverable', 'required_permission', 'resource_type', 'security_level', 'service_name', 'status', 'status_code', 'suggested_action', 'timeout', 'timeout_duration', 'timestamp', 'total_errors', 'unique_error_types', 'url', 'user_id', 'value']

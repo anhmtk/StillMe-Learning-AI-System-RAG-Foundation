@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\middleware\reflex_engine.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.7, 1.0, 1000, 'abuse_score', 'action', 'action_result', 'allow_reflex', 'balanced', 'breakdown', 'bypass', 'confidence', 'context', 'context_score', 'decision', 'disabled', 'dry_run', 'enabled', 'fallback', 'habit_action', 'habit_score', 'history_score', 'match_time_us', 'matches', 'mode', 'ok', 'original_decision', 'params', 'pattern_hits', 'pattern_score', 'policy', 'processing_time_ms', 'reason', 'reflex_decision', 'reflex_response', 'safe', 'safety_result', 'scores', 'shadow', 'shadow_mode', 'stub_safety', 'text', 'trace_id', 'utf-8', 'why_reflex']

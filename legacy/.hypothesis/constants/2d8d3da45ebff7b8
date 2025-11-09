@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\middleware\reflex_safety.py
-# hypothesis_version: 6.140.2
-
-[0.001, 0.1, 0.9, 5.0, 1000, '\\s+', 'a', 'attack', 'c', 'check_type', 'circuit_breaker', 'circuit_breaker_open', 'closed', 'config', 'dangerous', 'deep', 'deep_blocks', 'deep_check', 'deep_check_disabled', 'deep_check_enabled', 'deep_check_passed', 'deep_check_simulated', 'deep_check_timeout', 'deep_checks', 'e', 'entropy_threshold', 'exploit', 'failure_count', 'fast', 'fast_blocks', 'fast_check', 'fast_check_disabled', 'fast_check_enabled', 'fast_checks', 'h', 'half-open', 'harmful', 'illegal', 'javascript:', 'k', 'last_failure_time', 'm', 'o', 'on\\w+\\s*=', 'open', 'p', 'processing_time_ms', 'reason', 'safe', 'state', 'stats', 't', 'timeouts', 'x', 'y', 'а', 'е', 'к', 'м', 'н', 'о', 'р', 'с', 'т', 'у', 'х']

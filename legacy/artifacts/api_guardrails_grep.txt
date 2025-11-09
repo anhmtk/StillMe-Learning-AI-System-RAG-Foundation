@@ -1,4 +1,0 @@
-No matches found for "/api/v1/guardrails" in codebase.
-
-This confirms that guardrails API endpoints are NOT yet implemented.
-Status: PLANNED (as per impact_report.json)

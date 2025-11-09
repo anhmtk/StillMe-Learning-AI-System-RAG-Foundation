@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\detectors\detector_base.py
-# hypothesis_version: 6.140.2
-
-[0.0, 1000, '## Analysis\n\n', '## Recommendations\n\n', 'a', 'category', 'confidence', 'detector', 'error', 'failure_count', 'fallback', 'features', 'last_failure_time', 'latency_ms', 'name', 'needs_clarification', 'success', 'telemetry_file', 'timestamp', 'unknown', 'utf-8', 'w']

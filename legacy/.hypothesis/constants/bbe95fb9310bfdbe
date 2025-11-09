@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\supervisor.py
-# hypothesis_version: 6.140.2
-
-[0.0, 70.0, 120, 'active', 'active_supervisors', 'approval_required', 'approved', 'approved_proposals', 'auto_approve_simple', 'average_performance', 'completed', 'error', 'ethics', 'in_progress', 'inactive', 'learning_categories', 'maintenance', 'max_lesson_duration', 'max_lessons_per_day', 'medium', 'min_lesson_duration', 'pending', 'pending_proposals', 'performance', 'programming', 'rejected', 'rejection_reason', 'security', 'supervisor_config', 'system', 'timestamp']

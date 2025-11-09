@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\audit_logger.py
-# hypothesis_version: 6.140.2
-
-[100, 1024, 86400, ',', 'AuditCategory', 'AuditConfig', 'AuditEvent', 'AuditLevel', 'AuditLogger', 'ComplianceManager', 'PrivacyFilter', 'audit.log', 'by_category', 'by_level', 'by_user', 'category', 'checks', 'compliance', 'compliant', 'critical', 'error', 'event_id', 'info', 'json', 'level', 'message', 'operations', 'recent_activity', 'security', 'status', 'system', 'timestamp', 'total_events', 'user_id', 'warning']

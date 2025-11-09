@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\security\content_wrap.py
-# hypothesis_version: 6.140.2
-
-['../../', '<script>', 'DROP TABLE', 'Path traversal', 'SELECT * FROM', '[/SECURE]', '[SECURE:', ']', 'block_rate', 'description', 'drop', 'eval(', 'exec', 'exec(', 'high', 'issues', 'javascript:', 'low', 'medium', 'os.system', 'pattern', 'position', 'risk_level', 'severity', 'subprocess', 'system', 'system(', 'total_blocked', 'total_filtered', 'valid']

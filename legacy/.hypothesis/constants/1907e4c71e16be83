@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\detectors\json_detector.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.1, 0.3, 0.4, 0.5, 1.0, '\\"[^\\"]*$', '\\"[^\\"]*\\"', '\\"[^\\"]*\\"[^,}\\]]*$', '\\[[^\\]]*$', '\\[[^\\]]*\\]', '\\{[^}]*\\"[^\\"]*$', 'category', 'confidence', 'features', 'json_detector', 'json_error', 'json_like_count', 'json_valid', 'malformed_data', 'malformed_patterns', 'needs_clarification', 'test_malformed_found']

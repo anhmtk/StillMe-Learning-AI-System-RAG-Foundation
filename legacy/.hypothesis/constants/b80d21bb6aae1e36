@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\providers\factory.py
-# hypothesis_version: 6.140.2
-
-['local_llm', 'openai']

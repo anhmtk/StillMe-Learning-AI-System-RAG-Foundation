@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\modules\detectors\syntax_detector.py
-# hypothesis_version: 6.140.2
-
-[0.0, 0.2, 0.3, 0.4, 0.5, 1.0, ':', 'category', 'class', 'code_syntax_error', 'confidence', 'def', 'def\\s+\\w+\\s*\\([^)]*$', 'except', 'except\\s+[^:]*$', 'features', 'finally', 'finally\\s*$', 'for', 'for\\s+[^:]*$', 'if', 'if\\s+[^:]*$', 'indentation_issues', 'needs_clarification', 'return', 'return\\s+[^;]*$', 'syntax_detector', 'syntax_error', 'syntax_patterns', 'syntax_valid', 'test_syntax_found', 'try', 'try\\s*$', 'while', 'while\\s+[^:]*$', 'with', 'with\\s+[^:]*$']

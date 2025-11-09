@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\agent_dev\persistence\models.py
-# hypothesis_version: 6.140.2
-
-[1.0, 255, ':memory:', 'error_type', 'feedback', 'idx_feedback_session', 'is_active', 'learned_solutions', 'metric_name', 'metric_type', 'metrics', 'preference_key', 'priority', 'rules', 'session_id', 'sqlite:///', 'sqlite:///:memory:', 'success_rate', 'timestamp', 'user_id', 'user_preferences']

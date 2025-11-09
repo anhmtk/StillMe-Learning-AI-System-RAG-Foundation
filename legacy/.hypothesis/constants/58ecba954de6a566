@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\metrics\web_metrics.py
-# hypothesis_version: 6.140.2
-
-[0.0, 1.0, 100, 200, 300, 400, 3600, 'Web metrics reset', 'avg_response_time', 'count', 'dict', 'error', 'error_rate', 'error_requests_count', 'failed_requests', 'max_response_time', 'min_response_time', 'popular_endpoints', 'requests_per_minute', 'slow_requests_count', 'successful_requests', 'total_requests', 'url']

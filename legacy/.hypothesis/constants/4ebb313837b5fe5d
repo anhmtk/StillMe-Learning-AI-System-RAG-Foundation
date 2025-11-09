@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\monitoring\dashboard.py
-# hypothesis_version: 6.140.2
-
-[8080, '/', '/api/alerts', '/api/analysis', '/api/metrics', '/api/status', '/ws', '2.0.0', 'Dashboard stopped', 'alerts', 'components', 'critical', 'dashboard', 'duration', 'error', 'evolution_milestones', 'healthy', 'high', 'info', 'initializing', 'last_update', 'learning_sessions', 'localhost', 'performance_analysis', 'performance_analyzer', 'resource_metrics', 'resource_monitor', 'session_id', 'start_time', 'status', 'system_status', 'unknown', 'warning']

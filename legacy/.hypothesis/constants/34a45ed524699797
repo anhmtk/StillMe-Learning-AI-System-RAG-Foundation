@@ -1,4 +1,0 @@
-# file: D:\stillme_ai\stillme_core\common\validation.py
-# hypothesis_version: 6.140.2
-
-[1000, 5000, '\x00', '%Y-%m-%d', '%Y-%m-%d %H:%M:%S', "'", "''", '(\\b(CAST|CONVERT)\\b)', '(\\b(SP_|XP_)\\w+)', '--', '0', '1', '<button[^>]*>', '<embed[^>]*>', '<form[^>]*>', '<iframe[^>]*>', '<input[^>]*>', '<link[^>]*>', '<meta[^>]*>', '<object[^>]*>', '<select[^>]*>', '<style[^>]*>', '<textarea[^>]*>', '@import', 'Invalid URL format', 'Invalid phone number', 'VN', 'Validation completed', '[;]', 'boolean', 'critical', 'csv', 'data', 'date', 'datetime', 'email', 'error', 'expression\\s*\\(', 'false', 'file', 'float', 'html', 'info', 'integer', 'ip_address', 'javascript', 'javascript:', 'json', 'no', 'off', 'on', 'on\\w+\\s*=', 'phone', 'string', 'true', 'url', 'url\\s*\\(', 'uuid', 'validation', 'validation_engine', 'vbscript', 'vbscript:', 'warning', 'xml', 'yes']
