@@ -279,7 +279,7 @@ class ChromaClient:
                             )
                             
                             # Create a test collection to ensure client works
-                            test_collection = temp_client.create_collection(
+                            _ = temp_client.create_collection(
                                 name="test_init",
                                 metadata={"test": "true"}
                             )

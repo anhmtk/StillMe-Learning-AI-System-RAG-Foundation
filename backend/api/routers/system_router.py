@@ -254,7 +254,6 @@ async def prometheus_metrics():
     try:
         from backend.api.metrics_collector import get_metrics_collector
         from backend.validators.metrics import get_metrics as get_validation_metrics
-        from backend.learning import KnowledgeRetention
         
         metrics_collector = get_metrics_collector()
         metrics_data = metrics_collector.get_metrics()

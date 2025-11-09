@@ -3,7 +3,7 @@ Chat API request and response models with comprehensive validation
 """
 
 from pydantic import BaseModel, Field, validator
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import re
 from .common_models import sanitize_string
 
