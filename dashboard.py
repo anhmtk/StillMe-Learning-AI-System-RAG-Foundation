@@ -1147,6 +1147,12 @@ def sidebar(page_for_chat: str | None = None):
             knowledge_alert = None
             reply = None
             
+            # Initialize variables before try-except to avoid UnboundLocalError
+            confidence_score = None
+            validation_info = None
+            learning_suggestions = None
+            latency_metrics = None
+            
             try:
                 # Show progress message
                 status_placeholder.info("🤔 StillMe is thinking... This may take 30-90 seconds (AI generation + validation). If this is the first request, the embedding model may be loading (this can take 2-3 minutes).")
