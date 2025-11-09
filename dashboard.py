@@ -1001,8 +1001,10 @@ def sidebar(page_for_chat: str | None = None):
         
         # Display chat history in a larger, scrollable container
         if st.session_state.chat_history:
-            # Use expander for better space management
-            with st.sidebar.expander("📜 Chat History", expanded=True):
+            # Use container instead of expander to avoid nested expander issues
+            # (Metadata display uses button + container, not expander)
+            st.sidebar.markdown("### 📜 Chat History")
+            with st.sidebar.container():
                 # Create chat messages with better styling
                 for idx, m in enumerate(st.session_state.chat_history[-20:]):  # Show last 20 messages
                     speaker = "You" if m["role"] == "user" else "StillMe"
@@ -1067,9 +1069,9 @@ def sidebar(page_for_chat: str | None = None):
                                         context_docs_count = validation_info.get("context_docs_count", 0)
                                         
                                         if passed:
-                                            st.success(f"✅ Validation Passed")
+                                            st.success("✅ Validation Passed")
                                         else:
-                                            st.warning(f"⚠️ Validation Failed")
+                                            st.warning("⚠️ Validation Failed")
                                         
                                         if used_fallback:
                                             st.info("🛡️ **Safe Fallback Answer Used** - Original response was replaced with a safe fallback to prevent hallucination.")
