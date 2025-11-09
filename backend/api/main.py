@@ -330,9 +330,6 @@ def _initialize_rag_components():
             except Exception:
                 pass
         
-
-
-            
         else:
             # For non-schema errors, also allow service to continue
             logger.warning("⚠️ RAG components initialization failed, but service will continue")
