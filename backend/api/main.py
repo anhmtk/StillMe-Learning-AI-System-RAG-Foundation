@@ -3,13 +3,11 @@ StillMe Backend API
 Learning AI system with RAG foundation - FastAPI backend with RAG (Retrieval-Augmented Generation) capabilities
 """
 
-from fastapi import FastAPI, HTTPException, Request, Query
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
-from typing import Optional, Dict, Any, List
 import os
 import logging
-from datetime import datetime
 
 # Import RAG components
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
@@ -21,7 +19,7 @@ from backend.services.self_diagnosis import SelfDiagnosisAgent
 from backend.services.content_curator import ContentCurator
 from backend.services.rss_fetch_history import RSSFetchHistory
 from backend.services.source_integration import SourceIntegration
-from backend.api.rate_limiter import limiter, get_rate_limit_key_func, RateLimitExceeded
+from backend.api.rate_limiter import limiter, RateLimitExceeded
 from backend.api.security_middleware import get_security_middleware
 
 # Import standardized error handlers
@@ -329,7 +327,6 @@ async def startup_event():
     logger.info(f"  - RAG Retrieval: {'✓' if rag_retrieval else '✗'}")
     logger.info(f"  - Knowledge Retention: {'✓' if knowledge_retention else '✗'}")
     logger.info(f"  - Accuracy Scorer: {'✓' if accuracy_scorer else '✗'}")
- main
     
     if _initialization_error:
         logger.warning(f"⚠️ Service started with initialization errors: {_initialization_error}")
