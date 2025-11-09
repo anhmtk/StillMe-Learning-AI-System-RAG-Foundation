@@ -319,6 +319,7 @@ def _initialize_rag_components():
             rag_retrieval = None
             knowledge_retention = None
             accuracy_scorer = None
+ refactor/routerization
             
             # Update metrics collector with component health (all failed)
             try:
@@ -330,6 +331,8 @@ def _initialize_rag_components():
                 metrics_collector.set_component_health("knowledge_retention_ready", False)
             except Exception:
                 pass
+
+ main
             
         else:
             # For non-schema errors, also allow service to continue
