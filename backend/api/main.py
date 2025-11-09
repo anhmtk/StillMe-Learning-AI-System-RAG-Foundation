@@ -334,6 +334,17 @@ def _initialize_rag_components():
 
  main
             
+            # Update metrics collector with component health (all failed)
+            try:
+                from backend.api.metrics_collector import get_metrics_collector
+                metrics_collector = get_metrics_collector()
+                metrics_collector.set_component_health("rag_initialized", False)
+                metrics_collector.set_component_health("chromadb_available", False)
+                metrics_collector.set_component_health("embedding_service_ready", False)
+                metrics_collector.set_component_health("knowledge_retention_ready", False)
+            except Exception:
+                pass
+            
         else:
             # For non-schema errors, also allow service to continue
             logger.warning("⚠️ RAG components initialization failed, but service will continue")
