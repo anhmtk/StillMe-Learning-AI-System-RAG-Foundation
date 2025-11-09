@@ -100,6 +100,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     rag_retrieval_latency = 0.0
     llm_inference_latency = 0.0
     
+    # Initialize variables before try-except to avoid UnboundLocalError
+    confidence_score = None
+    validation_info = None
+    
     try:
         # Get services
         rag_retrieval = get_rag_retrieval()
