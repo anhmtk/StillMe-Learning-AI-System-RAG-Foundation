@@ -235,32 +235,94 @@ class ChromaClient:
                         import time
                         time.sleep(2.0)  # Increased wait time for Railway filesystem sync
                         
+                        # CRITICAL: Also try to delete parent data directory if it exists
+                        # This ensures no leftover SQLite files or locks
+                        parent_dir = os.path.dirname(persist_directory) if os.path.dirname(persist_directory) else "data"
+                        if parent_dir and os.path.exists(parent_dir):
+                            # Check if there are other important files in data/ directory
+                            try:
+                                other_files = [f for f in os.listdir(parent_dir) if f != "vector_db"]
+                                if not other_files or all(f.endswith('.db') for f in other_files):
+                                    # Only vector_db or only .db files - safe to delete parent
+                                    logger.info(f"🗑️ Also deleting parent directory {parent_dir} to ensure clean reset...")
+                                    try:
+                                        shutil.rmtree(parent_dir, ignore_errors=True)
+                                        time.sleep(1.0)
+                                        os.makedirs(parent_dir, exist_ok=True)
+                                        logger.info(f"✅ Recreated parent directory {parent_dir}")
+                                    except Exception as parent_error:
+                                        logger.warning(f"Could not delete parent directory (this is OK): {parent_error}")
+                            except Exception:
+                                pass  # Ignore if can't list directory
+                        
                         # Create fresh directory
                         os.makedirs(persist_directory, exist_ok=True)
                         logger.info(f"✅ Created fresh directory: {persist_directory}")
                         
                         # Wait a bit more before creating client
-                        time.sleep(0.5)
+                        time.sleep(1.0)  # Increased wait time
                         
-                        # Now create fresh client with explicit reset
-                        # Use a temporary path first to avoid any caching issues
-                        temp_client = chromadb.PersistentClient(
-                            path=persist_directory,
-                            settings=Settings(
-                                anonymized_telemetry=False,
-                                allow_reset=True
+                        # CRITICAL FIX: Create client with a temporary unique path first
+                        # This ensures ChromaDB creates completely fresh database
+                        import uuid
+                        temp_path = os.path.join(persist_directory, f"temp_{uuid.uuid4().hex[:8]}")
+                        logger.info(f"🔄 Creating ChromaDB client with temporary path first: {temp_path}")
+                        
+                        try:
+                            # Create client with temp path first
+                            temp_client = chromadb.PersistentClient(
+                                path=temp_path,
+                                settings=Settings(
+                                    anonymized_telemetry=False,
+                                    allow_reset=True
+                                )
                             )
-                        )
+                            
+                            # Create a test collection to ensure client works
+                            test_collection = temp_client.create_collection(
+                                name="test_init",
+                                metadata={"test": "true"}
+                            )
+                            temp_client.delete_collection("test_init")
+                            
+                            # Now close temp client and move to final path
+                            del temp_client
+                            import gc
+                            gc.collect()
+                            time.sleep(0.5)
+                            
+                            # Remove temp directory
+                            if os.path.exists(temp_path):
+                                shutil.rmtree(temp_path, ignore_errors=True)
+                            
+                            # Now create client with final path
+                            logger.info(f"🔄 Creating ChromaDB client with final path: {persist_directory}")
+                            self.client = chromadb.PersistentClient(
+                                path=persist_directory,
+                                settings=Settings(
+                                    anonymized_telemetry=False,
+                                    allow_reset=True
+                                )
+                            )
+                            
+                        except Exception as temp_error:
+                            logger.warning(f"Temp path approach failed, trying direct path: {temp_error}")
+                            # Fallback: Create directly with final path
+                            self.client = chromadb.PersistentClient(
+                                path=persist_directory,
+                                settings=Settings(
+                                    anonymized_telemetry=False,
+                                    allow_reset=True
+                                )
+                            )
                         
                         # Try to reset if method exists (some ChromaDB versions have this)
                         try:
-                            if hasattr(temp_client, 'reset'):
+                            if hasattr(self.client, 'reset'):
                                 logger.info("Calling ChromaDB client.reset() to clear any cached metadata...")
-                                temp_client.reset()
+                                self.client.reset()
                         except Exception as reset_warning:
                             logger.warning(f"client.reset() not available or failed (this is OK): {reset_warning}")
-                        
-                        self.client = temp_client
                         
                         # Create fresh collections
                         self.knowledge_collection = self.client.create_collection(
