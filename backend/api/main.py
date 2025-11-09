@@ -355,6 +355,7 @@ refactor/routerization
                 pass
  refactor/routerization
         
+refactor/routerization
 
             
             # Update metrics collector with component health (all failed)
@@ -369,6 +370,12 @@ refactor/routerization
                 pass
             
  main
+ main
+
+        
+
+
+            
  main
         else:
             # For non-schema errors, also allow service to continue
