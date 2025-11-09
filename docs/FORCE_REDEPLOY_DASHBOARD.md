@@ -15,22 +15,35 @@ Dashboard service và Backend service deploy **độc lập** trên Railway:
 
 ## ✅ Giải pháp: Force Redeploy Dashboard Service
 
-### Bước 1: Kiểm tra Dashboard Service trên Railway
+### Bước 1: Vào Project athletic-victory
 
-1. **Railway Dashboard** → **dashboard** service (không phải `stillme-backend`)
-2. Click tab **"Deployments"**
-3. Kiểm tra commit nào đang được deploy:
+1. **Railway Dashboard** → Click vào project **"athletic-victory"**
+2. Bạn sẽ thấy 2 services: `stillme-backend` và `dashboard`
+
+### Bước 2: Kiểm tra Deployments (Project Level)
+
+1. Trong project **athletic-victory**, click tab **"Deployments"** (ở top navigation)
+2. Bạn sẽ thấy danh sách deployments cho cả 2 services
+3. Tìm deployment của **dashboard** service
+4. Kiểm tra commit nào đang được deploy:
    - Nếu thấy commit cũ (trước `d559319d6`) → Cần redeploy
-   - Nếu thấy commit `d559319d6` hoặc mới hơn → Có thể là cache issue
+   - Nếu thấy commit `d559319d6` hoặc mới hơn nhưng vẫn lỗi → Có thể là cache issue
 
-### Bước 2: Force Redeploy Dashboard
+### Bước 3: Force Redeploy Dashboard
 
-**Option A: Manual Redeploy (Khuyến nghị)**
+**Option A: Redeploy từ Project Deployments Tab (Khuyến nghị)**
 
-1. **Dashboard service** → **Deployments** tab
-2. Tìm deployment mới nhất (có commit `d559319d6` hoặc `89380e7f3`)
-3. Click **"Redeploy"** button
+1. **athletic-victory** → Tab **"Deployments"**
+2. Tìm deployment của **dashboard** service (có commit `d559319d6` hoặc `89380e7f3`)
+3. Click **"Redeploy"** button bên cạnh deployment đó
 4. Hoặc click **"Deploy"** để trigger deploy mới từ commit mới nhất
+
+**Option B: Redeploy từ Service Details**
+
+1. **athletic-victory** → Click vào service **"dashboard"** (card)
+2. Bạn sẽ vào service details page
+3. Tab **"Details"** → Tìm deployment mới nhất
+4. Click **"Redeploy"** hoặc **"Deploy"** button
 
 **Option B: Trigger bằng Empty Commit**
 
@@ -46,17 +59,17 @@ git commit --allow-empty -m "chore: trigger dashboard redeploy"
 
 Railway sẽ detect commit mới và auto-deploy cả 2 services.
 
-### Bước 3: Verify Deployment
+### Bước 4: Verify Deployment
 
 Sau khi redeploy:
-1. **Dashboard service** → **Deployments** tab
-2. Kiểm tra deployment mới nhất:
+1. **athletic-victory** → Tab **"Deployments"** (hoặc click vào service **"dashboard"** → Tab **"Details"**)
+2. Kiểm tra deployment mới nhất của **dashboard**:
    - Commit phải là `d559319d6` hoặc mới hơn
    - Tất cả steps (Initialization, Build, Deploy, Network, Post-deploy) phải **màu xanh**
-3. **Dashboard service** → **Logs** tab
+3. **athletic-victory** → Click vào service **"dashboard"** → Tab **"Logs"** (hoặc tab **"Deploy Logs"**)
 4. Kiểm tra log có: `Starting Streamlit dashboard...` (không phải `Starting FastAPI server...`)
 
-### Bước 4: Test Dashboard
+### Bước 5: Test Dashboard
 
 1. Mở dashboard URL
 2. Chat với StillMe
@@ -68,17 +81,19 @@ Sau khi redeploy:
 
 Nếu vẫn lỗi sau khi redeploy, kiểm tra code đang chạy:
 
-1. **Dashboard service** → **Logs** tab
+1. **athletic-victory** → Click vào service **"dashboard"** → Tab **"Logs"** hoặc **"Deploy Logs"**
 2. Tìm dòng có `File "/app/dashboard.py", line 1021`
 3. Nếu vẫn thấy `st.expander("📊 Response Metadata")` → Code cũ vẫn đang chạy
 4. Nếu thấy `st.button("📊 Show Metadata")` → Code mới đã được deploy
 
 ## 💡 Lưu ý
 
+- **Tab "Deployments" chỉ có ở project level** (`athletic-victory`), không có ở service level
 - **Dashboard và Backend deploy độc lập** - Cần redeploy riêng
 - **Railway có thể cache** - Cần force redeploy để clear cache
 - **Commit fix đã có** (`d559319d6`) - Chỉ cần deploy lại
 - **Code local đã đúng** - Không cần sửa code nữa
+- **Service level có tabs**: Details, Build Logs, Deploy Logs, HTTP Logs, Variables, Metrics, Settings
 
 ## ✅ Kết quả mong đợi
 
