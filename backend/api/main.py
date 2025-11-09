@@ -319,7 +319,6 @@ def _initialize_rag_components():
             rag_retrieval = None
             knowledge_retention = None
             accuracy_scorer = None
-            
             # Update metrics collector with component health (all failed)
             try:
                 from backend.api.metrics_collector import get_metrics_collector
@@ -330,7 +329,7 @@ def _initialize_rag_components():
                 metrics_collector.set_component_health("knowledge_retention_ready", False)
             except Exception:
                 pass
-            
+        
         else:
             # For non-schema errors, also allow service to continue
             logger.warning("⚠️ RAG components initialization failed, but service will continue")
