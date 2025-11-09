@@ -156,10 +156,6 @@ class ChromaClient:
                         # Close existing client if it exists
                         if hasattr(self, 'client'):
                             try:
-refactor/routerization
-
- refactor/routerization
- main
                                 # Try to reset client if method exists
                                 if hasattr(self.client, 'reset'):
                                     try:
@@ -167,26 +163,15 @@ refactor/routerization
                                         self.client.reset()
                                     except Exception as reset_error:
                                         logger.warning(f"client.reset() failed (may not be available): {reset_error}")
- refactor/routerization
-
-
- main
- main
                                 del self.client
                             except Exception:
                                 pass
                         
- refactor/routerization
-
- refactor/routerization
- main
                         # Force garbage collection to ensure old client is fully freed
                         import gc
                         gc.collect()
                         logger.info("Garbage collected old client references")
                         
- refactor/routerization
-
                         # Force delete directory completely (more aggressive approach)
                         if os.path.exists(persist_directory):
                             logger.info(f"🗑️ Deleting {persist_directory} directory and all contents...")
@@ -238,66 +223,6 @@ refactor/routerization
                                     logger.error(f"❌ Directory still exists after {max_retries} attempts")
                                     raise RuntimeError(f"Failed to delete {persist_directory} after {max_retries} attempts")
                                     
-
- main
-                        # Force delete directory completely (more aggressive approach)
-                        if os.path.exists(persist_directory):
-                            logger.info(f"🗑️ Deleting {persist_directory} directory and all contents...")
-                            try:
-                                # First, try to make all files writable and delete
-                                max_retries = 3
-                                for attempt in range(max_retries):
-                                    try:
-                                        # Make all files writable first
-                                        for root, dirs, files in os.walk(persist_directory, topdown=False):
-                                            for f in files:
-                                                try:
-                                                    file_path = os.path.join(root, f)
-                                                    os.chmod(file_path, 0o777)
-                                                    os.remove(file_path)
-                                                except Exception:
-                                                    pass
-                                            for d in dirs:
-                                                try:
-                                                    dir_path = os.path.join(root, d)
-                                                    os.chmod(dir_path, 0o777)
-                                                    shutil.rmtree(dir_path, ignore_errors=True)
-                                                except Exception:
-                                                    pass
-                                        
-                                        # Now delete the directory itself
-                                        os.chmod(persist_directory, 0o777)
-                                        shutil.rmtree(persist_directory, ignore_errors=True)
-                                        
-                                        # Verify deletion
-                                        if not os.path.exists(persist_directory):
-                                            logger.info(f"✅ Deleted {persist_directory} (attempt {attempt + 1})")
-                                            break
-                                        else:
-                                            if attempt < max_retries - 1:
-                                                logger.warning(f"Directory still exists, retrying... (attempt {attempt + 1}/{max_retries})")
-                                                import time
-                                                time.sleep(0.5)
-                                    except Exception as delete_error:
-                                        if attempt < max_retries - 1:
-                                            logger.warning(f"Delete attempt {attempt + 1} failed: {delete_error}, retrying...")
-                                            import time
-                                            time.sleep(0.5)
-                                        else:
-                                            raise
-                                
- refactor/routerization
-                                # Final verification
-                                if os.path.exists(persist_directory):
-                                    logger.error(f"❌ Directory still exists after {max_retries} attempts")
-                                    raise RuntimeError(f"Failed to delete {persist_directory} after {max_retries} attempts")
-                                    
-
-                                # Now delete everything
-                                shutil.rmtree(persist_directory, ignore_errors=True)
-                                logger.info(f"✅ Deleted {persist_directory}")
- main
- main
                             except Exception as delete_error:
                                 logger.error(f"❌ Failed to delete directory: {delete_error}")
                                 logger.error("💡 MANUAL ACTION REQUIRED: Please delete data/vector_db directory on Railway and restart service")
@@ -306,7 +231,6 @@ refactor/routerization
                                     "Please manually delete data/vector_db directory on Railway and restart."
                                 ) from delete_error
                         
- refactor/routerization
                         # Wait for filesystem sync (longer wait for Railway)
                         import time
                         time.sleep(2.0)  # Increased wait time for Railway filesystem sync
@@ -330,23 +254,11 @@ refactor/routerization
                                         logger.warning(f"Could not delete parent directory (this is OK): {parent_error}")
                             except Exception:
                                 pass  # Ignore if can't list directory
-
- refactor/routerization
-                        # Wait for filesystem sync (longer wait for Railway)
-                        import time
-                        time.sleep(2.0)  # Increased wait time for Railway filesystem sync
-
-                        # Wait for filesystem sync
-                        import time
-                        time.sleep(1.0)  # Increased wait time for Railway filesystem
- main
- main
                         
                         # Create fresh directory
                         os.makedirs(persist_directory, exist_ok=True)
                         logger.info(f"✅ Created fresh directory: {persist_directory}")
                         
- refactor/routerization
                         # Wait a bit more before creating client
                         time.sleep(1.0)  # Increased wait time
                         
@@ -411,40 +323,7 @@ refactor/routerization
                                 self.client.reset()
                         except Exception as reset_warning:
                             logger.warning(f"client.reset() not available or failed (this is OK): {reset_warning}")
-
- refactor/routerization
-                        # Wait a bit more before creating client
-                        time.sleep(0.5)
                         
-                        # Now create fresh client with explicit reset
-                        # Use a temporary path first to avoid any caching issues
-                        temp_client = chromadb.PersistentClient(
-
-                        # Now create fresh client
-                        self.client = chromadb.PersistentClient(
- main
-                            path=persist_directory,
-                            settings=Settings(
-                                anonymized_telemetry=False,
-                                allow_reset=True
-                            )
-                        )
- refactor/routerization
-                        
-                        # Try to reset if method exists (some ChromaDB versions have this)
-                        try:
-                            if hasattr(temp_client, 'reset'):
-                                logger.info("Calling ChromaDB client.reset() to clear any cached metadata...")
-                                temp_client.reset()
-                        except Exception as reset_warning:
-                            logger.warning(f"client.reset() not available or failed (this is OK): {reset_warning}")
-                        
-                        self.client = temp_client
-                        
-
-                        
- main
- main
                         # Create fresh collections
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
