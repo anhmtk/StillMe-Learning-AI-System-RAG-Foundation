@@ -35,11 +35,15 @@ While major AI companies build closed systems with proprietary algorithms, Still
 **Current MVP Status:** Foundation components are implemented and working:
 - ✅ **Vector Database (ChromaDB)**: Semantic search and knowledge retrieval functional
 - ✅ **RAG System**: Retrieval-Augmented Generation for context-aware responses  
-- ✅ **Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, and ethics checks
+- ✅ **Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, confidence validation, and ethics checks
+  - **ConfidenceValidator**: AI knows when to say "I don't know" (prevents overconfidence without context)
+  - **FallbackHandler**: Safe fallback answers when validation fails (prevents hallucinated content)
+  - **Confidence Score**: Real-time confidence calculation (0.0-1.0) based on context quality
+  - **Learning Suggestions**: Auto-suggests topics to learn from knowledge gaps
 - ✅ **Identity Injection**: Ensures StillMe brand consistency across all models (DeepSeek, GPT, Gemini, local)
 - ✅ **Knowledge Retention**: Learning metrics tracking system
 - ✅ **Accuracy Scoring**: Response quality measurement
-- ✅ **Dashboard**: Interactive UI with RAG interface, validation metrics, and learning metrics
+- ✅ **Dashboard**: Interactive UI with RAG interface, validation metrics, confidence scores, and learning metrics
 - ✅ **Continuum Memory System** (NEW): Tiered memory architecture (L0-L3) with promotion/demotion, multi-timescale scheduler, and forgetting metrics
 - ✅ **Multi-Source Learning** (NEW): Integrated fetching from RSS, arXiv, CrossRef, and Wikipedia with pre-filtering
 
@@ -287,12 +291,19 @@ graph TB
 ### ✅ **Implemented & Functional:**
 - **🗄️ Vector Database (ChromaDB)**: Semantic search and knowledge retrieval working - [ChromaDB Documentation](https://www.trychroma.com/)
 - **🔍 RAG System**: Retrieval-Augmented Generation fully functional - Based on [Lewis et al. (2020)](https://arxiv.org/abs/2005.11401) "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"
-- **✅ Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, and ethics checks
+- **✅ Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, confidence validation, and ethics checks
+  - **ConfidenceValidator**: Detects when AI should express uncertainty (especially when no context)
+  - **FallbackHandler**: Provides safe fallback answers when validation fails critically
+  - **Confidence Score**: Calculates AI confidence based on context quality and validation results
+  - **Learning Suggestions**: Auto-generates topics to learn from knowledge gaps
 - **🎭 Identity Injection**: Ensures StillMe brand consistency across all models (DeepSeek, GPT, Gemini, local)
 - **🎨 Tone Alignment**: Normalizes response tone to StillMe style
 - **🧠 Knowledge Retention**: Learning metrics tracking system
 - **📊 Accuracy Scoring**: Response quality measurement
 - **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, validation panel, memory health, and chat
+  - **Confidence Score Display**: Color-coded confidence indicators (🟢 green / 🟡 orange / 🔴 red)
+  - **Validation Info**: Shows validation status, reasons, and fallback usage
+  - **Learning Suggestions**: Displays topics to learn based on knowledge gaps
 - **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`) + Validation API (`/api/validators/metrics`) + SPICE API (`/api/spice/*`) + Continuum Memory API (`/api/v1/tiers/*`) + Health/Ready endpoints (`/health`, `/ready`)
 - **📦 Modular Router Architecture** (NEW): Refactored monolithic `main.py` (2817 lines) into modular routers for better maintainability:
   - `chat_router.py` - Chat endpoints (4 endpoints)
@@ -363,7 +374,10 @@ graph TB
 - **📈 Evolution Panel**: Real-time AI stage and progress tracking
 - **💬 Chat Interface**: Interactive communication with StillMe via sidebar
 - **🔍 RAG Interface**: Add knowledge to Vector DB and test retrieval
-- **✅ Validation Panel**: Monitor validator chain performance, pass rate, overlap scores, and failure reasons
+- **✅ Validation Panel**: Monitor validator chain performance, pass rate, overlap scores, confidence scores, fallback usage, and hallucination reduction rate
+- **📊 Confidence Score Display**: Visual indicators showing AI confidence level for each response
+- **🛡️ Fallback Indicator**: Shows when safe fallback answers were used to prevent hallucinations
+- **💡 Learning Suggestions**: Displays topics StillMe should learn based on knowledge gaps
 - **📊 Learning Sessions**: Record and score learning interactions
 - **📈 Metrics Dashboard**: Vector DB stats, accuracy metrics, retention tracking
 - **🔄 Quick Actions**: Run learning sessions, update metrics
@@ -488,14 +502,20 @@ StillMe progresses through distinct developmental stages based on **learning ses
 - **Status**: MVP functional and tested. Ready for production scaling.
 
 #### **v0.6.4 - Validator Chain & Identity Injection (✅ Done - MVP)**
-- ✅ **Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, numeric, and ethics checks
+- ✅ **Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, confidence validation, numeric, and ethics checks
 - 🎭 **Identity Injection**: Ensures StillMe brand consistency across all models (DeepSeek, GPT, Gemini, local)
 - 🎨 **Tone Alignment**: Normalizes response tone to StillMe style
-- 📊 **Validation Metrics**: Dashboard panel with pass rate, overlap scores, and failure reasons
-- **Technical Implementation**: ✅ ValidatorChain + IdentityInjector + ToneAligner modules
+- 🛡️ **ConfidenceValidator**: Detects when AI should express uncertainty (prevents overconfidence without context)
+- 🔄 **FallbackHandler**: Provides safe fallback answers when validation fails (prevents hallucinated content)
+- 📊 **Confidence Score**: Calculates AI confidence (0.0-1.0) based on context quality and validation results
+- 💡 **Learning Suggestions**: Auto-generates topics to learn from knowledge gaps
+- 📊 **Validation Metrics**: Dashboard panel with pass rate, overlap scores, confidence scores, fallback usage, and hallucination reduction rate
+- **Technical Implementation**: ✅ ValidatorChain + IdentityInjector + ToneAligner + ConfidenceValidator + FallbackHandler modules
 - **Configuration**: Enable with `ENABLE_VALIDATORS=true` (safe rollout, backward compatible)
-- **API Endpoints**: `GET /api/validators/metrics` - Get validation metrics
-- **Status**: MVP functional. All tests passing (18 tests). Ready for production.
+- **API Endpoints**: `GET /api/validators/metrics` - Get validation metrics including confidence and hallucination reduction
+- **API Response**: ChatResponse now includes `confidence_score`, `validation_info`, and `learning_suggestions`
+- **Dashboard**: Confidence score display, validation info, and learning suggestions in chat interface
+- **Status**: MVP functional. All tests passing (27 tests for confidence validation). Ready for production.
 
 #### **v0.6.2 - Self-Diagnosis & Content Curation (✅ Done - MVP)**
 - 🔍 **Self-Diagnosis Agent**: ✅ Identify knowledge gaps using RAG semantic search
@@ -1137,8 +1157,9 @@ If you're in a developing nation working on:
 - ✅ HTTPS enforcement middleware with security headers
 
 **Testing:**
-- ✅ Test coverage expanded: 83 tests covering RSS fetcher, scheduler, curator, knowledge retention, integration tests
+- ✅ Test coverage expanded: 110+ tests covering RSS fetcher, scheduler, curator, knowledge retention, integration tests, confidence validation (27 new tests)
 - ✅ Integration tests for RSS → RAG pipeline implemented
+- ✅ Confidence validation tests: 27 strict tests (11 confidence validator, 10 fallback handler, 6 integration) - all passing
 
 **Scalability:**
 - ⚠️ SQLite database will bottleneck when scaling (PostgreSQL migration planned - Alembic setup completed, see `docs/DATABASE_MIGRATION_PLANNING.md`)
@@ -1199,6 +1220,7 @@ StillMe's documentation is **intentionally modular** - each file focuses on a sp
 - **Deployment Guide**: See [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) for deployment instructions
 - **Development Guide**: See [`docs/DEVELOPMENT_GUIDE.md`](docs/DEVELOPMENT_GUIDE.md) for contributing guidelines
 - **SPICE Architecture**: See [`docs/SPICE_ARCHITECTURE.md`](docs/SPICE_ARCHITECTURE.md) for SPICE framework details
+- **Confidence Validation**: See [`docs/CONFIDENCE_AND_FALLBACK.md`](docs/CONFIDENCE_AND_FALLBACK.md) for confidence validation and fallback handler details
 
 **💡 Quick Navigation:**
 - **Want to understand StillMe's vision?** → [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md)
