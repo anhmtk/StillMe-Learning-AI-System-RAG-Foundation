@@ -283,23 +283,32 @@ app.include_router(system_router.router, tags=["system"])
 
 @app.on_event("startup")
 async def startup_event():
-    """Log when FastAPI/uvicorn server is ready"""
-    logger.info("🚀 FastAPI application startup complete")
+    """Initialize RAG components and log when FastAPI/uvicorn server is ready"""
+    logger.info("🚀 FastAPI application startup event triggered")
     logger.info("🌐 Uvicorn server is ready to accept connections")
+    logger.info("📋 /health endpoint is available immediately")
+    logger.info("⏳ Starting RAG components initialization in background...")
     
-    # Log RAG components status
-    logger.info("📊 RAG Components Status:")
-    logger.info(f"  - ChromaDB: {'✓' if chroma_client else '✗'}")
-    logger.info(f"  - Embedding Service: {'✓' if embedding_service else '✗'}")
-    logger.info(f"  - RAG Retrieval: {'✓' if rag_retrieval else '✗'}")
-    logger.info(f"  - Knowledge Retention: {'✓' if knowledge_retention else '✗'}")
-    logger.info(f"  - Accuracy Scorer: {'✓' if accuracy_scorer else '✗'}")
+    # Initialize RAG components lazily (non-blocking)
+    # This allows /health endpoint to work immediately
+    import asyncio
+    asyncio.create_task(asyncio.to_thread(_initialize_rag_components))
+    
+    # Give it a moment, then log status
+    await asyncio.sleep(0.1)
+    
+    # Log RAG components status (may still be initializing)
+    logger.info("📊 RAG Components Status (initialization may be in progress):")
+    logger.info(f"  - ChromaDB: {'✓' if chroma_client else '⏳ Initializing...'}")
+    logger.info(f"  - Embedding Service: {'✓' if embedding_service else '⏳ Initializing...'}")
+    logger.info(f"  - RAG Retrieval: {'✓' if rag_retrieval else '⏳ Initializing...'}")
+    logger.info(f"  - Knowledge Retention: {'✓' if knowledge_retention else '⏳ Initializing...'}")
+    logger.info(f"  - Accuracy Scorer: {'✓' if accuracy_scorer else '⏳ Initializing...'}")
     
     if _initialization_error:
         logger.warning(f"⚠️ Service started with initialization errors: {_initialization_error}")
-    elif rag_retrieval is None:
-        logger.error("❌ CRITICAL: RAG retrieval is None despite successful initialization logs!")
-        logger.error("   This may indicate a race condition or variable scope issue.")
+    elif not _rag_initialization_complete and not _rag_initialization_started:
+        logger.info("ℹ️ RAG initialization starting in background - /health endpoint is ready")
 
 @app.on_event("shutdown")
 async def shutdown_event():
