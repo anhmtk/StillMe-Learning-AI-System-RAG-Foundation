@@ -3,7 +3,7 @@ SchemaFormat validator - Checks if answer matches required format/sections
 """
 
 from typing import List, Optional
-from .base import Validator, ValidationResult
+from .base import ValidationResult
 import logging
 
 logger = logging.getLogger(__name__)

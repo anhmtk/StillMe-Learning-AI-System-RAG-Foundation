@@ -109,11 +109,10 @@ class WikipediaFetcher:
             content_url = data.get("content_urls", {}).get("desktop", {}).get("page", "")
             
             # Fetch full page content if available
-            full_content = extract
-            if "pageid" in data:
-                page_id = data["pageid"]
-                # Try to get full content (may require different endpoint)
-                # For now, use extract as content
+            # TODO: Use page_id to fetch full content if needed
+            # if "pageid" in data:
+            #     page_id = data["pageid"]
+            #     # Try to get full content (may require different endpoint)
             
             # Clean HTML from extract
             extract = self._strip_html(extract)

@@ -6,7 +6,6 @@ Shared utilities for chat endpoints (language detection, AI response generation)
 import os
 import logging
 import httpx
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

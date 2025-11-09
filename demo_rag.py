@@ -7,7 +7,6 @@ Demonstrates Vector DB and Meta-Learning capabilities
 import asyncio
 import sys
 import os
-from datetime import datetime
 
 # Add backend to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
@@ -58,7 +57,7 @@ async def demo_rag_system():
         
         for item in sample_knowledge:
             # Add to knowledge retention
-            knowledge_id = knowledge_retention.add_knowledge(
+            knowledge_retention.add_knowledge(
                 content=item["content"],
                 source=item["source"],
                 knowledge_type=item["type"],

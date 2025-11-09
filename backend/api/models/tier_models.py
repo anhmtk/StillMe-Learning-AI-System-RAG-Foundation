@@ -5,7 +5,6 @@ Pydantic models for tier-related APIs
 
 from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any, List
-from datetime import datetime
 
 
 class TierStatsResponse(BaseModel):

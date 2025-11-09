@@ -96,8 +96,8 @@ This transparency ensures StillMe learns responsibly while maintaining community
 
 ```bash
 # Clone repository
-git clone https://github.com/anhmtk/StillMe---Self-Evolving-AI-System.git
-cd StillMe---Self-Evolving-AI-System
+git clone https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation.git
+cd StillMe-Learning-AI-System-RAG-Foundation
 
 # One-click setup (Linux/Mac)
 chmod +x quick-start.sh
@@ -121,7 +121,7 @@ docker-compose up -d
 1. Push code to GitHub (already done ✅)
 2. Go to https://railway.app → Login with GitHub
 3. Click "New Project" → "Deploy from GitHub repo"
-4. Select `StillMe---Self-Evolving-AI-System`
+4. Select `StillMe-Learning-AI-System-RAG-Foundation`
 5. Railway auto-detects `docker-compose.yml` → Deploy!
 6. Add environment variables:
    - `DEEPSEEK_API_KEY=sk-your-key`
@@ -143,8 +143,8 @@ docker-compose up -d
 
 ```bash
 # Clone repository
-git clone https://github.com/anhmtk/StillMe---Self-Evolving-AI-System.git
-cd StillMe---Self-Evolving-AI-System
+git clone https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation.git
+cd StillMe-Learning-AI-System-RAG-Foundation
 
 # Install dependencies
 pip install -r requirements.txt
@@ -255,15 +255,15 @@ graph TB
 - **🧠 Knowledge Retention**: Learning metrics tracking system
 - **📊 Accuracy Scoring**: Response quality measurement
 - **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, validation panel, memory health, and chat
-- **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`) + Validation API (`/api/validators/metrics`) + SPICE API (`/api/spice/*`) + Continuum Memory API (`/api/v1/tiers/*`)
+- **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`) + Validation API (`/api/validators/metrics`) + SPICE API (`/api/spice/*`) + Continuum Memory API (`/api/v1/tiers/*`) + Health/Ready endpoints (`/health`, `/ready`)
 - **📦 Modular Router Architecture** (NEW): Refactored monolithic `main.py` (2817 lines) into modular routers for better maintainability:
   - `chat_router.py` - Chat endpoints (4 endpoints)
   - `learning_router.py` - Learning endpoints (19 endpoints)
   - `rag_router.py` - RAG endpoints (4 endpoints)
   - `tiers_router.py` - Continuum Memory tier management (5 endpoints)
   - `spice_router.py` - SPICE framework endpoints (6 endpoints)
-  - `system_router.py` - System endpoints: root, health, status, validators/metrics (4 endpoints)
-  - **Total**: 42 endpoints organized into 6 routers
+  - `system_router.py` - System endpoints: root, health, ready, status, validators/metrics (5 endpoints)
+  - **Total**: 43 endpoints organized into 6 routers
   - **Benefits**: Better code organization, easier maintenance, OSS-friendly structure
 - **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours + Multi-timescale scheduler (hourly/daily/weekly/monthly)
 - **🔍 Self-Diagnosis**: Knowledge gap detection and learning focus suggestions
@@ -275,6 +275,8 @@ graph TB
 - **🎯 SPICE Framework**: Self-Play In Corpus Environments architecture (v0.5+)
 - **🌐 Multilingual Support**: Automatic language detection and response in user's language (Vietnamese, English, and more)
 - **🚀 Public Deployment Ready**: Config files included (`railway.json`, `render.yaml`) - 1-click deploy
+- **🏥 Health & Readiness Probes**: `/health` (liveness) and `/ready` (readiness) endpoints for Kubernetes/Docker deployments
+- **🗄️ Database Migration Planning**: Alembic setup completed for future PostgreSQL migration (see `docs/DATABASE_MIGRATION_PLANNING.md`)
 
 ### 🚧 **MVP Ready (Manual Use):**
 - **📰 RSS Learning Pipeline**: ✅ Basic RSS fetcher working - manual trigger via API
@@ -837,6 +839,14 @@ NOTIFY_ERRORS=true
 
 ## 📊 API Endpoints
 
+### **System Health APIs**
+- `GET /health` - Liveness probe (always returns 200 when service is running)
+- `GET /ready` - Readiness probe (returns 200 when all checks pass, 503 if any check fails)
+  - Checks: SQLite database connectivity, ChromaDB availability, Embedding service (2s timeout)
+  - Feature flag: `ENABLE_HEALTH_READY` (default: `true`)
+- `GET /api/status` - System status
+- `GET /api/validators/metrics` - Validation metrics
+
 ### **Core Learning APIs**
 - `GET /api/learning/sessions` - Get learning sessions
 - `POST /api/learning/sessions/run` - Trigger learning session
@@ -888,27 +898,48 @@ NOTIFY_ERRORS=true
 
 ## 🤝 Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup guide.
 
-**Quick Start for Adding New AI Models:**
+### 🚧 Current Status & Contribution Opportunities
+
+**MVP Stage** - Built by solo founder with AI assistance. Some areas need improvement:
+
+- ✅ **Working**: Core RAG, Validator Chain, Learning Pipeline, Modular Routers
+- 🚧 **In Progress**: SPICE Framework (framework ready, implementation needed)
+- 📋 **Planned**: PostgreSQL migration, Observability stack, Advanced features
+- 🎯 **Good First Issues**: Type hints, Dependency Injection refactor, Documentation improvements
+
+**Contributions Welcome!** We're actively looking for contributors to help improve StillMe.
+
+### **Quick Start for Adding New AI Models:**
 - See [CONTRIBUTING.md#adding-support-for-new-ai-models](CONTRIBUTING.md#-adding-support-for-new-ai-models) for step-by-step guide
 - All models automatically get language matching via `build_system_prompt_with_language()`
 - Just create one function and add one line to the router!
 
 ### **Areas for Contribution**
-- **UI/UX Improvements**: Dashboard enhancements, mobile responsiveness
-- **Learning Sources**: Add new RSS feeds and API integrations
-- **Ethical Filtering**: Improve safety algorithms and rules
-- **Documentation**: API docs, tutorials, guides
-- **Testing**: Unit tests, integration tests, performance tests
-- **Evolution Metrics**: Help implement accuracy tracking, retention metrics
-- **Docker & DevOps**: Improve deployment, CI/CD pipelines
+
+**Good First Issues** (Great for newcomers):
+- Add type hints to functions
+- Refactor to dependency injection (FastAPI `Depends()`)
+- Improve documentation
+- Add unit tests for existing features
+
+**Help Wanted** (Community contributions welcome):
+- Complete SPICE implementation
+- PostgreSQL migration execution
+- Add observability (Prometheus metrics, structured logging)
+- Integration tests for critical paths
+
+**Advanced** (Requires expertise):
+- Performance optimization (Redis caching, query optimization)
+- Scalability architecture improvements
+- Security enhancements
 
 ### **Community Resources**
 
-- **GitHub Discussions**: [Join discussions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions)
-- **Issues**: [Report bugs or request features](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues)
-- **Pull Requests**: [Contribute code](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/pulls)
+- **GitHub Discussions**: [Join discussions](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/discussions)
+- **Issues**: [Report bugs or request features](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/issues)
+- **Pull Requests**: [Contribute code](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/pulls)
 
 > **Note**: As a new project, we're building our community. Every contribution, no matter how small, helps StillMe evolve!
 
@@ -934,9 +965,9 @@ Whether you support or oppose it, StillMe forces you to pay attention:
 This project is maintained by passion and community contributions. If you believe in the mission:
 
 - **🔧 Contribute**: Code, docs, testing, translations - every contribution matters
-- **💬 Join Discussions**: [GitHub Discussions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions) - Engage, debate, share ideas
+- **💬 Join Discussions**: [GitHub Discussions](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/discussions) - Engage, debate, share ideas
 - **📢 Spread The Word**: Share with developer and researcher communities
-- **🎯 Provide Feedback**: [Open an Issue](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues) - Criticize, suggest, propose
+- **🎯 Provide Feedback**: [Open an Issue](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/issues) - Criticize, suggest, propose
 
 > **Note**: We're not accepting monetary donations yet. The best way to support StillMe is through contributions, discussions, and spreading the word. Community channels and donation options will be announced as the project grows.
 
@@ -1072,7 +1103,7 @@ If you're in a developing nation working on:
 - ✅ Integration tests for RSS → RAG pipeline implemented
 
 **Scalability:**
-- ⚠️ SQLite database will bottleneck when scaling (needs PostgreSQL migration)
+- ⚠️ SQLite database will bottleneck when scaling (PostgreSQL migration planned - Alembic setup completed, see `docs/DATABASE_MIGRATION_PLANNING.md`)
 - ⚠️ Single-threaded scheduler (needs distributed task queue)
 - ⚠️ ChromaDB memory-based (needs persistence strategy for scaling)
 
@@ -1091,9 +1122,9 @@ See details in [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IM
 3. ✅ Error handling standardization - **COMPLETED**
 
 **SHORT-TERM (1-3 months):**
-4. Database migration planning (SQLite → PostgreSQL)
+4. Database migration execution (SQLite → PostgreSQL) - ✅ Planning completed (Alembic setup done)
 5. Performance optimization (Redis caching, query optimization)
-6. Monitoring & observability (health checks, metrics, logging)
+6. Monitoring & observability (health checks, metrics, logging) - ✅ Health/ready endpoints implemented
 
 **MEDIUM-TERM (3-6 months):**
 7. Scalability architecture (PostgreSQL, Celery, load balancer)

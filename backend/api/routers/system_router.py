@@ -3,12 +3,19 @@ System Router - Core endpoints for API health, status, and metrics
 Handles root, health check, system status, and validation metrics
 """
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException, Response
 import logging
+import os
+import sqlite3
+import asyncio
 from datetime import datetime
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Feature flag for health/ready endpoints
+ENABLE_HEALTH_READY = os.getenv("ENABLE_HEALTH_READY", "true").lower() == "true"
 
 # Import global services from main (temporary - will refactor to dependency injection later)
 def get_rag_retrieval():
@@ -43,27 +50,151 @@ async def root():
 @router.get("/health")
 async def health_check(request: Request):
     """
-    Health check endpoint for Railway/Docker health probes.
+    Liveness probe endpoint for Railway/Docker health probes.
+    Returns 200 if service is running (even with minor issues).
+    No rate limiting - must always be available for monitoring.
+    
+    This endpoint is designed to be lightweight and always return 200,
+    even during RAG component initialization, to prevent Railway from
+    killing the container during startup.
+    
+    IMPORTANT: This endpoint must return 200 IMMEDIATELY, even before
+    FastAPI app is fully initialized, to prevent Railway from marking
+    deployment as failed during startup.
+    
+    This is a PURE LIVENESS check - it only verifies the process is running.
+    For dependency checks (DB, ChromaDB, Embeddings), use /ready endpoint.
+    """
+    # Always return 200 - this endpoint only checks if the service is running
+    # Use /ready endpoint for detailed readiness checks
+    # This endpoint should NEVER fail - it's the first thing Railway checks
+    
+    # Pure liveness check - no dependencies, no try/except needed
+    # Just return 200 OK immediately
+    return {
+        "status": "healthy",
+        "service": "stillme-backend",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@router.get("/ready")
+async def readiness_check(request: Request):
+    """
+    Readiness probe endpoint for Kubernetes/Docker readiness checks.
+    Returns 200 when all checks pass, 503 if any check fails.
+    Checks: SQLite database, ChromaDB, Embedding service.
     No rate limiting - must always be available for monitoring.
     """
-    try:
-        rag_retrieval = get_rag_retrieval()
-        rag_status = "enabled" if rag_retrieval else "disabled"
+    if not ENABLE_HEALTH_READY:
         return {
-            "status": "healthy",
-            "rag_status": rag_status,
+            "status": "ready",
+            "checks": {},
+            "message": "Health/ready endpoints disabled via ENABLE_HEALTH_READY=false",
             "timestamp": datetime.now().isoformat()
         }
-    except Exception as e:
-        # Health check should always return 200, even if there are minor issues
-        # This ensures Railway/Docker doesn't kill the container
-        logger.warning(f"Health check warning: {e}")
-        return {
-            "status": "healthy",
-            "rag_status": "unknown",
-            "timestamp": datetime.now().isoformat(),
-            "warning": str(e)
+    
+    checks: Dict[str, bool] = {
+        "database": False,
+        "vector_db": False,
+        "embeddings": False
+    }
+    
+    check_details: Dict[str, Any] = {}
+    
+    # Check 1: SQLite database connectivity
+    try:
+        db_paths = [
+            "data/knowledge_retention.db",
+            "data/continuum_memory.db",
+            "data/rss_fetch_history.db",
+            "data/accuracy_scores.db"
+        ]
+        
+        db_check_passed = False
+        for db_path in db_paths:
+            try:
+                conn = sqlite3.connect(db_path, timeout=1.0)
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+                conn.close()
+                db_check_passed = True
+                break
+            except Exception as db_error:
+                logger.debug(f"Database check failed for {db_path}: {db_error}")
+                continue
+        
+        checks["database"] = db_check_passed
+        check_details["database"] = {
+            "status": "ok" if db_check_passed else "failed",
+            "message": "At least one database accessible" if db_check_passed else "All databases failed"
         }
+    except Exception as e:
+        logger.warning(f"Database readiness check error: {e}")
+        check_details["database"] = {"status": "error", "message": str(e)}
+    
+    # Check 2: ChromaDB heartbeat
+    try:
+        rag_retrieval = get_rag_retrieval()
+        if rag_retrieval and rag_retrieval.chroma_client:
+            # Try to access ChromaDB client
+            client = rag_retrieval.chroma_client.client
+            # ChromaDB PersistentClient doesn't have explicit heartbeat, but we can check if client exists
+            if client is not None:
+                checks["vector_db"] = True
+                check_details["vector_db"] = {"status": "ok", "message": "ChromaDB client available"}
+            else:
+                check_details["vector_db"] = {"status": "failed", "message": "ChromaDB client is None"}
+        else:
+            check_details["vector_db"] = {"status": "failed", "message": "RAG retrieval or ChromaDB client not initialized"}
+    except Exception as e:
+        logger.warning(f"ChromaDB readiness check error: {e}")
+        check_details["vector_db"] = {"status": "error", "message": str(e)}
+    
+    # Check 3: Embedding service
+    try:
+        rag_retrieval = get_rag_retrieval()
+        if rag_retrieval and rag_retrieval.embedding_service:
+            # Try encoding a test string with timeout
+            test_text = "test"
+            try:
+                # Run encoding in executor to avoid blocking
+                loop = asyncio.get_event_loop()
+                embedding = await asyncio.wait_for(
+                    loop.run_in_executor(None, rag_retrieval.embedding_service.encode_text, test_text),
+                    timeout=2.0
+                )
+                if embedding is not None and len(embedding) > 0:
+                    checks["embeddings"] = True
+                    check_details["embeddings"] = {"status": "ok", "message": f"Embedding service working (dim={len(embedding)})"}
+                else:
+                    check_details["embeddings"] = {"status": "failed", "message": "Embedding returned empty result"}
+            except asyncio.TimeoutError:
+                check_details["embeddings"] = {"status": "timeout", "message": "Embedding service timeout (>2s)"}
+            except Exception as embed_error:
+                check_details["embeddings"] = {"status": "error", "message": str(embed_error)}
+        else:
+            check_details["embeddings"] = {"status": "failed", "message": "RAG retrieval or embedding service not initialized"}
+    except Exception as e:
+        logger.warning(f"Embedding service readiness check error: {e}")
+        check_details["embeddings"] = {"status": "error", "message": str(e)}
+    
+    # Determine overall readiness
+    all_ready = all(checks.values())
+    status_code = 200 if all_ready else 503
+    
+    response = {
+        "status": "ready" if all_ready else "not_ready",
+        "checks": checks,
+        "check_details": check_details,
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    if not all_ready:
+        logger.warning(f"Readiness check failed: {checks}")
+        raise HTTPException(status_code=status_code, detail=response)
+    
+    return response
 
 @router.get("/api/status")
 async def get_status():
@@ -110,4 +241,125 @@ async def get_validation_metrics():
                 "recent_logs": []
             }
         }
+
+@router.get("/metrics")
+async def prometheus_metrics():
+    """
+    Prometheus-compatible metrics endpoint.
+    Returns metrics in Prometheus text format for monitoring tools.
+    
+    This endpoint exposes system metrics in standard Prometheus format,
+    allowing integration with monitoring tools like Prometheus, Grafana, etc.
+    """
+    try:
+        from backend.api.metrics_collector import get_metrics_collector
+        from backend.validators.metrics import get_metrics as get_validation_metrics
+        from backend.learning import KnowledgeRetention
+        
+        metrics_collector = get_metrics_collector()
+        metrics_data = metrics_collector.get_metrics()
+        
+        lines = []
+        
+        # RAG Component Health Metrics
+        lines.append("# HELP stillme_rag_initialized Whether RAG components are initialized (1=yes, 0=no)")
+        lines.append("# TYPE stillme_rag_initialized gauge")
+        lines.append(f"stillme_rag_initialized {metrics_data['component_health'].get('rag_initialized', 0)}")
+        
+        lines.append("# HELP stillme_chromadb_available Whether ChromaDB is available (1=yes, 0=no)")
+        lines.append("# TYPE stillme_chromadb_available gauge")
+        lines.append(f"stillme_chromadb_available {metrics_data['component_health'].get('chromadb_available', 0)}")
+        
+        lines.append("# HELP stillme_embedding_service_ready Whether embedding service is ready (1=yes, 0=no)")
+        lines.append("# TYPE stillme_embedding_service_ready gauge")
+        lines.append(f"stillme_embedding_service_ready {metrics_data['component_health'].get('embedding_service_ready', 0)}")
+        
+        lines.append("# HELP stillme_knowledge_retention_ready Whether knowledge retention is ready (1=yes, 0=no)")
+        lines.append("# TYPE stillme_knowledge_retention_ready gauge")
+        lines.append(f"stillme_knowledge_retention_ready {metrics_data['component_health'].get('knowledge_retention_ready', 0)}")
+        
+        # Request Metrics
+        total_requests = sum(metrics_data['request_counters'].values())
+        lines.append("# HELP stillme_requests_total Total number of HTTP requests")
+        lines.append("# TYPE stillme_requests_total counter")
+        lines.append(f"stillme_requests_total {total_requests}")
+        
+        # Request counters by endpoint
+        for key, count in metrics_data['request_counters'].items():
+            method, endpoint = key.split(':', 1) if ':' in key else ('UNKNOWN', key)
+            lines.append(f'stillme_requests_total{{method="{method}",endpoint="{endpoint}"}} {count}')
+        
+        # Error Metrics
+        total_errors = sum(metrics_data['error_counters'].values())
+        lines.append("# HELP stillme_requests_errors_total Total number of HTTP errors")
+        lines.append("# TYPE stillme_requests_errors_total counter")
+        lines.append(f"stillme_requests_errors_total {total_errors}")
+        
+        # Error counters by endpoint and status
+        for key, count in metrics_data['error_counters'].items():
+            parts = key.split(':')
+            if len(parts) >= 3:
+                method, endpoint, status = parts[0], parts[1], parts[2]
+                lines.append(f'stillme_requests_errors_total{{method="{method}",endpoint="{endpoint}",status="{status}"}} {count}')
+        
+        # Learning Metrics
+        lines.append("# HELP stillme_knowledge_items_total Total number of knowledge items in the system")
+        lines.append("# TYPE stillme_knowledge_items_total gauge")
+        lines.append(f"stillme_knowledge_items_total {metrics_data['knowledge_items_total']}")
+        
+        # Validation Metrics
+        try:
+            validation_metrics = get_validation_metrics()
+            val_data = validation_metrics.get_metrics()
+            
+            lines.append("# HELP stillme_validations_total Total number of validations performed")
+            lines.append("# TYPE stillme_validations_total counter")
+            lines.append(f"stillme_validations_total {val_data.get('total_validations', 0)}")
+            
+            lines.append("# HELP stillme_validations_passed_total Total number of passed validations")
+            lines.append("# TYPE stillme_validations_passed_total counter")
+            lines.append(f"stillme_validations_passed_total {val_data.get('passed_count', 0)}")
+            
+            lines.append("# HELP stillme_validations_failed_total Total number of failed validations")
+            lines.append("# TYPE stillme_validations_failed_total counter")
+            lines.append(f"stillme_validations_failed_total {val_data.get('failed_count', 0)}")
+            
+            lines.append("# HELP stillme_validation_pass_rate Validation pass rate (0.0 to 1.0)")
+            lines.append("# TYPE stillme_validation_pass_rate gauge")
+            lines.append(f"stillme_validation_pass_rate {val_data.get('pass_rate', 0.0)}")
+            
+            lines.append("# HELP stillme_validation_overlap_score_avg Average evidence overlap score")
+            lines.append("# TYPE stillme_validation_overlap_score_avg gauge")
+            lines.append(f"stillme_validation_overlap_score_avg {val_data.get('avg_overlap_score', 0.0)}")
+        except Exception as val_error:
+            logger.debug(f"Could not get validation metrics: {val_error}")
+        
+        # Knowledge Retention Metrics (if available)
+        try:
+            knowledge_retention = get_knowledge_retention()
+            if knowledge_retention:
+                retention_metrics = knowledge_retention.calculate_retention_metrics()
+                if retention_metrics:
+                    total_items = retention_metrics.get('total_items', 0)
+                    lines.append("# HELP stillme_knowledge_retention_items_total Total items in knowledge retention")
+                    lines.append("# TYPE stillme_knowledge_retention_items_total gauge")
+                    lines.append(f"stillme_knowledge_retention_items_total {total_items}")
+        except Exception as kr_error:
+            logger.debug(f"Could not get knowledge retention metrics: {kr_error}")
+        
+        metrics_text = "\n".join(lines) + "\n"
+        return Response(content=metrics_text, media_type="text/plain")
+        
+    except Exception as e:
+        logger.error(f"Error generating Prometheus metrics: {e}", exc_info=True)
+        return Response(
+            content="# Error generating metrics\n",
+            media_type="text/plain",
+            status_code=500
+        )
+
+def get_knowledge_retention():
+    """Get knowledge retention service from main module"""
+    import backend.api.main as main_module
+    return main_module.knowledge_retention
 

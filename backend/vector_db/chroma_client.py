@@ -27,7 +27,6 @@ class ChromaClient:
         self.reset_on_error = reset_on_error
         
         # Check if database exists and needs reset
-        original_directory = persist_directory
         if reset_on_error:
             # Delete directory completely
             if os.path.exists(persist_directory):
@@ -98,7 +97,7 @@ class ChromaClient:
                         logger.warning(f"Collection exists, deleting first: {create_error}")
                         try:
                             self.client.delete_collection("stillme_knowledge")
-                        except:
+                        except Exception:
                             pass
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
@@ -120,7 +119,7 @@ class ChromaClient:
                         logger.warning(f"Collection exists, deleting first: {create_error}")
                         try:
                             self.client.delete_collection("stillme_conversations")
-                        except:
+                        except Exception:
                             pass
                         self.conversation_collection = self.client.create_collection(
                             name="stillme_conversations",
@@ -148,29 +147,184 @@ class ChromaClient:
             error_msg = str(e).lower()
             # Check for schema mismatch errors
             if "no such column" in error_msg or "schema" in error_msg or "topic" in error_msg:
-                logger.warning(f"ChromaDB schema mismatch detected: {e}")
+                logger.warning(f"⚠️ ChromaDB schema mismatch detected: {e}")
+                logger.warning("This usually happens when ChromaDB version changed or database was created with older version")
+                
                 if self.reset_on_error:
-                    logger.info("Attempting to reset ChromaDB database...")
+                    logger.info("🔄 Attempting to reset ChromaDB database by deleting directory...")
                     try:
-                        # Reset client
-                        self.client = chromadb.PersistentClient(
-                            path=persist_directory,
-                            settings=Settings(
-                                anonymized_telemetry=False,
-                                allow_reset=True
-                            )
-                        )
-                        # Delete and recreate collections
-                        try:
-                            self.client.delete_collection("stillme_knowledge")
-                        except:
-                            pass
-                        try:
-                            self.client.delete_collection("stillme_conversations")
-                        except:
-                            pass
+                        # Close existing client if it exists
+                        if hasattr(self, 'client'):
+                            try:
+                                # Try to reset client if method exists
+                                if hasattr(self.client, 'reset'):
+                                    try:
+                                        logger.info("Attempting ChromaDB client.reset()...")
+                                        self.client.reset()
+                                    except Exception as reset_error:
+                                        logger.warning(f"client.reset() failed (may not be available): {reset_error}")
+                                del self.client
+                            except Exception:
+                                pass
                         
-                        # Recreate collections
+                        # Force garbage collection to ensure old client is fully freed
+                        import gc
+                        gc.collect()
+                        logger.info("Garbage collected old client references")
+                        
+                        # Force delete directory completely (more aggressive approach)
+                        if os.path.exists(persist_directory):
+                            logger.info(f"🗑️ Deleting {persist_directory} directory and all contents...")
+                            try:
+                                # First, try to make all files writable and delete
+                                max_retries = 3
+                                for attempt in range(max_retries):
+                                    try:
+                                        # Make all files writable first
+                                        for root, dirs, files in os.walk(persist_directory, topdown=False):
+                                            for f in files:
+                                                try:
+                                                    file_path = os.path.join(root, f)
+                                                    os.chmod(file_path, 0o777)
+                                                    os.remove(file_path)
+                                                except Exception:
+                                                    pass
+                                            for d in dirs:
+                                                try:
+                                                    dir_path = os.path.join(root, d)
+                                                    os.chmod(dir_path, 0o777)
+                                                    shutil.rmtree(dir_path, ignore_errors=True)
+                                                except Exception:
+                                                    pass
+                                        
+                                        # Now delete the directory itself
+                                        os.chmod(persist_directory, 0o777)
+                                        shutil.rmtree(persist_directory, ignore_errors=True)
+                                        
+                                        # Verify deletion
+                                        if not os.path.exists(persist_directory):
+                                            logger.info(f"✅ Deleted {persist_directory} (attempt {attempt + 1})")
+                                            break
+                                        else:
+                                            if attempt < max_retries - 1:
+                                                logger.warning(f"Directory still exists, retrying... (attempt {attempt + 1}/{max_retries})")
+                                                import time
+                                                time.sleep(0.5)
+                                    except Exception as delete_error:
+                                        if attempt < max_retries - 1:
+                                            logger.warning(f"Delete attempt {attempt + 1} failed: {delete_error}, retrying...")
+                                            import time
+                                            time.sleep(0.5)
+                                        else:
+                                            raise
+                                
+                                # Final verification
+                                if os.path.exists(persist_directory):
+                                    logger.error(f"❌ Directory still exists after {max_retries} attempts")
+                                    raise RuntimeError(f"Failed to delete {persist_directory} after {max_retries} attempts")
+                                    
+                            except Exception as delete_error:
+                                logger.error(f"❌ Failed to delete directory: {delete_error}")
+                                logger.error("💡 MANUAL ACTION REQUIRED: Please delete data/vector_db directory on Railway and restart service")
+                                raise RuntimeError(
+                                    f"ChromaDB schema mismatch and directory deletion failed: {delete_error}. "
+                                    "Please manually delete data/vector_db directory on Railway and restart."
+                                ) from delete_error
+                        
+                        # Wait for filesystem sync (longer wait for Railway)
+                        import time
+                        time.sleep(2.0)  # Increased wait time for Railway filesystem sync
+                        
+                        # CRITICAL: Also try to delete parent data directory if it exists
+                        # This ensures no leftover SQLite files or locks
+                        parent_dir = os.path.dirname(persist_directory) if os.path.dirname(persist_directory) else "data"
+                        if parent_dir and os.path.exists(parent_dir):
+                            # Check if there are other important files in data/ directory
+                            try:
+                                other_files = [f for f in os.listdir(parent_dir) if f != "vector_db"]
+                                if not other_files or all(f.endswith('.db') for f in other_files):
+                                    # Only vector_db or only .db files - safe to delete parent
+                                    logger.info(f"🗑️ Also deleting parent directory {parent_dir} to ensure clean reset...")
+                                    try:
+                                        shutil.rmtree(parent_dir, ignore_errors=True)
+                                        time.sleep(1.0)
+                                        os.makedirs(parent_dir, exist_ok=True)
+                                        logger.info(f"✅ Recreated parent directory {parent_dir}")
+                                    except Exception as parent_error:
+                                        logger.warning(f"Could not delete parent directory (this is OK): {parent_error}")
+                            except Exception:
+                                pass  # Ignore if can't list directory
+                        
+                        # Create fresh directory
+                        os.makedirs(persist_directory, exist_ok=True)
+                        logger.info(f"✅ Created fresh directory: {persist_directory}")
+                        
+                        # Wait a bit more before creating client
+                        time.sleep(1.0)  # Increased wait time
+                        
+                        # CRITICAL FIX: Create client with a temporary unique path first
+                        # This ensures ChromaDB creates completely fresh database
+                        import uuid
+                        temp_path = os.path.join(persist_directory, f"temp_{uuid.uuid4().hex[:8]}")
+                        logger.info(f"🔄 Creating ChromaDB client with temporary path first: {temp_path}")
+                        
+                        try:
+                            # Create client with temp path first
+                            temp_client = chromadb.PersistentClient(
+                                path=temp_path,
+                                settings=Settings(
+                                    anonymized_telemetry=False,
+                                    allow_reset=True
+                                )
+                            )
+                            
+                            # Create a test collection to ensure client works
+                            test_collection = temp_client.create_collection(
+                                name="test_init",
+                                metadata={"test": "true"}
+                            )
+                            temp_client.delete_collection("test_init")
+                            
+                            # Now close temp client and move to final path
+                            del temp_client
+                            import gc
+                            gc.collect()
+                            time.sleep(0.5)
+                            
+                            # Remove temp directory
+                            if os.path.exists(temp_path):
+                                shutil.rmtree(temp_path, ignore_errors=True)
+                            
+                            # Now create client with final path
+                            logger.info(f"🔄 Creating ChromaDB client with final path: {persist_directory}")
+                            self.client = chromadb.PersistentClient(
+                                path=persist_directory,
+                                settings=Settings(
+                                    anonymized_telemetry=False,
+                                    allow_reset=True
+                                )
+                            )
+                            
+                        except Exception as temp_error:
+                            logger.warning(f"Temp path approach failed, trying direct path: {temp_error}")
+                            # Fallback: Create directly with final path
+                            self.client = chromadb.PersistentClient(
+                                path=persist_directory,
+                                settings=Settings(
+                                    anonymized_telemetry=False,
+                                    allow_reset=True
+                                )
+                            )
+                        
+                        # Try to reset if method exists (some ChromaDB versions have this)
+                        try:
+                            if hasattr(self.client, 'reset'):
+                                logger.info("Calling ChromaDB client.reset() to clear any cached metadata...")
+                                self.client.reset()
+                        except Exception as reset_warning:
+                            logger.warning(f"client.reset() not available or failed (this is OK): {reset_warning}")
+                        
+                        # Create fresh collections
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
                             metadata={"description": "Knowledge base for StillMe learning"}
@@ -179,15 +333,19 @@ class ChromaClient:
                             name="stillme_conversations",
                             metadata={"description": "Conversation history for context"}
                         )
-                        logger.info("✅ ChromaDB database reset successfully")
+                        logger.info("✅ ChromaDB database reset successfully - fresh collections created")
                     except Exception as reset_error:
-                        logger.error(f"Failed to reset ChromaDB: {reset_error}")
-                        raise
+                        logger.error(f"❌ CRITICAL: Failed to reset ChromaDB: {reset_error}", exc_info=True)
+                        logger.error("💡 MANUAL ACTION REQUIRED: Delete data/vector_db directory on Railway and restart service")
+                        raise RuntimeError(
+                            f"ChromaDB schema mismatch and reset failed: {reset_error}. "
+                            "Please manually delete data/vector_db directory on Railway and restart the service."
+                        ) from reset_error
                 else:
                     raise RuntimeError(
                         f"ChromaDB schema mismatch: {e}. "
                         "This usually happens when ChromaDB version changed. "
-                        "You may need to delete the data/vector_db directory and restart."
+                        "Set FORCE_DB_RESET_ON_STARTUP=true or manually delete the data/vector_db directory and restart."
                     ) from e
             else:
                 raise
