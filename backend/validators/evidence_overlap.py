@@ -72,11 +72,10 @@ class EvidenceOverlap:
             ValidationResult with overlap score
         """
         if not ctx_docs:
-            logger.warning("No context documents provided for overlap check")
-            return ValidationResult(
-                passed=False,
-                reasons=["no_context_docs"]
-            )
+            # No context means no overlap check needed - this is handled by ConfidenceValidator
+            # Don't fail here, let ConfidenceValidator handle the no-context case
+            logger.debug("No context documents provided for overlap check - skipping (ConfidenceValidator will handle)")
+            return ValidationResult(passed=True)
         
         # Calculate overlap with each context doc, take maximum
         overlaps = [
