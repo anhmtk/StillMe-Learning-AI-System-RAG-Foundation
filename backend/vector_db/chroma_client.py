@@ -147,11 +147,58 @@ class ChromaClient:
             error_msg = str(e).lower()
             # Check for schema mismatch errors
             if "no such column" in error_msg or "schema" in error_msg or "topic" in error_msg:
-                logger.warning(f"ChromaDB schema mismatch detected: {e}")
+                logger.warning(f"⚠️ ChromaDB schema mismatch detected: {e}")
+                logger.warning("This usually happens when ChromaDB version changed or database was created with older version")
+                
                 if self.reset_on_error:
-                    logger.info("Attempting to reset ChromaDB database...")
+                    logger.info("🔄 Attempting to reset ChromaDB database by deleting directory...")
                     try:
-                        # Reset client
+                        # Close existing client if it exists
+                        if hasattr(self, 'client'):
+                            try:
+                                del self.client
+                            except Exception:
+                                pass
+                        
+                        # Force delete directory completely (more aggressive approach)
+                        if os.path.exists(persist_directory):
+                            logger.info(f"🗑️ Deleting {persist_directory} directory...")
+                            try:
+                                # Make all files writable first
+                                for root, dirs, files in os.walk(persist_directory, topdown=False):
+                                    for f in files:
+                                        try:
+                                            file_path = os.path.join(root, f)
+                                            os.chmod(file_path, 0o777)
+                                        except Exception:
+                                            pass
+                                    for d in dirs:
+                                        try:
+                                            dir_path = os.path.join(root, d)
+                                            os.chmod(dir_path, 0o777)
+                                        except Exception:
+                                            pass
+                                
+                                # Now delete everything
+                                shutil.rmtree(persist_directory, ignore_errors=True)
+                                logger.info(f"✅ Deleted {persist_directory}")
+                            except Exception as delete_error:
+                                logger.error(f"❌ Failed to delete directory: {delete_error}")
+                                logger.error("💡 MANUAL ACTION REQUIRED: Please delete data/vector_db directory on Railway and restart service")
+                                raise RuntimeError(
+                                    f"ChromaDB schema mismatch and directory deletion failed: {delete_error}. "
+                                    "Please manually delete data/vector_db directory on Railway and restart."
+                                ) from delete_error
+                        
+                        # Wait for filesystem sync
+                        import time
+                        time.sleep(1.0)  # Increased wait time for Railway filesystem
+                        
+                        # Create fresh directory
+                        os.makedirs(persist_directory, exist_ok=True)
+                        logger.info(f"✅ Created fresh directory: {persist_directory}")
+                        
+                        # Now create fresh client
                         self.client = chromadb.PersistentClient(
                             path=persist_directory,
                             settings=Settings(
@@ -159,17 +206,8 @@ class ChromaClient:
                                 allow_reset=True
                             )
                         )
-                        # Delete and recreate collections
-                        try:
-                            self.client.delete_collection("stillme_knowledge")
-                        except Exception:
-                            pass
-                        try:
-                            self.client.delete_collection("stillme_conversations")
-                        except Exception:
-                            pass
                         
-                        # Recreate collections
+                        # Create fresh collections
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
                             metadata={"description": "Knowledge base for StillMe learning"}
@@ -178,15 +216,19 @@ class ChromaClient:
                             name="stillme_conversations",
                             metadata={"description": "Conversation history for context"}
                         )
-                        logger.info("✅ ChromaDB database reset successfully")
+                        logger.info("✅ ChromaDB database reset successfully - fresh collections created")
                     except Exception as reset_error:
-                        logger.error(f"Failed to reset ChromaDB: {reset_error}")
-                        raise
+                        logger.error(f"❌ CRITICAL: Failed to reset ChromaDB: {reset_error}", exc_info=True)
+                        logger.error("💡 MANUAL ACTION REQUIRED: Delete data/vector_db directory on Railway and restart service")
+                        raise RuntimeError(
+                            f"ChromaDB schema mismatch and reset failed: {reset_error}. "
+                            "Please manually delete data/vector_db directory on Railway and restart the service."
+                        ) from reset_error
                 else:
                     raise RuntimeError(
                         f"ChromaDB schema mismatch: {e}. "
                         "This usually happens when ChromaDB version changed. "
-                        "You may need to delete the data/vector_db directory and restart."
+                        "Set FORCE_DB_RESET_ON_STARTUP=true or manually delete the data/vector_db directory and restart."
                     ) from e
             else:
                 raise

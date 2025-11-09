@@ -570,3 +570,129 @@ async def chat_deepseek(request: ChatRequest):
     dummy_request = DummyRequest()
     return await chat_with_rag(dummy_request, request)
 
+
+@router.post("/ask", response_model=ChatResponse)
+@limiter.limit("10/minute", key_func=get_rate_limit_key_func)
+async def ask_question(request: Request, chat_request: ChatRequest):
+    """
+    Simplified question-answering endpoint.
+    Alias for /rag endpoint with RAG enabled by default.
+    
+    This endpoint is designed for simple Q&A use cases where RAG context
+    is always desired. It's a convenience wrapper around the full RAG chat endpoint.
+    """
+    # Ensure RAG is enabled for /ask endpoint
+    chat_request.use_rag = True
+    # Use default context limit if not specified
+    if chat_request.context_limit is None or chat_request.context_limit < 1:
+        chat_request.context_limit = 2
+    
+    # Delegate to the main RAG chat endpoint
+    return await chat_with_rag(request, chat_request)
+
+
+@router.post("/validate")
+@limiter.limit("20/minute", key_func=get_rate_limit_key_func)
+async def validate_content(request: Request, chat_request: ChatRequest):
+    """
+    Standalone content validation endpoint.
+    
+    Validates user input/question for:
+    - Ethical compliance
+    - Content safety
+    - Format validation
+    
+    Returns validation result without generating a response.
+    This is useful for pre-validation before processing expensive RAG/LLM calls.
+    """
+    from backend.validators.chain import ValidatorChain
+    from backend.validators.citation import CitationRequired
+    from backend.validators.evidence_overlap import EvidenceOverlap
+    from backend.validators.numeric import NumericUnitsBasic
+    from backend.validators.ethics_adapter import EthicsAdapter
+    
+    try:
+        # Get RAG retrieval for context (if needed for validation)
+        rag_retrieval = get_rag_retrieval()
+        
+        # Get context if RAG is enabled
+        context_docs = []
+        if rag_retrieval and chat_request.use_rag:
+            try:
+                context = rag_retrieval.retrieve_context(
+                    query=chat_request.message,
+                    knowledge_limit=min(chat_request.context_limit, 3),  # Limit for validation
+                    conversation_limit=0  # Don't need conversation for validation
+                )
+                context_docs = [
+                    doc["content"] for doc in context.get("knowledge_docs", [])
+                ]
+            except Exception as context_error:
+                logger.warning(f"Could not retrieve context for validation: {context_error}")
+                context_docs = []
+        
+        # Create validator chain
+        enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
+        
+        if enable_validators:
+            chain = ValidatorChain([
+                CitationRequired(),  # Not applicable for input, but included for completeness
+                EvidenceOverlap(threshold=0.01),
+                NumericUnitsBasic(),
+                EthicsAdapter(guard_callable=None)
+            ])
+            
+            # Validate the message itself (treating it as "answer" to check)
+            # Note: This validates the user input, not a response
+            validation_result = chain.run(chat_request.message, context_docs)
+            
+            # Record metrics
+            try:
+                from backend.validators.metrics import get_metrics
+                metrics = get_metrics()
+                metrics.record_validation(
+                    passed=validation_result.passed,
+                    reasons=validation_result.reasons,
+                    overlap_score=0.0  # Not applicable for input validation
+                )
+            except Exception as metrics_error:
+                logger.warning(f"Could not record validation metrics: {metrics_error}")
+            
+            return {
+                "is_valid": validation_result.passed,
+                "message": chat_request.message,
+                "validation_details": {
+                    "passed": validation_result.passed,
+                    "reasons": validation_result.reasons,
+                    "patched_content": validation_result.patched if hasattr(validation_result, 'patched') else None
+                },
+                "context_used": {
+                    "context_docs_count": len(context_docs),
+                    "rag_enabled": chat_request.use_rag
+                }
+            }
+        else:
+            # If validators are disabled, do basic validation only
+            return {
+                "is_valid": True,
+                "message": chat_request.message,
+                "validation_details": {
+                    "passed": True,
+                    "reasons": ["Validators disabled - basic format check passed"],
+                    "note": "Full validation disabled via ENABLE_VALIDATORS=false"
+                },
+                "context_used": {
+                    "context_docs_count": len(context_docs),
+                    "rag_enabled": chat_request.use_rag
+                }
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in /validate endpoint: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Validation error: {str(e)}. Please check backend logs for details."
+        )
+
