@@ -438,6 +438,11 @@ class ChromaClient:
         Returns:
             List of search results
         """
+        # Validate limit parameter - must be > 0
+        if limit <= 0:
+            logger.warning(f"Invalid knowledge search limit: {limit}. Must be > 0. Returning empty results.")
+            return []
+        
         try:
             results = self.knowledge_collection.query(
                 query_embeddings=[query_embedding],
@@ -469,12 +474,17 @@ class ChromaClient:
         
         Args:
             query_embedding: Query embedding vector
-            limit: Number of results to return
+            limit: Number of results to return (must be > 0)
             where: Optional metadata filter
             
         Returns:
             List of search results
         """
+        # Validate limit parameter - must be > 0
+        if limit <= 0:
+            logger.warning(f"Invalid conversation search limit: {limit}. Must be > 0. Returning empty results.")
+            return []
+        
         try:
             results = self.conversation_collection.query(
                 query_embeddings=[query_embedding],
