@@ -98,12 +98,16 @@ class RAGRetrieval:
             
             logger.info(f"Knowledge search returned {len(knowledge_results)} results")
             
-            # Retrieve conversation documents
-            conversation_results = self.chroma_client.search_conversations(
-                query_embedding=query_embedding,
-                limit=conversation_limit
-            )
-            logger.info(f"Conversation search returned {len(conversation_results)} results")
+            # Retrieve conversation documents (only if conversation_limit > 0)
+            conversation_results = []
+            if conversation_limit > 0:
+                conversation_results = self.chroma_client.search_conversations(
+                    query_embedding=query_embedding,
+                    limit=conversation_limit
+                )
+                logger.info(f"Conversation search returned {len(conversation_results)} results")
+            else:
+                logger.debug(f"Skipping conversation search (conversation_limit={conversation_limit})")
             
             return {
                 "knowledge_docs": knowledge_results[:knowledge_limit],
