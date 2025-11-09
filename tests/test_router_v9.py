@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
 Test GATED ROUTER v9
+LEGACY TEST - Module stillme_entry no longer exists
 """
 
 import pytest
+
+# Skip entire test file - legacy module no longer exists
+pytest.skip("Legacy test - stillme_entry module no longer exists", allow_module_level=True)
 
 from stillme_entry import generate
 
