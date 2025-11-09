@@ -251,7 +251,7 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
             # Check if context is empty - if so, use special prompt
             if context["total_context_docs"] == 0:
                 # NO CONTEXT AVAILABLE - Use special prompt that encourages uncertainty
-                no_context_instruction = f"""
+                no_context_instruction = """
 ⚠️ NO CONTEXT AVAILABLE ⚠️
 
 StillMe's RAG system searched the knowledge base but found NO relevant documents for this question.

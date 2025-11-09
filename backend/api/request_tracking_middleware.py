@@ -44,7 +44,7 @@ class RequestTrackingMiddleware(BaseHTTPMiddleware):
             
             return response
             
-        except Exception as e:
+        except Exception:
             # Track error in metrics collector
             try:
                 from backend.api.metrics_collector import get_metrics_collector

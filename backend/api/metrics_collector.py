@@ -5,7 +5,6 @@ Tracks system-wide metrics for monitoring and observability
 
 from typing import Dict
 from collections import defaultdict
-import time
 import logging
 from threading import Lock
 

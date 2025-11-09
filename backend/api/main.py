@@ -32,6 +32,9 @@ from backend.api.error_handlers import (
 )
 from backend.api.error_tracking import error_tracker
 
+# Import middleware
+from backend.api.request_tracking_middleware import RequestTrackingMiddleware
+
 # Import routers
 from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
 
@@ -77,7 +80,6 @@ app.add_middleware(
 )
 
 # Request tracking middleware (for metrics collection)
-from backend.api.request_tracking_middleware import RequestTrackingMiddleware
 app.add_middleware(RequestTrackingMiddleware)
 
 # Security middleware (HTTPS enforcement, HSTS headers, etc.)
