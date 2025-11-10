@@ -9,6 +9,7 @@ from backend.api.rate_limiter import limiter, get_rate_limit_key_func
 from backend.api.auth import require_api_key
 from backend.api.job_queue import get_job_queue
 from typing import Optional, Dict, Any, List
+import asyncio
 import logging
 from datetime import datetime
 
