@@ -50,12 +50,24 @@ class EmbeddingService:
                 cache_dir = Path(cache_path)
                 if cache_dir.exists():
                     logger.info(f"✅ Cache directory exists: {cache_dir}")
-                    # Check if model files exist
-                    model_cache = cache_dir / "sentence_transformers" / model_name.replace("/", "_")
-                    if model_cache.exists():
-                        logger.info(f"✅ Model files found in cache: {model_cache}")
-                    else:
-                        logger.warning(f"⚠️ Model files not found in cache: {model_cache}")
+                    # Check if model files exist (sentence-transformers uses different paths)
+                    # Try multiple possible cache locations
+                    possible_paths = [
+                        cache_dir / "sentence_transformers" / model_name.replace("/", "_"),
+                        cache_dir / "sentence_transformers" / model_name,
+                        cache_dir / "models--" + model_name.replace("/", "--"),
+                        Path.home() / ".cache" / "huggingface" / "hub" / ("models--" + model_name.replace("/", "--"))
+                    ]
+                    model_found = False
+                    for model_path in possible_paths:
+                        if model_path.exists():
+                            logger.info(f"✅ Model files found in cache: {model_path}")
+                            model_found = True
+                            break
+                    if not model_found:
+                        logger.warning(f"⚠️ Model files not found in cache. Will download on first use.")
+                        logger.info(f"Cache directory: {cache_dir}")
+                        logger.info(f"Model will be cached to: {cache_dir / 'sentence_transformers' / model_name.replace('/', '_')}")
                 else:
                     logger.error(f"❌ Cache directory does not exist: {cache_dir}")
         except Exception as e:
