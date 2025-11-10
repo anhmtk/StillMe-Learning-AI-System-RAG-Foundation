@@ -492,14 +492,11 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     # Handle validation failures with FallbackHandler
                     if not validation_result.passed:
                         # Check for critical failures that require fallback
-                        critical_failures = [
-                            "missing_uncertainty_no_context",
-                            "missing_citation"
-                        ]
-                        has_critical_failure = any(
-                            reason in validation_result.reasons 
-                            for reason in critical_failures
-                        ) and len(ctx_docs) == 0
+                        # missing_uncertainty_no_context: when no context and no uncertainty expression
+                        # missing_citation: when context exists but no citations in answer
+                        has_missing_uncertainty = "missing_uncertainty_no_context" in validation_result.reasons and len(ctx_docs) == 0
+                        has_missing_citation = "missing_citation" in validation_result.reasons and len(ctx_docs) > 0
+                        has_critical_failure = has_missing_uncertainty or has_missing_citation
                         
                         if has_critical_failure:
                             # Use FallbackHandler to generate safe answer
@@ -517,15 +514,10 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             response = validation_result.patched_answer
                             logger.info(f"Validation failed but using patched answer. Reasons: {validation_result.reasons}")
                         else:
-                            logger.warning(f"Validation failed: {validation_result.reasons}")
-                            raise HTTPException(
-                                status_code=422,
-                                detail={
-                                    "error": "validation_failed",
-                                    "reasons": validation_result.reasons,
-                                    "original_response_preview": raw_response[:200] if raw_response else ""
-                                }
-                            )
+                            # For non-critical validation failures, still return the response but log warning
+                            # This prevents 422 errors for minor validation issues
+                            logger.warning(f"Validation failed but returning response anyway. Reasons: {validation_result.reasons}")
+                            response = raw_response
                     else:
                         response = validation_result.patched_answer or raw_response
                         logger.debug(f"✅ Validation passed. Reasons: {validation_result.reasons}")
