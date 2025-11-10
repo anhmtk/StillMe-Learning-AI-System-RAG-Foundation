@@ -53,13 +53,19 @@ async def run_learning_cycle_background(job_id: str):
         
         # Initialize Tiered Update Isolation for Nested Learning
         update_isolation = None
+        promotion_manager = None
         if ENABLE_CONTINUUM_MEMORY:
             try:
                 from backend.learning.continuum_memory import TieredUpdateIsolation
+                from backend.learning.promotion_manager import PromotionManager
+                from backend.api.metrics_collector import get_metrics_collector
                 update_isolation = TieredUpdateIsolation()
+                promotion_manager = PromotionManager()
+                metrics = get_metrics_collector()
+                metrics.set_cycle_count(cycle_number)
                 job.add_log(f"Nested Learning: Update isolation enabled (cycle #{cycle_number})")
             except Exception as e:
-                logger.warning(f"Failed to initialize TieredUpdateIsolation: {e}")
+                logger.warning(f"Failed to initialize Nested Learning components: {e}")
                 job.add_log(f"Warning: Update isolation not available: {e}")
         
         job.update_progress("fetching", entries_fetched=result.get("entries_fetched", 0))
@@ -183,6 +189,10 @@ async def run_learning_cycle_background(job_id: str):
                             
                             if not should_update:
                                 skipped_count += 1
+                                # Track skipped metrics
+                                from backend.api.metrics_collector import get_metrics_collector
+                                metrics = get_metrics_collector()
+                                metrics.increment_tier_skipped(tier)
                                 job.add_log(
                                     f"Skipped entry (tier {tier}, cycle {cycle_number}, "
                                     f"surprise={surprise_score:.2f}): {entry.get('title', '')[:50]}"
@@ -236,8 +246,20 @@ async def run_learning_cycle_background(job_id: str):
                                 import hashlib
                                 item_id = hashlib.md5(content.encode()).hexdigest()
                                 update_isolation.update_tier_cycle(item_id, tier, cycle_number)
+                                
+                                # Track metrics for Nested Learning
+                                from backend.api.metrics_collector import get_metrics_collector
+                                metrics = get_metrics_collector()
+                                metrics.increment_tier_update(tier)
+                                metrics.increment_embedding_operation(tier)
+                                metrics.add_surprise_score(surprise_score)
                             except Exception as e:
                                 logger.debug(f"Error updating tier cycle: {e}")
+                        else:
+                            # Track embedding operation even without Nested Learning
+                            from backend.api.metrics_collector import get_metrics_collector
+                            metrics = get_metrics_collector()
+                            metrics.increment_embedding_operation()
                     
                 except Exception as e:
                     logger.error(f"Error adding entry to RAG: {e}")

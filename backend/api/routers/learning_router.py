@@ -1217,6 +1217,62 @@ async def prioritize_content(content_list: List[Dict[str, Any]]):
         logger.error(f"Content prioritization error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/nested-learning/metrics")
+async def get_nested_learning_metrics():
+    """
+    Get Nested Learning metrics (tier distribution, update frequency, cost reduction)
+    Requires ENABLE_CONTINUUM_MEMORY=true
+    """
+    import os
+    ENABLE_CONTINUUM_MEMORY = os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true"
+    
+    if not ENABLE_CONTINUUM_MEMORY:
+        return {
+            "enabled": False,
+            "message": "Nested Learning is disabled. Set ENABLE_CONTINUUM_MEMORY=true to enable."
+        }
+    
+    try:
+        from backend.api.metrics_collector import get_metrics_collector
+        from backend.learning.continuum_memory import ContinuumMemory, TIER_UPDATE_FREQUENCY
+        
+        metrics = get_metrics_collector()
+        all_metrics = metrics.get_metrics()
+        nested_metrics = all_metrics.get("nested_learning", {})
+        
+        # Get tier distribution from database
+        continuum_memory = ContinuumMemory()
+        tier_stats = continuum_memory.get_tier_statistics()
+        
+        # Calculate cost reduction estimate
+        total_operations = nested_metrics.get("embedding_operations_total", 0)
+        skipped_operations = sum(nested_metrics.get("tier_skipped_counts", {}).values())
+        cost_reduction_pct = 0.0
+        if total_operations > 0:
+            cost_reduction_pct = (skipped_operations / (total_operations + skipped_operations)) * 100
+        
+        return {
+            "enabled": True,
+            "cycle_count": nested_metrics.get("cycle_count", 0),
+            "tier_distribution": tier_stats.get("tier_counts", {}),
+            "tier_update_frequency": TIER_UPDATE_FREQUENCY,
+            "tier_update_counts": nested_metrics.get("tier_update_counts", {}),
+            "tier_skipped_counts": nested_metrics.get("tier_skipped_counts", {}),
+            "embedding_operations": {
+                "total": nested_metrics.get("embedding_operations_total", 0),
+                "by_tier": nested_metrics.get("embedding_operations_by_tier", {})
+            },
+            "cost_reduction": {
+                "skipped_operations": skipped_operations,
+                "total_operations": total_operations + skipped_operations,
+                "reduction_percentage": round(cost_reduction_pct, 2)
+            },
+            "surprise_score_stats": nested_metrics.get("surprise_score_stats", {})
+        }
+    except Exception as e:
+        logger.error(f"Error getting Nested Learning metrics: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting metrics: {str(e)}")
+
 @router.get("/curator/stats")
 async def get_curation_stats():
     """Get content curation statistics"""
