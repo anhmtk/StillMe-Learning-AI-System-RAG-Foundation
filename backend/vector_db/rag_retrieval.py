@@ -128,6 +128,13 @@ class RAGRetrieval:
                 "conversation_docs": conversation_results,
                 "total_context_docs": len(knowledge_results[:knowledge_limit]) + len(conversation_results)
             }
+        except Exception as e:
+            logger.error(f"Error retrieving context: {e}")
+            return {
+                "knowledge_docs": [],
+                "conversation_docs": [],
+                "total_context_docs": 0
+            }
     
     def retrieve_by_tier(self, 
                         query: str,
