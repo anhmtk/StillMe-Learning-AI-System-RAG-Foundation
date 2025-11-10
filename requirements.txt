@@ -39,7 +39,7 @@ python-dateutil==2.8.2
 langdetect==1.0.9
 
 # JSON & Data Serialization
-orjson==3.9.10
+orjson==3.11.4
 
 # Vector Database & Embeddings
 # Note: Install torch CPU version separately to reduce build time
