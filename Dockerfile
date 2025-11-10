@@ -42,8 +42,24 @@ ENV TRANSFORMERS_CACHE=/app/.model_cache
 ENV HF_HOME=/app/.model_cache
 
 # Pre-download embedding model during build stage
-# This ensures model is available in image and doesn't need to be downloaded at runtime
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/app/.model_cache')"
+# CRITICAL: This ensures model is available in image and can be copied to persistent volume at runtime
+# Set environment variables FIRST before importing SentenceTransformer
+RUN python -c "\
+import os; \
+os.environ['HF_HOME'] = '/app/.model_cache'; \
+os.environ['TRANSFORMERS_CACHE'] = '/app/.model_cache'; \
+os.environ['SENTENCE_TRANSFORMERS_HOME'] = '/app/.model_cache'; \
+os.environ['HF_HUB_CACHE'] = '/app/.model_cache/hub'; \
+print('🏗️ Pre-downloading model all-MiniLM-L6-v2...'); \
+from sentence_transformers import SentenceTransformer; \
+model = SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/app/.model_cache'); \
+print('✅ Model pre-downloaded to /app/.model_cache'); \
+import pathlib; \
+cache_path = pathlib.Path('/app/.model_cache'); \
+if cache_path.exists(): \
+    total_size = sum(f.stat().st_size for f in cache_path.rglob('*') if f.is_file()); \
+    print(f'📦 Cache size: {total_size / (1024*1024):.2f} MB'); \
+"
 
 # Copy scripts directory first (for chroma_warmup.py)
 # This allows us to use the warmup script before copying all application code
