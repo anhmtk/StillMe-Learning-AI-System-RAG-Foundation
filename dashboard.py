@@ -417,22 +417,34 @@ def page_overview():
                         st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
                 except requests.exceptions.Timeout:
                     # Timeout is OK - job is running in background
+                    # Don't set a fake job_id - we'll poll scheduler status instead
                     st.session_state["learning_job_started"] = True
-                    st.session_state["learning_job_id"] = "timeout_fallback"
+                    st.session_state["learning_job_id"] = None  # No specific job ID, will poll scheduler status
                     st.session_state["last_action"] = "⏳ Learning cycle is running in background. This may take 2-5 minutes. Progress will be shown below."
                     st.rerun()
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed: {e}"
         
         # Display learning cycle progress if job is running
-        if st.session_state.get("learning_job_started") and st.session_state.get("learning_job_id"):
+        if st.session_state.get("learning_job_started"):
             job_id = st.session_state.get("learning_job_id")
             st.markdown("---")
             st.subheader("📊 Learning Cycle Progress")
             
-            # Poll job status (with longer timeout - learning cycle can take 2-5 minutes)
-            try:
-                job_status_r = requests.get(f"{API_BASE}/api/learning/scheduler/job-status/{job_id}", timeout=60)
+            # Skip polling if job_id is None or "timeout_fallback" (not a real job ID)
+            if not job_id or job_id == "timeout_fallback":
+                st.info("⏳ Learning cycle is running in background. This may take 2-5 minutes.")
+                st.info("💡 **Tip:** Check scheduler status below to see when the cycle completes.")
+                # Auto-refresh to check scheduler status
+                refresh_placeholder = st.empty()
+                refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
+                import time
+                time.sleep(3)
+                st.rerun()
+            else:
+                # Poll job status (with longer timeout - learning cycle can take 2-5 minutes)
+                try:
+                    job_status_r = requests.get(f"{API_BASE}/api/learning/scheduler/job-status/{job_id}", timeout=60)
                 if job_status_r.status_code == 200:
                     job_data = job_status_r.json()
                     job_status = job_data.get("status", "unknown")
