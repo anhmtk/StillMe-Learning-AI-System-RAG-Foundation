@@ -79,43 +79,18 @@ class EmbeddingService:
     def _get_cache_path(self) -> Union[str, None]:
         """
         Get cache path for HuggingFace models.
-        Prioritizes model cache from Docker image (SENTENCE_TRANSFORMERS_HOME),
-        then persistent volume path, then custom cache path.
+        CRITICAL: Railway persistent volume has HIGHEST priority to prevent re-downloading on every deploy.
+        Priority order:
+        1. Railway persistent volume (/app/hf_cache) - PERSISTENT across deploys
+        2. PERSISTENT_CACHE_PATH environment variable
+        3. Docker image cache (/app/.model_cache) - EPHEMERAL, re-downloads on deploy
+        4. Custom cache paths
         
         Returns:
             Cache path string or None to use default
         """
-        # Priority 1: Use cache from Docker image (set in Dockerfile)
-        # This ensures model is loaded from image, not re-downloaded
-        image_cache = os.getenv("SENTENCE_TRANSFORMERS_HOME")
-        if image_cache:
-            cache_dir = Path(image_cache)
-            if cache_dir.exists():
-                logger.info(f"Using model cache from Docker image: {cache_dir}")
-                return str(cache_dir)
-            else:
-                logger.warning(f"Image cache path does not exist: {cache_dir}, falling back to other options")
-        
-        # Priority 2: Check for Railway persistent volume path (from railway.json: /app/hf_cache)
-        # First check env var, then check if persistent volume mount exists
-        persistent_cache = os.getenv("PERSISTENT_CACHE_PATH")
-        if persistent_cache:
-            # If path ends with /hf_cache, use it directly, otherwise append /huggingface
-            if persistent_cache.endswith("/hf_cache") or persistent_cache.endswith("\\hf_cache"):
-                cache_dir = Path(persistent_cache)
-            else:
-                cache_dir = Path(persistent_cache) / "huggingface"
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            logger.info(f"✅ Using persistent volume cache: {cache_dir}")
-            # Set environment variables immediately
-            os.environ["TRANSFORMERS_CACHE"] = str(cache_dir)
-            os.environ["HF_HOME"] = str(cache_dir)
-            os.environ["HF_DATASETS_CACHE"] = str(cache_dir / "datasets")
-            os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(cache_dir)
-            return str(cache_dir)
-        
-        # Priority 2b: Check if Railway persistent volume mount exists directly
-        # Railway mounts /app/hf_cache as persistent volume
+        # Priority 1: Railway persistent volume (HIGHEST PRIORITY - persists across deploys)
+        # Check if Railway persistent volume mount exists directly
         railway_cache = Path("/app/hf_cache")
         if railway_cache.exists():
             cache_dir = railway_cache
@@ -139,7 +114,37 @@ class EmbeddingService:
             os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(cache_dir)
             return str(cache_dir)
         
-        # Priority 3: Check for custom cache path
+        # Priority 2: Check PERSISTENT_CACHE_PATH environment variable
+        persistent_cache = os.getenv("PERSISTENT_CACHE_PATH")
+        if persistent_cache:
+            # If path ends with /hf_cache, use it directly, otherwise append /huggingface
+            if persistent_cache.endswith("/hf_cache") or persistent_cache.endswith("\\hf_cache"):
+                cache_dir = Path(persistent_cache)
+            else:
+                cache_dir = Path(persistent_cache) / "huggingface"
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"✅ Using persistent volume cache: {cache_dir}")
+            # Set environment variables immediately
+            os.environ["TRANSFORMERS_CACHE"] = str(cache_dir)
+            os.environ["HF_HOME"] = str(cache_dir)
+            os.environ["HF_DATASETS_CACHE"] = str(cache_dir / "datasets")
+            os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(cache_dir)
+            return str(cache_dir)
+        
+        # Priority 3: Use cache from Docker image (set in Dockerfile) - EPHEMERAL
+        # This is lower priority because it's ephemeral and re-downloads on every deploy
+        # Only use if Railway persistent volume is not available
+        image_cache = os.getenv("SENTENCE_TRANSFORMERS_HOME")
+        if image_cache:
+            cache_dir = Path(image_cache)
+            if cache_dir.exists():
+                logger.info(f"⚠️ Using model cache from Docker image: {cache_dir} (EPHEMERAL - will re-download on deploy)")
+                logger.warning(f"⚠️ To prevent re-downloading, use Railway persistent volume at /app/hf_cache")
+                return str(cache_dir)
+            else:
+                logger.warning(f"Image cache path does not exist: {cache_dir}, falling back to other options")
+        
+        # Priority 4: Check for custom cache path
         custom_cache = os.getenv("HF_CACHE_PATH")
         if custom_cache:
             cache_dir = Path(custom_cache)
