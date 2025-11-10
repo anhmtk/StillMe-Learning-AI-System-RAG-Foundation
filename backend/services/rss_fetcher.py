@@ -4,7 +4,7 @@ Simple RSS fetching service to populate knowledge base
 """
 
 import feedparser
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
 
@@ -20,6 +20,12 @@ class RSSFetcher:
             "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
             # Add more trusted feeds here
         ]
+        # Track error states for self-diagnosis
+        self.last_error: Optional[str] = None
+        self.error_count = 0
+        self.last_success_time: Optional[datetime] = None
+        self.successful_feeds = 0
+        self.failed_feeds = 0
     
     def fetch_feeds(self, max_items_per_feed: int = 5) -> List[Dict[str, Any]]:
         """Fetch entries from all RSS feeds
@@ -31,10 +37,21 @@ class RSSFetcher:
             List of feed entries
         """
         all_entries = []
+        self.successful_feeds = 0
+        self.failed_feeds = 0
+        errors = []
         
         for feed_url in self.feeds:
             try:
                 feed = feedparser.parse(feed_url)
+                
+                # Check if feed parsing was successful
+                if feed.bozo and feed.bozo_exception:
+                    error_msg = f"RSS feed parse error for {feed_url}: {feed.bozo_exception}"
+                    errors.append(error_msg)
+                    self.failed_feeds += 1
+                    logger.warning(error_msg)
+                    continue
                 
                 for entry in feed.entries[:max_items_per_feed]:
                     entry_data = {
@@ -47,12 +64,24 @@ class RSSFetcher:
                     }
                     all_entries.append(entry_data)
                 
+                self.successful_feeds += 1
                 logger.info(f"Fetched {len(feed.entries[:max_items_per_feed])} items from {feed_url}")
                 
             except Exception as e:
-                logger.error(f"Failed to fetch {feed_url}: {e}")
+                error_msg = f"Failed to fetch {feed_url}: {e}"
+                errors.append(error_msg)
+                self.failed_feeds += 1
+                self.error_count += 1
+                logger.error(error_msg)
         
-        logger.info(f"Total entries fetched: {len(all_entries)}")
+        # Update error state
+        if errors:
+            self.last_error = "; ".join(errors[:3])  # Keep first 3 errors
+        else:
+            self.last_error = None
+            self.last_success_time = datetime.now()
+        
+        logger.info(f"Total entries fetched: {len(all_entries)} (successful: {self.successful_feeds}, failed: {self.failed_feeds})")
         return all_entries
     
     def fetch_single_feed(self, feed_url: str, max_items: int = 5) -> List[Dict[str, Any]]:
@@ -75,6 +104,22 @@ class RSSFetcher:
             return entries
             
         except Exception as e:
-            logger.error(f"Failed to fetch {feed_url}: {e}")
+            error_msg = f"Failed to fetch {feed_url}: {e}"
+            self.last_error = error_msg
+            self.error_count += 1
+            logger.error(error_msg)
             return []
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get fetcher statistics"""
+        return {
+            "source": "rss",
+            "feeds_count": len(self.feeds),
+            "successful_feeds": self.successful_feeds,
+            "failed_feeds": self.failed_feeds,
+            "error_count": self.error_count,
+            "last_error": self.last_error,
+            "last_success_time": self.last_success_time.isoformat() if self.last_success_time else None,
+            "status": "error" if self.last_error and (not self.last_success_time or self.failed_feeds > 0) else "ok"
+        }
 

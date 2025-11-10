@@ -30,6 +30,10 @@ class CrossrefFetcher:
         """Initialize CrossRef fetcher"""
         self.last_request_time: Optional[datetime] = None
         self.request_count = 0
+        # Track error states for self-diagnosis
+        self.last_error: Optional[str] = None
+        self.error_count = 0
+        self.last_success_time: Optional[datetime] = None
         logger.info("CrossRef Fetcher initialized")
     
     def _rate_limit(self):
@@ -63,7 +67,10 @@ class CrossrefFetcher:
                     logger.warning(f"CrossRef API request failed (attempt {attempt + 1}/{CROSSREF_MAX_RETRIES}): {e}. Retrying in {delay}s...")
                     time.sleep(delay)
                 else:
-                    logger.error(f"CrossRef API request failed after {CROSSREF_MAX_RETRIES} attempts: {e}")
+                    error_msg = f"CrossRef API request failed after {CROSSREF_MAX_RETRIES} attempts: {e}"
+                    self.last_error = error_msg
+                    self.error_count += 1
+                    logger.error(error_msg)
                     return None
         return None
     
@@ -176,8 +183,16 @@ class CrossrefFetcher:
             
             logger.info(f"Fetched {len(works)} works from CrossRef")
             
+            # Track success if we found works
+            if works:
+                self.last_success_time = datetime.now()
+                self.last_error = None
+                
         except Exception as e:
-            logger.error(f"Error fetching from CrossRef: {e}")
+            error_msg = f"Error fetching from CrossRef: {e}"
+            self.last_error = error_msg
+            self.error_count += 1
+            logger.error(error_msg)
         
         return works
     
@@ -203,6 +218,10 @@ class CrossrefFetcher:
             "source": "crossref",
             "request_count": self.request_count,
             "last_request_time": self.last_request_time.isoformat() if self.last_request_time else None,
-            "rate_limit_delay": CROSSREF_RATE_LIMIT_DELAY
+            "rate_limit_delay": CROSSREF_RATE_LIMIT_DELAY,
+            "error_count": self.error_count,
+            "last_error": self.last_error,
+            "last_success_time": self.last_success_time.isoformat() if self.last_success_time else None,
+            "status": "error" if self.last_error and (not self.last_success_time or self.error_count > 0) else "ok"
         }
 
