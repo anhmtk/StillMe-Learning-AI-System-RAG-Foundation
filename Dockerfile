@@ -1,5 +1,7 @@
 # Dockerfile for StillMe - Learning AI system with RAG foundation
-FROM python:3.14-slim
+# Using Python 3.11 for compatibility with onnxruntime and ChromaDB 1.3.4
+# Python 3.12 doesn't have onnxruntime wheels on Linux yet
+FROM python:3.11-slim
 
 LABEL maintainer="StillMe Team"
 LABEL description="StillMe - Learning AI system with RAG foundation with Complete Ethical Transparency"
@@ -23,7 +25,7 @@ RUN pip install --upgrade pip setuptools wheel
 COPY requirements.txt .
 
 # Install Python dependencies
-# Install torch CPU version first (Python 3.12 compatible) to reduce build time
+# Install torch CPU version first (Python 3.11 compatible) to reduce build time
 RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt
 
