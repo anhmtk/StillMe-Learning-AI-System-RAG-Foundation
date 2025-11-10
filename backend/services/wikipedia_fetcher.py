@@ -126,9 +126,16 @@ class WikipediaFetcher:
         try:
             # Fetch page content using correct REST v1 endpoint
             # URL format: https://{language}.wikipedia.org/w/rest.php/v1/page/summary/{title}
-            # Title needs URL encoding for special characters and spaces
+            # Wikipedia page titles use underscores, not spaces
+            # Title from search results may already have underscores, or may have spaces
             from urllib.parse import quote
-            encoded_title = quote(title.replace(" ", "_"), safe="")
+            
+            # Normalize title: replace spaces with underscores (Wikipedia format)
+            # But preserve existing underscores
+            normalized_title = title.replace(" ", "_")
+            # URL encode special characters, but keep underscores and alphanumeric
+            # safe="_" means underscores won't be encoded
+            encoded_title = quote(normalized_title, safe="_")
             url = f"{self.api_base}/page/summary/{encoded_title}"
             response = self._fetch_with_retry(url)
             
