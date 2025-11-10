@@ -200,11 +200,15 @@ async def readiness_check(request: Request):
 async def get_status():
     """Get system status"""
     try:
+        import os
+        enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
+        
         status = {
             "stage": "Infant",
             "sessions_completed": 0,
             "milestone_sessions": 100,
-            "system_age_days": 0
+            "system_age_days": 0,
+            "validators_enabled": enable_validators
         }
         
         # Try to get from database if available
@@ -218,7 +222,8 @@ async def get_status():
             "stage": "Unknown",
             "sessions_completed": 0,
             "milestone_sessions": 100,
-            "system_age_days": 0
+            "system_age_days": 0,
+            "validators_enabled": False
         }
 
 @router.get("/api/validators/metrics")
