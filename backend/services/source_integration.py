@@ -5,6 +5,7 @@ Integrates multiple data sources (RSS, arXiv, CrossRef, Wikipedia) into unified 
 
 import logging
 from typing import List, Dict, Any, Optional
+from datetime import datetime
 import os
 
 from backend.services.rss_fetcher import RSSFetcher
@@ -95,8 +96,38 @@ class SourceIntegration:
                 )
                 all_entries.extend(wikipedia_entries)
                 logger.info(f"Fetched {len(wikipedia_entries)} entries from Wikipedia")
+                
+                # Update system status tracker with Wikipedia fetcher status
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                wikipedia_stats = self.wikipedia_fetcher.get_stats()
+                if wikipedia_stats.get("status") == "error":
+                    status_tracker.update_component_status(
+                        component_name="wikipedia_fetcher",
+                        status="error",
+                        error_message=wikipedia_stats.get("last_error", "Unknown error"),
+                        error_count=wikipedia_stats.get("error_count", 0),
+                        last_success=datetime.fromisoformat(wikipedia_stats["last_success_time"]) if wikipedia_stats.get("last_success_time") else None
+                    )
+                else:
+                    status_tracker.update_component_status(
+                        component_name="wikipedia_fetcher",
+                        status="ok",
+                        error_message=None,
+                        error_count=0,
+                        last_success=datetime.now()
+                    )
             except Exception as e:
                 logger.error(f"Error fetching Wikipedia: {e}")
+                # Track error in system status
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                status_tracker.update_component_status(
+                    component_name="wikipedia_fetcher",
+                    status="error",
+                    error_message=str(e),
+                    error_count=1
+                )
         
         # Apply pre-filter if enabled
         if use_pre_filter and all_entries:
