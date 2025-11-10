@@ -378,7 +378,9 @@ def page_overview():
                     if r.status_code == 202:
                         data = r.json()
                         job_id = data.get("job_id")
-                        st.session_state["last_action"] = f"✅ Learning cycle started! Job ID: {job_id[:8]}... Use job status endpoint to check progress."
+                        # Store job_id in session state for progress tracking
+                        st.session_state["learning_job_id"] = job_id
+                        st.session_state["learning_job_started"] = True
                         st.rerun()
                     elif r.status_code == 200:
                         # Sync mode (for tests)
@@ -398,6 +400,80 @@ def page_overview():
                     st.session_state["last_error"] = "⏳ Learning cycle is running in background. This may take 2-5 minutes. Check job status to see progress."
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed: {e}"
+        
+        # Display learning cycle progress if job is running
+        if st.session_state.get("learning_job_started") and st.session_state.get("learning_job_id"):
+            job_id = st.session_state.get("learning_job_id")
+            st.markdown("---")
+            st.subheader("📊 Learning Cycle Progress")
+            
+            # Poll job status
+            try:
+                job_status_r = requests.get(f"{API_BASE}/api/learning/scheduler/job-status/{job_id}", timeout=5)
+                if job_status_r.status_code == 200:
+                    job_data = job_status_r.json()
+                    job_status = job_data.get("status", "unknown")
+                    progress = job_data.get("progress", {})
+                    logs = job_data.get("logs", [])
+                    
+                    # Status indicator
+                    if job_status == "done":
+                        st.success("✅ Learning cycle completed!")
+                        result = job_data.get("result", {})
+                        entries_fetched = result.get("entries_fetched", 0)
+                        entries_filtered = result.get("entries_filtered", 0)
+                        entries_added = result.get("entries_added_to_rag", 0)
+                        
+                        st.metric("Entries Fetched", entries_fetched)
+                        st.metric("Entries Filtered", entries_filtered)
+                        st.metric("Entries Added to RAG", entries_added)
+                        
+                        # Clear job tracking
+                        st.session_state["learning_job_started"] = False
+                        st.session_state["learning_job_id"] = None
+                    elif job_status == "error":
+                        st.error(f"❌ Learning cycle failed: {job_data.get('error', 'Unknown error')}")
+                        st.session_state["learning_job_started"] = False
+                        st.session_state["learning_job_id"] = None
+                    else:
+                        # Show progress
+                        phase = progress.get("phase", "pending")
+                        phase_display = {
+                            "pending": "⏳ Waiting to start...",
+                            "fetching": "📥 Fetching from sources...",
+                            "prefilter": "🔍 Filtering content...",
+                            "embedding": "🧠 Generating embeddings...",
+                            "adding_to_rag": "💾 Adding to RAG..."
+                        }.get(phase, f"🔄 {phase}...")
+                        
+                        st.info(phase_display)
+                        
+                        # Show metrics
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Entries Fetched", progress.get("entries_fetched", 0))
+                        with col2:
+                            st.metric("Entries Filtered", progress.get("entries_filtered", 0))
+                        with col3:
+                            st.metric("Entries Added", progress.get("entries_added", 0))
+                        
+                        # Show recent logs
+                        if logs:
+                            with st.expander("📋 Recent Logs", expanded=False):
+                                for log in logs[-10:]:  # Last 10 logs
+                                    st.text(log)
+                        
+                        # Auto-refresh every 3 seconds using st.rerun with delay
+                        # Use placeholder to show refresh status
+                        refresh_placeholder = st.empty()
+                        refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
+                        import time
+                        time.sleep(3)
+                        st.rerun()
+                else:
+                    st.warning(f"⚠️ Could not fetch job status: {job_status_r.status_code}")
+            except Exception as e:
+                st.warning(f"⚠️ Error checking job status: {e}")
     else:
         status_msg = scheduler_status.get("message", "Unknown error")
         init_error = scheduler_status.get("initialization_error")
