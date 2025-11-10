@@ -311,7 +311,9 @@ class EmbeddingService:
                     
                     model_found = False
                     found_location = None
+                    logger.debug(f"🔍 Checking {len(possible_locations)} possible cache locations for model: {self.model_name}")
                     for loc in possible_locations:
+                        logger.debug(f"  Checking: {loc} (exists: {loc.exists()})")
                         if loc.exists():
                             # Check if it's actually a model directory
                             # HuggingFace cache format: models--sentence-transformers--all-MiniLM-L6-v2/
@@ -329,28 +331,34 @@ class EmbeddingService:
                                 # Also check if it's a HuggingFace cache directory (has snapshots/ subdirectory)
                                 has_hf_structure = (loc / "snapshots").exists() or (loc / "refs").exists()
                                 # Check if directory has any subdirectories (HuggingFace cache structure)
-                                has_subdirs = any(loc.iterdir()) if loc.exists() else False
+                                try:
+                                    has_subdirs = any(loc.iterdir()) if loc.exists() else False
+                                except Exception as e:
+                                    logger.debug(f"  Could not check subdirs for {loc}: {e}")
+                                    has_subdirs = False
+                                
+                                logger.debug(f"    has_model_files: {has_model_files}, has_hf_structure: {has_hf_structure}, has_subdirs: {has_subdirs}")
+                                
                                 if has_model_files or has_hf_structure or has_subdirs:
                                     # Additional check: if it's a HuggingFace cache, verify it has content
-                                    if has_hf_structure or has_subdirs:
+                                    if has_hf_structure:
                                         # Check if snapshots directory has any content
                                         snapshots_dir = loc / "snapshots"
                                         if snapshots_dir.exists():
-                                            snapshots = list(snapshots_dir.iterdir())
-                                            if snapshots:
-                                                model_found = True
-                                                found_location = loc
-                                                logger.info(f"✅ Found HuggingFace cache structure: {loc} with {len(snapshots)} snapshot(s)")
-                                                break
-                                        # Or if it's a direct model directory with subdirs
-                                        elif has_subdirs:
-                                            model_found = True
-                                            found_location = loc
-                                            logger.info(f"✅ Found model directory with subdirectories: {loc}")
-                                            break
-                                    else:
+                                            try:
+                                                snapshots = list(snapshots_dir.iterdir())
+                                                if snapshots:
+                                                    model_found = True
+                                                    found_location = loc
+                                                    logger.info(f"✅ Found HuggingFace cache structure: {loc} with {len(snapshots)} snapshot(s)")
+                                                    break
+                                            except Exception as e:
+                                                logger.debug(f"  Could not list snapshots for {snapshots_dir}: {e}")
+                                    # Or if it's a direct model directory with subdirs or model files
+                                    elif has_subdirs or has_model_files:
                                         model_found = True
                                         found_location = loc
+                                        logger.info(f"✅ Found model directory: {loc} (has_subdirs: {has_subdirs}, has_model_files: {has_model_files})")
                                         break
                     
                     if model_found:

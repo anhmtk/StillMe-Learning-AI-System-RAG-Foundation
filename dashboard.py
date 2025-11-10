@@ -448,8 +448,13 @@ def page_overview():
                     # Check if we have a stored cycle_count to compare
                     stored_cycle_count = st.session_state.get("learning_cycle_count_at_start", None)
                     
+                    # If stored_cycle_count is None, set it to current cycle_count (first check after timeout)
+                    if stored_cycle_count is None:
+                        st.session_state["learning_cycle_count_at_start"] = cycle_count
+                        stored_cycle_count = cycle_count
+                    
                     # If scheduler is not running AND cycle_count increased, cycle completed
-                    if not is_running and stored_cycle_count is not None and cycle_count > stored_cycle_count:
+                    if not is_running and cycle_count > stored_cycle_count:
                         st.success("✅ Learning cycle completed!")
                         # Show results from scheduler status
                         st.info("💡 Check scheduler status below for details.")
