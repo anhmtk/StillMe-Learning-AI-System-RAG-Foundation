@@ -47,6 +47,7 @@ While major AI companies build closed systems with proprietary algorithms, Still
 - ✅ **Dashboard**: Interactive UI with RAG interface, validation metrics, confidence scores, and learning metrics
 - ✅ **Continuum Memory System** (NEW): Tiered memory architecture (L0-L3) with promotion/demotion, multi-timescale scheduler, and forgetting metrics
 - ✅ **Multi-Source Learning** (NEW): Integrated fetching from RSS, arXiv, CrossRef, and Wikipedia with pre-filtering
+- 🔬 **Nested Learning** (EXPERIMENTAL): Tiered update frequency system inspired by Google Research's Nested Learning paradigm - reduces embedding costs by updating knowledge at different frequencies (L0: every cycle, L1: every 10 cycles, L2: every 100 cycles, L3: every 1000 cycles). Currently in experimental branch `experimental/nested-learning` for testing and validation.
 
 **Vision:** Evolve through developmental stages (Infant → Child → Adolescent → Adult) with community governance, automated learning pipelines, and complete transparency.
 
@@ -55,6 +56,7 @@ While major AI companies build closed systems with proprietary algorithms, Still
 - **🧬 Evolutionary Learning**: AI progresses through stages (Infant → Child → Adolescent → Adult)
 - **📚 Multi-Source Learning**: RSS feeds + arXiv + CrossRef + Wikipedia with intelligent pre-filtering
 - **🧠 Continuum Memory**: Tiered memory system (L0-L3) with surprise-based promotion/demotion and forgetting metrics
+- **🔬 Nested Learning** (Experimental): Tiered update frequency system that reduces embedding costs and protects long-term knowledge by updating different memory tiers at different rates (inspired by Google Research's Nested Learning paradigm)
 - **🌐 Real-time Data**: Live data from multiple trusted sources with transparency
 - **🛡️ Ethical Filtering**: Comprehensive ethical content filtering with complete transparency
 - **📊 Transparent Dashboard**: Complete visibility into all learning sources, memory health, and tier statistics
