@@ -314,10 +314,24 @@ class EmbeddingService:
                     for loc in possible_locations:
                         if loc.exists():
                             # Check if it's actually a model directory
-                            if loc.is_dir() and (any(loc.glob("*.json")) or any(loc.glob("*.bin")) or any(loc.glob("*.safetensors"))):
-                                model_found = True
-                                found_location = loc
-                                break
+                            # HuggingFace cache format: models--sentence-transformers--all-MiniLM-L6-v2/
+                            #   contains: snapshots/{hash}/model files
+                            if loc.is_dir():
+                                # Check for model files directly or in subdirectories (HuggingFace format)
+                                has_model_files = (
+                                    any(loc.glob("*.json")) or 
+                                    any(loc.glob("*.bin")) or 
+                                    any(loc.glob("*.safetensors")) or
+                                    any(loc.rglob("*.json")) or  # Check subdirectories
+                                    any(loc.rglob("*.bin")) or
+                                    any(loc.rglob("*.safetensors"))
+                                )
+                                # Also check if it's a HuggingFace cache directory (has snapshots/ subdirectory)
+                                has_hf_structure = (loc / "snapshots").exists() or (loc / "refs").exists()
+                                if has_model_files or has_hf_structure:
+                                    model_found = True
+                                    found_location = loc
+                                    break
                     
                     if model_found:
                         logger.info(f"✅ After first use: Model files cached in persistent volume: {found_location}")
