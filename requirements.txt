@@ -28,7 +28,7 @@ beautifulsoup4==4.12.2
 
 # Environment & Configuration
 python-dotenv==1.2.1
-pydantic==2.5.0
+pydantic==2.12.4
 
 # Logging & Monitoring
 loguru==0.7.2
