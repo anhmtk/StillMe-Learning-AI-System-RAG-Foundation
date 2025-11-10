@@ -134,6 +134,8 @@ class EmbeddingService:
                         st_cache_path_alt,
                         hf_hub_path,
                         cache_dir / f"models--{model_name_hf}",
+                        cache_dir / f"models--sentence-transformers--{model_name_hf}",  # HuggingFace format for sentence-transformers
+                        cache_dir / "hub" / f"models--sentence-transformers--{model_name_hf}",
                     ]
                     
                     model_found = False
@@ -295,11 +297,16 @@ class EmbeddingService:
                     model_name_hf = self.model_name.replace("/", "--")
                     
                     # Check multiple possible cache locations
+                    # HuggingFace uses: models--{model_name} format
+                    # sentence-transformers uses: sentence_transformers/{model_name} format
+                    # Also check for sentence-transformers specific format: models--sentence-transformers--{model_name}
                     possible_locations = [
                         cache_dir / "sentence_transformers" / model_name_safe,
                         cache_dir / "sentence_transformers" / self.model_name,
                         cache_dir / "hub" / f"models--{model_name_hf}",
                         cache_dir / f"models--{model_name_hf}",
+                        cache_dir / f"models--sentence-transformers--{model_name_hf}",  # HuggingFace format for sentence-transformers
+                        cache_dir / "hub" / f"models--sentence-transformers--{model_name_hf}",
                     ]
                     
                     model_found = False
