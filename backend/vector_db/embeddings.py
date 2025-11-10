@@ -292,19 +292,52 @@ class EmbeddingService:
                 if cache_path:
                     cache_dir = Path(cache_path)
                     model_name_safe = self.model_name.replace("/", "_")
-                    expected_model_dir = cache_dir / "sentence_transformers" / model_name_safe
-                    if expected_model_dir.exists():
-                        logger.info(f"✅ After first use: Model files cached in persistent volume: {expected_model_dir}")
+                    model_name_hf = self.model_name.replace("/", "--")
+                    
+                    # Check multiple possible cache locations
+                    possible_locations = [
+                        cache_dir / "sentence_transformers" / model_name_safe,
+                        cache_dir / "sentence_transformers" / self.model_name,
+                        cache_dir / "hub" / f"models--{model_name_hf}",
+                        cache_dir / f"models--{model_name_hf}",
+                    ]
+                    
+                    model_found = False
+                    found_location = None
+                    for loc in possible_locations:
+                        if loc.exists():
+                            # Check if it's actually a model directory
+                            if loc.is_dir() and (any(loc.glob("*.json")) or any(loc.glob("*.bin")) or any(loc.glob("*.safetensors"))):
+                                model_found = True
+                                found_location = loc
+                                break
+                    
+                    if model_found:
+                        logger.info(f"✅ After first use: Model files cached in persistent volume: {found_location}")
                     else:
-                        logger.warning(f"⚠️ After first use: Model files NOT in persistent volume. Expected: {expected_model_dir}")
+                        logger.warning(f"⚠️ After first use: Model files NOT in persistent volume. Expected: {possible_locations[0]}")
                         # Check HuggingFace default cache
                         try:
                             from transformers import file_utils
                             hf_cache = file_utils.default_cache_path
+                            logger.info(f"📦 Checking HuggingFace default cache: {hf_cache}")
                             if hf_cache.exists():
-                                logger.warning(f"⚠️ Model may be in HuggingFace default cache: {hf_cache}")
-                        except:
-                            pass
+                                # Check if model is in HF cache
+                                hf_model_path = hf_cache / f"models--{model_name_hf}"
+                                if hf_model_path.exists():
+                                    logger.warning(f"⚠️ Model is in HuggingFace default cache (NOT persistent): {hf_model_path}")
+                                else:
+                                    logger.warning(f"⚠️ Model not found in HuggingFace cache either: {hf_cache}")
+                        except Exception as e:
+                            logger.debug(f"Could not check HuggingFace cache: {e}")
+                        
+                        # List what's actually in the persistent volume cache directory
+                        try:
+                            if cache_dir.exists():
+                                contents = list(cache_dir.iterdir())
+                                logger.info(f"📁 Contents of persistent volume cache: {[str(c.name) for c in contents[:10]]}")
+                        except Exception as e:
+                            logger.debug(f"Could not list cache directory: {e}")
             
             # Convert to list if single text
             if isinstance(text, str):
