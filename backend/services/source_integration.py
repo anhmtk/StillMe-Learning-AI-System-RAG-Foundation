@@ -61,8 +61,38 @@ class SourceIntegration:
             rss_entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=max_items_per_source)
             all_entries.extend(rss_entries)
             logger.info(f"Fetched {len(rss_entries)} entries from RSS")
+            
+            # Update system status tracker with RSS fetcher status
+            from backend.services.system_status_tracker import get_system_status_tracker
+            status_tracker = get_system_status_tracker()
+            rss_stats = self.rss_fetcher.get_stats()
+            if rss_stats.get("status") == "error":
+                status_tracker.update_component_status(
+                    component_name="rss_fetcher",
+                    status="error",
+                    error_message=rss_stats.get("last_error", "Unknown error"),
+                    error_count=rss_stats.get("error_count", 0),
+                    last_success=datetime.fromisoformat(rss_stats["last_success_time"]) if rss_stats.get("last_success_time") else None
+                )
+            else:
+                status_tracker.update_component_status(
+                    component_name="rss_fetcher",
+                    status="ok",
+                    error_message=None,
+                    error_count=0,
+                    last_success=datetime.now()
+                )
         except Exception as e:
             logger.error(f"Error fetching RSS: {e}")
+            # Track error in system status
+            from backend.services.system_status_tracker import get_system_status_tracker
+            status_tracker = get_system_status_tracker()
+            status_tracker.update_component_status(
+                component_name="rss_fetcher",
+                status="error",
+                error_message=str(e),
+                error_count=1
+            )
         
         # Fetch from arXiv
         if self.arxiv_fetcher and ENABLE_ARXIV:
@@ -70,8 +100,38 @@ class SourceIntegration:
                 arxiv_entries = self.arxiv_fetcher.fetch_recent_papers(max_results=max_items_per_source)
                 all_entries.extend(arxiv_entries)
                 logger.info(f"Fetched {len(arxiv_entries)} entries from arXiv")
+                
+                # Update system status tracker with arXiv fetcher status
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                arxiv_stats = self.arxiv_fetcher.get_stats()
+                if arxiv_stats.get("status") == "error":
+                    status_tracker.update_component_status(
+                        component_name="arxiv_fetcher",
+                        status="error",
+                        error_message=arxiv_stats.get("last_error", "Unknown error"),
+                        error_count=arxiv_stats.get("error_count", 0),
+                        last_success=datetime.fromisoformat(arxiv_stats["last_success_time"]) if arxiv_stats.get("last_success_time") else None
+                    )
+                else:
+                    status_tracker.update_component_status(
+                        component_name="arxiv_fetcher",
+                        status="ok",
+                        error_message=None,
+                        error_count=0,
+                        last_success=datetime.now()
+                    )
             except Exception as e:
                 logger.error(f"Error fetching arXiv: {e}")
+                # Track error in system status
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                status_tracker.update_component_status(
+                    component_name="arxiv_fetcher",
+                    status="error",
+                    error_message=str(e),
+                    error_count=1
+                )
         
         # Fetch from CrossRef
         if self.crossref_fetcher and ENABLE_CROSSREF:
@@ -83,8 +143,38 @@ class SourceIntegration:
                 )
                 all_entries.extend(crossref_entries)
                 logger.info(f"Fetched {len(crossref_entries)} entries from CrossRef")
+                
+                # Update system status tracker with CrossRef fetcher status
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                crossref_stats = self.crossref_fetcher.get_stats()
+                if crossref_stats.get("status") == "error":
+                    status_tracker.update_component_status(
+                        component_name="crossref_fetcher",
+                        status="error",
+                        error_message=crossref_stats.get("last_error", "Unknown error"),
+                        error_count=crossref_stats.get("error_count", 0),
+                        last_success=datetime.fromisoformat(crossref_stats["last_success_time"]) if crossref_stats.get("last_success_time") else None
+                    )
+                else:
+                    status_tracker.update_component_status(
+                        component_name="crossref_fetcher",
+                        status="ok",
+                        error_message=None,
+                        error_count=0,
+                        last_success=datetime.now()
+                    )
             except Exception as e:
                 logger.error(f"Error fetching CrossRef: {e}")
+                # Track error in system status
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                status_tracker.update_component_status(
+                    component_name="crossref_fetcher",
+                    status="error",
+                    error_message=str(e),
+                    error_count=1
+                )
         
         # Fetch from Wikipedia
         if self.wikipedia_fetcher and ENABLE_WIKIPEDIA:

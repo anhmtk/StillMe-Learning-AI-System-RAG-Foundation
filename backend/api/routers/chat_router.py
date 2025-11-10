@@ -289,6 +289,51 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
 """
             else:
                 # Context available - use normal prompt
+                # CRITICAL: Calculate preliminary confidence score BEFORE generating response
+                # This allows StillMe to know when it should say "I don't know"
+                preliminary_confidence = _calculate_confidence_score(
+                    context_docs_count=context.get("total_context_docs", 0),
+                    validation_result=None,  # No validation yet, just context-based
+                    context=context
+                )
+                
+                # Build confidence-aware instruction
+                confidence_instruction = ""
+                if preliminary_confidence < 0.5:
+                    # Low confidence - StillMe should express uncertainty
+                    confidence_instruction = f"""
+
+⚠️ LOW CONFIDENCE WARNING ⚠️
+
+StillMe's confidence score for this question is {preliminary_confidence:.2f} (below 0.5 threshold).
+
+This means:
+- The retrieved context may not be highly relevant to the question
+- The information may be incomplete or insufficient
+- You should express appropriate uncertainty in your response
+
+YOU MUST:
+1. Acknowledge the limitations of the available context
+2. Use phrases like "Based on the limited context available", "I'm not entirely certain", or "The information suggests"
+3. If the context is clearly insufficient, say "I don't have enough information to answer this confidently"
+4. DO NOT make definitive claims when confidence is low
+
+Remember: It's better to admit uncertainty than to overstate confidence with insufficient evidence.
+"""
+                elif preliminary_confidence < 0.7:
+                    # Medium confidence - StillMe should be cautious
+                    confidence_instruction = f"""
+
+⚠️ MODERATE CONFIDENCE ⚠️
+
+StillMe's confidence score for this question is {preliminary_confidence:.2f} (moderate).
+
+You should:
+- Be cautious and acknowledge any limitations
+- Cite sources from the context
+- Express appropriate uncertainty when the context is not definitive
+"""
+                
                 # Special instruction for StillMe queries with ERROR STATE CHECKING
                 stillme_instruction = ""
                 if is_stillme_query:
@@ -345,6 +390,7 @@ UNDER NO CIRCUMSTANCES return a response in any language other than {detected_la
 
 Context: {context_text}
 {citation_instruction}
+{confidence_instruction}
 {stillme_instruction}
 
 User Question (in {detected_lang_name.upper()}): {chat_request.message}
