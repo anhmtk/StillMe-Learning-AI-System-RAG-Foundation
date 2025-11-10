@@ -1244,6 +1244,11 @@ async def get_nested_learning_metrics():
         continuum_memory = ContinuumMemory()
         tier_stats = continuum_memory.get_tier_statistics()
         
+        # Update metrics collector with tier distribution
+        tier_counts = tier_stats.get("tier_counts", {})
+        for tier, count in tier_counts.items():
+            metrics.update_tier_distribution(tier, count)
+        
         # Calculate cost reduction estimate
         total_operations = nested_metrics.get("embedding_operations_total", 0)
         skipped_operations = sum(nested_metrics.get("tier_skipped_counts", {}).values())
