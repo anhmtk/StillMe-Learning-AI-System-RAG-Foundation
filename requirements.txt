@@ -23,8 +23,13 @@ pandas==2.3.3
 plotly==5.18.0
 
 # RSS & XML Processing
+ dependabot/pip/beautifulsoup4-4.14.2
+feedparser==6.0.10
+beautifulsoup4==4.14.2
+
 feedparser==6.0.12
 beautifulsoup4==4.12.2
+ main
 
 # Environment & Configuration
 python-dotenv==1.2.1
