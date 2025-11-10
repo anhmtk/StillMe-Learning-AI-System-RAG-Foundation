@@ -418,6 +418,10 @@ def page_overview():
                 except requests.exceptions.Timeout:
                     # Timeout is OK - job is running in background
                     # Don't set a fake job_id - we'll poll scheduler status instead
+                    # Store current cycle_count to detect when cycle completes
+                    current_status = get_json("/api/learning/scheduler/status", {}, timeout=10)
+                    if current_status and current_status.get("status") == "ok":
+                        st.session_state["learning_cycle_count_at_start"] = current_status.get("cycle_count", 0)
                     st.session_state["learning_job_started"] = True
                     st.session_state["learning_job_id"] = None  # No specific job ID, will poll scheduler status
                     st.session_state["last_action"] = "⏳ Learning cycle is running in background. This may take 2-5 minutes. Progress will be shown below."
@@ -433,14 +437,63 @@ def page_overview():
             
             # Skip polling if job_id is None or "timeout_fallback" (not a real job ID)
             if not job_id or job_id == "timeout_fallback":
-                st.info("⏳ Learning cycle is running in background. This may take 2-5 minutes.")
-                st.info("💡 **Tip:** Check scheduler status below to see when the cycle completes.")
-                # Auto-refresh to check scheduler status
-                refresh_placeholder = st.empty()
-                refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
-                import time
-                time.sleep(3)
-                st.rerun()
+                # Check scheduler status to see if cycle has completed
+                # Get current scheduler status to check if cycle finished
+                current_scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=60)
+                if current_scheduler_status and current_scheduler_status.get("status") == "ok":
+                    is_running = current_scheduler_status.get("is_running", False)
+                    last_run_time = current_scheduler_status.get("last_run_time")
+                    cycle_count = current_scheduler_status.get("cycle_count", 0)
+                    
+                    # Check if we have a stored cycle_count to compare
+                    stored_cycle_count = st.session_state.get("learning_cycle_count_at_start", None)
+                    
+                    # If scheduler is not running AND cycle_count increased, cycle completed
+                    if not is_running and stored_cycle_count is not None and cycle_count > stored_cycle_count:
+                        st.success("✅ Learning cycle completed!")
+                        # Show results from scheduler status
+                        st.info("💡 Check scheduler status below for details.")
+                        # Clear job tracking
+                        st.session_state["learning_job_started"] = False
+                        st.session_state["learning_job_id"] = None
+                        st.session_state["learning_cycle_count_at_start"] = None
+                    elif not is_running and last_run_time:
+                        # Scheduler stopped and has a last_run_time - cycle likely completed
+                        # But we can't be 100% sure, so show message and allow manual clear
+                        st.info("⏳ Learning cycle may have completed. Scheduler is stopped.")
+                        st.info("💡 **Tip:** Check scheduler status below. If cycle completed, you can dismiss this message.")
+                        if st.button("✅ Dismiss (Cycle Completed)", key="dismiss_cycle"):
+                            st.session_state["learning_job_started"] = False
+                            st.session_state["learning_job_id"] = None
+                            st.session_state["learning_cycle_count_at_start"] = None
+                            st.rerun()
+                        else:
+                            # Auto-refresh to check scheduler status
+                            refresh_placeholder = st.empty()
+                            refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
+                            import time
+                            time.sleep(3)
+                            st.rerun()
+                    else:
+                        # Still running or unknown status - continue auto-refresh
+                        st.info("⏳ Learning cycle is running in background. This may take 2-5 minutes.")
+                        st.info("💡 **Tip:** Check scheduler status below to see when the cycle completes.")
+                        # Auto-refresh to check scheduler status
+                        refresh_placeholder = st.empty()
+                        refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
+                        import time
+                        time.sleep(3)
+                        st.rerun()
+                else:
+                    # Could not get scheduler status - continue auto-refresh but with warning
+                    st.warning("⚠️ Could not check scheduler status. Learning cycle may still be running.")
+                    st.info("💡 **Tip:** Check backend logs to see if learning cycle is still running.")
+                    # Auto-refresh to check scheduler status
+                    refresh_placeholder = st.empty()
+                    refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
+                    import time
+                    time.sleep(3)
+                    st.rerun()
             else:
                 # Poll job status (with longer timeout - learning cycle can take 2-5 minutes)
                 try:
