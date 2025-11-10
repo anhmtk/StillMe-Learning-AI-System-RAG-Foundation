@@ -45,7 +45,7 @@ orjson==3.9.10
 # Note: Install torch CPU version separately to reduce build time
 # Use: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 # For now, let sentence-transformers install torch (will be slower but compatible)
-chromadb==0.4.22
+chromadb==1.3.4
 sentence-transformers>=2.7.0  # Updated to support newer huggingface_hub
 
 # Security & Rate Limiting
