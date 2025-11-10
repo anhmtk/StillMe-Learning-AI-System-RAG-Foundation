@@ -1,5 +1,5 @@
 # Dockerfile for StillMe - Learning AI system with RAG foundation
-FROM python:3.12-slim
+FROM python:3.14-slim
 
 LABEL maintainer="StillMe Team"
 LABEL description="StillMe - Learning AI system with RAG foundation with Complete Ethical Transparency"
