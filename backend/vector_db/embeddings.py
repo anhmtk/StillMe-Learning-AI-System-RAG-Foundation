@@ -40,11 +40,39 @@ class EmbeddingService:
             # SentenceTransformer will use TRANSFORMERS_CACHE/HF_HOME env vars
             # cache_folder parameter is also passed for redundancy
             # CRITICAL: Force cache_folder to ensure model is cached in persistent volume
+            # Note: SentenceTransformer may ignore cache_folder if env vars are set
+            # So we MUST set env vars BEFORE creating the model
             self.model = SentenceTransformer(
                 model_name, 
                 cache_folder=cache_path if cache_path else None
             )
             logger.info(f"Embedding model '{model_name}' loaded successfully")
+            
+            # CRITICAL: Check where model was actually loaded from
+            # SentenceTransformer stores model path in model._modules['0'].auto_model.config._name_or_path
+            # But more importantly, check the actual cache location
+            try:
+                # Check if model has cache_dir attribute
+                if hasattr(self.model, 'cache_dir'):
+                    logger.info(f"📦 Model cache_dir attribute: {self.model.cache_dir}")
+                
+                # Check HuggingFace cache location (where model files actually are)
+                from transformers import file_utils
+                hf_cache_dir = file_utils.default_cache_path
+                logger.info(f"📦 HuggingFace default cache path: {hf_cache_dir}")
+                
+                # Check if model files exist in expected persistent volume location
+                if cache_path:
+                    expected_model_dir = Path(cache_path) / "sentence_transformers" / model_name.replace("/", "_")
+                    if expected_model_dir.exists():
+                        logger.info(f"✅ Model files found in persistent volume: {expected_model_dir}")
+                    else:
+                        logger.warning(f"⚠️ Model files NOT in persistent volume. Expected: {expected_model_dir}")
+                        # Check if model is in HuggingFace default cache instead
+                        if hf_cache_dir.exists() and hf_cache_dir != Path(cache_path):
+                            logger.warning(f"⚠️ Model may be cached in HuggingFace default location: {hf_cache_dir}")
+            except Exception as check_error:
+                logger.debug(f"Could not check model cache location: {check_error}")
             if cache_path:
                 logger.info(f"✅ Model cached at: {cache_path}")
                 
@@ -239,6 +267,28 @@ class EmbeddingService:
         """
         try:
             embeddings = self.model.encode(text, convert_to_tensor=False)
+            
+            # After first encode, model files should be cached
+            # Verify cache location after first use (only log once)
+            if not hasattr(self, '_cache_verified_after_use'):
+                self._cache_verified_after_use = True
+                cache_path = self._get_cache_path()
+                if cache_path:
+                    cache_dir = Path(cache_path)
+                    model_name_safe = self.model_name.replace("/", "_")
+                    expected_model_dir = cache_dir / "sentence_transformers" / model_name_safe
+                    if expected_model_dir.exists():
+                        logger.info(f"✅ After first use: Model files cached in persistent volume: {expected_model_dir}")
+                    else:
+                        logger.warning(f"⚠️ After first use: Model files NOT in persistent volume. Expected: {expected_model_dir}")
+                        # Check HuggingFace default cache
+                        try:
+                            from transformers import file_utils
+                            hf_cache = file_utils.default_cache_path
+                            if hf_cache.exists():
+                                logger.warning(f"⚠️ Model may be in HuggingFace default cache: {hf_cache}")
+                        except:
+                            pass
             
             # Convert to list if single text
             if isinstance(text, str):
