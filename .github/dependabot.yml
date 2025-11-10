@@ -26,6 +26,11 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "pydantic"
         update-types: ["version-update:semver-major"]
+      # Ignore chromadb major updates - requires onnxruntime which may not be compatible with Python 3.12
+      # ChromaDB 1.x requires onnxruntime>=1.14.1, but onnxruntime wheels for Python 3.12 on Linux are not available yet
+      # We're using Python 3.11 for compatibility, so major chromadb updates need manual review
+      - dependency-name: "chromadb"
+        update-types: ["version-update:semver-major"]
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
@@ -64,3 +69,10 @@ updates:
     labels:
       - "dependencies"
       - "docker"
+    ignore:
+      # CRITICAL: Ignore Python base image major version updates
+      # We're pinned to Python 3.11 for onnxruntime compatibility
+      # Python 3.12 doesn't have onnxruntime wheels on Linux yet
+      # Only allow patch/minor updates (e.g., 3.11.0 -> 3.11.1, but not 3.11 -> 3.12)
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major"]
