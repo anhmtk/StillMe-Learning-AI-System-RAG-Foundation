@@ -52,11 +52,13 @@ class EmbeddingService:
                     logger.info(f"✅ Cache directory exists: {cache_dir}")
                     # Check if model files exist (sentence-transformers uses different paths)
                     # Try multiple possible cache locations
+                    model_name_safe = model_name.replace("/", "_")
+                    model_name_hf = model_name.replace("/", "--")
                     possible_paths = [
-                        cache_dir / "sentence_transformers" / model_name.replace("/", "_"),
+                        cache_dir / "sentence_transformers" / model_name_safe,
                         cache_dir / "sentence_transformers" / model_name,
-                        cache_dir / "models--" + model_name.replace("/", "--"),
-                        Path.home() / ".cache" / "huggingface" / "hub" / ("models--" + model_name.replace("/", "--"))
+                        cache_dir / f"models--{model_name_hf}",
+                        Path.home() / ".cache" / "huggingface" / "hub" / f"models--{model_name_hf}"
                     ]
                     model_found = False
                     for model_path in possible_paths:
