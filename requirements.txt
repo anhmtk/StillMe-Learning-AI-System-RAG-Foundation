@@ -11,7 +11,7 @@ alembic==1.13.1
 # Note: sqlite3 is built-in Python module, no need to install
 
 # HTTP Requests
-httpx==0.25.2
+httpx==0.28.1
 requests==2.31.0
 
 # Data Processing
