@@ -61,6 +61,7 @@ class EmbeddingService:
                 logger.warning(f"Image cache path does not exist: {cache_dir}, falling back to other options")
         
         # Priority 2: Check for Railway persistent volume path (from railway.json: /app/hf_cache)
+        # First check env var, then check if persistent volume mount exists
         persistent_cache = os.getenv("PERSISTENT_CACHE_PATH")
         if persistent_cache:
             # If path ends with /hf_cache, use it directly, otherwise append /huggingface
@@ -70,6 +71,15 @@ class EmbeddingService:
                 cache_dir = Path(persistent_cache) / "huggingface"
             cache_dir.mkdir(parents=True, exist_ok=True)
             logger.info(f"Using persistent volume cache: {cache_dir}")
+            return str(cache_dir)
+        
+        # Priority 2b: Check if Railway persistent volume mount exists directly
+        # Railway mounts /app/hf_cache as persistent volume
+        railway_cache = Path("/app/hf_cache")
+        if railway_cache.exists() or railway_cache.parent.exists():
+            cache_dir = railway_cache
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"Using Railway persistent volume cache: {cache_dir}")
             return str(cache_dir)
         
         # Priority 3: Check for custom cache path
