@@ -126,7 +126,10 @@ class WikipediaFetcher:
         try:
             # Fetch page content using correct REST v1 endpoint
             # URL format: https://{language}.wikipedia.org/w/rest.php/v1/page/summary/{title}
-            url = f"{self.api_base}/page/summary/{title}"
+            # Title needs URL encoding for special characters and spaces
+            from urllib.parse import quote
+            encoded_title = quote(title.replace(" ", "_"), safe="")
+            url = f"{self.api_base}/page/summary/{encoded_title}"
             response = self._fetch_with_retry(url)
             
             # Track success

@@ -3,7 +3,7 @@ Learning Router for StillMe API
 Handles all learning-related endpoints (knowledge retention, RSS, scheduler, self-diagnosis, curator)
 """
 
-from fastapi import APIRouter, Request, HTTPException, Depends, Query
+from fastapi import APIRouter, Request, HTTPException, Depends, Query, status
 from backend.api.models import LearningRequest, LearningResponse
 from backend.api.rate_limiter import limiter, get_rate_limit_key_func
 from backend.api.auth import require_api_key
