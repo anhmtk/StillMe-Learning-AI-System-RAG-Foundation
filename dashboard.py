@@ -1572,6 +1572,8 @@ def main():
     elif page == "Memory Health":
         from dashboard_memory_health import page_memory_health
         page_memory_health()
+    elif page == "Nested Learning":
+        page_nested_learning()
 
     # Tiny auto-refresh toggle for live demos
     with st.sidebar.expander("Auto Refresh"):
