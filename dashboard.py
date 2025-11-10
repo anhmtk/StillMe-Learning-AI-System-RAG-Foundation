@@ -286,7 +286,20 @@ def page_overview():
         if API_BASE == "http://localhost:8000":
             st.warning("⚠️ **WARNING:** API_BASE is still `localhost:8000`! This means `STILLME_API_BASE` environment variable is NOT set in Railway dashboard service. You need to set it to your backend URL (e.g., `https://stillme-backend-production-xxxx.up.railway.app`)")
     
-    scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=30)
+    # Get scheduler status with longer timeout (backend may be busy during learning cycle)
+    # Use try-except to handle timeout gracefully and show progress if job is running
+    try:
+        scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=60)
+    except requests.exceptions.Timeout:
+        # Backend may be busy processing learning cycle - check if job is running
+        if st.session_state.get("learning_job_started") and st.session_state.get("learning_job_id"):
+            st.warning("⏳ Backend is processing learning cycle. Showing job progress below...")
+            scheduler_status = {}  # Empty to trigger job status display
+        else:
+            st.error("⚠️ **Warning:** Backend did not respond to status check within 60 seconds.")
+            st.info("💡 **Possible causes:**\n- Backend is processing a learning cycle\n- Backend is under heavy load\n- Network connectivity issue")
+            st.info("🔄 **Try:** Refresh the page or wait a few moments and try again.")
+            scheduler_status = {}
     
     # Debug: Show what we received and test connection
     if not scheduler_status or scheduler_status == {}:
@@ -295,7 +308,7 @@ def page_overview():
         # Try to provide more specific error info
         try:
             test_url = f"{API_BASE}/api/status"
-            test_r = requests.get(test_url, timeout=5)
+            test_r = requests.get(test_url, timeout=30)  # Increased timeout for status checks
             if test_r.status_code == 200:
                 st.warning("💡 Backend is reachable at `/api/status`, but `/api/learning/scheduler/status` returned empty response.")
                 st.info("This may indicate the scheduler endpoint has an issue. Check backend logs.")
@@ -379,7 +392,8 @@ def page_overview():
             if st.button("🚀 Run Now", use_container_width=True):
                 try:
                     # Non-blocking: returns 202 immediately
-                    r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=10)
+                    # Increased timeout to 30s to handle slow backend responses during learning cycle
+                    r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=30)
                     if r.status_code == 202:
                         data = r.json()
                         job_id = data.get("job_id")
@@ -418,7 +432,7 @@ def page_overview():
             
             # Poll job status (with longer timeout - learning cycle can take 2-5 minutes)
             try:
-                job_status_r = requests.get(f"{API_BASE}/api/learning/scheduler/job-status/{job_id}", timeout=30)
+                job_status_r = requests.get(f"{API_BASE}/api/learning/scheduler/job-status/{job_id}", timeout=60)
                 if job_status_r.status_code == 200:
                     job_data = job_status_r.json()
                     job_status = job_data.get("status", "unknown")
@@ -482,8 +496,19 @@ def page_overview():
                         st.rerun()
                 else:
                     st.warning(f"⚠️ Could not fetch job status: {job_status_r.status_code}")
+            except requests.exceptions.Timeout:
+                st.warning("⏱️ Job status check timed out (60s). Learning cycle may still be running.")
+                st.info("💡 **Tip:** Backend is processing. This is normal - learning cycles take 2-5 minutes.")
+                st.info("🔄 **Auto-refresh:** This page will auto-refresh every 3 seconds to show progress.")
+                # Keep job tracking active so it continues polling
+                refresh_placeholder = st.empty()
+                refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
+                import time
+                time.sleep(3)
+                st.rerun()
             except Exception as e:
-                st.warning(f"⚠️ Error checking job status: {e}")
+                st.error(f"❌ Error checking job status: {e}")
+                st.info("💡 **Tip:** Check backend logs to see if learning cycle is still running.")
     else:
         status_msg = scheduler_status.get("message", "Unknown error")
         init_error = scheduler_status.get("initialization_error")
