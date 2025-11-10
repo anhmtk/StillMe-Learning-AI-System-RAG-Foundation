@@ -69,6 +69,19 @@ class ChromaClient:
             logger.info(f"✅ Created fresh directory: {persist_directory}")
         
         try:
+            # CRITICAL: Set ChromaDB ONNX cache to persistent volume
+            # ChromaDB caches ONNX models in ~/.cache/chroma/onnx_models/
+            # We need to redirect this to Railway persistent volume
+            import os
+            chroma_cache_dir = "/app/.cache/chroma"
+            if os.path.exists(chroma_cache_dir):
+                # Persistent volume is mounted at /app/.cache/chroma
+                os.environ["CHROMA_CACHE_DIR"] = chroma_cache_dir
+                logger.info(f"✅ Using Railway persistent volume for ChromaDB ONNX cache: {chroma_cache_dir}")
+            else:
+                # Fallback to default cache location
+                logger.warning(f"⚠️ ChromaDB persistent cache not found at {chroma_cache_dir}, using default cache")
+            
             # Create client - if reset_on_error was True, directory is fresh
             self.client = chromadb.PersistentClient(
                 path=persist_directory,

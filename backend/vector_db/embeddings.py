@@ -39,6 +39,7 @@ class EmbeddingService:
             
             # SentenceTransformer will use TRANSFORMERS_CACHE/HF_HOME env vars
             # cache_folder parameter is also passed for redundancy
+            # CRITICAL: Force cache_folder to ensure model is cached in persistent volume
             self.model = SentenceTransformer(
                 model_name, 
                 cache_folder=cache_path if cache_path else None
@@ -46,6 +47,19 @@ class EmbeddingService:
             logger.info(f"Embedding model '{model_name}' loaded successfully")
             if cache_path:
                 logger.info(f"✅ Model cached at: {cache_path}")
+                
+                # CRITICAL: Verify where model was actually cached
+                # SentenceTransformer may cache in different locations
+                import sentence_transformers
+                actual_cache_dir = getattr(sentence_transformers.util, 'MODEL_CACHE_DIR', None)
+                if actual_cache_dir:
+                    logger.info(f"📦 SentenceTransformer cache directory: {actual_cache_dir}")
+                
+                # Check environment variables to see what SentenceTransformer is using
+                logger.info(f"📦 TRANSFORMERS_CACHE: {os.getenv('TRANSFORMERS_CACHE', 'NOT SET')}")
+                logger.info(f"📦 HF_HOME: {os.getenv('HF_HOME', 'NOT SET')}")
+                logger.info(f"📦 SENTENCE_TRANSFORMERS_HOME: {os.getenv('SENTENCE_TRANSFORMERS_HOME', 'NOT SET')}")
+                
                 # Verify cache exists
                 cache_dir = Path(cache_path)
                 if cache_dir.exists():
