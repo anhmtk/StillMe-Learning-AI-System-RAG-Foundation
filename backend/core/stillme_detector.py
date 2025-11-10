@@ -52,6 +52,13 @@ STILLME_KEYWORDS = {
     # RAG-related
     "rag", "retrieval", "vector", "knowledge base", "cơ sở tri thức",
     
+    # Technical details (embedding, model, database)
+    "embedding", "embeddings", "mô hình embedding", "embedding model",
+    "sentence-transformers", "sentence transformers", "all-minilm",
+    "chromadb", "chroma", "vector database", "vector db",
+    "cơ sở dữ liệu vector", "mô hình", "model", "models",
+    "dimension", "dimensions", "384", "384-dimensional",
+    
     # Evolution-related
     "tiến hóa", "evolution", "evolve", "self-evolving",
     
@@ -139,6 +146,23 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         matched_keywords.append("learning_direct")
         return (True, matched_keywords)
     
+    # Pattern 3c: Technical questions about StillMe (embedding, model, database)
+    # "Bạn đang sử dụng mô hình Embedding nào?" / "What embedding model do you use?"
+    has_technical_keyword = any(
+        keyword in query_lower 
+        for keyword in [
+            "embedding", "embeddings", "mô hình embedding", "embedding model",
+            "sentence-transformers", "sentence transformers", "all-minilm",
+            "chromadb", "chroma", "vector database", "vector db",
+            "cơ sở dữ liệu vector", "mô hình", "model", "models",
+            "dimension", "dimensions", "384"
+        ]
+    )
+    
+    if has_technical_keyword and has_stillme_context:
+        matched_keywords.append("technical")
+        return (True, matched_keywords)
+    
     # Pattern 4: RAG/transparency/evolution keywords (likely about StillMe)
     has_rag_keyword = any(
         keyword in query_lower 
@@ -154,6 +178,12 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         keyword in query_lower 
         for keyword in ["tiến hóa", "evolution", "evolve", "self-evolving"]
     )
+    
+    # Also check for technical keywords (even without explicit StillMe context)
+    # If query is about embedding/model/database, it's likely about StillMe
+    if has_technical_keyword:
+        matched_keywords.append("technical")
+        return (True, matched_keywords)
     
     if has_rag_keyword or has_transparency_keyword or has_evolution_keyword:
         if has_rag_keyword:
@@ -177,6 +207,7 @@ def get_foundational_query_variants(query: str) -> List[str]:
     Returns:
         List of query variants optimized for StillMe knowledge retrieval
     """
+    query_lower = query.lower()
     variants = [
         query,  # Original query
         "StillMe Learning AI system RAG foundation learning",
@@ -185,13 +216,29 @@ def get_foundational_query_variants(query: str) -> List[str]:
         "StillMe how it learns updates knowledge",
     ]
     
+    # Add technical variants if query is about embedding/model/database
+    if any(keyword in query_lower for keyword in ["embedding", "model", "mô hình", "chromadb", "vector"]):
+        variants.extend([
+            "StillMe embedding model all-MiniLM-L6-v2 ChromaDB",
+            "StillMe sentence-transformers all-MiniLM-L6-v2 384 dimensions",
+            "StillMe vector database ChromaDB embedding model",
+            "StillMe RAG embedding model technical architecture",
+        ])
+    
     # Add language-specific variants
-    query_lower = query.lower()
     if any(keyword in query_lower for keyword in ["học", "học tập", "gì", "như thế nào"]):
         variants.extend([
             "StillMe hệ thống AI tự tiến hóa RAG",
             "StillMe học tập liên tục RSS",
             "StillMe cập nhật tri thức hàng ngày",
+        ])
+    
+    # Add Vietnamese technical variants
+    if any(keyword in query_lower for keyword in ["mô hình", "embedding", "cơ sở dữ liệu"]):
+        variants.extend([
+            "StillMe mô hình embedding all-MiniLM-L6-v2 ChromaDB",
+            "StillMe cơ sở dữ liệu vector ChromaDB",
+            "StillMe kiến trúc kỹ thuật embedding model",
         ])
     
     return variants
