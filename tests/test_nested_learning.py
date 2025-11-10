@@ -155,14 +155,22 @@ class TestTieredUpdateIsolation:
     
     def test_update_tier_cycle_database_operation(self, update_isolation, temp_db):
         """STRICT: update_tier_cycle must correctly update database"""
-        # Create tier_metrics table
+        # Create tier_metrics table with full schema (matching continuum_memory.py)
         conn = sqlite3.connect(temp_db)
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS tier_metrics (
                 item_id TEXT PRIMARY KEY,
-                tier TEXT NOT NULL,
-                last_update_cycle INTEGER DEFAULT 0
+                tier TEXT NOT NULL CHECK(tier IN ('L0', 'L1', 'L2', 'L3')),
+                surprise_score REAL DEFAULT 0.0,
+                retrieval_count_7d INTEGER DEFAULT 0,
+                retrieval_count_30d INTEGER DEFAULT 0,
+                validator_overlap REAL DEFAULT 0.0,
+                last_promoted_at TIMESTAMP,
+                last_demoted_at TIMESTAMP,
+                last_update_cycle INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         cursor.execute("""
@@ -188,14 +196,22 @@ class TestTieredUpdateIsolation:
     
     def test_update_tier_cycle_nonexistent_item_fails(self, update_isolation, temp_db):
         """STRICT: update_tier_cycle must handle nonexistent items gracefully"""
-        # Create empty database
+        # Create empty database with full schema
         conn = sqlite3.connect(temp_db)
         cursor = conn.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS tier_metrics (
                 item_id TEXT PRIMARY KEY,
-                tier TEXT NOT NULL,
-                last_update_cycle INTEGER DEFAULT 0
+                tier TEXT NOT NULL CHECK(tier IN ('L0', 'L1', 'L2', 'L3')),
+                surprise_score REAL DEFAULT 0.0,
+                retrieval_count_7d INTEGER DEFAULT 0,
+                retrieval_count_30d INTEGER DEFAULT 0,
+                validator_overlap REAL DEFAULT 0.0,
+                last_promoted_at TIMESTAMP,
+                last_demoted_at TIMESTAMP,
+                last_update_cycle INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         conn.commit()
@@ -442,17 +458,25 @@ class TestNestedLearningEdgeCases:
     
     def test_continuum_memory_disabled_fallback(self):
         """STRICT: When ENABLE_CONTINUUM_MEMORY=false, must fallback gracefully"""
-        with patch.dict(os.environ, {"ENABLE_CONTINUUM_MEMORY": "false"}):
-            from backend.learning.continuum_memory import TieredUpdateIsolation
-            update_isolation = TieredUpdateIsolation()
-            
-            # Should always return True (fallback behavior)
+        # Test with a fresh instance when ENABLE_CONTINUUM_MEMORY is False
+        # The method should check the module-level ENABLE_CONTINUUM_MEMORY at runtime
+        # Since we set it to True at the top of the test file, we need to patch it
+        
+        from backend.learning.continuum_memory import TieredUpdateIsolation, ENABLE_CONTINUUM_MEMORY
+        
+        # Create instance (will have ENABLE_CONTINUUM_MEMORY=True from test setup)
+        update_isolation = TieredUpdateIsolation()
+        
+        # Patch the module-level variable for this test
+        with patch('backend.learning.continuum_memory.ENABLE_CONTINUUM_MEMORY', False):
+            # should_update_tier checks ENABLE_CONTINUUM_MEMORY at runtime
+            # So it should return True when disabled (fallback behavior)
             assert update_isolation.should_update_tier("L0", 1) is True
             assert update_isolation.should_update_tier("L1", 1) is True
             assert update_isolation.should_update_tier("L2", 1) is True
             assert update_isolation.should_update_tier("L3", 1) is True
             
-            # Tier routing should default to L0
+            # Tier routing should default to L0 when disabled
             tier = update_isolation.get_tier_for_knowledge("test", 0.9)
             assert tier == "L0", "When disabled, must default to L0"
 
