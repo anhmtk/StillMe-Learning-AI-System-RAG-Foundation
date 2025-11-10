@@ -4,11 +4,15 @@ Extracted from learning_router.py for better organization
 """
 
 import logging
+import os
 from datetime import datetime
 from typing import Dict, Any
 from backend.api.job_queue import get_job_queue, JobStatus
 
 logger = logging.getLogger(__name__)
+
+# Feature flag check
+ENABLE_CONTINUUM_MEMORY = os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true"
 
 
 async def run_learning_cycle_background(job_id: str):
@@ -46,6 +50,17 @@ async def run_learning_cycle_background(job_id: str):
         job.add_log("Fetching entries from all sources...")
         result = await learning_scheduler.run_learning_cycle()
         cycle_number = result.get("cycle_number", 0)
+        
+        # Initialize Tiered Update Isolation for Nested Learning
+        update_isolation = None
+        if ENABLE_CONTINUUM_MEMORY:
+            try:
+                from backend.learning.continuum_memory import TieredUpdateIsolation
+                update_isolation = TieredUpdateIsolation()
+                job.add_log(f"Nested Learning: Update isolation enabled (cycle #{cycle_number})")
+            except Exception as e:
+                logger.warning(f"Failed to initialize TieredUpdateIsolation: {e}")
+                job.add_log(f"Warning: Update isolation not available: {e}")
         
         job.update_progress("fetching", entries_fetched=result.get("entries_fetched", 0))
         job.add_log(f"Fetched {result.get('entries_fetched', 0)} entries")
@@ -95,9 +110,19 @@ async def run_learning_cycle_background(job_id: str):
                 job.add_log(f"Error preparing entries: {str(e)}")
                 entries_to_add = []
             
-            # Phase 3: Embedding and adding to RAG
+            # Phase 3: Embedding and adding to RAG (with Nested Learning tiered update isolation)
             added_count = 0
+            skipped_count = 0
             total_entries = len(entries_to_add)
+            
+            # Get PromotionManager for surprise score calculation
+            promotion_manager = None
+            if ENABLE_CONTINUUM_MEMORY:
+                try:
+                    from backend.learning.promotion_manager import PromotionManager
+                    promotion_manager = PromotionManager()
+                except Exception as e:
+                    logger.warning(f"PromotionManager not available: {e}")
             
             for idx, entry in enumerate(entries_to_add):
                 try:
@@ -131,30 +156,88 @@ async def run_learning_cycle_background(job_id: str):
                     if is_duplicate:
                         continue
                     
+                    # Nested Learning: Calculate surprise score and route to tier
+                    tier = "L0"  # Default tier
+                    surprise_score = 0.0
+                    should_update = True
+                    
+                    if update_isolation and promotion_manager:
+                        try:
+                            # Generate item_id for this entry
+                            import hashlib
+                            item_id = hashlib.md5(content.encode()).hexdigest()
+                            
+                            # Calculate surprise score
+                            surprise_score = promotion_manager.calculate_surprise_score(
+                                item_id=item_id,
+                                content=content,
+                                existing_keywords=None,
+                                centroid_embeddings=None
+                            )
+                            
+                            # Route to tier based on surprise score
+                            tier = update_isolation.get_tier_for_knowledge(item_id, surprise_score)
+                            
+                            # Check if tier should update at this cycle
+                            should_update = update_isolation.should_update_tier(tier, cycle_number)
+                            
+                            if not should_update:
+                                skipped_count += 1
+                                job.add_log(
+                                    f"Skipped entry (tier {tier}, cycle {cycle_number}, "
+                                    f"surprise={surprise_score:.2f}): {entry.get('title', '')[:50]}"
+                                )
+                                continue
+                            
+                            job.add_log(
+                                f"Entry routed to tier {tier} (surprise={surprise_score:.2f}): "
+                                f"{entry.get('title', '')[:50]}"
+                            )
+                        except Exception as e:
+                            logger.warning(f"Error in tiered routing: {e}")
+                            # Fallback: continue with default behavior
+                            should_update = True
+                    
                     # Add to RAG
                     job.update_progress("adding_to_rag", entries_added=added_count)
                     importance_score = 0.5
                     if content_curator:
                         importance_score = content_curator.calculate_importance_score(entry)
                     
+                    # Add tier and surprise score to metadata
+                    metadata = {
+                        "link": entry.get('link', ''),
+                        "published": entry.get('published', ''),
+                        "type": "rss_feed",
+                        "scheduler_cycle": cycle_number,
+                        "priority_score": entry.get("priority_score", 0.5),
+                        "importance_score": importance_score,
+                        "title": entry.get('title', '')[:200]
+                    }
+                    
+                    if ENABLE_CONTINUUM_MEMORY:
+                        metadata["tier"] = tier
+                        metadata["surprise_score"] = surprise_score
+                    
                     success = rag_retrieval.add_learning_content(
                         content=content,
                         source=entry.get('source', 'rss'),
                         content_type="knowledge",
-                        metadata={
-                            "link": entry.get('link', ''),
-                            "published": entry.get('published', ''),
-                            "type": "rss_feed",
-                            "scheduler_cycle": cycle_number,
-                            "priority_score": entry.get("priority_score", 0.5),
-                            "importance_score": importance_score,
-                            "title": entry.get('title', '')[:200]
-                        }
+                        metadata=metadata
                     )
                     
                     if success:
                         added_count += 1
                         job.update_progress("adding_to_rag", entries_added=added_count)
+                        
+                        # Update tier cycle tracking
+                        if update_isolation and ENABLE_CONTINUUM_MEMORY:
+                            try:
+                                import hashlib
+                                item_id = hashlib.md5(content.encode()).hexdigest()
+                                update_isolation.update_tier_cycle(item_id, tier, cycle_number)
+                            except Exception as e:
+                                logger.debug(f"Error updating tier cycle: {e}")
                     
                 except Exception as e:
                     logger.error(f"Error adding entry to RAG: {e}")
@@ -163,6 +246,9 @@ async def run_learning_cycle_background(job_id: str):
             
             result["entries_added_to_rag"] = added_count
             result["entries_filtered"] = filtered_count
+            if ENABLE_CONTINUUM_MEMORY:
+                result["entries_skipped_tiered"] = skipped_count
+                job.add_log(f"Nested Learning: Added {added_count} entries, skipped {skipped_count} (tiered update isolation)")
             
             if rss_fetch_history and cycle_id:
                 rss_fetch_history.complete_fetch_cycle(cycle_id)
