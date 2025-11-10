@@ -27,6 +27,129 @@ TIER_RETENTION_DAYS = {
     "L3": int(os.getenv("TIER_RETENTION_DAYS_L3", "9999"))
 }
 
+# Tier update frequency (Nested Learning: update frequency in cycles)
+# L0: Update every cycle (short-term, task-specific)
+# L1: Update every 10 cycles (in-context learning)
+# L2: Update every 100 cycles (domain knowledge)
+# L3: Update every 1000 cycles (core reasoning, long-term)
+TIER_UPDATE_FREQUENCY = {
+    "L0": int(os.getenv("TIER_UPDATE_FREQUENCY_L0", "1")),
+    "L1": int(os.getenv("TIER_UPDATE_FREQUENCY_L1", "10")),
+    "L2": int(os.getenv("TIER_UPDATE_FREQUENCY_L2", "100")),
+    "L3": int(os.getenv("TIER_UPDATE_FREQUENCY_L3", "1000"))
+}
+
+
+class TieredUpdateIsolation:
+    """
+    Nested Learning: Isolates update frequency by tier.
+    Simulates "gradient isolation" in RAG context by controlling when each tier updates.
+    """
+    
+    def __init__(self, db_path: str = "data/continuum_memory.db"):
+        """Initialize tiered update isolation
+        
+        Args:
+            db_path: Path to Continuum Memory database
+        """
+        if not ENABLE_CONTINUUM_MEMORY:
+            logger.info("Tiered Update Isolation disabled (ENABLE_CONTINUUM_MEMORY=false)")
+            return
+        
+        self.db_path = db_path
+    
+    def should_update_tier(self, tier: str, cycle_count: int) -> bool:
+        """
+        Check if a tier should be updated at this cycle count.
+        
+        Args:
+            tier: Tier name (L0, L1, L2, L3)
+            cycle_count: Current learning cycle count
+            
+        Returns:
+            bool: True if tier should update, False otherwise
+        """
+        if not ENABLE_CONTINUUM_MEMORY:
+            # If Continuum Memory is disabled, always update (fallback to current behavior)
+            return True
+        
+        if tier not in TIER_UPDATE_FREQUENCY:
+            logger.warning(f"Unknown tier: {tier}, defaulting to update")
+            return True
+        
+        update_frequency = TIER_UPDATE_FREQUENCY[tier]
+        
+        # L0 always updates (every cycle)
+        if tier == "L0":
+            return True
+        
+        # Other tiers update when cycle_count is divisible by update_frequency
+        should_update = (cycle_count % update_frequency) == 0
+        
+        if should_update:
+            logger.debug(f"Tier {tier} should update at cycle {cycle_count} (frequency: {update_frequency})")
+        
+        return should_update
+    
+    def get_tier_for_knowledge(self, item_id: str, surprise_score: float) -> str:
+        """
+        Route knowledge item to appropriate tier based on surprise score.
+        
+        Args:
+            item_id: Knowledge item ID
+            surprise_score: Surprise score (0.0-1.0)
+            
+        Returns:
+            str: Tier name (L0, L1, L2, L3)
+        """
+        if not ENABLE_CONTINUUM_MEMORY:
+            return "L0"  # Default to L0 if Continuum Memory disabled
+        
+        # Route based on surprise score thresholds
+        if surprise_score >= 0.8:
+            return "L3"  # High surprise → core reasoning (long-term)
+        elif surprise_score >= 0.6:
+            return "L2"  # Medium-high surprise → domain knowledge
+        elif surprise_score >= 0.4:
+            return "L1"  # Medium surprise → in-context learning
+        else:
+            return "L0"  # Low surprise → short-term
+    
+    def update_tier_cycle(self, item_id: str, tier: str, cycle_count: int) -> bool:
+        """
+        Update last_update_cycle for a knowledge item.
+        
+        Args:
+            item_id: Knowledge item ID
+            tier: Tier name
+            cycle_count: Current cycle count
+            
+        Returns:
+            bool: Success status
+        """
+        if not ENABLE_CONTINUUM_MEMORY:
+            return False
+        
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                UPDATE tier_metrics
+                SET last_update_cycle = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE item_id = ?
+            """, (cycle_count, item_id))
+            
+            conn.commit()
+            conn.close()
+            
+            logger.debug(f"Updated last_update_cycle for {item_id} (tier {tier}) to cycle {cycle_count}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error updating tier cycle for {item_id}: {e}")
+            return False
+
 
 class ContinuumMemory:
     """Manages tiered memory system with promotion/demotion"""
@@ -66,10 +189,19 @@ class ContinuumMemory:
                     validator_overlap REAL DEFAULT 0.0,
                     last_promoted_at TIMESTAMP,
                     last_demoted_at TIMESTAMP,
+                    last_update_cycle INTEGER DEFAULT 0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+            
+            # Migration: Add last_update_cycle column if it doesn't exist (for existing databases)
+            try:
+                cursor.execute("ALTER TABLE tier_metrics ADD COLUMN last_update_cycle INTEGER DEFAULT 0")
+                logger.info("Added last_update_cycle column to tier_metrics table")
+            except sqlite3.OperationalError:
+                # Column already exists, ignore
+                pass
             
             # Tier audit table - tracks all promotion/demotion events
             cursor.execute("""
