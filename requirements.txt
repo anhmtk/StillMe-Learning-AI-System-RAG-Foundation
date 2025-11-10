@@ -23,7 +23,7 @@ pandas==2.3.3
 plotly==5.18.0
 
 # RSS & XML Processing
-feedparser==6.0.10
+feedparser==6.0.12
 beautifulsoup4==4.12.2
 
 # Environment & Configuration
