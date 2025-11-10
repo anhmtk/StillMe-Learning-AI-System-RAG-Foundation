@@ -26,7 +26,7 @@ feedparser==6.0.10
 beautifulsoup4==4.12.2
 
 # Environment & Configuration
-python-dotenv==1.0.0
+python-dotenv==1.2.1
 pydantic==2.5.0
 
 # Logging & Monitoring
