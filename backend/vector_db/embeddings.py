@@ -3,11 +3,27 @@ Embedding Service for StillMe
 Handles text embedding generation using sentence-transformers
 """
 
+# CRITICAL: Set environment variables BEFORE importing SentenceTransformer
+# HuggingFace/transformers resolves cache path on first import
+# We must set env vars before any transformers imports
+import os
+from pathlib import Path
+
+# Check for Railway persistent volume FIRST (before any imports)
+_railway_cache = Path("/app/hf_cache")
+if _railway_cache.exists() or _railway_cache.parent.exists():
+    # Set env vars immediately to override Dockerfile defaults
+    os.environ["TRANSFORMERS_CACHE"] = str(_railway_cache)
+    os.environ["HF_HOME"] = str(_railway_cache)
+    os.environ["HF_DATASETS_CACHE"] = str(_railway_cache / "datasets")
+    os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(_railway_cache)
+    # Force HuggingFace to use our cache
+    os.environ["HF_HUB_CACHE"] = str(_railway_cache / "hub")
+
+# NOW import SentenceTransformer (after env vars are set)
 from sentence_transformers import SentenceTransformer
 from typing import List, Union
 import logging
-import os
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
