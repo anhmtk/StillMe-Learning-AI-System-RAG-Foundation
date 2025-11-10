@@ -94,15 +94,20 @@ def display_local_time(utc_time_str: str, label: str = "Next run"):
     components.html(html, height=30)
 
 
-def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]:
+def get_json(path: str, default: Dict[str, Any] | None = None, timeout: int = 10) -> Dict[str, Any]:
     """
     Fetch JSON from API endpoint.
     Returns default dict if request fails.
     Does NOT raise exceptions - gracefully handles errors.
+    
+    Args:
+        path: API endpoint path
+        default: Default value to return on error
+        timeout: Request timeout in seconds (default: 10s)
     """
     url = f"{API_BASE}{path}"
     try:
-        r = requests.get(url, timeout=10)  # Increased timeout
+        r = requests.get(url, timeout=timeout)
         r.raise_for_status()
         return r.json()
     except requests.exceptions.ConnectionError as e:
@@ -146,8 +151,8 @@ def page_overview():
     rag_stats = get_json("/api/rag/stats", {}).get("stats", {})
     accuracy = get_json("/api/learning/accuracy_metrics", {}).get("metrics", {})
     
-    # Get scheduler status
-    scheduler_status = get_json("/api/learning/scheduler/status", {})
+    # Get scheduler status (with longer timeout for status checks)
+    scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=30)
 
     # Display logo and title
     col_logo, col_title = st.columns([1, 4])
@@ -281,7 +286,7 @@ def page_overview():
         if API_BASE == "http://localhost:8000":
             st.warning("⚠️ **WARNING:** API_BASE is still `localhost:8000`! This means `STILLME_API_BASE` environment variable is NOT set in Railway dashboard service. You need to set it to your backend URL (e.g., `https://stillme-backend-production-xxxx.up.railway.app`)")
     
-    scheduler_status = get_json("/api/learning/scheduler/status", {})
+    scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=30)
     
     # Debug: Show what we received and test connection
     if not scheduler_status or scheduler_status == {}:
@@ -397,7 +402,11 @@ def page_overview():
                     else:
                         st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
                 except requests.exceptions.Timeout:
-                    st.session_state["last_error"] = "⏳ Learning cycle is running in background. This may take 2-5 minutes. Check job status to see progress."
+                    # Timeout is OK - job is running in background
+                    st.session_state["learning_job_started"] = True
+                    st.session_state["learning_job_id"] = "timeout_fallback"
+                    st.session_state["last_action"] = "⏳ Learning cycle is running in background. This may take 2-5 minutes. Progress will be shown below."
+                    st.rerun()
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed: {e}"
         
@@ -407,9 +416,9 @@ def page_overview():
             st.markdown("---")
             st.subheader("📊 Learning Cycle Progress")
             
-            # Poll job status
+            # Poll job status (with longer timeout - learning cycle can take 2-5 minutes)
             try:
-                job_status_r = requests.get(f"{API_BASE}/api/learning/scheduler/job-status/{job_id}", timeout=5)
+                job_status_r = requests.get(f"{API_BASE}/api/learning/scheduler/job-status/{job_id}", timeout=30)
                 if job_status_r.status_code == 200:
                     job_data = job_status_r.json()
                     job_status = job_data.get("status", "unknown")
@@ -447,6 +456,7 @@ def page_overview():
                         }.get(phase, f"🔄 {phase}...")
                         
                         st.info(phase_display)
+                        st.caption("⏱️ Learning cycle typically takes 2-5 minutes. Please wait...")
                         
                         # Show metrics
                         col1, col2, col3 = st.columns(3)
