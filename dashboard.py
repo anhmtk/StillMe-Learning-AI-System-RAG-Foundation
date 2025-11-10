@@ -818,14 +818,36 @@ def page_validation():
     st.markdown("## Validation Metrics")
     st.caption("Monitor validator chain performance and reduce hallucinations")
     
+    # Check if validators are enabled
+    try:
+        status_data = get_json("/api/status", {})
+        validators_enabled = status_data.get("validators_enabled", False)
+    except Exception:
+        validators_enabled = False
+    
     # Get validation metrics
     try:
         metrics_data = get_json("/api/validators/metrics", {}).get("metrics", {})
     except Exception:
         metrics_data = {}
     
-    if not metrics_data or metrics_data.get("total_validations", 0) == 0:
-        st.info("ℹ️ No validation data yet. Enable validators with `ENABLE_VALIDATORS=true` to start collecting metrics.")
+    total_validations = metrics_data.get("total_validations", 0)
+    
+    if total_validations == 0:
+        if validators_enabled:
+            st.info(
+                "✅ **Validators are enabled** (`ENABLE_VALIDATORS=true`)\n\n"
+                "📊 **No validation data yet.** Send a chat message in the sidebar to start collecting metrics.\n\n"
+                "💡 Validation metrics are recorded automatically when you chat with StillMe."
+            )
+        else:
+            st.warning(
+                "⚠️ **Validators are disabled** (`ENABLE_VALIDATORS=false`)\n\n"
+                "To enable validators:\n"
+                "1. Set `ENABLE_VALIDATORS=true` in your backend environment variables\n"
+                "2. Restart the backend service\n"
+                "3. Send a chat message to start collecting validation metrics"
+            )
         return
     
     # Metrics overview
