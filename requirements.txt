@@ -2,7 +2,7 @@
 
 # Core Framework
 fastapi==0.121.1
-uvicorn[standard]==0.24.0
+uvicorn[standard]==0.38.0
 streamlit==1.51.0
 
 # Database
