@@ -164,9 +164,10 @@ class EmbeddingService:
                     if not model_found:
                         logger.warning(f"⚠️ Model files not found in cache. Will download on first use.")
                         logger.info(f"Cache directory: {cache_dir}")
-                        logger.info(f"Expected model path: {st_cache_path}")
-                        logger.info(f"Alternative path: {hf_hub_path}")
+                        logger.info(f"Expected model path (sentence-transformers format): {st_cache_path}")
+                        logger.info(f"Alternative path (HuggingFace format): {cache_dir / f'models--sentence-transformers--{model_name_hf}'}")
                         logger.info(f"💡 Model will be downloaded and cached when first used.")
+                        logger.info(f"💡 After download, model will be cached at: {cache_dir / f'models--sentence-transformers--{model_name_hf}'}")
                     else:
                         logger.info(f"✅ Model cache verified: {found_path}")
                 else:
