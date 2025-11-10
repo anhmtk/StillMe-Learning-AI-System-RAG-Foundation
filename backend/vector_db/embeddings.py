@@ -328,10 +328,30 @@ class EmbeddingService:
                                 )
                                 # Also check if it's a HuggingFace cache directory (has snapshots/ subdirectory)
                                 has_hf_structure = (loc / "snapshots").exists() or (loc / "refs").exists()
-                                if has_model_files or has_hf_structure:
-                                    model_found = True
-                                    found_location = loc
-                                    break
+                                # Check if directory has any subdirectories (HuggingFace cache structure)
+                                has_subdirs = any(loc.iterdir()) if loc.exists() else False
+                                if has_model_files or has_hf_structure or has_subdirs:
+                                    # Additional check: if it's a HuggingFace cache, verify it has content
+                                    if has_hf_structure or has_subdirs:
+                                        # Check if snapshots directory has any content
+                                        snapshots_dir = loc / "snapshots"
+                                        if snapshots_dir.exists():
+                                            snapshots = list(snapshots_dir.iterdir())
+                                            if snapshots:
+                                                model_found = True
+                                                found_location = loc
+                                                logger.info(f"✅ Found HuggingFace cache structure: {loc} with {len(snapshots)} snapshot(s)")
+                                                break
+                                        # Or if it's a direct model directory with subdirs
+                                        elif has_subdirs:
+                                            model_found = True
+                                            found_location = loc
+                                            logger.info(f"✅ Found model directory with subdirectories: {loc}")
+                                            break
+                                    else:
+                                        model_found = True
+                                        found_location = loc
+                                        break
                     
                     if model_found:
                         logger.info(f"✅ After first use: Model files cached in persistent volume: {found_location}")

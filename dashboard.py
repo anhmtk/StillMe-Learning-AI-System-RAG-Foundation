@@ -1295,10 +1295,16 @@ def page_nested_learning():
 
 def sidebar(page_for_chat: str | None = None):
     st.sidebar.header("Dashboard")
+    
+    # Initialize session state for page selector if not exists
+    if "page_selector" not in st.session_state:
+        st.session_state["page_selector"] = "Overview"
+    
     page = st.sidebar.selectbox(
         "Select Page",
         ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health", "Nested Learning"],
-        key="page_selector"
+        key="page_selector",
+        index=0 if st.session_state["page_selector"] not in ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health", "Nested Learning"] else ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health", "Nested Learning"].index(st.session_state["page_selector"])
     )
 
     st.sidebar.success("Backend Connected")
