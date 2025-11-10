@@ -1032,14 +1032,14 @@ def sidebar(page_for_chat: str | None = None):
                             metadata_key = f"metadata_{idx}"
                             show_metadata = st.session_state.get(metadata_key, False)
                             
-                            # Toggle button for metadata
-                            if st.button("📊 Show Metadata", key=f"toggle_{idx}", use_container_width=True):
+                            # Toggle button for metadata (use sidebar button to avoid nesting issues)
+                            if st.sidebar.button("📊 Show Metadata", key=f"toggle_{idx}", use_container_width=True):
                                 st.session_state[metadata_key] = not show_metadata
                                 st.rerun()
                             
-                            # Display metadata if toggled
+                            # Display metadata if toggled (in sidebar container, not nested expander)
                             if st.session_state.get(metadata_key, False):
-                                with st.container():
+                                with st.sidebar.container():
                                     # Confidence Score
                                     if confidence_score is not None:
                                         # Color based on confidence level
