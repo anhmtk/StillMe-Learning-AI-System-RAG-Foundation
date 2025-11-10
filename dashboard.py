@@ -1059,11 +1059,155 @@ def page_validation():
         st.error(f"Error fetching retained knowledge data: {e}")
 
 
+def page_nested_learning():
+    """Nested Learning metrics and visualization page"""
+    st.header("🔬 Nested Learning Metrics")
+    st.caption("Tiered update frequency system - reduces embedding costs by updating knowledge at different frequencies")
+    
+    # Fetch metrics
+    metrics = get_json("/api/learning/nested-learning/metrics", {}, timeout=30)
+    
+    if not metrics or metrics.get("enabled") is False:
+        st.warning("⚠️ **Nested Learning is disabled**")
+        st.info("To enable Nested Learning, set `ENABLE_CONTINUUM_MEMORY=true` in your environment variables.")
+        return
+    
+    # Overview metrics
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Current Cycle", metrics.get("cycle_count", 0))
+    with col2:
+        cost_reduction = metrics.get("cost_reduction", {})
+        st.metric("Cost Reduction", f"{cost_reduction.get('reduction_percentage', 0):.1f}%")
+    with col3:
+        total_ops = cost_reduction.get("total_operations", 0)
+        st.metric("Total Operations", total_ops)
+    with col4:
+        skipped_ops = cost_reduction.get("skipped_operations", 0)
+        st.metric("Skipped Operations", skipped_ops)
+    
+    st.markdown("---")
+    
+    # Tier Distribution
+    st.subheader("📊 Tier Distribution")
+    tier_dist = metrics.get("tier_distribution", {})
+    if tier_dist:
+        col1, col2 = st.columns(2)
+        with col1:
+            # Bar chart
+            tiers = ["L0", "L1", "L2", "L3"]
+            counts = [tier_dist.get(tier, 0) for tier in tiers]
+            fig = go.Figure(data=[
+                go.Bar(x=tiers, y=counts, marker_color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])
+            ])
+            fig.update_layout(
+                title="Knowledge Items per Tier",
+                xaxis_title="Tier",
+                yaxis_title="Count",
+                height=300
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            # Pie chart
+            if sum(counts) > 0:
+                fig = go.Figure(data=[go.Pie(
+                    labels=tiers,
+                    values=counts,
+                    hole=0.3,
+                    marker_colors=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
+                )])
+                fig.update_layout(
+                    title="Tier Distribution (%)",
+                    height=300
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No knowledge items in tiers yet. Run a learning cycle to populate tiers.")
+    else:
+        st.info("No tier distribution data available yet.")
+    
+    st.markdown("---")
+    
+    # Update Frequency & Operations
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("🔄 Update Frequency")
+        update_freq = metrics.get("tier_update_frequency", {})
+        update_counts = metrics.get("tier_update_counts", {})
+        skipped_counts = metrics.get("tier_skipped_counts", {})
+        
+        for tier in ["L0", "L1", "L2", "L3"]:
+            freq = update_freq.get(tier, 0)
+            updated = update_counts.get(tier, 0)
+            skipped = skipped_counts.get(tier, 0)
+            st.write(f"**{tier}**: Every {freq} cycles | Updated: {updated} | Skipped: {skipped}")
+    
+    with col2:
+        st.subheader("💾 Embedding Operations")
+        emb_ops = metrics.get("embedding_operations", {})
+        total = emb_ops.get("total", 0)
+        by_tier = emb_ops.get("by_tier", {})
+        
+        st.metric("Total Embeddings", total)
+        for tier in ["L0", "L1", "L2", "L3"]:
+            count = by_tier.get(tier, 0)
+            if total > 0:
+                pct = (count / total) * 100
+                st.write(f"**{tier}**: {count} ({pct:.1f}%)")
+    
+    st.markdown("---")
+    
+    # Surprise Score Statistics
+    st.subheader("🎯 Surprise Score Statistics")
+    surprise_stats = metrics.get("surprise_score_stats", {})
+    if surprise_stats and surprise_stats.get("count", 0) > 0:
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Count", surprise_stats.get("count", 0))
+        with col2:
+            st.metric("Min", f"{surprise_stats.get('min', 0):.3f}")
+        with col3:
+            st.metric("Max", f"{surprise_stats.get('max', 0):.3f}")
+        with col4:
+            st.metric("Average", f"{surprise_stats.get('avg', 0):.3f}")
+        
+        st.caption("Surprise score determines tier routing: L0 (<0.4), L1 (0.4-0.6), L2 (0.6-0.8), L3 (≥0.8)")
+    else:
+        st.info("No surprise score data yet. Run a learning cycle to collect statistics.")
+    
+    st.markdown("---")
+    
+    # Cost Reduction Details
+    st.subheader("💰 Cost Reduction Analysis")
+    cost_reduction = metrics.get("cost_reduction", {})
+    total_ops = cost_reduction.get("total_operations", 0)
+    skipped_ops = cost_reduction.get("skipped_operations", 0)
+    reduction_pct = cost_reduction.get("reduction_percentage", 0)
+    
+    if total_ops > 0:
+        st.info(f"**{reduction_pct}% cost reduction** by skipping {skipped_ops} out of {total_ops} embedding operations")
+        
+        # Visualize cost reduction
+        fig = go.Figure(data=[
+            go.Bar(name="Performed", x=["Embedding Operations"], y=[total_ops], marker_color='#2ca02c'),
+            go.Bar(name="Skipped", x=["Embedding Operations"], y=[skipped_ops], marker_color='#ff7f0e')
+        ])
+        fig.update_layout(
+            title="Embedding Operations: Performed vs Skipped",
+            barmode='stack',
+            height=300
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("No embedding operations recorded yet. Run a learning cycle to see cost reduction metrics.")
+
+
 def sidebar(page_for_chat: str | None = None):
     st.sidebar.header("Dashboard")
     page = st.sidebar.selectbox(
         "Select Page",
-        ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health"],
+        ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health", "Nested Learning"],
         key="page_selector"
     )
 
