@@ -24,7 +24,7 @@ plotly==5.18.0
 
 # RSS & XML Processing
 feedparser==6.0.10
-beautifulsoup4==4.12.2
+beautifulsoup4==4.14.2
 
 # Environment & Configuration
 python-dotenv==1.2.1
