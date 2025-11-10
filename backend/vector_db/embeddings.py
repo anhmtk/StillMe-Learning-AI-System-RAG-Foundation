@@ -118,7 +118,23 @@ class EmbeddingService:
         if railway_cache.exists():
             cache_dir = railway_cache
             cache_dir.mkdir(parents=True, exist_ok=True)
-            logger.info(f"Using Railway persistent volume cache: {cache_dir}")
+            logger.info(f"✅ Using Railway persistent volume cache: {cache_dir}")
+            # Set environment variables immediately
+            os.environ["TRANSFORMERS_CACHE"] = str(cache_dir)
+            os.environ["HF_HOME"] = str(cache_dir)
+            os.environ["HF_DATASETS_CACHE"] = str(cache_dir / "datasets")
+            os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(cache_dir)
+            return str(cache_dir)
+        elif railway_cache.parent.exists():
+            # Parent exists but not the cache dir itself - create it
+            cache_dir = railway_cache
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            logger.info(f"✅ Created Railway persistent volume cache: {cache_dir}")
+            # Set environment variables immediately
+            os.environ["TRANSFORMERS_CACHE"] = str(cache_dir)
+            os.environ["HF_HOME"] = str(cache_dir)
+            os.environ["HF_DATASETS_CACHE"] = str(cache_dir / "datasets")
+            os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(cache_dir)
             return str(cache_dir)
         
         # Priority 3: Check for custom cache path
