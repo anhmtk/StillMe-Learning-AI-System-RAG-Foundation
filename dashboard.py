@@ -395,7 +395,7 @@ def page_overview():
                     else:
                         st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
                 except requests.exceptions.Timeout:
-                    st.session_state["last_error"] = "❌ Request timed out. Backend may be slow."
+                    st.session_state["last_error"] = "⏳ Learning cycle is running in background. This may take 2-5 minutes. Check job status to see progress."
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed: {e}"
     else:
