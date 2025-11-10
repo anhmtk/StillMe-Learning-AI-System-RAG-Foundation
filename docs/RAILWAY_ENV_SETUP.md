@@ -56,10 +56,29 @@ The persistent volume is already configured in `railway-backend.json`:
 }
 ```
 
-Make sure this volume is created in Railway:
-1. Go to Backend service → **Volumes** tab
-2. Verify `stillme-hf-cache` volume exists
-3. If not, Railway should auto-create it from `railway-backend.json`
+**Important**: Railway manages volumes through **Config-as-Code** (not a separate "Volumes" tab).
+
+### How to Verify Volume:
+
+1. **Check Config-as-Code**:
+   - Go to Backend service → **Settings** → **Config-as-code** tab
+   - Verify `railway-backend.json` is selected
+   - Check that volumes configuration is present
+
+2. **Verify via Backend Logs** (After deploy):
+   - Look for: `✅ Using Railway persistent volume cache: /app/hf_cache`
+   - If you see this, volume is mounted correctly
+
+3. **Check if volume exists** (via logs):
+   - After first deploy, check if `/app/hf_cache` directory exists
+   - Model will be cached there after first download
+
+### If Volume Not Working:
+
+Railway should **auto-create** the volume from `railway-backend.json` on first deploy. If it doesn't:
+1. Check **Config-as-code** tab → verify `railway-backend.json` path is correct
+2. Redeploy the service (Railway will read config and create volume)
+3. Check logs for volume mount messages
 
 ## Troubleshooting
 
