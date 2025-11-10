@@ -40,6 +40,7 @@ While major AI companies build closed systems with proprietary algorithms, Still
   - **FallbackHandler**: Safe fallback answers when validation fails (prevents hallucinated content)
   - **Confidence Score**: Real-time confidence calculation (0.0-1.0) based on context quality
   - **Learning Suggestions**: Auto-suggests topics to learn from knowledge gaps
+  - **Epistemic Humility**: StillMe's core principle—knowing when it doesn't know is not a weakness, it's intellectual honesty
 - ✅ **Identity Injection**: Ensures StillMe brand consistency across all models (DeepSeek, GPT, Gemini, local)
 - ✅ **Knowledge Retention**: Learning metrics tracking system
 - ✅ **Accuracy Scoring**: Response quality measurement
@@ -96,6 +97,8 @@ StillMe doesn't fight against this mathematical reality. Instead, we **build sys
 This philosophical foundation shapes StillMe's entire approach: **Practical accountability > Perfect transparency**. We don't promise to "open the black box"—we promise to build transparent systems around it, verify its behavior, and give the community control over its evolution. This is both mathematically honest and practically achievable.
 
 **StillMe builds trust through verification, not just interpretation.**
+
+> **"Perhaps the world needs AI systems that are smart enough to know when they don't know. StillMe is our humble attempt to build exactly that—an AI that values intellectual honesty over false confidence."**
 
 ## 🛡️ Our Uncompromising Commitment
 
