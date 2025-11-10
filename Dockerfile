@@ -1,7 +1,7 @@
 # Dockerfile for StillMe - Learning AI system with RAG foundation
 # Using Python 3.11 for compatibility with onnxruntime and ChromaDB 1.3.4
 # Python 3.12 doesn't have onnxruntime wheels on Linux yet
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 LABEL maintainer="StillMe Team"
 LABEL description="StillMe - Learning AI system with RAG foundation with Complete Ethical Transparency"
