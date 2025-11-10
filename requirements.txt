@@ -31,7 +31,7 @@ python-dotenv==1.2.1
 pydantic==2.5.0
 
 # Logging & Monitoring
-loguru==0.7.2
+loguru==0.7.3
 
 # Date & Time
 python-dateutil==2.8.2
