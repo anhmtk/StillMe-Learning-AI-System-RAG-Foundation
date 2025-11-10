@@ -51,25 +51,64 @@ class EmbeddingService:
                 if cache_dir.exists():
                     logger.info(f"✅ Cache directory exists: {cache_dir}")
                     # Check if model files exist (sentence-transformers uses different paths)
-                    # Try multiple possible cache locations
+                    # SentenceTransformer stores models in: {cache_dir}/sentence_transformers/{model_name}/
+                    # OR: {HF_HOME}/hub/models--{model_name_hf}/
                     model_name_safe = model_name.replace("/", "_")
                     model_name_hf = model_name.replace("/", "--")
+                    
+                    # Check sentence-transformers cache location (most common)
+                    st_cache_path = cache_dir / "sentence_transformers" / model_name_safe
+                    st_cache_path_alt = cache_dir / "sentence_transformers" / model_name
+                    
+                    # Check HuggingFace hub cache location
+                    hf_hub_path = cache_dir / "hub" / f"models--{model_name_hf}"
+                    
+                    # Also check if cache_dir itself contains model files (direct storage)
+                    cache_has_models = (
+                        (cache_dir / "sentence_transformers").exists() or
+                        (cache_dir / "hub").exists() or
+                        any(cache_dir.glob("*.bin")) or  # Model weight files
+                        any(cache_dir.glob("*.safetensors"))  # SafeTensor files
+                    )
+                    
                     possible_paths = [
-                        cache_dir / "sentence_transformers" / model_name_safe,
-                        cache_dir / "sentence_transformers" / model_name,
+                        st_cache_path,
+                        st_cache_path_alt,
+                        hf_hub_path,
                         cache_dir / f"models--{model_name_hf}",
-                        Path.home() / ".cache" / "huggingface" / "hub" / f"models--{model_name_hf}"
                     ]
+                    
                     model_found = False
+                    found_path = None
                     for model_path in possible_paths:
-                        if model_path.exists():
-                            logger.info(f"✅ Model files found in cache: {model_path}")
-                            model_found = True
-                            break
+                        if model_path.exists() and (model_path.is_dir() or model_path.is_file()):
+                            # Check if it's actually a model directory (has config.json or similar)
+                            if model_path.is_dir():
+                                if any(model_path.glob("*.json")) or any(model_path.glob("*.bin")) or any(model_path.glob("*.safetensors")):
+                                    logger.info(f"✅ Model files found in cache: {model_path}")
+                                    model_found = True
+                                    found_path = model_path
+                                    break
+                            else:
+                                logger.info(f"✅ Model file found in cache: {model_path}")
+                                model_found = True
+                                found_path = model_path
+                                break
+                    
+                    # Also check if cache directory has any model-related files
+                    if not model_found and cache_has_models:
+                        logger.info(f"✅ Model cache directory contains model files: {cache_dir}")
+                        model_found = True
+                        found_path = cache_dir
+                    
                     if not model_found:
                         logger.warning(f"⚠️ Model files not found in cache. Will download on first use.")
                         logger.info(f"Cache directory: {cache_dir}")
-                        logger.info(f"Model will be cached to: {cache_dir / 'sentence_transformers' / model_name.replace('/', '_')}")
+                        logger.info(f"Expected model path: {st_cache_path}")
+                        logger.info(f"Alternative path: {hf_hub_path}")
+                        logger.info(f"💡 Model will be downloaded and cached when first used.")
+                    else:
+                        logger.info(f"✅ Model cache verified: {found_path}")
                 else:
                     logger.error(f"❌ Cache directory does not exist: {cache_dir}")
         except Exception as e:

@@ -805,10 +805,18 @@ async def get_scheduler_status():
             if _initialization_error:
                 error_msg = f"Scheduler not initialized: {_initialization_error}"
             logger.warning(f"Returning not_available status: {error_msg}")
+            # Return proper JSON response, not empty
             return {
                 "status": "not_available",
                 "message": error_msg,
-                "initialization_error": _initialization_error if _initialization_error else None
+                "initialization_error": _initialization_error if _initialization_error else None,
+                "is_running": False,
+                "interval_hours": 4,
+                "auto_add_to_rag": False,
+                "cycle_count": 0,
+                "last_run_time": None,
+                "next_run_time": None,
+                "feeds_configured": 0
             }
         
         # Get status from scheduler
@@ -821,7 +829,18 @@ async def get_scheduler_status():
         }
     except Exception as e:
         logger.error(f"Scheduler status error: {e}", exc_info=True)
-        return {"status": "error", "message": str(e)}
+        # Return proper JSON response even on error, not empty
+        return {
+            "status": "error",
+            "message": str(e),
+            "is_running": False,
+            "interval_hours": 4,
+            "auto_add_to_rag": False,
+            "cycle_count": 0,
+            "last_run_time": None,
+            "next_run_time": None,
+            "feeds_configured": 0
+        }
 
 @router.post("/scheduler/run-now")
 async def run_scheduler_now(request: Request, sync: bool = Query(False, description="Run synchronously (for tests)")):
