@@ -9,16 +9,47 @@ Handles text embedding generation using sentence-transformers
 import os
 from pathlib import Path
 
-# Check for Railway persistent volume FIRST (before any imports)
-_railway_cache = Path("/app/hf_cache")
-if _railway_cache.exists() or _railway_cache.parent.exists():
-    # Set env vars immediately to override Dockerfile defaults
-    os.environ["TRANSFORMERS_CACHE"] = str(_railway_cache)
-    os.environ["HF_HOME"] = str(_railway_cache)
-    os.environ["HF_DATASETS_CACHE"] = str(_railway_cache / "datasets")
-    os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(_railway_cache)
-    # Force HuggingFace to use our cache
-    os.environ["HF_HUB_CACHE"] = str(_railway_cache / "hub")
+# CRITICAL: Initialize ModelManager FIRST to setup environment and verify cache
+# This MUST happen before any SentenceTransformer imports
+try:
+    from backend.utils.model_cache import ModelManager
+    # Initialize ModelManager at module level to setup environment variables
+    # This ensures cache is configured before SentenceTransformer is imported
+    _global_model_manager = ModelManager(model_name="all-MiniLM-L6-v2")
+    # Import logging here to avoid circular import
+    import logging as _logging_module
+    _temp_logger = _logging_module.getLogger(__name__)
+    _temp_logger.info("✅ ModelManager initialized - cache environment configured")
+except ImportError as e:
+    # Fallback if ModelManager not available
+    _global_model_manager = None
+    import logging as _logging_module
+    _temp_logger = _logging_module.getLogger(__name__)
+    _temp_logger.warning(f"⚠️ ModelManager not available, using fallback: {e}")
+    # Check for Railway persistent volume FIRST (before any imports)
+    _railway_cache = Path("/app/hf_cache")
+    if _railway_cache.exists() or _railway_cache.parent.exists():
+        # Set env vars immediately to override Dockerfile defaults
+        os.environ["TRANSFORMERS_CACHE"] = str(_railway_cache)
+        os.environ["HF_HOME"] = str(_railway_cache)
+        os.environ["HF_DATASETS_CACHE"] = str(_railway_cache / "datasets")
+        os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(_railway_cache)
+        # Force HuggingFace to use our cache
+        os.environ["HF_HUB_CACHE"] = str(_railway_cache / "hub")
+except Exception as e:
+    # If ModelManager fails, use fallback
+    _global_model_manager = None
+    import logging as _logging_module
+    _temp_logger = _logging_module.getLogger(__name__)
+    _temp_logger.warning(f"⚠️ ModelManager initialization failed, using fallback: {e}")
+    # Check for Railway persistent volume
+    _railway_cache = Path("/app/hf_cache")
+    if _railway_cache.exists() or _railway_cache.parent.exists():
+        os.environ["TRANSFORMERS_CACHE"] = str(_railway_cache)
+        os.environ["HF_HOME"] = str(_railway_cache)
+        os.environ["HF_DATASETS_CACHE"] = str(_railway_cache / "datasets")
+        os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(_railway_cache)
+        os.environ["HF_HUB_CACHE"] = str(_railway_cache / "hub")
 
 # NOW import SentenceTransformer (after env vars are set)
 from sentence_transformers import SentenceTransformer
@@ -38,10 +69,32 @@ class EmbeddingService:
         """
         self.model_name = model_name
         
-        # Configure cache path for persistent storage (Railway persistent volume)
-        # This prevents re-downloading model on every restart/redeploy
-        # CRITICAL: Get cache path FIRST, then set env vars in _get_cache_path()
-        cache_path = self._get_cache_path()
+        # CRITICAL: Use global ModelManager for cache verification
+        # ModelManager was already initialized at module level to setup environment
+        if _global_model_manager is not None:
+            self.model_manager = _global_model_manager
+            
+            # Try to copy model from image cache to persistent volume if needed
+            if not self.model_manager.cache_status.model_files_found:
+                logger.info("⚠️ Model not found in persistent cache, attempting to copy from image cache...")
+                self.model_manager.copy_model_from_image_cache()
+            
+            cache_path = self.model_manager.cache_path
+            cache_status = self.model_manager.cache_status
+            
+            # Log cache status
+            if cache_status.model_files_found:
+                logger.info(f"✅ Model cache verified: {cache_status.path}")
+                logger.info(f"   Size: {cache_status.size_mb:.2f} MB")
+                logger.info(f"   Persistent: {'✅ YES' if cache_status.is_persistent else '❌ NO'}")
+            else:
+                logger.warning(f"⚠️ Model cache NOT found. Will download on first use.")
+                logger.warning(f"   Expected location: {cache_path}")
+        else:
+            # Fallback to old method
+            logger.warning("⚠️ Using fallback cache method (ModelManager not available)")
+            cache_path = self._get_cache_path()
+            self.model_manager = None
         
         try:
             # CRITICAL: Set environment variables BEFORE loading model
