@@ -423,7 +423,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             
             # Validate response if enabled
             validation_info = None
-            confidence_score = None
+            # confidence_score already initialized at function start (line 104)
+            # Don't reassign here to avoid UnboundLocalError
             used_fallback = False
             
             if enable_validators:
@@ -555,6 +556,10 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 )
         else:
             # Fallback to regular AI response (no RAG context)
+            # Initialize confidence_score for non-RAG path
+            confidence_score = 0.3  # Low confidence when no RAG context
+            validation_info = None
+            
             # Detect language FIRST
             detected_lang = detect_language(chat_request.message)
             logger.info(f"🌐 Detected language (non-RAG): {detected_lang}")
