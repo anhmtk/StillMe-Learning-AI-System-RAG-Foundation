@@ -56,7 +56,7 @@ sentence-transformers>=2.7.0  # Updated to support newer huggingface_hub
 slowapi==0.1.9
 
 # Development & Testing
-pytest==7.4.3
+pytest==9.0.0
 pytest-asyncio==0.21.1
 pytest-cov==7.0.0
 pytest-xdist==3.8.0
