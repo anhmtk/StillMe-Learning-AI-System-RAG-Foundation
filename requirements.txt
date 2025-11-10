@@ -12,7 +12,7 @@ alembic==1.13.1
 
 # HTTP Requests
 httpx==0.25.2
-requests==2.31.0
+requests==2.32.5
 
 # Data Processing
 pandas==2.3.3
