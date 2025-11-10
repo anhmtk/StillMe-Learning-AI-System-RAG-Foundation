@@ -24,18 +24,40 @@ class EmbeddingService:
         
         # Configure cache path for persistent storage (Railway persistent volume)
         # This prevents re-downloading model on every restart/redeploy
+        # CRITICAL: Get cache path FIRST, then set env vars in _get_cache_path()
         cache_path = self._get_cache_path()
-        if cache_path:
-            os.environ["TRANSFORMERS_CACHE"] = str(cache_path)
-            os.environ["HF_HOME"] = str(cache_path)
-            logger.info(f"Using persistent cache path: {cache_path}")
         
         try:
+            # CRITICAL: Set environment variables BEFORE loading model
+            # This ensures SentenceTransformer uses the persistent cache
+            if cache_path:
+                os.environ["TRANSFORMERS_CACHE"] = str(cache_path)
+                os.environ["HF_HOME"] = str(cache_path)
+                os.environ["HF_DATASETS_CACHE"] = str(Path(cache_path) / "datasets")
+                os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(cache_path)
+                logger.info(f"Set cache environment variables to: {cache_path}")
+            
             # SentenceTransformer will use TRANSFORMERS_CACHE/HF_HOME env vars
-            self.model = SentenceTransformer(model_name, cache_folder=cache_path)
+            # cache_folder parameter is also passed for redundancy
+            self.model = SentenceTransformer(
+                model_name, 
+                cache_folder=cache_path if cache_path else None
+            )
             logger.info(f"Embedding model '{model_name}' loaded successfully")
             if cache_path:
-                logger.info(f"Model cached at: {cache_path}")
+                logger.info(f"✅ Model cached at: {cache_path}")
+                # Verify cache exists
+                cache_dir = Path(cache_path)
+                if cache_dir.exists():
+                    logger.info(f"✅ Cache directory exists: {cache_dir}")
+                    # Check if model files exist
+                    model_cache = cache_dir / "sentence_transformers" / model_name.replace("/", "_")
+                    if model_cache.exists():
+                        logger.info(f"✅ Model files found in cache: {model_cache}")
+                    else:
+                        logger.warning(f"⚠️ Model files not found in cache: {model_cache}")
+                else:
+                    logger.error(f"❌ Cache directory does not exist: {cache_dir}")
         except Exception as e:
             logger.error(f"Failed to load embedding model: {e}")
             raise
@@ -70,13 +92,18 @@ class EmbeddingService:
             else:
                 cache_dir = Path(persistent_cache) / "huggingface"
             cache_dir.mkdir(parents=True, exist_ok=True)
-            logger.info(f"Using persistent volume cache: {cache_dir}")
+            logger.info(f"✅ Using persistent volume cache: {cache_dir}")
+            # Set environment variables immediately
+            os.environ["TRANSFORMERS_CACHE"] = str(cache_dir)
+            os.environ["HF_HOME"] = str(cache_dir)
+            os.environ["HF_DATASETS_CACHE"] = str(cache_dir / "datasets")
+            os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(cache_dir)
             return str(cache_dir)
         
         # Priority 2b: Check if Railway persistent volume mount exists directly
         # Railway mounts /app/hf_cache as persistent volume
         railway_cache = Path("/app/hf_cache")
-        if railway_cache.exists() or railway_cache.parent.exists():
+        if railway_cache.exists():
             cache_dir = railway_cache
             cache_dir.mkdir(parents=True, exist_ok=True)
             logger.info(f"Using Railway persistent volume cache: {cache_dir}")
