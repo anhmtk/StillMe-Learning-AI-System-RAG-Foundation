@@ -7,7 +7,7 @@ streamlit==1.51.0
 
 # Database
 sqlalchemy==2.0.44
-alembic==1.13.1
+alembic==1.17.1
 # Note: sqlite3 is built-in Python module, no need to install
 
 # HTTP Requests
@@ -23,15 +23,15 @@ pandas==2.3.3
 plotly==5.18.0
 
 # RSS & XML Processing
-feedparser==6.0.10
-beautifulsoup4==4.12.2
+feedparser==6.0.12
+beautifulsoup4==4.14.2
 
 # Environment & Configuration
 python-dotenv==1.2.1
-pydantic==2.5.0
+pydantic==2.12.4
 
 # Logging & Monitoring
-loguru==0.7.2
+loguru==0.7.3
 
 # Date & Time
 python-dateutil==2.8.2
@@ -59,4 +59,4 @@ slowapi==0.1.9
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==7.0.0
-pytest-xdist==3.5.0
+pytest-xdist==3.8.0
