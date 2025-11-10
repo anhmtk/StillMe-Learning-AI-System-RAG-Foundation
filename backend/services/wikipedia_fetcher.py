@@ -34,9 +34,14 @@ class WikipediaFetcher:
             language: Wikipedia language code (default: en)
         """
         self.language = language
-        self.api_base = f"https://{language}.wikipedia.org/api/rest_v1"
+        # Use correct REST v1 endpoint base URL
+        self.api_base = f"https://{language}.wikipedia.org/w/rest.php/v1"
         self.last_request_time: Optional[datetime] = None
         self.request_count = 0
+        # Track error states for self-diagnosis
+        self.last_error: Optional[str] = None
+        self.error_count = 0
+        self.last_success_time: Optional[datetime] = None
         logger.info(f"Wikipedia Fetcher initialized (language: {language})")
     
     def _rate_limit(self):
@@ -119,11 +124,32 @@ class WikipediaFetcher:
             Article entry with content
         """
         try:
-            # Fetch page content
+            # Fetch page content using correct REST v1 endpoint
+            # URL format: https://{language}.wikipedia.org/w/rest.php/v1/page/summary/{title}
             url = f"{self.api_base}/page/summary/{title}"
             response = self._fetch_with_retry(url)
             
+            # Track success
+            if response and response.status_code == 200:
+                self.last_success_time = datetime.now()
+                self.last_error = None
+            
             if not response:
+                self.last_error = "No response from Wikipedia API"
+                self.error_count += 1
+                return None
+            
+            # Track 404 errors
+            if response.status_code == 404:
+                self.last_error = f"404 Not Found: Article '{title}' not found"
+                self.error_count += 1
+                logger.warning(f"Wikipedia article not found: {title}")
+                return None
+            
+            # Track other errors
+            if response.status_code != 200:
+                self.last_error = f"HTTP {response.status_code}: {response.reason}"
+                self.error_count += 1
                 return None
             
             data = response.json()
@@ -163,7 +189,10 @@ class WikipediaFetcher:
             return article_entry
             
         except Exception as e:
-            logger.error(f"Error fetching Wikipedia article '{title}': {e}")
+            error_msg = f"Error fetching Wikipedia article '{title}': {e}"
+            self.last_error = error_msg
+            self.error_count += 1
+            logger.error(error_msg)
             return None
     
     def search_articles(self,
@@ -233,7 +262,10 @@ class WikipediaFetcher:
             
             # Parse REST v1 response
             if response.status_code != 200:
-                logger.error(f"Wikipedia search returned {response.status_code} for query: {query}")
+                error_msg = f"Wikipedia search returned {response.status_code} for query: {query}"
+                self.last_error = error_msg
+                self.error_count += 1
+                logger.error(error_msg)
                 return articles
             
             data = response.json()
@@ -251,8 +283,16 @@ class WikipediaFetcher:
             
             logger.info(f"Found {len(articles)} Wikipedia articles for query: {query}")
             
+            # Track success if we found articles
+            if articles:
+                self.last_success_time = datetime.now()
+                self.last_error = None
+            
         except Exception as e:
-            logger.error(f"Error searching Wikipedia: {e}")
+            error_msg = f"Error searching Wikipedia: {e}"
+            self.last_error = error_msg
+            self.error_count += 1
+            logger.error(error_msg)
         
         return articles
     
@@ -281,6 +321,10 @@ class WikipediaFetcher:
             "language": self.language,
             "request_count": self.request_count,
             "last_request_time": self.last_request_time.isoformat() if self.last_request_time else None,
-            "rate_limit_delay": WIKIPEDIA_RATE_LIMIT_DELAY
+            "rate_limit_delay": WIKIPEDIA_RATE_LIMIT_DELAY,
+            "error_count": self.error_count,
+            "last_error": self.last_error,
+            "last_success_time": self.last_success_time.isoformat() if self.last_success_time else None,
+            "status": "error" if self.last_error and (not self.last_success_time or self.error_count > 0) else "ok"
         }
 
