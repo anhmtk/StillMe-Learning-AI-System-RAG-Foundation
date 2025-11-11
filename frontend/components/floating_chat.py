@@ -141,6 +141,19 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 resize: none !important;
             }}
             
+            /* Force visible class (fallback if inline style doesn't work) */
+            #stillme-chat-panel.force-visible {{
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }}
+            
+            #stillme-chat-overlay.force-visible {{
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }}
+            
             /* Resize handles - 8 handles (4 corners + 4 edges) */
             .resize-handle {{
                 position: absolute;
@@ -658,16 +671,40 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     // Toggle chat panel with overlay
                     function toggleChat() {{
                         console.log('StillMe Chat: toggleChat() called');
-                        const isVisible = panel.style.display === 'flex';
+                        const isVisible = panel.style.display === 'flex' || panel.style.display === '';
                         console.log('StillMe Chat: Panel currently visible:', isVisible);
+                        console.log('StillMe Chat: Panel computed style before:', window.getComputedStyle(panel).display);
                         
-                        panel.style.display = isVisible ? 'none' : 'flex';
-                        overlay.style.display = isVisible ? 'none' : 'block';
+                        // Force set display with !important via setProperty
+                        if (isVisible) {{
+                            // Close panel
+                            panel.style.setProperty('display', 'none', 'important');
+                            overlay.style.setProperty('display', 'none', 'important');
+                            console.log('StillMe Chat: Panel CLOSED');
+                        }} else {{
+                            // Open panel
+                            panel.style.setProperty('display', 'flex', 'important');
+                            overlay.style.setProperty('display', 'block', 'important');
+                            console.log('StillMe Chat: Panel OPENED');
+                        }}
                         
-                        console.log('StillMe Chat: Panel display set to:', panel.style.display);
-                        console.log('StillMe Chat: Overlay display set to:', overlay.style.display);
-                        console.log('StillMe Chat: Panel element:', panel);
-                        console.log('StillMe Chat: Overlay element:', overlay);
+                        // Verify after setting
+                        const panelComputed = window.getComputedStyle(panel).display;
+                        const overlayComputed = window.getComputedStyle(overlay).display;
+                        console.log('StillMe Chat: Panel computed style after:', panelComputed);
+                        console.log('StillMe Chat: Overlay computed style after:', overlayComputed);
+                        console.log('StillMe Chat: Panel inline style:', panel.style.display);
+                        console.log('StillMe Chat: Overlay inline style:', overlay.style.display);
+                        
+                        // Double-check: if still not visible, force with class
+                        if (!isVisible && panelComputed === 'none') {{
+                            console.warn('StillMe Chat: Panel still hidden after setting display, trying class method');
+                            panel.classList.add('force-visible');
+                            overlay.classList.add('force-visible');
+                        }} else if (isVisible && panelComputed !== 'none') {{
+                            panel.classList.remove('force-visible');
+                            overlay.classList.remove('force-visible');
+                        }}
                         
                         // Ensure button stays visible
                         ensureButtonVisible();
