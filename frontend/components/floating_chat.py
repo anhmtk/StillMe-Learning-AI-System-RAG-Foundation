@@ -944,61 +944,49 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     
                                     console.log('StillMe Chat: Parent panel created with correct HTML structure (header -> messages -> input)');
                                     
-                                    // Setup event handlers for parent panel
-                                    const parentCloseBtn = parentPanel.querySelector('.stillme-chat-close');
-                                    const parentMinimizeBtn = parentPanel.querySelector('#minimize-btn');
-                                    const parentFullscreenBtn = parentPanel.querySelector('#fullscreen-btn');
-                                    
-                                    if (parentCloseBtn) {{
-                                        parentCloseBtn.onclick = function(e) {{
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            const iframes = parentDoc.querySelectorAll('iframe');
-                                            for (let iframe of iframes) {{
-                                                try {{
-                                                    if (iframe.contentWindow) {{
-                                                        iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
-                                                    }}
-                                                }} catch (err) {{
-                                                    console.warn('StillMe Chat: Could not send toggle message:', err);
+                                    // Setup event handlers for parent panel (use elements we just created)
+                                    closeBtn.onclick = function(e) {{
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        const iframes = parentDoc.querySelectorAll('iframe');
+                                        for (let iframe of iframes) {{
+                                            try {{
+                                                if (iframe.contentWindow) {{
+                                                    iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
                                                 }}
+                                            }} catch (err) {{
+                                                console.warn('StillMe Chat: Could not send toggle message:', err);
                                             }}
-                                        }};
-                                    }}
+                                        }}
+                                    }};
                                     
-                                    if (parentMinimizeBtn) {{
-                                        parentMinimizeBtn.onclick = function(e) {{
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            parentPanel.classList.toggle('minimized');
-                                            if (parentPanel.classList.contains('minimized')) {{
-                                                parentMinimizeBtn.textContent = '□';
-                                                parentMinimizeBtn.title = 'Restore';
-                                            }} else {{
-                                                parentMinimizeBtn.textContent = '−';
-                                                parentMinimizeBtn.title = 'Minimize';
-                                            }}
-                                        }};
-                                    }}
+                                    minimizeBtn.onclick = function(e) {{
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        parentPanel.classList.toggle('minimized');
+                                        if (parentPanel.classList.contains('minimized')) {{
+                                            minimizeBtn.textContent = '□';
+                                            minimizeBtn.title = 'Restore';
+                                        }} else {{
+                                            minimizeBtn.textContent = '−';
+                                            minimizeBtn.title = 'Minimize';
+                                        }}
+                                    }};
                                     
-                                    if (parentFullscreenBtn) {{
-                                        parentFullscreenBtn.onclick = function(e) {{
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            parentPanel.classList.toggle('fullscreen');
-                                            if (parentPanel.classList.contains('fullscreen')) {{
-                                                parentFullscreenBtn.textContent = '⛶';
-                                                parentFullscreenBtn.title = 'Exit Fullscreen';
-                                            }} else {{
-                                                parentFullscreenBtn.textContent = '⛶';
-                                                parentFullscreenBtn.title = 'Toggle Fullscreen';
-                                            }}
-                                        }};
-                                    }}
+                                    fullscreenBtn.onclick = function(e) {{
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        parentPanel.classList.toggle('fullscreen');
+                                        if (parentPanel.classList.contains('fullscreen')) {{
+                                            fullscreenBtn.textContent = '⛶';
+                                            fullscreenBtn.title = 'Exit Fullscreen';
+                                        }} else {{
+                                            fullscreenBtn.textContent = '⛶';
+                                            fullscreenBtn.title = 'Toggle Fullscreen';
+                                        }}
+                                    }};
                                     
-                                    // Setup input handler for parent panel
-                                    const parentInput = parentPanel.querySelector('#stillme-chat-input');
-                                    const parentSendBtn = parentPanel.querySelector('#stillme-chat-send');
+                                    // Setup input handler for parent panel (use elements we just created)
                                     if (parentInput && parentSendBtn) {{
                                         // Send message handler
                                         const handleSend = async function() {{
