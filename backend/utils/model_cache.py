@@ -250,10 +250,15 @@ class ModelManager:
             return True
         
         # Check if image cache has model
+        # Model can be cached in multiple formats by HuggingFace/sentence-transformers
         image_model_paths = [
+            # Sentence-transformers format
             image_cache / "sentence_transformers" / self.model_name_safe,
             image_cache / "sentence_transformers" / self.model_name,
+            # HuggingFace hub format (full format)
+            image_cache / "hub" / f"models--sentence-transformers--{self.model_name_hf}",
             image_cache / "hub" / f"models--{self.model_name_hf}",
+            image_cache / f"models--sentence-transformers--{self.model_name_hf}",
             image_cache / f"models--{self.model_name_hf}",
         ]
         
