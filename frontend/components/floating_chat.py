@@ -451,20 +451,73 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 try {{
                     if (window.parent && window.parent !== window) {{
                         console.log('StillMe Chat: Detected iframe, attempting to inject into parent...');
-                        // Clone button and inject into parent
                         const parentDoc = window.parent.document;
-                        const clonedButton = chatButton.cloneNode(true);
+                        
+                        // Remove existing button if any
+                        const existingBtn = parentDoc.getElementById('stillme-chat-button-parent');
+                        if (existingBtn) {{
+                            existingBtn.remove();
+                        }}
+                        
+                        // Create new button with full styling
+                        const clonedButton = parentDoc.createElement('button');
                         clonedButton.id = 'stillme-chat-button-parent';
-                        clonedButton.style.position = 'fixed';
-                        clonedButton.style.bottom = '20px';
-                        clonedButton.style.right = '20px';
-                        clonedButton.style.zIndex = '2147483647';
-                        clonedButton.onclick = function() {{
+                        clonedButton.textContent = '💬';
+                        clonedButton.innerHTML = '💬';
+                        
+                        // Apply ALL styles directly (critical for parent window)
+                        clonedButton.style.cssText = `
+                            position: fixed !important;
+                            bottom: 20px !important;
+                            right: 20px !important;
+                            width: 60px !important;
+                            height: 60px !important;
+                            border-radius: 50% !important;
+                            background: linear-gradient(135deg, #46b3ff 0%, #1e90ff 100%) !important;
+                            border: 3px solid #ffffff !important;
+                            color: white !important;
+                            font-size: 28px !important;
+                            cursor: pointer !important;
+                            box-shadow: 0 4px 20px rgba(70, 179, 255, 0.6), 0 0 0 4px rgba(70, 179, 255, 0.2) !important;
+                            transition: all 0.3s ease !important;
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                            z-index: 2147483647 !important;
+                            visibility: visible !important;
+                            opacity: 1 !important;
+                            pointer-events: auto !important;
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                        `;
+                        
+                        clonedButton.onclick = function(e) {{
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('StillMe Chat: Parent button clicked');
                             window.parent.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                            // Also try to trigger in iframe
+                            const iframe = parentDoc.querySelector('iframe[src*="about:srcdoc"]');
+                            if (iframe && iframe.contentWindow) {{
+                                iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                            }}
                         }};
+                        
+                        clonedButton.onmouseenter = function() {{
+                            this.style.transform = 'scale(1.15)';
+                            this.style.boxShadow = '0 6px 24px rgba(70, 179, 255, 0.8), 0 0 0 6px rgba(70, 179, 255, 0.3)';
+                        }};
+                        
+                        clonedButton.onmouseleave = function() {{
+                            this.style.transform = 'scale(1)';
+                            this.style.boxShadow = '0 4px 20px rgba(70, 179, 255, 0.6), 0 0 0 4px rgba(70, 179, 255, 0.2)';
+                        }};
+                        
                         if (parentDoc.body) {{
                             parentDoc.body.appendChild(clonedButton);
                             console.log('StillMe Chat: Button injected into parent window');
+                            console.log('StillMe Chat: Parent button position:', clonedButton.getBoundingClientRect());
                         }}
                     }}
                 }} catch (e) {{
