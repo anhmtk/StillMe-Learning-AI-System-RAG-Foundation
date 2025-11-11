@@ -394,7 +394,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         <button class="stillme-chat-header-btn" id="minimize-btn" onclick="toggleMinimize()" title="Minimize">−</button>
                         <button class="stillme-chat-header-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
                         <button class="stillme-chat-close" onclick="toggleChat()" title="Close">×</button>
-                    </div>
+                </div>
                 </div>
                 
                 <!-- Messages container (auto-scroll) -->
@@ -494,7 +494,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     // Initialize
                     console.log('StillMe Chat: Loading panel state...');
                     loadPanelState();
-                    if (!isOpen) {{
+            if (!isOpen) {{
                         panel.style.display = 'none';
                         overlay.style.display = 'none';
                     }}
@@ -938,7 +938,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     }}, 100);
                 }}
             }}
-                    
+            
                     // Toggle minimize
                     function toggleMinimize() {{
                         isMinimized = !isMinimized;
@@ -1237,11 +1237,11 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     }}
                     
                     // Send message (from iframe input)
-                    async function sendMessage() {{
-                        const input = document.getElementById('stillme-chat-input');
-                        const message = input.value.trim();
-                        
-                        if (!message) return;
+            async function sendMessage() {{
+                const input = document.getElementById('stillme-chat-input');
+                const message = input.value.trim();
+                
+                if (!message) return;
                 
                 // Disable send button
                 const sendBtn = document.getElementById('stillme-chat-send');
