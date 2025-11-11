@@ -327,6 +327,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
         </style>
     </head>
     <body>
+        <script>
+            // Debug: Log when body loads
+            console.log('StillMe Chat: HTML body loaded');
+            console.log('StillMe Chat: Window dimensions:', window.innerWidth, 'x', window.innerHeight);
+        </script>
+        
         <!-- Overlay backdrop - covers dashboard when chat is open -->
         <div id="stillme-chat-overlay" onclick="toggleChat()"></div>
         
@@ -423,6 +429,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             }}
             
             // Initialize
+            console.log('StillMe Chat: Initializing...');
             loadPanelState();
             if (!isOpen) {{
                 panel.style.display = 'none';
@@ -431,13 +438,38 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             
             // CRITICAL: Ensure chat button is always visible
             const chatButton = document.getElementById('stillme-chat-button');
+            console.log('StillMe Chat: Button element:', chatButton);
             if (chatButton) {{
                 chatButton.style.display = 'flex';
                 chatButton.style.visibility = 'visible';
                 chatButton.style.opacity = '1';
                 chatButton.style.zIndex = '2147483647';
-                // Force button to be on top
-                document.body.appendChild(chatButton);
+                console.log('StillMe Chat: Button styles applied');
+                console.log('StillMe Chat: Button position:', chatButton.getBoundingClientRect());
+                
+                // Try to inject button into parent window if in iframe
+                try {{
+                    if (window.parent && window.parent !== window) {{
+                        console.log('StillMe Chat: Detected iframe, attempting to inject into parent...');
+                        // Clone button and inject into parent
+                        const parentDoc = window.parent.document;
+                        const clonedButton = chatButton.cloneNode(true);
+                        clonedButton.id = 'stillme-chat-button-parent';
+                        clonedButton.style.position = 'fixed';
+                        clonedButton.style.bottom = '20px';
+                        clonedButton.style.right = '20px';
+                        clonedButton.style.zIndex = '2147483647';
+                        clonedButton.onclick = function() {{
+                            window.parent.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                        }};
+                        if (parentDoc.body) {{
+                            parentDoc.body.appendChild(clonedButton);
+                            console.log('StillMe Chat: Button injected into parent window');
+                        }}
+                    }}
+                }} catch (e) {{
+                    console.warn('StillMe Chat: Could not inject into parent:', e);
+                }}
             }} else {{
                 console.error('StillMe Chat: Button not found!');
             }}
@@ -446,15 +478,28 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             function ensureButtonVisible() {{
                 const btn = document.getElementById('stillme-chat-button');
                 if (btn) {{
-                    btn.style.display = 'flex';
-                    btn.style.visibility = 'visible';
-                    btn.style.opacity = '1';
-                    btn.style.zIndex = '2147483647';
+                    const rect = btn.getBoundingClientRect();
+                    if (rect.width === 0 || rect.height === 0) {{
+                        console.warn('StillMe Chat: Button has zero dimensions!');
+                        btn.style.display = 'flex';
+                        btn.style.visibility = 'visible';
+                        btn.style.opacity = '1';
+                        btn.style.zIndex = '2147483647';
+                    }}
+                }} else {{
+                    console.warn('StillMe Chat: Button not found in ensureButtonVisible()');
                 }}
             }}
             
             // Check button visibility periodically
             setInterval(ensureButtonVisible, 1000);
+            
+            // Listen for messages from parent window
+            window.addEventListener('message', function(event) {{
+                if (event.data && event.data.type === 'stillme_toggle_chat') {{
+                    toggleChat();
+                }}
+            }});
             
             // Render chat history with auto-scroll
             function renderMessages() {{
