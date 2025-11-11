@@ -295,65 +295,75 @@ External Sources → Learning Pipeline → Vector DB → RAG → Validator Chain
 ```mermaid
 graph TB
     subgraph "External Sources"
-        RSS[RSS Feeds<br/>ArXiv, TechCrunch, HN]
-        API[Public APIs<br/>NewsAPI, GNews]
+        RSS[RSS Feeds<br/>Hacker News, NYTimes Tech]
+        ArXiv[arXiv<br/>Research Papers]
+        CrossRef[CrossRef<br/>Academic Publications]
+        Wikipedia[Wikipedia<br/>Encyclopedia Articles]
     end
     
-    subgraph "StillMe Core System"
-        Scheduler[Hybrid Learning Scheduler<br/>Every 4 hours]
-        Learning[Learning Engine<br/>FastAPI Backend]
+    subgraph "StillMe Learning Pipeline"
+        Scheduler[Learning Scheduler<br/>Every 4 hours]
+        SourceInt[Source Integration<br/>Multi-source Fetching]
         
-        subgraph "Processing Pipeline"
-            Fetch[Content Fetching]
-            RedTeam[Red-Team Agent<br/>Safety Scanning]
-            Ethics[EthicsGuard<br/>Ethical Filter]
-            Assess[Quality Assessment]
+        subgraph "Content Processing"
+            PreFilter[Pre-Filter<br/>Content Curator<br/>Min 150 chars, Quality Check]
+            Prioritize[Prioritization<br/>Self-Diagnosis + Curator<br/>Knowledge Gap Analysis]
+            Ethics[EthicsAdapter<br/>Ethical Filtering]
         end
         
-        subgraph "Routing System"
-            Router{Smart Router<br/>DeepSeek/Ollama}
-            AutoApprove[Auto-Approve<br/>Trust > 0.8]
-            Community[Community Queue<br/>Trust 0.6-0.8]
-            HumanReview[Human Review<br/>Trust < 0.6]
+        subgraph "Nested Learning"
+            Surprise[Surprise Score<br/>PromotionManager<br/>Rarity + Novelty]
+            TierRoute[Tier Routing<br/>L0/L1/L2/L3<br/>Based on Surprise]
+            UpdateCheck[Update Isolation<br/>Skip if Tier Not Due]
         end
         
-        subgraph "Data Layer"
-            KB[(Knowledge Base<br/>JSON)]
-            DB[(SQLite DB<br/>Sessions, Votes)]
-            Evolution[(Evolution DB<br/>Stages)]
+        subgraph "Embedding & Storage"
+            Embed[Embedding Service<br/>all-MiniLM-L6-v2<br/>384 dimensions]
+            ChromaDB[(ChromaDB<br/>Vector Database<br/>stillme_knowledge)]
         end
-        
+    end
+    
+    subgraph "Query & Response"
+        Chat[Chat Interface<br/>User Query]
+        StillMeDet[StillMe Detector<br/>Query Classification]
+        RAGRet[RAG Retrieval<br/>Semantic Search]
+        Validator[Validator Chain<br/>Citation + Evidence<br/>Confidence + Ethics]
+        LLM[LLM Router<br/>DeepSeek/OpenAI<br/>Response Generation]
+    end
+    
+    subgraph "Data & Monitoring"
+        SQLite[(SQLite DB<br/>Sessions, Metrics<br/>Fetch History)]
+        Metrics[Metrics Collector<br/>Nested Learning Stats<br/>Cost Reduction]
         Dashboard[Streamlit Dashboard<br/>Real-time Monitoring]
-        Chat[Chat Interface<br/>User Interaction]
     end
     
-    subgraph "Community"
-        Voters[Community Voting<br/>Weighted Trust]
-        EthicsQueue[EthicsGuard Queue]
-    end
+    RSS --> SourceInt
+    ArXiv --> SourceInt
+    CrossRef --> SourceInt
+    Wikipedia --> SourceInt
     
-    RSS --> Fetch
-    API --> Fetch
-    Scheduler --> Learning
-    Learning --> Fetch
-    Fetch --> RedTeam
-    RedTeam --> Ethics
-    Ethics --> Assess
-    Assess --> Router
-    Router --> AutoApprove
-    Router --> Community
-    Router --> HumanReview
-    AutoApprove --> KB
-    Community --> Voters
-    Voters --> EthicsQueue
-    EthicsQueue --> KB
-    HumanReview --> KB
-    KB --> Dashboard
-    DB --> Dashboard
-    Evolution --> Dashboard
-    Chat --> Router
-    Learning --> Evolution
-    Learning --> DB
+    Scheduler --> SourceInt
+    SourceInt --> PreFilter
+    PreFilter --> Prioritize
+    Prioritize --> Ethics
+    Ethics --> Surprise
+    Surprise --> TierRoute
+    TierRoute --> UpdateCheck
+    UpdateCheck --> Embed
+    Embed --> ChromaDB
+    
+    Chat --> StillMeDet
+    StillMeDet --> RAGRet
+    RAGRet --> ChromaDB
+    RAGRet --> LLM
+    LLM --> Validator
+    Validator --> Chat
+    
+    Scheduler --> SQLite
+    UpdateCheck --> Metrics
+    Metrics --> SQLite
+    SQLite --> Dashboard
+    ChromaDB --> Dashboard
 ```
 
 > **Detailed architecture documentation**: See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
