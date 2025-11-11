@@ -597,14 +597,31 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             
             // Toggle chat panel with overlay
             function toggleChat() {{
+                console.log('StillMe Chat: toggleChat() called');
                 const isVisible = panel.style.display === 'flex';
+                console.log('StillMe Chat: Panel currently visible:', isVisible);
+                
                 panel.style.display = isVisible ? 'none' : 'flex';
                 overlay.style.display = isVisible ? 'none' : 'block';
+                
+                console.log('StillMe Chat: Panel display set to:', panel.style.display);
+                console.log('StillMe Chat: Overlay display set to:', overlay.style.display);
+                console.log('StillMe Chat: Panel element:', panel);
+                console.log('StillMe Chat: Overlay element:', overlay);
+                
+                // Ensure button stays visible
+                ensureButtonVisible();
                 
                 if (!isVisible) {{
                     // Focus input when opening
                     setTimeout(() => {{
-                        document.getElementById('stillme-chat-input').focus();
+                        const input = document.getElementById('stillme-chat-input');
+                        if (input) {{
+                            input.focus();
+                            console.log('StillMe Chat: Input focused');
+                        }} else {{
+                            console.warn('StillMe Chat: Input not found');
+                        }}
                     }}, 100);
                 }}
             }}
