@@ -1162,9 +1162,19 @@ def page_nested_learning():
     # Fetch metrics
     metrics = get_json("/api/learning/nested-learning/metrics", {}, timeout=30)
     
-    if not metrics or metrics.get("enabled") is False:
+    if not metrics:
+        st.error("❌ **Failed to fetch metrics from backend**")
+        st.info("Please check backend logs and ensure backend is running.")
+        return
+    
+    if metrics.get("enabled") is False:
         st.warning("⚠️ **Nested Learning is disabled**")
-        st.info("To enable Nested Learning, set `ENABLE_CONTINUUM_MEMORY=true` in your environment variables.")
+        message = metrics.get("message", "Nested Learning is disabled")
+        st.info(f"{message}\n\n**To enable:** Set `ENABLE_CONTINUUM_MEMORY=true` in backend environment variables, then restart/redeploy backend.")
+        
+        # Show current API response for debugging
+        with st.expander("🔍 Debug: API Response"):
+            st.json(metrics)
         return
     
     # Overview metrics
