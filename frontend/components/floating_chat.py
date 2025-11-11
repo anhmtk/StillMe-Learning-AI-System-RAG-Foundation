@@ -529,16 +529,48 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         try {{
                                             if (iframe.contentWindow) {{
                                                 console.log('StillMe Chat: Sending message to iframe:', iframe.src || 'srcdoc');
-                                                iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
-                                                messageSent = true;
+                                                
+                                                // Method 1: Try postMessage
+                                                try {{
+                                                    iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                                                    messageSent = true;
+                                                    console.log('StillMe Chat: Message sent via postMessage');
+                                                }} catch (postErr) {{
+                                                    console.warn('StillMe Chat: postMessage failed:', postErr);
+                                                }}
+                                                
+                                                // Method 2: Try direct function call (fallback)
+                                                try {{
+                                                    if (iframe.contentWindow.stillmeToggleChat) {{
+                                                        console.log('StillMe Chat: Calling stillmeToggleChat directly');
+                                                        iframe.contentWindow.stillmeToggleChat();
+                                                        messageSent = true;
+                                                    }}
+                                                }} catch (directErr) {{
+                                                    console.warn('StillMe Chat: Direct call failed:', directErr);
+                                                }}
+                                                
+                                                // Method 3: Try accessing toggleChat via iframe window
+                                                try {{
+                                                    // Access the iframe's window and call toggleChat if available
+                                                    const iframeWindow = iframe.contentWindow;
+                                                    if (iframeWindow && typeof iframeWindow.toggleChat === 'function') {{
+                                                        console.log('StillMe Chat: Calling toggleChat via iframe window');
+                                                        iframeWindow.toggleChat();
+                                                        messageSent = true;
+                                                    }}
+                                                }} catch (windowErr) {{
+                                                    console.warn('StillMe Chat: Window access failed:', windowErr);
+                                                }}
                                             }}
                                         }} catch (err) {{
-                                            console.warn('StillMe Chat: Could not send to iframe:', err);
+                                            console.warn('StillMe Chat: Could not access iframe:', err);
                                         }}
                                     }}
                                     
                                     if (!messageSent) {{
                                         console.error('StillMe Chat: Could not find iframe to send message to');
+                                        console.error('StillMe Chat: All communication methods failed');
                                     }}
                                 }};
                                 
@@ -585,20 +617,25 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     // Check button visibility periodically
                     setInterval(ensureButtonVisible, 1000);
                     
-                    // Listen for messages from parent window
+                    // Listen for messages from parent window (register early)
                     window.addEventListener('message', function(event) {{
                         console.log('StillMe Chat: Received message:', event.data, 'from:', event.origin);
                         if (event.data && event.data.type === 'stillme_toggle_chat') {{
                             console.log('StillMe Chat: Toggling chat panel...');
                             toggleChat();
                         }}
-                    }});
+                    }}, false); // Use capture phase for earlier registration
                     
                     // Also expose toggleChat globally for direct access (fallback)
                     window.stillmeToggleChat = function() {{
                         console.log('StillMe Chat: toggleChat called via global function');
                         toggleChat();
                     }};
+                    
+                    // Expose toggleChat on window for direct access
+                    window.toggleChat = toggleChat;
+                    
+                    console.log('StillMe Chat: Message listener registered and toggleChat exposed globally');
                     
                     // Render chat history with auto-scroll
                     function renderMessages() {{
