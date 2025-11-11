@@ -26,7 +26,7 @@ class RAGRetrieval:
     
     def retrieve_context(self, 
                         query: str, 
-                        knowledge_limit: int = 2,  # Optimized: reduced from 3 to 2 for latency
+                        knowledge_limit: int = 3,  # Increased from 2 to 3 for better coverage
                         conversation_limit: int = 1,  # Optimized: reduced from 2 to 1 for latency
                         prioritize_foundational: bool = False,
                         tier_preference: Optional[str] = None) -> Dict[str, Any]:

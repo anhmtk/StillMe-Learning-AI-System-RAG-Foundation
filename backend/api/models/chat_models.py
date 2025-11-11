@@ -13,7 +13,7 @@ class ChatRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=5000, description="User message")
     user_id: Optional[str] = Field(default=None, max_length=100, description="User identifier")
     use_rag: bool = Field(default=True, description="Whether to use RAG for context")
-    context_limit: int = Field(default=2, ge=1, le=5, description="Maximum number of context documents (optimized for latency: reduced from 3 to 2)")
+    context_limit: int = Field(default=3, ge=1, le=5, description="Maximum number of context documents (increased from 2 to 3 for better coverage)")
     
     @validator('message')
     def validate_message(cls, v):
@@ -55,7 +55,7 @@ class ChatRequest(BaseModel):
             raise ValueError("Context limit must be an integer")
         
         if v < 1 or v > 5:
-            raise ValueError("Context limit must be between 1 and 5 (optimized for latency)")
+            raise ValueError("Context limit must be between 1 and 5")
         
         return v
     
@@ -65,7 +65,7 @@ class ChatRequest(BaseModel):
                 "message": "What is StillMe?",
                 "user_id": "user123",
                 "use_rag": True,
-                "context_limit": 2
+                "context_limit": 3
             }
         }
 
