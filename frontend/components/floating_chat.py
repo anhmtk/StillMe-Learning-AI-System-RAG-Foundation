@@ -270,6 +270,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 flex-direction: column;
                 gap: 12px;
                 background: #1e1e1e !important; /* Match panel background */
+                min-height: 0; /* CRITICAL: Allow flex item to shrink */
             }}
             
             .stillme-chat-message {{
@@ -295,9 +296,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             
             .stillme-chat-input-container {{
                 padding: 12px 16px !important; /* Tighter padding like Cursor */
-                border-top: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border */
-                background: #1e1e1e !important; /* Match panel background */
+                border-top: 1px solid rgba(255, 255, 255, 0.15) !important; /* More visible border to separate from messages */
+                background: #252526 !important; /* Slightly different background like Cursor */
                 flex-shrink: 0; /* Don't shrink input area */
+                margin-top: auto; /* Push to bottom */
             }}
             
             .stillme-chat-input-wrapper {{
@@ -1025,11 +1027,14 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }});
                     }}
                     
-                    // Resize functionality
+                    // Resize functionality - improved
                     function setupResizeHandle(handle, direction) {{
-                        if (!handle) return;
+                        if (!handle) {{
+                            console.warn(`StillMe Chat: Resize handle not found for direction: ${{direction}}`);
+                            return;
+                        }}
                         handle.addEventListener('mousedown', (e) => {{
-                            if (isFullscreen) return; // Don't resize in fullscreen
+                            if (isFullscreen || isMinimized) return; // Don't resize in fullscreen or minimized
                             isResizing = true;
                             resizeHandle = direction;
                             dragStartX = e.clientX;
@@ -1044,6 +1049,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             panel.style.transform = 'none';
                             panel.style.left = panelStartX + 'px';
                             panel.style.top = panelStartY + 'px';
+                            
+                            console.log(`StillMe Chat: Resize started - direction: ${{direction}}, start size: ${{panelStartWidth}}x${{panelStartHeight}}`);
                             
                             e.preventDefault();
                             e.stopPropagation();
