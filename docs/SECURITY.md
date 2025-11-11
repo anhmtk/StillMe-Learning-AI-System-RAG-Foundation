@@ -281,10 +281,52 @@ CORS_ENABLED=true
 - **Scope**: stillme.ai domain
 - **Rewards**: $100 - $10,000
 
-### **Disclosure**
-- **Responsible Disclosure**: 90 days
-- **Public Disclosure**: After fix
-- **Credit**: Given to researchers
+### **Responsible Disclosure Policy**
+
+We take security seriously and appreciate responsible disclosure of vulnerabilities. If you discover a security vulnerability, please follow these guidelines:
+
+**How to Report:**
+1. **Email**: security@stillme.ai (or create a private security advisory on GitHub)
+2. **Subject**: `[SECURITY] Brief description of vulnerability`
+3. **Include**:
+   - Description of the vulnerability
+   - Steps to reproduce
+   - Potential impact
+   - Suggested fix (if any)
+   - Your contact information
+
+**What to Expect:**
+- **Response Time**: We will acknowledge receipt within 48 hours
+- **Initial Assessment**: Within 7 days
+- **Fix Timeline**: Depends on severity (Critical: <7 days, High: <30 days, Medium: <90 days)
+- **Disclosure**: Public disclosure after fix is deployed (minimum 90 days from report)
+- **Credit**: We will credit you in security advisories (unless you prefer to remain anonymous)
+
+**What NOT to Do:**
+- ❌ Do NOT publicly disclose before we've had time to fix
+- ❌ Do NOT access or modify data that doesn't belong to you
+- ❌ Do NOT perform any attack that could harm StillMe users or services
+- ❌ Do NOT violate any laws or breach any agreements
+
+**Scope:**
+- ✅ StillMe codebase and infrastructure
+- ✅ API endpoints and authentication
+- ✅ Data handling and privacy
+- ❌ Social engineering attacks
+- ❌ Physical attacks
+- ❌ Denial of service attacks
+
+**Safe Harbor:**
+We will not pursue legal action against security researchers who:
+- Act in good faith
+- Follow responsible disclosure practices
+- Do not access data beyond what's necessary to demonstrate the vulnerability
+- Do not cause harm to StillMe users or services
+
+### **Disclosure Timeline**
+- **Responsible Disclosure**: 90 days minimum before public disclosure
+- **Public Disclosure**: After fix is deployed and tested
+- **Credit**: Given to researchers (unless anonymous requested)
 
 ---
 
