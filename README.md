@@ -14,6 +14,16 @@
 [![Ethical AI](https://img.shields.io/badge/Ethical%20AI-Transparent-green.svg)](https://github.com/anhmtk/stillme_ai_ipc)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## 📑 Table of Contents
+
+- [What is StillMe?](#-what-is-stillme)
+- [Quick Start](#-quick-start)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Documentation](#-documentation)
+- [Contributing](#-contributing)
+- [License](#-license)
+
 ## 🌟 What is StillMe?
 
 StillMe is the **Counter-Movement to Black Box AI** — a **Transparent AI Learning System** building toward true self-evolution.
@@ -35,7 +45,7 @@ While major AI companies build closed systems with proprietary algorithms, Still
 **Current MVP Status:** Foundation components are implemented and working:
 - ✅ **Vector Database (ChromaDB)**: Semantic search and knowledge retrieval functional
 - ✅ **RAG System**: Retrieval-Augmented Generation for context-aware responses  
-- ✅ **Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, confidence validation, and ethics checks
+- ✅ **Validator Chain**: Implements multi-layer validation to reduce hallucinations through citation, evidence overlap, confidence validation, and ethics checks. See [Claims & Evaluation](docs/CLAIMS_AND_EVAL.md) for methodology and results.
   - **ConfidenceValidator**: AI knows when to say "I don't know" (prevents overconfidence without context)
   - **FallbackHandler**: Safe fallback answers when validation fails (prevents hallucinated content)
   - **Confidence Score**: Real-time confidence calculation (0.0-1.0) based on context quality
@@ -154,13 +164,15 @@ chmod +x quick-start.sh
 .\quick-start.ps1
 
 # Or manually with Docker Compose
-docker-compose up -d
+docker compose up -d
 ```
 
 **Access after startup:**
 - 📊 **Dashboard**: http://localhost:8501
 - 🔌 **API**: http://localhost:8000
 - 📚 **API Docs**: http://localhost:8000/docs
+
+⚠️ **Security Note**: Never commit `.env` file containing API keys. Enable pre-commit hooks to scan for secrets (see [CONTRIBUTING.md](CONTRIBUTING.md) for setup).
 
 ### **Option 1b: Deploy Public Dashboard (For Community)**
 
@@ -169,7 +181,7 @@ docker-compose up -d
 2. Go to https://railway.app → Login with GitHub
 3. Click "New Project" → "Deploy from GitHub repo"
 4. Select `StillMe-Learning-AI-System-RAG-Foundation`
-5. Railway auto-detects `docker-compose.yml` → Deploy!
+5. Railway auto-detects `docker-compose.yml` → Deploy! (Note: Uses Docker Compose v2 syntax)
 6. Add environment variables:
    - `DEEPSEEK_API_KEY=sk-your-key`
    - `OPENAI_API_KEY=sk-your-key`
@@ -199,6 +211,8 @@ pip install -r requirements.txt
 # Configure environment
 cp env.example .env
 # Edit .env with your API keys
+
+⚠️ **Important**: Never commit `.env` file. It contains sensitive API keys. Use pre-commit hooks to prevent accidental commits (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 # Optional: Enable Validator Chain (reduces hallucinations by 80%)
 # ENABLE_VALIDATORS=true
@@ -424,7 +438,7 @@ Instead of chasing vanity metrics, StillMe focuses on **meaningful progress**:
 | **v0.1** - Core System | ✅ Done | Basic learning + dashboard | SQLite + JSON | Foundation |
 | **v0.2** - Hybrid Learning | ✅ Done | 70/30 AI/Community split | Community Voting System | Trust-based routing |
 | **v0.3** - Secure Voting | ✅ Done | Weighted trust + EthicsGuard | EthicsGuard + Weighted Votes | Security & Fairness |
-| **v0.4** - Docker Setup | ✅ Done | 1-click deployment | Docker + docker-compose | Easy Deployment |
+| **v0.4** - Docker Setup | ✅ Done | 1-click deployment | Docker + docker compose | Easy Deployment |
 | **v0.5** - Enhanced Metrics | ✅ **Done (MVP)** | Accuracy, retention tracking | Knowledge Retention Tracker | Quality-based Evolution |
 | **v0.6** - Vector DB + RAG | ✅ **Done (MVP)** | Vector DB integration (RAG) | ChromaDB + Sentence Transformers | Semantic Search & Context Retrieval |
 | **v0.6.1** - Automated Scheduler | 🔄 **IN PROGRESS** | Auto-fetch RSS every 4 hours | Background task scheduler | Complete learning loop |
