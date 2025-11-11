@@ -512,14 +512,66 @@ def page_overview():
                         # Status indicator
                         if job_status == "done":
                             st.success("✅ Learning cycle completed!")
+                            
                             result = job_data.get("result", {})
                             entries_fetched = result.get("entries_fetched", 0)
                             entries_filtered = result.get("entries_filtered", 0)
                             entries_added = result.get("entries_added_to_rag", 0)
+                            entries_skipped = result.get("entries_skipped_tiered", 0)
                             
-                            st.metric("Entries Fetched", entries_fetched)
-                            st.metric("Entries Filtered", entries_filtered)
-                            st.metric("Entries Added to RAG", entries_added)
+                            # Show completion summary with details
+                            col1, col2, col3, col4 = st.columns(4)
+                            
+                            with col1:
+                                st.metric("📥 Fetched", entries_fetched,
+                                         help="Total entries fetched from all sources")
+                            
+                            with col2:
+                                st.metric("🔍 Filtered", entries_filtered,
+                                         delta=f"-{entries_filtered}" if entries_filtered > 0 else None,
+                                         delta_color="inverse",
+                                         help="Entries filtered out (low quality, too short, or duplicate)")
+                            
+                            with col3:
+                                st.metric("🧠 Processed", entries_added + entries_skipped,
+                                         help="Total entries processed (added + skipped by Nested Learning)")
+                            
+                            with col4:
+                                st.metric("💾 Added to RAG", entries_added,
+                                         delta=f"+{entries_added}" if entries_added > 0 else None,
+                                         help="Entries successfully added to vector database")
+                            
+                            # Show filter reasons if available
+                            filter_reasons = result.get("filter_reasons", {})
+                            if filter_reasons:
+                                with st.expander("🔍 Filter Details", expanded=False):
+                                    st.write("**Reasons for filtering:**")
+                                    for reason, count in filter_reasons.items():
+                                        st.write(f"- **{reason}**: {count} entries")
+                            
+                            # Show Nested Learning summary if enabled
+                            if entries_skipped > 0:
+                                cost_reduction = (entries_skipped / (entries_added + entries_skipped)) * 100 if (entries_added + entries_skipped) > 0 else 0
+                                st.success(f"🎯 **Nested Learning**: Skipped {entries_skipped} entries - {cost_reduction:.1f}% cost reduction!")
+                            
+                            # Show elapsed time
+                            if job_data.get("started_at") and job_data.get("completed_at"):
+                                from datetime import datetime
+                                try:
+                                    started_str = job_data["started_at"]
+                                    completed_str = job_data["completed_at"]
+                                    if started_str.endswith('Z'):
+                                        started_str = started_str[:-1] + '+00:00'
+                                    if completed_str.endswith('Z'):
+                                        completed_str = completed_str[:-1] + '+00:00'
+                                    started = datetime.fromisoformat(started_str)
+                                    completed = datetime.fromisoformat(completed_str)
+                                    elapsed = (completed - started).total_seconds()
+                                    elapsed_min = int(elapsed // 60)
+                                    elapsed_sec = int(elapsed % 60)
+                                    st.caption(f"⏱️ Total time: {elapsed_min}m {elapsed_sec}s")
+                                except:
+                                    pass
                             
                             # Clear job tracking
                             st.session_state["learning_job_started"] = False
@@ -529,40 +581,101 @@ def page_overview():
                             st.session_state["learning_job_started"] = False
                             st.session_state["learning_job_id"] = None
                         else:
-                            # Show progress
+                            # Show detailed progress with percentage
                             phase = progress.get("phase", "pending")
-                            phase_display = {
-                                "pending": "⏳ Waiting to start...",
-                                "fetching": "📥 Fetching from sources...",
-                                "prefilter": "🔍 Filtering content...",
-                                "embedding": "🧠 Generating embeddings...",
-                                "adding_to_rag": "💾 Adding to RAG..."
-                            }.get(phase, f"🔄 {phase}...")
                             
-                            st.info(phase_display)
-                            st.caption("⏱️ Learning cycle typically takes 2-5 minutes. Please wait...")
+                            # Phase display with progress percentage
+                            phase_info = {
+                                "pending": ("⏳ Waiting to start...", 0),
+                                "fetching": ("📥 Fetching from sources...", 20),
+                                "prefilter": ("🔍 Filtering content...", 40),
+                                "embedding": ("🧠 Generating embeddings...", 60),
+                                "adding_to_rag": ("💾 Adding to RAG...", 80)
+                            }.get(phase, (f"🔄 {phase}...", 0))
                             
-                            # Show metrics
-                            col1, col2, col3 = st.columns(3)
+                            phase_text, phase_percent = phase_info
+                            
+                            # Show progress bar
+                            st.progress(phase_percent / 100, text=f"{phase_text} ({phase_percent}%)")
+                            
+                            # Show detailed metrics
+                            entries_fetched = progress.get("entries_fetched", 0)
+                            entries_filtered = progress.get("entries_filtered", 0)
+                            entries_added = progress.get("entries_added", 0)
+                            entries_skipped = progress.get("entries_skipped_tiered", 0)
+                            current_item = progress.get("current_item", "")
+                            
+                            # Create columns for metrics
+                            col1, col2, col3, col4 = st.columns(4)
+                            
                             with col1:
-                                st.metric("Entries Fetched", progress.get("entries_fetched", 0))
+                                st.metric("📥 Fetched", entries_fetched, 
+                                         help="Total entries fetched from all sources (RSS, arXiv, CrossRef, Wikipedia)")
+                            
                             with col2:
-                                st.metric("Entries Filtered", progress.get("entries_filtered", 0))
+                                st.metric("🔍 Filtered", entries_filtered, 
+                                         delta=f"-{entries_filtered}" if entries_filtered > 0 else None,
+                                         delta_color="inverse",
+                                         help="Entries filtered out (low quality, too short, or duplicate)")
+                            
                             with col3:
-                                st.metric("Entries Added", progress.get("entries_added", 0))
+                                total_processed = entries_added + entries_skipped
+                                st.metric("🧠 Processed", total_processed,
+                                         help="Total entries processed for embedding (added + skipped by Nested Learning)")
+                            
+                            with col4:
+                                st.metric("💾 Added to RAG", entries_added,
+                                         delta=f"+{entries_added}" if entries_added > 0 else None,
+                                         help="Entries successfully added to vector database")
+                            
+                            # Show current item being processed
+                            if current_item:
+                                st.caption(f"🔄 Currently processing: {current_item}")
+                            
+                            # Show filtered reasons if available (from result)
+                            result = job_data.get("result", {})
+                            if result and entries_filtered > 0:
+                                filter_reasons = result.get("filter_reasons", {})
+                                if filter_reasons:
+                                    with st.expander("🔍 Filter Details", expanded=False):
+                                        st.write("**Reasons for filtering:**")
+                                        for reason, count in filter_reasons.items():
+                                            st.write(f"- **{reason}**: {count} entries")
+                                else:
+                                    # Show general filter info
+                                    st.caption(f"💡 {entries_filtered} entries filtered (low quality, too short, or duplicate)")
+                            
+                            # Show Nested Learning info if enabled
+                            if entries_skipped > 0:
+                                st.info(f"🎯 **Nested Learning**: Skipped {entries_skipped} entries (tiered update isolation) - Cost saved!")
                             
                             # Show recent logs
                             if logs:
-                                with st.expander("📋 Recent Logs", expanded=False):
-                                    for log in logs[-10:]:  # Last 10 logs
+                                with st.expander("📋 Recent Activity Logs", expanded=True):
+                                    # Show last 10 logs
+                                    for log in logs[-10:]:
                                         st.text(log)
                             
-                            # Auto-refresh every 3 seconds using st.rerun with delay
-                            # Use placeholder to show refresh status
+                            # Show elapsed time
+                            if job_data.get("started_at"):
+                                from datetime import datetime
+                                try:
+                                    started_str = job_data["started_at"]
+                                    if started_str.endswith('Z'):
+                                        started_str = started_str[:-1] + '+00:00'
+                                    started = datetime.fromisoformat(started_str)
+                                    elapsed = (datetime.now(started.tzinfo) - started).total_seconds()
+                                    elapsed_min = int(elapsed // 60)
+                                    elapsed_sec = int(elapsed % 60)
+                                    st.caption(f"⏱️ Elapsed time: {elapsed_min}m {elapsed_sec}s | Estimated remaining: {max(0, 3 - elapsed_min)}m")
+                                except Exception as e:
+                                    pass
+                            
+                            # Auto-refresh every 2 seconds
                             refresh_placeholder = st.empty()
-                            refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
+                            refresh_placeholder.info("🔄 Auto-refreshing in 2 seconds...")
                             import time
-                            time.sleep(3)
+                            time.sleep(2)
                             st.rerun()
                     else:
                         st.warning(f"⚠️ Could not fetch job status: {job_status_r.status_code}")

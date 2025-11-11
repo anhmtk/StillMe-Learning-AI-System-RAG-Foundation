@@ -272,6 +272,10 @@ async def run_learning_cycle_background(job_id: str):
                 result["entries_skipped_tiered"] = skipped_count
                 job.add_log(f"Nested Learning: Added {added_count} entries, skipped {skipped_count} (tiered update isolation)")
             
+            # Add filter reasons if available from pre-filter
+            if content_curator and hasattr(content_curator, 'last_filter_reasons'):
+                result["filter_reasons"] = content_curator.last_filter_reasons
+            
             if rss_fetch_history and cycle_id:
                 rss_fetch_history.complete_fetch_cycle(cycle_id)
             
