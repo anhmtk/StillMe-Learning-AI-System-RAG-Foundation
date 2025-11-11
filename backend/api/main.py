@@ -67,13 +67,27 @@ else:
     env = os.getenv("ENV", "development").lower()
     is_production = env == "production"
     
+    # Auto-detect Railway origins in production
+    cors_origin_regex = None
     if is_production:
-        logger.warning(
-            "⚠️ PRODUCTION WARNING: CORS_ALLOWED_ORIGINS not set! "
-            "This is a security risk in production. "
-            "Set CORS_ALLOWED_ORIGINS environment variable with comma-separated list of allowed origins. "
-            "Example: CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com"
-        )
+        # Check if we're running on Railway (Railway sets RAILWAY_ENVIRONMENT)
+        railway_env = os.getenv("RAILWAY_ENVIRONMENT", "")
+        if railway_env:
+            # Allow all Railway subdomains using regex
+            # Railway URLs pattern: https://<service-name>-<environment>.up.railway.app
+            cors_origin_regex = r"https?://.*\.up\.railway\.app"
+            logger.info(
+                "✅ Railway environment detected. "
+                "Auto-allowing Railway origins (regex: *.up.railway.app) for CORS. "
+                "For production, consider setting CORS_ALLOWED_ORIGINS explicitly for better security."
+            )
+        else:
+            logger.warning(
+                "⚠️ PRODUCTION WARNING: CORS_ALLOWED_ORIGINS not set! "
+                "This is a security risk in production. "
+                "Set CORS_ALLOWED_ORIGINS environment variable with comma-separated list of allowed origins. "
+                "Example: CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com"
+            )
     else:
         logger.warning(
             "⚠️ CORS_ALLOWED_ORIGINS not set. Using default localhost origins only. "
@@ -83,12 +97,22 @@ else:
 # Security: Only allow credentials if origins are restricted (not "*")
 allow_creds = "*" not in cors_origins
 
+# Configure CORS middleware
+cors_middleware_kwargs = {
+    "allow_origins": cors_origins,  # Restricted origins instead of "*"
+    "allow_credentials": allow_creds,  # Only allow if origins are restricted
+    "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Specific methods instead of "*"
+    "allow_headers": ["Content-Type", "Authorization", "X-API-Key"],  # Specific headers instead of "*"
+}
+
+# Add regex pattern for Railway origins if detected
+if cors_origin_regex:
+    cors_middleware_kwargs["allow_origin_regex"] = cors_origin_regex
+    logger.info(f"✅ CORS origin regex pattern: {cors_origin_regex}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,  # Restricted origins instead of "*"
-    allow_credentials=allow_creds,  # Only allow if origins are restricted
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Specific methods instead of "*"
-    allow_headers=["Content-Type", "Authorization", "X-API-Key"],  # Specific headers instead of "*"
+    **cors_middleware_kwargs
 )
 
 # Request tracking middleware (for metrics collection)
