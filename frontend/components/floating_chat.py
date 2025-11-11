@@ -668,12 +668,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             console.log('StillMe Chat: Received send message request from parent');
                             const message = event.data.message;
                             if (message) {{
-                                // Use existing sendMessage function
-                                const input = document.getElementById('stillme-chat-input');
-                                if (input) {{
-                                    input.value = message;
-                                    sendMessage();
-                                }}
+                                // CRITICAL: Call sendMessageFromParent to avoid CORS (API call in iframe context)
+                                sendMessageFromParent(message);
                             }}
                         }}
                     }}, false); // Use capture phase for earlier registration
@@ -1129,12 +1125,123 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         resizeHandle = null;
                     }});
             
-            // Send message
-            async function sendMessage() {{
-                const input = document.getElementById('stillme-chat-input');
-                const message = input.value.trim();
-                
-                if (!message) return;
+                    // Send message from parent (called via postMessage) - NO CORS issue
+                    async function sendMessageFromParent(messageText) {{
+                        if (!messageText || !messageText.trim()) return;
+                        
+                        const message = messageText.trim();
+                        
+                        // Add user message to history
+                        chatHistory.push({{ role: 'user', content: message }});
+                        renderMessages();
+                        
+                        // Update parent panel with user message
+                        if (window.parent && window.parent !== window) {{
+                            const parentDoc = window.parent.document;
+                            const parentPanel = parentDoc.getElementById('stillme-chat-panel-parent');
+                            if (parentPanel) {{
+                                const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
+                                if (parentMessages) {{
+                                    const userMsg = parentDoc.createElement('div');
+                                    userMsg.className = 'stillme-chat-message user';
+                                    userMsg.textContent = message;
+                                    parentMessages.appendChild(userMsg);
+                                    parentMessages.scrollTop = parentMessages.scrollHeight;
+                                }}
+                            }}
+                        }}
+                        
+                        // Disable send button in iframe
+                        const sendBtn = document.getElementById('stillme-chat-send');
+                        if (sendBtn) {{
+                            sendBtn.disabled = true;
+                            sendBtn.textContent = 'Sending...';
+                        }}
+                        
+                        // CRITICAL: Send to backend from iframe context (no CORS issue)
+                        try {{
+                            const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
+                                method: 'POST',
+                                headers: {{
+                                    'Content-Type': 'application/json',
+                                }},
+                                body: JSON.stringify({{ message: message }}),
+                            }});
+                            
+                            const data = await response.json();
+                            const reply = data.response || data.message || JSON.stringify(data);
+                            
+                            // Add assistant response
+                            chatHistory.push({{ role: 'assistant', content: reply }});
+                            renderMessages();
+                            
+                            // Update parent panel with new messages
+                            if (window.parent && window.parent !== window) {{
+                                const parentDoc = window.parent.document;
+                                const parentPanel = parentDoc.getElementById('stillme-chat-panel-parent');
+                                if (parentPanel) {{
+                                    const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
+                                    if (parentMessages) {{
+                                        // Clear and re-render all messages
+                                        parentMessages.innerHTML = '';
+                                        chatHistory.forEach(msg => {{
+                                            const messageDiv = parentDoc.createElement('div');
+                                            messageDiv.className = `stillme-chat-message ${{msg.role}}`;
+                                            messageDiv.textContent = msg.content;
+                                            parentMessages.appendChild(messageDiv);
+                                        }});
+                                        parentMessages.scrollTop = parentMessages.scrollHeight;
+                                        console.log('StillMe Chat: Updated parent panel with new messages');
+                                    }}
+                                }}
+                            }}
+                            
+                            // Send message to Streamlit parent
+                            window.parent.postMessage({{
+                                type: 'stillme_chat_message',
+                                history: chatHistory
+                            }}, '*');
+                            
+                        }} catch (error) {{
+                            chatHistory.push({{ 
+                                role: 'assistant', 
+                                content: `❌ Error: ${{error.message}}` 
+                            }});
+                            renderMessages();
+                            
+                            // Update parent panel with error message
+                            if (window.parent && window.parent !== window) {{
+                                const parentDoc = window.parent.document;
+                                const parentPanel = parentDoc.getElementById('stillme-chat-panel-parent');
+                                if (parentPanel) {{
+                                    const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
+                                    if (parentMessages) {{
+                                        // Clear and re-render all messages
+                                        parentMessages.innerHTML = '';
+                                        chatHistory.forEach(msg => {{
+                                            const messageDiv = parentDoc.createElement('div');
+                                            messageDiv.className = `stillme-chat-message ${{msg.role}}`;
+                                            messageDiv.textContent = msg.content;
+                                            parentMessages.appendChild(messageDiv);
+                                        }});
+                                        parentMessages.scrollTop = parentMessages.scrollHeight;
+                                    }}
+                                }}
+                            }}
+                        }} finally {{
+                            if (sendBtn) {{
+                                sendBtn.disabled = false;
+                                sendBtn.textContent = 'Send';
+                            }}
+                        }}
+                    }}
+                    
+                    // Send message (from iframe input)
+                    async function sendMessage() {{
+                        const input = document.getElementById('stillme-chat-input');
+                        const message = input.value.trim();
+                        
+                        if (!message) return;
                 
                 // Disable send button
                 const sendBtn = document.getElementById('stillme-chat-send');
