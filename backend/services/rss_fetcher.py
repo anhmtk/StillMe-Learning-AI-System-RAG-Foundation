@@ -16,9 +16,27 @@ class RSSFetcher:
     def __init__(self):
         # Default trusted RSS feeds
         self.feeds = [
+            # Existing feeds
             "https://news.ycombinator.com/rss",
             "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml",
-            # Add more trusted feeds here
+            
+            # Statistics
+            "https://www.r-bloggers.com/feed/",
+            "https://feeds.feedburner.com/StatisticalModelingCausalInferenceAndSocialScience",
+            
+            # Psychology
+            "https://www.psychologicalscience.org/feed",
+            
+            # Biology
+            "https://www.nature.com/nature.rss",
+            "https://www.sciencedaily.com/rss/matter_energy.xml",  # ScienceDaily Biology
+            
+            # Physics
+            "https://physicsworld.com/feed/",
+            "https://phys.org/rss-feed/physics-news/",  # Phys.org Physics
+            
+            # Chemistry
+            # Note: Some chemistry feeds may be empty - will be monitored and replaced if needed
         ]
         # Track error states for self-diagnosis
         self.last_error: Optional[str] = None

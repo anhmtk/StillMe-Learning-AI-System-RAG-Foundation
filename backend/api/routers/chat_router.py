@@ -188,11 +188,23 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             
             # Build base prompt with citation instructions
             citation_instruction = ""
-            if enable_validators:
-                # Count knowledge docs for citation numbering
-                num_knowledge = len(context.get("knowledge_docs", []))
-                if num_knowledge > 0:
-                    citation_instruction = "\n\nIMPORTANT: When referencing information from the context above, include citations in the format [1], [2], etc. where the number corresponds to the context item number. For example, if you reference the first context item, use [1]."
+            # Count knowledge docs for citation numbering
+            num_knowledge = len(context.get("knowledge_docs", []))
+            if num_knowledge > 0:
+                citation_instruction = f"""
+                
+📚 CRITICAL CITATION REQUIREMENT:
+
+You have {num_knowledge} context document(s) available. You MUST cite your sources using [1], [2], [3] format.
+
+CRITICAL RULES:
+1. You MUST cite at least one source using [1], [2], [3] format when making factual claims
+2. Use [1] for the first context document, [2] for the second, [3] for the third, etc.
+3. Example: "According to [1], quantum entanglement is..." or "Research shows [2] that..."
+4. If you use information from multiple sources, cite each: "Studies [1] and [2] indicate that..."
+5. DO NOT make unsourced claims when context is available - always cite your sources
+
+FAILURE TO CITE SOURCES WHEN CONTEXT IS AVAILABLE IS A CRITICAL ERROR."""
             
             # Detect language FIRST - before building prompt
             detected_lang = detect_language(chat_request.message)
@@ -850,7 +862,7 @@ async def ask_question(request: Request, chat_request: ChatRequest):
     chat_request.use_rag = True
     # Use default context limit if not specified
     if chat_request.context_limit is None or chat_request.context_limit < 1:
-        chat_request.context_limit = 2
+        chat_request.context_limit = 3
     
     # Delegate to the main RAG chat endpoint
     return await chat_with_rag(request, chat_request)
