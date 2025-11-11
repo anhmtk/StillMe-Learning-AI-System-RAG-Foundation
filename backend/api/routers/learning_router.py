@@ -1261,10 +1261,11 @@ async def get_nested_learning_metrics():
         
         # Get tier distribution from database
         continuum_memory = ContinuumMemory()
-        tier_stats = continuum_memory.get_tier_statistics()
+        tier_stats = continuum_memory.get_tier_stats()
         
         # Update metrics collector with tier distribution
-        tier_counts = tier_stats.get("tier_counts", {})
+        # get_tier_stats() returns {"L0": count, "L1": count, ...}
+        tier_counts = {k: v for k, v in tier_stats.items() if k in ["L0", "L1", "L2", "L3"]}
         for tier, count in tier_counts.items():
             metrics.update_tier_distribution(tier, count)
         
@@ -1278,7 +1279,7 @@ async def get_nested_learning_metrics():
         return {
             "enabled": True,
             "cycle_count": nested_metrics.get("cycle_count", 0),
-            "tier_distribution": tier_stats.get("tier_counts", {}),
+            "tier_distribution": tier_counts,
             "tier_update_frequency": TIER_UPDATE_FREQUENCY,
             "tier_update_counts": nested_metrics.get("tier_update_counts", {}),
             "tier_skipped_counts": nested_metrics.get("tier_skipped_counts", {}),
