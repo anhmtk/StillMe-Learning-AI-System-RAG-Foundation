@@ -1057,15 +1057,28 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }});
                     }}
                     
-                    // Setup all resize handles
-                    setupResizeHandle(document.querySelector('.resize-handle.nw'), 'nw');
-                    setupResizeHandle(document.querySelector('.resize-handle.ne'), 'ne');
-                    setupResizeHandle(document.querySelector('.resize-handle.sw'), 'sw');
-                    setupResizeHandle(document.querySelector('.resize-handle.se'), 'se');
-                    setupResizeHandle(document.querySelector('.resize-handle.n'), 'n');
-                    setupResizeHandle(document.querySelector('.resize-handle.s'), 's');
-                    setupResizeHandle(document.querySelector('.resize-handle.e'), 'e');
-                    setupResizeHandle(document.querySelector('.resize-handle.w'), 'w');
+                    // Setup all resize handles - with error checking
+                    const resizeHandles = {{
+                        nw: document.querySelector('.resize-handle.nw'),
+                        ne: document.querySelector('.resize-handle.ne'),
+                        sw: document.querySelector('.resize-handle.sw'),
+                        se: document.querySelector('.resize-handle.se'),
+                        n: document.querySelector('.resize-handle.n'),
+                        s: document.querySelector('.resize-handle.s'),
+                        e: document.querySelector('.resize-handle.e'),
+                        w: document.querySelector('.resize-handle.w')
+                    }};
+                    
+                    let handlesSetup = 0;
+                    for (const [direction, handle] of Object.entries(resizeHandles)) {{
+                        if (handle) {{
+                            setupResizeHandle(handle, direction);
+                            handlesSetup++;
+                        }} else {{
+                            console.warn(`StillMe Chat: Resize handle ${{direction}} not found!`);
+                        }}
+                    }}
+                    console.log(`StillMe Chat: Setup ${{handlesSetup}}/8 resize handles`);
                     
                     // Mouse move handler for drag and resize - improved like Cursor
                     document.addEventListener('mousemove', (e) => {{
@@ -1109,9 +1122,11 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                 newY = panelStartY + deltaY;
                             }}
                             
-                            // Constrain to viewport
-                            newWidth = Math.min(newWidth, window.innerWidth - newX);
-                            newHeight = Math.min(newHeight, window.innerHeight - newY);
+                            // Constrain to viewport (allow partial off-screen like Cursor)
+                            const maxWidth = window.innerWidth - newX + 50; // Allow 50px off-screen
+                            const maxHeight = window.innerHeight - newY + 50; // Allow 50px off-screen
+                            newWidth = Math.min(newWidth, maxWidth);
+                            newHeight = Math.min(newHeight, maxHeight);
                             
                             panel.style.width = newWidth + 'px';
                             panel.style.height = newHeight + 'px';
@@ -1244,40 +1259,40 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     }}
                     
                     // Send message (from iframe input)
-                    async function sendMessage() {{
-                        const input = document.getElementById('stillme-chat-input');
-                        const message = input.value.trim();
-                        
-                        if (!message) return;
-                        
-                        // Disable send button
-                        const sendBtn = document.getElementById('stillme-chat-send');
-                        sendBtn.disabled = true;
-                        sendBtn.textContent = 'Sending...';
-                        
-                        // Add user message to history
-                        chatHistory.push({{ role: 'user', content: message }});
-                        renderMessages();
-                        
-                        // Clear input
-                        input.value = '';
-                        
-                        // Send to backend
-                        try {{
-                            const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
-                                method: 'POST',
-                                headers: {{
-                                    'Content-Type': 'application/json',
-                                }},
-                                body: JSON.stringify({{ message: message }}),
-                            }});
-                            
-                            const data = await response.json();
-                            const reply = data.response || data.message || JSON.stringify(data);
-                            
-                            // Add assistant response
-                            chatHistory.push({{ role: 'assistant', content: reply }});
-                            renderMessages();
+            async function sendMessage() {{
+                const input = document.getElementById('stillme-chat-input');
+                const message = input.value.trim();
+                
+                if (!message) return;
+                
+                // Disable send button
+                const sendBtn = document.getElementById('stillme-chat-send');
+                sendBtn.disabled = true;
+                sendBtn.textContent = 'Sending...';
+                
+                // Add user message to history
+                chatHistory.push({{ role: 'user', content: message }});
+                renderMessages();
+                
+                // Clear input
+                input.value = '';
+                
+                // Send to backend
+                try {{
+                    const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
+                        method: 'POST',
+                        headers: {{
+                            'Content-Type': 'application/json',
+                        }},
+                        body: JSON.stringify({{ message: message }}),
+                    }});
+                    
+                    const data = await response.json();
+                    const reply = data.response || data.message || JSON.stringify(data);
+                    
+                    // Add assistant response
+                    chatHistory.push({{ role: 'assistant', content: reply }});
+                    renderMessages();
                             
                             // Update parent panel with new messages
                             if (window.parent && window.parent !== window) {{
@@ -1299,19 +1314,19 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }}
                                 }}
                             }}
-                            
-                            // Send message to Streamlit parent
-                            window.parent.postMessage({{
-                                type: 'stillme_chat_message',
-                                history: chatHistory
-                            }}, '*');
-                            
-                        }} catch (error) {{
-                            chatHistory.push({{ 
-                                role: 'assistant', 
-                                content: `❌ Error: ${{error.message}}` 
-                            }});
-                            renderMessages();
+                    
+                    // Send message to Streamlit parent
+                    window.parent.postMessage({{
+                        type: 'stillme_chat_message',
+                        history: chatHistory
+                    }}, '*');
+                    
+                }} catch (error) {{
+                    chatHistory.push({{ 
+                        role: 'assistant', 
+                        content: `❌ Error: ${{error.message}}` 
+                    }});
+                    renderMessages();
                             
                             // Update parent panel with error message
                             if (window.parent && window.parent !== window) {{
@@ -1332,12 +1347,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }}
                                 }}
                             }}
-                        }} finally {{
-                            sendBtn.disabled = false;
-                            sendBtn.textContent = 'Send';
-                            input.focus();
-                        }}
-                    }}
+                }} finally {{
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send';
+                    input.focus();
+                }}
+            }}
             
             // Handle Enter key (Enter to send, Shift+Enter for new line)
                     const inputElement = document.getElementById('stillme-chat-input');
