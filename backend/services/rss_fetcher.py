@@ -37,6 +37,13 @@ class RSSFetcher:
             
             # Chemistry
             # Note: Some chemistry feeds may be empty - will be monitored and replaced if needed
+            
+            # Religious Studies & Philosophy
+            "https://aeon.co/feed.rss",  # Aeon Magazine - Philosophy, Religion, Culture
+            "https://www.theguardian.com/world/religion/rss",  # The Guardian - Religion
+            "https://tricycle.org/feed/",  # Tricycle - The Buddhist Review
+            "https://www.lionsroar.com/feed/",  # Lion's Roar - Buddhist Wisdom for Our Time
+            # Note: Some religious studies feeds may be empty - will be monitored and replaced if needed
         ]
         # Track error states for self-diagnosis
         self.last_error: Optional[str] = None

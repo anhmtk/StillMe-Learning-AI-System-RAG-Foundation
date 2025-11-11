@@ -179,13 +179,32 @@ class SourceIntegration:
         # Fetch from Wikipedia
         if self.wikipedia_fetcher and ENABLE_WIKIPEDIA:
             try:
-                # Search for AI-related articles
-                wikipedia_entries = self.wikipedia_fetcher.search_articles(
-                    query="artificial intelligence",
-                    max_results=max_items_per_source
-                )
-                all_entries.extend(wikipedia_entries)
-                logger.info(f"Fetched {len(wikipedia_entries)} entries from Wikipedia")
+                # Search for diverse topics including AI, religion, philosophy
+                wikipedia_queries = [
+                    "artificial intelligence",
+                    "Buddhism",
+                    "religious studies",
+                    "philosophy of religion",
+                    "ethics"
+                ]
+                
+                all_wikipedia_entries = []
+                items_per_query = max(1, max_items_per_source // len(wikipedia_queries))
+                
+                for query in wikipedia_queries:
+                    try:
+                        query_entries = self.wikipedia_fetcher.search_articles(
+                            query=query,
+                            max_results=items_per_query
+                        )
+                        all_wikipedia_entries.extend(query_entries)
+                        logger.debug(f"Fetched {len(query_entries)} Wikipedia entries for query: {query}")
+                    except Exception as query_error:
+                        logger.warning(f"Error fetching Wikipedia articles for query '{query}': {query_error}")
+                        continue
+                
+                all_entries.extend(all_wikipedia_entries)
+                logger.info(f"Fetched {len(all_wikipedia_entries)} total entries from Wikipedia ({len(wikipedia_queries)} queries)")
                 
                 # Update system status tracker with Wikipedia fetcher status
                 from backend.services.system_status_tracker import get_system_status_tracker
