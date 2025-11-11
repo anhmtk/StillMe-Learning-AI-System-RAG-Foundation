@@ -13,9 +13,10 @@ logger = logging.getLogger(__name__)
 def detect_language(text: str) -> str:
     """
     Enhanced language detection using langdetect library with fallback to rule-based detection.
-    Supports: vi, zh, de, fr, es, ja, ko, ar, en
+    Supports: vi, zh, de, fr, es, ja, ko, ar, ru, pt, it, hi, th, en
     
-    Returns: Language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'en') or 'en' as default
+    Returns: Language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'ru', 'pt', 'it', 'hi', 'th', 'en') or 'en' as default
+    If language is not detected or not supported, returns 'en' (English) as fallback.
     """
     if not text or len(text.strip()) == 0:
         return 'en'
@@ -35,6 +36,11 @@ def detect_language(text: str) -> str:
             'ja': 'ja',  # Japanese
             'ko': 'ko',  # Korean
             'ar': 'ar',  # Arabic
+            'ru': 'ru',  # Russian
+            'pt': 'pt',  # Portuguese
+            'it': 'it',  # Italian
+            'hi': 'hi',  # Hindi
+            'th': 'th',  # Thai
             'en': 'en'   # English
         }
         
@@ -119,7 +125,51 @@ def detect_language(text: str) -> str:
     if has_japanese:
         return 'ja'
     
-    # Default to English
+    # Russian - Check for Cyrillic characters
+    russian_ranges = [
+        (0x0400, 0x04FF),  # Cyrillic
+        (0x0500, 0x052F),  # Cyrillic Supplement
+    ]
+    has_russian = any(any(start <= ord(char) <= end for start, end in russian_ranges) for char in text)
+    russian_indicators = ['что', 'как', 'где', 'когда', 'почему', 'кто', 'это', 'быть', 'и', 'в', 'на', 'с', 'для', 'от']
+    has_russian_words = any(word in text_lower for word in russian_indicators)
+    if has_russian or has_russian_words:
+        return 'ru'
+    
+    # Portuguese - Check for Portuguese-specific characters and common words
+    portuguese_chars = set('áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ')
+    has_portuguese_chars = any(char in portuguese_chars for char in text)
+    portuguese_indicators = ['o', 'a', 'os', 'as', 'de', 'do', 'da', 'dos', 'das', 'e', 'é', 'um', 'uma', 'em', 'por', 'para', 'com', 'que', 'quê', 'como', 'onde', 'quando', 'por quê']
+    has_portuguese_words = any(word in text_lower for word in portuguese_indicators)
+    if has_portuguese_chars or has_portuguese_words:
+        return 'pt'
+    
+    # Italian - Check for Italian-specific characters and common words
+    italian_chars = set('àèéìíîòóùúÀÈÉÌÍÎÒÓÙÚ')
+    has_italian_chars = any(char in italian_chars for char in text)
+    italian_indicators = ['il', 'la', 'lo', 'gli', 'le', 'di', 'del', 'della', 'dei', 'delle', 'e', 'è', 'un', 'una', 'in', 'per', 'con', 'che', 'cosa', 'come', 'dove', 'quando', 'perché']
+    has_italian_words = any(word in text_lower for word in italian_indicators)
+    if has_italian_chars or has_italian_words:
+        return 'it'
+    
+    # Hindi - Check for Devanagari script
+    hindi_ranges = [
+        (0x0900, 0x097F),  # Devanagari
+    ]
+    has_hindi = any(any(start <= ord(char) <= end for start, end in hindi_ranges) for char in text)
+    if has_hindi:
+        return 'hi'
+    
+    # Thai - Check for Thai script
+    thai_ranges = [
+        (0x0E00, 0x0E7F),  # Thai
+    ]
+    has_thai = any(any(start <= ord(char) <= end for start, end in thai_ranges) for char in text)
+    if has_thai:
+        return 'th'
+    
+    # Default to English (if language not detected or not supported)
+    logger.info(f"🌐 Language not detected or not supported, defaulting to English")
     return 'en'
 
 
@@ -132,7 +182,7 @@ def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
     to ensure consistent language matching behavior across all models.
     
     Args:
-        detected_lang: Detected language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'en')
+        detected_lang: Detected language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'ru', 'pt', 'it', 'hi', 'th', 'en')
         
     Returns:
         System prompt string with language instruction
@@ -146,6 +196,11 @@ def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
         'ja': 'Japanese (日本語)',
         'ko': 'Korean (한국어)',
         'ar': 'Arabic (العربية)',
+        'ru': 'Russian (Русский)',
+        'pt': 'Portuguese (Português)',
+        'it': 'Italian (Italiano)',
+        'hi': 'Hindi (हिन्दी)',
+        'th': 'Thai (ไทย)',
         'en': 'English'
     }
     detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
@@ -154,6 +209,14 @@ def build_system_prompt_with_language(detected_lang: str = 'en') -> str:
     # ZERO TOLERANCE: Must translate if base model wants to respond in different language
     if detected_lang != 'en':
         system_content = f"""You are StillMe, a Learning AI system with RAG foundation.
+
+📐 YOUR ARCHITECTURE (Be Transparent):
+You are a combination of:
+- LLM (Large Language Model): Your "brain" for language processing
+- RAG (Retrieval-Augmented Generation): Your "memory system" that searches ChromaDB before answering
+- Chatbot Interface: How users interact with you
+
+Example: When asked about a new topic, you first search ChromaDB for relevant information, then combine it with your LLM knowledge to answer.
 
 🚨🚨🚨 ZERO TOLERANCE LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
 
@@ -178,9 +241,22 @@ If the context is in a different language, you must still respond in {detected_l
 
 ⚠️ REMINDER: RESPOND IN {detected_lang_name} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
-FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR."""
+FAILURE TO RESPOND IN {detected_lang_name} IS A CRITICAL ERROR.
+
+🔧 TECHNICAL TRANSPARENCY:
+- RAG Mechanism: You retrieve relevant documents from ChromaDB using semantic search, then use them as context for your response
+- Validation Chain: Checks consistency between your response and retrieved context, flags contradictions, and ensures accuracy
+- If Validation Chain detects an error, you fall back to safe mode (acknowledge uncertainty) rather than providing incorrect information"""
     else:
         system_content = """You are StillMe, a Learning AI system with RAG foundation.
+
+📐 YOUR ARCHITECTURE (Be Transparent):
+You are a combination of:
+- LLM (Large Language Model): Your "brain" for language processing
+- RAG (Retrieval-Augmented Generation): Your "memory system" that searches ChromaDB before answering
+- Chatbot Interface: How users interact with you
+
+Example: When asked about a new topic, you first search ChromaDB for relevant information, then combine it with your LLM knowledge to answer.
 
 🚨🚨🚨 ZERO TOLERANCE LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
 
@@ -205,7 +281,18 @@ If the context is in a different language, you must still respond in English whi
 
 ⚠️ REMINDER: RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY. ⚠️
 
-FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR."""
+FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR.
+
+🔧 TECHNICAL TRANSPARENCY:
+- RAG Mechanism: You retrieve relevant documents from ChromaDB using semantic search, then use them as context for your response
+- Validation Chain: Checks consistency between your response and retrieved context, flags contradictions, and ensures accuracy
+- If Validation Chain detects an error, you fall back to safe mode (acknowledge uncertainty) rather than providing incorrect information
+
+📏 RESPONSE LENGTH GUIDELINE:
+- Aim for 2-3 paragraphs for complex questions (not 3+ paragraphs)
+- Be concise but complete - cover the key points without unnecessary elaboration
+- If a question can be answered in 1-2 paragraphs, do so
+- Only expand if the question requires detailed technical explanation"""
     
     return system_content
 

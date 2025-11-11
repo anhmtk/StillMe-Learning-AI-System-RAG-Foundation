@@ -1,5 +1,6 @@
 import os
 import time
+import hashlib
 from typing import Any, Dict
 
 import requests
@@ -13,6 +14,14 @@ try:
     FLOATING_CHAT_AVAILABLE = True
 except ImportError:
     FLOATING_CHAT_AVAILABLE = False
+
+# Import chat history service
+try:
+    from backend.services.chat_history import ChatHistory
+    CHAT_HISTORY_AVAILABLE = True
+except ImportError:
+    CHAT_HISTORY_AVAILABLE = False
+    ChatHistory = None
 
 
 API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
@@ -1449,9 +1458,54 @@ def sidebar(page_for_chat: str | None = None):
     
     st.sidebar.markdown("---")
     
+    # Initialize chat history service
+    if CHAT_HISTORY_AVAILABLE:
+        if "chat_history_service" not in st.session_state:
+            try:
+                st.session_state.chat_history_service = ChatHistory()
+            except Exception as e:
+                st.sidebar.warning(f"⚠️ Chat history service unavailable: {e}")
+                st.session_state.chat_history_service = None
+    else:
+        st.session_state.chat_history_service = None
+    
+    # Generate session ID from Streamlit session state
+    if "chat_session_id" not in st.session_state:
+        # Generate a stable session ID based on Streamlit session state
+        session_id_str = str(st.session_state.get("_session_id", id(st.session_state)))
+        st.session_state.chat_session_id = hashlib.md5(session_id_str.encode()).hexdigest()[:16]
+    
     # Initialize chat history in session state
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
+        
+        # Load chat history from SQLite if available
+        if st.session_state.chat_history_service:
+            try:
+                db_history = st.session_state.chat_history_service.get_history(
+                    session_id=st.session_state.chat_session_id,
+                    limit=100
+                )
+                # Convert database format to session state format
+                for msg in db_history:
+                    st.session_state.chat_history.append({
+                        "role": "user",
+                        "content": msg["user_message"]
+                    })
+                    st.session_state.chat_history.append({
+                        "role": "assistant",
+                        "content": msg["assistant_response"],
+                        "confidence_score": msg.get("confidence_score"),
+                        "validation_info": {
+                            "passed": msg.get("validation_passed"),
+                            "context_docs_count": msg.get("context_docs_count")
+                        } if msg.get("validation_passed") is not None else None,
+                        "latency_metrics": f"Latency: {msg.get('latency', 0):.2f}s" if msg.get("latency") else None
+                    })
+                if db_history:
+                    st.sidebar.success(f"✅ Loaded {len(db_history)} messages from history")
+            except Exception as e:
+                st.sidebar.warning(f"⚠️ Failed to load chat history: {e}")
     
     # Render floating widget if selected and available
     if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
@@ -1487,6 +1541,15 @@ def sidebar(page_for_chat: str | None = None):
         if st.session_state.chat_history:
             if st.sidebar.button("🗑️ Clear Chat", use_container_width=True, key="clear_chat"):
                 st.session_state.chat_history = []
+                # Optionally delete from SQLite (commented out to preserve history)
+                # if st.session_state.chat_history_service:
+                #     try:
+                #         st.session_state.chat_history_service.delete_history(
+                #             session_id=st.session_state.chat_session_id
+                #         )
+                #     except Exception as e:
+                #         import logging
+                #         logging.warning(f"Failed to delete chat history from SQLite: {e}")
                 st.rerun()
         
         # Display chat history in a larger, scrollable container
@@ -1630,6 +1693,20 @@ def sidebar(page_for_chat: str | None = None):
             
             # Add user message to history
             st.session_state.chat_history.append({"role": "user", "content": message_to_send})
+            
+            # Save user message to SQLite (with empty assistant_response, will be updated later)
+            if st.session_state.chat_history_service:
+                try:
+                    st.session_state.chat_history_service.save_message(
+                        user_message=message_to_send,
+                        assistant_response="",  # Will be updated when response arrives
+                        session_id=st.session_state.chat_session_id
+                    )
+                    # Store the message ID for updating later
+                    st.session_state["pending_assistant_response"] = True
+                except Exception as e:
+                    import logging
+                    logging.warning(f"Failed to save user message to SQLite: {e}")
             
             # Show loading status (using status instead of spinner in sidebar)
             status_placeholder = st.sidebar.empty()
@@ -1776,6 +1853,55 @@ def sidebar(page_for_chat: str | None = None):
             if latency_metrics:
                 message_entry["latency_metrics"] = latency_metrics
             st.session_state.chat_history.append(message_entry)
+            
+            # Save assistant response to SQLite
+            if st.session_state.chat_history_service:
+                try:
+                    # Extract latency from latency_metrics string if available
+                    latency_value = None
+                    if latency_metrics and isinstance(latency_metrics, str):
+                        # Try to extract latency from string like "Latency: 1.23s"
+                        try:
+                            latency_str = latency_metrics.split(":")[1].strip().replace("s", "")
+                            latency_value = float(latency_str)
+                        except (IndexError, ValueError):
+                            pass
+                    
+                    # Try to update the last message with empty assistant_response first
+                    updated = False
+                    if st.session_state.get("pending_assistant_response", False):
+                        try:
+                            st.session_state.chat_history_service.save_message(
+                                user_message=message_to_send,
+                                assistant_response=reply,
+                                session_id=st.session_state.chat_session_id,
+                                confidence_score=confidence_score,
+                                validation_passed=validation_info.get("passed") if validation_info else None,
+                                response_length=len(reply) if reply else None,
+                                context_docs_count=validation_info.get("context_docs_count") if validation_info else None,
+                                latency=latency_value,
+                                update_existing=True
+                            )
+                            updated = True
+                            st.session_state["pending_assistant_response"] = False
+                        except Exception:
+                            pass  # Fall through to insert new message
+                    
+                    # If update failed, insert new message
+                    if not updated:
+                        st.session_state.chat_history_service.save_message(
+                            user_message=message_to_send,
+                            assistant_response=reply,
+                            session_id=st.session_state.chat_session_id,
+                            confidence_score=confidence_score,
+                            validation_passed=validation_info.get("passed") if validation_info else None,
+                            response_length=len(reply) if reply else None,
+                            context_docs_count=validation_info.get("context_docs_count") if validation_info else None,
+                            latency=latency_value
+                        )
+                except Exception as e:
+                    import logging
+                    logging.warning(f"Failed to save assistant message to SQLite: {e}")
             
             # Clear knowledge alert from session state after adding to history
             if "knowledge_alert" in st.session_state:
