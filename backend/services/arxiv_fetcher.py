@@ -54,6 +54,22 @@ class ArxivFetcher:
             try:
                 self._rate_limit()
                 response = requests.get(url, params=params, timeout=30)
+                
+                # Handle 429 (Rate Limit) - wait longer before retry
+                if response.status_code == 429:
+                    if attempt < ARXIV_MAX_RETRIES - 1:
+                        # arXiv rate limit: wait 60 seconds for 429 errors
+                        delay = 60.0
+                        logger.warning(f"arXiv API rate limited (429) (attempt {attempt + 1}/{ARXIV_MAX_RETRIES}). Waiting {delay}s before retry...")
+                        time.sleep(delay)
+                        continue
+                    else:
+                        error_msg = f"arXiv API rate limited (429) after {ARXIV_MAX_RETRIES} attempts. Please wait before retrying."
+                        self.last_error = error_msg
+                        self.error_count += 1
+                        logger.error(error_msg)
+                        return None
+                
                 response.raise_for_status()
                 return response
             except requests.exceptions.RequestException as e:

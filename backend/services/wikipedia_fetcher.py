@@ -221,71 +221,34 @@ class WikipediaFetcher:
         articles = []
         
         try:
-            # Try REST API v1 search endpoint first
-            # Documentation: https://www.mediawiki.org/wiki/API:REST_API
-            # Endpoint: /w/rest.php/v1/search/page
-            search_url = f"https://{self.language}.wikipedia.org/w/rest.php/v1/search/page"
+            # Use MediaWiki Action API search directly (more reliable than REST v1)
+            # Documentation: https://www.mediawiki.org/wiki/API:Search
+            search_url = f"https://{self.language}.wikipedia.org/w/api.php"
             params = {
-                "q": query,
-                "limit": min(max_results, WIKIPEDIA_MAX_RESULTS)
+                "action": "query",
+                "list": "search",
+                "srsearch": query,
+                "srlimit": min(max_results, WIKIPEDIA_MAX_RESULTS),
+                "format": "json",
+                "formatversion": "2"
             }
             
             response = self._fetch_with_retry(search_url, params)
             
-            # Handle 404 or other errors - try alternative endpoint
-            if not response or response.status_code == 404:
-                logger.warning(
-                    f"Wikipedia REST v1 search returned {response.status_code if response else 'None'} "
-                    f"for query: {query}. Trying alternative search method..."
-                )
-                
-                # Fallback: Use MediaWiki Action API search
-                # Documentation: https://www.mediawiki.org/wiki/API:Search
-                fallback_url = f"https://{self.language}.wikipedia.org/w/api.php"
-                fallback_params = {
-                    "action": "query",
-                    "list": "search",
-                    "srsearch": query,
-                    "srlimit": min(max_results, WIKIPEDIA_MAX_RESULTS),
-                    "format": "json",
-                    "formatversion": "2"
-                }
-                
-                fallback_response = self._fetch_with_retry(fallback_url, fallback_params)
-                if fallback_response and fallback_response.status_code == 200:
-                    fallback_data = fallback_response.json()
-                    search_results = fallback_data.get("query", {}).get("search", [])
-                    
-                    # Convert MediaWiki format to our format
-                    for result in search_results[:max_results]:
-                        title = result.get("title", "")
-                        if title:
-                            article = self.fetch_article(title)
-                            if article:
-                                articles.append(article)
-                    
-                    logger.info(f"Found {len(articles)} Wikipedia articles using fallback API for query: {query}")
-                    return articles
-                else:
-                    logger.error(f"Wikipedia fallback search also failed for query: {query}")
-                    return articles
-            
-            # Parse REST v1 response
-            if response.status_code != 200:
-                error_msg = f"Wikipedia search returned {response.status_code} for query: {query}"
-                self.last_error = error_msg
-                self.error_count += 1
-                logger.error(error_msg)
+            if not response or response.status_code != 200:
+                logger.warning(f"Wikipedia search failed for query: {query} (status: {response.status_code if response else 'None'})")
                 return articles
             
             data = response.json()
+            search_results = data.get("query", {}).get("search", [])
             
-            # Extract search results from REST v1 format
-            pages = data.get("pages", [])
+            if not search_results:
+                logger.info(f"No Wikipedia search results for query: {query}")
+                return articles
             
-            for page in pages[:max_results]:
-                # REST v1 returns title directly
-                title = page.get("title", "")
+            # Fetch articles from search results
+            for result in search_results[:max_results]:
+                title = result.get("title", "")
                 if title:
                     article = self.fetch_article(title)
                     if article:
