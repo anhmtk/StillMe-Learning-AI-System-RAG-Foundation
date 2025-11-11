@@ -70,9 +70,14 @@ else:
     # Auto-detect Railway origins in production
     cors_origin_regex = None
     if is_production:
-        # Check if we're running on Railway (Railway sets RAILWAY_ENVIRONMENT)
+        # Check if we're running on Railway
+        # Railway sets various env vars: RAILWAY_ENVIRONMENT, RAILWAY_PROJECT_NAME, PORT, etc.
         railway_env = os.getenv("RAILWAY_ENVIRONMENT", "")
-        if railway_env:
+        railway_project = os.getenv("RAILWAY_PROJECT_NAME", "")
+        # Also check if PORT is set (Railway always sets this)
+        port_env = os.getenv("PORT", "")
+        # If any Railway indicator is present, allow Railway origins
+        if railway_env or railway_project or (port_env and port_env.isdigit()):
             # Allow all Railway subdomains using regex
             # Railway URLs pattern: https://<service-name>-<environment>.up.railway.app
             cors_origin_regex = r"https?://.*\.up\.railway\.app"
