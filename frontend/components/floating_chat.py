@@ -651,6 +651,6 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
     """
     
     # CRITICAL: Use height=0 to allow full viewport control
-    # Set key to force re-render on mode change
-    return components.html(html_content, height=0, key="stillme_floating_chat_widget")
+    # Note: components.html() doesn't support 'key' parameter
+    return components.html(html_content, height=0)
 
