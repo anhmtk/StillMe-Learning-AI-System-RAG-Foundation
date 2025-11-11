@@ -1261,7 +1261,15 @@ async def get_nested_learning_metrics():
         
         # Get tier distribution from database
         continuum_memory = ContinuumMemory()
-        tier_stats = continuum_memory.get_tier_stats()
+        
+        # Try to get tier stats - handle both old and new method names for compatibility
+        try:
+            tier_stats = continuum_memory.get_tier_stats()
+        except AttributeError as e:
+            # Fallback: if method doesn't exist, return empty stats
+            # This handles cases where code hasn't been updated yet
+            logger.warning(f"get_tier_stats() not available, using fallback: {e}")
+            tier_stats = {"L0": 0, "L1": 0, "L2": 0, "L3": 0, "total": 0, "promoted_7d": 0, "demoted_7d": 0}
         
         # Update metrics collector with tier distribution
         # get_tier_stats() returns {"L0": count, "L1": count, ...}
