@@ -25,7 +25,8 @@ class RSSFetcher:
             "https://feeds.feedburner.com/StatisticalModelingCausalInferenceAndSocialScience",
             
             # Psychology
-            "https://www.psychologicalscience.org/feed",
+            # Note: psychologicalscience.org feed has parse errors - removed temporarily
+            # "https://www.psychologicalscience.org/feed",
             
             # Biology
             "https://www.nature.com/nature.rss",
