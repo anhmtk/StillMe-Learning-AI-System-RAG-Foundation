@@ -126,6 +126,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 overflow: hidden !important;
                 resize: both !important; /* Browser native resize (fallback) */
                 z-index: 1000000 !important;
+                /* CRITICAL: Ensure proper flex layout */
+                align-items: stretch !important;
             }}
             
             /* Fullscreen mode */
@@ -200,12 +202,13 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 background: #252526 !important; /* Cursor-like header background */
                 padding: 12px 16px !important; /* Tighter padding like Cursor */
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border */
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                cursor: move; /* Indicate draggable */
-                user-select: none; /* Prevent text selection when dragging */
-                flex-shrink: 0; /* Don't shrink header */
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                cursor: move !important; /* Indicate draggable */
+                user-select: none !important; /* Prevent text selection when dragging */
+                flex-shrink: 0 !important; /* Don't shrink header */
+                order: 1 !important; /* Header first */
             }}
             
             .stillme-chat-header h3 {{
@@ -263,14 +266,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             }}
             
             .stillme-chat-messages {{
-                flex: 1;
-                overflow-y: auto;
+                flex: 1 1 auto !important; /* Take available space */
+                overflow-y: auto !important;
                 padding: 16px !important; /* Tighter padding like Cursor */
-                display: flex;
-                flex-direction: column;
-                gap: 12px;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
                 background: #1e1e1e !important; /* Match panel background */
-                min-height: 0; /* CRITICAL: Allow flex item to shrink */
+                min-height: 0 !important; /* CRITICAL: Allow flex item to shrink */
+                order: 2 !important; /* Messages second */
             }}
             
             .stillme-chat-message {{
@@ -298,8 +302,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 padding: 12px 16px !important; /* Tighter padding like Cursor */
                 border-top: 1px solid rgba(255, 255, 255, 0.15) !important; /* More visible border to separate from messages */
                 background: #252526 !important; /* Slightly different background like Cursor */
-                flex-shrink: 0; /* Don't shrink input area */
-                margin-top: auto; /* Push to bottom */
+                flex-shrink: 0 !important; /* Don't shrink input area */
+                flex-grow: 0 !important; /* Don't grow */
+                order: 3 !important; /* Input last (at bottom) */
+                margin-top: auto !important; /* Push to bottom - CRITICAL */
             }}
             
             .stillme-chat-input-wrapper {{
