@@ -382,19 +382,45 @@ def page_overview():
         with col_start:
             if st.button("▶️ Start Scheduler", use_container_width=True):
                 try:
-                    r = requests.post(f"{API_BASE}/api/learning/scheduler/start", timeout=10)
+                    # Increased timeout to 30s to handle network latency (Railway deployment)
+                    r = requests.post(f"{API_BASE}/api/learning/scheduler/start", timeout=30)
                     if r.status_code == 200:
                         st.session_state["last_action"] = "✅ Scheduler started successfully!"
                         st.rerun()
+                except requests.exceptions.Timeout:
+                    # Timeout doesn't mean failure - scheduler may have started in background
+                    # Check status to confirm
+                    try:
+                        status_check = get_json("/api/learning/scheduler/status", {}, timeout=10)
+                        if status_check.get("is_running", False):
+                            st.session_state["last_action"] = "✅ Scheduler started successfully! (Confirmed via status check)"
+                            st.rerun()
+                        else:
+                            st.session_state["last_error"] = "⏱️ Request timed out. Please check scheduler status - it may have started in background."
+                    except:
+                        st.session_state["last_error"] = "⏱️ Request timed out. Scheduler may have started - please refresh to check status."
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed to start scheduler: {e}"
         with col_stop:
             if st.button("⏹️ Stop Scheduler", use_container_width=True):
                 try:
-                    r = requests.post(f"{API_BASE}/api/learning/scheduler/stop", timeout=10)
+                    # Increased timeout to 30s to handle network latency (Railway deployment)
+                    r = requests.post(f"{API_BASE}/api/learning/scheduler/stop", timeout=30)
                     if r.status_code == 200:
                         st.session_state["last_action"] = "✅ Scheduler stopped successfully!"
                         st.rerun()
+                except requests.exceptions.Timeout:
+                    # Timeout doesn't mean failure - scheduler may have stopped in background
+                    # Check status to confirm
+                    try:
+                        status_check = get_json("/api/learning/scheduler/status", {}, timeout=10)
+                        if not status_check.get("is_running", True):
+                            st.session_state["last_action"] = "✅ Scheduler stopped successfully! (Confirmed via status check)"
+                            st.rerun()
+                        else:
+                            st.session_state["last_error"] = "⏱️ Request timed out. Please check scheduler status - it may have stopped in background."
+                    except:
+                        st.session_state["last_error"] = "⏱️ Request timed out. Scheduler may have stopped - please refresh to check status."
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
         with col_run_now:
