@@ -987,52 +987,46 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }};
                                     
                                     // Setup input handler for parent panel (use elements we just created)
-                                    if (parentInput && parentSendBtn) {{
-                                        // Send message handler
-                                        const handleSend = async function() {{
-                                            const message = parentInput.value.trim();
-                                            if (!message) return;
-                                            
-                                            // Add user message to parent panel
-                                            const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
-                                            if (parentMessages) {{
-                                                const userMsg = parentDoc.createElement('div');
-                                                userMsg.className = 'stillme-chat-message user';
-                                                userMsg.textContent = message;
-                                                parentMessages.appendChild(userMsg);
-                                                parentMessages.scrollTop = parentMessages.scrollHeight;
-                                            }}
-                                            
-                                            parentInput.value = '';
-                                            
-                                            // Send to iframe to handle API call
-                                            const iframes = parentDoc.querySelectorAll('iframe');
-                                            for (let iframe of iframes) {{
-                                                try {{
-                                                    if (iframe.contentWindow) {{
-                                                        iframe.contentWindow.postMessage({{
-                                                            type: 'stillme_send_message',
-                                                            message: message
-                                                        }}, '*');
-                                                    }}
-                                                }} catch (err) {{
-                                                    console.warn('StillMe Chat: Could not send message:', err);
-                                                }}
-                                            }}
-                                        }};
+                                    // Send message handler
+                                    const handleSend = async function() {{
+                                        const message = parentInput.value.trim();
+                                        if (!message) return;
                                         
-                                        parentSendBtn.onclick = handleSend;
-                                        parentInput.addEventListener('keydown', (e) => {{
-                                            if (e.key === 'Enter' && !e.shiftKey) {{
-                                                e.preventDefault();
-                                                handleSend();
+                                        // Add user message to parent panel
+                                        const userMsg = parentDoc.createElement('div');
+                                        userMsg.className = 'stillme-chat-message user';
+                                        userMsg.textContent = message;
+                                        parentMessages.appendChild(userMsg);
+                                        parentMessages.scrollTop = parentMessages.scrollHeight;
+                                        
+                                        parentInput.value = '';
+                                        
+                                        // Send to iframe to handle API call
+                                        const iframes = parentDoc.querySelectorAll('iframe');
+                                        for (let iframe of iframes) {{
+                                            try {{
+                                                if (iframe.contentWindow) {{
+                                                    iframe.contentWindow.postMessage({{
+                                                        type: 'stillme_send_message',
+                                                        message: message
+                                                    }}, '*');
+                                                }}
+                                            }} catch (err) {{
+                                                console.warn('StillMe Chat: Could not send message:', err);
                                             }}
-                                        }});
-                                    }}
+                                        }}
+                                    }};
+                                    
+                                    parentSendBtn.onclick = handleSend;
+                                    parentInput.addEventListener('keydown', (e) => {{
+                                        if (e.key === 'Enter' && !e.shiftKey) {{
+                                            e.preventDefault();
+                                            handleSend();
+                                        }}
+                                    }});
                                     
                                     // Render initial messages in parent panel
-                                    const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
-                                    if (parentMessages && chatHistory) {{
+                                    if (chatHistory) {{
                                         chatHistory.forEach(msg => {{
                                             const messageDiv = parentDoc.createElement('div');
                                             messageDiv.className = `stillme-chat-message ${{msg.role}}`;
