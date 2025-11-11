@@ -1467,6 +1467,17 @@ def sidebar(page_for_chat: str | None = None):
         st.sidebar.info("💡 Look for the **💬 chat button** in the **bottom-right corner** of your screen. Click it to open the resizable chat panel!")
         st.sidebar.markdown("---")
         st.sidebar.caption("**Features:** Resize, Drag, Fullscreen, Overlay")
+        
+        # Fallback: If button is not visible, show instructions
+        st.sidebar.markdown("---")
+        st.sidebar.warning("⚠️ **Can't find the chat button?**")
+        st.sidebar.markdown("""
+        **Try these steps:**
+        1. **Hard refresh** the page (Ctrl+Shift+R or Cmd+Shift+R)
+        2. **Scroll down** to bottom-right corner
+        3. **Check browser console** (F12) for errors
+        4. If still not visible, try **Sidebar Chat** mode instead
+        """)
     
     # Sidebar chat (original implementation)
     elif chat_mode == "Sidebar Chat":

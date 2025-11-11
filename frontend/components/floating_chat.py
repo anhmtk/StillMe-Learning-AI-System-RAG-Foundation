@@ -77,21 +77,33 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 height: 60px !important;
                 border-radius: 50% !important;
                 background: linear-gradient(135deg, #46b3ff 0%, #1e90ff 100%) !important;
-                border: none !important;
+                border: 3px solid #ffffff !important;
                 color: white !important;
-                font-size: 24px !important;
+                font-size: 28px !important;
                 cursor: pointer !important;
-                box-shadow: 0 4px 12px rgba(70, 179, 255, 0.4) !important;
+                box-shadow: 0 4px 20px rgba(70, 179, 255, 0.6), 0 0 0 4px rgba(70, 179, 255, 0.2) !important;
                 transition: all 0.3s ease !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                z-index: 1000001 !important;
+                z-index: 2147483647 !important; /* Maximum z-index value */
+                visibility: visible !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }}
             
             #stillme-chat-button:hover {{
-                transform: scale(1.1);
-                box-shadow: 0 6px 16px rgba(70, 179, 255, 0.6);
+                transform: scale(1.15) !important;
+                box-shadow: 0 6px 24px rgba(70, 179, 255, 0.8), 0 0 0 6px rgba(70, 179, 255, 0.3) !important;
+            }}
+            
+            /* Ensure button is always visible - even if panel is open */
+            #stillme-chat-button:not(:disabled) {{
+                display: flex !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }}
             
             #stillme-chat-panel {{
@@ -416,6 +428,33 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 panel.style.display = 'none';
                 overlay.style.display = 'none';
             }}
+            
+            // CRITICAL: Ensure chat button is always visible
+            const chatButton = document.getElementById('stillme-chat-button');
+            if (chatButton) {{
+                chatButton.style.display = 'flex';
+                chatButton.style.visibility = 'visible';
+                chatButton.style.opacity = '1';
+                chatButton.style.zIndex = '2147483647';
+                // Force button to be on top
+                document.body.appendChild(chatButton);
+            }} else {{
+                console.error('StillMe Chat: Button not found!');
+            }}
+            
+            // Ensure button stays visible even when panel is open
+            function ensureButtonVisible() {{
+                const btn = document.getElementById('stillme-chat-button');
+                if (btn) {{
+                    btn.style.display = 'flex';
+                    btn.style.visibility = 'visible';
+                    btn.style.opacity = '1';
+                    btn.style.zIndex = '2147483647';
+                }}
+            }}
+            
+            // Check button visibility periodically
+            setInterval(ensureButtonVisible, 1000);
             
             // Render chat history with auto-scroll
             function renderMessages() {{
