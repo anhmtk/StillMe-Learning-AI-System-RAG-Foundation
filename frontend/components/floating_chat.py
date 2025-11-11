@@ -141,6 +141,18 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 resize: none !important;
             }}
             
+            /* Minimized mode - chỉ hiển thị header */
+            #stillme-chat-panel.minimized {{
+                height: auto !important;
+                min-height: auto !important;
+                max-height: 60px !important;
+            }}
+            
+            #stillme-chat-panel.minimized .stillme-chat-messages,
+            #stillme-chat-panel.minimized .stillme-chat-input-container {{
+                display: none !important;
+            }}
+            
             /* Force visible class (fallback if inline style doesn't work) */
             #stillme-chat-panel.force-visible {{
                 display: flex !important;
@@ -154,28 +166,34 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 opacity: 1 !important;
             }}
             
-            /* Resize handles - 8 handles (4 corners + 4 edges) */
+            /* Resize handles - 8 handles (4 corners + 4 edges) - Cursor style */
             .resize-handle {{
                 position: absolute;
                 background: transparent;
                 z-index: 10;
             }}
             
-            /* Corner handles */
-            .resize-handle.nw {{ top: 0; left: 0; width: 10px; height: 10px; cursor: nw-resize; }}
-            .resize-handle.ne {{ top: 0; right: 0; width: 10px; height: 10px; cursor: ne-resize; }}
-            .resize-handle.sw {{ bottom: 0; left: 0; width: 10px; height: 10px; cursor: sw-resize; }}
-            .resize-handle.se {{ bottom: 0; right: 0; width: 10px; height: 10px; cursor: se-resize; }}
+            /* Corner handles - larger for easier grabbing */
+            .resize-handle.nw {{ top: 0; left: 0; width: 15px; height: 15px; cursor: nw-resize; }}
+            .resize-handle.ne {{ top: 0; right: 0; width: 15px; height: 15px; cursor: ne-resize; }}
+            .resize-handle.sw {{ bottom: 0; left: 0; width: 15px; height: 15px; cursor: sw-resize; }}
+            .resize-handle.se {{ bottom: 0; right: 0; width: 15px; height: 15px; cursor: se-resize; }}
             
-            /* Edge handles */
-            .resize-handle.n {{ top: 0; left: 10px; right: 10px; height: 10px; cursor: n-resize; }}
-            .resize-handle.s {{ bottom: 0; left: 10px; right: 10px; height: 10px; cursor: s-resize; }}
-            .resize-handle.e {{ top: 10px; bottom: 10px; right: 0; width: 10px; cursor: e-resize; }}
-            .resize-handle.w {{ top: 10px; bottom: 10px; left: 0; width: 10px; cursor: w-resize; }}
+            /* Edge handles - wider for easier grabbing */
+            .resize-handle.n {{ top: 0; left: 15px; right: 15px; height: 8px; cursor: n-resize; }}
+            .resize-handle.s {{ bottom: 0; left: 15px; right: 15px; height: 8px; cursor: s-resize; }}
+            .resize-handle.e {{ top: 15px; bottom: 15px; right: 0; width: 8px; cursor: e-resize; }}
+            .resize-handle.w {{ top: 15px; bottom: 15px; left: 0; width: 8px; cursor: w-resize; }}
             
-            /* Visual resize indicator (optional - subtle) */
+            /* Visual resize indicator - more visible like Cursor */
             .resize-handle:hover {{
-                background: rgba(70, 179, 255, 0.2);
+                background: rgba(70, 179, 255, 0.3);
+            }}
+            
+            /* Disable resize when minimized or fullscreen */
+            #stillme-chat-panel.minimized .resize-handle,
+            #stillme-chat-panel.fullscreen .resize-handle {{
+                display: none !important;
             }}
             
             .stillme-chat-header {{
@@ -365,6 +383,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 <div class="stillme-chat-header" id="stillme-chat-header">
                     <h3>💬 Chat with StillMe</h3>
                     <div class="stillme-chat-header-buttons">
+                        <button class="stillme-chat-header-btn" id="minimize-btn" onclick="toggleMinimize()" title="Minimize">−</button>
                         <button class="stillme-chat-header-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
                         <button class="stillme-chat-close" onclick="toggleChat()" title="Close">×</button>
                     </div>
@@ -901,10 +920,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }}
                     }}
                     
-                    // Drag functionality
+                    // Drag functionality - improved like Cursor
                     if (header) {{
                         header.addEventListener('mousedown', (e) => {{
-                            if (isFullscreen) return; // Don't drag in fullscreen
+                            // Don't drag if clicking on buttons
+                            if (e.target.closest('.stillme-chat-header-btn, .stillme-chat-close')) {{
+                                return;
+                            }}
+                            
+                            if (isFullscreen || isMinimized) return; // Don't drag in fullscreen or minimized
                             isDragging = true;
                             dragStartX = e.clientX;
                             dragStartY = e.clientY;
@@ -917,7 +941,11 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             panel.style.left = panelStartX + 'px';
                             panel.style.top = panelStartY + 'px';
                             
+                            // Add dragging class for visual feedback
+                            panel.classList.add('dragging');
+                            
                             e.preventDefault();
+                            e.stopPropagation();
                         }});
                     }}
                     
@@ -1011,6 +1039,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     document.addEventListener('mouseup', () => {{
                         if (isDragging || isResizing) {{
                             savePanelState();
+                            // Remove dragging class
+                            panel.classList.remove('dragging');
                         }}
                         isDragging = false;
                         isResizing = false;
