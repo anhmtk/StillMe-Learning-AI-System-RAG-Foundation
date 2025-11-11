@@ -217,7 +217,7 @@ cp env.example .env
 # Optional: Enable Validator Chain (reduces hallucinations by 80%)
 # ENABLE_VALIDATORS=true
 # ENABLE_TONE_ALIGN=true
-# VALIDATOR_EVIDENCE_THRESHOLD=0.08  # 8% overlap minimum
+# VALIDATOR_EVIDENCE_THRESHOLD=0.01  # 1% overlap minimum (lowered from 0.08 to prevent false positives)
 
 # Start backend (terminal 1)
 python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload
