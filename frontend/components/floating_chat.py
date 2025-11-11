@@ -1086,6 +1086,20 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     }}
                     console.log(`StillMe Chat: Setup ${{handlesSetup}}/8 resize handles`);
                     
+                    // CRITICAL: Verify panel layout
+                    const messagesEl = document.querySelector('.stillme-chat-messages');
+                    const inputEl = document.querySelector('.stillme-chat-input-container');
+                    if (messagesEl && inputEl) {{
+                        console.log('StillMe Chat: Panel flex-direction:', window.getComputedStyle(panel).flexDirection);
+                        console.log('StillMe Chat: Messages order:', window.getComputedStyle(messagesEl).order);
+                        console.log('StillMe Chat: Input order:', window.getComputedStyle(inputEl).order);
+                        console.log('StillMe Chat: Input margin-top:', window.getComputedStyle(inputEl).marginTop);
+                        console.log('StillMe Chat: Messages flex:', window.getComputedStyle(messagesEl).flex);
+                        console.log('StillMe Chat: Input flex-grow:', window.getComputedStyle(inputEl).flexGrow);
+                    }} else {{
+                        console.warn('StillMe Chat: Messages or Input element not found for layout verification');
+                    }}
+                    
                     // Mouse move handler for drag and resize - improved like Cursor
                     document.addEventListener('mousemove', (e) => {{
                         if (isDragging && !isFullscreen && !isMinimized) {{
