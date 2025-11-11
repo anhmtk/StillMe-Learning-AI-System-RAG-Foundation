@@ -378,95 +378,118 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
         </div>
         
         <script>
-            const API_BASE = '{api_base}';
-            let chatHistory = {chat_history_json};
-            let isOpen = {str(is_open).lower()};
-            
-            // Panel state
-            let isFullscreen = false;
-            let isDragging = false;
-            let isResizing = false;
-            let resizeHandle = null;
-            let dragStartX = 0;
-            let dragStartY = 0;
-            let panelStartX = 0;
-            let panelStartY = 0;
-            let panelStartWidth = 0;
-            let panelStartHeight = 0;
-            
-            // Get panel element
-            const panel = document.getElementById('stillme-chat-panel');
-            const overlay = document.getElementById('stillme-chat-overlay');
-            const header = document.getElementById('stillme-chat-header');
-            
-            // Load saved position/size from localStorage
-            function loadPanelState() {{
-                const saved = localStorage.getItem('stillme_chat_panel_state');
-                if (saved) {{
-                    try {{
-                        const state = JSON.parse(saved);
-                        if (state.width) panel.style.width = state.width;
-                        if (state.height) panel.style.height = state.height;
-                        if (state.left) panel.style.left = state.left;
-                        if (state.top) panel.style.top = state.top;
-                        if (state.transform) panel.style.transform = state.transform;
-                    }} catch (e) {{
-                        console.warn('Failed to load panel state:', e);
-                    }}
-                }}
-            }}
-            
-            // Save panel state to localStorage
-            function savePanelState() {{
-                const state = {{
-                    width: panel.style.width,
-                    height: panel.style.height,
-                    left: panel.style.left,
-                    top: panel.style.top,
-                    transform: panel.style.transform
-                }};
-                localStorage.setItem('stillme_chat_panel_state', JSON.stringify(state));
-            }}
-            
-            // Initialize
-            console.log('StillMe Chat: Initializing...');
-            loadPanelState();
-            if (!isOpen) {{
-                panel.style.display = 'none';
-                overlay.style.display = 'none';
-            }}
-            
-            // CRITICAL: Ensure chat button is always visible
-            const chatButton = document.getElementById('stillme-chat-button');
-            console.log('StillMe Chat: Button element:', chatButton);
-            if (chatButton) {{
-                chatButton.style.display = 'flex';
-                chatButton.style.visibility = 'visible';
-                chatButton.style.opacity = '1';
-                chatButton.style.zIndex = '2147483647';
-                console.log('StillMe Chat: Button styles applied');
-                console.log('StillMe Chat: Button position:', chatButton.getBoundingClientRect());
+            // Wrap everything in try-catch to prevent silent failures
+            try {{
+                console.log('StillMe Chat: Script starting...');
                 
-                // Try to inject button into parent window if in iframe
-                try {{
-                    if (window.parent && window.parent !== window) {{
-                        console.log('StillMe Chat: Detected iframe, attempting to inject into parent...');
-                        const parentDoc = window.parent.document;
-                        
-                        // Remove existing button if any
-                        const existingBtn = parentDoc.getElementById('stillme-chat-button-parent');
-                        if (existingBtn) {{
-                            existingBtn.remove();
+                const API_BASE = '{api_base}';
+                let chatHistory = {chat_history_json};
+                let isOpen = {str(is_open).lower()};
+                
+                console.log('StillMe Chat: Variables initialized, isOpen:', isOpen);
+                
+                // Panel state
+                let isFullscreen = false;
+                let isDragging = false;
+                let isResizing = false;
+                let resizeHandle = null;
+                let dragStartX = 0;
+                let dragStartY = 0;
+                let panelStartX = 0;
+                let panelStartY = 0;
+                let panelStartWidth = 0;
+                let panelStartHeight = 0;
+                
+                // Wait for DOM to be ready
+                function initChat() {{
+                    console.log('StillMe Chat: Initializing chat widget...');
+                    
+                    // Get panel element
+                    const panel = document.getElementById('stillme-chat-panel');
+                    const overlay = document.getElementById('stillme-chat-overlay');
+                    const header = document.getElementById('stillme-chat-header');
+                    
+                    console.log('StillMe Chat: Panel element:', panel);
+                    console.log('StillMe Chat: Overlay element:', overlay);
+                    console.log('StillMe Chat: Header element:', header);
+                    
+                    if (!panel) {{
+                        console.error('StillMe Chat: Panel element not found!');
+                        return;
+                    }}
+                    if (!overlay) {{
+                        console.error('StillMe Chat: Overlay element not found!');
+                        return;
+                    }}
+            
+                    // Load saved position/size from localStorage
+                    function loadPanelState() {{
+                        const saved = localStorage.getItem('stillme_chat_panel_state');
+                        if (saved) {{
+                            try {{
+                                const state = JSON.parse(saved);
+                                if (state.width) panel.style.width = state.width;
+                                if (state.height) panel.style.height = state.height;
+                                if (state.left) panel.style.left = state.left;
+                                if (state.top) panel.style.top = state.top;
+                                if (state.transform) panel.style.transform = state.transform;
+                            }} catch (e) {{
+                                console.warn('StillMe Chat: Failed to load panel state:', e);
+                            }}
                         }}
+                    }}
+                    
+                    // Save panel state to localStorage
+                    function savePanelState() {{
+                        const state = {{
+                            width: panel.style.width,
+                            height: panel.style.height,
+                            left: panel.style.left,
+                            top: panel.style.top,
+                            transform: panel.style.transform
+                        }};
+                        localStorage.setItem('stillme_chat_panel_state', JSON.stringify(state));
+                    }}
+                    
+                    // Initialize
+                    console.log('StillMe Chat: Loading panel state...');
+                    loadPanelState();
+                    if (!isOpen) {{
+                        panel.style.display = 'none';
+                        overlay.style.display = 'none';
+                    }}
+                    
+                    // CRITICAL: Ensure chat button is always visible
+                    const chatButton = document.getElementById('stillme-chat-button');
+                    console.log('StillMe Chat: Button element:', chatButton);
+                    if (chatButton) {{
+                        chatButton.style.display = 'flex';
+                        chatButton.style.visibility = 'visible';
+                        chatButton.style.opacity = '1';
+                        chatButton.style.zIndex = '2147483647';
+                        console.log('StillMe Chat: Button styles applied');
+                        console.log('StillMe Chat: Button position:', chatButton.getBoundingClientRect());
                         
-                        // Create new button with full styling
-                        const clonedButton = parentDoc.createElement('button');
-                        clonedButton.id = 'stillme-chat-button-parent';
-                        clonedButton.textContent = '💬';
-                        clonedButton.innerHTML = '💬';
-                        
-                        // Apply ALL styles directly (critical for parent window)
-                        clonedButton.style.cssText = `
+                        // Try to inject button into parent window if in iframe
+                        try {{
+                            if (window.parent && window.parent !== window) {{
+                                console.log('StillMe Chat: Detected iframe, attempting to inject into parent...');
+                                const parentDoc = window.parent.document;
+                                
+                                // Remove existing button if any
+                                const existingBtn = parentDoc.getElementById('stillme-chat-button-parent');
+                                if (existingBtn) {{
+                                    existingBtn.remove();
+                                }}
+                                
+                                // Create new button with full styling
+                                const clonedButton = parentDoc.createElement('button');
+                                clonedButton.id = 'stillme-chat-button-parent';
+                                clonedButton.textContent = '💬';
+                                clonedButton.innerHTML = '💬';
+                                
+                                // Apply ALL styles directly (critical for parent window)
+                                clonedButton.style.cssText = `
                             position: fixed !important;
                             bottom: 20px !important;
                             right: 20px !important;
@@ -490,141 +513,141 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             margin: 0 !important;
                             padding: 0 !important;
                             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-                        `;
-                        
-                        clonedButton.onclick = function(e) {{
-                            e.preventDefault();
-                            e.stopPropagation();
-                            console.log('StillMe Chat: Parent button clicked');
-                            
-                            // Find iframe and send message to it
-                            const iframes = parentDoc.querySelectorAll('iframe');
-                            console.log('StillMe Chat: Found iframes:', iframes.length);
-                            
-                            let messageSent = false;
-                            for (let iframe of iframes) {{
-                                try {{
-                                    if (iframe.contentWindow) {{
-                                        console.log('StillMe Chat: Sending message to iframe:', iframe.src || 'srcdoc');
-                                        iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
-                                        messageSent = true;
+                                `;
+                                
+                                clonedButton.onclick = function(e) {{
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    console.log('StillMe Chat: Parent button clicked');
+                                    
+                                    // Find iframe and send message to it
+                                    const iframes = parentDoc.querySelectorAll('iframe');
+                                    console.log('StillMe Chat: Found iframes:', iframes.length);
+                                    
+                                    let messageSent = false;
+                                    for (let iframe of iframes) {{
+                                        try {{
+                                            if (iframe.contentWindow) {{
+                                                console.log('StillMe Chat: Sending message to iframe:', iframe.src || 'srcdoc');
+                                                iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                                                messageSent = true;
+                                            }}
+                                        }} catch (err) {{
+                                            console.warn('StillMe Chat: Could not send to iframe:', err);
+                                        }}
                                     }}
-                                }} catch (err) {{
-                                    console.warn('StillMe Chat: Could not send to iframe:', err);
+                                    
+                                    if (!messageSent) {{
+                                        console.error('StillMe Chat: Could not find iframe to send message to');
+                                    }}
+                                }};
+                                
+                                clonedButton.onmouseenter = function() {{
+                                    this.style.transform = 'scale(1.15)';
+                                    this.style.boxShadow = '0 6px 24px rgba(70, 179, 255, 0.8), 0 0 0 6px rgba(70, 179, 255, 0.3)';
+                                }};
+                                
+                                clonedButton.onmouseleave = function() {{
+                                    this.style.transform = 'scale(1)';
+                                    this.style.boxShadow = '0 4px 20px rgba(70, 179, 255, 0.6), 0 0 0 4px rgba(70, 179, 255, 0.2)';
+                                }};
+                                
+                                if (parentDoc.body) {{
+                                    parentDoc.body.appendChild(clonedButton);
+                                    console.log('StillMe Chat: Button injected into parent window');
+                                    console.log('StillMe Chat: Parent button position:', clonedButton.getBoundingClientRect());
                                 }}
                             }}
-                            
-                            if (!messageSent) {{
-                                console.error('StillMe Chat: Could not find iframe to send message to');
+                        }} catch (e) {{
+                            console.warn('StillMe Chat: Could not inject into parent:', e);
+                        }}
+                    }} else {{
+                        console.error('StillMe Chat: Button not found!');
+                    }}
+                    
+                    // Ensure button stays visible even when panel is open
+                    function ensureButtonVisible() {{
+                        const btn = document.getElementById('stillme-chat-button');
+                        if (btn) {{
+                            const rect = btn.getBoundingClientRect();
+                            if (rect.width === 0 || rect.height === 0) {{
+                                console.warn('StillMe Chat: Button has zero dimensions!');
+                                btn.style.display = 'flex';
+                                btn.style.visibility = 'visible';
+                                btn.style.opacity = '1';
+                                btn.style.zIndex = '2147483647';
                             }}
-                        }};
-                        
-                        clonedButton.onmouseenter = function() {{
-                            this.style.transform = 'scale(1.15)';
-                            this.style.boxShadow = '0 6px 24px rgba(70, 179, 255, 0.8), 0 0 0 6px rgba(70, 179, 255, 0.3)';
-                        }};
-                        
-                        clonedButton.onmouseleave = function() {{
-                            this.style.transform = 'scale(1)';
-                            this.style.boxShadow = '0 4px 20px rgba(70, 179, 255, 0.6), 0 0 0 4px rgba(70, 179, 255, 0.2)';
-                        }};
-                        
-                        if (parentDoc.body) {{
-                            parentDoc.body.appendChild(clonedButton);
-                            console.log('StillMe Chat: Button injected into parent window');
-                            console.log('StillMe Chat: Parent button position:', clonedButton.getBoundingClientRect());
-                        }}
-                    }}
-                }} catch (e) {{
-                    console.warn('StillMe Chat: Could not inject into parent:', e);
-                }}
-            }} else {{
-                console.error('StillMe Chat: Button not found!');
-            }}
-            
-            // Ensure button stays visible even when panel is open
-            function ensureButtonVisible() {{
-                const btn = document.getElementById('stillme-chat-button');
-                if (btn) {{
-                    const rect = btn.getBoundingClientRect();
-                    if (rect.width === 0 || rect.height === 0) {{
-                        console.warn('StillMe Chat: Button has zero dimensions!');
-                        btn.style.display = 'flex';
-                        btn.style.visibility = 'visible';
-                        btn.style.opacity = '1';
-                        btn.style.zIndex = '2147483647';
-                    }}
-                }} else {{
-                    console.warn('StillMe Chat: Button not found in ensureButtonVisible()');
-                }}
-            }}
-            
-            // Check button visibility periodically
-            setInterval(ensureButtonVisible, 1000);
-            
-            // Listen for messages from parent window
-            window.addEventListener('message', function(event) {{
-                console.log('StillMe Chat: Received message:', event.data, 'from:', event.origin);
-                if (event.data && event.data.type === 'stillme_toggle_chat') {{
-                    console.log('StillMe Chat: Toggling chat panel...');
-                    toggleChat();
-                }}
-            }});
-            
-            // Also expose toggleChat globally for direct access (fallback)
-            window.stillmeToggleChat = function() {{
-                console.log('StillMe Chat: toggleChat called via global function');
-                toggleChat();
-            }};
-            
-            // Render chat history with auto-scroll
-            function renderMessages() {{
-                const messagesContainer = document.getElementById('stillme-chat-messages');
-                messagesContainer.innerHTML = '';
-                
-                chatHistory.forEach(msg => {{
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `stillme-chat-message ${{msg.role}}`;
-                    messageDiv.textContent = msg.content;
-                    messagesContainer.appendChild(messageDiv);
-                }});
-                
-                // Auto-scroll to bottom (like ChatGPT, DeepSeek, etc.)
-                setTimeout(() => {{
-                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-                }}, 10);
-            }}
-            
-            // Toggle chat panel with overlay
-            function toggleChat() {{
-                console.log('StillMe Chat: toggleChat() called');
-                const isVisible = panel.style.display === 'flex';
-                console.log('StillMe Chat: Panel currently visible:', isVisible);
-                
-                panel.style.display = isVisible ? 'none' : 'flex';
-                overlay.style.display = isVisible ? 'none' : 'block';
-                
-                console.log('StillMe Chat: Panel display set to:', panel.style.display);
-                console.log('StillMe Chat: Overlay display set to:', overlay.style.display);
-                console.log('StillMe Chat: Panel element:', panel);
-                console.log('StillMe Chat: Overlay element:', overlay);
-                
-                // Ensure button stays visible
-                ensureButtonVisible();
-                
-                if (!isVisible) {{
-                    // Focus input when opening
-                    setTimeout(() => {{
-                        const input = document.getElementById('stillme-chat-input');
-                        if (input) {{
-                            input.focus();
-                            console.log('StillMe Chat: Input focused');
                         }} else {{
-                            console.warn('StillMe Chat: Input not found');
+                            console.warn('StillMe Chat: Button not found in ensureButtonVisible()');
                         }}
-                    }}, 100);
-                }}
-            }}
+                    }}
+                    
+                    // Check button visibility periodically
+                    setInterval(ensureButtonVisible, 1000);
+                    
+                    // Listen for messages from parent window
+                    window.addEventListener('message', function(event) {{
+                        console.log('StillMe Chat: Received message:', event.data, 'from:', event.origin);
+                        if (event.data && event.data.type === 'stillme_toggle_chat') {{
+                            console.log('StillMe Chat: Toggling chat panel...');
+                            toggleChat();
+                        }}
+                    }});
+                    
+                    // Also expose toggleChat globally for direct access (fallback)
+                    window.stillmeToggleChat = function() {{
+                        console.log('StillMe Chat: toggleChat called via global function');
+                        toggleChat();
+                    }};
+                    
+                    // Render chat history with auto-scroll
+                    function renderMessages() {{
+                        const messagesContainer = document.getElementById('stillme-chat-messages');
+                        messagesContainer.innerHTML = '';
+                        
+                        chatHistory.forEach(msg => {{
+                            const messageDiv = document.createElement('div');
+                            messageDiv.className = `stillme-chat-message ${{msg.role}}`;
+                            messageDiv.textContent = msg.content;
+                            messagesContainer.appendChild(messageDiv);
+                        }});
+                        
+                        // Auto-scroll to bottom (like ChatGPT, DeepSeek, etc.)
+                        setTimeout(() => {{
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }}, 10);
+                    }}
+                    
+                    // Toggle chat panel with overlay
+                    function toggleChat() {{
+                        console.log('StillMe Chat: toggleChat() called');
+                        const isVisible = panel.style.display === 'flex';
+                        console.log('StillMe Chat: Panel currently visible:', isVisible);
+                        
+                        panel.style.display = isVisible ? 'none' : 'flex';
+                        overlay.style.display = isVisible ? 'none' : 'block';
+                        
+                        console.log('StillMe Chat: Panel display set to:', panel.style.display);
+                        console.log('StillMe Chat: Overlay display set to:', overlay.style.display);
+                        console.log('StillMe Chat: Panel element:', panel);
+                        console.log('StillMe Chat: Overlay element:', overlay);
+                        
+                        // Ensure button stays visible
+                        ensureButtonVisible();
+                        
+                        if (!isVisible) {{
+                            // Focus input when opening
+                            setTimeout(() => {{
+                                const input = document.getElementById('stillme-chat-input');
+                                if (input) {{
+                                    input.focus();
+                                    console.log('StillMe Chat: Input focused');
+                                }} else {{
+                                    console.warn('StillMe Chat: Input not found');
+                                }}
+                            }}, 100);
+                        }}
+                    }}
             
             // Toggle fullscreen
             function toggleFullscreen() {{
@@ -820,8 +843,22 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 }}
             }});
             
-            // Initial render
-            renderMessages();
+                    // Initial render
+                    renderMessages();
+                }} // End of initChat()
+                
+                // Call initChat when DOM is ready
+                if (document.readyState === 'loading') {{
+                    document.addEventListener('DOMContentLoaded', initChat);
+                }} else {{
+                    // DOM already loaded, call immediately
+                    initChat();
+                }}
+                
+            }} catch (error) {{
+                console.error('StillMe Chat: Fatal error in script:', error);
+                console.error('StillMe Chat: Error stack:', error.stack);
+            }}
         </script>
     </body>
     </html>
