@@ -636,6 +636,18 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         if (event.data && event.data.type === 'stillme_toggle_chat') {{
                             console.log('StillMe Chat: Toggling chat panel...');
                             toggleChat();
+                        }} else if (event.data && event.data.type === 'stillme_send_message') {{
+                            // Handle message sent from parent panel
+                            console.log('StillMe Chat: Received send message request from parent');
+                            const message = event.data.message;
+                            if (message) {{
+                                // Use existing sendMessage function
+                                const input = document.getElementById('stillme-chat-input');
+                                if (input) {{
+                                    input.value = message;
+                                    sendMessage();
+                                }}
+                            }}
                         }}
                     }}, false); // Use capture phase for earlier registration
                     
@@ -685,28 +697,140 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                 // Open panel - create in parent if doesn't exist
                                 if (!parentPanel) {{
                                     console.log('StillMe Chat: Creating panel in parent window...');
-                                    // Clone panel to parent
-                                    parentPanel = panel.cloneNode(true);
-                                    parentPanel.id = 'stillme-chat-panel-parent';
-                                    parentPanel.style.cssText = panel.style.cssText;
-                                    parentPanel.style.setProperty('display', 'flex', 'important');
-                                    parentPanel.style.setProperty('z-index', '1000000', 'important');
                                     
-                                    parentOverlay = overlay.cloneNode(true);
+                                    // Create overlay in parent
+                                    parentOverlay = parentDoc.createElement('div');
                                     parentOverlay.id = 'stillme-chat-overlay-parent';
-                                    parentOverlay.style.cssText = overlay.style.cssText;
-                                    parentOverlay.style.setProperty('display', 'block', 'important');
-                                    parentOverlay.style.setProperty('z-index', '999999', 'important');
-                                    
-                                    // Update onclick handlers for parent elements
+                                    parentOverlay.style.cssText = `
+                                        position: fixed !important;
+                                        top: 0 !important;
+                                        left: 0 !important;
+                                        width: 100vw !important;
+                                        height: 100vh !important;
+                                        background: rgba(0, 0, 0, 0.3) !important;
+                                        z-index: 999999 !important;
+                                        display: block !important;
+                                    `;
                                     parentOverlay.onclick = function() {{
-                                        window.parent.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                                        const iframes = parentDoc.querySelectorAll('iframe');
+                                        for (let iframe of iframes) {{
+                                            try {{
+                                                if (iframe.contentWindow) {{
+                                                    iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                                                }}
+                                            }} catch (e) {{
+                                                console.warn('StillMe Chat: Could not send toggle message:', e);
+                                            }}
+                                        }}
                                     }};
+                                    
+                                    // Create panel in parent with full HTML structure
+                                    parentPanel = parentDoc.createElement('div');
+                                    parentPanel.id = 'stillme-chat-panel-parent';
+                                    parentPanel.innerHTML = panel.innerHTML; // Copy inner HTML
+                                    parentPanel.style.cssText = `
+                                        position: fixed !important;
+                                        top: 50% !important;
+                                        left: 50% !important;
+                                        transform: translate(-50%, -50%) !important;
+                                        width: 600px !important;
+                                        height: 700px !important;
+                                        min-width: 400px !important;
+                                        min-height: 400px !important;
+                                        max-width: 95vw !important;
+                                        max-height: 95vh !important;
+                                        background: #0e1117 !important;
+                                        border-radius: 12px !important;
+                                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+                                        display: flex !important;
+                                        flex-direction: column !important;
+                                        border: 1px solid #262730 !important;
+                                        overflow: hidden !important;
+                                        z-index: 1000000 !important;
+                                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                                    `;
+                                    
+                                    // Setup event handlers for parent panel
+                                    const parentCloseBtn = parentPanel.querySelector('.stillme-chat-close');
+                                    if (parentCloseBtn) {{
+                                        parentCloseBtn.onclick = function(e) {{
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            const iframes = parentDoc.querySelectorAll('iframe');
+                                            for (let iframe of iframes) {{
+                                                try {{
+                                                    if (iframe.contentWindow) {{
+                                                        iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                                                    }}
+                                                }} catch (err) {{
+                                                    console.warn('StillMe Chat: Could not send toggle message:', err);
+                                                }}
+                                            }}
+                                        }};
+                                    }}
+                                    
+                                    // Setup input handler for parent panel
+                                    const parentInput = parentPanel.querySelector('#stillme-chat-input');
+                                    const parentSendBtn = parentPanel.querySelector('#stillme-chat-send');
+                                    if (parentInput && parentSendBtn) {{
+                                        // Send message handler
+                                        const handleSend = async function() {{
+                                            const message = parentInput.value.trim();
+                                            if (!message) return;
+                                            
+                                            // Add user message to parent panel
+                                            const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
+                                            if (parentMessages) {{
+                                                const userMsg = parentDoc.createElement('div');
+                                                userMsg.className = 'stillme-chat-message user';
+                                                userMsg.textContent = message;
+                                                parentMessages.appendChild(userMsg);
+                                                parentMessages.scrollTop = parentMessages.scrollHeight;
+                                            }}
+                                            
+                                            parentInput.value = '';
+                                            
+                                            // Send to iframe to handle API call
+                                            const iframes = parentDoc.querySelectorAll('iframe');
+                                            for (let iframe of iframes) {{
+                                                try {{
+                                                    if (iframe.contentWindow) {{
+                                                        iframe.contentWindow.postMessage({{
+                                                            type: 'stillme_send_message',
+                                                            message: message
+                                                        }}, '*');
+                                                    }}
+                                                }} catch (err) {{
+                                                    console.warn('StillMe Chat: Could not send message:', err);
+                                                }}
+                                            }}
+                                        }};
+                                        
+                                        parentSendBtn.onclick = handleSend;
+                                        parentInput.addEventListener('keydown', (e) => {{
+                                            if (e.key === 'Enter' && !e.shiftKey) {{
+                                                e.preventDefault();
+                                                handleSend();
+                                            }}
+                                        }});
+                                    }}
+                                    
+                                    // Render initial messages in parent panel
+                                    const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
+                                    if (parentMessages && chatHistory) {{
+                                        chatHistory.forEach(msg => {{
+                                            const messageDiv = parentDoc.createElement('div');
+                                            messageDiv.className = `stillme-chat-message ${{msg.role}}`;
+                                            messageDiv.textContent = msg.content;
+                                            parentMessages.appendChild(messageDiv);
+                                        }});
+                                        parentMessages.scrollTop = parentMessages.scrollHeight;
+                                    }}
                                     
                                     if (parentDoc.body) {{
                                         parentDoc.body.appendChild(parentOverlay);
                                         parentDoc.body.appendChild(parentPanel);
-                                        console.log('StillMe Chat: Panel and overlay injected into parent window');
+                                        console.log('StillMe Chat: Panel and overlay injected into parent window with full functionality');
                                     }}
                                 }} else {{
                                     parentPanel.style.setProperty('display', 'flex', 'important');
@@ -929,6 +1053,27 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             chatHistory.push({{ role: 'assistant', content: reply }});
                             renderMessages();
                             
+                            // Update parent panel with new messages
+                            if (window.parent && window.parent !== window) {{
+                                const parentDoc = window.parent.document;
+                                const parentPanel = parentDoc.getElementById('stillme-chat-panel-parent');
+                                if (parentPanel) {{
+                                    const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
+                                    if (parentMessages) {{
+                                        // Clear and re-render all messages
+                                        parentMessages.innerHTML = '';
+                                        chatHistory.forEach(msg => {{
+                                            const messageDiv = parentDoc.createElement('div');
+                                            messageDiv.className = `stillme-chat-message ${{msg.role}}`;
+                                            messageDiv.textContent = msg.content;
+                                            parentMessages.appendChild(messageDiv);
+                                        }});
+                                        parentMessages.scrollTop = parentMessages.scrollHeight;
+                                        console.log('StillMe Chat: Updated parent panel with new messages');
+                                    }}
+                                }}
+                            }}
+                            
                             // Send message to Streamlit parent
                             window.parent.postMessage({{
                                 type: 'stillme_chat_message',
@@ -941,6 +1086,26 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                 content: `❌ Error: ${{error.message}}` 
                             }});
                             renderMessages();
+                            
+                            // Update parent panel with error message
+                            if (window.parent && window.parent !== window) {{
+                                const parentDoc = window.parent.document;
+                                const parentPanel = parentDoc.getElementById('stillme-chat-panel-parent');
+                                if (parentPanel) {{
+                                    const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
+                                    if (parentMessages) {{
+                                        // Clear and re-render all messages
+                                        parentMessages.innerHTML = '';
+                                        chatHistory.forEach(msg => {{
+                                            const messageDiv = parentDoc.createElement('div');
+                                            messageDiv.className = `stillme-chat-message ${{msg.role}}`;
+                                            messageDiv.textContent = msg.content;
+                                            parentMessages.appendChild(messageDiv);
+                                        }});
+                                        parentMessages.scrollTop = parentMessages.scrollHeight;
+                                    }}
+                                }}
+                            }}
                         }} finally {{
                             sendBtn.disabled = false;
                             sendBtn.textContent = 'Send';
