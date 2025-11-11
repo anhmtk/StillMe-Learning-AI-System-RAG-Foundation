@@ -648,201 +648,207 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             }}, 100);
                         }}
                     }}
-            
-            // Toggle fullscreen
-            function toggleFullscreen() {{
-                isFullscreen = !isFullscreen;
-                const fullscreenBtn = document.getElementById('fullscreen-btn');
-                
-                if (isFullscreen) {{
-                    panel.classList.add('fullscreen');
-                    fullscreenBtn.textContent = '⛶'; // Restore icon
-                    fullscreenBtn.title = 'Exit Fullscreen';
-                }} else {{
-                    panel.classList.remove('fullscreen');
-                    fullscreenBtn.textContent = '⛶'; // Fullscreen icon
-                    fullscreenBtn.title = 'Toggle Fullscreen';
-                    // Restore saved position/size
-                    loadPanelState();
-                }}
-            }}
-            
-            // Drag functionality
-            header.addEventListener('mousedown', (e) => {{
-                if (isFullscreen) return; // Don't drag in fullscreen
-                isDragging = true;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
-                
-                const rect = panel.getBoundingClientRect();
-                panelStartX = rect.left;
-                panelStartY = rect.top;
-                
-                panel.style.transform = 'none';
-                panel.style.left = panelStartX + 'px';
-                panel.style.top = panelStartY + 'px';
-                
-                e.preventDefault();
-            }});
-            
-            // Resize functionality
-            function setupResizeHandle(handle, direction) {{
-                handle.addEventListener('mousedown', (e) => {{
-                    if (isFullscreen) return; // Don't resize in fullscreen
-                    isResizing = true;
-                    resizeHandle = direction;
-                    dragStartX = e.clientX;
-                    dragStartY = e.clientY;
                     
-                    const rect = panel.getBoundingClientRect();
-                    panelStartX = rect.left;
-                    panelStartY = rect.top;
-                    panelStartWidth = rect.width;
-                    panelStartHeight = rect.height;
-                    
-                    panel.style.transform = 'none';
-                    panel.style.left = panelStartX + 'px';
-                    panel.style.top = panelStartY + 'px';
-                    
-                    e.preventDefault();
-                    e.stopPropagation();
-                }});
-            }}
-            
-            // Setup all resize handles
-            setupResizeHandle(document.querySelector('.resize-handle.nw'), 'nw');
-            setupResizeHandle(document.querySelector('.resize-handle.ne'), 'ne');
-            setupResizeHandle(document.querySelector('.resize-handle.sw'), 'sw');
-            setupResizeHandle(document.querySelector('.resize-handle.se'), 'se');
-            setupResizeHandle(document.querySelector('.resize-handle.n'), 'n');
-            setupResizeHandle(document.querySelector('.resize-handle.s'), 's');
-            setupResizeHandle(document.querySelector('.resize-handle.e'), 'e');
-            setupResizeHandle(document.querySelector('.resize-handle.w'), 'w');
-            
-            // Mouse move handler for drag and resize
-            document.addEventListener('mousemove', (e) => {{
-                if (isDragging && !isFullscreen) {{
-                    const deltaX = e.clientX - dragStartX;
-                    const deltaY = e.clientY - dragStartY;
-                    
-                    let newX = panelStartX + deltaX;
-                    let newY = panelStartY + deltaY;
-                    
-                    // Constrain to viewport
-                    newX = Math.max(0, Math.min(newX, window.innerWidth - panel.offsetWidth));
-                    newY = Math.max(0, Math.min(newY, window.innerHeight - panel.offsetHeight));
-                    
-                    panel.style.left = newX + 'px';
-                    panel.style.top = newY + 'px';
-                }} else if (isResizing && !isFullscreen && resizeHandle) {{
-                    const deltaX = e.clientX - dragStartX;
-                    const deltaY = e.clientY - dragStartY;
-                    
-                    let newWidth = panelStartWidth;
-                    let newHeight = panelStartHeight;
-                    let newX = panelStartX;
-                    let newY = panelStartY;
-                    
-                    // Handle different resize directions
-                    if (resizeHandle.includes('e')) {{
-                        newWidth = Math.max(400, panelStartWidth + deltaX);
-                    }}
-                    if (resizeHandle.includes('w')) {{
-                        newWidth = Math.max(400, panelStartWidth - deltaX);
-                        newX = panelStartX + deltaX;
-                    }}
-                    if (resizeHandle.includes('s')) {{
-                        newHeight = Math.max(400, panelStartHeight + deltaY);
-                    }}
-                    if (resizeHandle.includes('n')) {{
-                        newHeight = Math.max(400, panelStartHeight - deltaY);
-                        newY = panelStartY + deltaY;
+                    // Toggle fullscreen
+                    function toggleFullscreen() {{
+                        isFullscreen = !isFullscreen;
+                        const fullscreenBtn = document.getElementById('fullscreen-btn');
+                        
+                        if (isFullscreen) {{
+                            panel.classList.add('fullscreen');
+                            fullscreenBtn.textContent = '⛶'; // Restore icon
+                            fullscreenBtn.title = 'Exit Fullscreen';
+                        }} else {{
+                            panel.classList.remove('fullscreen');
+                            fullscreenBtn.textContent = '⛶'; // Fullscreen icon
+                            fullscreenBtn.title = 'Toggle Fullscreen';
+                            // Restore saved position/size
+                            loadPanelState();
+                        }}
                     }}
                     
-                    // Constrain to viewport
-                    newWidth = Math.min(newWidth, window.innerWidth - newX);
-                    newHeight = Math.min(newHeight, window.innerHeight - newY);
+                    // Drag functionality
+                    if (header) {{
+                        header.addEventListener('mousedown', (e) => {{
+                            if (isFullscreen) return; // Don't drag in fullscreen
+                            isDragging = true;
+                            dragStartX = e.clientX;
+                            dragStartY = e.clientY;
+                            
+                            const rect = panel.getBoundingClientRect();
+                            panelStartX = rect.left;
+                            panelStartY = rect.top;
+                            
+                            panel.style.transform = 'none';
+                            panel.style.left = panelStartX + 'px';
+                            panel.style.top = panelStartY + 'px';
+                            
+                            e.preventDefault();
+                        }});
+                    }}
                     
-                    panel.style.width = newWidth + 'px';
-                    panel.style.height = newHeight + 'px';
-                    panel.style.left = newX + 'px';
-                    panel.style.top = newY + 'px';
-                }}
-            }});
-            
-            // Mouse up handler
-            document.addEventListener('mouseup', () => {{
-                if (isDragging || isResizing) {{
-                    savePanelState();
-                }}
-                isDragging = false;
-                isResizing = false;
-                resizeHandle = null;
-            }});
-            
-            // Send message
-            async function sendMessage() {{
-                const input = document.getElementById('stillme-chat-input');
-                const message = input.value.trim();
-                
-                if (!message) return;
-                
-                // Disable send button
-                const sendBtn = document.getElementById('stillme-chat-send');
-                sendBtn.disabled = true;
-                sendBtn.textContent = 'Sending...';
-                
-                // Add user message to history
-                chatHistory.push({{ role: 'user', content: message }});
-                renderMessages();
-                
-                // Clear input
-                input.value = '';
-                
-                // Send to backend
-                try {{
-                    const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
-                        method: 'POST',
-                        headers: {{
-                            'Content-Type': 'application/json',
-                        }},
-                        body: JSON.stringify({{ message: message }}),
+                    // Resize functionality
+                    function setupResizeHandle(handle, direction) {{
+                        if (!handle) return;
+                        handle.addEventListener('mousedown', (e) => {{
+                            if (isFullscreen) return; // Don't resize in fullscreen
+                            isResizing = true;
+                            resizeHandle = direction;
+                            dragStartX = e.clientX;
+                            dragStartY = e.clientY;
+                            
+                            const rect = panel.getBoundingClientRect();
+                            panelStartX = rect.left;
+                            panelStartY = rect.top;
+                            panelStartWidth = rect.width;
+                            panelStartHeight = rect.height;
+                            
+                            panel.style.transform = 'none';
+                            panel.style.left = panelStartX + 'px';
+                            panel.style.top = panelStartY + 'px';
+                            
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }});
+                    }}
+                    
+                    // Setup all resize handles
+                    setupResizeHandle(document.querySelector('.resize-handle.nw'), 'nw');
+                    setupResizeHandle(document.querySelector('.resize-handle.ne'), 'ne');
+                    setupResizeHandle(document.querySelector('.resize-handle.sw'), 'sw');
+                    setupResizeHandle(document.querySelector('.resize-handle.se'), 'se');
+                    setupResizeHandle(document.querySelector('.resize-handle.n'), 'n');
+                    setupResizeHandle(document.querySelector('.resize-handle.s'), 's');
+                    setupResizeHandle(document.querySelector('.resize-handle.e'), 'e');
+                    setupResizeHandle(document.querySelector('.resize-handle.w'), 'w');
+                    
+                    // Mouse move handler for drag and resize
+                    document.addEventListener('mousemove', (e) => {{
+                        if (isDragging && !isFullscreen) {{
+                            const deltaX = e.clientX - dragStartX;
+                            const deltaY = e.clientY - dragStartY;
+                            
+                            let newX = panelStartX + deltaX;
+                            let newY = panelStartY + deltaY;
+                            
+                            // Constrain to viewport
+                            newX = Math.max(0, Math.min(newX, window.innerWidth - panel.offsetWidth));
+                            newY = Math.max(0, Math.min(newY, window.innerHeight - panel.offsetHeight));
+                            
+                            panel.style.left = newX + 'px';
+                            panel.style.top = newY + 'px';
+                        }} else if (isResizing && !isFullscreen && resizeHandle) {{
+                            const deltaX = e.clientX - dragStartX;
+                            const deltaY = e.clientY - dragStartY;
+                            
+                            let newWidth = panelStartWidth;
+                            let newHeight = panelStartHeight;
+                            let newX = panelStartX;
+                            let newY = panelStartY;
+                            
+                            // Handle different resize directions
+                            if (resizeHandle.includes('e')) {{
+                                newWidth = Math.max(400, panelStartWidth + deltaX);
+                            }}
+                            if (resizeHandle.includes('w')) {{
+                                newWidth = Math.max(400, panelStartWidth - deltaX);
+                                newX = panelStartX + deltaX;
+                            }}
+                            if (resizeHandle.includes('s')) {{
+                                newHeight = Math.max(400, panelStartHeight + deltaY);
+                            }}
+                            if (resizeHandle.includes('n')) {{
+                                newHeight = Math.max(400, panelStartHeight - deltaY);
+                                newY = panelStartY + deltaY;
+                            }}
+                            
+                            // Constrain to viewport
+                            newWidth = Math.min(newWidth, window.innerWidth - newX);
+                            newHeight = Math.min(newHeight, window.innerHeight - newY);
+                            
+                            panel.style.width = newWidth + 'px';
+                            panel.style.height = newHeight + 'px';
+                            panel.style.left = newX + 'px';
+                            panel.style.top = newY + 'px';
+                        }}
                     }});
                     
-                    const data = await response.json();
-                    const reply = data.response || data.message || JSON.stringify(data);
-                    
-                    // Add assistant response
-                    chatHistory.push({{ role: 'assistant', content: reply }});
-                    renderMessages();
-                    
-                    // Send message to Streamlit parent
-                    window.parent.postMessage({{
-                        type: 'stillme_chat_message',
-                        history: chatHistory
-                    }}, '*');
-                    
-                }} catch (error) {{
-                    chatHistory.push({{ 
-                        role: 'assistant', 
-                        content: `❌ Error: ${{error.message}}` 
+                    // Mouse up handler
+                    document.addEventListener('mouseup', () => {{
+                        if (isDragging || isResizing) {{
+                            savePanelState();
+                        }}
+                        isDragging = false;
+                        isResizing = false;
+                        resizeHandle = null;
                     }});
-                    renderMessages();
-                }} finally {{
-                    sendBtn.disabled = false;
-                    sendBtn.textContent = 'Send';
-                    input.focus();
-                }}
-            }}
-            
-            // Handle Enter key (Enter to send, Shift+Enter for new line)
-            document.getElementById('stillme-chat-input').addEventListener('keydown', (e) => {{
-                if (e.key === 'Enter' && !e.shiftKey) {{
-                    e.preventDefault();
-                    sendMessage();
-                }}
-            }});
-            
+                    
+                    // Send message
+                    async function sendMessage() {{
+                        const input = document.getElementById('stillme-chat-input');
+                        const message = input.value.trim();
+                        
+                        if (!message) return;
+                        
+                        // Disable send button
+                        const sendBtn = document.getElementById('stillme-chat-send');
+                        sendBtn.disabled = true;
+                        sendBtn.textContent = 'Sending...';
+                        
+                        // Add user message to history
+                        chatHistory.push({{ role: 'user', content: message }});
+                        renderMessages();
+                        
+                        // Clear input
+                        input.value = '';
+                        
+                        // Send to backend
+                        try {{
+                            const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
+                                method: 'POST',
+                                headers: {{
+                                    'Content-Type': 'application/json',
+                                }},
+                                body: JSON.stringify({{ message: message }}),
+                            }});
+                            
+                            const data = await response.json();
+                            const reply = data.response || data.message || JSON.stringify(data);
+                            
+                            // Add assistant response
+                            chatHistory.push({{ role: 'assistant', content: reply }});
+                            renderMessages();
+                            
+                            // Send message to Streamlit parent
+                            window.parent.postMessage({{
+                                type: 'stillme_chat_message',
+                                history: chatHistory
+                            }}, '*');
+                            
+                        }} catch (error) {{
+                            chatHistory.push({{ 
+                                role: 'assistant', 
+                                content: `❌ Error: ${{error.message}}` 
+                            }});
+                            renderMessages();
+                        }} finally {{
+                            sendBtn.disabled = false;
+                            sendBtn.textContent = 'Send';
+                            input.focus();
+                        }}
+                    }}
+                    
+                    // Handle Enter key (Enter to send, Shift+Enter for new line)
+                    const inputElement = document.getElementById('stillme-chat-input');
+                    if (inputElement) {{
+                        inputElement.addEventListener('keydown', (e) => {{
+                            if (e.key === 'Enter' && !e.shiftKey) {{
+                                e.preventDefault();
+                                sendMessage();
+                            }}
+                        }});
+                    }}
+                    
                     // Initial render
                     renderMessages();
                 }} // End of initChat()
