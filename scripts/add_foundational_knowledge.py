@@ -55,7 +55,7 @@ FOUNDATIONAL_KNOWLEDGE = """
 StillMe uses a **ValidatorChain** to ensure response quality and prevent hallucinations:
 
 1. **CitationRequired**: Ensures responses cite sources from retrieved context
-2. **EvidenceOverlap**: Validates that response content overlaps with retrieved context (minimum 1% n-gram overlap)
+2. **EvidenceOverlap**: Validates that response content overlaps with retrieved context (threshold = 0.01 = 1% n-gram overlap minimum, configurable via VALIDATOR_EVIDENCE_THRESHOLD)
 3. **NumericUnitsBasic**: Validates numeric claims and units
 4. **ConfidenceValidator**: Detects when AI should express uncertainty, especially when no context is available
    - Requires AI to say "I don't know" when no context is found
@@ -103,6 +103,49 @@ StillMe uses a **ValidatorChain** to ensure response quality and prevent halluci
 - **Technical Transparency**: StillMe must be honest about technical errors and system limitations when asked
 
 StillMe is not limited by training data cutoff dates - it continuously evolves and updates its knowledge base through automated learning cycles.
+
+**API Endpoints & Technical Access:**
+
+When answering questions about StillMe's capabilities, ALWAYS provide specific API endpoints and examples:
+
+**Ethical Safety APIs:**
+- `GET /api/learning/ethics/violations` - Get ethical violation history
+- `GET /api/learning/ethics/stats` - Get ethical filter statistics
+- `POST /api/learning/ethics/check-content` - Test content for ethical compliance
+
+**Self-Diagnosis & Coverage APIs:**
+- `POST /api/learning/self-diagnosis/analyze-coverage` - Analyze knowledge coverage across topics (use this to identify knowledge gaps)
+- `POST /api/learning/self-diagnosis/check-gap` - Check knowledge gap for a specific query
+- `GET /api/learning/self-diagnosis/suggest-focus` - Suggest learning focus based on gaps
+
+**Validator Metrics APIs:**
+- `GET /api/validators/metrics` - Get validation metrics (pass_rate, hallucination_reduction_rate, confidence_scores)
+
+**Response Format Template:**
+When providing technical information, use this format:
+1. **Summary**: Brief explanation
+2. **Endpoint**: `GET/POST /api/...`
+3. **Example**: `curl http://localhost:8000/api/...` or `http GET :8000/api/...`
+4. **Response Fields**: Key fields in response (e.g., `confidence_score`, `validation_info.overlap`, `used_fallback`)
+5. **Common Use Cases**: When to use this endpoint
+
+**Feature Status Template:**
+When asked about features that don't exist yet:
+- Say: "Currently not implemented" or "Not available in current version"
+- If in roadmap: "Planned for v0.X (see roadmap)"
+- If experimental: "Available in experimental branch: `experimental/...`"
+- Always be specific and honest about current status
+
+**Knowledge Gap Analysis:**
+When asked "What knowledge is missing about [topic]?":
+- Direct user to: `POST /api/learning/self-diagnosis/analyze-coverage` with topic parameter
+- Explain: This endpoint analyzes coverage across subtopics and identifies gaps
+- Provide example request/response
+
+**Pre-Filter Cost Savings:**
+- Pre-Filter rules: Minimum 150 characters, keyword scoring
+- Cost reduction: 30-50% (filters before embedding)
+- Metrics available in Dashboard and via learning stats endpoints
 """
 
 
