@@ -496,11 +496,26 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             e.preventDefault();
                             e.stopPropagation();
                             console.log('StillMe Chat: Parent button clicked');
-                            window.parent.postMessage({{type: 'stillme_toggle_chat'}}, '*');
-                            // Also try to trigger in iframe
-                            const iframe = parentDoc.querySelector('iframe[src*="about:srcdoc"]');
-                            if (iframe && iframe.contentWindow) {{
-                                iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                            
+                            // Find iframe and send message to it
+                            const iframes = parentDoc.querySelectorAll('iframe');
+                            console.log('StillMe Chat: Found iframes:', iframes.length);
+                            
+                            let messageSent = false;
+                            for (let iframe of iframes) {{
+                                try {{
+                                    if (iframe.contentWindow) {{
+                                        console.log('StillMe Chat: Sending message to iframe:', iframe.src || 'srcdoc');
+                                        iframe.contentWindow.postMessage({{type: 'stillme_toggle_chat'}}, '*');
+                                        messageSent = true;
+                                    }}
+                                }} catch (err) {{
+                                    console.warn('StillMe Chat: Could not send to iframe:', err);
+                                }}
+                            }}
+                            
+                            if (!messageSent) {{
+                                console.error('StillMe Chat: Could not find iframe to send message to');
                             }}
                         }};
                         
@@ -549,10 +564,18 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             
             // Listen for messages from parent window
             window.addEventListener('message', function(event) {{
+                console.log('StillMe Chat: Received message:', event.data, 'from:', event.origin);
                 if (event.data && event.data.type === 'stillme_toggle_chat') {{
+                    console.log('StillMe Chat: Toggling chat panel...');
                     toggleChat();
                 }}
             }});
+            
+            // Also expose toggleChat globally for direct access (fallback)
+            window.stillmeToggleChat = function() {{
+                console.log('StillMe Chat: toggleChat called via global function');
+                toggleChat();
+            }};
             
             // Render chat history with auto-scroll
             function renderMessages() {{
