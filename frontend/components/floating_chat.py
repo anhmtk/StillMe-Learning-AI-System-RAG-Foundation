@@ -879,10 +879,70 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }}
                                     
                                     // Create panel in parent with full HTML structure
+                                    // CRITICAL: Create elements in correct order (header -> messages -> input)
                                     parentPanel = parentDoc.createElement('div');
                                     parentPanel.id = 'stillme-chat-panel-parent';
-                                    parentPanel.innerHTML = panel.innerHTML; // Copy inner HTML (header -> messages -> input)
-                                    // No need for inline styles - CSS is in <style> tag
+                                    
+                                    // Create header
+                                    const parentHeader = parentDoc.createElement('div');
+                                    parentHeader.className = 'stillme-chat-header';
+                                    parentHeader.id = 'stillme-chat-header-parent';
+                                    const headerTitle = parentDoc.createElement('h3');
+                                    headerTitle.textContent = '💬 Chat with StillMe';
+                                    const headerButtons = parentDoc.createElement('div');
+                                    headerButtons.className = 'stillme-chat-header-buttons';
+                                    
+                                    const minimizeBtn = parentDoc.createElement('button');
+                                    minimizeBtn.className = 'stillme-chat-header-btn';
+                                    minimizeBtn.id = 'minimize-btn';
+                                    minimizeBtn.textContent = '−';
+                                    minimizeBtn.title = 'Minimize';
+                                    
+                                    const fullscreenBtn = parentDoc.createElement('button');
+                                    fullscreenBtn.className = 'stillme-chat-header-btn';
+                                    fullscreenBtn.id = 'fullscreen-btn';
+                                    fullscreenBtn.textContent = '⛶';
+                                    fullscreenBtn.title = 'Toggle Fullscreen';
+                                    
+                                    const closeBtn = parentDoc.createElement('button');
+                                    closeBtn.className = 'stillme-chat-close';
+                                    closeBtn.textContent = '×';
+                                    closeBtn.title = 'Close';
+                                    
+                                    headerButtons.appendChild(minimizeBtn);
+                                    headerButtons.appendChild(fullscreenBtn);
+                                    headerButtons.appendChild(closeBtn);
+                                    parentHeader.appendChild(headerTitle);
+                                    parentHeader.appendChild(headerButtons);
+                                    
+                                    // Create messages container
+                                    const parentMessages = parentDoc.createElement('div');
+                                    parentMessages.className = 'stillme-chat-messages';
+                                    parentMessages.id = 'stillme-chat-messages';
+                                    
+                                    // Create input container
+                                    const parentInputContainer = parentDoc.createElement('div');
+                                    parentInputContainer.className = 'stillme-chat-input-container';
+                                    const parentInputWrapper = parentDoc.createElement('div');
+                                    parentInputWrapper.className = 'stillme-chat-input-wrapper';
+                                    const parentInput = parentDoc.createElement('textarea');
+                                    parentInput.id = 'stillme-chat-input';
+                                    parentInput.placeholder = 'Type your message... (Press Enter to send, Shift+Enter for new line)';
+                                    parentInput.rows = 2;
+                                    const parentSendBtn = parentDoc.createElement('button');
+                                    parentSendBtn.id = 'stillme-chat-send';
+                                    parentSendBtn.textContent = 'Send';
+                                    
+                                    parentInputWrapper.appendChild(parentInput);
+                                    parentInputWrapper.appendChild(parentSendBtn);
+                                    parentInputContainer.appendChild(parentInputWrapper);
+                                    
+                                    // Append in correct order: header -> messages -> input
+                                    parentPanel.appendChild(parentHeader);
+                                    parentPanel.appendChild(parentMessages);
+                                    parentPanel.appendChild(parentInputContainer);
+                                    
+                                    console.log('StillMe Chat: Parent panel created with correct HTML structure (header -> messages -> input)');
                                     
                                     // Setup event handlers for parent panel
                                     const parentCloseBtn = parentPanel.querySelector('.stillme-chat-close');
