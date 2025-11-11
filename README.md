@@ -666,71 +666,9 @@ We open these questions to the community:
 
 ## 🔧 Architecture
 
-```mermaid
-graph TB
-    subgraph "External Sources"
-        RSS[RSS Feeds<br/>ArXiv, TechCrunch, HN]
-        API[Public APIs<br/>NewsAPI, GNews]
-    end
-    
-    subgraph "StillMe Core System"
-        Scheduler[Hybrid Learning Scheduler<br/>Every 4 hours]
-        Learning[Learning Engine<br/>FastAPI Backend]
-        
-        subgraph "Processing Pipeline"
-            Fetch[Content Fetching]
-            RedTeam[Red-Team Agent<br/>Safety Scanning]
-            Ethics[EthicsGuard<br/>Ethical Filter]
-            Assess[Quality Assessment]
-        end
-        
-        subgraph "Routing System"
-            Router{Smart Router<br/>DeepSeek/Ollama}
-            AutoApprove[Auto-Approve<br/>Trust > 0.8]
-            Community[Community Queue<br/>Trust 0.6-0.8]
-            HumanReview[Human Review<br/>Trust < 0.6]
-        end
-        
-        subgraph "Data Layer"
-            KB[(Knowledge Base<br/>JSON)]
-            DB[(SQLite DB<br/>Sessions, Votes)]
-            Evolution[(Evolution DB<br/>Stages)]
-        end
-        
-        Dashboard[Streamlit Dashboard<br/>Real-time Monitoring]
-        Chat[Chat Interface<br/>User Interaction]
-    end
-    
-    subgraph "Community"
-        Voters[Community Voting<br/>Weighted Trust]
-        EthicsQueue[EthicsGuard Queue]
-    end
-    
-    RSS --> Fetch
-    API --> Fetch
-    Scheduler --> Learning
-    Learning --> Fetch
-    Fetch --> RedTeam
-    RedTeam --> Ethics
-    Ethics --> Assess
-    Assess --> Router
-    Router --> AutoApprove
-    Router --> Community
-    Router --> HumanReview
-    AutoApprove --> KB
-    Community --> Voters
-    Voters --> EthicsQueue
-    EthicsQueue --> KB
-    HumanReview --> KB
-    KB --> Dashboard
-    DB --> Dashboard
-    Evolution --> Dashboard
-    Chat --> Router
-    Learning --> Evolution
-    Learning --> DB
-```
-
 > **Detailed architecture documentation**: See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for component details, data flow, API architecture, and deployment considerations.
+
+> **Note**: The System Architecture Diagram is shown above in the [Architecture](#-architecture) section. It reflects the current implementation with Source Integration, Pre-Filter, Nested Learning, and ChromaDB.
 
 ## 🌍 StillMe & The Path to Digital Sovereignty
 
