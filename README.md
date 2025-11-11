@@ -418,6 +418,7 @@ graph TB
 ### 📋 **Planned/In Development (Next 30-60 days):**
 - **⏰ Automated Scheduler**: ✅ **IMPLEMENTED** - Background task auto-fetches RSS every 4 hours
 - **🧪 Test Coverage**: ✅ **IMPLEMENTED** - 83 tests covering RSS fetcher, scheduler, curator, knowledge retention, integration tests
+- **🎯 Dynamic Test Suite**: ✅ **IMPLEMENTED** - Automated quality testing with rotating question pool, domain coverage analysis, and knowledge gap-based question generation. See [`docs/DYNAMIC_TEST_SUITE_DESIGN.md`](docs/DYNAMIC_TEST_SUITE_DESIGN.md) for architecture and [`tests/stillme_chat_test_suite.py`](tests/stillme_chat_test_suite.py) for implementation.
 - **🔐 Security Hardening**: ✅ **IMPLEMENTED** - Rate limiting, comprehensive input validation, SQL injection protection (audited), HTTPS enforcement
 - **👥 Community Voting**: Secure voting system designed, awaiting implementation
 - **🛡️ Ethical Filtering**: Framework exists, needs integration
@@ -1180,6 +1181,7 @@ If you're in a developing nation working on:
 - ✅ Test coverage expanded: 110+ tests covering RSS fetcher, scheduler, curator, knowledge retention, integration tests, confidence validation (27 new tests)
 - ✅ Integration tests for RSS → RAG pipeline implemented
 - ✅ Confidence validation tests: 27 strict tests (11 confidence validator, 10 fallback handler, 6 integration) - all passing
+- ✅ Dynamic Test Suite: Automated quality testing with rotating question pool, domain coverage analysis, and knowledge gap-based question generation (Phase 1-4 complete)
 
 **Scalability:**
 - ⚠️ SQLite database will bottleneck when scaling (PostgreSQL migration planned - Alembic setup completed, see `docs/DATABASE_MIGRATION_PLANNING.md`)
@@ -1241,6 +1243,7 @@ StillMe's documentation is **intentionally modular** - each file focuses on a sp
 - **Development Guide**: See [`docs/DEVELOPMENT_GUIDE.md`](docs/DEVELOPMENT_GUIDE.md) for contributing guidelines
 - **SPICE Architecture**: See [`docs/SPICE_ARCHITECTURE.md`](docs/SPICE_ARCHITECTURE.md) for SPICE framework details
 - **Confidence Validation**: See [`docs/CONFIDENCE_AND_FALLBACK.md`](docs/CONFIDENCE_AND_FALLBACK.md) for confidence validation and fallback handler details
+- **Dynamic Test Suite**: See [`docs/DYNAMIC_TEST_SUITE_DESIGN.md`](docs/DYNAMIC_TEST_SUITE_DESIGN.md) for automated quality testing architecture. Run tests with [`tests/stillme_chat_test_suite.py`](tests/stillme_chat_test_suite.py)
 
 **💡 Quick Navigation:**
 - **Want to understand StillMe's vision?** → [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md)

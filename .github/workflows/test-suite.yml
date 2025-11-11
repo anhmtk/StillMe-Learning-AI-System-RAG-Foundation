@@ -1,0 +1,74 @@
+name: StillMe Chat Test Suite
+
+on:
+  push:
+    branches: [main, learning-update]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      use_coverage:
+        description: 'Use domain coverage analysis'
+        required: false
+        default: 'false'
+        type: boolean
+      generate_from_gaps:
+        description: 'Generate questions from gaps'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  test-suite:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+      
+      - name: Wait for backend to be ready
+        run: |
+          echo "Waiting for backend to be ready..."
+          timeout=300
+          elapsed=0
+          while [ $elapsed -lt $timeout ]; do
+            if curl -f http://localhost:8000/health > /dev/null 2>&1; then
+              echo "Backend is ready!"
+              break
+            fi
+            echo "Waiting... ($elapsed/$timeout seconds)"
+            sleep 5
+            elapsed=$((elapsed + 5))
+          done
+        continue-on-error: true
+      
+      - name: Run test suite
+        env:
+          API_BASE: ${{ secrets.API_BASE || 'http://localhost:8000' }}
+        run: |
+          python tests/stillme_chat_test_suite.py \
+            --api-base $API_BASE \
+            --questions 20 \
+            --use-coverage ${{ github.event.inputs.use_coverage || 'false' }} \
+            --generate-from-gaps ${{ github.event.inputs.generate_from_gaps || 'false' }} \
+            --output "test_${{ github.run_id }}"
+        continue-on-error: true
+      
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: tests/results/*.csv
+          retention-days: 30
+
