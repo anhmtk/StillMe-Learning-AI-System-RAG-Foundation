@@ -755,31 +755,134 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         }}
                                     }};
                                     
+                                    // CRITICAL: Inject CSS styles into parent window first
+                                    if (!parentDoc.getElementById('stillme-chat-styles')) {{
+                                        const styleSheet = parentDoc.createElement('style');
+                                        styleSheet.id = 'stillme-chat-styles';
+                                        styleSheet.textContent = `
+                                            #stillme-chat-panel-parent {{
+                                                position: fixed !important;
+                                                top: 50% !important;
+                                                left: 50% !important;
+                                                transform: translate(-50%, -50%) !important;
+                                                width: 600px !important;
+                                                height: 700px !important;
+                                                min-width: 400px !important;
+                                                min-height: 400px !important;
+                                                max-width: 95vw !important;
+                                                max-height: 95vh !important;
+                                                background: #1e1e1e !important;
+                                                border-radius: 8px !important;
+                                                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+                                                display: flex !important;
+                                                flex-direction: column !important;
+                                                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                                                overflow: hidden !important;
+                                                z-index: 1000000 !important;
+                                                align-items: stretch !important;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-header {{
+                                                background: #252526 !important;
+                                                padding: 12px 16px !important;
+                                                border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+                                                display: flex !important;
+                                                justify-content: space-between !important;
+                                                align-items: center !important;
+                                                cursor: move !important;
+                                                user-select: none !important;
+                                                flex-shrink: 0 !important;
+                                                order: 1 !important;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-header h3 {{
+                                                margin: 0;
+                                                color: #cccccc !important;
+                                                font-size: 14px !important;
+                                                font-weight: 500 !important;
+                                                flex: 1;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-messages {{
+                                                flex: 1 1 auto !important;
+                                                overflow-y: auto !important;
+                                                padding: 16px !important;
+                                                display: flex !important;
+                                                flex-direction: column !important;
+                                                gap: 12px !important;
+                                                background: #1e1e1e !important;
+                                                min-height: 0 !important;
+                                                order: 2 !important;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-input-container {{
+                                                padding: 12px 16px !important;
+                                                border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+                                                background: #252526 !important;
+                                                flex-shrink: 0 !important;
+                                                flex-grow: 0 !important;
+                                                order: 3 !important;
+                                                margin-top: auto !important;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-input-wrapper {{
+                                                display: flex;
+                                                gap: 8px;
+                                            }}
+                                            #stillme-chat-panel-parent #stillme-chat-input {{
+                                                flex: 1;
+                                                padding: 10px 14px !important;
+                                                background: #2d2d30 !important;
+                                                border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                                                border-radius: 4px !important;
+                                                color: #cccccc !important;
+                                                font-size: 14px !important;
+                                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                                                resize: none;
+                                            }}
+                                            #stillme-chat-panel-parent #stillme-chat-input:focus {{
+                                                outline: none !important;
+                                                border-color: #0e639c !important;
+                                            }}
+                                            #stillme-chat-panel-parent #stillme-chat-input::placeholder {{
+                                                color: #858585 !important;
+                                            }}
+                                            #stillme-chat-panel-parent #stillme-chat-send {{
+                                                padding: 12px 24px;
+                                                background: #46b3ff;
+                                                border: none;
+                                                border-radius: 8px;
+                                                color: white;
+                                                font-weight: 600;
+                                                cursor: pointer;
+                                                transition: background 0.2s;
+                                            }}
+                                            #stillme-chat-panel-parent #stillme-chat-send:hover {{
+                                                background: #1e90ff;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-message {{
+                                                padding: 10px 14px !important;
+                                                border-radius: 6px !important;
+                                                max-width: 80%;
+                                                word-wrap: break-word;
+                                                line-height: 1.5 !important;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-message.user {{
+                                                background: #0e639c !important;
+                                                color: #ffffff !important;
+                                                align-self: flex-end;
+                                                margin-left: auto;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant {{
+                                                background: #2d2d30 !important;
+                                                color: #cccccc !important;
+                                                align-self: flex-start;
+                                            }}
+                                        `;
+                                        parentDoc.head.appendChild(styleSheet);
+                                        console.log('StillMe Chat: CSS styles injected into parent window');
+                                    }}
+                                    
                                     // Create panel in parent with full HTML structure
                                     parentPanel = parentDoc.createElement('div');
                                     parentPanel.id = 'stillme-chat-panel-parent';
-                                    parentPanel.innerHTML = panel.innerHTML; // Copy inner HTML
-                                    parentPanel.style.cssText = `
-                                        position: fixed !important;
-                                        top: 50% !important;
-                                        left: 50% !important;
-                                        transform: translate(-50%, -50%) !important;
-                                        width: 600px !important;
-                                        height: 700px !important;
-                                        min-width: 400px !important;
-                                        min-height: 400px !important;
-                                        max-width: 95vw !important;
-                                        max-height: 95vh !important;
-                                        background: #0e1117 !important;
-                                        border-radius: 12px !important;
-                                        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
-                                        display: flex !important;
-                                        flex-direction: column !important;
-                                        border: 1px solid #262730 !important;
-                                        overflow: hidden !important;
-                                        z-index: 1000000 !important;
-                                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-                                    `;
+                                    parentPanel.innerHTML = panel.innerHTML; // Copy inner HTML (header -> messages -> input)
+                                    // No need for inline styles - CSS is in <style> tag
                                     
                                     // Setup event handlers for parent panel
                                     const parentCloseBtn = parentPanel.querySelector('.stillme-chat-close');
