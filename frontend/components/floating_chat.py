@@ -1237,40 +1237,40 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     }}
                     
                     // Send message (from iframe input)
-            async function sendMessage() {{
-                const input = document.getElementById('stillme-chat-input');
-                const message = input.value.trim();
-                
-                if (!message) return;
-                
-                // Disable send button
-                const sendBtn = document.getElementById('stillme-chat-send');
-                sendBtn.disabled = true;
-                sendBtn.textContent = 'Sending...';
-                
-                // Add user message to history
-                chatHistory.push({{ role: 'user', content: message }});
-                renderMessages();
-                
-                // Clear input
-                input.value = '';
-                
-                // Send to backend
-                try {{
-                    const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
-                        method: 'POST',
-                        headers: {{
-                            'Content-Type': 'application/json',
-                        }},
-                        body: JSON.stringify({{ message: message }}),
-                    }});
-                    
-                    const data = await response.json();
-                    const reply = data.response || data.message || JSON.stringify(data);
-                    
-                    // Add assistant response
-                    chatHistory.push({{ role: 'assistant', content: reply }});
-                    renderMessages();
+                    async function sendMessage() {{
+                        const input = document.getElementById('stillme-chat-input');
+                        const message = input.value.trim();
+                        
+                        if (!message) return;
+                        
+                        // Disable send button
+                        const sendBtn = document.getElementById('stillme-chat-send');
+                        sendBtn.disabled = true;
+                        sendBtn.textContent = 'Sending...';
+                        
+                        // Add user message to history
+                        chatHistory.push({{ role: 'user', content: message }});
+                        renderMessages();
+                        
+                        // Clear input
+                        input.value = '';
+                        
+                        // Send to backend
+                        try {{
+                            const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
+                                method: 'POST',
+                                headers: {{
+                                    'Content-Type': 'application/json',
+                                }},
+                                body: JSON.stringify({{ message: message }}),
+                            }});
+                            
+                            const data = await response.json();
+                            const reply = data.response || data.message || JSON.stringify(data);
+                            
+                            // Add assistant response
+                            chatHistory.push({{ role: 'assistant', content: reply }});
+                            renderMessages();
                             
                             // Update parent panel with new messages
                             if (window.parent && window.parent !== window) {{
@@ -1292,19 +1292,19 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }}
                                 }}
                             }}
-                    
-                    // Send message to Streamlit parent
-                    window.parent.postMessage({{
-                        type: 'stillme_chat_message',
-                        history: chatHistory
-                    }}, '*');
-                    
-                }} catch (error) {{
-                    chatHistory.push({{ 
-                        role: 'assistant', 
-                        content: `❌ Error: ${{error.message}}` 
-                    }});
-                    renderMessages();
+                            
+                            // Send message to Streamlit parent
+                            window.parent.postMessage({{
+                                type: 'stillme_chat_message',
+                                history: chatHistory
+                            }}, '*');
+                            
+                        }} catch (error) {{
+                            chatHistory.push({{ 
+                                role: 'assistant', 
+                                content: `❌ Error: ${{error.message}}` 
+                            }});
+                            renderMessages();
                             
                             // Update parent panel with error message
                             if (window.parent && window.parent !== window) {{
@@ -1325,12 +1325,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }}
                                 }}
                             }}
-                }} finally {{
-                    sendBtn.disabled = false;
-                    sendBtn.textContent = 'Send';
-                    input.focus();
-                }}
-            }}
+                        }} finally {{
+                            sendBtn.disabled = false;
+                            sendBtn.textContent = 'Send';
+                            input.focus();
+                        }}
+                    }}
             
             // Handle Enter key (Enter to send, Shift+Enter for new line)
                     const inputElement = document.getElementById('stillme-chat-input');
