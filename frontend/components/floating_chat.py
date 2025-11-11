@@ -771,6 +771,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     
                                     // Setup event handlers for parent panel
                                     const parentCloseBtn = parentPanel.querySelector('.stillme-chat-close');
+                                    const parentMinimizeBtn = parentPanel.querySelector('#minimize-btn');
+                                    const parentFullscreenBtn = parentPanel.querySelector('#fullscreen-btn');
+                                    
                                     if (parentCloseBtn) {{
                                         parentCloseBtn.onclick = function(e) {{
                                             e.preventDefault();
@@ -784,6 +787,36 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 }} catch (err) {{
                                                     console.warn('StillMe Chat: Could not send toggle message:', err);
                                                 }}
+                                            }}
+                                        }};
+                                    }}
+                                    
+                                    if (parentMinimizeBtn) {{
+                                        parentMinimizeBtn.onclick = function(e) {{
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            parentPanel.classList.toggle('minimized');
+                                            if (parentPanel.classList.contains('minimized')) {{
+                                                parentMinimizeBtn.textContent = '□';
+                                                parentMinimizeBtn.title = 'Restore';
+                                            }} else {{
+                                                parentMinimizeBtn.textContent = '−';
+                                                parentMinimizeBtn.title = 'Minimize';
+                                            }}
+                                        }};
+                                    }}
+                                    
+                                    if (parentFullscreenBtn) {{
+                                        parentFullscreenBtn.onclick = function(e) {{
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            parentPanel.classList.toggle('fullscreen');
+                                            if (parentPanel.classList.contains('fullscreen')) {{
+                                                parentFullscreenBtn.textContent = '⛶';
+                                                parentFullscreenBtn.title = 'Exit Fullscreen';
+                                            }} else {{
+                                                parentFullscreenBtn.textContent = '⛶';
+                                                parentFullscreenBtn.title = 'Toggle Fullscreen';
                                             }}
                                         }};
                                     }}
@@ -902,8 +935,44 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }}
                     }}
                     
+                    // Toggle minimize
+                    function toggleMinimize() {{
+                        isMinimized = !isMinimized;
+                        const minimizeBtn = document.getElementById('minimize-btn');
+                        
+                        if (isMinimized) {{
+                            panel.classList.add('minimized');
+                            minimizeBtn.textContent = '□'; // Restore icon
+                            minimizeBtn.title = 'Restore';
+                            // Exit fullscreen if minimized
+                            if (isFullscreen) {{
+                                isFullscreen = false;
+                                panel.classList.remove('fullscreen');
+                                const fullscreenBtn = document.getElementById('fullscreen-btn');
+                                fullscreenBtn.textContent = '⛶';
+                                fullscreenBtn.title = 'Toggle Fullscreen';
+                            }}
+                        }} else {{
+                            panel.classList.remove('minimized');
+                            minimizeBtn.textContent = '−'; // Minimize icon
+                            minimizeBtn.title = 'Minimize';
+                        }}
+                        
+                        // Save state
+                        savePanelState();
+                    }}
+                    
                     // Toggle fullscreen
                     function toggleFullscreen() {{
+                        // Exit minimize if fullscreen
+                        if (isMinimized) {{
+                            isMinimized = false;
+                            panel.classList.remove('minimized');
+                            const minimizeBtn = document.getElementById('minimize-btn');
+                            minimizeBtn.textContent = '−';
+                            minimizeBtn.title = 'Minimize';
+                        }}
+                        
                         isFullscreen = !isFullscreen;
                         const fullscreenBtn = document.getElementById('fullscreen-btn');
                         
@@ -918,6 +987,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             // Restore saved position/size
                             loadPanelState();
                         }}
+                        
+                        // Save state
+                        savePanelState();
                     }}
                     
                     // Drag functionality - improved like Cursor
@@ -984,22 +1056,24 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     setupResizeHandle(document.querySelector('.resize-handle.e'), 'e');
                     setupResizeHandle(document.querySelector('.resize-handle.w'), 'w');
                     
-                    // Mouse move handler for drag and resize
+                    // Mouse move handler for drag and resize - improved like Cursor
                     document.addEventListener('mousemove', (e) => {{
-                        if (isDragging && !isFullscreen) {{
+                        if (isDragging && !isFullscreen && !isMinimized) {{
                             const deltaX = e.clientX - dragStartX;
                             const deltaY = e.clientY - dragStartY;
                             
                             let newX = panelStartX + deltaX;
                             let newY = panelStartY + deltaY;
                             
-                            // Constrain to viewport
-                            newX = Math.max(0, Math.min(newX, window.innerWidth - panel.offsetWidth));
-                            newY = Math.max(0, Math.min(newY, window.innerHeight - panel.offsetHeight));
+                            // Constrain to viewport (allow partial off-screen like Cursor)
+                            const panelWidth = panel.offsetWidth;
+                            const panelHeight = panel.offsetHeight;
+                            newX = Math.max(-panelWidth + 100, Math.min(newX, window.innerWidth - 100));
+                            newY = Math.max(0, Math.min(newY, window.innerHeight - 50));
                             
                             panel.style.left = newX + 'px';
                             panel.style.top = newY + 'px';
-                        }} else if (isResizing && !isFullscreen && resizeHandle) {{
+                        }} else if (isResizing && !isFullscreen && !isMinimized && resizeHandle) {{
                             const deltaX = e.clientX - dragStartX;
                             const deltaY = e.clientY - dragStartY;
                             
