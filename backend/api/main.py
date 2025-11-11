@@ -67,32 +67,31 @@ else:
     env = os.getenv("ENV", "development").lower()
     is_production = env == "production"
     
-    # Auto-detect Railway origins in production
+    # Auto-detect Railway origins (check regardless of ENV, since Railway may not set ENV=production)
     cors_origin_regex = None
-    if is_production:
-        # Check if we're running on Railway
-        # Railway sets various env vars: RAILWAY_ENVIRONMENT, RAILWAY_PROJECT_NAME, PORT, etc.
-        railway_env = os.getenv("RAILWAY_ENVIRONMENT", "")
-        railway_project = os.getenv("RAILWAY_PROJECT_NAME", "")
-        # Also check if PORT is set (Railway always sets this)
-        port_env = os.getenv("PORT", "")
-        # If any Railway indicator is present, allow Railway origins
-        if railway_env or railway_project or (port_env and port_env.isdigit()):
-            # Allow all Railway subdomains using regex
-            # Railway URLs pattern: https://<service-name>-<environment>.up.railway.app
-            cors_origin_regex = r"https?://.*\.up\.railway\.app"
-            logger.info(
-                "✅ Railway environment detected. "
-                "Auto-allowing Railway origins (regex: *.up.railway.app) for CORS. "
-                "For production, consider setting CORS_ALLOWED_ORIGINS explicitly for better security."
-            )
-        else:
-            logger.warning(
-                "⚠️ PRODUCTION WARNING: CORS_ALLOWED_ORIGINS not set! "
-                "This is a security risk in production. "
-                "Set CORS_ALLOWED_ORIGINS environment variable with comma-separated list of allowed origins. "
-                "Example: CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com"
-            )
+    # Check if we're running on Railway
+    # Railway sets various env vars: RAILWAY_ENVIRONMENT, RAILWAY_PROJECT_NAME, PORT, etc.
+    railway_env = os.getenv("RAILWAY_ENVIRONMENT", "")
+    railway_project = os.getenv("RAILWAY_PROJECT_NAME", "")
+    # Also check if PORT is set (Railway always sets this, but other platforms might too)
+    port_env = os.getenv("PORT", "")
+    # If any Railway indicator is present, allow Railway origins
+    if railway_env or railway_project or (port_env and port_env.isdigit()):
+        # Allow all Railway subdomains using regex
+        # Railway URLs pattern: https://<service-name>-<environment>.up.railway.app
+        cors_origin_regex = r"https?://.*\.up\.railway\.app"
+        logger.info(
+            "✅ Railway environment detected. "
+            "Auto-allowing Railway origins (regex: *.up.railway.app) for CORS. "
+            "For production, consider setting CORS_ALLOWED_ORIGINS explicitly for better security."
+        )
+    elif is_production:
+        logger.warning(
+            "⚠️ PRODUCTION WARNING: CORS_ALLOWED_ORIGINS not set! "
+            "This is a security risk in production. "
+            "Set CORS_ALLOWED_ORIGINS environment variable with comma-separated list of allowed origins. "
+            "Example: CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com"
+        )
     else:
         logger.warning(
             "⚠️ CORS_ALLOWED_ORIGINS not set. Using default localhost origins only. "
