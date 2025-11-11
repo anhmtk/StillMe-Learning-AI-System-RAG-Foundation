@@ -281,11 +281,17 @@ class ModelManager:
             logger.info(f"   Destination: {persistent_volume}")
             
             # Determine destination path based on source structure
-            if "sentence_transformers" in str(source_path):
+            # Preserve the same structure as source (hub/ or sentence_transformers/)
+            if "hub" in str(source_path):
+                # HuggingFace hub format - preserve full path structure
+                if "models--sentence-transformers--" in str(source_path):
+                    dest_path = persistent_volume / "hub" / f"models--sentence-transformers--{self.model_name_hf}"
+                else:
+                    dest_path = persistent_volume / "hub" / f"models--{self.model_name_hf}"
+            elif "sentence_transformers" in str(source_path):
                 dest_path = persistent_volume / "sentence_transformers" / self.model_name_safe
-            elif "hub" in str(source_path) or "models--" in str(source_path):
-                dest_path = persistent_volume / "hub" / f"models--{self.model_name_hf}"
             else:
+                # Fallback: use source name
                 dest_path = persistent_volume / source_path.name
             
             dest_path.parent.mkdir(parents=True, exist_ok=True)
