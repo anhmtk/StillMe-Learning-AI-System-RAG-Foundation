@@ -1253,6 +1253,15 @@ async def get_nested_learning_metrics():
     
     try:
         from backend.api.metrics_collector import get_metrics_collector
+        
+        # CRITICAL: Force reload module to avoid Python cache issues
+        # If code was updated but module was cached, this ensures we get the latest version
+        import sys
+        import importlib
+        if 'backend.learning.continuum_memory' in sys.modules:
+            importlib.reload(sys.modules['backend.learning.continuum_memory'])
+        
+        # Import after reload to ensure we get the latest version
         from backend.learning.continuum_memory import ContinuumMemory, TIER_UPDATE_FREQUENCY
         
         metrics = get_metrics_collector()
@@ -1260,14 +1269,24 @@ async def get_nested_learning_metrics():
         nested_metrics = all_metrics.get("nested_learning", {})
         
         # Get tier distribution from database
+        
         continuum_memory = ContinuumMemory()
         
         # Try to get tier stats - handle both old and new method names for compatibility
         try:
             tier_stats = continuum_memory.get_tier_stats()
         except AttributeError as e:
-            # Fallback: if method doesn't exist, return empty stats
-            # This handles cases where code hasn't been updated yet
+            # Check if it's the old method name issue
+            if 'get_tier_statistics' in str(e) or 'get_tier_stats' in str(e):
+                logger.error(f"❌ CRITICAL: ContinuumMemory class is outdated. Method not found: {e}")
+                logger.error("   This usually means Python module cache needs to be cleared.")
+                logger.error("   Solution: Restart the backend service to clear Python cache.")
+                # Return error response instead of empty stats
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"ContinuumMemory class is outdated. Please restart the backend service to clear Python module cache. Error: {str(e)}"
+                )
+            # Other AttributeError - use fallback
             logger.warning(f"get_tier_stats() not available, using fallback: {e}")
             tier_stats = {"L0": 0, "L1": 0, "L2": 0, "L3": 0, "total": 0, "promoted_7d": 0, "demoted_7d": 0}
         
