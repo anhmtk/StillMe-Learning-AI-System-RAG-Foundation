@@ -268,5 +268,5 @@ POST /api/spice/reasoner/evaluate
 
 - SPICE Paper: https://arxiv.org/abs/2510.24684
 - Meta AI Research: Self-Play In Corpus Environments
-- StillMe Core Principles: Transparency, Open Governance, Counter-movement to Black Box AI
+- StillMe Core Principles: Transparency, Open Governance, Acknowledging Black Box Reality and Building Transparent Solutions
 
