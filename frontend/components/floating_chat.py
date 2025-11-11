@@ -117,12 +117,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 min-height: 400px !important;
                 max-width: 95vw !important;
                 max-height: 95vh !important;
-                background: #0e1117 !important;
-                border-radius: 12px !important;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+                background: #1e1e1e !important; /* Cursor-like dark background */
+                border-radius: 8px !important; /* Smaller radius like Cursor */
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) !important; /* Subtle shadow like Cursor */
                 display: {'flex' if is_open else 'none'} !important;
                 flex-direction: column !important;
-                border: 1px solid #262730 !important;
+                border: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border like Cursor */
                 overflow: hidden !important;
                 resize: both !important; /* Browser native resize (fallback) */
                 z-index: 1000000 !important;
@@ -197,21 +197,22 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             }}
             
             .stillme-chat-header {{
-                background: #262730;
-                padding: 16px 20px;
-                border-bottom: 1px solid #3a3d47;
+                background: #252526 !important; /* Cursor-like header background */
+                padding: 12px 16px !important; /* Tighter padding like Cursor */
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border */
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 cursor: move; /* Indicate draggable */
                 user-select: none; /* Prevent text selection when dragging */
+                flex-shrink: 0; /* Don't shrink header */
             }}
             
             .stillme-chat-header h3 {{
                 margin: 0;
-                color: #46b3ff;
-                font-size: 18px;
-                font-weight: 600;
+                color: #cccccc !important; /* Cursor-like text color */
+                font-size: 14px !important; /* Smaller font like Cursor */
+                font-weight: 500 !important; /* Medium weight like Cursor */
                 flex: 1;
             }}
             
@@ -264,36 +265,39 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             .stillme-chat-messages {{
                 flex: 1;
                 overflow-y: auto;
-                padding: 20px;
+                padding: 16px !important; /* Tighter padding like Cursor */
                 display: flex;
                 flex-direction: column;
                 gap: 12px;
+                background: #1e1e1e !important; /* Match panel background */
             }}
             
             .stillme-chat-message {{
-                padding: 12px 16px;
-                border-radius: 8px;
+                padding: 10px 14px !important; /* Tighter padding like Cursor */
+                border-radius: 6px !important; /* Smaller radius like Cursor */
                 max-width: 80%;
                 word-wrap: break-word;
+                line-height: 1.5 !important; /* Better line height */
             }}
             
             .stillme-chat-message.user {{
-                background: #46b3ff;
-                color: white;
+                background: #0e639c !important; /* Cursor-like blue */
+                color: #ffffff !important;
                 align-self: flex-end;
                 margin-left: auto;
             }}
             
             .stillme-chat-message.assistant {{
-                background: #262730;
-                color: #ffffff;
+                background: #2d2d30 !important; /* Cursor-like dark gray */
+                color: #cccccc !important; /* Cursor-like text color */
                 align-self: flex-start;
             }}
             
             .stillme-chat-input-container {{
-                padding: 16px 20px;
-                border-top: 1px solid #262730;
-                background: #0e1117;
+                padding: 12px 16px !important; /* Tighter padding like Cursor */
+                border-top: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border */
+                background: #1e1e1e !important; /* Match panel background */
+                flex-shrink: 0; /* Don't shrink input area */
             }}
             
             .stillme-chat-input-wrapper {{
@@ -303,19 +307,23 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             
             #stillme-chat-input {{
                 flex: 1;
-                padding: 12px 16px;
-                background: #262730;
-                border: 1px solid #3a3d47;
-                border-radius: 8px;
-                color: #ffffff;
-                font-size: 14px;
-                font-family: inherit;
+                padding: 10px 14px !important; /* Tighter padding like Cursor */
+                background: #2d2d30 !important; /* Cursor-like input background */
+                border: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border */
+                border-radius: 4px !important; /* Smaller radius like Cursor */
+                color: #cccccc !important; /* Cursor-like text color */
+                font-size: 14px !important;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
                 resize: none;
             }}
             
             #stillme-chat-input:focus {{
-                outline: none;
-                border-color: #46b3ff;
+                outline: none !important;
+                border-color: #0e639c !important; /* Cursor-like focus color */
+            }}
+            
+            #stillme-chat-input::placeholder {{
+                color: #858585 !important; /* Cursor-like placeholder color */
             }}
             
             #stillme-chat-send {{
@@ -414,10 +422,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             try {{
                 console.log('StillMe Chat: Script starting...');
                 
-                const API_BASE = '{api_base}';
-                let chatHistory = {chat_history_json};
-                let isOpen = {str(is_open).lower()};
-                
+            const API_BASE = '{api_base}';
+            let chatHistory = {chat_history_json};
+            let isOpen = {str(is_open).lower()};
+            
                 console.log('StillMe Chat: Variables initialized, isOpen:', isOpen);
                 
                 // Panel state
@@ -682,25 +690,25 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     console.log('StillMe Chat: Message listener registered and toggleChat exposed globally');
                     
                     // Render chat history with auto-scroll
-                    function renderMessages() {{
-                        const messagesContainer = document.getElementById('stillme-chat-messages');
-                        messagesContainer.innerHTML = '';
-                        
-                        chatHistory.forEach(msg => {{
-                            const messageDiv = document.createElement('div');
-                            messageDiv.className = `stillme-chat-message ${{msg.role}}`;
-                            messageDiv.textContent = msg.content;
-                            messagesContainer.appendChild(messageDiv);
-                        }});
-                        
+            function renderMessages() {{
+                const messagesContainer = document.getElementById('stillme-chat-messages');
+                messagesContainer.innerHTML = '';
+                
+                chatHistory.forEach(msg => {{
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `stillme-chat-message ${{msg.role}}`;
+                    messageDiv.textContent = msg.content;
+                    messagesContainer.appendChild(messageDiv);
+                }});
+                
                         // Auto-scroll to bottom (like ChatGPT, DeepSeek, etc.)
                         setTimeout(() => {{
-                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
                         }}, 10);
-                    }}
-                    
+            }}
+            
                     // Toggle chat panel with overlay
-                    function toggleChat() {{
+            function toggleChat() {{
                         console.log('StillMe Chat: toggleChat() called');
                         const isVisible = panel.style.display === 'flex' || panel.style.display === '';
                         console.log('StillMe Chat: Panel currently visible:', isVisible);
@@ -920,10 +928,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         
                         // Ensure button stays visible
                         ensureButtonVisible();
-                        
-                        if (!isVisible) {{
-                            // Focus input when opening
-                            setTimeout(() => {{
+                
+                if (!isVisible) {{
+                    // Focus input when opening
+                    setTimeout(() => {{
                                 const input = document.getElementById('stillme-chat-input');
                                 if (input) {{
                                     input.focus();
@@ -931,9 +939,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                 }} else {{
                                     console.warn('StillMe Chat: Input not found');
                                 }}
-                            }}, 100);
-                        }}
-                    }}
+                    }}, 100);
+                }}
+            }}
                     
                     // Toggle minimize
                     function toggleMinimize() {{
@@ -1120,42 +1128,42 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         isResizing = false;
                         resizeHandle = null;
                     }});
+            
+            // Send message
+            async function sendMessage() {{
+                const input = document.getElementById('stillme-chat-input');
+                const message = input.value.trim();
+                
+                if (!message) return;
+                
+                // Disable send button
+                const sendBtn = document.getElementById('stillme-chat-send');
+                sendBtn.disabled = true;
+                sendBtn.textContent = 'Sending...';
+                
+                // Add user message to history
+                chatHistory.push({{ role: 'user', content: message }});
+                renderMessages();
+                
+                // Clear input
+                input.value = '';
+                
+                // Send to backend
+                try {{
+                    const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
+                        method: 'POST',
+                        headers: {{
+                            'Content-Type': 'application/json',
+                        }},
+                        body: JSON.stringify({{ message: message }}),
+                    }});
                     
-                    // Send message
-                    async function sendMessage() {{
-                        const input = document.getElementById('stillme-chat-input');
-                        const message = input.value.trim();
-                        
-                        if (!message) return;
-                        
-                        // Disable send button
-                        const sendBtn = document.getElementById('stillme-chat-send');
-                        sendBtn.disabled = true;
-                        sendBtn.textContent = 'Sending...';
-                        
-                        // Add user message to history
-                        chatHistory.push({{ role: 'user', content: message }});
-                        renderMessages();
-                        
-                        // Clear input
-                        input.value = '';
-                        
-                        // Send to backend
-                        try {{
-                            const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
-                                method: 'POST',
-                                headers: {{
-                                    'Content-Type': 'application/json',
-                                }},
-                                body: JSON.stringify({{ message: message }}),
-                            }});
-                            
-                            const data = await response.json();
-                            const reply = data.response || data.message || JSON.stringify(data);
-                            
-                            // Add assistant response
-                            chatHistory.push({{ role: 'assistant', content: reply }});
-                            renderMessages();
+                    const data = await response.json();
+                    const reply = data.response || data.message || JSON.stringify(data);
+                    
+                    // Add assistant response
+                    chatHistory.push({{ role: 'assistant', content: reply }});
+                    renderMessages();
                             
                             // Update parent panel with new messages
                             if (window.parent && window.parent !== window) {{
@@ -1177,19 +1185,19 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }}
                                 }}
                             }}
-                            
-                            // Send message to Streamlit parent
-                            window.parent.postMessage({{
-                                type: 'stillme_chat_message',
-                                history: chatHistory
-                            }}, '*');
-                            
-                        }} catch (error) {{
-                            chatHistory.push({{ 
-                                role: 'assistant', 
-                                content: `❌ Error: ${{error.message}}` 
-                            }});
-                            renderMessages();
+                    
+                    // Send message to Streamlit parent
+                    window.parent.postMessage({{
+                        type: 'stillme_chat_message',
+                        history: chatHistory
+                    }}, '*');
+                    
+                }} catch (error) {{
+                    chatHistory.push({{ 
+                        role: 'assistant', 
+                        content: `❌ Error: ${{error.message}}` 
+                    }});
+                    renderMessages();
                             
                             // Update parent panel with error message
                             if (window.parent && window.parent !== window) {{
@@ -1210,26 +1218,26 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }}
                                 }}
                             }}
-                        }} finally {{
-                            sendBtn.disabled = false;
-                            sendBtn.textContent = 'Send';
-                            input.focus();
-                        }}
-                    }}
-                    
-                    // Handle Enter key (Enter to send, Shift+Enter for new line)
+                }} finally {{
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send';
+                    input.focus();
+                }}
+            }}
+            
+            // Handle Enter key (Enter to send, Shift+Enter for new line)
                     const inputElement = document.getElementById('stillme-chat-input');
                     if (inputElement) {{
                         inputElement.addEventListener('keydown', (e) => {{
-                            if (e.key === 'Enter' && !e.shiftKey) {{
-                                e.preventDefault();
-                                sendMessage();
-                            }}
-                        }});
+                if (e.key === 'Enter' && !e.shiftKey) {{
+                    e.preventDefault();
+                    sendMessage();
+                }}
+            }});
                     }}
-                    
-                    // Initial render
-                    renderMessages();
+            
+            // Initial render
+            renderMessages();
                 }} // End of initChat()
                 
                 // Call initChat when DOM is ready
