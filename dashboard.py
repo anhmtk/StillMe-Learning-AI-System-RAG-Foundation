@@ -1463,7 +1463,10 @@ def sidebar(page_for_chat: str | None = None):
         )
         
         # Note: Floating widget handles its own chat logic via JavaScript
-        st.sidebar.info("💡 Floating chat widget is active. Use the chat button in the bottom-right corner.")
+        st.sidebar.success("✅ **Floating Widget Active!**")
+        st.sidebar.info("💡 Look for the **💬 chat button** in the **bottom-right corner** of your screen. Click it to open the resizable chat panel!")
+        st.sidebar.markdown("---")
+        st.sidebar.caption("**Features:** Resize, Drag, Fullscreen, Overlay")
     
     # Sidebar chat (original implementation)
     elif chat_mode == "Sidebar Chat":

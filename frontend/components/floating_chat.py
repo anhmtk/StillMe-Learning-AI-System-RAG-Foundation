@@ -36,42 +36,57 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
     <html>
     <head>
         <style>
+            /* CRITICAL: Ensure body/html take full viewport */
+            html, body {{
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }}
+            
             /* Overlay backdrop - covers dashboard when chat is open */
             #stillme-chat-overlay {{
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.3);
-                z-index: 999;
-                display: {'block' if is_open else 'none'};
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background: rgba(0, 0, 0, 0.3) !important;
+                z-index: 999999 !important;
+                display: {'block' if is_open else 'none'} !important;
+                pointer-events: auto !important;
             }}
             
             #stillme-chat-widget {{
-                position: fixed;
-                z-index: 1000;
+                position: fixed !important;
+                z-index: 1000000 !important;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                pointer-events: none !important;
+            }}
+            
+            #stillme-chat-widget * {{
+                pointer-events: auto !important;
             }}
             
             #stillme-chat-button {{
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #46b3ff 0%, #1e90ff 100%);
-                border: none;
-                color: white;
-                font-size: 24px;
-                cursor: pointer;
-                box-shadow: 0 4px 12px rgba(70, 179, 255, 0.4);
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1001;
+                position: fixed !important;
+                bottom: 20px !important;
+                right: 20px !important;
+                width: 60px !important;
+                height: 60px !important;
+                border-radius: 50% !important;
+                background: linear-gradient(135deg, #46b3ff 0%, #1e90ff 100%) !important;
+                border: none !important;
+                color: white !important;
+                font-size: 24px !important;
+                cursor: pointer !important;
+                box-shadow: 0 4px 12px rgba(70, 179, 255, 0.4) !important;
+                transition: all 0.3s ease !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                z-index: 1000001 !important;
             }}
             
             #stillme-chat-button:hover {{
@@ -80,24 +95,25 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             }}
             
             #stillme-chat-panel {{
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                width: 600px;
-                height: 700px;
-                min-width: 400px;
-                min-height: 400px;
-                max-width: 95vw;
-                max-height: 95vh;
-                background: #0e1117;
-                border-radius: 12px;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-                display: {'flex' if is_open else 'none'};
-                flex-direction: column;
-                border: 1px solid #262730;
-                overflow: hidden;
-                resize: both; /* Browser native resize (fallback) */
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: 600px !important;
+                height: 700px !important;
+                min-width: 400px !important;
+                min-height: 400px !important;
+                max-width: 95vw !important;
+                max-height: 95vh !important;
+                background: #0e1117 !important;
+                border-radius: 12px !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+                display: {'flex' if is_open else 'none'} !important;
+                flex-direction: column !important;
+                border: 1px solid #262730 !important;
+                overflow: hidden !important;
+                resize: both !important; /* Browser native resize (fallback) */
+                z-index: 1000000 !important;
             }}
             
             /* Fullscreen mode */
@@ -634,5 +650,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
     </html>
     """
     
-    return components.html(html_content, height=0)
+    # CRITICAL: Use height=0 to allow full viewport control
+    # Set key to force re-render on mode change
+    return components.html(html_content, height=0, key="stillme_floating_chat_widget")
 
