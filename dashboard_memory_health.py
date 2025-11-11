@@ -18,14 +18,23 @@ def page_memory_health():
     st.header("🧠 Memory Health")
     st.caption("Continuum Memory System - Tier Management & Forgetting Metrics")
     
-    # Check if Continuum Memory is enabled
-    enable_continuum_memory = st.sidebar.checkbox(
-        "Enable Continuum Memory",
-        value=False,
-        help="Enable tier-based memory system (requires ENABLE_CONTINUUM_MEMORY=true on backend)"
-    )
+    # Check if Continuum Memory is enabled on backend
+    try:
+        # Check backend status
+        status_data = get_json("/api/status", {})
+        continuum_enabled_backend = status_data.get("continuum_memory_enabled", False)
+        
+        # Also check nested learning metrics endpoint
+        nested_metrics = get_json("/api/learning/nested-learning/metrics", {}, timeout=10)
+        continuum_enabled_api = nested_metrics.get("enabled", False) if nested_metrics else False
+        
+        # Use API response as source of truth
+        continuum_enabled = continuum_enabled_api or continuum_enabled_backend
+    except Exception as e:
+        continuum_enabled = False
+        st.warning(f"⚠️ Could not check backend status: {e}")
     
-    if not enable_continuum_memory:
+    if not continuum_enabled:
         st.info("💡 **Continuum Memory is disabled.** Enable it in the sidebar to view metrics.")
         st.markdown("""
         ### About Continuum Memory
@@ -41,7 +50,20 @@ def page_memory_health():
         - Surprise-based promotion/demotion
         - Multi-timescale scheduler
         - Forgetting@RAG metrics (Recall@k degradation tracking)
+        
+        **To Enable:**
+        1. Set `ENABLE_CONTINUUM_MEMORY=true` in backend environment variables
+        2. Restart/redeploy backend service
+        3. Refresh this page
         """)
+        
+        # Show debug info
+        with st.expander("🔍 Debug: Backend Status"):
+            st.json({
+                "continuum_enabled_backend": continuum_enabled_backend if 'continuum_enabled_backend' in locals() else "N/A",
+                "continuum_enabled_api": continuum_enabled_api if 'continuum_enabled_api' in locals() else "N/A",
+                "nested_metrics": nested_metrics if 'nested_metrics' in locals() else "N/A"
+            })
         return
     
     # Fetch tier stats
