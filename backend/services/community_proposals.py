@@ -6,6 +6,7 @@ Manages community proposals for learning sources and content
 import sqlite3
 import logging
 import uuid
+import os
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -18,7 +19,8 @@ MAX_RETRIES = 5
 RETRY_DELAY_BASE = 0.1
 
 # Voting thresholds
-MIN_VOTES_TO_LEARN = 10  # Minimum votes required for a proposal to be learned
+# Configurable via environment variable COMMUNITY_MIN_VOTES (default: 10)
+MIN_VOTES_TO_LEARN = int(os.getenv("COMMUNITY_MIN_VOTES", "10"))
 VOTE_COOLDOWN_HOURS = 24  # Cooldown period between votes from same user
 
 
