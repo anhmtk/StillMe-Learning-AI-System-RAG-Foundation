@@ -583,13 +583,53 @@ def page_overview():
                                          delta=f"+{entries_added}" if entries_added > 0 else None,
                                          help="Entries successfully added to vector database")
                             
-                            # Show filter reasons if available
+                            # Parse logs for detailed breakdown
+                            source_breakdown = {}
+                            filter_reasons_detail = {}
+                            
+                            for log in logs:
+                                log_lower = log.lower()
+                                # Extract source breakdown
+                                if "source breakdown:" in log_lower:
+                                    breakdown_text = log.split("Source breakdown:")[-1].strip()
+                                    for part in breakdown_text.split(","):
+                                        if ":" in part:
+                                            try:
+                                                source, count = part.strip().split(":", 1)
+                                                source_breakdown[source.strip()] = int(count.strip())
+                                            except:
+                                                pass
+                                # Extract filter reasons
+                                if "filter reasons:" in log_lower:
+                                    reasons_text = log.split("Filter reasons:")[-1].strip()
+                                    for part in reasons_text.split(","):
+                                        if ":" in part:
+                                            try:
+                                                reason, count = part.strip().split(":", 1)
+                                                filter_reasons_detail[reason.strip()] = int(count.strip())
+                                            except:
+                                                pass
+                            
+                            # Show source breakdown if available
+                            if source_breakdown:
+                                st.markdown("### 📊 Source Breakdown")
+                                cols = st.columns(len(source_breakdown) if len(source_breakdown) <= 4 else 4)
+                                for idx, (source, count) in enumerate(source_breakdown.items()):
+                                    with cols[idx % len(cols)]:
+                                        st.metric(source, count, help=f"Items fetched from {source}")
+                            
+                            # Show filter reasons if available (from result or logs)
                             filter_reasons = result.get("filter_reasons", {})
+                            if not filter_reasons and filter_reasons_detail:
+                                filter_reasons = filter_reasons_detail
+                            
                             if filter_reasons:
-                                with st.expander("🔍 Filter Details", expanded=False):
+                                with st.expander("🔍 Filter Details", expanded=True):
                                     st.write("**Reasons for filtering:**")
                                     for reason, count in filter_reasons.items():
                                         st.write(f"- **{reason}**: {count} entries")
+                            elif entries_filtered > 0:
+                                st.caption(f"💡 {entries_filtered} entries filtered (low quality, too short, or duplicate)")
                             
                             # Show Nested Learning summary if enabled
                             if entries_skipped > 0:
