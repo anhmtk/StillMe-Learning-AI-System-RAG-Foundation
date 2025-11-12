@@ -1445,10 +1445,11 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     // Send to backend
                     try {{
                         // Build conversation history (exclude current message, keep last 5 pairs)
+                        // Current message is already in chatHistory, so we exclude it
                         const conversationHistory = [];
-                        if (chatHistory.length > 0) {{
-                            // Get last 10 messages before current (5 pairs)
-                            const historySlice = chatHistory.slice(-10);
+                        if (chatHistory.length > 1) {{
+                            // Get last 10 messages before current (5 pairs), exclude the last one (current message)
+                            const historySlice = chatHistory.slice(0, -1).slice(-10);
                             conversationHistory.push(...historySlice);
                         }}
                         
