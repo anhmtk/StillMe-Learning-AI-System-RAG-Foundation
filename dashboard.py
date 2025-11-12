@@ -324,15 +324,18 @@ def page_overview():
     
     # Debug: Show what we received and test connection
     if not scheduler_status or scheduler_status == {}:
-        st.error("⚠️ **Warning:** Could not fetch scheduler status from backend. API may be unreachable.")
+        # Don't show error if we know a job is running (timeout is expected)
+        if not st.session_state.get("learning_job_started"):
+            st.warning("⚠️ **Warning:** Could not fetch scheduler status from backend.")
+            st.info("💡 **Tip:** If you just clicked 'Run Now', the learning cycle is starting. Wait a moment and refresh.")
         
-        # Try to provide more specific error info
-        try:
-            test_url = f"{API_BASE}/api/status"
-            test_r = requests.get(test_url, timeout=10)  # Quick check for backend availability
-            if test_r.status_code == 200:
-                st.warning("💡 Backend is reachable at `/api/status`, but `/api/learning/scheduler/status` returned empty response.")
-                st.info("This may indicate the scheduler endpoint has an issue. Check backend logs.")
+        # Try to provide more specific error info (only if not a known job)
+        if not st.session_state.get("learning_job_started"):
+            try:
+                test_url = f"{API_BASE}/api/status"
+                test_r = requests.get(test_url, timeout=10)  # Quick check for backend availability
+                if test_r.status_code == 200:
+                    st.info("💡 Backend is reachable. Scheduler status may be temporarily unavailable during learning cycle.")
             elif test_r.status_code == 502:
                 st.error("❌ **502 Bad Gateway** - Backend service is not responding.")
                 st.markdown("""
