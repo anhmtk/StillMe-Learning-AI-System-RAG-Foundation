@@ -201,6 +201,22 @@ def analyze_results(results: List[Dict]) -> Dict:
 
 def main():
     """Main test runner"""
+    # Check API_BASE
+    if API_BASE == "http://localhost:8000":
+        print("⚠️  WARNING: API_BASE is set to localhost:8000")
+        print("   If your backend is deployed on Railway, set STILLME_API_BASE environment variable:")
+        print("   set STILLME_API_BASE=https://stillme-backend-production.up.railway.app")
+        print("   Or edit scripts/run_comprehensive_tests.py and change API_BASE")
+        print()
+        try:
+            response = input("Continue with localhost:8000? (y/n): ")
+            if response.lower() != 'y':
+                print("Exiting. Please set STILLME_API_BASE environment variable or edit the script.")
+                return
+        except (EOFError, KeyboardInterrupt):
+            # Non-interactive mode, just continue
+            pass
+    
     # Load test suite
     if not TEST_SUITE_FILE.exists():
         logger.error(f"Test suite file not found: {TEST_SUITE_FILE}")
@@ -220,6 +236,25 @@ def main():
     print(f"Total questions: {len(questions)}")
     print(f"API Base: {API_BASE}")
     print(f"Max concurrent: 10")
+    print("="*60)
+    print("\n🔍 Testing API connection...")
+    
+    # Test API connection first
+    try:
+        import requests
+        test_response = requests.get(f"{API_BASE}/api/status", timeout=10)
+        if test_response.status_code == 200:
+            print(f"✅ API connection successful!")
+        else:
+            print(f"⚠️  API returned status {test_response.status_code}")
+    except Exception as e:
+        print(f"❌ API connection failed: {e}")
+        print(f"\nPlease check:")
+        print(f"  1. Backend is running at {API_BASE}")
+        print(f"  2. If deployed on Railway, set STILLME_API_BASE environment variable")
+        print(f"  3. Network/firewall is not blocking the connection")
+        return
+    
     print("="*60 + "\n")
     
     results = asyncio.run(run_tests(questions, max_concurrent=10, max_questions=None))
