@@ -111,6 +111,11 @@ class EmbeddingService:
             # CRITICAL: Force cache_folder to ensure model is cached in persistent volume
             # Note: SentenceTransformer may ignore cache_folder if env vars are set
             # So we MUST set env vars BEFORE creating the model
+            
+            # Suppress tqdm progress bars from sentence-transformers to avoid log spam
+            # Set TQDM_DISABLE=1 to prevent "Batches: 100%|..." output in logs
+            os.environ.setdefault("TQDM_DISABLE", "1")
+            
             self.model = SentenceTransformer(
                 model_name, 
                 cache_folder=cache_path if cache_path else None
