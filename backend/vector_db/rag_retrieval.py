@@ -96,12 +96,31 @@ class RAGRetrieval:
                 if len(knowledge_results) < knowledge_limit:
                     normal_results = self.chroma_client.search_knowledge(
                         query_embedding=query_embedding,
-                        limit=knowledge_limit
+                        limit=knowledge_limit * 2  # Get more to filter out provenance
                     )
                     # Merge results, avoiding duplicates
                     existing_ids = {doc.get("id") for doc in knowledge_results}
                     for doc in normal_results:
                         if doc.get("id") not in existing_ids:
+                            # CRITICAL: Filter out provenance documents unless explicitly requested
+                            # Check if document is provenance (should only be retrieved for origin queries)
+                            doc_metadata = doc.get("metadata", {})
+                            doc_source = doc_metadata.get("source", "")
+                            doc_type = doc_metadata.get("type", "")
+                            doc_tags = doc_metadata.get("tags", "")
+                            
+                            is_provenance = (
+                                doc_source == "PROVENANCE" or
+                                doc_type == "provenance" or
+                                "provenance" in str(doc_tags).lower() or
+                                "intent:origin" in str(doc_tags).lower() or
+                                "intent:founder" in str(doc_tags).lower()
+                            )
+                            
+                            # Skip provenance documents in normal retrieval (they will be retrieved separately if needed)
+                            if is_provenance:
+                                continue
+                            
                             knowledge_results.append(doc)
                             if len(knowledge_results) >= knowledge_limit:
                                 break

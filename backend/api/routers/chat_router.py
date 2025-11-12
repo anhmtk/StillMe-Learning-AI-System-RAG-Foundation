@@ -112,12 +112,20 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         # Special Retrieval Rule: Detect StillMe-related queries
         is_stillme_query = False
+        is_origin_query = False
         if rag_retrieval and chat_request.use_rag:
             try:
-                from backend.core.stillme_detector import detect_stillme_query, get_foundational_query_variants
+                from backend.core.stillme_detector import (
+                    detect_stillme_query, 
+                    get_foundational_query_variants,
+                    detect_origin_query
+                )
                 is_stillme_query, matched_keywords = detect_stillme_query(chat_request.message)
+                is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
                 if is_stillme_query:
                     logger.info(f"StillMe query detected! Matched keywords: {matched_keywords}")
+                if is_origin_query:
+                    logger.info(f"Origin query detected! Matched keywords: {origin_keywords}")
             except ImportError:
                 logger.warning("StillMe detector not available, skipping special retrieval rule")
             except Exception as detector_error:
@@ -128,8 +136,41 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         context = None
         rag_retrieval_start = time.time()
         if rag_retrieval and chat_request.use_rag:
-            # If StillMe query detected, prioritize foundational knowledge
-            if is_stillme_query:
+            # CRITICAL: If origin query detected, retrieve provenance knowledge ONLY
+            # This ensures provenance is ONLY retrieved when explicitly asked about origin/founder
+            if is_origin_query:
+                logger.info("Origin query detected - retrieving provenance knowledge")
+                try:
+                    query_embedding = rag_retrieval.embedding_service.encode_text(chat_request.message)
+                    provenance_results = rag_retrieval.chroma_client.search_knowledge(
+                        query_embedding=query_embedding,
+                        limit=2,
+                        where={"source": "PROVENANCE"}
+                    )
+                    if provenance_results:
+                        context = {
+                            "knowledge_docs": provenance_results,
+                            "conversation_docs": [],
+                            "total_context_docs": len(provenance_results)
+                        }
+                        logger.info(f"Retrieved {len(provenance_results)} provenance documents")
+                    else:
+                        # Fallback to normal retrieval if provenance not found
+                        context = rag_retrieval.retrieve_context(
+                            query=chat_request.message,
+                            knowledge_limit=chat_request.context_limit,
+                            conversation_limit=1
+                        )
+                except Exception as provenance_error:
+                    logger.warning(f"Provenance retrieval failed: {provenance_error}, falling back to normal retrieval")
+                    context = rag_retrieval.retrieve_context(
+                        query=chat_request.message,
+                        knowledge_limit=chat_request.context_limit,
+                        conversation_limit=1
+                    )
+            
+            # If StillMe query detected (but not origin), prioritize foundational knowledge
+            elif is_stillme_query:
                 # Try multiple query variants to ensure we get StillMe foundational knowledge
                 query_variants = get_foundational_query_variants(chat_request.message)
                 all_knowledge_docs = []
