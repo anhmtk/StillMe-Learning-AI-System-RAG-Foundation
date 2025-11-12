@@ -906,20 +906,19 @@ async def _run_learning_cycle_sync():
         cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=cycle_number)
     
     # ============================================================================
-    # 70/30 LEARNING ALLOCATION SYSTEM
+    # 70/30 LEARNING ALLOCATION SYSTEM (PERCENTAGE-BASED, NOT HARD LIMIT)
     # ============================================================================
-    # Total learning capacity per cycle
-    LEARNING_CAPACITY_PER_CYCLE = 10  # Total items StillMe can learn per cycle
-    
     # Allocation split: 70% automatic, 30% community
-    AUTOMATIC_LEARNING_QUOTA = int(LEARNING_CAPACITY_PER_CYCLE * 0.7)  # 7 items
-    COMMUNITY_LEARNING_QUOTA = int(LEARNING_CAPACITY_PER_CYCLE * 0.3)  # 3 items
+    # This is calculated based on ACTUAL items available, not a fixed limit
+    COMMUNITY_ALLOCATION_PERCENTAGE = 0.30  # 30%
+    AUTOMATIC_ALLOCATION_PERCENTAGE = 0.70   # 70%
     
     all_entries_to_add = []
     community_items_added = 0
     automatic_items_added = 0
     
     # STEP 1: Process Community Proposals (30% quota - PRIORITY)
+    # First, we need to know how many approved proposals are available
     try:
         from backend.services.community_proposals import get_community_proposals
         from backend.services.url_fetcher import get_url_fetcher
@@ -927,11 +926,13 @@ async def _run_learning_cycle_sync():
         community = get_community_proposals()
         url_fetcher = get_url_fetcher()
         
-        approved_proposals = community.get_approved_proposals_not_learned(limit=COMMUNITY_LEARNING_QUOTA)
+        # Get ALL approved proposals (no limit here, we'll calculate quota later)
+        approved_proposals = community.get_approved_proposals_not_learned(limit=1000)  # Large limit to get all
         
         logger.info(f"Found {len(approved_proposals)} approved community proposals to learn")
         
-        for proposal in approved_proposals[:COMMUNITY_LEARNING_QUOTA]:
+        # Process all approved proposals (we'll apply percentage limit after fetching automatic sources)
+        for proposal in approved_proposals:
             try:
                 # Fetch content from proposal URL
                 content_data = url_fetcher.fetch_content(
@@ -970,13 +971,7 @@ async def _run_learning_cycle_sync():
     except Exception as e:
         logger.error(f"Error processing community proposals: {e}")
     
-    # Calculate remaining quota for automatic learning
-    remaining_quota = LEARNING_CAPACITY_PER_CYCLE - community_items_added
-    automatic_quota = min(AUTOMATIC_LEARNING_QUOTA, remaining_quota)
-    
-    logger.info(f"Learning allocation: {community_items_added} community items, {automatic_quota} automatic items (quota: {COMMUNITY_LEARNING_QUOTA}/{AUTOMATIC_LEARNING_QUOTA})")
-    
-    # STEP 2: Process Automatic Sources (70% quota, or remaining if community used less)
+    # STEP 2: Process Automatic Sources (70% quota)
     if learning_scheduler.auto_add_to_rag and rag_retrieval:
         # Use entries from the learning cycle result (already fetched)
         # Don't fetch again - use the entries that were already fetched in run_learning_cycle
@@ -1034,17 +1029,52 @@ async def _run_learning_cycle_sync():
                     all_entries,
                     knowledge_gaps=recent_gaps
                 )
-                # Take top entries up to automatic quota
-                entries_to_add = prioritized[:min(automatic_quota, len(prioritized))]
-                logger.info(f"Content curator prioritized {len(entries_to_add)} entries from {len(all_entries)} total (quota: {automatic_quota})")
+                # Store all prioritized entries (we'll apply percentage limit later)
+                entries_to_add = prioritized
+                logger.info(f"Content curator prioritized {len(entries_to_add)} entries from {len(all_entries)} total")
             else:
-                # If no curator, add entries up to automatic quota
-                entries_to_add = all_entries[:min(automatic_quota, len(all_entries))]
-                logger.info(f"No content curator, adding {len(entries_to_add)} entries directly (quota: {automatic_quota})")
+                # If no curator, use all entries (we'll apply percentage limit later)
+                entries_to_add = all_entries
+                logger.info(f"No content curator, using {len(entries_to_add)} entries directly")
             
-            # Add automatic entries to the list
-            all_entries_to_add.extend(entries_to_add)
-            automatic_items_added = len(entries_to_add)
+            # Calculate total available items (community + automatic)
+            total_available_items = community_items_added + len(entries_to_add)
+            
+            # Calculate quotas based on PERCENTAGE of total available
+            if total_available_items > 0:
+                # Community should get 30% of total
+                community_quota = int(total_available_items * COMMUNITY_ALLOCATION_PERCENTAGE)
+                # Automatic should get 70% of total
+                automatic_quota = int(total_available_items * AUTOMATIC_ALLOCATION_PERCENTAGE)
+                
+                # Ensure community gets at least what we already processed (if any)
+                if community_items_added > 0:
+                    community_quota = max(community_quota, community_items_added)
+                
+                # Limit automatic entries to 70% quota
+                automatic_entries_final = entries_to_add[:automatic_quota]
+                automatic_items_added = len(automatic_entries_final)
+                
+                # Limit community entries to 30% quota (if we processed more than quota)
+                if community_items_added > community_quota:
+                    # Keep only the first community_quota items
+                    all_entries_to_add = all_entries_to_add[:community_quota]
+                    community_items_added = community_quota
+                    logger.warning(f"Community proposals exceeded 30% quota, limited to {community_quota} items")
+                
+                # Add automatic entries to the list
+                all_entries_to_add.extend(automatic_entries_final)
+                
+                logger.info(
+                    f"Learning allocation (percentage-based): "
+                    f"Total available: {total_available_items}, "
+                    f"Community: {community_items_added}/{community_quota} ({COMMUNITY_ALLOCATION_PERCENTAGE*100}%), "
+                    f"Automatic: {automatic_items_added}/{automatic_quota} ({AUTOMATIC_ALLOCATION_PERCENTAGE*100}%)"
+                )
+            else:
+                # No items available
+                logger.warning("No items available for learning")
+                automatic_items_added = 0
             
         except Exception as e:
             logger.error(f"Error preparing entries for RAG: {e}")
@@ -1191,12 +1221,14 @@ async def _run_learning_cycle_sync():
         if rss_fetch_history and cycle_id:
             rss_fetch_history.complete_fetch_cycle(cycle_id)
         
+        total_items = community_items_added + automatic_items_added
         logger.info(
             f"Learning cycle: Fetched {result.get('entries_fetched', 0)} entries, "
             f"Filtered {filtered_count} (Low quality/Short), "
             f"Added {added_count} to RAG "
-            f"(Community: {community_items_added}/{COMMUNITY_LEARNING_QUOTA}, "
-            f"Automatic: {automatic_items_added}/{AUTOMATIC_LEARNING_QUOTA})"
+            f"(Community: {community_items_added} ({COMMUNITY_ALLOCATION_PERCENTAGE*100}%), "
+            f"Automatic: {automatic_items_added} ({AUTOMATIC_ALLOCATION_PERCENTAGE*100}%), "
+            f"Total: {total_items} items)"
         )
     
     return result
