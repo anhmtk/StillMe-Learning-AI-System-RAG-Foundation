@@ -358,6 +358,7 @@ You should:
                     # Build error status message if there are errors
                     # CRITICAL: Only inject error warnings when relevant to the query
                     # This prevents noise in responses that don't relate to system status
+                    # ENHANCED: Also check if question is philosophical/metaphysical - don't inject technical errors
                     error_status_message = ""
                     if status_summary.get("has_errors"):
                         errors = status_summary.get("errors", [])
@@ -379,20 +380,32 @@ You should:
                             error_details.append(f"{component_name}: {error_msg}")
                         
                         if error_details:
-                            # Check if query is relevant to system status, errors, or sources
                             query_lower = chat_request.message.lower()
+                            
+                            # Check if query is about philosophical/metaphysical topics - don't inject errors
+                            philosophical_keywords = [
+                                "truth", "ethics", "moral", "philosophy", "consciousness", "existence",
+                                "identity", "freedom", "reality", "knowledge", "epistemology", "ontology",
+                                "metaphysics", "paradox", "contradiction", "principle", "value", "meaning",
+                                "purpose", "being", "self", "soul", "mind", "spirit", "essence", "nature"
+                            ]
+                            is_philosophical = any(keyword in query_lower for keyword in philosophical_keywords)
+                            
+                            # Check if query is relevant to system status, errors, or sources
                             is_relevant = (
                                 any(keyword in query_lower for keyword in [
                                     "wikipedia", "rss", "arxiv", "crossref", "source", "fetcher",
                                     "error", "status", "issue", "problem", "broken", "fail",
-                                    "system", "technical", "working", "functioning"
+                                    "system", "technical", "working", "functioning", "learn", "learning",
+                                    "knowledge base", "database", "vector", "embedding", "rag"
                                 ]) or
                                 is_stillme_query  # StillMe queries often relate to system status
                             )
                             
-                            if is_relevant:
+                            # Only inject if relevant AND not philosophical
+                            if is_relevant and not is_philosophical:
                                 error_status_message = f"\n\n⚠️ CRITICAL TRANSPARENCY REQUIREMENT - SYSTEM ERROR STATUS:\nStillMe is currently experiencing technical errors:\n" + "\n".join(f"- {detail}" for detail in error_details) + "\n\nYou MUST acknowledge these errors truthfully when asked about StillMe's features or status. Do NOT deny or minimize these errors. StillMe's core value is transparency - hiding errors contradicts this principle. If the user asks about a specific feature (e.g., Wikipedia), and that feature has errors, you MUST say: 'I acknowledge that [feature] is currently experiencing [error type]. This is a technical issue that needs to be fixed.'"
-                            # If not relevant, don't inject error message to avoid noise
+                            # If philosophical or not relevant, don't inject error message to maintain conversational elegance
                     
                     # Base StillMe instruction
                     base_stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a Learning AI system with RAG foundation that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, CrossRef, and Wikipedia every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB using all-MiniLM-L6-v2 embeddings), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database using all-MiniLM-L6-v2 embeddings (384 dimensions), (3) Continuous knowledge updates through RSS feeds, arXiv, CrossRef, and Wikipedia, (4) Validation chain (CitationRequired, EvidenceOverlap, ConfidenceValidator, FallbackHandler) to reduce hallucinations by 80%, (5) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
