@@ -406,6 +406,82 @@ class CommunityProposals:
         finally:
             conn.close()
     
+    def get_approved_proposals_not_learned(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Get approved proposals that haven't been learned yet
+        
+        Args:
+            limit: Maximum number of proposals to return
+            
+        Returns:
+            List of approved proposals not yet learned
+        """
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT proposal_id, proposal_type, source_url, description,
+                       proposer_id, votes_for, votes_against, created_at
+                FROM proposals
+                WHERE status = 'approved' AND learned_at IS NULL
+                ORDER BY votes_for DESC, created_at ASC
+                LIMIT ?
+            """, (limit,))
+            
+            proposals = []
+            for row in cursor.fetchall():
+                proposals.append({
+                    "proposal_id": row[0],
+                    "proposal_type": row[1],
+                    "source_url": row[2],
+                    "description": row[3],
+                    "proposer_id": row[4],
+                    "votes_for": row[5],
+                    "votes_against": row[6],
+                    "created_at": row[7]
+                })
+            
+            return proposals
+        finally:
+            conn.close()
+    
+    def mark_proposal_as_learned(self, proposal_id: str, cycle_id: Optional[str] = None) -> bool:
+        """
+        Mark a proposal as learned
+        
+        Args:
+            proposal_id: ID of the proposal
+            cycle_id: Optional learning cycle ID
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        conn = self._get_connection()
+        try:
+            cursor = conn.cursor()
+            learned_at = datetime.now().isoformat()
+            
+            if cycle_id:
+                cursor.execute("""
+                    UPDATE proposals
+                    SET learned_at = ?, learning_cycle_id = ?
+                    WHERE proposal_id = ?
+                """, (learned_at, cycle_id, proposal_id))
+            else:
+                cursor.execute("""
+                    UPDATE proposals
+                    SET learned_at = ?
+                    WHERE proposal_id = ?
+                """, (learned_at, proposal_id))
+            
+            conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            logger.error(f"Error marking proposal as learned: {e}")
+            return False
+        finally:
+            conn.close()
+    
     def get_daily_stats(self) -> Dict[str, Any]:
         """
         Get daily voting statistics
