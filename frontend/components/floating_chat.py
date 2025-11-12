@@ -1387,6 +1387,34 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             const data = await response.json();
                             const reply = data.response || data.message || JSON.stringify(data);
                             
+                            // Display processing steps if available
+                            const processingSteps = data.processing_steps || [];
+                            if (processingSteps.length > 0) {{
+                                const lastSteps = processingSteps.slice(-3).join(' | ');
+                                const statusDiv = document.getElementById('stillme-chat-status');
+                                if (statusDiv) {{
+                                    statusDiv.textContent = lastSteps;
+                                    statusDiv.style.display = 'block';
+                                }}
+                            }} else {{
+                                const statusDiv = document.getElementById('stillme-chat-status');
+                                if (statusDiv) {{
+                                    statusDiv.style.display = 'none';
+                                }}
+                            }}
+                            
+                            // Check for learning proposal
+                            const learningProposal = data.learning_proposal;
+                            const permissionRequest = data.permission_request;
+                            if (learningProposal && permissionRequest) {{
+                                const statusDiv = document.getElementById('stillme-chat-status');
+                                if (statusDiv) {{
+                                    statusDiv.textContent = '💡 StillMe wants to learn from this!';
+                                    statusDiv.style.display = 'block';
+                                    statusDiv.style.color = '#46b3ff';
+                                }}
+                            }}
+                            
                             // Add assistant response
                             chatHistory.push({{ role: 'assistant', content: reply }});
                             renderMessages();
