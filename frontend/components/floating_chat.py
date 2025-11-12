@@ -124,10 +124,18 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 flex-direction: column !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border like Cursor */
                 overflow: hidden !important;
-                resize: both !important; /* Browser native resize (fallback) */
+                resize: none !important; /* Disable browser native resize - we use custom handles */
                 z-index: 1000000 !important;
                 /* CRITICAL: Ensure proper flex layout */
                 align-items: stretch !important;
+                /* CRITICAL: Enable dragging */
+                cursor: default !important;
+            }}
+            
+            /* Dragging state */
+            #stillme-chat-panel.dragging {{
+                cursor: move !important;
+                user-select: none !important;
             }}
             
             /* Fullscreen mode */
@@ -216,7 +224,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 color: #cccccc !important; /* Cursor-like text color */
                 font-size: 14px !important; /* Smaller font like Cursor */
                 font-weight: 500 !important; /* Medium weight like Cursor */
-                flex: 1;
+            }}
+            
+            #stillme-chat-status {{
+                color: #858585 !important;
+                font-size: 11px !important;
+                font-style: italic !important;
+                margin-top: 4px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
             }}
             
             .stillme-chat-header-buttons {{
@@ -397,8 +414,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 
                 <!-- Header (draggable) -->
                 <div class="stillme-chat-header" id="stillme-chat-header">
-                    <h3>💬 Chat with StillMe</h3>
-                    <div id="stillme-chat-status" style="font-size: 11px; color: #858585; margin-top: 4px; display: none;"></div>
+                    <div style="flex: 1; min-width: 0;">
+                        <h3>💬 Chat with StillMe</h3>
+                        <div id="stillme-chat-status" style="font-size: 11px; color: #858585; margin-top: 4px; display: none; font-style: italic;"></div>
+                    </div>
                     <div class="stillme-chat-header-buttons">
                         <button class="stillme-chat-header-btn" id="minimize-btn" onclick="toggleMinimize()" title="Minimize">−</button>
                         <button class="stillme-chat-header-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
@@ -1436,6 +1455,13 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 sendBtn.disabled = true;
                 sendBtn.textContent = 'Sending...';
                 
+                // Show processing status immediately
+                const statusDiv = document.getElementById('stillme-chat-status');
+                if (statusDiv) {{
+                    statusDiv.textContent = '🤔 StillMe is thinking...';
+                    statusDiv.style.display = 'block';
+                }}
+                
                 // Add user message to history
                 chatHistory.push({{ role: 'user', content: message }});
                 renderMessages();
@@ -1482,12 +1508,32 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         const processingSteps = data.processing_steps || [];
                         if (processingSteps.length > 0) {{
                             console.log('StillMe processing steps:', processingSteps);
-                            // Optionally show last step in UI
-                            const lastStep = processingSteps[processingSteps.length - 1];
+                            // Show all steps in status (last 3 steps)
+                            const lastSteps = processingSteps.slice(-3).join(' | ');
                             const statusDiv = document.getElementById('stillme-chat-status');
                             if (statusDiv) {{
-                                statusDiv.textContent = lastStep;
+                                statusDiv.textContent = lastSteps;
                                 statusDiv.style.display = 'block';
+                            }}
+                        }} else {{
+                            // Hide status if no steps
+                            const statusDiv = document.getElementById('stillme-chat-status');
+                            if (statusDiv) {{
+                                statusDiv.style.display = 'none';
+                            }}
+                        }}
+                        
+                        // Check for learning proposal
+                        const learningProposal = data.learning_proposal;
+                        const permissionRequest = data.permission_request;
+                        if (learningProposal && permissionRequest) {{
+                            console.log('StillMe wants to learn from this conversation!');
+                            // Show learning proposal in UI
+                            const statusDiv = document.getElementById('stillme-chat-status');
+                            if (statusDiv) {{
+                                statusDiv.textContent = '💡 StillMe wants to learn from this! Check permission request.';
+                                statusDiv.style.display = 'block';
+                                statusDiv.style.color = '#46b3ff';
                             }}
                         }}
                         
@@ -1523,6 +1569,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     }}, '*');
                     
                 }} catch (error) {{
+                    // Hide status on error
+                    const statusDiv = document.getElementById('stillme-chat-status');
+                    if (statusDiv) {{
+                        statusDiv.style.display = 'none';
+                    }}
+                    
                     chatHistory.push({{ 
                         role: 'assistant', 
                         content: `❌ Error: ${{error.message}}` 

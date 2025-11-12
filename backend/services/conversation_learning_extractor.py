@@ -305,11 +305,21 @@ class ConversationLearningExtractor:
         Valuable questions are worth learning because they represent important topics
         """
         valuable_indicators = [
-            # Philosophical questions
+            # Philosophical questions (English & Vietnamese)
             r'\b(philosophy|philosophical|ethics|ethical|moral|morality|đạo đức|triết học)\b',
             r'\b(consciousness|awareness|conscious|ý thức|nhận thức)\b',
             r'\b(existence|reality|truth|meaning|tồn tại|thực tại|ý nghĩa)\b',
             r'\b(identity|self|bản sắc|bản thân|tự ngã)\b',
+            
+            # Paradox & self-reflection (English & Vietnamese)
+            r'\b(paradox|contradiction|nghịch lý|mâu thuẫn)\b',
+            r'\b(self.*reflect|tự.*phản|phản chiếu)\b',
+            r'\b(transparency|minh bạch|rõ ràng)\b',
+            r'\b(limit|giới hạn|boundary|ranh giới)\b',
+            r'\b(evolution|tiến hóa|phát triển)\b',
+            r'\b(learn.*forever|học.*mãi|học.*mãi mãi)\b',
+            r'\b(absolute|tuyệt đối|perfect|hoàn hảo)\b',
+            r'\b(impossible|bất khả thi|không thể)\b',
             
             # Deep technical questions
             r'\b(how.*work|mechanism|algorithm|architecture|kiến trúc|thuật toán)\b',
@@ -326,19 +336,34 @@ class ConversationLearningExtractor:
             r'\b(artificial.*intelligence.*capable|AI.*limit)\b',
             r'\b(machine.*learn|machine.*understand)\b',
             
-            # Meta-cognitive questions
+            # Meta-cognitive questions (English & Vietnamese)
             r'\b(how.*know|how.*understand|how.*learn|làm sao.*biết)\b',
             r'\b(what.*mean|ý nghĩa|meaning)\b',
             r'\b(why.*exist|tại sao.*tồn tại)\b',
+            r'\b(biết.*không biết|know.*not know|khiêm tốn)\b',
+            
+            # Vietnamese-specific philosophical patterns
+            r'(liệu.*có|liệu.*không|nếu.*thì)',
+            r'(đạt.*đến|chạm.*giới hạn|vượt qua)',
+            r'(mô tả.*chính mình|tự.*mô tả|mô tả.*hệ thống)',
+            r'(thay đổi.*bằng.*hành động|hành động.*thay đổi)',
+            r'(vượt qua.*nguồn gốc|phản bội.*nguồn gốc)',
+            r'(tiến hóa|phát triển|tiến bộ)',
+            r'(tồn tại.*khách quan|tồn tại.*chủ quan)',
+            r'(nói dối.*bảo vệ|giữ nguyên tắc|phá vỡ nguyên tắc)',
         ]
         
         text_lower = text.lower()
         for pattern in valuable_indicators:
-            if re.search(pattern, text_lower):
+            if re.search(pattern, text_lower, re.IGNORECASE):
                 return True
         
         # Check for question length (longer questions are often deeper)
         if len(text.strip()) > 100:
+            return True
+        
+        # Check for multiple question marks or complex structure (indicates deep question)
+        if text.count('?') >= 2 or ('liệu' in text_lower and '?' in text):
             return True
         
         return False
@@ -354,11 +379,15 @@ class ConversationLearningExtractor:
         length_score = min(1.0, len(text) / 200.0)  # Normalize to 200 chars
         score += length_score * 0.2
         
-        # Philosophical/ethical depth
+        # Philosophical/ethical depth (English & Vietnamese)
         depth_indicators = [
-            r'\b(philosophy|ethics|moral|consciousness|existence|reality|truth)\b',
+            r'\b(philosophy|ethics|moral|consciousness|existence|reality|truth|triết học|đạo đức)\b',
             r'\b(meaning|purpose|significance|ý nghĩa|mục đích)\b',
-            r'\b(identity|self|nature|essence|bản chất|bản sắc)\b',
+            r'\b(identity|self|nature|essence|bản chất|bản sắc|tự ngã)\b',
+            r'\b(paradox|nghịch lý|contradiction|mâu thuẫn)\b',
+            r'\b(transparency|minh bạch|self.*reflect|tự.*phản)\b',
+            r'\b(limit|giới hạn|boundary|ranh giới)\b',
+            r'\b(evolution|tiến hóa|learn.*forever|học.*mãi)\b',
         ]
         
         depth_count = sum(1 for pattern in depth_indicators if re.search(pattern, text, re.IGNORECASE))
