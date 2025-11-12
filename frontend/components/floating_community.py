@@ -23,7 +23,7 @@ def render_floating_community_button():
         z-index: 1000;
         cursor: pointer;
     ">
-        <a href="?page=community" onclick="window.parent.postMessage({type: 'streamlit:setFrameHeight', height: 0}, '*'); return false;" style="
+        <a href="/community.py" target="_blank" style="
             display: flex;
             align-items: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

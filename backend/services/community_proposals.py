@@ -449,10 +449,11 @@ class CommunityProposals:
             
             # Total votes needed across all pending
             cursor.execute("""
-                SELECT SUM(?) - SUM(votes_for) FROM proposals
-                WHERE status = 'pending'
-            """, (MIN_VOTES_TO_LEARN,))
-            total_votes_needed = cursor.fetchone()[0] or 0
+                SELECT COALESCE(SUM(?), 0) - COALESCE(SUM(votes_for), 0) FROM proposals
+                WHERE status = 'pending' AND votes_for < ?
+            """, (MIN_VOTES_TO_LEARN, MIN_VOTES_TO_LEARN))
+            result = cursor.fetchone()
+            total_votes_needed = int(result[0]) if result and result[0] is not None else 0
             
             return {
                 "votes_today": votes_today,

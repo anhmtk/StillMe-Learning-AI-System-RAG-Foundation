@@ -65,6 +65,7 @@ Instead of claiming to "open the black box" (mathematically impossible), we buil
 - ✅ **Continuum Memory System** (NEW): Tiered memory architecture (L0-L3) with promotion/demotion, multi-timescale scheduler, and forgetting metrics
 - ✅ **Multi-Source Learning** (NEW): Integrated fetching from RSS, arXiv, CrossRef, and Wikipedia with pre-filtering
 - ✅ **Interactive Conversation Learning** (NEW): StillMe can learn from user conversations by detecting valuable knowledge, requesting permission, and adding it to the knowledge base with full transparency and user control
+- ✅ **Community-Driven Learning** (NEW): Standalone Community page with voting system - community members propose learning sources, vote on proposals (10 votes threshold), and track what StillMe has learned and what's coming next
 - 🔬 **Nested Learning** (EXPERIMENTAL): Tiered update frequency system inspired by Google Research's Nested Learning paradigm - reduces embedding costs by updating knowledge at different frequencies (L0: every cycle, L1: every 10 cycles, L2: every 100 cycles, L3: every 1000 cycles). Currently in experimental branch `experimental/nested-learning` for testing and validation.
 
 **Vision:** Evolve through developmental stages (Infant → Child → Adolescent → Adult) with community governance, automated learning pipelines, and complete transparency.
