@@ -193,11 +193,14 @@ def render_floating_community_panel():
                     <button class="stillme-community-close" onclick="closeCommunity()">×</button>
                 </div>
                 <div id="stillme-community-content">
+                    <div id="community-loading" style="text-align: center; padding: 2rem; color: #aaa;">
+                        <p>Loading Community...</p>
+                    </div>
                     <iframe 
                         id="community-iframe" 
-                        src="/Community" 
-                        style="width: 100%; height: 100%; border: none; background: #1e1e1e;"
-                        onload="adjustIframeHeight()">
+                        src="" 
+                        style="width: 100%; height: 100%; border: none; background: #1e1e1e; display: none;"
+                        onload="iframeLoaded()">
                     </iframe>
                 </div>
             </div>
@@ -210,13 +213,27 @@ def render_floating_community_panel():
                 isCommunityOpen = !isCommunityOpen;
                 const panel = document.getElementById('stillme-community-panel');
                 const overlay = document.getElementById('stillme-community-overlay');
+                const iframe = document.getElementById('community-iframe');
                 
                 if (isCommunityOpen) {{
                     panel.classList.add('open');
                     overlay.style.display = 'block';
+                    // Load iframe only when opening
+                    if (iframe && !iframe.src) {{
+                        iframe.src = window.location.origin + '/Community';
+                    }}
                 }} else {{
                     panel.classList.remove('open');
                     overlay.style.display = 'none';
+                }}
+            }}
+            
+            function iframeLoaded() {{
+                const iframe = document.getElementById('community-iframe');
+                const loading = document.getElementById('community-loading');
+                if (iframe && loading) {{
+                    loading.style.display = 'none';
+                    iframe.style.display = 'block';
                 }}
             }}
             
@@ -228,13 +245,6 @@ def render_floating_community_panel():
                 overlay.style.display = 'none';
             }}
             
-            function adjustIframeHeight() {{
-                const iframe = document.getElementById('community-iframe');
-                const content = document.getElementById('stillme-community-content');
-                if (iframe && content) {{
-                    iframe.style.height = content.clientHeight + 'px';
-                }}
-            }}
             
             // Fetch daily stats and update badge
             (function() {{
