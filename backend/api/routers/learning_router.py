@@ -1205,15 +1205,19 @@ async def _run_learning_cycle_sync():
         result["entries_filtered"] = filtered_count
         result["community_items_added"] = community_items_added
         result["automatic_items_added"] = automatic_items_added
+        
+        total_items = community_items_added + automatic_items_added
         result["learning_allocation"] = {
-            "total_capacity": LEARNING_CAPACITY_PER_CYCLE,
-            "community_quota": COMMUNITY_LEARNING_QUOTA,
-            "automatic_quota": AUTOMATIC_LEARNING_QUOTA,
+            "total_items_available": total_items,
+            "community_allocation_percentage": COMMUNITY_ALLOCATION_PERCENTAGE * 100,
+            "automatic_allocation_percentage": AUTOMATIC_ALLOCATION_PERCENTAGE * 100,
+            "community_quota": int(total_items * COMMUNITY_ALLOCATION_PERCENTAGE) if total_items > 0 else 0,
+            "automatic_quota": int(total_items * AUTOMATIC_ALLOCATION_PERCENTAGE) if total_items > 0 else 0,
             "community_used": community_items_added,
             "automatic_used": automatic_items_added,
             "allocation_percentage": {
-                "community": round((community_items_added / LEARNING_CAPACITY_PER_CYCLE) * 100, 1) if LEARNING_CAPACITY_PER_CYCLE > 0 else 0,
-                "automatic": round((automatic_items_added / LEARNING_CAPACITY_PER_CYCLE) * 100, 1) if LEARNING_CAPACITY_PER_CYCLE > 0 else 0
+                "community": round((community_items_added / total_items) * 100, 1) if total_items > 0 else 0,
+                "automatic": round((automatic_items_added / total_items) * 100, 1) if total_items > 0 else 0
             }
         }
         
