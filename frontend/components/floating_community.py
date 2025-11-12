@@ -23,7 +23,7 @@ def render_floating_community_button():
         z-index: 1000;
         cursor: pointer;
     ">
-        <a href="javascript:void(0)" onclick="window.open('https://dashboard-production-e4ca.up.railway.app/community.py', '_blank')" style="
+        <a href="/community.py" target="_blank" style="
             display: flex;
             align-items: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
