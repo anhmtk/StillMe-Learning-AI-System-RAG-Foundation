@@ -1779,9 +1779,10 @@ def sidebar(page_for_chat: str | None = None):
             validation_info = None
             learning_suggestions = None
             latency_metrics = None
+            processing_steps = []
             
             try:
-                # Show progress message
+                # Show initial progress message
                 status_placeholder.info("🤔 StillMe is thinking... This may take 30-90 seconds (AI generation + validation). If this is the first request, the embedding model may be loading (this can take 2-3 minutes).")
                 
                 # DEBUG: Log request details
@@ -1823,6 +1824,12 @@ def sidebar(page_for_chat: str | None = None):
                 validation_info = data.get("validation_info")
                 learning_suggestions = data.get("learning_suggestions")
                 latency_metrics = data.get("latency_metrics")  # Extract latency metrics
+                processing_steps = data.get("processing_steps", [])  # Extract processing steps
+                
+                # Display processing steps if available
+                if processing_steps:
+                    steps_text = " | ".join(processing_steps[-3:])  # Show last 3 steps
+                    status_placeholder.info(f"🤔 {steps_text}")
                 
                 # Check for learning proposal and permission request
                 learning_proposal = data.get("learning_proposal")

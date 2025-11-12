@@ -85,6 +85,7 @@ class ChatResponse(BaseModel):
     permission_request: Optional[str] = Field(None, description="Permission request message to ask user if StillMe can learn from their input")
     timing: Optional[Dict[str, str]] = None
     latency_metrics: Optional[str] = Field(None, description="Formatted latency metrics for display (BẮT BUỘC HIỂN THỊ LOG)")
+    processing_steps: Optional[List[str]] = Field(None, description="Real-time processing steps for status indicator (e.g., 'RAG retrieval...', 'Calling DeepSeek API...', 'Validation...')")
     
     class Config:
         schema_extra = {
