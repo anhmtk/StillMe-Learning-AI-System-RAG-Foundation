@@ -1282,6 +1282,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             
                             panel.style.left = newX + 'px';
                             panel.style.top = newY + 'px';
+                            panel.style.transform = 'none'; // CRITICAL: Remove transform when dragging
                         }} else if (isResizing && !isFullscreen && !isMinimized && resizeHandle) {{
                             const deltaX = e.clientX - dragStartX;
                             const deltaY = e.clientY - dragStartY;
@@ -1317,6 +1318,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             panel.style.height = newHeight + 'px';
                             panel.style.left = newX + 'px';
                             panel.style.top = newY + 'px';
+                            panel.style.transform = 'none'; // CRITICAL: Remove transform when resizing
                         }}
                     }});
                     
