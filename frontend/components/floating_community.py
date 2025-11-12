@@ -17,10 +17,10 @@ def render_floating_community_button():
     
     html = f"""
     <div id="floating-community-button" style="
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        z-index: 1000;
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 20px !important;
+        z-index: 999999 !important;
         cursor: pointer;
     ">
         <a href="/community.py" target="_blank" style="

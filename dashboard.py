@@ -1465,9 +1465,6 @@ def sidebar(page_for_chat: str | None = None):
                 st.sidebar.warning(f"⚠️ Failed to load chat history: {e}")
     
     # Render floating community button (always visible, not just in chat mode)
-    if FLOATING_COMMUNITY_AVAILABLE:
-        render_floating_community_button()
-    
     # Render floating widget if selected and available
     if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
         # Render floating chat widget
@@ -1984,6 +1981,11 @@ def main():
         layout="wide",
         initial_sidebar_state="expanded"
     )
+    
+    # Render floating community button (always visible, outside sidebar)
+    if FLOATING_COMMUNITY_AVAILABLE:
+        render_floating_community_button()
+    
     page = sidebar()
 
     if page == "Overview":
