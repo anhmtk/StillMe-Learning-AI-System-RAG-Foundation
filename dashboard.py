@@ -15,9 +15,9 @@ try:
 except ImportError:
     FLOATING_CHAT_AVAILABLE = False
 
-# Import floating community button
+# Import floating community panel
 try:
-    from frontend.components.floating_community import render_floating_community_button
+    from frontend.components.floating_community_panel import render_floating_community_panel
     FLOATING_COMMUNITY_AVAILABLE = True
 except ImportError:
     FLOATING_COMMUNITY_AVAILABLE = False
@@ -1984,13 +1984,13 @@ def main():
     
     page = sidebar()
     
-    # Render floating community button (always visible, after sidebar to ensure it's on top)
+    # Render floating community panel (always visible, after sidebar to ensure it's on top)
     if FLOATING_COMMUNITY_AVAILABLE:
         try:
-            render_floating_community_button()
+            render_floating_community_panel()
         except Exception as e:
-            # Fallback: Show button in sidebar if floating fails
-            st.sidebar.error(f"⚠️ Community button error: {e}")
+            # Fallback: Show link in sidebar if floating panel fails
+            st.sidebar.error(f"⚠️ Community panel error: {e}")
             st.sidebar.markdown("---")
             st.sidebar.markdown("### 🤝 Community")
             st.sidebar.markdown("[Open Community Page](/Community)")
