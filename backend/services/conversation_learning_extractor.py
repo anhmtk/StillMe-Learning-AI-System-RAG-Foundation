@@ -307,21 +307,21 @@ class ConversationLearningExtractor:
         Valuable questions are worth learning because they represent important topics
         """
         valuable_indicators = [
-            # Philosophical questions (English & Vietnamese)
-            r'\b(philosophy|philosophical|ethics|ethical|moral|morality|đạo đức|triết học)\b',
-            r'\b(consciousness|awareness|conscious|ý thức|nhận thức)\b',
-            r'\b(existence|reality|truth|meaning|tồn tại|thực tại|ý nghĩa)\b',
-            r'\b(identity|self|bản sắc|bản thân|tự ngã)\b',
+            # Philosophical questions - MULTILINGUAL (English, Vietnamese, Chinese, Japanese, Korean, Spanish, French, German, Portuguese, Russian, Arabic, Hindi)
+            r'\b(philosophy|philosophical|ethics|ethical|moral|morality|đạo đức|triết học|哲学|倫理|철학|filosofía|éthique|Ethik|filosofia|философия|فلسفة|दर्शन)\b',
+            r'\b(consciousness|awareness|conscious|ý thức|nhận thức|意识|意識|의식|consciencia|conscience|Bewusstsein|consciência|сознание|وعي|चेतना)\b',
+            r'\b(existence|reality|truth|meaning|tồn tại|thực tại|ý nghĩa|存在|存在|존재|existencia|existence|Existenz|existência|существование|وجود|अस्तित्व)\b',
+            r'\b(identity|self|bản sắc|bản thân|tự ngã|身份|自己|정체성|identidad|identité|Identität|identidade|идентичность|هوية|पहचान)\b',
             
-            # Paradox & self-reflection (English & Vietnamese)
-            r'\b(paradox|contradiction|nghịch lý|mâu thuẫn)\b',
-            r'\b(self.*reflect|tự.*phản|phản chiếu)\b',
-            r'\b(transparency|minh bạch|rõ ràng)\b',
-            r'\b(limit|giới hạn|boundary|ranh giới)\b',
-            r'\b(evolution|tiến hóa|phát triển)\b',
-            r'\b(learn.*forever|học.*mãi|học.*mãi mãi)\b',
-            r'\b(absolute|tuyệt đối|perfect|hoàn hảo)\b',
-            r'\b(impossible|bất khả thi|không thể)\b',
+            # Paradox & self-reflection - MULTILINGUAL
+            r'\b(paradox|contradiction|nghịch lý|mâu thuẫn|悖论|パラドックス|역설|paradoja|paradoxe|Paradoxon|paradoxo|парадокс|مفارقة|विरोधाभास)\b',
+            r'\b(self.*reflect|tự.*phản|phản chiếu|自我反思|自己反省|자기반성|autorreflexión|autoréflexion|Selbstreflexion|autorreflexão|саморефлексия|تأمل ذاتي|आत्म-चिंतन)\b',
+            r'\b(transparency|minh bạch|rõ ràng|透明|透明性|투명성|transparencia|transparence|Transparenz|transparência|прозрачность|شفافية|पारदर्शिता)\b',
+            r'\b(limit|giới hạn|boundary|ranh giới|限制|限界|한계|límite|limite|Grenze|limite|предел|حد|सीमा)\b',
+            r'\b(evolution|tiến hóa|phát triển|进化|進化|진화|evolución|évolution|Evolution|evolução|эволюция|تطور|विकास)\b',
+            r'\b(learn.*forever|học.*mãi|học.*mãi mãi|永远学习|永遠に学ぶ|영원히 배우다|aprender.*siempre|apprendre.*toujours|ewig.*lernen|aprender.*sempre|учиться.*вечно|التعلم.*دائما|हमेशा सीखना)\b',
+            r'\b(absolute|tuyệt đối|perfect|hoàn hảo|绝对|絶対|절대|absoluto|absolu|absolut|absoluto|абсолютный|مطلق|पूर्ण)\b',
+            r'\b(impossible|bất khả thi|không thể|不可能|不可能|불가능|imposible|impossible|unmöglich|impossível|невозможно|مستحيل|असंभव)\b',
             
             # Deep technical questions
             r'\b(how.*work|mechanism|algorithm|architecture|kiến trúc|thuật toán)\b',
