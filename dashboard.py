@@ -167,8 +167,12 @@ def page_overview():
     rag_stats = get_json("/api/rag/stats", {}).get("stats", {})
     accuracy = get_json("/api/learning/accuracy_metrics", {}).get("metrics", {})
     
-    # Get scheduler status (with longer timeout for status checks)
-    scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=30)
+    # Get scheduler status (with longer timeout - backend may be busy during learning cycle)
+    try:
+        scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=90)
+    except requests.exceptions.Timeout:
+        # Backend may be busy processing learning cycle - this is OK
+        scheduler_status = {}
 
     # Display logo and title
     col_logo, col_title = st.columns([1, 4])
@@ -305,16 +309,17 @@ def page_overview():
     # Get scheduler status with longer timeout (backend may be busy during learning cycle)
     # Use try-except to handle timeout gracefully and show progress if job is running
     try:
-        scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=60)
+        scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=90)
     except requests.exceptions.Timeout:
         # Backend may be busy processing learning cycle - check if job is running
-        if st.session_state.get("learning_job_started") and st.session_state.get("learning_job_id"):
-            st.warning("⏳ Backend is processing learning cycle. Showing job progress below...")
+        if st.session_state.get("learning_job_started"):
+            # Job is running - this is expected, don't show error
+            st.info("⏳ Backend is processing learning cycle. Showing job progress below...")
             scheduler_status = {}  # Empty to trigger job status display
         else:
-            st.error("⚠️ **Warning:** Backend did not respond to status check within 60 seconds.")
-            st.info("💡 **Possible causes:**\n- Backend is processing a learning cycle\n- Backend is under heavy load\n- Network connectivity issue")
-            st.info("🔄 **Try:** Refresh the page or wait a few moments and try again.")
+            # No job running but timeout - backend may be busy or slow
+            st.warning("⏳ Backend is taking longer than usual to respond. This may indicate a learning cycle is running.")
+            st.info("💡 **Tip:** If you just clicked 'Run Now', the learning cycle is likely starting. Progress will appear below.")
             scheduler_status = {}
     
     # Debug: Show what we received and test connection
@@ -324,7 +329,7 @@ def page_overview():
         # Try to provide more specific error info
         try:
             test_url = f"{API_BASE}/api/status"
-            test_r = requests.get(test_url, timeout=30)  # Increased timeout for status checks
+            test_r = requests.get(test_url, timeout=10)  # Quick check for backend availability
             if test_r.status_code == 200:
                 st.warning("💡 Backend is reachable at `/api/status`, but `/api/learning/scheduler/status` returned empty response.")
                 st.info("This may indicate the scheduler endpoint has an issue. Check backend logs.")
@@ -434,8 +439,8 @@ def page_overview():
             if st.button("🚀 Run Now", use_container_width=True):
                 try:
                     # Non-blocking: returns 202 immediately
-                    # Increased timeout to 30s to handle slow backend responses during learning cycle
-                    r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=30)
+                    # Increased timeout to 60s to handle slow backend responses during learning cycle startup
+                    r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=60)
                     if r.status_code == 202:
                         data = r.json()
                         job_id = data.get("job_id")
@@ -461,7 +466,11 @@ def page_overview():
                     # Timeout is OK - job is running in background
                     # Don't set a fake job_id - we'll poll scheduler status instead
                     # Store current cycle_count to detect when cycle completes
-                    current_status = get_json("/api/learning/scheduler/status", {}, timeout=10)
+                    try:
+                        current_status = get_json("/api/learning/scheduler/status", {}, timeout=30)
+                    except requests.exceptions.Timeout:
+                        # Backend is busy - this is expected when starting learning cycle
+                        current_status = {}
                     if current_status and current_status.get("status") == "ok":
                         st.session_state["learning_cycle_count_at_start"] = current_status.get("cycle_count", 0)
                     st.session_state["learning_job_started"] = True
@@ -481,7 +490,11 @@ def page_overview():
             if not job_id or job_id == "timeout_fallback":
                 # Check scheduler status to see if cycle has completed
                 # Get current scheduler status to check if cycle finished
-                current_scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=60)
+                try:
+                    current_scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=90)
+                except requests.exceptions.Timeout:
+                    # Backend is busy - likely still processing
+                    current_scheduler_status = {}
                 if current_scheduler_status and current_scheduler_status.get("status") == "ok":
                     is_running = current_scheduler_status.get("is_running", False)
                     last_run_time = current_scheduler_status.get("last_run_time")
