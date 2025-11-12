@@ -30,24 +30,15 @@ StillMe is a **Transparent AI Learning System** that acknowledges black box beha
 
 > **"Black box behavior emerges naturally when AI systems reach sufficient complexity — this is not a flaw to fix, but a mathematical reality to acknowledge. StillMe's approach: complete transparency, open collaboration, and collective research to understand and mitigate this reality together."**
 
-### 🎯 Our Approach: Acknowledging Black Box Reality, Building Transparent Solutions
+### 🎯 Our Approach
 
-StillMe recognizes that **black box behavior is an inherent property of sufficiently complex AI systems** — not a design flaw, but a mathematical consequence (Gödel's Incompleteness Theorems). Rather than fighting this reality, we build **transparent systems around it** through:
+StillMe recognizes that **black box behavior is an inherent property of sufficiently complex AI systems** — not a design flaw, but a mathematical reality. Rather than fighting this reality, we build **transparent systems around it** through:
 
 - **🔬 Acknowledging Mathematical Reality**: Black box behavior emerges when systems are complex enough to be useful — this is inevitable, not fixable
 - **🔓 Complete Transparency**: Every algorithm, every decision, every line of code is public — we invite everyone to understand, discuss, and improve
 - **🤝 Open Collaboration**: Collective research, shared insights, and community-driven solutions — we stand together, not in opposition
 - **✅ Systematic Validation**: Validator Chain, RAG grounding, and confidence scoring to minimize hallucinations despite black box internals
 - **🌍 Community Governance**: You control the AI's evolution through transparent decision-making, not corporate control
-
-**Our Philosophy:**
-Instead of claiming to "open the black box" (mathematically impossible), we build **transparent systems that use AI responsibly**:
-
-- **🔬 Deep Understanding**: Recognizing black box as mathematical reality (Gödel's Incompleteness), not a flaw to fix
-- **🔓 Complete Transparency**: Every algorithm, every decision, every line of code is public — open for discussion, research, and improvement
-- **🤝 Collective Research**: We invite everyone to understand, discuss, propose solutions, and contribute — building together, not in opposition
-- **✅ Practical Solutions**: Validator Chain, RAG grounding, and confidence scoring to minimize hallucinations despite black box internals
-- **🌍 Community Governance**: Transparent decision-making where you control the AI's evolution through open collaboration
 
 **Current MVP Status:** Foundation components are implemented and working:
 - ✅ **Vector Database (ChromaDB)**: Semantic search and knowledge retrieval functional
@@ -82,7 +73,7 @@ Instead of claiming to "open the black box" (mathematically impossible), we buil
 - **💬 Interactive Chat**: Communicate with your evolving AI assistant
 - **🤝 Interactive Learning**: Learn from user conversations with permission-based knowledge extraction, quality validation, and ethics checks
 
-## 🧠 Philosophical Foundation: Acknowledging Mathematical Reality
+## 🧠 Philosophical Foundation
 
 StillMe's approach is grounded in a fundamental mathematical truth: **Gödel's Incompleteness Theorems**. Just as these theorems reveal that any sufficiently complex formal system contains statements that cannot be proven within that system, we recognize that **black box behavior emerges naturally when AI systems reach sufficient complexity**. 
 
@@ -92,86 +83,22 @@ Rather than claiming to "solve" black box behavior (which would be mathematicall
 
 > *"In any consistent formal system, there are statements that are true but unprovable within that system."* — Kurt Gödel
 
-### **The Gödel Connection: Why Perfect Transparency is Mathematically Impossible**
-
-Like mathematics and quantum physics, AI systems of sufficient complexity exhibit inherent limitations in interpretability. When neural networks reach a certain scale, their decision-making processes become too complex to fully trace or explain—not because of poor design, but because complexity itself creates boundaries. This mirrors Gödel's insight: systems powerful enough to be useful are also complex enough to contain unexplainable behaviors.
-
 **What this means for AI:**
 - 🔬 **Complexity → Incompleteness**: More capable AI systems inherently have less interpretable behaviors
-- 🌊 **Quantum Parallel**: Similar to quantum mechanics—we can observe outcomes but not fully explain the underlying process
 - 📐 **Mathematical Certainty**: This isn't a bug—it's a feature of sufficiently complex systems
-
-### **Our Practical Approach: System-Level Transparency Over Model-Level Interpretability**
-
-StillMe doesn't fight against this mathematical reality. Instead, we **build systems around it**:
-
-- ✅ **We acknowledge limitations**: Perfect model interpretability is mathematically impossible for complex AI
-- ✅ **We focus on what we CAN control**: System-level transparency, verification, and accountability
-- ✅ **We verify, not just interpret**: Trust through observable behavior, not just internal explanations
-- ✅ **We build practical accountability**: Community governance, audit trails, and transparent decision-making
 
 **StillMe's Approach:**
 - 🏗️ **System Architecture Transparency**: Every component, every decision, every data flow is visible — open for everyone to understand, discuss, and improve
 - 🔍 **Verification Over Interpretation**: We prove correctness through testing and validation, acknowledging that model internals remain complex
-- 🤝 **Open Collaboration**: Collective research, shared insights, and community-driven solutions — we invite everyone to stand together
+- 🤝 **Open Collaboration**: Collective research, shared insights, and community-driven solutions
 - 📊 **Complete Audit Trails**: Full history of learning decisions, ethical checks, and system behavior — transparent for collective understanding
 
-> *"We acknowledge that black box behavior is a mathematical reality in complex AI systems. Instead of claiming to 'solve' it, we build transparent systems around it, invite collective research, and work together to understand and mitigate its effects."*
-
-### **Why This Approach Matters**
-
-This philosophical foundation shapes StillMe's entire approach: **Acknowledging reality > Denying it**. We don't claim to "open the black box" (mathematically impossible) — we acknowledge it exists, build transparent systems around it, and invite everyone to collaborate on understanding and mitigating its effects.
-
-**StillMe builds trust through transparency, collaboration, and honest acknowledgment of mathematical reality.**
-
 > **"Perhaps the world needs AI systems that are smart enough to know when they don't know. StillMe is our humble attempt to build exactly that—an AI that values intellectual honesty over false confidence."**
-
-### **🤔 "But You Use DeepSeek/OpenAI APIs - Isn't That Black Box?"**
-
-**This is an excellent question that demonstrates deep thinking.** Here's our honest answer:
-
-**StillMe acknowledges that black box behavior is a mathematical reality in complex AI systems — including the LLMs we use.**
-
-**Our Approach:**
-
-✅ **We use LLM APIs (DeepSeek, OpenAI) as "reasoning engines"** — and we acknowledge their black box nature is a mathematical reality (Gödel's Incompleteness). Rather than claiming to "solve" it, we build **transparent systems around it**:
-
-- **Transparent data sources**: You see exactly what StillMe learns (RSS, arXiv, Wikipedia)
-- **Transparent retrieval**: You see what context is retrieved from vector DB
-- **Transparent validation**: You see validation results, confidence scores, citations
-- **Transparent decisions**: Every learning decision is logged and auditable
-- **Open collaboration**: Everyone can understand, discuss, propose solutions, and contribute
-
-✅ **StillMe's transparency is about SYSTEM architecture, not model internals:**
-- Every line of StillMe's code is public — open for collective research
-- Every data flow is visible — transparent for understanding and improvement
-- Every learning decision is logged — auditable for community review
-- Every validation result is transparent — shared for collective learning
-
-✅ **We acknowledge the mathematical reality:**
-- Black box behavior emerges when systems are complex enough to be useful
-- This is not a flaw to fix — it's a mathematical consequence
-- We don't promise to "open the LLM black box" (mathematically impossible)
-- We promise to build transparent systems that use LLMs responsibly
-
-✅ **Our solutions to mitigate black box effects:**
-- **Validator Chain**: Multi-layer validation to catch hallucinations
-- **RAG Grounding**: Responses grounded in retrieved context, not pure LLM generation
-- **Confidence Scoring**: Honest uncertainty when context is insufficient
-- **Open Collaboration**: Collective research to understand and improve
-
-**Analogy:**
-Think of it like a car:
-- **Closed system**: A car where you can't see anything — engine, fuel, dashboard are all hidden (ChatGPT, Claude)
-- **StillMe**: A car with transparent hood, visible fuel gauge, clear dashboard — you see everything about HOW the car works, even though the engine internals (LLM weights) remain complex. We invite everyone to study, understand, and improve the system together.
-
-**StillMe's Value Proposition:**
-> "We acknowledge that black box behavior is a mathematical reality in complex AI systems. We don't claim to 'solve' it — we build transparent systems around it, invite collective research, and work together to understand and mitigate its effects. This approach demonstrates deep understanding of both the nature and the phenomenon, while providing practical solutions to minimize hallucinations."
 
 ## 🛡️ Our Uncompromising Commitment
 
 ### 🌟 **100% Transparency - Nothing to Hide**
-- **Every line of code is public** - no "black box", no proprietary algorithms
+- **Every line of code is public** - no proprietary algorithms
 - **Every API call is visible** - see exactly what AI learns from and when
 - **Every decision is transparent** - from ethical filtering to quality assessment
 - **Complete audit trail** - full history of all learning decisions and violations
@@ -669,11 +596,7 @@ We open these questions to the community:
 
 > **📖 Learn more about StillMe's transparency experiment, safety mechanisms, and vision**: See [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md)
 
-## 🔧 Architecture
-
 > **Detailed architecture documentation**: See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for component details, data flow, API architecture, and deployment considerations.
-
-> **Note**: The System Architecture Diagram is shown above in the [Architecture](#-architecture) section. It reflects the current implementation with Source Integration, Pre-Filter, Nested Learning, and ChromaDB.
 
 ## 🌍 StillMe & The Path to Digital Sovereignty
 
@@ -743,7 +666,7 @@ I'm a **non-technical founder** with no formal IT background. StillMe was built 
 
 ### **Why StillMe?**
 
-After studying the mathematical reality of black box behavior in complex AI systems (Gödel's Incompleteness), I realized:
+After studying the mathematical reality of black box behavior in complex AI systems, I realized:
 
 - **Users deserve to know** what AI learns and why
 - **Ethics shouldn't be optional** - it must be foundational
@@ -754,7 +677,7 @@ StillMe is my attempt to demonstrate that **transparency + ethics + community = 
 
 ### **A Call to Shapers: Join the Movement**
 
-StillMe is **open source** and **needs your help**. We're building a transparent AI system that acknowledges black box reality and invites collective research — and we need **two types of contributors**:
+StillMe is **open source** and **needs your help**. We're building a transparent AI system that invites collective research — and we need **two types of contributors**:
 
 #### **Path 1: Ethics & Governance (No Coding Required)**
 
@@ -789,7 +712,7 @@ StillMe is **open source** and **needs your help**. We're building a transparent
 - Build robust testing and CI/CD pipelines
 - Scale infrastructure for global deployment
 
-**We need both paths.** This project started with an idea and AI assistance — but it needs **human expertise** (both technical and ethical) to reach its full potential. Every contribution makes StillMe better and strengthens our collective understanding of how to build transparent AI systems that acknowledge and work with black box reality.
+**We need both paths.** This project started with an idea and AI assistance — but it needs **human expertise** (both technical and ethical) to reach its full potential. Every contribution makes StillMe better and strengthens our collective understanding of how to build transparent AI systems.
 
 > **Note**: This is an AI-assisted project. Code may have bugs — that's why we're open source and need your help! Whether you contribute through code or through governance, you're helping build a better future for AI.
 
@@ -1041,7 +964,7 @@ Whether you support or oppose it, StillMe forces you to pay attention:
 - **Skeptical?** - Check the code, test the system, find vulnerabilities
 - **Interested?** - Follow, share, discuss
 
-> **"In a world where black box behavior is a mathematical reality, our transparency, open collaboration, and collective research are our strongest tools for understanding and mitigation."**
+> **"Our transparency, open collaboration, and collective research are our strongest tools for building better AI."**
 
 ## 💖 Support The Mission
 
@@ -1102,7 +1025,7 @@ We're transparent about exploring these options to sustain development:
 
 **Join us. Watch us. Critique us. But you can't ignore us.**
 
-*Because in acknowledging the mathematical reality of black box behavior, our transparency, collaboration, and collective research illuminate the path forward.*
+*Because transparency, collaboration, and collective research illuminate the path forward.*
 
 ## 🌍 StillMe & The Path to Digital Sovereignty
 
