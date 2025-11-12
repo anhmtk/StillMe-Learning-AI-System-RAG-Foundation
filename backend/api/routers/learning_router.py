@@ -1173,6 +1173,19 @@ async def _run_learning_cycle_sync():
         
         result["entries_added_to_rag"] = added_count
         result["entries_filtered"] = filtered_count
+        result["community_items_added"] = community_items_added
+        result["automatic_items_added"] = automatic_items_added
+        result["learning_allocation"] = {
+            "total_capacity": LEARNING_CAPACITY_PER_CYCLE,
+            "community_quota": COMMUNITY_LEARNING_QUOTA,
+            "automatic_quota": AUTOMATIC_LEARNING_QUOTA,
+            "community_used": community_items_added,
+            "automatic_used": automatic_items_added,
+            "allocation_percentage": {
+                "community": round((community_items_added / LEARNING_CAPACITY_PER_CYCLE) * 100, 1) if LEARNING_CAPACITY_PER_CYCLE > 0 else 0,
+                "automatic": round((automatic_items_added / LEARNING_CAPACITY_PER_CYCLE) * 100, 1) if LEARNING_CAPACITY_PER_CYCLE > 0 else 0
+            }
+        }
         
         # Complete cycle
         if rss_fetch_history and cycle_id:
@@ -1181,7 +1194,9 @@ async def _run_learning_cycle_sync():
         logger.info(
             f"Learning cycle: Fetched {result.get('entries_fetched', 0)} entries, "
             f"Filtered {filtered_count} (Low quality/Short), "
-            f"Added {added_count} to RAG"
+            f"Added {added_count} to RAG "
+            f"(Community: {community_items_added}/{COMMUNITY_LEARNING_QUOTA}, "
+            f"Automatic: {automatic_items_added}/{AUTOMATIC_LEARNING_QUOTA})"
         )
     
     return result
