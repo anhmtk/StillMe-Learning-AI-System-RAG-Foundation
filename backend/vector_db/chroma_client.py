@@ -467,11 +467,16 @@ class ChromaClient:
             search_results = []
             if results["documents"] and results["documents"][0]:
                 for i, doc in enumerate(results["documents"][0]):
+                    # Safely extract metadata - filter out None values to avoid ChromaDB TypeError
+                    raw_metadata = results["metadatas"][0][i] if results["metadatas"] and results["metadatas"][0] and i < len(results["metadatas"][0]) else {}
+                    # Filter out None values - ChromaDB Rust client can't handle None in metadata
+                    clean_metadata = {k: v for k, v in raw_metadata.items() if v is not None} if isinstance(raw_metadata, dict) else {}
+                    
                     search_results.append({
                         "content": doc,
-                        "metadata": results["metadatas"][0][i] if results["metadatas"] and results["metadatas"][0] else {},
-                        "distance": results["distances"][0][i] if results["distances"] and results["distances"][0] else 0.0,
-                        "id": results["ids"][0][i] if results["ids"] and results["ids"][0] else f"doc_{i}"
+                        "metadata": clean_metadata,
+                        "distance": results["distances"][0][i] if results["distances"] and results["distances"][0] and i < len(results["distances"][0]) else 0.0,
+                        "id": results["ids"][0][i] if results["ids"] and results["ids"][0] and i < len(results["ids"][0]) else f"doc_{i}"
                     })
             
             return search_results

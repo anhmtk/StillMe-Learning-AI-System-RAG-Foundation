@@ -443,6 +443,8 @@ class EmbeddingService:
                             logger.debug(f"Could not list cache directory: {e}")
             
             # Convert to list if single text
+            # Note: sentence-transformers may print "Batches: 100%|..." progress bar
+            # This is from tqdm and is normal behavior - we suppress it via TQDM_DISABLE env var
             if isinstance(text, str):
                 return embeddings.tolist()
             else:
