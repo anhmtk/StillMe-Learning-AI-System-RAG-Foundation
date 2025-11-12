@@ -1671,6 +1671,99 @@ def sidebar(page_for_chat: str | None = None):
                                         st.markdown("**⏱️ Latency Metrics:**")
                                         st.code(latency_metrics, language="text")
                     
+                    # Show permission request if available
+                    if st.session_state.get("learning_proposal") and st.session_state.get("permission_request"):
+                        proposal = st.session_state["learning_proposal"]
+                        permission_msg = st.session_state["permission_request"]
+                        
+                        with st.expander("💡 **Learning Request from Conversation**", expanded=True):
+                            st.markdown(permission_msg)
+                            
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                if st.button("✅ Đồng ý / Yes", key=f"accept_{proposal.get('proposal_id', 'unknown')}", use_container_width=True):
+                                    # Send acceptance
+                                    try:
+                                        response = requests.post(
+                                            f"{API_BASE}/api/learning/permission/respond",
+                                            json={
+                                                "proposal_id": proposal.get("proposal_id"),
+                                                "user_response": "yes",
+                                                "user_id": st.session_state.get("user_id")
+                                            },
+                                            timeout=10
+                                        )
+                                        response.raise_for_status()
+                                        result = response.json()
+                                        if result.get("status") in ["accepted", "edited"]:
+                                            st.success("✅ " + result.get("message", "Thank you! Information added to knowledge base."))
+                                            # Clear from session state
+                                            del st.session_state["learning_proposal"]
+                                            del st.session_state["permission_request"]
+                                            st.rerun()
+                                        else:
+                                            st.error("❌ " + result.get("message", "Failed to add information."))
+                                    except Exception as e:
+                                        st.error(f"❌ Error: {str(e)}")
+                            
+                            with col2:
+                                if st.button("❌ Từ chối / No", key=f"decline_{proposal.get('proposal_id', 'unknown')}", use_container_width=True):
+                                    # Send decline
+                                    try:
+                                        response = requests.post(
+                                            f"{API_BASE}/api/learning/permission/respond",
+                                            json={
+                                                "proposal_id": proposal.get("proposal_id"),
+                                                "user_response": "no",
+                                                "user_id": st.session_state.get("user_id")
+                                            },
+                                            timeout=10
+                                        )
+                                        response.raise_for_status()
+                                        result = response.json()
+                                        st.info("ℹ️ " + result.get("message", "Permission declined. Information will not be saved."))
+                                        # Clear from session state
+                                        del st.session_state["learning_proposal"]
+                                        del st.session_state["permission_request"]
+                                        st.rerun()
+                                    except Exception as e:
+                                        st.error(f"❌ Error: {str(e)}")
+                            
+                            with col3:
+                                edited_content = st.text_area(
+                                    "✏️ Edit content (optional)",
+                                    value=proposal.get("knowledge_snippet", "")[:500],
+                                    key=f"edit_{proposal.get('proposal_id', 'unknown')}",
+                                    height=100
+                                )
+                                if st.button("📝 Submit Edited", key=f"submit_edit_{proposal.get('proposal_id', 'unknown')}", use_container_width=True):
+                                    if len(edited_content.strip()) > 50:
+                                        try:
+                                            response = requests.post(
+                                                f"{API_BASE}/api/learning/permission/respond",
+                                                json={
+                                                    "proposal_id": proposal.get("proposal_id"),
+                                                    "user_response": edited_content,
+                                                    "user_id": st.session_state.get("user_id")
+                                                },
+                                                timeout=10
+                                            )
+                                            response.raise_for_status()
+                                            result = response.json()
+                                            if result.get("status") in ["accepted", "edited"]:
+                                                st.success("✅ " + result.get("message", "Thank you! Edited content added to knowledge base."))
+                                                # Clear from session state
+                                                del st.session_state["learning_proposal"]
+                                                del st.session_state["permission_request"]
+                                                st.rerun()
+                                            else:
+                                                st.error("❌ " + result.get("message", "Failed to add edited content."))
+                                        except Exception as e:
+                                            st.error(f"❌ Error: {str(e)}")
+                                    else:
+                                        st.warning("⚠️ Edited content must be at least 50 characters.")
+                    
                     # Show knowledge alert after StillMe's response
                     if m["role"] == "assistant" and "knowledge_alert" in m:
                         alert = m["knowledge_alert"]
@@ -1783,6 +1876,15 @@ def sidebar(page_for_chat: str | None = None):
                 validation_info = data.get("validation_info")
                 learning_suggestions = data.get("learning_suggestions")
                 latency_metrics = data.get("latency_metrics")  # Extract latency metrics
+                
+                # Check for learning proposal and permission request
+                learning_proposal = data.get("learning_proposal")
+                permission_request = data.get("permission_request")
+                if learning_proposal and permission_request:
+                    st.session_state["learning_proposal"] = learning_proposal
+                    st.session_state["permission_request"] = permission_request
+                    import logging
+                    logging.info(f"Learning proposal received: {learning_proposal.get('proposal_id', 'unknown')}")
                 
                 # Check for knowledge alert
                 knowledge_alert = data.get("knowledge_alert")

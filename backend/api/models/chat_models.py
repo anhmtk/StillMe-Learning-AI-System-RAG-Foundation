@@ -80,6 +80,8 @@ class ChatResponse(BaseModel):
     learning_suggestions: Optional[List[str]] = Field(None, description="Suggested topics to learn based on knowledge gaps")
     learning_session_id: Optional[int] = None
     knowledge_alert: Optional[Dict[str, Any]] = None
+    learning_proposal: Optional[Dict[str, Any]] = Field(None, description="Proposal to learn from user conversation (requires permission)")
+    permission_request: Optional[str] = Field(None, description="Permission request message to ask user if StillMe can learn from their input")
     timing: Optional[Dict[str, str]] = None
     latency_metrics: Optional[str] = Field(None, description="Formatted latency metrics for display (BẮT BUỘC HIỂN THỊ LOG)")
     
