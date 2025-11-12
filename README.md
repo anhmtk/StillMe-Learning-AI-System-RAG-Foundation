@@ -4,7 +4,7 @@
   <img src="assets/logo.png" alt="StillMe Logo" width="200" height="200">
 </div>
 
-> **A Transparent AI Learning System — Acknowledging that black box behavior is a mathematical reality in complex AI systems, StillMe builds transparent solutions through open collaboration, collective research, and systematic validation to minimize hallucinations. Currently in MVP stage with Vector DB + RAG + Validator Chain working.**
+> **A Transparent AI Learning System that continuously learns from multiple sources and provides context-aware responses through RAG architecture. Currently in MVP stage with Vector DB + RAG + Validator Chain working.**
 
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
@@ -26,19 +26,14 @@
 
 ## 🌟 What is StillMe?
 
-StillMe is a **Transparent AI Learning System** that acknowledges black box behavior as a mathematical reality in complex AI systems, and builds transparent solutions through open collaboration and systematic validation.
+StillMe is a **Transparent AI Learning System** that continuously learns from multiple sources (RSS, arXiv, Wikipedia) and provides context-aware responses through RAG (Retrieval-Augmented Generation) architecture.
 
-> **"Black box behavior emerges naturally when AI systems reach sufficient complexity — this is not a flaw to fix, but a mathematical reality to acknowledge. StillMe's approach: complete transparency, open collaboration, and collective research to understand and mitigate this reality together."**
+### 🎯 Key Features
 
-### 🎯 Our Approach
-
-StillMe recognizes that **black box behavior is an inherent property of sufficiently complex AI systems** — not a design flaw, but a mathematical reality. Rather than fighting this reality, we build **transparent systems around it** through:
-
-- **🔬 Acknowledging Mathematical Reality**: Black box behavior emerges when systems are complex enough to be useful — this is inevitable, not fixable
-- **🔓 Complete Transparency**: Every algorithm, every decision, every line of code is public — we invite everyone to understand, discuss, and improve
-- **🤝 Open Collaboration**: Collective research, shared insights, and community-driven solutions — we stand together, not in opposition
-- **✅ Systematic Validation**: Validator Chain, RAG grounding, and confidence scoring to minimize hallucinations despite black box internals
-- **🌍 Community Governance**: You control the AI's evolution through transparent decision-making, not corporate control
+- **🔓 Complete Transparency**: Every algorithm, every decision, every line of code is public
+- **🤝 Open Collaboration**: Community-driven development and governance
+- **✅ Systematic Validation**: Validator Chain reduces hallucinations by 80% through citation, evidence overlap, and confidence scoring
+- **🌍 Community Governance**: You control the AI's evolution through transparent decision-making
 
 **Current MVP Status:** Foundation components are implemented and working:
 - ✅ **Vector Database (ChromaDB)**: Semantic search and knowledge retrieval functional
@@ -73,35 +68,15 @@ StillMe recognizes that **black box behavior is an inherent property of sufficie
 - **💬 Interactive Chat**: Communicate with your evolving AI assistant
 - **🤝 Interactive Learning**: Learn from user conversations with permission-based knowledge extraction, quality validation, and ethics checks
 
-## 🧠 Philosophical Foundation
+## 🛡️ Transparency & Ethics
 
-StillMe's approach is grounded in a fundamental mathematical truth: **Gödel's Incompleteness Theorems**. Just as these theorems reveal that any sufficiently complex formal system contains statements that cannot be proven within that system, we recognize that **black box behavior emerges naturally when AI systems reach sufficient complexity**. 
-
-**This is not a flaw to fix — it's a mathematical reality we must acknowledge and work with.**
-
-Rather than claiming to "solve" black box behavior (which would be mathematically naive), StillMe builds **transparent systems around it** through open collaboration, collective research, and systematic validation.
-
-> *"In any consistent formal system, there are statements that are true but unprovable within that system."* — Kurt Gödel
-
-**What this means for AI:**
-- 🔬 **Complexity → Incompleteness**: More capable AI systems inherently have less interpretable behaviors
-- 📐 **Mathematical Certainty**: This isn't a bug—it's a feature of sufficiently complex systems
-
-**StillMe's Approach:**
-- 🏗️ **System Architecture Transparency**: Every component, every decision, every data flow is visible — open for everyone to understand, discuss, and improve
-- 🔍 **Verification Over Interpretation**: We prove correctness through testing and validation, acknowledging that model internals remain complex
-- 🤝 **Open Collaboration**: Collective research, shared insights, and community-driven solutions
-- 📊 **Complete Audit Trails**: Full history of learning decisions, ethical checks, and system behavior — transparent for collective understanding
-
-> **"Perhaps the world needs AI systems that are smart enough to know when they don't know. StillMe is our humble attempt to build exactly that—an AI that values intellectual honesty over false confidence."**
-
-## 🛡️ Our Uncompromising Commitment
-
-### 🌟 **100% Transparency - Nothing to Hide**
+### 🌟 **100% Transparency**
 - **Every line of code is public** - no proprietary algorithms
 - **Every API call is visible** - see exactly what AI learns from and when
 - **Every decision is transparent** - from ethical filtering to quality assessment
 - **Complete audit trail** - full history of all learning decisions and violations
+
+> **📖 Learn more about StillMe's philosophy**: See [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md)
 
 ### 🎯 **Ethical AI - Our Highest Priority**
 We believe that **ethics isn't a feature - it's the foundation**. StillMe is built with unwavering principles:
@@ -117,18 +92,6 @@ We believe that **ethics isn't a feature - it's the foundation**. StillMe is bui
 - **No personal data collection** - learns only from public sources
 - **Self-hosted codebase** - you maintain complete control over your data
 - **Delete anytime** - your data, your rules, your control
-
-## 🛡️ Ethical AI Transparency
-
-StillMe features the world's first **completely transparent ethical filtering system**:
-
-- **Complete Visibility**: All ethical violations are logged and visible
-- **Open Source**: Filtering rules and algorithms are publicly available
-- **Community Driven**: Blacklist and rules can be managed by the community
-- **Audit Trail**: Full history of all ethical decisions and violations
-- **Configurable**: Ethics level can be adjusted based on community needs
-
-This transparency ensures StillMe learns responsibly while maintaining community trust.
 
 ## 🚀 Quick Start
 
@@ -664,18 +627,7 @@ I'm a **non-technical founder** with no formal IT background. StillMe was built 
 
 > **Verified Commits by Anh MTK**: All commits in this repository are signed with PGP/SSH keys to ensure authenticity and trust. This demonstrates that professionalism and transparency are not reserved for large corporations — they are accessible to anyone committed to building responsibly.
 
-### **Why StillMe?**
-
-After studying the mathematical reality of black box behavior in complex AI systems, I realized:
-
-- **Users deserve to know** what AI learns and why
-- **Ethics shouldn't be optional** - it must be foundational
-- **Community should have control** - not just corporations
-- **Building AI is an experiment** - testing whether vision, tools, and persistence can meaningfully contribute
-
-StillMe is my attempt to demonstrate that **transparency + ethics + community = better AI**.
-
-### **A Call to Shapers: Join the Movement**
+### **A Call to Contributors**
 
 StillMe is **open source** and **needs your help**. We're building a transparent AI system that invites collective research — and we need **two types of contributors**:
 
@@ -949,23 +901,6 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 
 > **Note**: As a new project, we're building our community. Every contribution, no matter how small, helps StillMe evolve!
 
-## 🤝 Join The Movement - Not Just A Project
-
-### 🌍 **Why You Can't Ignore StillMe**
-Whether you support or oppose it, StillMe forces you to pay attention:
-
-- **If you support**: You're helping build the future of transparent AI
-- **If you oppose**: You need to monitor what's happening
-- **Either way**: You can't deny the impact of a 100% open project
-
-### 💬 **We Welcome All Voices**
-- **Supporting?** - Contribute code, ideas, resources
-- **Criticizing?** - Point out flaws, suggest improvements  
-- **Skeptical?** - Check the code, test the system, find vulnerabilities
-- **Interested?** - Follow, share, discuss
-
-> **"Our transparency, open collaboration, and collective research are our strongest tools for building better AI."**
-
 ## 💖 Support The Mission
 
 This project is maintained by passion and community contributions. If you believe in the mission:
@@ -1023,76 +958,8 @@ We're transparent about exploring these options to sustain development:
 
 ---
 
-**Join us. Watch us. Critique us. But you can't ignore us.**
+**Join us. Watch us. Critique us. Help us build better AI.**
 
-*Because transparency, collaboration, and collective research illuminate the path forward.*
-
-## 🌍 StillMe & The Path to Digital Sovereignty
-
-### **Global Solution, Local Relevance**
-
-StillMe's **100% Transparency and Open Governance** represents more than just an AI project—it's a **blueprint for digital sovereignty** in the 21st century.
-
-### **Why This Matters Globally**
-
-In an era where AI technology is increasingly controlled by a few corporations, StillMe offers a **pioneering alternative**:
-
-- **🔓 Complete Transparency**: No hidden algorithms, no proprietary secrets
-- **🌐 Open Governance**: Community-driven decisions, not corporate mandates
-- **🛡️ Data Sovereignty**: Self-hosted, self-controlled, self-maintained
-- **📚 Knowledge Sharing**: Open source code, open documentation, open learning
-
-### **Particular Relevance for Developing Nations**
-
-StillMe's approach is **especially aligned** with the **Open Technology Strategies** of developing nations like Vietnam and others across Asia, Africa, and Latin America:
-
-#### **1. Technology Independence**
-- **No Vendor Lock-in**: Self-hosted deployment means no dependency on foreign tech giants
-- **Local Control**: All data and algorithms remain within national borders
-- **Customizable**: Adapt StillMe to local languages, cultures, and ethical standards
-
-#### **2. Economic Development**
-- **Open Source = Lower Costs**: No licensing fees, no subscription costs
-- **Skill Development**: Local developers can learn, contribute, and build expertise
-- **Innovation Hub**: Create local AI ecosystems without foreign dependency
-
-#### **3. Strategic Alignment**
-- **National AI Policies**: Supports developing nations' goals of building sovereign AI capabilities
-- **Digital Transformation**: Enables AI adoption without compromising on transparency or control
-- **Knowledge Transfer**: Open source code facilitates technology transfer and capacity building
-
-#### **4. Ethical & Cultural Alignment**
-- **Local Values**: StillMe's community-driven ethics model allows nations to embed their own values
-- **Cultural Sensitivity**: Transparent algorithms enable cultural customization
-- **Regulatory Compliance**: Open governance supports local regulatory requirements
-
-### **The StillMe Vision for Digital Sovereignty**
-
-> **"Digital sovereignty isn't about isolation—it's about having the tools, knowledge, and control to build your own future."**
-
-StillMe demonstrates that **developing nations don't need to choose between**:
-- ❌ Using foreign closed AI systems without transparency (convenient but dependent)
-- ❌ Building from scratch (expensive and time-consuming)
-
-Instead, they can:
-- ✅ **Adopt open, transparent AI** (StillMe and similar projects)
-- ✅ **Customize for local needs** (community-driven governance)
-- ✅ **Build local expertise** (open source learning)
-- ✅ **Maintain strategic autonomy** (self-hosted, self-controlled)
-
-### **A Call to Action**
-
-If you're in a developing nation working on:
-- **National AI Strategies**
-- **Digital Transformation Initiatives**
-- **Technology Sovereignty Programs**
-- **Open Source Advocacy**
-
-**StillMe is your proof of concept.** We're not just building AI—we're building a **model for transparent, sovereign AI development** that any nation can adopt, adapt, and evolve.
-
----
-
-> **"The future of AI shouldn't be decided in Silicon Valley boardrooms. It should be built in communities, nations, and open source projects where transparency, ethics, and local values matter."**
 
 ## ⚠️ Known Limitations & Areas for Improvement
 
