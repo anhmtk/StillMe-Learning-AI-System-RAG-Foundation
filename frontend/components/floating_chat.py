@@ -398,6 +398,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 <!-- Header (draggable) -->
                 <div class="stillme-chat-header" id="stillme-chat-header">
                     <h3>💬 Chat with StillMe</h3>
+                    <div id="stillme-chat-status" style="font-size: 11px; color: #858585; margin-top: 4px; display: none;"></div>
                     <div class="stillme-chat-header-buttons">
                         <button class="stillme-chat-header-btn" id="minimize-btn" onclick="toggleMinimize()" title="Minimize">−</button>
                         <button class="stillme-chat-header-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
@@ -1476,6 +1477,19 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         
                         const data = await response.json();
                         const reply = data.response || data.message || JSON.stringify(data);
+                        
+                        // Display processing steps if available (for debugging/status)
+                        const processingSteps = data.processing_steps || [];
+                        if (processingSteps.length > 0) {{
+                            console.log('StillMe processing steps:', processingSteps);
+                            // Optionally show last step in UI
+                            const lastStep = processingSteps[processingSteps.length - 1];
+                            const statusDiv = document.getElementById('stillme-chat-status');
+                            if (statusDiv) {{
+                                statusDiv.textContent = lastStep;
+                                statusDiv.style.display = 'block';
+                            }}
+                        }}
                         
                         // Add assistant response
                         chatHistory.push({{ role: 'assistant', content: reply }});

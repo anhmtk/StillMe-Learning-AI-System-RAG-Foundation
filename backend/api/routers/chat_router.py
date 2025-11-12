@@ -103,6 +103,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     # Initialize variables before try-except to avoid UnboundLocalError
     confidence_score = None
     validation_info = None
+    processing_steps = []  # Track processing steps for real-time status
     
     try:
         # Get services
@@ -136,6 +137,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         context = None
         rag_retrieval_start = time.time()
         if rag_retrieval and chat_request.use_rag:
+            processing_steps.append("🔍 Searching knowledge base...")
             # CRITICAL: If origin query detected, retrieve provenance knowledge ONLY
             # This ensures provenance is ONLY retrieved when explicitly asked about origin/founder
             if is_origin_query:
@@ -218,6 +220,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         rag_retrieval_latency = rag_retrieval_end - rag_retrieval_start
         timing_logs["rag_retrieval"] = f"{rag_retrieval_latency:.2f}s"
         logger.info(f"⏱️ RAG retrieval took {rag_retrieval_latency:.2f}s")
+        if rag_retrieval and chat_request.use_rag:
+            processing_steps.append(f"✅ Found {context.get('total_context_docs', 0) if context else 0} relevant documents ({rag_retrieval_latency:.2f}s)")
         
         # Generate response using AI (simplified for demo)
         enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
@@ -248,10 +252,12 @@ CRITICAL RULES:
 FAILURE TO CITE SOURCES WHEN CONTEXT IS AVAILABLE IS A CRITICAL ERROR."""
             
             # Detect language FIRST - before building prompt
+            processing_steps.append("🌐 Detecting language...")
             detected_lang = detect_language(chat_request.message)
             lang_detect_time = time.time() - start_time
             timing_logs["language_detection"] = f"{lang_detect_time:.3f}s"
             logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s) for question: '{chat_request.message[:100]}...'")
+            processing_steps.append(f"✅ Language detected: {detected_lang}")
             
             # Language names mapping
             language_names = {
@@ -644,12 +650,14 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             
             # Generate AI response with timing
             # LLM_Inference_Latency: Time from API call start to response received
+            processing_steps.append("🤖 Calling AI model (DeepSeek/OpenAI)...")
             llm_inference_start = time.time()
             raw_response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
             llm_inference_end = time.time()
             llm_inference_latency = llm_inference_end - llm_inference_start
             timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
             logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
+            processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
             
             # Validate response if enabled
             validation_info = None
@@ -659,6 +667,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             
             if enable_validators:
                 try:
+                    processing_steps.append("🔍 Validating response...")
                     validation_start = time.time()
                     from backend.validators.chain import ValidatorChain
                     from backend.validators.citation import CitationRequired
@@ -689,6 +698,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     validation_time = time.time() - validation_start
                     timing_logs["validation"] = f"{validation_time:.2f}s"
                     logger.info(f"⏱️ Validation took {validation_time:.2f}s")
+                    processing_steps.append(f"✅ Validation completed ({validation_time:.2f}s)")
                     
                     # Calculate confidence score based on context quality and validation
                     confidence_score = _calculate_confidence_score(
@@ -1040,7 +1050,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             learning_proposal=learning_proposal,  # Learning proposal (if valuable knowledge detected)
             permission_request=permission_request,  # Permission request message
             timing=timing_logs,
-            latency_metrics=latency_metrics_text  # BẮT BUỘC HIỂN THỊ LOG trong response cho frontend
+            latency_metrics=latency_metrics_text,  # BẮT BUỘC HIỂN THỊ LOG trong response cho frontend
+            processing_steps=processing_steps  # Real-time processing steps for status indicator
         )
         
     except HTTPException:
