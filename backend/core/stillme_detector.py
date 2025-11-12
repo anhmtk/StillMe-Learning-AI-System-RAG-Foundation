@@ -257,6 +257,8 @@ ORIGIN_KEYWORDS = {
     "người tạo ra", "người sáng lập", "tác giả", "ai đứng sau", "ai đã tạo",
     "về stillme", "lịch sử stillme", "câu chuyện stillme", "background stillme",
     "người sáng lập là ai", "ai là người sáng lập", "người tạo ra stillme",
+    "ai là người", "ai đã tạo ra bạn", "ai tạo ra bạn", "ai làm ra bạn",
+    "người nào tạo ra", "ai đã làm ra", "ai đã xây dựng",
     
     # About-related
     "about", "về", "giới thiệu", "introduction", "overview",
@@ -294,6 +296,16 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
     # Check for pattern: "ai" + "tạo ra/xây dựng" + "stillme" (Vietnamese)
     if re.search(r'\bai\b.*\b(tạo ra|xây dựng|làm ra|phát triển|sáng lập)\b.*\bstillme\b', query_lower):
         matched_keywords.append("ai_tao_ra_pattern")
+        return (True, matched_keywords)
+    
+    # Check for pattern: "ai là người" + "đã tạo ra/tạo ra" + "bạn" (Vietnamese)
+    if re.search(r'\bai\s+là\s+người\b.*\b(đã\s+)?(tạo ra|làm ra|xây dựng|phát triển|sáng lập)\b.*\b(bạn|stillme)\b', query_lower):
+        matched_keywords.append("ai_la_nguoi_pattern")
+        return (True, matched_keywords)
+    
+    # Check for pattern: "ai" + "đã tạo ra/tạo ra" + "bạn" (Vietnamese)
+    if re.search(r'\bai\b.*\b(đã\s+)?(tạo ra|làm ra|xây dựng|phát triển)\b.*\b(bạn|stillme)\b', query_lower):
+        matched_keywords.append("ai_tao_ra_ban_pattern")
         return (True, matched_keywords)
     
     # Check for pattern: "người sáng lập" / "founder"

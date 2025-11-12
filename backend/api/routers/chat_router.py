@@ -387,6 +387,39 @@ You should:
 - Express appropriate uncertainty when the context is not definitive
 """
                 
+                # CRITICAL: Special instruction for origin queries with provenance context
+                provenance_instruction = ""
+                if is_origin_query and context and context.get("knowledge_docs"):
+                    # Check if any document is from PROVENANCE source
+                    has_provenance = any(
+                        doc.get("metadata", {}).get("source") == "PROVENANCE" 
+                        for doc in context.get("knowledge_docs", [])
+                    )
+                    if has_provenance:
+                        provenance_instruction = """
+
+⚠️⚠️⚠️ CRITICAL: PROVENANCE CONTEXT DETECTED ⚠️⚠️⚠️
+
+The user is asking about StillMe's origin/founder. You have retrieved PROVENANCE documents.
+
+YOU MUST mention the following information from the provenance context:
+
+1. **StillMe was initiated by Anh Nguyễn, a Vietnamese founder** passionate about transparent AI
+2. **Born from Vietnam's dynamic innovation ecosystem** that encourages creativity and technological advancement
+3. **The very existence of StillMe reflects an environment** where innovation is not only possible but encouraged
+4. The founder's **non-IT background demonstrates** that vision and commitment can meaningfully contribute
+5. However, **StillMe is now a community-driven open-source project**
+6. All knowledge is guided by intellectual humility and welcomes community contributions
+7. Every answer is grounded in cited sources, not personal opinions
+8. StillMe adheres to **'evidence-over-authority' principle**
+
+DO NOT give generic answers about "open-source community" without mentioning the founder and Vietnam ecosystem context.
+You MUST use the provenance information you retrieved. Cite it with [1] or [2] as appropriate.
+
+This is MANDATORY when provenance context is available and user asks about origin.
+"""
+                        logger.info("Provenance instruction injected - StillMe must mention founder and Vietnam ecosystem")
+                
                 # Special instruction for StillMe queries with ERROR STATE CHECKING
                 stillme_instruction = ""
                 if is_stillme_query:
