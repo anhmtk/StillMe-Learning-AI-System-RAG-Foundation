@@ -241,6 +241,7 @@ docker compose up -d
 6. Add environment variables:
    - `DEEPSEEK_API_KEY=sk-your-key`
    - `OPENAI_API_KEY=sk-your-key`
+   - `COMMUNITY_MIN_VOTES=5` (optional, default: 10 - adjust based on community size)
 7. Get public URLs:
    - Dashboard: `https://stillme-dashboard.railway.app`
    - API: `https://stillme-backend.railway.app`

@@ -18,6 +18,19 @@
 - **Why**: Prevents re-downloading `all-MiniLM-L6-v2` model (79MB) on every deploy
 - **Note**: This MUST be set to match the persistent volume mount path in `railway-backend.json`
 
+### Optional: Community Vote Threshold (Configurable)
+
+**`COMMUNITY_MIN_VOTES`** = `10` (default) or custom value
+- **Location**: Backend service → Variables tab
+- **Purpose**: Minimum votes required for a community proposal to be approved and learned
+- **Default**: `10` votes (if not set)
+- **Recommended Values**:
+  - Small community (< 20 users): `3-5` votes
+  - Medium community (20-100 users): `7-10` votes (default)
+  - Large community (100-500 users): `10-15` votes
+  - Very large community (> 500 users): `15-20` votes
+- **Note**: Lower threshold = easier to approve proposals, but risk of spam. Higher threshold = more consensus needed.
+
 ### How to Set in Railway
 
 1. Go to Railway Dashboard
@@ -30,7 +43,10 @@
 6. Add:
    - **Name**: `PERSISTENT_CACHE_PATH`
    - **Value**: `/app/hf_cache`
-7. Click **Save**
+7. (Optional) Add:
+   - **Name**: `COMMUNITY_MIN_VOTES`
+   - **Value**: `5` (or your preferred threshold, default is 10)
+8. Click **Save**
 
 ### Verification
 
