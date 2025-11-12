@@ -1982,11 +1982,18 @@ def main():
         initial_sidebar_state="expanded"
     )
     
-    # Render floating community button (always visible, outside sidebar)
-    if FLOATING_COMMUNITY_AVAILABLE:
-        render_floating_community_button()
-    
     page = sidebar()
+    
+    # Render floating community button (always visible, after sidebar to ensure it's on top)
+    if FLOATING_COMMUNITY_AVAILABLE:
+        try:
+            render_floating_community_button()
+        except Exception as e:
+            # Fallback: Show button in sidebar if floating fails
+            st.sidebar.error(f"⚠️ Community button error: {e}")
+            st.sidebar.markdown("---")
+            st.sidebar.markdown("### 🤝 Community")
+            st.sidebar.markdown("[Open Community Page](/community.py)")
 
     if page == "Overview":
         page_overview()
