@@ -1472,9 +1472,9 @@ def sidebar(page_for_chat: str | None = None):
     
     page = st.sidebar.selectbox(
         "Select Page",
-        ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health", "Nested Learning"],
+        ["Overview", "RAG", "Learning", "Validation", "Memory Health", "Nested Learning"],
         key="page_selector",
-        index=0 if st.session_state["page_selector"] not in ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health", "Nested Learning"] else ["Overview", "RAG", "Learning", "Validation", "Community", "Memory Health", "Nested Learning"].index(st.session_state["page_selector"])
+        index=0 if st.session_state["page_selector"] not in ["Overview", "RAG", "Learning", "Validation", "Memory Health", "Nested Learning"] else ["Overview", "RAG", "Learning", "Validation", "Memory Health", "Nested Learning"].index(st.session_state["page_selector"])
     )
 
     st.sidebar.success("Backend Connected")
@@ -2070,8 +2070,6 @@ def main():
         page_learning()
     elif page == "Validation":
         page_validation()
-    elif page == "Community":
-        page_community()
     elif page == "Memory Health":
         from dashboard_memory_health import page_memory_health
         page_memory_health()
