@@ -1376,12 +1376,30 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         
                         // CRITICAL: Send to backend from iframe context (no CORS issue)
                         try {{
+                            // Build conversation history
+                            const conversationHistory = [];
+                            if (chatHistory.length > 1) {{
+                                const historySlice = chatHistory.slice(0, -1).slice(-10);
+                                conversationHistory.push(...historySlice);
+                            }}
+                            
+                            const requestPayload = {{
+                                message: message,
+                                user_id: 'floating_chat_user',
+                                use_rag: true,
+                                context_limit: 3
+                            }};
+                            
+                            if (conversationHistory.length > 0) {{
+                                requestPayload.conversation_history = conversationHistory;
+                            }}
+                            
                             const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
                                 method: 'POST',
                                 headers: {{
                                     'Content-Type': 'application/json',
                                 }},
-                                body: JSON.stringify({{ message: message }}),
+                                body: JSON.stringify(requestPayload),
                             }});
                             
                             const data = await response.json();
