@@ -1442,21 +1442,42 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 // Clear input
                 input.value = '';
                 
-                // Send to backend
-                try {{
-                    const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
-                        method: 'POST',
-                        headers: {{
-                            'Content-Type': 'application/json',
-                        }},
-                        body: JSON.stringify({{ message: message }}),
-                    }});
-                    
-                    const data = await response.json();
-                    const reply = data.response || data.message || JSON.stringify(data);
-                    
-                    // Add assistant response
-                    chatHistory.push({{ role: 'assistant', content: reply }});
+                    // Send to backend
+                    try {{
+                        // Build conversation history (exclude current message, keep last 5 pairs)
+                        const conversationHistory = [];
+                        if (chatHistory.length > 0) {{
+                            // Get last 10 messages before current (5 pairs)
+                            const historySlice = chatHistory.slice(-10);
+                            conversationHistory.push(...historySlice);
+                        }}
+                        
+                        // Build request payload
+                        const requestPayload = {{
+                            message: message,
+                            user_id: 'floating_chat_user',
+                            use_rag: true,
+                            context_limit: 3
+                        }};
+                        
+                        // Add conversation history if available
+                        if (conversationHistory.length > 0) {{
+                            requestPayload.conversation_history = conversationHistory;
+                        }}
+                        
+                        const response = await fetch(`${{API_BASE}}/api/chat/smart_router`, {{
+                            method: 'POST',
+                            headers: {{
+                                'Content-Type': 'application/json',
+                            }},
+                            body: JSON.stringify(requestPayload),
+                        }});
+                        
+                        const data = await response.json();
+                        const reply = data.response || data.message || JSON.stringify(data);
+                        
+                        // Add assistant response
+                        chatHistory.push({{ role: 'assistant', content: reply }});
                     renderMessages();
                             
                             // Update parent panel with new messages

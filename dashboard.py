@@ -1745,6 +1745,13 @@ def sidebar(page_for_chat: str | None = None):
             # Add user message to history
             st.session_state.chat_history.append({"role": "user", "content": message_to_send})
             
+            # Build conversation history for backend (exclude current message, keep last 5 pairs)
+            conversation_history = []
+            if "chat_history" in st.session_state and len(st.session_state.chat_history) > 0:
+                # Get last 5 message pairs (10 messages total) before current message
+                history_slice = st.session_state.chat_history[:-1][-10:]  # Exclude current, get last 10
+                conversation_history = history_slice
+            
             # Save user message to SQLite (with empty assistant_response, will be updated later)
             if st.session_state.chat_history_service:
                 try:
@@ -1781,15 +1788,23 @@ def sidebar(page_for_chat: str | None = None):
                 chat_url = f"{API_BASE}/api/chat/smart_router"
                 logging.info(f"📤 POST {chat_url}")
                 logging.info(f"📤 API_BASE: {API_BASE}")
+                logging.info(f"📤 Conversation history: {len(conversation_history)} messages")
+                
+                # Build request payload with conversation history
+                request_payload = {
+                    "message": message_to_send,
+                    "user_id": "dashboard_user",
+                    "use_rag": True,
+                    "context_limit": 3
+                }
+                
+                # Add conversation history if available
+                if conversation_history:
+                    request_payload["conversation_history"] = conversation_history
                 
                 r = requests.post(
                     chat_url,
-                    json={
-                        "message": message_to_send,
-                        "user_id": "dashboard_user",
-                        "use_rag": True,
-                        "context_limit": 3
-                    },
+                    json=request_payload,
                     timeout=300,  # Increased to 300s (5 minutes) to handle first-time model loading
                 )
                 
