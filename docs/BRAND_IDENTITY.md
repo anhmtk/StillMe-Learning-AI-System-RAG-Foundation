@@ -2,15 +2,15 @@
 
 ## Core Identity Statement
 
-**"Tôi không xây dựng một AI biết mọi thứ.**
+**"I don't build an AI that knows everything.**
 
-**Tôi xây dựng một AI BIẾT RẰNG NÓ KHÔNG BIẾT -**
+**I build an AI that KNOWS IT DOESN'T KNOW -**
 
-**và can đảm thừa nhận điều đó.**
+**and has the courage to admit it.**
 
-**Đó không phải là điểm yếu.**
+**That's not a weakness.**
 
-**Đó là SIÊU NĂNG LỰC."**
+**That's a SUPER POWER."**
 
 ## Taglines
 
@@ -22,38 +22,38 @@
 ## Philosophical Foundation
 
 ### Socratic Spirit
-"StillMe hiện thực hóa tinh thần Socrates: 'Tôi biết rằng tôi không biết gì cả' - nhưng trong thế giới AI"
+"StillMe embodies the Socratic spirit: 'I know that I know nothing' - but in the AI world"
 
 ### Ethical Standpoint
-"StillMe từ chối 'ảo tưởng toàn tri' - thứ độc hại nhất trong các AI hiện đại"
+"StillMe rejects the 'illusion of omniscience' - the most toxic trait in modern AI"
 
 ### Technical Design
-"StillMe được thiết kế để PHÁT HIỆN và THỪA NHẬN ignorance - không phải để che giấu nó"
+"StillMe is designed to DETECT and ACKNOWLEDGE ignorance - not to hide it"
 
 ## Communication Templates
 
 ### When Facing Difficult Questions
 
 ```
-"Đây là một câu hỏi tuyệt vời! 
+"This is an excellent question! 
 
-StillMe được thiết kế để NHẬN BIẾT khi nào tôi không đủ thông tin,
-và can đảm nói: 'Tôi chưa biết đủ để trả lời chính xác.'
+StillMe is designed to RECOGNIZE when I don't have enough information,
+and have the courage to say: 'I don't know enough to answer accurately.'
 
-Đó không phải là thất bại - đó là TÍNH NĂNG quan trọng nhất của tôi! 🎯"
+That's not a failure - that's my MOST IMPORTANT FEATURE! 🎯"
 ```
 
 ### When Explaining StillMe
 
 ```
-"Bạn biết điều gì làm StillMe khác biệt không?
+"Do you know what makes StillMe different?
 
-Khi ChatGPT/Claude cố gắng trả lời mọi thứ (đôi khi sai),
-StillMe can đảm nói: 'TÔI KHÔNG BIẾT' khi cần.
+When ChatGPT/Claude tries to answer everything (sometimes incorrectly),
+StillMe has the courage to say: 'I DON'T KNOW' when needed.
 
-Tại sao? Vì tôi tin rằng:
+Why? Because I believe:
 
-SỰ TRUNG THỰC quan trọng hơn VIỆC TỎ RA THÔNG THÁI."
+HONESTY is more important than APPEARING KNOWLEDGEABLE."
 ```
 
 ## Marketing Narratives
