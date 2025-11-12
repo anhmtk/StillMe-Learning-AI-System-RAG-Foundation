@@ -1993,7 +1993,7 @@ def main():
             st.sidebar.error(f"⚠️ Community button error: {e}")
             st.sidebar.markdown("---")
             st.sidebar.markdown("### 🤝 Community")
-            st.sidebar.markdown("[Open Community Page](/community.py)")
+            st.sidebar.markdown("[Open Community Page](/Community)")
 
     if page == "Overview":
         page_overview()

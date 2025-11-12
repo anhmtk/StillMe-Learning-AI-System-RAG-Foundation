@@ -67,7 +67,7 @@ def render_floating_community_button():
     </style>
     
     <div id="floating-community-button">
-        <a href="/community.py" target="_blank">
+        <a href="/Community" target="_self">
             <span style="margin-right: 8px; font-size: 18px;">🤝</span>
             <span>Community</span>
             <span id="community-badge">0</span>
