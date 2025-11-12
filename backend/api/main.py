@@ -38,6 +38,7 @@ from backend.api.request_tracking_middleware import RequestTrackingMiddleware
 # Import routers
 from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
 from backend.api.routers import debug_router, learning_permission_router, community_router
+from backend.api.routers import feedback_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -673,6 +674,7 @@ app.include_router(spice_router, prefix="/api/spice", tags=["spice"])
 app.include_router(learning_router, prefix="/api/learning", tags=["learning"])
 app.include_router(learning_permission_router.router, prefix="/api/learning", tags=["learning"])
 app.include_router(community_router.router, prefix="/api/community", tags=["community"])
+app.include_router(feedback_router.router, prefix="/api/feedback", tags=["feedback"])
 app.include_router(system_router, tags=["system"])
 app.include_router(debug_router.router)  # Debug endpoints for cache/model monitoring
 

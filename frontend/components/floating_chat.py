@@ -718,10 +718,31 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 const messagesContainer = document.getElementById('stillme-chat-messages');
                 messagesContainer.innerHTML = '';
                 
-                chatHistory.forEach(msg => {{
+                chatHistory.forEach((msg, index) => {{
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `stillme-chat-message ${{msg.role}}`;
                     messageDiv.textContent = msg.content;
+                    
+                    // Add feedback buttons for assistant messages
+                    if (msg.role === 'assistant' && msg.message_id) {{
+                        const feedbackDiv = document.createElement('div');
+                        feedbackDiv.className = 'stillme-feedback-buttons';
+                        
+                        const likeBtn = document.createElement('button');
+                        likeBtn.className = 'stillme-feedback-btn';
+                        likeBtn.innerHTML = '👍 Like';
+                        likeBtn.onclick = () => submitFeedback(msg.message_id, msg.question || '', msg.content, 1);
+                        
+                        const dislikeBtn = document.createElement('button');
+                        dislikeBtn.className = 'stillme-feedback-btn';
+                        dislikeBtn.innerHTML = '👎 Dislike';
+                        dislikeBtn.onclick = () => submitFeedback(msg.message_id, msg.question || '', msg.content, -1);
+                        
+                        feedbackDiv.appendChild(likeBtn);
+                        feedbackDiv.appendChild(dislikeBtn);
+                        messageDiv.appendChild(feedbackDiv);
+                    }}
+                    
                     messagesContainer.appendChild(messageDiv);
                 }});
                 
@@ -729,6 +750,39 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         setTimeout(() => {{
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
                         }}, 10);
+            }}
+            
+            // Submit feedback (like/dislike)
+            async function submitFeedback(messageId, question, response, rating) {{
+                try {{
+                    const response_data = await fetch(`${{API_BASE}}/api/feedback/submit`, {{
+                        method: 'POST',
+                        headers: {{ 'Content-Type': 'application/json' }},
+                        body: JSON.stringify({{
+                            message_id: messageId,
+                            question: question,
+                            response: response,
+                            rating: rating,
+                        }}),
+                    }});
+                    
+                    if (response_data.ok) {{
+                        const data = await response_data.json();
+                        console.log('Feedback submitted:', data);
+                        
+                        // Update button state
+                        const buttons = document.querySelectorAll(`[data-message-id="${{messageId}}"]`);
+                        buttons.forEach(btn => {{
+                            if (rating === 1) {{
+                                btn.classList.add('liked');
+                            }} else {{
+                                btn.classList.add('disliked');
+                            }}
+                        }});
+                    }}
+                }} catch (error) {{
+                    console.error('Error submitting feedback:', error);
+                }}
             }}
             
                     // Toggle chat panel with overlay
@@ -888,11 +942,51 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 align-self: flex-end;
                                                 margin-left: auto;
                                             }}
-                                            #stillme-chat-panel-parent .stillme-chat-message.assistant {{
-                                                background: #2d2d30 !important;
-                                                color: #cccccc !important;
-                                                align-self: flex-start;
-                                            }}
+                                            #stillme-chat-panel-parent             .stillme-chat-message.assistant {{
+                background: #2d2d30 !important;
+                color: #cccccc !important;
+                align-self: flex-start;
+            }}
+            
+            /* Feedback buttons (like/dislike) */
+            .stillme-feedback-buttons {{
+                display: flex !important;
+                gap: 8px !important;
+                margin-top: 8px !important;
+                padding-top: 8px !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            }}
+            
+            .stillme-feedback-btn {{
+                padding: 6px 12px !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                border-radius: 4px !important;
+                background: transparent !important;
+                color: #cccccc !important;
+                cursor: pointer !important;
+                font-size: 12px !important;
+                transition: all 0.2s !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+            }}
+            
+            .stillme-feedback-btn:hover {{
+                background: rgba(255, 255, 255, 0.1) !important;
+                border-color: rgba(255, 255, 255, 0.3) !important;
+            }}
+            
+            .stillme-feedback-btn.liked {{
+                background: rgba(70, 179, 255, 0.2) !important;
+                border-color: #46b3ff !important;
+                color: #46b3ff !important;
+            }}
+            
+            .stillme-feedback-btn.disliked {{
+                background: rgba(255, 100, 100, 0.2) !important;
+                border-color: #ff6464 !important;
+                color: #ff6464 !important;
+            }}
                                         `;
                                         parentDoc.head.appendChild(styleSheet);
                                         console.log('StillMe Chat: CSS styles injected into parent window');

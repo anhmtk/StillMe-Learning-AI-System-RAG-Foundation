@@ -74,6 +74,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     """Chat response with RAG context"""
     response: str
+    message_id: Optional[str] = Field(None, description="Unique message ID for feedback tracking")
     context_used: Optional[Dict[str, Any]] = None
     accuracy_score: Optional[float] = Field(None, ge=0.0, le=1.0)
     confidence_score: Optional[float] = Field(None, ge=0.0, le=1.0, description="AI confidence in the answer (0.0 = uncertain, 1.0 = very confident)")

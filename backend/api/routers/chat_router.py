@@ -1049,8 +1049,13 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             except Exception as suggestion_error:
                 logger.warning(f"Failed to generate learning suggestions: {suggestion_error}")
         
+        # Generate unique message ID for feedback tracking
+        import uuid
+        message_id = f"msg_{uuid.uuid4().hex[:16]}"
+        
         return ChatResponse(
             response=response,
+            message_id=message_id,
             context_used=context,
             accuracy_score=accuracy_score,
             confidence_score=confidence_score,
