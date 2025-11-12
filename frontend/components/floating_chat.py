@@ -1340,6 +1340,13 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         
                         const message = messageText.trim();
                         
+                        // Show processing status immediately
+                        const statusDiv = document.getElementById('stillme-chat-status');
+                        if (statusDiv) {{
+                            statusDiv.textContent = '🤔 StillMe is thinking...';
+                            statusDiv.style.display = 'block';
+                        }}
+                        
                         // Add user message to history
                         chatHistory.push({{ role: 'user', content: message }});
                         renderMessages();
