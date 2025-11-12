@@ -801,6 +801,30 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             
             detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
             
+            # Build conversation history context if provided
+            conversation_history_text = ""
+            if chat_request.conversation_history and len(chat_request.conversation_history) > 0:
+                # Format conversation history for context
+                history_lines = []
+                for msg in chat_request.conversation_history[-5:]:  # Keep last 5 messages to avoid token limit
+                    role = msg.get("role", "user")
+                    content = msg.get("content", "")
+                    if role == "user":
+                        history_lines.append(f"User: {content}")
+                    elif role == "assistant":
+                        history_lines.append(f"Assistant: {content}")
+                
+                if history_lines:
+                    conversation_history_text = f"""
+📜 CONVERSATION HISTORY (Previous messages for context):
+
+{chr(10).join(history_lines)}
+
+---
+Current message:
+"""
+                    logger.info(f"Including {len(chat_request.conversation_history)} previous messages in context (non-RAG)")
+            
             # Strong language instruction - put FIRST
             if detected_lang != 'en':
                 language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
@@ -818,7 +842,7 @@ THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 """
                 base_prompt = f"""{language_instruction}
 
-User Question: {chat_request.message}
+{conversation_history_text}User Question: {chat_request.message}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
 """
@@ -835,7 +859,7 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
 
 THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
-User Question: {chat_request.message}
+{conversation_history_text}User Question: {chat_request.message}
 
 Remember: RESPOND IN ENGLISH ONLY."""
             
