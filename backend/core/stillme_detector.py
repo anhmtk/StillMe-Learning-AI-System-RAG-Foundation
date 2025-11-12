@@ -243,3 +243,68 @@ def get_foundational_query_variants(query: str) -> List[str]:
     
     return variants
 
+
+# Keywords that indicate origin/founder queries (Vietnamese and English)
+ORIGIN_KEYWORDS = {
+    # Origin-related (English)
+    "origin", "origins", "who created", "who built", "who made", "who developed",
+    "creator", "founder", "founders", "author", "authors", "created by",
+    "built by", "made by", "developed by", "who is behind", "who stands behind",
+    "about stillme", "stillme history", "stillme story", "stillme background",
+    
+    # Origin-related (Vietnamese)
+    "nguồn gốc", "xuất xứ", "ai tạo ra", "ai xây dựng", "ai làm ra", "ai phát triển",
+    "người tạo ra", "người sáng lập", "tác giả", "ai đứng sau", "ai đã tạo",
+    "về stillme", "lịch sử stillme", "câu chuyện stillme", "background stillme",
+    "người sáng lập là ai", "ai là người sáng lập", "người tạo ra stillme",
+    
+    # About-related
+    "about", "về", "giới thiệu", "introduction", "overview",
+    
+    # History-related
+    "history", "lịch sử", "story", "câu chuyện", "background", "nền tảng"
+}
+
+
+def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
+    """
+    Detect if query is about StillMe's origin/founder.
+    CRITICAL: This is used to determine if provenance knowledge should be retrieved.
+    
+    Args:
+        query: User query string
+        
+    Returns:
+        Tuple of (is_origin_query, matched_keywords)
+    """
+    query_lower = query.lower()
+    matched_keywords = []
+    
+    # Check for explicit origin/founder keywords
+    for keyword in ORIGIN_KEYWORDS:
+        if keyword in query_lower:
+            matched_keywords.append(keyword)
+            return (True, matched_keywords)
+    
+    # Check for pattern: "who" + "created/built/made" + "stillme"
+    if re.search(r'\bwho\b.*\b(created|built|made|developed|founded)\b.*\bstillme\b', query_lower):
+        matched_keywords.append("who_created_pattern")
+        return (True, matched_keywords)
+    
+    # Check for pattern: "ai" + "tạo ra/xây dựng" + "stillme" (Vietnamese)
+    if re.search(r'\bai\b.*\b(tạo ra|xây dựng|làm ra|phát triển|sáng lập)\b.*\bstillme\b', query_lower):
+        matched_keywords.append("ai_tao_ra_pattern")
+        return (True, matched_keywords)
+    
+    # Check for pattern: "người sáng lập" / "founder"
+    if re.search(r'\b(người sáng lập|founder|tác giả|author|creator)\b', query_lower):
+        matched_keywords.append("founder_keyword")
+        return (True, matched_keywords)
+    
+    # Check for "about StillMe" pattern
+    if re.search(r'\b(about|về|giới thiệu)\b.*\bstillme\b', query_lower):
+        matched_keywords.append("about_stillme")
+        return (True, matched_keywords)
+    
+    return (False, [])
+
