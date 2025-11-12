@@ -336,7 +336,7 @@ def page_overview():
                 test_r = requests.get(test_url, timeout=10)  # Quick check for backend availability
                 if test_r.status_code == 200:
                     st.info("💡 Backend is reachable. Scheduler status may be temporarily unavailable during learning cycle.")
-            elif test_r.status_code == 502:
+                elif test_r.status_code == 502:
                 st.error("❌ **502 Bad Gateway** - Backend service is not responding.")
                 st.markdown("""
                 **502 Bad Gateway means the backend service is down or crashed.**
