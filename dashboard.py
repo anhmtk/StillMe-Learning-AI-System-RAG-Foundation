@@ -1069,84 +1069,8 @@ def page_learning():
         st.error(f"Error fetching data: {e}")
 
 
-def page_community():
-    st.markdown("## Community Proposals")
-    st.caption("Propose learning sources, content, or improvements for StillMe")
-    
-    # Community Proposal Form
-    with st.expander("📝 Propose a Learning Source", expanded=True):
-        st.markdown("**Help StillMe learn by proposing new sources of knowledge!**")
-        
-        proposal_type = st.selectbox(
-            "Proposal Type",
-            ["RSS Feed", "Website/Article", "API Source", "Other"],
-            help="What type of learning source are you proposing?"
-        )
-        
-        source_url = st.text_input(
-            "Source URL/Feed",
-            placeholder="https://example.com/feed.xml or https://example.com/article",
-            help="Enter the URL of the RSS feed, article, or API endpoint"
-        )
-        
-        description = st.text_area(
-            "Description",
-            placeholder="Describe why this source would be valuable for StillMe to learn from...",
-            height=100,
-            help="Explain the value and relevance of this source"
-        )
-        
-        # TODO: Store proposer name when backend supports it
-        # your_name = st.text_input(
-        #     "Your Name (Optional)",
-        #     placeholder="Leave blank for anonymous",
-        #     help="Optional: Your name or GitHub username"
-        # )
-        
-        if st.button("💡 Submit Proposal", type="primary", use_container_width=True):
-            if source_url and description:
-                try:
-                    # For now, store in a simple way (can be enhanced with proper database later)
-                    # TODO: Store proposal_data when backend supports it
-                    # proposal_data = {
-                    #     "type": proposal_type,
-                    #     "url": source_url,
-                    #     "description": description,
-                    #     "proposer": your_name or "Anonymous",
-                    #     "timestamp": datetime.now().isoformat(),
-                    #     "status": "pending"
-                    # }
-                    
-                    # Try to add via RAG API as a proposal (if backend supports it)
-                    # Or display success and store suggestion
-                    st.success("✅ Proposal submitted! Thank you for contributing to StillMe's learning.")
-                    st.info(
-                        f"**Proposal Details:**\n"
-                        f"- Type: {proposal_type}\n"
-                        f"- URL: {source_url}\n"
-                        f"- Status: Pending review\n\n"
-                        f"*Note: Full proposal system with voting will be implemented in a future release.*"
-                    )
-                    
-                    # In future, this could POST to /api/community/proposals endpoint
-                    # For now, we'll show the proposal
-                    
-                except Exception as e:
-                    st.error(f"Failed to submit proposal: {e}")
-            else:
-                st.warning("Please fill in both Source URL and Description.")
-    
-    st.markdown("---")
-    
-    # Community Voting Section (Coming Soon)
-    st.subheader("🗳️ Community Voting (Coming Soon)")
-    st.info(
-        "Secure voting system with minimum votes, threshold, cooldown, and EthicsGuard will be available here. "
-        "Community members will be able to vote on proposals and content quality."
-    )
-    
-    if st.button("View Mock Vote", help="Placeholder button"):
-        st.success("Thanks! Voting API will be wired in a next release.")
+# Community page has been moved to standalone community.py
+# Access it via the floating Community button in bottom-left corner
 
 
 def page_validation():
