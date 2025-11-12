@@ -381,15 +381,15 @@ class ConversationLearningExtractor:
         length_score = min(1.0, len(text) / 200.0)  # Normalize to 200 chars
         score += length_score * 0.2
         
-        # Philosophical/ethical depth (English & Vietnamese)
+        # Philosophical/ethical depth - MULTILINGUAL
         depth_indicators = [
-            r'\b(philosophy|ethics|moral|consciousness|existence|reality|truth|triết học|đạo đức)\b',
-            r'\b(meaning|purpose|significance|ý nghĩa|mục đích)\b',
-            r'\b(identity|self|nature|essence|bản chất|bản sắc|tự ngã)\b',
-            r'\b(paradox|nghịch lý|contradiction|mâu thuẫn)\b',
-            r'\b(transparency|minh bạch|self.*reflect|tự.*phản)\b',
-            r'\b(limit|giới hạn|boundary|ranh giới)\b',
-            r'\b(evolution|tiến hóa|learn.*forever|học.*mãi)\b',
+            r'\b(philosophy|ethics|moral|consciousness|existence|reality|truth|triết học|đạo đức|哲学|倫理|철학|filosofía|éthique|Ethik|filosofia|философия|فلسفة|दर्शन)\b',
+            r'\b(meaning|purpose|significance|ý nghĩa|mục đích|意义|意味|의미|significado|signification|Bedeutung|significado|значение|معنى|अर्थ)\b',
+            r'\b(identity|self|nature|essence|bản chất|bản sắc|tự ngã|本质|本質|본질|identidad|nature|Wesen|essência|сущность|جوهر|सार)\b',
+            r'\b(paradox|nghịch lý|contradiction|mâu thuẫn|悖论|パラドックス|역설|paradoja|paradoxe|Paradoxon|paradoxo|парадокс|مفارقة|विरोधाभास)\b',
+            r'\b(transparency|minh bạch|self.*reflect|tự.*phản|透明|自己反省|자기반성|transparencia|transparence|Selbstreflexion|transparência|прозрачность|شفافية|पारदर्शिता)\b',
+            r'\b(limit|giới hạn|boundary|ranh giới|限制|限界|한계|límite|limite|Grenze|limite|предел|حد|सीमा)\b',
+            r'\b(evolution|tiến hóa|learn.*forever|học.*mãi|进化|永遠に学ぶ|진화|evolución|évolution|Evolution|evolução|эволюция|تطور|विकास)\b',
         ]
         
         depth_count = sum(1 for pattern in depth_indicators if re.search(pattern, text, re.IGNORECASE))
