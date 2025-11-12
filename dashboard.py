@@ -1540,12 +1540,12 @@ def sidebar(page_for_chat: str | None = None):
             except Exception as e:
                 st.sidebar.warning(f"⚠️ Failed to load chat history: {e}")
     
+    # Render floating community button (always visible, not just in chat mode)
+    if FLOATING_COMMUNITY_AVAILABLE:
+        render_floating_community_button()
+    
     # Render floating widget if selected and available
     if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
-        # Render floating community button
-        if FLOATING_COMMUNITY_AVAILABLE:
-            render_floating_community_button()
-        
         # Render floating chat widget
         render_floating_chat(
             chat_history=st.session_state.chat_history,
