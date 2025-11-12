@@ -80,7 +80,9 @@ class ConversationLearningExtractor:
             if self._is_valuable_question(user_message):
                 # Extract the question as valuable knowledge
                 knowledge_score = self._assess_question_value(user_message)
-                if knowledge_score >= 0.6:  # Threshold for valuable questions
+                # Lower threshold for philosophical questions (they're always valuable)
+                threshold = 0.5 if len(user_message) > 150 else 0.6  # Lower threshold for longer questions
+                if knowledge_score >= threshold:
                     learning_proposal = {
                         "knowledge_snippet": self._extract_question_snippet(user_message),
                         "source": "user_question",
