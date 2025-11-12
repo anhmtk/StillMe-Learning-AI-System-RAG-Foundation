@@ -8,16 +8,21 @@ import json
 import asyncio
 import aiohttp
 import time
+import os
 from pathlib import Path
 from typing import List, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # API base URL
-API_BASE = "http://localhost:8000"  # Change to production URL if needed
+# IMPORTANT: Change this to your backend URL!
+# - Local: "http://localhost:8000"
+# - Railway: "https://stillme-backend-production.up.railway.app"
+# - Or set via environment variable: STILLME_API_BASE
+API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
 
 # Test suite file
 TEST_SUITE_FILE = Path(__file__).parent.parent / "tests" / "data" / "comprehensive_test_suite.json"
@@ -68,7 +73,7 @@ async def test_question(session: aiohttp.ClientSession, question: Dict, timeout:
                     "processing_steps": data.get("processing_steps", []),
                     "latency": elapsed,
                     "status": "success",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             else:
                 error_text = await response.text()
@@ -77,7 +82,7 @@ async def test_question(session: aiohttp.ClientSession, question: Dict, timeout:
                     "question": question["question"],
                     "status": "error",
                     "error": f"HTTP {response.status}: {error_text}",
-                    "timestamp": datetime.utcnow().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
     except asyncio.TimeoutError:
         return {
