@@ -691,12 +691,59 @@ def page_overview():
                             if entries_skipped > 0:
                                 st.info(f"🎯 **Nested Learning**: Skipped {entries_skipped} entries (tiered update isolation) - Cost saved!")
                             
-                            # Show recent logs
+                            # Show detailed breakdown from logs
                             if logs:
+                                # Parse logs to extract source breakdown and filter details
+                                source_breakdown = {}
+                                filter_reasons_detail = {}
+                                
+                                for log in logs:
+                                    log_lower = log.lower()
+                                    # Extract source breakdown
+                                    if "source breakdown:" in log_lower:
+                                        breakdown_text = log.split("Source breakdown:")[-1].strip()
+                                        for part in breakdown_text.split(","):
+                                            if ":" in part:
+                                                source, count = part.strip().split(":", 1)
+                                                source_breakdown[source.strip()] = int(count.strip())
+                                    # Extract filter reasons
+                                    if "filter reasons:" in log_lower:
+                                        reasons_text = log.split("Filter reasons:")[-1].strip()
+                                        for part in reasons_text.split(","):
+                                            if ":" in part:
+                                                reason, count = part.strip().split(":", 1)
+                                                filter_reasons_detail[reason.strip()] = int(count.strip())
+                                
+                                # Show source breakdown if available
+                                if source_breakdown:
+                                    with st.expander("📊 Source Breakdown", expanded=True):
+                                        cols = st.columns(len(source_breakdown))
+                                        for idx, (source, count) in enumerate(source_breakdown.items()):
+                                            with cols[idx % len(cols)]:
+                                                st.metric(source, count)
+                                
+                                # Show filter reasons detail if available
+                                if filter_reasons_detail:
+                                    with st.expander("🔍 Filter Reasons Detail", expanded=False):
+                                        for reason, count in filter_reasons_detail.items():
+                                            st.write(f"- **{reason}**: {count} entries")
+                                
+                                # Show recent logs
                                 with st.expander("📋 Recent Activity Logs", expanded=True):
-                                    # Show last 10 logs
-                                    for log in logs[-10:]:
-                                        st.text(log)
+                                    # Show last 15 logs (increased from 10)
+                                    for log in logs[-15:]:
+                                        # Highlight important logs
+                                        if any(keyword in log.lower() for keyword in ["fetched", "filter", "added", "completed", "error"]):
+                                            if "error" in log.lower() or "failed" in log.lower():
+                                                st.error(log)
+                                            elif "completed" in log.lower() or "added" in log.lower():
+                                                st.success(log)
+                                            elif "filter" in log.lower():
+                                                st.warning(log)
+                                            else:
+                                                st.info(log)
+                                        else:
+                                            st.text(log)
                             
                             # Show elapsed time
                             if job_data.get("started_at"):
