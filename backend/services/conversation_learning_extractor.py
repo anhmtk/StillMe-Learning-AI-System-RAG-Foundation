@@ -62,18 +62,36 @@ class ConversationLearningExtractor:
         """Analyze user message for valuable knowledge"""
         # Check if user message contains valuable knowledge
         # Criteria:
-        # 1. Length: At least 100 characters (substantial content)
-        # 2. Information density: Contains facts, explanations, or insights
-        # 3. Not a question: User is providing information, not asking
+        # 1. Length: At least 50 characters (substantial content)
+        # 2. Information density: Contains facts, explanations, insights, OR valuable questions
+        # 3. Valuable questions: Deep philosophical, ethical, or technical questions are also valuable
         # 4. Not personal: Doesn't contain personal information
         # 5. Educational value: Could benefit other users
         
-        if len(user_message.strip()) < 100:
+        if len(user_message.strip()) < 50:
             return None
         
-        # Check if it's a question (questions are not learning material)
+        # Check if it's a question
         is_question = self._is_question(user_message)
+        
         if is_question:
+            # Questions can also be valuable if they are deep/philosophical/technical
+            # Check if it's a valuable question worth learning
+            if self._is_valuable_question(user_message):
+                # Extract the question as valuable knowledge
+                knowledge_score = self._assess_question_value(user_message)
+                if knowledge_score >= 0.6:  # Threshold for valuable questions
+                    learning_proposal = {
+                        "knowledge_snippet": self._extract_question_snippet(user_message),
+                        "source": "user_question",
+                        "knowledge_score": knowledge_score,
+                        "timestamp": datetime.now().isoformat(),
+                        "reason": "Contains valuable philosophical/ethical/technical question worth preserving",
+                        "is_question": True
+                    }
+                    self.logger.info(f"Detected valuable question from user (score: {knowledge_score:.2f})")
+                    return learning_proposal
+            # If it's a question but not valuable, skip it
             return None
         
         # Check if it contains personal information (privacy concern)
@@ -280,6 +298,124 @@ class ConversationLearningExtractor:
             if re.search(pattern, text_lower):
                 return True
         return False
+    
+    def _is_valuable_question(self, text: str) -> bool:
+        """
+        Check if question is valuable (philosophical, ethical, technical, deep)
+        Valuable questions are worth learning because they represent important topics
+        """
+        valuable_indicators = [
+            # Philosophical questions
+            r'\b(philosophy|philosophical|ethics|ethical|moral|morality|đạo đức|triết học)\b',
+            r'\b(consciousness|awareness|conscious|ý thức|nhận thức)\b',
+            r'\b(existence|reality|truth|meaning|tồn tại|thực tại|ý nghĩa)\b',
+            r'\b(identity|self|bản sắc|bản thân|tự ngã)\b',
+            
+            # Deep technical questions
+            r'\b(how.*work|mechanism|algorithm|architecture|kiến trúc|thuật toán)\b',
+            r'\b(difference.*between|phân biệt|khác biệt)\b',
+            r'\b(create|generate|sáng tạo|tạo ra)\b',
+            
+            # Ethical/Responsibility questions
+            r'\b(responsibility|accountability|liability|trách nhiệm)\b',
+            r'\b(legal|law|pháp luật|pháp lý)\b',
+            r'\b(rights|quyền|human rights|quyền con người)\b',
+            
+            # AI-specific deep questions
+            r'\b(AI.*feel|AI.*think|AI.*conscious|AI.*emotion)\b',
+            r'\b(artificial.*intelligence.*capable|AI.*limit)\b',
+            r'\b(machine.*learn|machine.*understand)\b',
+            
+            # Meta-cognitive questions
+            r'\b(how.*know|how.*understand|how.*learn|làm sao.*biết)\b',
+            r'\b(what.*mean|ý nghĩa|meaning)\b',
+            r'\b(why.*exist|tại sao.*tồn tại)\b',
+        ]
+        
+        text_lower = text.lower()
+        for pattern in valuable_indicators:
+            if re.search(pattern, text_lower):
+                return True
+        
+        # Check for question length (longer questions are often deeper)
+        if len(text.strip()) > 100:
+            return True
+        
+        return False
+    
+    def _assess_question_value(self, text: str) -> float:
+        """
+        Assess the value of a question
+        Returns score between 0.0 and 1.0
+        """
+        score = 0.0
+        
+        # Length factor (longer questions are often deeper)
+        length_score = min(1.0, len(text) / 200.0)  # Normalize to 200 chars
+        score += length_score * 0.2
+        
+        # Philosophical/ethical depth
+        depth_indicators = [
+            r'\b(philosophy|ethics|moral|consciousness|existence|reality|truth)\b',
+            r'\b(meaning|purpose|significance|ý nghĩa|mục đích)\b',
+            r'\b(identity|self|nature|essence|bản chất|bản sắc)\b',
+        ]
+        
+        depth_count = sum(1 for pattern in depth_indicators if re.search(pattern, text, re.IGNORECASE))
+        depth_score = min(1.0, depth_count / 2.0)
+        score += depth_score * 0.4
+        
+        # Technical depth
+        technical_indicators = [
+            r'\b(how.*work|mechanism|process|algorithm|architecture)\b',
+            r'\b(difference|distinguish|compare|phân biệt|so sánh)\b',
+            r'\b(create|generate|produce|tạo|sản xuất)\b',
+        ]
+        
+        technical_count = sum(1 for pattern in technical_indicators if re.search(pattern, text, re.IGNORECASE))
+        technical_score = min(1.0, technical_count / 2.0)
+        score += technical_score * 0.2
+        
+        # Question complexity (multiple clauses, sub-questions)
+        complexity_indicators = [
+            r'\?.*\?',  # Multiple question marks
+            r'(if|nếu).*(then|thì|how|như thế nào)',  # Conditional questions
+            r'(what|gì).*(and|và).*(how|như thế nào)',  # Compound questions
+        ]
+        
+        complexity_count = sum(1 for pattern in complexity_indicators if re.search(pattern, text, re.IGNORECASE))
+        complexity_score = min(1.0, complexity_count / 1.0)
+        score += complexity_score * 0.2
+        
+        return min(1.0, score)
+    
+    def _extract_question_snippet(self, text: str, max_length: int = 300) -> Optional[str]:
+        """
+        Extract question snippet for learning
+        """
+        # Clean up the question
+        question = text.strip()
+        
+        # Remove leading/trailing whitespace
+        question = ' '.join(question.split())
+        
+        # Truncate if too long
+        if len(question) > max_length:
+            # Try to truncate at sentence boundary
+            sentences = re.split(r'[.!?]\s+', question)
+            snippet = ""
+            for sentence in sentences:
+                if len(snippet + sentence) > max_length:
+                    break
+                snippet += sentence + ". "
+            question = snippet.strip()
+            if not question:
+                question = question[:max_length] + "..."
+        
+        if len(question.strip()) < 30:  # Too short
+            return None
+        
+        return question.strip()
     
     def _contains_personal_info(self, text: str) -> bool:
         """Check if text contains personal information"""

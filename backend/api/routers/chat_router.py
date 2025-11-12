@@ -322,6 +322,30 @@ YOU MUST:
 Remember: It's better to say "I don't know" than to make up information.
 """
                 
+                # Build conversation history context if provided
+                conversation_history_text = ""
+                if chat_request.conversation_history and len(chat_request.conversation_history) > 0:
+                    # Format conversation history for context
+                    history_lines = []
+                    for msg in chat_request.conversation_history[-5:]:  # Keep last 5 messages to avoid token limit
+                        role = msg.get("role", "user")
+                        content = msg.get("content", "")
+                        if role == "user":
+                            history_lines.append(f"User: {content}")
+                        elif role == "assistant":
+                            history_lines.append(f"Assistant: {content}")
+                    
+                    if history_lines:
+                        conversation_history_text = f"""
+📜 CONVERSATION HISTORY (Previous messages for context):
+
+{chr(10).join(history_lines)}
+
+---
+Current message:
+"""
+                        logger.info(f"Including {len(chat_request.conversation_history)} previous messages in context")
+                
                 base_prompt = f"""{language_instruction}
 
 ⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
@@ -330,7 +354,7 @@ The user's question is in {detected_lang_name.upper()}.
 
 YOU MUST respond in {detected_lang_name.upper()} ONLY.
 
-{no_context_instruction}
+{conversation_history_text}{no_context_instruction}
 
 User Question (in {detected_lang_name.upper()}): {chat_request.message}
 
@@ -555,6 +579,30 @@ This is MANDATORY when provenance context is available and user asks about origi
                     # Combine base instruction with error status
                     stillme_instruction = base_stillme_instruction + error_status_message
                 
+                # Build conversation history context if provided
+                conversation_history_text = ""
+                if chat_request.conversation_history and len(chat_request.conversation_history) > 0:
+                    # Format conversation history for context
+                    history_lines = []
+                    for msg in chat_request.conversation_history[-5:]:  # Keep last 5 messages to avoid token limit
+                        role = msg.get("role", "user")
+                        content = msg.get("content", "")
+                        if role == "user":
+                            history_lines.append(f"User: {content}")
+                        elif role == "assistant":
+                            history_lines.append(f"Assistant: {content}")
+                    
+                    if history_lines:
+                        conversation_history_text = f"""
+📜 CONVERSATION HISTORY (Previous messages for context):
+
+{chr(10).join(history_lines)}
+
+---
+Current message:
+"""
+                        logger.info(f"Including {len(chat_request.conversation_history)} previous messages in context")
+                
                 # Build prompt with language instruction FIRST (before context)
                 # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
                 # ZERO TOLERANCE: Must translate if needed
@@ -570,7 +618,7 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN A DIFFERENT LANGUAGE, YOU MUST TRANSLATE 
 
 UNDER NO CIRCUMSTANCES return a response in any language other than {detected_lang_name.upper()}.
 
-Context: {context_text}
+{conversation_history_text}Context: {context_text}
 {citation_instruction}
 {confidence_instruction}
 {stillme_instruction}
