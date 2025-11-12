@@ -64,6 +64,7 @@ Instead of claiming to "open the black box" (mathematically impossible), we buil
 - ✅ **Dashboard**: Interactive UI with RAG interface, validation metrics, confidence scores, and learning metrics
 - ✅ **Continuum Memory System** (NEW): Tiered memory architecture (L0-L3) with promotion/demotion, multi-timescale scheduler, and forgetting metrics
 - ✅ **Multi-Source Learning** (NEW): Integrated fetching from RSS, arXiv, CrossRef, and Wikipedia with pre-filtering
+- ✅ **Interactive Conversation Learning** (NEW): StillMe can learn from user conversations by detecting valuable knowledge, requesting permission, and adding it to the knowledge base with full transparency and user control
 - 🔬 **Nested Learning** (EXPERIMENTAL): Tiered update frequency system inspired by Google Research's Nested Learning paradigm - reduces embedding costs by updating knowledge at different frequencies (L0: every cycle, L1: every 10 cycles, L2: every 100 cycles, L3: every 1000 cycles). Currently in experimental branch `experimental/nested-learning` for testing and validation.
 
 **Vision:** Evolve through developmental stages (Infant → Child → Adolescent → Adult) with community governance, automated learning pipelines, and complete transparency.
@@ -78,6 +79,7 @@ Instead of claiming to "open the black box" (mathematically impossible), we buil
 - **🛡️ Ethical Filtering**: Comprehensive ethical content filtering with complete transparency
 - **📊 Transparent Dashboard**: Complete visibility into all learning sources, memory health, and tier statistics
 - **💬 Interactive Chat**: Communicate with your evolving AI assistant
+- **🤝 Interactive Learning**: Learn from user conversations with permission-based knowledge extraction, quality validation, and ethics checks
 
 ## 🧠 Philosophical Foundation: Acknowledging Mathematical Reality
 

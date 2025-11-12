@@ -861,6 +861,42 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         timing_logs["latency_metrics_formatted"] = latency_metrics_text
         logger.info(f"📊 Timing breakdown: {timing_logs}")
         
+        # Analyze conversation for learning opportunities
+        learning_proposal = None
+        permission_request = None
+        proposal_id = None
+        if rag_retrieval and chat_request.use_rag:
+            try:
+                from backend.services.conversation_learning_extractor import get_conversation_learning_extractor
+                from backend.services.learning_proposal_storage import get_learning_proposal_storage
+                
+                extractor = get_conversation_learning_extractor()
+                storage = get_learning_proposal_storage()
+                
+                # Analyze user message for valuable knowledge
+                learning_proposal = extractor.analyze_conversation_for_learning(
+                    user_message=chat_request.message,
+                    assistant_response=response,
+                    context=context
+                )
+                
+                if learning_proposal:
+                    # Save proposal to storage
+                    proposal_id = storage.save_proposal(
+                        proposal=learning_proposal,
+                        user_id=chat_request.user_id
+                    )
+                    learning_proposal["proposal_id"] = proposal_id
+                    
+                    # Format permission request
+                    permission_request = extractor.format_permission_request(
+                        learning_proposal=learning_proposal,
+                        language=detected_lang
+                    )
+                    logger.info(f"Learning proposal generated (id: {proposal_id}, score: {learning_proposal.get('knowledge_score', 0):.2f})")
+            except Exception as extractor_error:
+                logger.warning(f"Conversation learning extractor error: {extractor_error}")
+        
         # Store conversation in vector DB
         if rag_retrieval:
             rag_retrieval.add_learning_content(
@@ -929,6 +965,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             learning_suggestions=learning_suggestions,
             learning_session_id=learning_session_id,
             knowledge_alert=knowledge_alert,
+            learning_proposal=learning_proposal,  # Learning proposal (if valuable knowledge detected)
+            permission_request=permission_request,  # Permission request message
             timing=timing_logs,
             latency_metrics=latency_metrics_text  # BẮT BUỘC HIỂN THỊ LOG trong response cho frontend
         )
