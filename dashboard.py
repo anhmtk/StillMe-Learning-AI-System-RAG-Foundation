@@ -15,6 +15,13 @@ try:
 except ImportError:
     FLOATING_CHAT_AVAILABLE = False
 
+# Import floating community button
+try:
+    from frontend.components.floating_community import render_floating_community_button
+    FLOATING_COMMUNITY_AVAILABLE = True
+except ImportError:
+    FLOATING_COMMUNITY_AVAILABLE = False
+
 # Import chat history service
 try:
     from backend.services.chat_history import ChatHistory
@@ -1535,6 +1542,10 @@ def sidebar(page_for_chat: str | None = None):
     
     # Render floating widget if selected and available
     if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
+        # Render floating community button
+        if FLOATING_COMMUNITY_AVAILABLE:
+            render_floating_community_button()
+        
         # Render floating chat widget
         render_floating_chat(
             chat_history=st.session_state.chat_history,
