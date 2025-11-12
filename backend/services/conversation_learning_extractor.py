@@ -40,55 +40,232 @@ class ConversationLearningExtractor:
             Dict with learning proposal if valuable knowledge detected, None otherwise
         """
         try:
-            # Check if user message contains valuable knowledge
-            # Criteria:
-            # 1. Length: At least 100 characters (substantial content)
-            # 2. Information density: Contains facts, explanations, or insights
-            # 3. Not a question: User is providing information, not asking
-            # 4. Not personal: Doesn't contain personal information
-            # 5. Educational value: Could benefit other users
+            # PRIORITY 1: Check if user message contains valuable knowledge
+            # (User-provided knowledge is most valuable)
+            user_proposal = self._analyze_user_message(user_message)
+            if user_proposal:
+                return user_proposal
             
-            if len(user_message.strip()) < 100:
-                return None
+            # PRIORITY 2: Check if assistant response contains exceptional insights
+            # (Only for philosophical depth, novel perspectives, or exceptional clarity)
+            assistant_proposal = self._analyze_assistant_response(assistant_response, user_message)
+            if assistant_proposal:
+                return assistant_proposal
             
-            # Check if it's a question (questions are not learning material)
-            is_question = self._is_question(user_message)
-            if is_question:
-                return None
-            
-            # Check if it contains personal information (privacy concern)
-            if self._contains_personal_info(user_message):
-                return None
-            
-            # Check if it's valuable knowledge (facts, explanations, insights)
-            knowledge_score = self._assess_knowledge_value(user_message)
-            if knowledge_score < 0.6:  # Threshold for valuable knowledge
-                return None
-            
-            # Extract knowledge snippet
-            knowledge_snippet = self._extract_knowledge_snippet(user_message)
-            if not knowledge_snippet:
-                return None
-            
-            # Check if this knowledge is already in RAG (avoid duplicates)
-            # This would require RAG search - for now, we'll skip this check
-            # and rely on user permission
-            
-            # Build learning proposal
-            learning_proposal = {
-                "knowledge_snippet": knowledge_snippet,
-                "source": "user_conversation",
-                "knowledge_score": knowledge_score,
-                "timestamp": datetime.now().isoformat(),
-                "reason": self._generate_learning_reason(user_message, knowledge_snippet)
-            }
-            
-            self.logger.info(f"Detected valuable knowledge from conversation (score: {knowledge_score:.2f})")
-            return learning_proposal
+            return None
             
         except Exception as e:
             self.logger.error(f"Error analyzing conversation for learning: {e}")
             return None
+    
+    def _analyze_user_message(self, user_message: str) -> Optional[Dict[str, Any]]:
+        """Analyze user message for valuable knowledge"""
+        # Check if user message contains valuable knowledge
+        # Criteria:
+        # 1. Length: At least 100 characters (substantial content)
+        # 2. Information density: Contains facts, explanations, or insights
+        # 3. Not a question: User is providing information, not asking
+        # 4. Not personal: Doesn't contain personal information
+        # 5. Educational value: Could benefit other users
+        
+        if len(user_message.strip()) < 100:
+            return None
+        
+        # Check if it's a question (questions are not learning material)
+        is_question = self._is_question(user_message)
+        if is_question:
+            return None
+        
+        # Check if it contains personal information (privacy concern)
+        if self._contains_personal_info(user_message):
+            return None
+        
+        # Check if it's valuable knowledge (facts, explanations, insights)
+        knowledge_score = self._assess_knowledge_value(user_message)
+        if knowledge_score < 0.6:  # Threshold for valuable knowledge
+            return None
+        
+        # Extract knowledge snippet
+        knowledge_snippet = self._extract_knowledge_snippet(user_message)
+        if not knowledge_snippet:
+            return None
+        
+        # Build learning proposal
+        learning_proposal = {
+            "knowledge_snippet": knowledge_snippet,
+            "source": "user_conversation",
+            "knowledge_score": knowledge_score,
+            "timestamp": datetime.now().isoformat(),
+            "reason": self._generate_learning_reason(user_message, knowledge_snippet)
+        }
+        
+        self.logger.info(f"Detected valuable knowledge from user message (score: {knowledge_score:.2f})")
+        return learning_proposal
+    
+    def _analyze_assistant_response(
+        self,
+        assistant_response: str,
+        user_message: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Analyze assistant response for exceptional insights worth learning
+        
+        Only extracts if response contains:
+        - Deep philosophical insights
+        - Novel perspectives or connections
+        - Exceptional clarity on complex topics
+        - Meta-cognitive reflections
+        
+        This prevents learning from every response (which would create loops)
+        """
+        # Only analyze if response is substantial
+        if len(assistant_response.strip()) < 200:
+            return None
+        
+        # Check for exceptional content indicators
+        exceptional_indicators = [
+            # Philosophical depth
+            r'\b(philosophy|philosophical|epistemology|ontology|metaphysics|consciousness|awareness)\b',
+            r'\b(Socratic|Kantian|Aristotelian|existential|phenomenological)\b',
+            r'\b(Chinese Room|Searle|Gödel|Wittgenstein)\b',
+            
+            # Meta-cognitive reflections
+            r'\b(self-aware|self-reflection|meta-cognitive|introspection)\b',
+            r'\b(acknowledge.*limit|admit.*don.*know|intellectual humility)\b',
+            
+            # Deep insights
+            r'\b(fundamental.*question|deep.*insight|profound.*understanding)\b',
+            r'\b(transcend.*limit|beyond.*comprehension|paradox.*awareness)\b',
+            
+            # Novel connections
+            r'\b(connection.*between|bridge.*gap|synthesize.*perspective)\b',
+        ]
+        
+        has_exceptional_content = any(
+            re.search(pattern, assistant_response, re.IGNORECASE)
+            for pattern in exceptional_indicators
+        )
+        
+        if not has_exceptional_content:
+            return None
+        
+        # Check for philosophical depth score
+        philosophical_score = self._assess_philosophical_depth(assistant_response)
+        if philosophical_score < 0.7:  # Higher threshold for assistant responses
+            return None
+        
+        # Extract knowledge snippet (focus on key insights)
+        knowledge_snippet = self._extract_philosophical_insight(assistant_response)
+        if not knowledge_snippet:
+            return None
+        
+        # Build learning proposal
+        learning_proposal = {
+            "knowledge_snippet": knowledge_snippet,
+            "source": "assistant_insight",
+            "knowledge_score": philosophical_score,
+            "timestamp": datetime.now().isoformat(),
+            "reason": "Contains exceptional philosophical insight or meta-cognitive reflection worth preserving",
+            "original_question": user_message[:200]  # Context about what triggered this insight
+        }
+        
+        self.logger.info(f"Detected exceptional insight from assistant response (score: {philosophical_score:.2f})")
+        return learning_proposal
+    
+    def _assess_philosophical_depth(self, text: str) -> float:
+        """
+        Assess philosophical depth of assistant response
+        Returns score between 0.0 and 1.0
+        """
+        score = 0.0
+        
+        # Length factor (longer philosophical responses are often deeper)
+        length_score = min(1.0, len(text) / 1000.0)  # Normalize to 1000 chars
+        score += length_score * 0.2
+        
+        # Philosophical terminology
+        philosophical_terms = [
+            r'\b(consciousness|awareness|epistemology|ontology|metaphysics)\b',
+            r'\b(paradox|contradiction|dialectic|synthesis)\b',
+            r'\b(meaning|existence|reality|truth|knowledge)\b',
+            r'\b(experience|subjective|objective|phenomenological)\b',
+        ]
+        
+        term_count = sum(1 for pattern in philosophical_terms if re.search(pattern, text, re.IGNORECASE))
+        term_score = min(1.0, term_count / 3.0)
+        score += term_score * 0.3
+        
+        # Meta-cognitive indicators
+        metacognitive_indicators = [
+            r'\b(acknowledge|admit|recognize|aware of limit)\b',
+            r'\b(self-reflection|introspection|meta-cognitive)\b',
+            r'\b(transparent.*nature|honest.*about|cannot.*pretend)\b',
+        ]
+        
+        metacognitive_count = sum(1 for pattern in metacognitive_indicators if re.search(pattern, text, re.IGNORECASE))
+        metacognitive_score = min(1.0, metacognitive_count / 2.0)
+        score += metacognitive_score * 0.3
+        
+        # Reference to philosophers or philosophical concepts
+        philosopher_references = [
+            r'\b(Socrates|Plato|Aristotle|Kant|Hegel|Nietzsche|Wittgenstein|Searle|Gödel)\b',
+            r'\b(Chinese Room|hard problem|qualia|zombie|Mary.*room)\b',
+        ]
+        
+        reference_count = sum(1 for pattern in philosopher_references if re.search(pattern, text, re.IGNORECASE))
+        reference_score = min(1.0, reference_count / 2.0)
+        score += reference_score * 0.2
+        
+        return min(1.0, score)
+    
+    def _extract_philosophical_insight(self, text: str, max_length: int = 500) -> Optional[str]:
+        """
+        Extract key philosophical insight from assistant response
+        Focus on the core insight, not the full response
+        """
+        # Try to extract the most insightful paragraph
+        paragraphs = text.split('\n\n')
+        
+        # Score each paragraph for insightfulness
+        best_paragraph = None
+        best_score = 0.0
+        
+        for para in paragraphs:
+            if len(para.strip()) < 50:
+                continue
+            
+            # Score based on philosophical indicators
+            insight_indicators = [
+                r'\b(acknowledge|admit|recognize|transparent|honest)\b',
+                r'\b(consciousness|awareness|understanding|experience)\b',
+                r'\b(limit|boundary|cannot|unable|impossible)\b',
+                r'\b(philosophy|philosophical|epistemology|ontology)\b',
+            ]
+            
+            score = sum(1 for pattern in insight_indicators if re.search(pattern, para, re.IGNORECASE))
+            if score > best_score:
+                best_score = score
+                best_paragraph = para
+        
+        if best_paragraph:
+            # Clean and truncate
+            insight = ' '.join(best_paragraph.split())
+            if len(insight) > max_length:
+                # Try to truncate at sentence boundary
+                sentences = re.split(r'[.!?]\s+', insight)
+                snippet = ""
+                for sentence in sentences:
+                    if len(snippet + sentence) > max_length:
+                        break
+                    snippet += sentence + ". "
+                insight = snippet.strip()
+                if not insight:
+                    insight = insight[:max_length] + "..."
+            
+            if len(insight.strip()) >= 100:  # Minimum length for valuable insight
+                return insight.strip()
+        
+        return None
     
     def _is_question(self, text: str) -> bool:
         """Check if text is a question"""
