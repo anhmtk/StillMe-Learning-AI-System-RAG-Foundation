@@ -91,6 +91,26 @@ async def run_learning_cycle_background(job_id: str):
                         use_pre_filter=False
                     )
                     job.add_log(f"Fetched {len(all_entries)} entries from all sources")
+                    
+                    # Count entries by source for detailed breakdown
+                    source_counts = {}
+                    for entry in all_entries:
+                        source = entry.get("source", "unknown")
+                        if "rss" in source.lower() or "feed" in source.lower():
+                            source_counts["RSS"] = source_counts.get("RSS", 0) + 1
+                        elif "arxiv" in source.lower():
+                            source_counts["arXiv"] = source_counts.get("arXiv", 0) + 1
+                        elif "crossref" in source.lower():
+                            source_counts["CrossRef"] = source_counts.get("CrossRef", 0) + 1
+                        elif "wikipedia" in source.lower():
+                            source_counts["Wikipedia"] = source_counts.get("Wikipedia", 0) + 1
+                        else:
+                            source_counts[source] = source_counts.get(source, 0) + 1
+                    
+                    # Log breakdown by source
+                    if source_counts:
+                        breakdown = ", ".join([f"{source}: {count}" for source, count in source_counts.items()])
+                        job.add_log(f"Source breakdown: {breakdown}")
                 else:
                     all_entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
                     job.add_log(f"Fetched {len(all_entries)} entries from RSS")
@@ -100,7 +120,19 @@ async def run_learning_cycle_background(job_id: str):
                     filtered_entries, rejected_entries = content_curator.pre_filter_content(all_entries)
                     filtered_count = len(rejected_entries)
                     job.update_progress("prefilter", entries_filtered=filtered_count)
-                    job.add_log(f"Pre-filter: {len(filtered_entries)}/{len(all_entries)} passed")
+                    job.add_log(f"Pre-filter: {len(filtered_entries)}/{len(all_entries)} passed. Rejected {filtered_count} items")
+                    
+                    # Log filter reasons breakdown
+                    if rejected_entries:
+                        reason_counts = {}
+                        for rejected in rejected_entries:
+                            reason = rejected.get("rejection_reason", "Unknown")
+                            reason_counts[reason] = reason_counts.get(reason, 0) + 1
+                        
+                        if reason_counts:
+                            reason_breakdown = ", ".join([f"{reason}: {count}" for reason, count in reason_counts.items()])
+                            job.add_log(f"Filter reasons: {reason_breakdown}")
+                    
                     all_entries = filtered_entries
                 
                 # Prioritize
