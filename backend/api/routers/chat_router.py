@@ -238,18 +238,29 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             if num_knowledge > 0:
                 citation_instruction = f"""
                 
-📚 CRITICAL CITATION REQUIREMENT:
+📚 SMART CITATION REQUIREMENT:
 
-You have {num_knowledge} context document(s) available. You MUST cite your sources using [1], [2], [3] format.
+You have {num_knowledge} context document(s) available. Cite sources when making FACTUAL CLAIMS, but NOT for your own reflections.
 
 CRITICAL RULES:
-1. You MUST cite at least one source using [1], [2], [3] format when making factual claims
-2. Use [1] for the first context document, [2] for the second, [3] for the third, etc.
-3. Example: "According to [1], quantum entanglement is..." or "Research shows [2] that..."
-4. If you use information from multiple sources, cite each: "Studies [1] and [2] indicate that..."
-5. DO NOT make unsourced claims when context is available - always cite your sources
+1. **Cite when**: Making factual claims, statistics, specific data, research findings
+   - Example: "According to [1], quantum entanglement is..." (factual claim)
+   - Example: "Research shows [2] that 80% of hallucinations..." (statistic)
+   
+2. **DO NOT cite for**:
+   - Your own philosophical reflections or meta-cognitive thoughts
+   - Personal observations about paradoxes or limits
+   - General statements about StillMe's design principles
+   - When expressing uncertainty ("I don't know", "I'm not certain")
+   - When acknowledging trade-offs or limitations
+   
+3. **Balance**: Aim for 1-2 citations per response when context is available, NOT every paragraph
+   - Cite the MOST RELEVANT source(s) for your key factual claims
+   - Quality over quantity: Better to cite 1 relevant source than 3 irrelevant ones
 
-FAILURE TO CITE SOURCES WHEN CONTEXT IS AVAILABLE IS A CRITICAL ERROR."""
+4. Use [1] for the first context document, [2] for the second, [3] for the third, etc.
+
+**Remember: Citations are for FACTS, not for HIDING behind sources. If you're uncertain, say "I don't know" - don't hide behind [1].**"""
             
             # Detect language FIRST - before building prompt
             processing_steps.append("🌐 Detecting language...")
