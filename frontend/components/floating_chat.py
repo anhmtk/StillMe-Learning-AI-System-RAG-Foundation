@@ -1692,7 +1692,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }}
                         
                         // Add assistant response
-                        chatHistory.push({{ role: 'assistant', content: reply }});
+                        chatHistory.push({{ 
+                            role: 'assistant', 
+                            content: reply,
+                            message_id: data.message_id || null,
+                            question: message
+                        }});
                     renderMessages();
                             
                             // Update parent panel with new messages
