@@ -337,44 +337,44 @@ def page_overview():
                 if test_r.status_code == 200:
                     st.info("💡 Backend is reachable. Scheduler status may be temporarily unavailable during learning cycle.")
                 elif test_r.status_code == 502:
-                st.error("❌ **502 Bad Gateway** - Backend service is not responding.")
+                    st.error("❌ **502 Bad Gateway** - Backend service is not responding.")
+                    st.markdown("""
+                    **502 Bad Gateway means the backend service is down or crashed.**
+                    
+                    **Immediate Actions:**
+                    1. Go to Railway Dashboard → Service "stillme-backend"
+                    2. Check **"Deployments"** tab → See if service is running
+                    3. Check **"Logs"** tab → Look for errors or crashes
+                    4. If service is stopped → Click **"Redeploy"** or **"Restart"**
+                    5. If service is building → Wait for deployment to complete
+                    
+                    **Common Causes:**
+                    - Backend crashed during initialization
+                    - Backend is restarting after code change
+                    - Backend ran out of memory (check Railway resource limits)
+                    - Database connection issues
+                    """)
+                else:
+                    st.error(f"❌ Backend returned status code {test_r.status_code} for `/api/status`")
+            except requests.exceptions.ConnectionError:
+                st.error(f"❌ **Cannot connect to backend at:** `{API_BASE}`")
                 st.markdown("""
-                **502 Bad Gateway means the backend service is down or crashed.**
+                **Possible causes:**
+                1. Backend service is not running on Railway
+                2. Environment variable `STILLME_API_BASE` is not set in dashboard service
+                3. Backend URL has changed
+                4. Network/firewall issue
                 
-                **Immediate Actions:**
-                1. Go to Railway Dashboard → Service "stillme-backend"
-                2. Check **"Deployments"** tab → See if service is running
-                3. Check **"Logs"** tab → Look for errors or crashes
-                4. If service is stopped → Click **"Redeploy"** or **"Restart"**
-                5. If service is building → Wait for deployment to complete
-                
-                **Common Causes:**
-                - Backend crashed during initialization
-                - Backend is restarting after code change
-                - Backend ran out of memory (check Railway resource limits)
-                - Database connection issues
+                **Solution:**
+                - Check Railway dashboard → Service "stillme-backend" → Ensure it's running
+                - Check Railway dashboard → Service "dashboard" → Variables → Verify `STILLME_API_BASE` is set
+                - Restart dashboard service if needed
                 """)
-            else:
-                st.error(f"❌ Backend returned status code {test_r.status_code} for `/api/status`")
-        except requests.exceptions.ConnectionError:
-            st.error(f"❌ **Cannot connect to backend at:** `{API_BASE}`")
-            st.markdown("""
-            **Possible causes:**
-            1. Backend service is not running on Railway
-            2. Environment variable `STILLME_API_BASE` is not set in dashboard service
-            3. Backend URL has changed
-            4. Network/firewall issue
+            except Exception as e:
+                st.warning(f"Error testing connection: {e}")
             
-            **Solution:**
-            - Check Railway dashboard → Service "stillme-backend" → Ensure it's running
-            - Check Railway dashboard → Service "dashboard" → Variables → Verify `STILLME_API_BASE` is set
-            - Restart dashboard service if needed
-            """)
-        except Exception as e:
-            st.warning(f"Error testing connection: {e}")
-        
-        st.json({"error": "Empty response from /api/learning/scheduler/status", "api_base": API_BASE})
-        return
+            st.json({"error": "Empty response from /api/learning/scheduler/status", "api_base": API_BASE})
+            return
     
     if scheduler_status.get("status") == "ok":
         is_running = scheduler_status.get("is_running", False)
