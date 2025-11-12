@@ -898,13 +898,85 @@ async def _run_learning_cycle_sync():
     
     result = await learning_scheduler.run_learning_cycle()
     cycle_number = result.get("cycle_number", 0)
+    cycle_id_str = f"cycle_{cycle_number}"
     
     # Create fetch cycle for tracking
     cycle_id = None
     if rss_fetch_history:
         cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=cycle_number)
     
-    # If auto_add_to_rag is enabled, add to RAG
+    # ============================================================================
+    # 70/30 LEARNING ALLOCATION SYSTEM
+    # ============================================================================
+    # Total learning capacity per cycle
+    LEARNING_CAPACITY_PER_CYCLE = 10  # Total items StillMe can learn per cycle
+    
+    # Allocation split: 70% automatic, 30% community
+    AUTOMATIC_LEARNING_QUOTA = int(LEARNING_CAPACITY_PER_CYCLE * 0.7)  # 7 items
+    COMMUNITY_LEARNING_QUOTA = int(LEARNING_CAPACITY_PER_CYCLE * 0.3)  # 3 items
+    
+    all_entries_to_add = []
+    community_items_added = 0
+    automatic_items_added = 0
+    
+    # STEP 1: Process Community Proposals (30% quota - PRIORITY)
+    try:
+        from backend.services.community_proposals import get_community_proposals
+        from backend.services.url_fetcher import get_url_fetcher
+        
+        community = get_community_proposals()
+        url_fetcher = get_url_fetcher()
+        
+        approved_proposals = community.get_approved_proposals_not_learned(limit=COMMUNITY_LEARNING_QUOTA)
+        
+        logger.info(f"Found {len(approved_proposals)} approved community proposals to learn")
+        
+        for proposal in approved_proposals[:COMMUNITY_LEARNING_QUOTA]:
+            try:
+                # Fetch content from proposal URL
+                content_data = url_fetcher.fetch_content(
+                    url=proposal["source_url"],
+                    proposal_type=proposal["proposal_type"]
+                )
+                
+                if not content_data or not content_data.get("success"):
+                    logger.warning(f"Failed to fetch content for proposal {proposal['proposal_id']}")
+                    continue
+                
+                # Prepare entry for RAG
+                entry = {
+                    "title": content_data.get("title", proposal.get("description", "Community Proposal")),
+                    "summary": content_data.get("summary", ""),
+                    "link": content_data.get("link", proposal["source_url"]),
+                    "published": content_data.get("published", datetime.now().isoformat()),
+                    "source": f"community_proposal:{proposal['proposal_id']}",
+                    "content_type": "community_proposal",
+                    "proposal_id": proposal["proposal_id"],
+                    "proposal_type": proposal["proposal_type"],
+                    "description": proposal.get("description", "")
+                }
+                
+                # Add full content if available
+                if content_data.get("full_content"):
+                    entry["full_content"] = content_data["full_content"]
+                
+                all_entries_to_add.append(entry)
+                community_items_added += 1
+                
+                logger.info(f"Community proposal {proposal['proposal_id']} prepared for learning")
+            except Exception as e:
+                logger.error(f"Error processing community proposal {proposal.get('proposal_id', 'unknown')}: {e}")
+                continue
+    except Exception as e:
+        logger.error(f"Error processing community proposals: {e}")
+    
+    # Calculate remaining quota for automatic learning
+    remaining_quota = LEARNING_CAPACITY_PER_CYCLE - community_items_added
+    automatic_quota = min(AUTOMATIC_LEARNING_QUOTA, remaining_quota)
+    
+    logger.info(f"Learning allocation: {community_items_added} community items, {automatic_quota} automatic items (quota: {COMMUNITY_LEARNING_QUOTA}/{AUTOMATIC_LEARNING_QUOTA})")
+    
+    # STEP 2: Process Automatic Sources (70% quota, or remaining if community used less)
     if learning_scheduler.auto_add_to_rag and rag_retrieval:
         # Use entries from the learning cycle result (already fetched)
         # Don't fetch again - use the entries that were already fetched in run_learning_cycle
@@ -962,20 +1034,25 @@ async def _run_learning_cycle_sync():
                     all_entries,
                     knowledge_gaps=recent_gaps
                 )
-                # Take top entries (up to 5, but can be fewer if prioritized list is shorter)
-                entries_to_add = prioritized[:min(5, len(prioritized))]
-                logger.info(f"Content curator prioritized {len(entries_to_add)} entries from {len(all_entries)} total")
+                # Take top entries up to automatic quota
+                entries_to_add = prioritized[:min(automatic_quota, len(prioritized))]
+                logger.info(f"Content curator prioritized {len(entries_to_add)} entries from {len(all_entries)} total (quota: {automatic_quota})")
             else:
-                # If no curator, add all entries (or limit to reasonable number)
-                entries_to_add = all_entries[:min(10, len(all_entries))]
-                logger.info(f"No content curator, adding {len(entries_to_add)} entries directly")
+                # If no curator, add entries up to automatic quota
+                entries_to_add = all_entries[:min(automatic_quota, len(all_entries))]
+                logger.info(f"No content curator, adding {len(entries_to_add)} entries directly (quota: {automatic_quota})")
+            
+            # Add automatic entries to the list
+            all_entries_to_add.extend(entries_to_add)
+            automatic_items_added = len(entries_to_add)
             
         except Exception as e:
             logger.error(f"Error preparing entries for RAG: {e}")
             entries_to_add = []
         
+        # STEP 3: Add all entries (community + automatic) to RAG
         added_count = 0
-        for entry in entries_to_add:
+        for entry in all_entries_to_add:
             try:
                 content = f"{entry.get('title', '')}\n{entry.get('summary', '')}"
                 if not content.strip():
@@ -1038,6 +1115,20 @@ async def _run_learning_cycle_sync():
                     added_count += 1
                     status = "Added to RAG"
                     vector_id = f"knowledge_{entry.get('link', '')[:8]}"
+                    
+                    # If this is a community proposal, mark it as learned
+                    if entry.get("proposal_id"):
+                        try:
+                            from backend.services.community_proposals import get_community_proposals
+                            community = get_community_proposals()
+                            community.mark_proposal_as_learned(
+                                proposal_id=entry["proposal_id"],
+                                cycle_id=cycle_id_str
+                            )
+                            logger.info(f"Marked community proposal {entry['proposal_id']} as learned")
+                        except Exception as e:
+                            logger.error(f"Error marking proposal as learned: {e}")
+                    
                     if rss_fetch_history and cycle_id:
                         rss_fetch_history.add_fetch_item(
                             cycle_id=cycle_id,
