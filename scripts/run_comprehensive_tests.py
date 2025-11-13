@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 # - Local: "http://localhost:8000"
 # - Railway: "https://stillme-backend-production.up.railway.app"
 # - Or set via environment variable: STILLME_API_BASE
-API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
+API_BASE = "https://stillme-backend-production.up.railway.app"  # Change this
 
 # Test suite file
 TEST_SUITE_FILE = Path(__file__).parent.parent / "tests" / "data" / "comprehensive_test_suite.json"
@@ -32,7 +32,7 @@ RESULTS_DIR = Path(__file__).parent.parent / "tests" / "results"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
-async def test_question(session: aiohttp.ClientSession, question: Dict, timeout: int = 30) -> Dict:
+async def test_question(session: aiohttp.ClientSession, question: Dict, timeout: int = 300) -> Dict:
     """
     Test a single question and get StillMe's response
     

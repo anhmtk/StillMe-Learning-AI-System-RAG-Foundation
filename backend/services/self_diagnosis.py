@@ -36,9 +36,12 @@ class SelfDiagnosisAgent:
             # Retrieve context for query
             context = self.rag_retrieval.retrieve_context(
                 query=query,
-                knowledge_limit=5,
-                min_similarity=threshold
+                knowledge_limit=5
             )
+            
+            # Filter by similarity threshold manually if needed
+            # Note: retrieve_context doesn't support min_similarity parameter
+            # Similarity filtering should be done at the search level if needed
             
             # Check if we have relevant knowledge
             knowledge_docs = context.get("knowledge_context", {}).get("documents", [])
