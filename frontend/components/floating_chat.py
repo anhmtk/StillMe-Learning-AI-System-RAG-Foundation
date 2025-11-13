@@ -1077,18 +1077,18 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     parentInputWrapper.appendChild(parentSendBtn);
                                     parentInputContainer.appendChild(parentInputWrapper);
                                     
-                                    // Create resize handles for parent panel
+                                    // Append in correct order: header -> messages -> input
+                                    parentPanel.appendChild(parentHeader);
+                                    parentPanel.appendChild(parentMessages);
+                                    parentPanel.appendChild(parentInputContainer);
+                                    
+                                    // Create resize handles for parent panel (AFTER appending to body so they're in DOM)
                                     const resizeHandles = ['nw', 'ne', 'sw', 'se', 'n', 's', 'e', 'w'];
                                     resizeHandles.forEach(direction => {{
                                         const handle = parentDoc.createElement('div');
                                         handle.className = `resize-handle ${{direction}}`;
                                         parentPanel.appendChild(handle);
                                     }});
-                                    
-                                    // Append in correct order: resize handles -> header -> messages -> input
-                                    parentPanel.appendChild(parentHeader);
-                                    parentPanel.appendChild(parentMessages);
-                                    parentPanel.appendChild(parentInputContainer);
                                     
                                     console.log('StillMe Chat: Parent panel created with correct HTML structure (header -> messages -> input) + resize handles');
                                     
@@ -1241,14 +1241,6 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             e.stopPropagation();
                                         }});
                                     }}
-                                    
-                                    // Setup all resize handles for parent panel
-                                    resizeHandles.forEach(direction => {{
-                                        const handle = parentPanel.querySelector(`.resize-handle.${{direction}}`);
-                                        if (handle) {{
-                                            setupParentResizeHandle(handle, direction);
-                                        }}
-                                    }});
                                     
                                     // Mouse move handler for parent panel drag/resize
                                     parentDoc.addEventListener('mousemove', (e) => {{
