@@ -212,7 +212,7 @@ def page_overview():
     fig.add_bar(name="Required Sessions", x=labels, y=req, marker_color="#8a8f98")
     fig.add_bar(name="Current Progress", x=labels, y=current, marker_color="#46b3ff")
     fig.update_layout(barmode="group", height=360, margin=dict(l=0, r=0, t=10, b=0))
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
 
     st.markdown("### Vector DB Stats")
     c1, c2, c3 = st.columns(3)
@@ -236,7 +236,7 @@ def page_overview():
         )
     )
     gauge.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0))
-    st.plotly_chart(gauge, use_container_width=True)
+    st.plotly_chart(gauge, width='stretch')
 
     st.markdown("---")
     
@@ -251,7 +251,7 @@ def page_overview():
         # Test backend connection
         col_test1, col_test2 = st.columns(2)
         with col_test1:
-            if st.button("🔍 Test Backend Connection", use_container_width=True):
+            if st.button("🔍 Test Backend Connection", width='stretch'):
                 try:
                     test_r = requests.get(f"{API_BASE}/health", timeout=5)
                     if test_r.status_code == 200:
@@ -263,7 +263,7 @@ def page_overview():
                     st.error(f"❌ Connection failed: {test_e}")
         
         with col_test2:
-            if st.button("📤 Test Chat Endpoint", use_container_width=True):
+            if st.button("📤 Test Chat Endpoint", width='stretch'):
                 with st.spinner("Testing chat endpoint (this may take 30-60 seconds if model is loading)..."):
                     try:
                         test_r = requests.post(
@@ -395,7 +395,7 @@ def page_overview():
         
         col_start, col_stop, col_run_now = st.columns(3)
         with col_start:
-            if st.button("▶️ Start Scheduler", use_container_width=True):
+            if st.button("▶️ Start Scheduler", width='stretch'):
                 try:
                     # Increased timeout to 30s to handle network latency (Railway deployment)
                     r = requests.post(f"{API_BASE}/api/learning/scheduler/start", timeout=30)
@@ -417,7 +417,7 @@ def page_overview():
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed to start scheduler: {e}"
         with col_stop:
-            if st.button("⏹️ Stop Scheduler", use_container_width=True):
+            if st.button("⏹️ Stop Scheduler", width='stretch'):
                 try:
                     # Increased timeout to 30s to handle network latency (Railway deployment)
                     r = requests.post(f"{API_BASE}/api/learning/scheduler/stop", timeout=30)
@@ -439,7 +439,7 @@ def page_overview():
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
         with col_run_now:
-            if st.button("🚀 Run Now", use_container_width=True):
+            if st.button("🚀 Run Now", width='stretch'):
                 try:
                     # Non-blocking: returns 202 immediately
                     # Increased timeout to 60s to handle slow backend responses during learning cycle startup
@@ -478,7 +478,8 @@ def page_overview():
                         st.session_state["learning_cycle_count_at_start"] = current_status.get("cycle_count", 0)
                     st.session_state["learning_job_started"] = True
                     st.session_state["learning_job_id"] = None  # No specific job ID, will poll scheduler status
-                    st.session_state["last_action"] = "⏳ Learning cycle is running in background. This may take 2-5 minutes. Progress will be shown below."
+                    st.session_state["last_action"] = "⏳ Learning cycle started! Running in background (2-5 minutes). Vector DB Stats will update when complete. Check progress below."
+                    st.success("🚀 Learning cycle started! Check progress below.")
                     st.rerun()
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed: {e}"
@@ -873,7 +874,7 @@ def page_overview():
             )
         with col_reset:
             st.warning("⚠️ **Quick Fix:**")
-            if st.button("🔄 Reset Vector Database", use_container_width=True, type="secondary"):
+            if st.button("🔄 Reset Vector Database", width='stretch', type="secondary"):
                 try:
                     with st.spinner("Resetting database (this may take a moment)..."):
                         r = requests.post(f"{API_BASE}/api/rag/reset-database", timeout=60)
@@ -924,7 +925,7 @@ def page_overview():
     
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🚀 Run Learning Session", use_container_width=True):
+        if st.button("🚀 Run Learning Session", width='stretch'):
             try:
                 r = requests.post(
                     f"{API_BASE}/api/learning/sessions/run",
@@ -1393,7 +1394,7 @@ def page_nested_learning():
                 yaxis_title="Count",
                 height=300
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width='stretch')
         
         with col2:
             # Pie chart
@@ -1408,7 +1409,7 @@ def page_nested_learning():
                     title="Tier Distribution (%)",
                     height=300
                 )
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
             else:
                 st.info("No knowledge items in tiers yet. Run a learning cycle to populate tiers.")
     else:
@@ -1485,7 +1486,7 @@ def page_nested_learning():
             barmode='stack',
             height=300
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
     else:
         st.info("No embedding operations recorded yet. Run a learning cycle to see cost reduction metrics.")
 

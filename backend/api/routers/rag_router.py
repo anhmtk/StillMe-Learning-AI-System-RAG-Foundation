@@ -126,6 +126,99 @@ async def get_rag_stats():
         logger.error(f"RAG stats error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/list-documents", dependencies=[Depends(require_api_key)])
+async def list_documents(
+    collection: str = "all",
+    limit: int = 100,
+    offset: int = 0
+):
+    """
+    List all documents in ChromaDB collections (requires API key)
+    
+    Args:
+        collection: "knowledge", "conversation", or "all" (default: "all")
+        limit: Maximum number of documents to return (default: 100, max: 1000)
+        offset: Number of documents to skip (default: 0)
+    
+    Returns:
+        List of documents with content and metadata
+    """
+    try:
+        chroma_client = get_chroma_client()
+        
+        if not chroma_client:
+            raise HTTPException(status_code=503, detail="Vector DB not available")
+        
+        limit = min(limit, 1000)  # Cap at 1000
+        
+        results = {
+            "knowledge_documents": [],
+            "conversation_documents": [],
+            "total_knowledge": 0,
+            "total_conversation": 0
+        }
+        
+        # Get knowledge documents
+        if collection in ["all", "knowledge"]:
+            try:
+                # ChromaDB doesn't have direct "get all" - we use query with empty embedding or peek
+                # For now, we'll use a workaround: query with a dummy embedding to get all
+                # Actually, ChromaDB has .get() method to retrieve all documents
+                knowledge_data = chroma_client.knowledge_collection.get(
+                    limit=limit,
+                    offset=offset
+                )
+                
+                if knowledge_data and "documents" in knowledge_data:
+                    for i, doc in enumerate(knowledge_data.get("documents", [])):
+                        doc_id = knowledge_data.get("ids", [])[i] if i < len(knowledge_data.get("ids", [])) else f"doc_{i}"
+                        metadata = knowledge_data.get("metadatas", [{}])[i] if i < len(knowledge_data.get("metadatas", [])) else {}
+                        
+                        results["knowledge_documents"].append({
+                            "id": doc_id,
+                            "content": doc[:500] + "..." if len(doc) > 500 else doc,  # Truncate for display
+                            "content_length": len(doc),
+                            "metadata": {k: v for k, v in metadata.items() if v is not None}
+                        })
+                
+                results["total_knowledge"] = chroma_client.knowledge_collection.count()
+            except Exception as e:
+                logger.error(f"Error getting knowledge documents: {e}")
+                results["knowledge_documents"] = []
+        
+        # Get conversation documents
+        if collection in ["all", "conversation"]:
+            try:
+                conversation_data = chroma_client.conversation_collection.get(
+                    limit=limit,
+                    offset=offset
+                )
+                
+                if conversation_data and "documents" in conversation_data:
+                    for i, doc in enumerate(conversation_data.get("documents", [])):
+                        doc_id = conversation_data.get("ids", [])[i] if i < len(conversation_data.get("ids", [])) else f"conv_{i}"
+                        metadata = conversation_data.get("metadatas", [{}])[i] if i < len(conversation_data.get("metadatas", [])) else {}
+                        
+                        results["conversation_documents"].append({
+                            "id": doc_id,
+                            "content": doc[:500] + "..." if len(doc) > 500 else doc,  # Truncate for display
+                            "content_length": len(doc),
+                            "metadata": {k: v for k, v in metadata.items() if v is not None}
+                        })
+                
+                results["total_conversation"] = chroma_client.conversation_collection.count()
+            except Exception as e:
+                logger.error(f"Error getting conversation documents: {e}")
+                results["conversation_documents"] = []
+        
+        return results
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"List documents error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/reset-database", dependencies=[Depends(require_api_key)])
 async def reset_rag_database():
     """
