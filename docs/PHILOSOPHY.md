@@ -32,7 +32,7 @@ We believe that **ethics isn't a feature - it's the foundation**. StillMe is bui
 - **Full Accountability**: Every mistake is public and corrected
 - **Community Control**: You decide what's acceptable, not corporations
 
-> **"We challenge the AI community to choose: Support transparency and ethics, or remain silent and admit they don't care."**
+> **"Perhaps it's time we each choose our own path — whether that's silence, indifference, or commitment to ethics."**
 
 ### 🔒 **Privacy & Data Protection**
 
@@ -41,17 +41,6 @@ We believe that **ethics isn't a feature - it's the foundation**. StillMe is bui
 - **Delete anytime** - your data, your rules, your control
 
 ## 🧪 The Transparency Experiment: Building Self-Evolving AI Publicly
-
-### **The Question Everyone's Avoiding**
-
-While Big Tech builds increasingly powerful AI behind closed doors, we're asking publicly: **"What does responsible AI self-improvement look like?"**
-
-### **Our Hypothesis: Transparency = Safety**
-
-**Traditional approach:**
-- Build powerful AI in secret
-- Deploy when "ready"
-- Ask forgiveness, not permission
 
 **StillMe's approach:**
 - Build in the open (100% transparent)
