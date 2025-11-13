@@ -97,24 +97,26 @@ def add_review_criteria():
         
         logger.info("Adding StillMe Review Criteria to RAG...")
         
-        # Check if already exists
-        # Query for existing review criteria
-        existing = rag_retrieval.query(
-            query="StillMe Peer Review Criteria",
-            n_results=5,
-            collection_name="stillme_knowledge"
-        )
-        
-        # Check if review criteria already exists
-        criteria_exists = False
-        for doc in existing.get("documents", []):
-            if "StillMe Peer Review Criteria" in doc or "Core Evaluation Criteria" in doc:
-                criteria_exists = True
-                break
-        
-        if criteria_exists:
-            logger.info("✅ Review Criteria already exists in RAG, skipping...")
-            return True
+        # Check if already exists by trying to retrieve
+        try:
+            existing = rag_retrieval.retrieve_context(
+                query="StillMe Peer Review Criteria",
+                knowledge_limit=5
+            )
+            
+            # Check if review criteria already exists in retrieved documents
+            criteria_exists = False
+            for doc in existing.get("knowledge_docs", []):
+                content = doc.get("content", "")
+                if "StillMe Peer Review Criteria" in content or "Core Evaluation Criteria" in content:
+                    criteria_exists = True
+                    break
+            
+            if criteria_exists:
+                logger.info("✅ Review Criteria already exists in RAG, skipping...")
+                return True
+        except Exception as check_error:
+            logger.debug(f"Could not check for existing criteria: {check_error}. Proceeding to add...")
         
         # Add review criteria with special metadata
         tags_list = ["review_criteria", "foundational:stillme", "evaluation", "peer_review"]

@@ -53,11 +53,10 @@ def init_feedback_db():
                 UNIQUE(message_id)
             )
         """)
-        cursor.execute("""
-            CREATE INDEX IF NOT EXISTS idx_feedback_rating ON feedback(rating);
-            CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at);
-            CREATE INDEX IF NOT EXISTS idx_feedback_message_id ON feedback(message_id);
-        """)
+        # SQLite only allows one statement per execute() call
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_feedback_rating ON feedback(rating)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_feedback_message_id ON feedback(message_id)")
         conn.commit()
         logger.info("Feedback database initialized")
     finally:
