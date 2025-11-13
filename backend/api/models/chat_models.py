@@ -60,9 +60,13 @@ class ChatRequest(BaseModel):
         
         return v
     
-    @validator('conversation_history')
+    @validator('conversation_history', pre=True)
     def validate_conversation_history(cls, v):
-        """Validate and normalize conversation history"""
+        """Validate and normalize conversation history
+        
+        CRITICAL: pre=True ensures this runs BEFORE Pydantic type validation,
+        allowing us to remove None values before Pydantic tries to validate types.
+        """
         if v is None:
             return v
         
@@ -70,6 +74,7 @@ class ChatRequest(BaseModel):
             raise ValueError("conversation_history must be a list")
         
         # Normalize each message: remove None values (especially message_id: null)
+        # This MUST happen before Pydantic validates types, hence pre=True
         normalized = []
         for msg in v:
             if not isinstance(msg, dict):
