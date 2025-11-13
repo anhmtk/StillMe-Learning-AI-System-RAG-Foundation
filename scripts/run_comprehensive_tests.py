@@ -90,7 +90,7 @@ async def test_question(session: aiohttp.ClientSession, question: Dict, timeout:
             "question": question["question"],
             "status": "timeout",
             "error": f"Request timed out after {timeout}s",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
     except Exception as e:
         return {
