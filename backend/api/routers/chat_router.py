@@ -1102,6 +1102,10 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         import uuid
         message_id = f"msg_{uuid.uuid4().hex[:16]}"
         
+        # If style learning response exists, prepend it to the response
+        if style_learning_response:
+            response = f"{style_learning_response}\n\n---\n\n{response}"
+        
         return ChatResponse(
             response=response,
             message_id=message_id,
