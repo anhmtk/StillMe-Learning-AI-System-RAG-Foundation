@@ -806,7 +806,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                 validation_result=validation_result,
                                 ctx_docs=ctx_docs,
                                 user_question=chat_request.message,
-                                detected_lang=detected_lang
+                                detected_lang=detected_lang,
+                                input_language=detected_lang  # Pass input language for language mismatch fallback
                             )
                             used_fallback = True
                             logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")

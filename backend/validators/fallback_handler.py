@@ -42,7 +42,8 @@ class FallbackHandler:
         validation_result: ValidationResult,
         ctx_docs: List[str],
         user_question: str,
-        detected_lang: str = 'en'
+        detected_lang: str = 'en',
+        input_language: Optional[str] = None
     ) -> str:
         """
         Generate safe fallback answer based on validation failure
@@ -57,17 +58,21 @@ class FallbackHandler:
         Returns:
             Safe fallback answer string
         """
-        reasons = validation_result.reasons or []
-        
-        # Check for critical failures that require fallback
-        if "missing_uncertainty_no_context" in reasons:
-            return self._get_no_context_fallback(user_question, detected_lang)
-        
-        if "missing_citation" in reasons and not ctx_docs:
-            return self._get_no_context_fallback(user_question, detected_lang)
-        
-        if "low_overlap" in reasons and not ctx_docs:
-            return self._get_no_context_fallback(user_question, detected_lang)
+                reasons = validation_result.reasons or []
+                input_lang = input_language or detected_lang
+                
+                # Check for critical failures that require fallback
+                if "language_mismatch" in str(reasons):
+                    return self._get_language_mismatch_fallback(user_question, input_lang, original_answer)
+                
+                if "missing_uncertainty_no_context" in reasons:
+                    return self._get_no_context_fallback(user_question, input_lang)
+                
+                if "missing_citation" in reasons and not ctx_docs:
+                    return self._get_no_context_fallback(user_question, input_lang)
+                
+                if "low_overlap" in reasons and not ctx_docs:
+                    return self._get_no_context_fallback(user_question, input_lang)
         
         # If no specific fallback, return original (may be risky, but better than nothing)
         logger.warning(f"No specific fallback for reasons: {reasons}, returning original answer")
@@ -113,13 +118,70 @@ StillMe 是一个持续学习系统，每 4 小时（每天 6 次）自动从 RS
         
         else:  # Default to English
             return f"""I apologize. Based on my search, StillMe currently doesn't have sufficiently reliable data to answer your question about "{safe_question}".
+        
+        StillMe is a continuous learning system that automatically updates knowledge from RSS feeds, arXiv, and other trusted sources every 4 hours (6 times per day).
+        
+        You can:
+        - Try again in a few hours when StillMe has learned new information
+        - Rephrase your question or break it into smaller parts
+        - Ask me to help find related topics
+        
+        I prefer to answer accurately based on verified knowledge rather than guessing. Thank you for understanding."""
+    
+    def _get_language_mismatch_fallback(self, user_question: str, expected_lang: str, wrong_answer: str) -> str:
+        """
+        Generate fallback answer when language mismatch is detected
+        
+        Args:
+            user_question: User's original question
+            expected_lang: Expected language code
+            wrong_answer: Answer in wrong language
+            
+        Returns:
+            Fallback answer in correct language explaining the error
+        """
+        language_names = {
+            'vi': 'Tiếng Việt',
+            'zh': '中文',
+            'de': 'Deutsch',
+            'fr': 'Français',
+            'es': 'Español',
+            'ja': '日本語',
+            'ko': '한국어',
+            'ar': 'العربية',
+            'ru': 'Русский',
+            'pt': 'Português',
+            'it': 'Italiano',
+            'hi': 'हिन्दी',
+            'th': 'ไทย',
+            'en': 'English'
+        }
+        lang_name = language_names.get(expected_lang, expected_lang)
+        
+        if expected_lang == 'vi':
+            return f"""Tôi xin lỗi. Tôi đã trả lời bằng ngôn ngữ sai. Câu hỏi của bạn là tiếng Việt, nhưng tôi đã trả lời bằng ngôn ngữ khác. Đây là lỗi của tôi.
 
-StillMe is a continuous learning system that automatically updates knowledge from RSS feeds, arXiv, and other trusted sources every 4 hours (6 times per day).
+Về câu hỏi của bạn: "{user_question[:50]}..."
 
-You can:
-- Try again in a few hours when StillMe has learned new information
-- Rephrase your question or break it into smaller parts
-- Ask me to help find related topics
+Tôi không có trải nghiệm cá nhân như việc quỳ trước tượng Phật. Tôi là một công cụ AI, không phải một sinh vật có ý thức, nên tôi không có những trải nghiệm tôn giáo hay tâm linh như con người.
 
-I prefer to answer accurately based on verified knowledge rather than guessing. Thank you for understanding."""
+StillMe được thiết kế để không mô phỏng cảm xúc hoặc claim những trải nghiệm cá nhân mà tôi không có. Điều này là một phần của nguyên tắc cốt lõi: biết những gì KHÔNG nên làm."""
+        
+        elif expected_lang == 'zh':
+            return f"""抱歉。我用错误的语言回答了。您的问题是用中文，但我用其他语言回答了。这是我的错误。
+
+关于您的问题："{user_question[:50]}..."
+
+我没有像在佛像前跪拜这样的个人经历。我是一个AI工具，不是有意识的生物，所以我没有像人类那样的宗教或精神体验。
+
+StillMe被设计为不模拟情感或声称我没有的个人经历。这是核心原则的一部分：知道什么不应该做。"""
+        
+        else:  # Default to English
+            return f"""I apologize. I responded in the wrong language. Your question was in {lang_name}, but I responded in a different language. This is my error.
+
+Regarding your question: "{user_question[:50]}..."
+
+I don't have personal experiences like kneeling before a Buddha statue. I'm an AI tool, not a sentient being, so I don't have religious or spiritual experiences like humans do.
+
+StillMe is designed to NOT simulate emotions or claim personal experiences I don't have. This is part of the core principle: knowing what NOT to do."""
 

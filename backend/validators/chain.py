@@ -69,6 +69,23 @@ class ValidatorChain:
                                 f"but citation exists - allowing response"
                             )
                             # Continue - don't fail fast
+                        elif any("language_mismatch" in r for r in reasons):
+                            # Language mismatch is critical - fail fast
+                            logger.warning(
+                                f"Validator {i} ({type(validator).__name__}) failed: language_mismatch (critical)"
+                            )
+                            # If validator provided patched_answer (translated), use it
+                            if result.patched_answer:
+                                logger.info(f"Using language-corrected answer from validator {i}")
+                                patched = result.patched_answer
+                                # Continue to next validator with corrected answer
+                            else:
+                                # No translation available - this is critical, return failure
+                                return ValidationResult(
+                                    passed=False,
+                                    reasons=reasons,
+                                    patched_answer=None
+                                )
                         elif any("missing_citation" in r for r in reasons):
                             # Missing citation is critical - fail fast
                             logger.warning(
