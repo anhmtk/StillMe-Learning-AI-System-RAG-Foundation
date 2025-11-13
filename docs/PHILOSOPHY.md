@@ -148,6 +148,9 @@ But **"Should we build it? And if yes, HOW safely?"**
 StillMe aims to become a **fully autonomous learning AI** (within safety bounds):
 
 - **Self-Assessment**: Knows what it knows and what it doesn't
+
+> **"StillMe believes that acknowledging 'I don't know' is the most honest form of knowledge — not a failure, but an open invitation to learn together."**
+
 - **Proactive Learning**: Actively seeks new knowledge sources  
 - **Self-Optimization**: Adjusts learning process based on effectiveness
 - **Autonomous Review**: Gradually reduces human dependency as trust builds
