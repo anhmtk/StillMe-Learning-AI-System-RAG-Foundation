@@ -2,11 +2,13 @@
 Content Curator for StillMe
 Prioritizes and optimizes learning content based on quality and effectiveness
 Includes Pre-Filter mechanism to reduce costs by filtering before embedding
+Now includes ReviewAdapter for simulated peer review evaluation
 """
 
 from typing import List, Dict, Any, Optional, Tuple
 import logging
 from datetime import datetime
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -44,10 +46,32 @@ IMPORTANT_KEYWORDS = {
 class ContentCurator:
     """Curates and prioritizes learning content with Pre-Filter for cost optimization"""
     
-    def __init__(self):
+    def __init__(self, enable_review_adapter: Optional[bool] = None):
+        """
+        Initialize Content Curator
+        
+        Args:
+            enable_review_adapter: Enable ReviewAdapter for peer review evaluation
+                                   If None, uses ENABLE_REVIEW_ADAPTER env var (default: False)
+        """
         self.source_quality_scores: Dict[str, float] = {}
         self.content_priorities: Dict[str, float] = {}
-        logger.info("Content Curator initialized with Pre-Filter")
+        
+        # Review Adapter (optional, for simulated peer review)
+        self.review_adapter = None
+        if enable_review_adapter is None:
+            enable_review_adapter = os.getenv("ENABLE_REVIEW_ADAPTER", "false").lower() == "true"
+        
+        if enable_review_adapter:
+            try:
+                from backend.validators.review_adapter import ReviewAdapter
+                self.review_adapter = ReviewAdapter(enable_cache=True)
+                logger.info("Content Curator initialized with Pre-Filter + ReviewAdapter")
+            except Exception as e:
+                logger.warning(f"Failed to initialize ReviewAdapter: {e}. Continuing without it.")
+                self.review_adapter = None
+        else:
+            logger.info("Content Curator initialized with Pre-Filter (ReviewAdapter disabled)")
     
     def pre_filter_content(self, content_list: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """
@@ -93,7 +117,43 @@ class ContentCurator:
                 })
                 continue
             
-            # Passed both filters
+            # Filter 3: Review Adapter (simulated peer review) - optional
+            if self.review_adapter:
+                try:
+                    # Build proposal text for review
+                    proposal_text = f"{title}\n\n{summary}".strip()
+                    if not proposal_text:
+                        proposal_text = full_text
+                    
+                    # Evaluate proposal
+                    review_result = self.review_adapter.evaluate_proposal(
+                        proposal=proposal_text,
+                        proposal_type="learning_content",
+                        context={
+                            "source": content.get("source", ""),
+                            "link": content.get("link", "")
+                        }
+                    )
+                    
+                    # Add review score to content metadata
+                    content["review_score"] = review_result["score"]
+                    content["review_passed"] = review_result["passed"]
+                    content["review_reasons"] = review_result.get("reasons", [])
+                    
+                    # Reject if review score too low
+                    if not review_result["passed"]:
+                        rejected.append({
+                            **content,
+                            "rejection_reason": f"Low review score ({review_result['score']:.2f} < 5.0)",
+                            "review_score": review_result["score"],
+                            "review_reasons": review_result.get("reasons", [])
+                        })
+                        continue
+                except Exception as e:
+                    # On error, log but don't block (fail open)
+                    logger.warning(f"ReviewAdapter error for content '{title}': {e}. Allowing content through.")
+            
+            # Passed all filters
             filtered.append({
                 **content,
                 "keyword_score": keyword_score,
@@ -279,10 +339,18 @@ class ContentCurator:
     
     def get_curation_stats(self) -> Dict[str, Any]:
         """Get curation statistics"""
-        return {
+        stats = {
             "sources_tracked": len(self.source_quality_scores),
             "average_source_quality": sum(self.source_quality_scores.values()) / len(self.source_quality_scores) if self.source_quality_scores else 0.0,
             "high_quality_sources": len([s for s in self.source_quality_scores.values() if s >= 0.7]),
-            "low_quality_sources": len([s for s in self.source_quality_scores.values() if s < 0.3])
+            "low_quality_sources": len([s for s in self.source_quality_scores.values() if s < 0.3]),
+            "review_adapter_enabled": self.review_adapter is not None
         }
+        
+        # Add review adapter stats if enabled
+        if self.review_adapter:
+            review_stats = self.review_adapter.get_stats()
+            stats["review_adapter"] = review_stats
+        
+        return stats
 

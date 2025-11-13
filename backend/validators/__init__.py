@@ -12,6 +12,7 @@ from .schema_format import SchemaFormat
 from .ethics_adapter import EthicsAdapter
 from .confidence import ConfidenceValidator
 from .fallback_handler import FallbackHandler
+from .review_adapter import ReviewAdapter
 
 __all__ = [
     "Validator",
@@ -24,5 +25,6 @@ __all__ = [
     "EthicsAdapter",
     "ConfidenceValidator",
     "FallbackHandler",
+    "ReviewAdapter",
 ]
 
