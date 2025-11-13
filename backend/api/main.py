@@ -367,17 +367,30 @@ def _initialize_rag_components():
                 test_embedding = embedding_service.encode_text("warm-up")
                 logger.info(f"  ✅ Embedding model warmed up (dimension: {len(test_embedding)})")
             
-            # 2. Pre-load ChromaDB ONNX model by doing a test query
+            # 2. Pre-load ChromaDB ONNX model by doing a test query AND adding a test conversation
+            # CRITICAL: ChromaDB ONNX model is downloaded when add_conversation is called, not retrieve_context
+            # So we need to trigger both to fully warm up
             if rag_retrieval and chroma_client:
                 logger.info("  ⏳ Pre-loading ChromaDB ONNX model (this may take 10-30 seconds on first run)...")
                 try:
-                    # Do a test query to trigger ONNX model download/loading
+                    # Step 1: Do a test query to warm up retrieval
                     test_context = rag_retrieval.retrieve_context(
                         query="warm-up query",
                         knowledge_limit=1,
                         conversation_limit=0
                     )
-                    logger.info("  ✅ ChromaDB ONNX model warmed up")
+                    logger.info("  ✅ ChromaDB retrieval warmed up")
+                    
+                    # Step 2: Add a test conversation to trigger ONNX model download
+                    # This is what actually downloads the ONNX model (79.3MB)
+                    import time
+                    test_conversation_id = f"warmup_{int(time.time())}"
+                    chroma_client.add_conversation(
+                        documents=["warm-up conversation"],
+                        metadatas=[{"source": "warmup", "timestamp": "warmup"}],
+                        ids=[test_conversation_id]
+                    )
+                    logger.info("  ✅ ChromaDB ONNX model warmed up (triggered by add_conversation)")
                 except Exception as warmup_error:
                     # ONNX download may fail if network is slow - that's OK, it will download on first real request
                     logger.warning(f"  ⚠️ ChromaDB warm-up failed (will load on first request): {warmup_error}")
