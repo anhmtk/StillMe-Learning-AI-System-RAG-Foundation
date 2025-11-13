@@ -88,13 +88,79 @@ class ValidationMetrics:
         if len(self.recent_logs) > self.max_logs:
             self.recent_logs = self.recent_logs[-self.max_logs:]
     
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self, days: int = None) -> Dict[str, Any]:
         """
         Get current metrics
+        
+        Args:
+            days: Optional number of days to filter logs (e.g., 3 for last 3 days)
         
         Returns:
             Dictionary with metrics
         """
+        # Filter logs by time if days specified
+        filtered_logs = self.recent_logs
+        if days is not None:
+            from datetime import timedelta
+            cutoff_time = datetime.now() - timedelta(days=days)
+            filtered_logs = [
+                log for log in self.recent_logs
+                if datetime.fromisoformat(log["timestamp"]) >= cutoff_time
+            ]
+        
+        # Calculate metrics from filtered logs
+        if days is not None and filtered_logs:
+            # Recalculate from filtered logs
+            filtered_total = len(filtered_logs)
+            filtered_passed = sum(1 for log in filtered_logs if log.get("passed", False))
+            filtered_failed = filtered_total - filtered_passed
+            
+            # Extract overlap and confidence scores from filtered logs
+            filtered_overlaps = [log.get("overlap_score", 0.0) for log in filtered_logs if log.get("overlap_score", 0.0) > 0]
+            filtered_confidences = [log.get("confidence_score") for log in filtered_logs if log.get("confidence_score") is not None]
+            
+            # Count reasons from filtered logs
+            filtered_reasons_histogram = defaultdict(int)
+            filtered_fallback_count = 0
+            filtered_hallucination_prevented = 0
+            filtered_uncertainty_count = 0
+            
+            for log in filtered_logs:
+                reasons = log.get("reasons", [])
+                for reason in reasons:
+                    filtered_reasons_histogram[reason] += 1
+                    if reason == "missing_uncertainty_no_context":
+                        filtered_hallucination_prevented += 1
+                    if "uncertainty" in reason.lower() or "don't know" in reason.lower():
+                        filtered_uncertainty_count += 1
+                if log.get("used_fallback", False):
+                    filtered_fallback_count += 1
+                    filtered_hallucination_prevented += 1
+            
+            pass_rate = filtered_passed / filtered_total if filtered_total > 0 else 0.0
+            avg_overlap = sum(filtered_overlaps) / len(filtered_overlaps) if filtered_overlaps else 0.0
+            avg_confidence = sum(filtered_confidences) / len(filtered_confidences) if filtered_confidences else 0.0
+            hallucination_reduction_rate = filtered_hallucination_prevented / filtered_total if filtered_total > 0 else 0.0
+            
+            return {
+                "total_validations": filtered_total,
+                "pass_rate": pass_rate,
+                "passed_count": filtered_passed,
+                "failed_count": filtered_failed,
+                "avg_overlap_score": avg_overlap,
+                "avg_confidence_score": avg_confidence,
+                "fallback_usage_count": filtered_fallback_count,
+                "fallback_usage_rate": filtered_fallback_count / filtered_total if filtered_total > 0 else 0.0,
+                "hallucination_prevented_count": filtered_hallucination_prevented,
+                "hallucination_reduction_rate": hallucination_reduction_rate,
+                "uncertainty_expressed_count": filtered_uncertainty_count,
+                "uncertainty_expression_rate": filtered_uncertainty_count / filtered_total if filtered_total > 0 else 0.0,
+                "reasons_histogram": dict(filtered_reasons_histogram),
+                "recent_logs": filtered_logs[-10:],  # Last 10 logs from filtered set
+                "filter_days": days
+            }
+        
+        # Default: return all-time metrics
         pass_rate = (
             self.passed_count / self.total_validations
             if self.total_validations > 0

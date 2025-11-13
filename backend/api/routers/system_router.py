@@ -227,12 +227,20 @@ async def get_status():
         }
 
 @router.get("/api/validators/metrics")
-async def get_validation_metrics():
-    """Get validation metrics"""
+async def get_validation_metrics(days: int = None):
+    """
+    Get validation metrics
+    
+    Args:
+        days: Optional number of days to filter (e.g., 3 for last 3 days)
+    
+    Returns:
+        Validation metrics including pass rate, error types, recent logs
+    """
     try:
         from backend.validators.metrics import get_metrics
         metrics = get_metrics()
-        return {"metrics": metrics.get_metrics()}
+        return {"metrics": metrics.get_metrics(days=days)}
     except Exception as e:
         logger.error(f"Validation metrics error: {e}")
         return {
