@@ -426,9 +426,15 @@ class ChromaClient:
             bool: Success status
         """
         try:
+            # Filter out None values from metadata to prevent ChromaDB TypeError
+            cleaned_metadatas = []
+            for metadata in metadatas:
+                cleaned_metadata = {k: v for k, v in metadata.items() if v is not None}
+                cleaned_metadatas.append(cleaned_metadata)
+            
             self.conversation_collection.add(
                 documents=documents,
-                metadatas=metadatas,
+                metadatas=cleaned_metadatas,
                 ids=ids
             )
             logger.info(f"Added {len(documents)} conversation documents")

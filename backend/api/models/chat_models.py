@@ -14,7 +14,7 @@ class ChatRequest(BaseModel):
     user_id: Optional[str] = Field(default=None, max_length=100, description="User identifier")
     use_rag: bool = Field(default=True, description="Whether to use RAG for context")
     context_limit: int = Field(default=3, ge=1, le=5, description="Maximum number of context documents (increased from 2 to 3 for better coverage)")
-    conversation_history: Optional[List[Dict[str, str]]] = Field(default=None, description="Previous conversation messages for context. Format: [{'role': 'user', 'content': '...'}, {'role': 'assistant', 'content': '...'}]")
+    conversation_history: Optional[List[Dict[str, Any]]] = Field(default=None, description="Previous conversation messages for context. Format: [{'role': 'user', 'content': '...', 'message_id': '...' (optional)}, {'role': 'assistant', 'content': '...', 'message_id': '...' (optional)}]")
     
     @validator('message')
     def validate_message(cls, v):
