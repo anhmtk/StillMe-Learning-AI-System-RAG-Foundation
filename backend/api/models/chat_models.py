@@ -2,7 +2,7 @@
 Chat API request and response models with comprehensive validation
 """
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Optional, Dict, Any, List
 import re
 from .common_models import sanitize_string
@@ -16,7 +16,8 @@ class ChatRequest(BaseModel):
     context_limit: int = Field(default=3, ge=1, le=5, description="Maximum number of context documents (increased from 2 to 3 for better coverage)")
     conversation_history: Optional[List[Dict[str, Any]]] = Field(default=None, description="Previous conversation messages for context. Format: [{'role': 'user', 'content': '...', 'message_id': '...' (optional)}, {'role': 'assistant', 'content': '...', 'message_id': '...' (optional)}]")
     
-    @validator('message')
+    @field_validator('message')
+    @classmethod
     def validate_message(cls, v):
         """Validate and sanitize message"""
         if not isinstance(v, str):
@@ -31,7 +32,8 @@ class ChatRequest(BaseModel):
         
         return v
     
-    @validator('user_id')
+    @field_validator('user_id')
+    @classmethod
     def validate_user_id(cls, v):
         """Validate user ID format"""
         if v is None:
@@ -49,7 +51,8 @@ class ChatRequest(BaseModel):
         
         return v
     
-    @validator('context_limit')
+    @field_validator('context_limit')
+    @classmethod
     def validate_context_limit(cls, v):
         """Validate context limit"""
         if not isinstance(v, int):
@@ -60,12 +63,14 @@ class ChatRequest(BaseModel):
         
         return v
     
-    @validator('conversation_history', pre=True)
+    @field_validator('conversation_history', mode='before')
+    @classmethod
     def validate_conversation_history(cls, v):
         """Validate and normalize conversation history
         
-        CRITICAL: pre=True ensures this runs BEFORE Pydantic type validation,
+        CRITICAL: mode='before' ensures this runs BEFORE Pydantic type validation,
         allowing us to remove None values before Pydantic tries to validate types.
+        This is equivalent to pre=True in Pydantic v1.
         """
         if v is None:
             return v
@@ -88,7 +93,7 @@ class ChatRequest(BaseModel):
         return normalized
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "message": "What is StillMe?",
                 "user_id": "user123",
@@ -116,7 +121,7 @@ class ChatResponse(BaseModel):
     processing_steps: Optional[List[str]] = Field(None, description="Real-time processing steps for status indicator (e.g., 'RAG retrieval...', 'Calling DeepSeek API...', 'Validation...')")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "response": "StillMe is a transparent AI learning system...",
                 "context_used": {"knowledge_docs": [], "total_context_docs": 0},
