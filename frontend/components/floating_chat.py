@@ -799,6 +799,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             let parentOverlay = parentDoc.getElementById('stillme-chat-overlay-parent');
                             
                             if (!isVisible) {{
+                                // Hide iframe panel when parent panel is shown (fix double input issue)
+                                panel.style.setProperty('display', 'none', 'important');
+                                
                                 // Open panel - create in parent if doesn't exist
                                 if (!parentPanel) {{
                                     console.log('StillMe Chat: Creating panel in parent window...');
@@ -1325,15 +1328,19 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                 }} else {{
                                     parentPanel.style.setProperty('display', 'flex', 'important');
                                     parentOverlay.style.setProperty('display', 'block', 'important');
-                                    console.log('StillMe Chat: Parent panel shown');
+                                    // Hide iframe panel when parent panel is shown (fix double input issue)
+                                    panel.style.setProperty('display', 'none', 'important');
+                                    console.log('StillMe Chat: Parent panel shown, iframe panel hidden');
                                 }}
                             }} else {{
-                                // Close panel - hide in parent
+                                // Close panel - hide in parent, show iframe panel
                                 if (parentPanel) {{
                                     parentPanel.style.setProperty('display', 'none', 'important');
                                     parentOverlay.style.setProperty('display', 'none', 'important');
                                     console.log('StillMe Chat: Parent panel hidden');
                                 }}
+                                // Show iframe panel when parent panel is closed
+                                panel.style.setProperty('display', 'flex', 'important');
                             }}
                         }}
                         

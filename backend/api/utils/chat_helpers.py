@@ -441,8 +441,9 @@ async def call_deepseek_api(prompt: str, api_key: str, detected_lang: str = 'en'
                             "content": prompt
                         }
                     ],
-                    "max_tokens": 2000,
-                    "temperature": 0.7
+                    "max_tokens": 1500,  # Reduced from 2000 to speed up inference
+                    "temperature": 0.7,
+                    "stream": False  # TODO: Implement streaming for better perceived latency
                 }
             )
             
@@ -495,8 +496,9 @@ async def call_openai_api(prompt: str, api_key: str, detected_lang: str = 'en') 
                             "content": prompt
                         }
                     ],
-                    "max_tokens": 2000,
-                    "temperature": 0.7
+                    "max_tokens": 1500,  # Reduced from 2000 to speed up inference
+                    "temperature": 0.7,
+                    "stream": False  # TODO: Implement streaming for better perceived latency
                 }
             )
             
