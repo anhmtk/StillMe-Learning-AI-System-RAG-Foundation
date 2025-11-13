@@ -67,6 +67,9 @@ docs/DEPLOYMENT_STATUS.md
 docs/RAILWAY_DEPLOYMENT_DEBUG.md
 docs/TEST_TROUBLESHOOTING.md
 docs/TEST_MONITORING_GUIDE.md
+docs/VECTOR_DB_EXPLANATION.md
+docs/MEMORY_HEALTH_EXPLANATION.md
+docs/TEST_SUITE_GUIDE.md
 
 # Internal dev setup guides (not for public repo)
 docs/gmail_advanced_protection_guide.md
