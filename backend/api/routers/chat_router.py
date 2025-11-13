@@ -792,11 +792,13 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     # Handle validation failures with FallbackHandler
                     if not validation_result.passed:
                         # Check for critical failures that require fallback
+                        # language_mismatch: when output language doesn't match input language
                         # missing_uncertainty_no_context: when no context and no uncertainty expression
                         # missing_citation: when context exists but no citations in answer
+                        has_language_mismatch = any("language_mismatch" in r for r in validation_result.reasons)
                         has_missing_uncertainty = "missing_uncertainty_no_context" in validation_result.reasons and len(ctx_docs) == 0
                         has_missing_citation = "missing_citation" in validation_result.reasons and len(ctx_docs) > 0
-                        has_critical_failure = has_missing_uncertainty or has_missing_citation
+                        has_critical_failure = has_language_mismatch or has_missing_uncertainty or has_missing_citation
                         
                         if has_critical_failure:
                             # Use FallbackHandler to generate safe answer
