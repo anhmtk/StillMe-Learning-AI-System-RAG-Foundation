@@ -100,6 +100,12 @@ We believe that **ethics isn't a feature - it's the foundation**. StillMe is bui
 ✅ Can AI suggest improvements to its architecture? → **v1.0: TBD (requires significant R&D)**  
 ✅ Can community governance keep autonomous learning safe? → **Ongoing experiment**
 
+🔬 **Dual Environment Learning Evaluation (AlphaResearch-inspired)** → **RESEARCHING**  
+- Exploring reward model approach for learning proposal evaluation (similar to AlphaResearch's simulated peer review)  
+- Investigating iterative learning strategy improvement with dual evaluation (idea quality + execution feasibility)  
+- **Status**: Research phase only - evaluating feasibility, costs, and alignment with StillMe's transparency philosophy  
+- **Note**: This is exploratory research, not a committed feature. Implementation depends on resources and community interest.
+
 ### **Safety Mechanisms (Current & Planned)**
 
 **Implemented (v0.6):**
