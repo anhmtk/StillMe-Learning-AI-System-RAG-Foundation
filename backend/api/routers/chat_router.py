@@ -744,8 +744,10 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         doc["content"] for doc in context["conversation_docs"]
                     ]
                     
-                    # Create validator chain with ConfidenceValidator
+                    # Create validator chain with LanguageValidator FIRST (highest priority)
+                    from backend.validators.language import LanguageValidator
                     chain = ValidatorChain([
+                        LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
                         CitationRequired(),
                         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
