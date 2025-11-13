@@ -45,6 +45,20 @@ class RSSFetcher:
             "https://tricycle.org/feed/",  # Tricycle - The Buddhist Review
             "https://www.lionsroar.com/feed/",  # Lion's Roar - Buddhist Wisdom for Our Time
             # Note: Some religious studies feeds may be empty - will be monitored and replaced if needed
+            
+            # NEW: Academic & Research Sources (as suggested by StillMe in user conversation)
+            # Added based on StillMe's analysis of reliable, peer-reviewed, and up-to-date sources
+            "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science",  # Science Magazine - Peer-reviewed research breakthroughs
+            "https://www.nature.com/nature.rss",  # Nature - Already exists, keeping for clarity
+            "https://feeds.reuters.com/reuters/topNews",  # Reuters - Top News (reliable, up-to-date)
+            "https://feeds.bloomberg.com/markets/news.rss",  # Bloomberg Markets - Economic & financial analysis
+            
+            # Note: Google Scholar, PubMed, IEEE Xplore don't have public RSS feeds
+            # These would require API integration (future enhancement):
+            # - Google Scholar: Would need scraping or unofficial API (rate-limited)
+            # - PubMed: Has API but requires API key and structured queries
+            # - IEEE Xplore: Requires institutional access and API key
+            # For now, we add what's available via RSS (Science, Nature, Reuters, Bloomberg)
         ]
         # Track error states for self-diagnosis
         self.last_error: Optional[str] = None
