@@ -476,7 +476,7 @@ def _initialize_rag_components():
 - **Search Method**: Semantic similarity search using cosine distance
 
 **Validation & Grounding Mechanism:**
-StillMe uses a **ValidatorChain** to ensure response quality and prevent hallucinations:
+StillMe uses a **ValidatorChain** to help ensure response quality and reduce hallucinations (enabled by default via ENABLE_VALIDATORS=true):
 
 1. **CitationRequired**: Ensures responses cite sources from retrieved context
 2. **EvidenceOverlap**: Validates that response content overlaps with retrieved context (threshold = 0.01 = 1% n-gram overlap minimum, configurable via VALIDATOR_EVIDENCE_THRESHOLD)
@@ -488,6 +488,11 @@ StillMe uses a **ValidatorChain** to ensure response quality and prevent halluci
    - Replaces hallucinated responses with honest "I don't know" messages
    - Explains StillMe's learning mechanism and suggests alternatives
 6. **EthicsAdapter**: Ethical content filtering
+
+**Validation Behavior:**
+- **Critical failures** (missing citation with context, missing uncertainty with no context): Response is replaced with fallback answer
+- **Non-critical failures** (low overlap with citation, numeric errors): Response is returned with warning logged
+- **Note**: Validation helps reduce hallucinations but does not guarantee 100% accuracy
 
 **Confidence Scoring:**
 - StillMe calculates confidence scores (0.0-1.0) based on:
@@ -505,7 +510,7 @@ StillMe uses a **ValidatorChain** to ensure response quality and prevent halluci
 - **Content Curation**: Intelligent filtering and prioritization of learning content based on quality and relevance
 - **Pre-Filter System**: Filters content BEFORE embedding to reduce costs by 30-50%
 - **Knowledge Alerts**: Proactively suggests important knowledge to users when StillMe learns something relevant
-- **Validation Chain**: Reduces hallucinations by 80% through citation, evidence overlap, confidence validation, and ethics checks
+- **Validation Chain**: Helps reduce hallucinations through citation, evidence overlap, confidence validation, and ethics checks (enabled by default, can be disabled via ENABLE_VALIDATORS=false)
 
 **How StillMe Learns:**
 1. Automated scheduler fetches RSS feeds, arXiv, CrossRef, Wikipedia every 4 hours
