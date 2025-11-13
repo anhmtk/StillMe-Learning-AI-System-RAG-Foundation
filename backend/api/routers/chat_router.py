@@ -224,7 +224,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             processing_steps.append(f"✅ Found {context.get('total_context_docs', 0) if context else 0} relevant documents ({rag_retrieval_latency:.2f}s)")
         
         # Generate response using AI (simplified for demo)
-        enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
+        # CRITICAL: Default to true - validation should be enabled by default
+        enable_validators = os.getenv("ENABLE_VALIDATORS", "true").lower() == "true"
         enable_tone_align = os.getenv("ENABLE_TONE_ALIGN", "true").lower() == "true"
         
         if context and context["total_context_docs"] > 0:
