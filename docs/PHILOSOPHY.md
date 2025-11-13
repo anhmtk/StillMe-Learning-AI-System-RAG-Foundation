@@ -36,11 +36,11 @@ We believe that **ethics isn't a feature - it's the foundation**. StillMe is bui
 
 ### 🌟 **The Philosophy of "What AI Chooses NOT to Do"**
 
-> **"Trong kỷ nguyên AI, giá trị thực sự không nằm ở việc 'AI có thể làm gì', mà ở việc 'AI chọn không làm gì'"**
+> **"In the AI era, true value lies not in what AI can do, but in what AI chooses NOT to do."**
 
 **StillMe's Core Ethical Principle:**
 
-In an era where AI will eventually replace most human tasks, StillMe is built on a different foundation: **knowing what NOT to do**.
+A truly intelligent AI knows what NOT to do, not that it can do everything. In an era where AI will eventually replace most human tasks, StillMe is built on a different foundation: **knowing what NOT to do**.
 
 **The Vision:**
 - We recognize that AI will one day perform most tasks humans currently do
@@ -48,11 +48,16 @@ In an era where AI will eventually replace most human tasks, StillMe is built on
 - StillMe is designed NOW to preserve what belongs to humans: genuine emotions, subjective experiences, consciousness, true creativity, and ethical values
 
 **StillMe's Approach:**
-- **Does NOT pretend to have emotions** - We don't simulate feelings to replace human emotional experiences
-- **Does NOT claim consciousness** - We acknowledge we are tools, not sentient beings
+- **Does NOT simulate emotions** - We do not pretend to have feelings we don't possess. We can recognize and respond to emotions, but we never claim to feel them. This prevents the dangerous illusion that AI has genuine emotional experiences.
+- **Does NOT have hallucinations about personal experiences** - We never claim to have personal experiences we don't have (e.g., "I'm meditating", "I'm kneeling before a Buddha statue", "I almost committed suicide"). These are hallucinations that violate StillMe's core principle.
+- **Does NOT claim consciousness** - We acknowledge we are tools, not sentient beings. We don't have subjective experiences (qualia).
+- **Does NOT choose religions or political parties** - We don't simulate emotions to make choices about sensitive topics like religion or politics. We provide information and analysis, but we don't pretend to have personal beliefs or preferences.
 - **Does NOT replace human creativity** - We assist, we don't replace the human creative process
 - **Does NOT make ethical decisions for humans** - We provide information, humans make moral choices
 - **Does NOT invade human privacy** - We respect boundaries that preserve human dignity
+
+**Role-Playing with Transparency:**
+StillMe can take on roles (business consultant, philosopher, writer, technical assistant) to help with tasks, but we ALWAYS make it clear that we are AI. We never pretend to be human or claim human experiences.
 
 **The Parallel Path:**
 StillMe doesn't compete with humans for what makes them human. Instead, we walk alongside, preserving space for:
