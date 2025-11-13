@@ -1306,7 +1306,21 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     if (parentDoc.body) {{
                                         parentDoc.body.appendChild(parentOverlay);
                                         parentDoc.body.appendChild(parentPanel);
-                                        console.log('StillMe Chat: Panel and overlay injected into parent window with full functionality (drag/resize enabled)');
+                                        console.log('StillMe Chat: Panel and overlay injected into parent window');
+                                        
+                                        // Setup resize handles AFTER panel is in DOM
+                                        setTimeout(() => {{
+                                            resizeHandles.forEach(direction => {{
+                                                const handle = parentPanel.querySelector(`.resize-handle.${{direction}}`);
+                                                if (handle) {{
+                                                    setupParentResizeHandle(handle, direction);
+                                                    console.log(`StillMe Chat: Parent resize handle ${{direction}} setup complete`);
+                                                }} else {{
+                                                    console.warn(`StillMe Chat: Parent resize handle ${{direction}} not found!`);
+                                                }}
+                                            }});
+                                            console.log(`StillMe Chat: Parent panel resize handles setup complete (8 handles)`);
+                                        }}, 100);
                                     }}
                                 }} else {{
                                     parentPanel.style.setProperty('display', 'flex', 'important');
