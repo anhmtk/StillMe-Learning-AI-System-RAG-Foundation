@@ -65,9 +65,25 @@ docs/PR_CREATION_GUIDE.md
 # Internal deployment/debug guides (not for public repo)
 docs/DEPLOYMENT_STATUS.md
 docs/RAILWAY_DEPLOYMENT_DEBUG.md
+docs/TEST_TROUBLESHOOTING.md
+docs/TEST_MONITORING_GUIDE.md
 
-# Internal verification scripts (not for public repo)
+# Internal dev setup guides (not for public repo)
+docs/gmail_advanced_protection_guide.md
+docs/tailscale_dev_link.md
+
+# Internal cleanup/collab/dev docs (not for public repo)
+docs/cleanup/
+docs/collab/
+docs/dev/
+
+# Internal verification/monitoring scripts (not for public repo)
 scripts/verify_backend_deployment.py
+scripts/view_test_suite.py
+scripts/view_test_progress.py
+
+# Test results (not for public repo)
+tests/results/
 
 # Temporary/junk files with encoding issues
 responsive*
