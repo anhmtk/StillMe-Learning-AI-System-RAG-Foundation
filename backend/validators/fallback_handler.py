@@ -58,21 +58,21 @@ class FallbackHandler:
         Returns:
             Safe fallback answer string
         """
-                reasons = validation_result.reasons or []
-                input_lang = input_language or detected_lang
-                
-                # Check for critical failures that require fallback
-                if "language_mismatch" in str(reasons):
-                    return self._get_language_mismatch_fallback(user_question, input_lang, original_answer)
-                
-                if "missing_uncertainty_no_context" in reasons:
-                    return self._get_no_context_fallback(user_question, input_lang)
-                
-                if "missing_citation" in reasons and not ctx_docs:
-                    return self._get_no_context_fallback(user_question, input_lang)
-                
-                if "low_overlap" in reasons and not ctx_docs:
-                    return self._get_no_context_fallback(user_question, input_lang)
+        reasons = validation_result.reasons or []
+        input_lang = input_language or detected_lang
+        
+        # Check for critical failures that require fallback
+        if "language_mismatch" in str(reasons):
+            return self._get_language_mismatch_fallback(user_question, input_lang, original_answer)
+        
+        if "missing_uncertainty_no_context" in reasons:
+            return self._get_no_context_fallback(user_question, input_lang)
+        
+        if "missing_citation" in reasons and not ctx_docs:
+            return self._get_no_context_fallback(user_question, input_lang)
+        
+        if "low_overlap" in reasons and not ctx_docs:
+            return self._get_no_context_fallback(user_question, input_lang)
         
         # If no specific fallback, return original (may be risky, but better than nothing)
         logger.warning(f"No specific fallback for reasons: {reasons}, returning original answer")

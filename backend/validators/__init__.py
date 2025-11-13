@@ -13,6 +13,7 @@ from .ethics_adapter import EthicsAdapter
 from .confidence import ConfidenceValidator
 from .fallback_handler import FallbackHandler
 from .review_adapter import ReviewAdapter
+from .language import LanguageValidator
 
 __all__ = [
     "Validator",
@@ -26,5 +27,6 @@ __all__ = [
     "ConfidenceValidator",
     "FallbackHandler",
     "ReviewAdapter",
+    "LanguageValidator",
 ]
 
