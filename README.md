@@ -30,7 +30,7 @@ StillMe is a **RAG-based AI system** that:
 - Validates responses to reduce hallucinations
 - Tracks learning metrics and knowledge retention
 
-**Core Philosophy:** *"Trong kỷ nguyên AI, giá trị thực sự không nằm ở việc 'AI có thể làm gì', mà ở việc 'AI chọn không làm gì'"* — StillMe preserves what makes humans human by knowing what NOT to do.
+**Core Philosophy:** *"In the AI era, true value lies not in what AI can do, but in what AI chooses NOT to do."* — A truly intelligent AI knows what NOT to do, not that it can do everything. StillMe preserves what makes humans human by knowing its boundaries.
 
 **Tech Stack:**
 - **Backend**: FastAPI, Python 3.12+
