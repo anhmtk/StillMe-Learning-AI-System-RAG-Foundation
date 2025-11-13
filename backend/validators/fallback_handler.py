@@ -4,7 +4,7 @@ FallbackHandler - Provides safe fallback answers when validation fails
 
 import html
 import logging
-from typing import List
+from typing import List, Optional
 from .base import ValidationResult
 
 logger = logging.getLogger(__name__)
