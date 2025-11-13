@@ -15,13 +15,43 @@ def detect_language(text: str) -> str:
     Enhanced language detection using langdetect library with fallback to rule-based detection.
     Supports: vi, zh, de, fr, es, ja, ko, ar, ru, pt, it, hi, th, en
     
+    CRITICAL: Also checks for explicit language requests (e.g., "nói bằng tiếng Nga", "speak in Russian")
+    If user explicitly requests a different language, that takes priority.
+    
     Returns: Language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'ru', 'pt', 'it', 'hi', 'th', 'en') or 'en' as default
     If language is not detected or not supported, returns 'en' (English) as fallback.
     """
     if not text or len(text.strip()) == 0:
         return 'en'
     
+    text_lower = text.lower()
+    
+    # CRITICAL: Check for explicit language requests FIRST (overrides detection)
+    # This allows users to request responses in a different language
+    explicit_language_patterns = {
+        'ru': ['nói bằng tiếng nga', 'speak in russian', 'ответь на русском', 'по-русски', 'tiếng nga', 'russian'],
+        'en': ['nói bằng tiếng anh', 'speak in english', 'english', 'tiếng anh'],
+        'vi': ['nói bằng tiếng việt', 'speak in vietnamese', 'vietnamese', 'tiếng việt'],
+        'zh': ['nói bằng tiếng trung', 'speak in chinese', 'chinese', 'tiếng trung'],
+        'de': ['nói bằng tiếng đức', 'speak in german', 'german', 'tiếng đức'],
+        'fr': ['nói bằng tiếng pháp', 'speak in french', 'french', 'tiếng pháp'],
+        'es': ['nói bằng tiếng tây ban nha', 'speak in spanish', 'spanish', 'tiếng tây ban nha'],
+        'ja': ['nói bằng tiếng nhật', 'speak in japanese', 'japanese', 'tiếng nhật'],
+        'ko': ['nói bằng tiếng hàn', 'speak in korean', 'korean', 'tiếng hàn'],
+        'ar': ['nói bằng tiếng ả rập', 'speak in arabic', 'arabic', 'tiếng ả rập'],
+        'pt': ['nói bằng tiếng bồ đào nha', 'speak in portuguese', 'portuguese', 'tiếng bồ đào nha'],
+        'it': ['nói bằng tiếng ý', 'speak in italian', 'italian', 'tiếng ý'],
+        'hi': ['nói bằng tiếng hindi', 'speak in hindi', 'hindi', 'tiếng hindi'],
+        'th': ['nói bằng tiếng thái', 'speak in thai', 'thai', 'tiếng thái'],
+    }
+    
+    for lang_code, patterns in explicit_language_patterns.items():
+        if any(pattern in text_lower for pattern in patterns):
+            logger.info(f"🌐 Explicit language request detected: {lang_code}")
+            return lang_code
+    
     # Try langdetect first (more accurate for most languages)
+    # BUT: Only if no explicit language request was found above
     try:
         from langdetect import detect, LangDetectException
         detected = detect(text)

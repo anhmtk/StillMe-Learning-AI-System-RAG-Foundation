@@ -874,6 +874,25 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 font-weight: 500 !important;
                                                 flex: 1;
                                             }}
+                                            #stillme-chat-panel-parent #stillme-chat-status {{
+                                                color: #858585 !important;
+                                                font-size: 11px !important;
+                                                font-style: italic !important;
+                                                margin-top: 4px !important;
+                                            }}
+                                            #stillme-chat-panel-parent .resize-handle {{
+                                                position: absolute !important;
+                                                z-index: 1000001 !important;
+                                                pointer-events: auto !important;
+                                            }}
+                                            #stillme-chat-panel-parent .resize-handle.nw {{ top: 0 !important; left: 0 !important; width: 15px !important; height: 15px !important; cursor: nw-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.ne {{ top: 0 !important; right: 0 !important; width: 15px !important; height: 15px !important; cursor: ne-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.sw {{ bottom: 0 !important; left: 0 !important; width: 15px !important; height: 15px !important; cursor: sw-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.se {{ bottom: 0 !important; right: 0 !important; width: 15px !important; height: 15px !important; cursor: se-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.n {{ top: 0 !important; left: 15px !important; right: 15px !important; height: 8px !important; cursor: n-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.s {{ bottom: 0 !important; left: 15px !important; right: 15px !important; height: 8px !important; cursor: s-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.e {{ top: 15px !important; bottom: 15px !important; right: 0 !important; width: 8px !important; cursor: e-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.w {{ top: 15px !important; bottom: 15px !important; left: 0 !important; width: 8px !important; cursor: w-resize !important; }}
                                             #stillme-chat-panel-parent .stillme-chat-messages {{
                                                 flex: 1 1 auto !important;
                                                 overflow-y: auto !important;
@@ -1001,8 +1020,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     const parentHeader = parentDoc.createElement('div');
                                     parentHeader.className = 'stillme-chat-header';
                                     parentHeader.id = 'stillme-chat-header-parent';
+                                    const headerTitleDiv = parentDoc.createElement('div');
+                                    headerTitleDiv.style.cssText = 'flex: 1; min-width: 0;';
                                     const headerTitle = parentDoc.createElement('h3');
                                     headerTitle.textContent = '💬 Chat with StillMe';
+                                    const parentStatusDiv = parentDoc.createElement('div');
+                                    parentStatusDiv.id = 'stillme-chat-status-parent';
+                                    parentStatusDiv.style.cssText = 'font-size: 11px; color: #858585; margin-top: 4px; display: none; font-style: italic;';
+                                    headerTitleDiv.appendChild(headerTitle);
+                                    headerTitleDiv.appendChild(parentStatusDiv);
                                     const headerButtons = parentDoc.createElement('div');
                                     headerButtons.className = 'stillme-chat-header-buttons';
                                     
@@ -1026,7 +1052,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     headerButtons.appendChild(minimizeBtn);
                                     headerButtons.appendChild(fullscreenBtn);
                                     headerButtons.appendChild(closeBtn);
-                                    parentHeader.appendChild(headerTitle);
+                                    parentHeader.appendChild(headerTitleDiv);
                                     parentHeader.appendChild(headerButtons);
                                     
                                     // Create messages container
@@ -1051,12 +1077,20 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     parentInputWrapper.appendChild(parentSendBtn);
                                     parentInputContainer.appendChild(parentInputWrapper);
                                     
-                                    // Append in correct order: header -> messages -> input
+                                    // Create resize handles for parent panel
+                                    const resizeHandles = ['nw', 'ne', 'sw', 'se', 'n', 's', 'e', 'w'];
+                                    resizeHandles.forEach(direction => {{
+                                        const handle = parentDoc.createElement('div');
+                                        handle.className = `resize-handle ${{direction}}`;
+                                        parentPanel.appendChild(handle);
+                                    }});
+                                    
+                                    // Append in correct order: resize handles -> header -> messages -> input
                                     parentPanel.appendChild(parentHeader);
                                     parentPanel.appendChild(parentMessages);
                                     parentPanel.appendChild(parentInputContainer);
                                     
-                                    console.log('StillMe Chat: Parent panel created with correct HTML structure (header -> messages -> input)');
+                                    console.log('StillMe Chat: Parent panel created with correct HTML structure (header -> messages -> input) + resize handles');
                                     
                                     // Setup event handlers for parent panel (use elements we just created)
                                     closeBtn.onclick = function(e) {{
@@ -1150,10 +1184,137 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         parentMessages.scrollTop = parentMessages.scrollHeight;
                                     }}
                                     
+                                    // Setup drag and resize for parent panel
+                                    let parentIsDragging = false;
+                                    let parentIsResizing = false;
+                                    let parentResizeHandle = null;
+                                    let parentDragStartX = 0;
+                                    let parentDragStartY = 0;
+                                    let parentPanelStartX = 0;
+                                    let parentPanelStartY = 0;
+                                    let parentPanelStartWidth = 0;
+                                    let parentPanelStartHeight = 0;
+                                    
+                                    // Drag functionality for parent panel
+                                    parentHeader.addEventListener('mousedown', (e) => {{
+                                        if (e.target.closest('.stillme-chat-header-btn, .stillme-chat-close')) return;
+                                        if (parentPanel.classList.contains('fullscreen') || parentPanel.classList.contains('minimized')) return;
+                                        
+                                        parentIsDragging = true;
+                                        parentDragStartX = e.clientX;
+                                        parentDragStartY = e.clientY;
+                                        
+                                        const rect = parentPanel.getBoundingClientRect();
+                                        parentPanelStartX = rect.left;
+                                        parentPanelStartY = rect.top;
+                                        
+                                        parentPanel.style.transform = 'none';
+                                        parentPanel.style.left = parentPanelStartX + 'px';
+                                        parentPanel.style.top = parentPanelStartY + 'px';
+                                        
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }});
+                                    
+                                    // Resize functionality for parent panel
+                                    function setupParentResizeHandle(handle, direction) {{
+                                        if (!handle) return;
+                                        handle.addEventListener('mousedown', (e) => {{
+                                            if (parentPanel.classList.contains('fullscreen') || parentPanel.classList.contains('minimized')) return;
+                                            
+                                            parentIsResizing = true;
+                                            parentResizeHandle = direction;
+                                            parentDragStartX = e.clientX;
+                                            parentDragStartY = e.clientY;
+                                            
+                                            const rect = parentPanel.getBoundingClientRect();
+                                            parentPanelStartX = rect.left;
+                                            parentPanelStartY = rect.top;
+                                            parentPanelStartWidth = rect.width;
+                                            parentPanelStartHeight = rect.height;
+                                            
+                                            parentPanel.style.transform = 'none';
+                                            parentPanel.style.left = parentPanelStartX + 'px';
+                                            parentPanel.style.top = parentPanelStartY + 'px';
+                                            
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }});
+                                    }}
+                                    
+                                    // Setup all resize handles for parent panel
+                                    resizeHandles.forEach(direction => {{
+                                        const handle = parentPanel.querySelector(`.resize-handle.${{direction}}`);
+                                        if (handle) {{
+                                            setupParentResizeHandle(handle, direction);
+                                        }}
+                                    }});
+                                    
+                                    // Mouse move handler for parent panel drag/resize
+                                    parentDoc.addEventListener('mousemove', (e) => {{
+                                        if (parentIsDragging && !parentPanel.classList.contains('fullscreen') && !parentPanel.classList.contains('minimized')) {{
+                                            const deltaX = e.clientX - parentDragStartX;
+                                            const deltaY = e.clientY - parentDragStartY;
+                                            
+                                            let newX = parentPanelStartX + deltaX;
+                                            let newY = parentPanelStartY + deltaY;
+                                            
+                                            const panelWidth = parentPanel.offsetWidth;
+                                            const panelHeight = parentPanel.offsetHeight;
+                                            newX = Math.max(-panelWidth + 100, Math.min(newX, window.innerWidth - 100));
+                                            newY = Math.max(0, Math.min(newY, window.innerHeight - 50));
+                                            
+                                            parentPanel.style.left = newX + 'px';
+                                            parentPanel.style.top = newY + 'px';
+                                            parentPanel.style.transform = 'none';
+                                        }} else if (parentIsResizing && !parentPanel.classList.contains('fullscreen') && !parentPanel.classList.contains('minimized') && parentResizeHandle) {{
+                                            const deltaX = e.clientX - parentDragStartX;
+                                            const deltaY = e.clientY - parentDragStartY;
+                                            
+                                            let newWidth = parentPanelStartWidth;
+                                            let newHeight = parentPanelStartHeight;
+                                            let newX = parentPanelStartX;
+                                            let newY = parentPanelStartY;
+                                            
+                                            if (parentResizeHandle.includes('e')) {{
+                                                newWidth = Math.max(400, parentPanelStartWidth + deltaX);
+                                            }}
+                                            if (parentResizeHandle.includes('w')) {{
+                                                newWidth = Math.max(400, parentPanelStartWidth - deltaX);
+                                                newX = parentPanelStartX + deltaX;
+                                            }}
+                                            if (parentResizeHandle.includes('s')) {{
+                                                newHeight = Math.max(400, parentPanelStartHeight + deltaY);
+                                            }}
+                                            if (parentResizeHandle.includes('n')) {{
+                                                newHeight = Math.max(400, parentPanelStartHeight - deltaY);
+                                                newY = parentPanelStartY + deltaY;
+                                            }}
+                                            
+                                            const maxWidth = window.innerWidth - newX + 50;
+                                            const maxHeight = window.innerHeight - newY + 50;
+                                            newWidth = Math.min(newWidth, maxWidth);
+                                            newHeight = Math.min(newHeight, maxHeight);
+                                            
+                                            parentPanel.style.width = newWidth + 'px';
+                                            parentPanel.style.height = newHeight + 'px';
+                                            parentPanel.style.left = newX + 'px';
+                                            parentPanel.style.top = newY + 'px';
+                                            parentPanel.style.transform = 'none';
+                                        }}
+                                    }});
+                                    
+                                    // Mouse up handler for parent panel
+                                    parentDoc.addEventListener('mouseup', () => {{
+                                        parentIsDragging = false;
+                                        parentIsResizing = false;
+                                        parentResizeHandle = null;
+                                    }});
+                                    
                                     if (parentDoc.body) {{
                                         parentDoc.body.appendChild(parentOverlay);
                                         parentDoc.body.appendChild(parentPanel);
-                                        console.log('StillMe Chat: Panel and overlay injected into parent window with full functionality');
+                                        console.log('StillMe Chat: Panel and overlay injected into parent window with full functionality (drag/resize enabled)');
                                     }}
                                 }} else {{
                                     parentPanel.style.setProperty('display', 'flex', 'important');
@@ -1434,11 +1595,20 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         
                         const message = messageText.trim();
                         
-                        // Show processing status immediately
+                        // Show processing status immediately (both iframe and parent)
                         const statusDiv = document.getElementById('stillme-chat-status');
                         if (statusDiv) {{
                             statusDiv.textContent = '🤔 StillMe is thinking...';
                             statusDiv.style.display = 'block';
+                        }}
+                        // Also update parent panel status
+                        if (window.parent && window.parent !== window) {{
+                            const parentDoc = window.parent.document;
+                            const parentStatusDiv = parentDoc.getElementById('stillme-chat-status-parent');
+                            if (parentStatusDiv) {{
+                                parentStatusDiv.textContent = '🤔 StillMe is thinking...';
+                                parentStatusDiv.style.display = 'block';
+                            }}
                         }}
                         
                         // Add user message to history
@@ -1514,7 +1684,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             const data = await response.json();
                             const reply = data.response || data.message || JSON.stringify(data);
                             
-                            // Display processing steps if available
+                            // Display processing steps if available (both iframe and parent)
                             const processingSteps = data.processing_steps || [];
                             if (processingSteps.length > 0) {{
                                 const lastSteps = processingSteps.slice(-3).join(' | ');
@@ -1523,10 +1693,27 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     statusDiv.textContent = lastSteps;
                                     statusDiv.style.display = 'block';
                                 }}
+                                // Update parent panel status
+                                if (window.parent && window.parent !== window) {{
+                                    const parentDoc = window.parent.document;
+                                    const parentStatusDiv = parentDoc.getElementById('stillme-chat-status-parent');
+                                    if (parentStatusDiv) {{
+                                        parentStatusDiv.textContent = lastSteps;
+                                        parentStatusDiv.style.display = 'block';
+                                    }}
+                                }}
                             }} else {{
                                 const statusDiv = document.getElementById('stillme-chat-status');
                                 if (statusDiv) {{
                                     statusDiv.style.display = 'none';
+                                }}
+                                // Hide parent panel status
+                                if (window.parent && window.parent !== window) {{
+                                    const parentDoc = window.parent.document;
+                                    const parentStatusDiv = parentDoc.getElementById('stillme-chat-status-parent');
+                                    if (parentStatusDiv) {{
+                                        parentStatusDiv.style.display = 'none';
+                                    }}
                                 }}
                             }}
                             
@@ -1636,11 +1823,20 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 sendBtn.disabled = true;
                 sendBtn.textContent = 'Sending...';
                 
-                // Show processing status immediately
+                // Show processing status immediately (both iframe and parent)
                 const statusDiv = document.getElementById('stillme-chat-status');
                 if (statusDiv) {{
                     statusDiv.textContent = '🤔 StillMe is thinking...';
                     statusDiv.style.display = 'block';
+                }}
+                // Also update parent panel status
+                if (window.parent && window.parent !== window) {{
+                    const parentDoc = window.parent.document;
+                    const parentStatusDiv = parentDoc.getElementById('stillme-chat-status-parent');
+                    if (parentStatusDiv) {{
+                        parentStatusDiv.textContent = '🤔 StillMe is thinking...';
+                        parentStatusDiv.style.display = 'block';
+                    }}
                 }}
                 
                 // Add user message to history
@@ -1700,7 +1896,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         const data = await response.json();
                         const reply = data.response || data.message || JSON.stringify(data);
                         
-                        // Display processing steps if available (for debugging/status)
+                        // Display processing steps if available (both iframe and parent)
                         const processingSteps = data.processing_steps || [];
                         if (processingSteps.length > 0) {{
                             console.log('StillMe processing steps:', processingSteps);
@@ -1711,11 +1907,28 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                 statusDiv.textContent = lastSteps;
                                 statusDiv.style.display = 'block';
                             }}
+                            // Update parent panel status
+                            if (window.parent && window.parent !== window) {{
+                                const parentDoc = window.parent.document;
+                                const parentStatusDiv = parentDoc.getElementById('stillme-chat-status-parent');
+                                if (parentStatusDiv) {{
+                                    parentStatusDiv.textContent = lastSteps;
+                                    parentStatusDiv.style.display = 'block';
+                                }}
+                            }}
                         }} else {{
-                            // Hide status if no steps
+                            // Hide status if no steps (both iframe and parent)
                             const statusDiv = document.getElementById('stillme-chat-status');
                             if (statusDiv) {{
                                 statusDiv.style.display = 'none';
+                            }}
+                            // Hide parent panel status
+                            if (window.parent && window.parent !== window) {{
+                                const parentDoc = window.parent.document;
+                                const parentStatusDiv = parentDoc.getElementById('stillme-chat-status-parent');
+                                if (parentStatusDiv) {{
+                                    parentStatusDiv.style.display = 'none';
+                                }}
                             }}
                         }}
                         
