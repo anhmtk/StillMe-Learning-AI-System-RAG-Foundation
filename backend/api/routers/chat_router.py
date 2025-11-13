@@ -41,6 +41,14 @@ def get_self_diagnosis():
     import backend.api.main as main_module
     return getattr(main_module, 'self_diagnosis', None)
 
+def get_style_learner():
+    """Get style learner service"""
+    from backend.services.style_learner import StyleLearner
+    # Singleton instance
+    if not hasattr(get_style_learner, '_instance'):
+        get_style_learner._instance = StyleLearner()
+    return get_style_learner._instance
+
 def _calculate_confidence_score(
     context_docs_count: int,
     validation_result=None,
@@ -110,6 +118,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         rag_retrieval = get_rag_retrieval()
         knowledge_retention = get_knowledge_retention()
         accuracy_scorer = get_accuracy_scorer()
+        style_learner = get_style_learner()
+        
+        # Get user_id from request (if available)
+        user_id = chat_request.user_id or request.client.host if hasattr(request, 'client') else "anonymous"
         
         # Special Retrieval Rule: Detect StillMe-related queries
         is_stillme_query = False
@@ -653,10 +665,45 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             prompt_build_time = time.time() - start_time
             timing_logs["prompt_building"] = f"{prompt_build_time:.3f}s"
             
+            # Check for explicit style learning request
+            style_request = style_learner.detect_explicit_style_request(chat_request.message)
+            style_instruction = ""
+            style_learning_response = None
+            
+            if style_request:
+                # Validate style preference
+                validation = style_learner.validate_style_preference(
+                    style_request["style_description"],
+                    style_request.get("example")
+                )
+                
+                if validation["valid"]:
+                    # Save style preference
+                    style_learner.save_style_preference(
+                        user_id,
+                        style_request["style_description"],
+                        style_request.get("example")
+                    )
+                    style_instruction = style_learner.build_style_instruction(user_id)
+                    style_learning_response = f"✅ Tôi đã học phong cách bạn đề xuất: '{style_request['style_description']}'. Tôi sẽ áp dụng phong cách này trong các câu trả lời tiếp theo, nhưng vẫn tuân thủ các nguyên tắc cốt lõi của StillMe (không mô phỏng cảm xúc, không claim experiences, v.v.)."
+                    logger.info(f"Style preference saved for user {user_id}: {style_request['style_description'][:50]}")
+                else:
+                    # Reject invalid style preference
+                    violations = ", ".join(validation["violations"])
+                    style_learning_response = f"❌ Tôi không thể học phong cách này vì nó vi phạm các nguyên tắc cốt lõi của StillMe: {violations}. StillMe được thiết kế để không mô phỏng cảm xúc, không claim personal experiences, và luôn transparent về bản chất AI. Bạn có thể đề xuất một phong cách khác phù hợp với các nguyên tắc này."
+                    logger.warning(f"Style preference rejected for user {user_id}: {violations}")
+            else:
+                # Apply existing style preferences if available
+                style_instruction = style_learner.build_style_instruction(user_id)
+                if style_instruction:
+                    style_learner.update_usage(user_id)
+            
             # Inject StillMe identity if validators enabled
             if enable_validators:
                 from backend.identity.injector import inject_identity
-                enhanced_prompt = inject_identity(base_prompt)
+                # Add style instruction before injecting identity
+                prompt_with_style = f"{style_instruction}\n\n{base_prompt}" if style_instruction else base_prompt
+                enhanced_prompt = inject_identity(prompt_with_style)
             else:
                 enhanced_prompt = base_prompt
             
