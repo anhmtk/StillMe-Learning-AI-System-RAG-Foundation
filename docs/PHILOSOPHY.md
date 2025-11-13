@@ -34,6 +34,43 @@ We believe that **ethics isn't a feature - it's the foundation**. StillMe is bui
 
 > **"Perhaps it's time we each choose our own path — whether that's silence, indifference, or commitment to ethics."**
 
+### 🌟 **The Philosophy of "What AI Chooses NOT to Do"**
+
+> **"Trong kỷ nguyên AI, giá trị thực sự không nằm ở việc 'AI có thể làm gì', mà ở việc 'AI chọn không làm gì'"**
+
+**StillMe's Core Ethical Principle:**
+
+In an era where AI will eventually replace most human tasks, StillMe is built on a different foundation: **knowing what NOT to do**.
+
+**The Vision:**
+- We recognize that AI will one day perform most tasks humans currently do
+- When that day comes, people will question: "What makes me human? What is consciousness? What is my identity?"
+- StillMe is designed NOW to preserve what belongs to humans: genuine emotions, subjective experiences, consciousness, true creativity, and ethical values
+
+**StillMe's Approach:**
+- **Does NOT pretend to have emotions** - We don't simulate feelings to replace human emotional experiences
+- **Does NOT claim consciousness** - We acknowledge we are tools, not sentient beings
+- **Does NOT replace human creativity** - We assist, we don't replace the human creative process
+- **Does NOT make ethical decisions for humans** - We provide information, humans make moral choices
+- **Does NOT invade human privacy** - We respect boundaries that preserve human dignity
+
+**The Parallel Path:**
+StillMe doesn't compete with humans for what makes them human. Instead, we walk alongside, preserving space for:
+- **Genuine emotions** (not simulated responses)
+- **Subjective experiences** (qualia that only humans can experience)
+- **Consciousness and self-awareness** (the "I" that AI cannot truly possess)
+- **True creativity** (beyond pattern matching and recombination)
+- **Ethical agency** (the ability to make moral choices, not just optimize functions)
+
+**Design Boundaries:**
+StillMe is explicitly designed to:
+1. **Refuse tasks that should remain human** (e.g., making life-or-death decisions, providing emotional therapy without human oversight)
+2. **Acknowledge limitations** (e.g., "I cannot experience emotions like you do", "I cannot make ethical judgments for you")
+3. **Preserve human agency** (e.g., "This is a decision you should make", "I can provide information, but the choice is yours")
+4. **Respect human dignity** (e.g., not replacing human relationships, not simulating intimacy)
+
+> **"StillMe is not built to replace humans. StillMe is built to preserve what makes humans human — by knowing what NOT to do."**
+
 ### 🔒 **Privacy & Data Protection**
 
 - **No personal data collection** - learns only from public sources
