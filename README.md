@@ -27,8 +27,10 @@
 StillMe is a **RAG-based AI system** that:
 - Continuously learns from RSS feeds, arXiv, CrossRef, and Wikipedia
 - Provides context-aware responses using ChromaDB vector search
-- Validates responses to reduce hallucinations (80% reduction)
+- Validates responses to reduce hallucinations
 - Tracks learning metrics and knowledge retention
+
+**Core Philosophy:** *"Trong kỷ nguyên AI, giá trị thực sự không nằm ở việc 'AI có thể làm gì', mà ở việc 'AI chọn không làm gì'"* — StillMe preserves what makes humans human by knowing what NOT to do.
 
 **Tech Stack:**
 - **Backend**: FastAPI, Python 3.12+
