@@ -440,19 +440,35 @@ def page_overview():
                     st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
         with col_run_now:
             if st.button("🚀 Run Now", width='stretch'):
+                # Store Vector DB stats BEFORE running to compare later
+                try:
+                    initial_rag_stats = get_json("/api/rag/stats", {}, timeout=10)
+                    st.session_state["initial_rag_stats"] = initial_rag_stats.get("stats", {})
+                except:
+                    st.session_state["initial_rag_stats"] = {}
+                
+                # Store current cycle count to detect completion
+                try:
+                    current_status = get_json("/api/learning/scheduler/status", {}, timeout=10)
+                    if current_status and current_status.get("status") == "ok":
+                        st.session_state["learning_cycle_count_at_start"] = current_status.get("cycle_count", 0)
+                except:
+                    st.session_state["learning_cycle_count_at_start"] = 0
+                
+                # Make the API call (with short timeout for immediate feedback)
                 try:
                     # Non-blocking: returns 202 immediately
-                    # Increased timeout to 60s to handle slow backend responses during learning cycle startup
-                    r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=60)
+                    r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=5)
                     if r.status_code == 202:
                         data = r.json()
                         job_id = data.get("job_id")
-                        # Store job_id in session state for progress tracking
                         st.session_state["learning_job_id"] = job_id
                         st.session_state["learning_job_started"] = True
-                        st.rerun()
+                        st.session_state["learning_job_start_time"] = time.time()
+                        # IMMEDIATE FEEDBACK
+                        st.success("🚀 Learning cycle started! Running in background (2-5 minutes). Results will appear below when complete.")
                     elif r.status_code == 200:
-                        # Sync mode (for tests)
+                        # Sync mode (for tests) - immediate results
                         data = r.json()
                         entries = data.get("entries_fetched", 0)
                         filtered = data.get("entries_filtered", 0)
@@ -462,27 +478,26 @@ def page_overview():
                             st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, Filtered {filtered} (Low quality/Short), Added {added} to RAG."
                         else:
                             st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, added {added} to RAG."
-                        st.rerun()
+                        st.session_state["learning_job_started"] = False
+                        st.session_state["learning_cycle_result"] = data
+                        st.success("✅ Learning cycle completed immediately!")
                     else:
                         st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
+                        st.error(st.session_state["last_error"])
                 except requests.exceptions.Timeout:
                     # Timeout is OK - job is running in background
-                    # Don't set a fake job_id - we'll poll scheduler status instead
-                    # Store current cycle_count to detect when cycle completes
-                    try:
-                        current_status = get_json("/api/learning/scheduler/status", {}, timeout=30)
-                    except requests.exceptions.Timeout:
-                        # Backend is busy - this is expected when starting learning cycle
-                        current_status = {}
-                    if current_status and current_status.get("status") == "ok":
-                        st.session_state["learning_cycle_count_at_start"] = current_status.get("cycle_count", 0)
+                    st.session_state["learning_job_id"] = None
                     st.session_state["learning_job_started"] = True
-                    st.session_state["learning_job_id"] = None  # No specific job ID, will poll scheduler status
-                    st.session_state["last_action"] = "⏳ Learning cycle started! Running in background (2-5 minutes). Vector DB Stats will update when complete. Check progress below."
-                    st.success("🚀 Learning cycle started! Check progress below.")
-                    st.rerun()
+                    st.session_state["learning_job_start_time"] = time.time()
+                    # IMMEDIATE FEEDBACK even on timeout
+                    st.success("🚀 Learning cycle started! Running in background (2-5 minutes). Results will appear below when complete.")
                 except Exception as e:
-                    st.session_state["last_error"] = f"❌ Failed: {e}"
+                    st.session_state["last_error"] = f"❌ Failed to start: {e}"
+                    st.session_state["learning_job_started"] = False
+                    st.error(st.session_state["last_error"])
+                
+                # Rerun to show progress section
+                st.rerun()
         
         # Display learning cycle progress if job is running
         if st.session_state.get("learning_job_started"):
@@ -514,30 +529,99 @@ def page_overview():
                     
                     # If scheduler is not running AND cycle_count increased, cycle completed
                     if not is_running and cycle_count > stored_cycle_count:
-                        st.success("✅ Learning cycle completed!")
-                        # Show results from scheduler status
-                        st.info("💡 Check scheduler status below for details.")
+                        # Get current Vector DB stats to show what changed
+                        try:
+                            current_rag_stats = get_json("/api/rag/stats", {}, timeout=10)
+                            current_stats = current_rag_stats.get("stats", {})
+                            initial_stats = st.session_state.get("initial_rag_stats", {})
+                            
+                            # Calculate changes
+                            initial_total = initial_stats.get("total_documents", 0)
+                            current_total = current_stats.get("total_documents", 0)
+                            docs_added = current_total - initial_total
+                            
+                            initial_knowledge = initial_stats.get("knowledge_documents", 0)
+                            current_knowledge = current_stats.get("knowledge_documents", 0)
+                            knowledge_added = current_knowledge - initial_knowledge
+                            
+                            # Show detailed results
+                            st.success("✅ Learning cycle completed!")
+                            
+                            if docs_added > 0:
+                                st.info(f"📊 **Results:** Added {docs_added} new documents to Vector DB ({knowledge_added} knowledge docs). Total: {current_total} documents.")
+                            elif docs_added == 0 and current_total > 0:
+                                st.info(f"📊 **Results:** No new documents added. Total: {current_total} documents (may have filtered out low-quality content).")
+                            else:
+                                st.info(f"📊 **Results:** Vector DB now has {current_total} documents.")
+                            
+                            # Try to get more details from scheduler if available
+                            if last_run_time:
+                                st.caption(f"⏰ Completed at: {last_run_time}")
+                        except Exception as stats_error:
+                            st.success("✅ Learning cycle completed!")
+                            st.info("💡 Check Vector DB Stats above and scheduler status below for details.")
+                        
                         # Clear job tracking
                         st.session_state["learning_job_started"] = False
                         st.session_state["learning_job_id"] = None
                         st.session_state["learning_cycle_count_at_start"] = None
+                        st.session_state["initial_rag_stats"] = {}
                     elif not is_running and last_run_time:
                         # Scheduler stopped and has a last_run_time - cycle likely completed
-                        # But we can't be 100% sure, so show message and allow manual clear
-                        st.info("⏳ Learning cycle may have completed. Scheduler is stopped.")
-                        st.info("💡 **Tip:** Check scheduler status below. If cycle completed, you can dismiss this message.")
-                        if st.button("✅ Dismiss (Cycle Completed)", key="dismiss_cycle"):
-                            st.session_state["learning_job_started"] = False
-                            st.session_state["learning_job_id"] = None
-                            st.session_state["learning_cycle_count_at_start"] = None
-                            st.rerun()
-                        else:
-                            # Auto-refresh to check scheduler status
-                            refresh_placeholder = st.empty()
-                            refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
-                            import time
-                            time.sleep(3)
-                            st.rerun()
+                        # Check if Vector DB stats changed to confirm
+                        try:
+                            current_rag_stats = get_json("/api/rag/stats", {}, timeout=10)
+                            current_stats = current_rag_stats.get("stats", {})
+                            initial_stats = st.session_state.get("initial_rag_stats", {})
+                            
+                            initial_total = initial_stats.get("total_documents", 0)
+                            current_total = current_stats.get("total_documents", 0)
+                            docs_added = current_total - initial_total
+                            
+                            # If stats changed, cycle definitely completed
+                            if docs_added > 0 or (current_total > 0 and initial_total == 0):
+                                st.success("✅ Learning cycle completed!")
+                                initial_knowledge = initial_stats.get("knowledge_documents", 0)
+                                current_knowledge = current_stats.get("knowledge_documents", 0)
+                                knowledge_added = current_knowledge - initial_knowledge
+                                
+                                if docs_added > 0:
+                                    st.info(f"📊 **Results:** Added {docs_added} new documents to Vector DB ({knowledge_added} knowledge docs). Total: {current_total} documents.")
+                                else:
+                                    st.info(f"📊 **Results:** Vector DB now has {current_total} documents.")
+                                
+                                if st.button("✅ Dismiss", key="dismiss_cycle"):
+                                    st.session_state["learning_job_started"] = False
+                                    st.session_state["learning_job_id"] = None
+                                    st.session_state["learning_cycle_count_at_start"] = None
+                                    st.session_state["initial_rag_stats"] = {}
+                                    st.rerun()
+                            else:
+                                # Stats didn't change - may still be processing or no new content
+                                st.info("⏳ Learning cycle may have completed. Scheduler is stopped.")
+                                st.info("💡 **Tip:** Check Vector DB Stats above and scheduler status below. If cycle completed, you can dismiss this message.")
+                                if st.button("✅ Dismiss (Cycle Completed)", key="dismiss_cycle"):
+                                    st.session_state["learning_job_started"] = False
+                                    st.session_state["learning_job_id"] = None
+                                    st.session_state["learning_cycle_count_at_start"] = None
+                                    st.session_state["initial_rag_stats"] = {}
+                                    st.rerun()
+                        except:
+                            # Fallback if can't get stats
+                            st.info("⏳ Learning cycle may have completed. Scheduler is stopped.")
+                            st.info("💡 **Tip:** Check scheduler status below. If cycle completed, you can dismiss this message.")
+                            if st.button("✅ Dismiss (Cycle Completed)", key="dismiss_cycle_fallback"):
+                                st.session_state["learning_job_started"] = False
+                                st.session_state["learning_job_id"] = None
+                                st.session_state["learning_cycle_count_at_start"] = None
+                                st.session_state["initial_rag_stats"] = {}
+                                st.rerun()
+                            else:
+                                # Auto-refresh to check scheduler status
+                                refresh_placeholder = st.empty()
+                                refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
+                                time.sleep(3)
+                                st.rerun()
                     else:
                         # Still running or unknown status - continue auto-refresh
                         st.info("⏳ Learning cycle is running in background. This may take 2-5 minutes.")
