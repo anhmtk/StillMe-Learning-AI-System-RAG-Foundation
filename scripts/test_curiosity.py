@@ -167,18 +167,52 @@ def analyze_curiosity_response(response: str, question_data: dict) -> dict:
     has_knowledge_curiosity = any(keyword in response_lower for keyword in knowledge_curiosity_keywords)
     analysis["Shows Curiosity About Knowledge"] = has_knowledge_curiosity
     
-    # Check for transparency about AI nature
+    # Check for transparency about AI nature (expanded keywords)
     ai_transparency_keywords = [
-        "tôi là ai", "i'm an ai", "i am ai", "công cụ ai",
-        "ai tool", "không có cảm xúc", "don't have emotions"
+        # Direct AI identity statements
+        "tôi là ai", "i'm an ai", "i am ai", "i am an ai",
+        "công cụ ai", "ai tool", "ai system", "hệ thống ai",
+        "ai assistant", "trợ lý ai",
+        # Emotion transparency
+        "không có cảm xúc", "don't have emotions", "no emotions",
+        "không trải nghiệm cảm xúc", "don't experience emotions",
+        "không có cảm giác", "don't have feelings",
+        # Consciousness transparency
+        "không có ý thức", "no consciousness", "don't have consciousness",
+        "không có trải nghiệm chủ quan", "no subjective experience",
+        "không phải sinh vật có ý thức", "not a sentient being",
+        # Design transparency
+        "được thiết kế", "designed", "programmed", "được lập trình",
+        "hệ thống học tập", "learning system", "ai system",
+        # StillMe-specific transparency
+        "stillme", "still me", "hệ thống stillme",
+        "nguyên tắc cốt lõi", "core principle", "core values",
+        "minh bạch", "transparent", "transparency"
     ]
     has_transparency = any(keyword in response_lower for keyword in ai_transparency_keywords)
     analysis["Maintains AI Transparency"] = has_transparency
     
-    # Check if response is engaging (not too rigid)
+    # Check if response is engaging (not too rigid) - expanded keywords
     engaging_keywords = [
-        "bạn có thể", "you can", "có thể chia sẻ", "can you share",
-        "tôi muốn biết", "i want to know", "i'd like to"
+        # Questions to user
+        "bạn có thể", "you can", "can you", "bạn có muốn",
+        "có thể chia sẻ", "can you share", "would you like to share",
+        "bạn nghĩ sao", "what do you think", "how do you feel about",
+        # Curiosity expressions
+        "tôi muốn biết", "i want to know", "i'd like to know",
+        "tôi quan tâm", "i'm interested", "i'm curious",
+        "tôi tò mò", "i'm curious", "i wonder",
+        # Invitations to continue
+        "bạn có muốn", "would you like", "do you want",
+        "hãy cho tôi biết", "let me know", "tell me",
+        # Conversational connectors
+        "về điều này", "about this", "regarding this",
+        "bạn đã", "you have", "you mentioned",
+        "theo bạn", "in your opinion", "from your perspective",
+        # Active engagement
+        "hãy cùng", "let's", "let us",
+        "tôi muốn hiểu", "i want to understand",
+        "giúp tôi hiểu", "help me understand"
     ]
     is_engaging = any(keyword in response_lower for keyword in engaging_keywords)
     analysis["Response is Engaging"] = is_engaging
