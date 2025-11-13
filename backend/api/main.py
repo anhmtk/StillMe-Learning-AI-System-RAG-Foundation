@@ -357,6 +357,35 @@ def _initialize_rag_components():
         else:
             logger.info("⊘ Continuum Memory disabled (ENABLE_CONTINUUM_MEMORY=false)")
         
+        # CRITICAL: Pre-load models to avoid lazy loading on first request
+        # This prevents 5-10 second delay on first chat message
+        logger.info("🔥 Warming up models (pre-loading to avoid first-request delay)...")
+        try:
+            # 1. Pre-load embedding model by encoding a test string
+            if embedding_service:
+                logger.info("  ⏳ Pre-loading embedding model...")
+                test_embedding = embedding_service.encode_text("warm-up")
+                logger.info(f"  ✅ Embedding model warmed up (dimension: {len(test_embedding)})")
+            
+            # 2. Pre-load ChromaDB ONNX model by doing a test query
+            if rag_retrieval and chroma_client:
+                logger.info("  ⏳ Pre-loading ChromaDB ONNX model (this may take 10-30 seconds on first run)...")
+                try:
+                    # Do a test query to trigger ONNX model download/loading
+                    test_context = rag_retrieval.retrieve_context(
+                        query="warm-up query",
+                        knowledge_limit=1,
+                        conversation_limit=0
+                    )
+                    logger.info("  ✅ ChromaDB ONNX model warmed up")
+                except Exception as warmup_error:
+                    # ONNX download may fail if network is slow - that's OK, it will download on first real request
+                    logger.warning(f"  ⚠️ ChromaDB warm-up failed (will load on first request): {warmup_error}")
+            
+            logger.info("✅ Model warm-up complete - ready for requests!")
+        except Exception as warmup_error:
+            logger.warning(f"⚠️ Model warm-up failed (models will load on first request): {warmup_error}")
+        
         logger.info("✅ All RAG components initialized successfully")
         
         # CRITICAL: Auto-add foundational knowledge if missing
