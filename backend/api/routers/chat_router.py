@@ -112,6 +112,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     confidence_score = None
     validation_info = None
     processing_steps = []  # Track processing steps for real-time status
+    style_learning_response = None  # Initialize for style learning
     
     try:
         # Get services
