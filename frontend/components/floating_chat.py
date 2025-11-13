@@ -1496,6 +1496,21 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                 body: JSON.stringify(requestPayload),
                             }});
                             
+                            // Check response status
+                            if (!response.ok) {{
+                                const errorText = await response.text();
+                                let errorMessage = `HTTP ${{response.status}}: ${{response.statusText}}`;
+                                try {{
+                                    const errorData = JSON.parse(errorText);
+                                    errorMessage = errorData.detail || errorData.message || errorMessage;
+                                }} catch {{
+                                    if (errorText) {{
+                                        errorMessage = errorText.substring(0, 200);
+                                    }}
+                                }}
+                                throw new Error(errorMessage);
+                            }}
+                            
                             const data = await response.json();
                             const reply = data.response || data.message || JSON.stringify(data);
                             
@@ -1564,9 +1579,21 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             }}, '*');
                             
                         }} catch (error) {{
+                            console.error('StillMe Chat Error (from parent):', error);
+                            
+                            // Show error in status
+                            const statusDiv = document.getElementById('stillme-chat-status');
+                            if (statusDiv) {{
+                                statusDiv.textContent = `❌ Error: ${{error.message}}`;
+                                statusDiv.style.display = 'block';
+                                statusDiv.style.color = '#ff6b6b';
+                            }}
+                            
+                            // Add error message to chat
+                            const errorMessage = error.message || 'Unknown error occurred';
                             chatHistory.push({{ 
                                 role: 'assistant', 
-                                content: `❌ Error: ${{error.message}}` 
+                                content: `❌ **Error:** ${{errorMessage}}\n\n💡 Please try again or check backend logs for details.` 
                             }});
                             renderMessages();
                             
@@ -1655,6 +1682,21 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             body: JSON.stringify(requestPayload),
                         }});
                         
+                        // Check response status
+                        if (!response.ok) {{
+                            const errorText = await response.text();
+                            let errorMessage = `HTTP ${{response.status}}: ${{response.statusText}}`;
+                            try {{
+                                const errorData = JSON.parse(errorText);
+                                errorMessage = errorData.detail || errorData.message || errorMessage;
+                            }} catch {{
+                                if (errorText) {{
+                                    errorMessage = errorText.substring(0, 200); // Limit error text length
+                                }}
+                            }}
+                            throw new Error(errorMessage);
+                        }}
+                        
                         const data = await response.json();
                         const reply = data.response || data.message || JSON.stringify(data);
                         
@@ -1728,15 +1770,21 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     }}, '*');
                     
                 }} catch (error) {{
-                    // Hide status on error
+                    console.error('StillMe Chat Error:', error);
+                    
+                    // Show error in status
                     const statusDiv = document.getElementById('stillme-chat-status');
                     if (statusDiv) {{
-                        statusDiv.style.display = 'none';
+                        statusDiv.textContent = `❌ Error: ${{error.message}}`;
+                        statusDiv.style.display = 'block';
+                        statusDiv.style.color = '#ff6b6b';
                     }}
                     
+                    // Add error message to chat
+                    const errorMessage = error.message || 'Unknown error occurred';
                     chatHistory.push({{ 
                         role: 'assistant', 
-                        content: `❌ Error: ${{error.message}}` 
+                        content: `❌ **Error:** ${{errorMessage}}\n\n💡 Please try again or check backend logs for details.` 
                     }});
                     renderMessages();
                             
