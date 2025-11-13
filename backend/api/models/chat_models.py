@@ -60,6 +60,28 @@ class ChatRequest(BaseModel):
         
         return v
     
+    @validator('conversation_history')
+    def validate_conversation_history(cls, v):
+        """Validate and normalize conversation history"""
+        if v is None:
+            return v
+        
+        if not isinstance(v, list):
+            raise ValueError("conversation_history must be a list")
+        
+        # Normalize each message: remove None values (especially message_id: null)
+        normalized = []
+        for msg in v:
+            if not isinstance(msg, dict):
+                raise ValueError("Each message in conversation_history must be a dict")
+            
+            # Remove None values to prevent Pydantic validation errors
+            # This allows frontend to send message_id: null without errors
+            cleaned_msg = {k: v_val for k, v_val in msg.items() if v_val is not None}
+            normalized.append(cleaned_msg)
+        
+        return normalized
+    
     class Config:
         schema_extra = {
             "example": {
