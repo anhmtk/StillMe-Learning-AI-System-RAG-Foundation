@@ -62,6 +62,13 @@ docs/HOW_TO_CLOSE_ISSUE.md
 docs/ISSUE_VS_PR_EXPLANATION.md
 docs/PR_CREATION_GUIDE.md
 
+# Internal deployment/debug guides (not for public repo)
+docs/DEPLOYMENT_STATUS.md
+docs/RAILWAY_DEPLOYMENT_DEBUG.md
+
+# Internal verification scripts (not for public repo)
+scripts/verify_backend_deployment.py
+
 # Temporary/junk files with encoding issues
 responsive*
 tatus*
