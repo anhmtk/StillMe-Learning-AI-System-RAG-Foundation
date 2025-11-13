@@ -242,7 +242,7 @@ def main():
     # Test API connection first
     try:
         import requests
-        test_response = requests.get(f"{API_BASE}/api/status", timeout=10)
+        test_response = requests.get(f"{API_BASE}/api/status", timeout=30)
         if test_response.status_code == 200:
             print(f"✅ API connection successful!")
         else:
