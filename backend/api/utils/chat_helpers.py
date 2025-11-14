@@ -6,7 +6,7 @@ Shared utilities for chat endpoints (language detection, AI response generation)
 import os
 import logging
 import httpx
-from typing import Optional
+from typing import Optional, AsyncIterator
 
 logger = logging.getLogger(__name__)
 
@@ -492,6 +492,81 @@ async def generate_ai_response(
     except Exception as e:
         logger.error(f"AI response error: {e}")
         return f"I encountered an error: {str(e)}"
+
+
+async def generate_ai_response_stream(
+    prompt: str, 
+    detected_lang: str = 'en',
+    llm_provider: Optional[str] = None,
+    llm_api_key: Optional[str] = None,
+    llm_api_url: Optional[str] = None,
+    llm_model_name: Optional[str] = None
+) -> AsyncIterator[str]:
+    """Generate streaming AI response with flexible LLM provider selection
+    
+    OPTIMIZATION: Streaming reduces perceived latency by returning tokens as they're generated.
+    
+    Supports multiple LLM providers: deepseek, openai, claude, gemini, ollama, custom
+    Priority: User-provided config > Environment variables
+    
+    Args:
+        prompt: User prompt
+        detected_lang: Detected language code (for system prompt)
+        llm_provider: Provider name ('deepseek', 'openai', 'claude', 'gemini', 'ollama', 'custom')
+        llm_api_key: API key for the provider
+        llm_api_url: Custom API URL (for Ollama or custom providers)
+        llm_model_name: Specific model name (e.g., 'gpt-4', 'claude-3-opus', 'llama2')
+        
+    Yields:
+        Token strings as they're generated
+    """
+    try:
+        from backend.api.utils.llm_providers import create_llm_provider
+        
+        # If user provided provider config, use it
+        if llm_provider:
+            if llm_provider == 'ollama':
+                provider = create_llm_provider(
+                    provider=llm_provider,
+                    api_key="",
+                    model_name=llm_model_name,
+                    api_url=llm_api_url
+                )
+            elif llm_api_key:
+                provider = create_llm_provider(
+                    provider=llm_provider,
+                    api_key=llm_api_key,
+                    model_name=llm_model_name,
+                    api_url=llm_api_url
+                )
+            else:
+                yield f"llm_api_key is required for provider '{llm_provider}' (except 'ollama')"
+                return
+            
+            async for token in provider.generate_stream(prompt, detected_lang=detected_lang):
+                yield token
+            return
+        
+        # Fallback to environment variables
+        deepseek_key = os.getenv("DEEPSEEK_API_KEY")
+        openai_key = os.getenv("OPENAI_API_KEY")
+        
+        if deepseek_key:
+            provider = create_llm_provider("deepseek", deepseek_key, model_name=llm_model_name)
+            async for token in provider.generate_stream(prompt, detected_lang=detected_lang):
+                yield token
+        elif openai_key:
+            provider = create_llm_provider("openai", openai_key, model_name=llm_model_name)
+            async for token in provider.generate_stream(prompt, detected_lang=detected_lang):
+                yield token
+        else:
+            yield "I'm StillMe, but I need API keys to provide real responses. Please configure:\n" \
+                  "- llm_provider and llm_api_key in your request, OR\n" \
+                  "- Environment variables: DEEPSEEK_API_KEY, OPENAI_API_KEY"
+            
+    except Exception as e:
+        logger.error(f"AI streaming error: {e}")
+        yield f"I encountered an error: {str(e)}"
 
 
 async def call_deepseek_api(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
