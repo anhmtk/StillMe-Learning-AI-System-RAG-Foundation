@@ -53,12 +53,25 @@ class RSSFetcher:
             "https://feeds.reuters.com/reuters/topNews",  # Reuters - Top News (reliable, up-to-date)
             "https://feeds.bloomberg.com/markets/news.rss",  # Bloomberg Markets - Economic & financial analysis
             
+            # Tech Policy & AI Governance Blogs
+            "https://www.eff.org/rss/updates.xml",  # Electronic Frontier Foundation - Tech policy
+            "https://www.brookings.edu/topic/technology-innovation/feed/",  # Brookings - Tech policy
+            "https://www.cato.org/rss/blog/technology",  # Cato Institute - Tech policy
+            "https://www.aei.org/technology/feed/",  # American Enterprise Institute - Tech policy
+            
+            # Academic Blogs
+            "https://distill.pub/rss.xml",  # Distill - ML research blog
+            "https://lilianweng.github.io/feed.xml",  # Lilian Weng's blog - ML research
+            "https://www.lesswrong.com/feed.xml",  # LessWrong - Rationality & AI safety
+            "https://www.alignmentforum.org/feed.xml",  # Alignment Forum - AI alignment
+            "https://www.overcomingbias.com/feed",  # Overcoming Bias - Rationality
+            "https://www.scottaaronson.com/blog/?feed=rss2",  # Scott Aaronson's blog - Quantum computing & CS theory
+            
             # Note: Google Scholar, PubMed, IEEE Xplore don't have public RSS feeds
             # These would require API integration (future enhancement):
             # - Google Scholar: Would need scraping or unofficial API (rate-limited)
             # - PubMed: Has API but requires API key and structured queries
             # - IEEE Xplore: Requires institutional access and API key
-            # For now, we add what's available via RSS (Science, Nature, Reuters, Bloomberg)
         ]
         # Track error states for self-diagnosis
         self.last_error: Optional[str] = None

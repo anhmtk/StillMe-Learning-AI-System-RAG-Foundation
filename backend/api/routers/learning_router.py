@@ -449,6 +449,71 @@ async def fetch_all_sources(
         logger.error(f"Multi-source fetch error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/sources/current")
+async def get_current_learning_sources():
+    """
+    Get list of current learning sources that StillMe is actively learning from.
+    This helps StillMe be self-aware about what sources it already has.
+    
+    Returns:
+        Dictionary with enabled sources and their status
+    """
+    try:
+        source_integration = get_source_integration()
+        
+        if not source_integration:
+            raise HTTPException(status_code=503, detail="Source integration not available")
+        
+        stats = source_integration.get_source_stats()
+        
+        # Format for StillMe's self-awareness
+        current_sources = {
+            "rss": {
+                "enabled": stats["rss"]["enabled"],
+                "feeds_count": stats["rss"].get("feeds_count", 0),
+                "status": "active"
+            },
+            "wikipedia": {
+                "enabled": stats["wikipedia"]["enabled"],
+                "status": stats["wikipedia"]["stats"]["status"] if stats["wikipedia"]["stats"] else "unknown"
+            },
+            "arxiv": {
+                "enabled": stats["arxiv"]["enabled"],
+                "status": stats["arxiv"]["stats"]["status"] if stats["arxiv"]["stats"] else "unknown"
+            },
+            "crossref": {
+                "enabled": stats["crossref"]["enabled"],
+                "status": stats["crossref"]["stats"]["status"] if stats["crossref"]["stats"] else "unknown"
+            },
+            "papers_with_code": {
+                "enabled": stats.get("papers_with_code", {}).get("enabled", False),
+                "status": stats.get("papers_with_code", {}).get("stats", {}).get("status", "unknown") if stats.get("papers_with_code", {}).get("stats") else "unknown"
+            },
+            "conferences": {
+                "enabled": stats.get("conferences", {}).get("enabled", False),
+                "status": stats.get("conferences", {}).get("stats", {}).get("status", "unknown") if stats.get("conferences", {}).get("stats") else "unknown"
+            },
+            "stanford_encyclopedia": {
+                "enabled": stats.get("stanford_encyclopedia", {}).get("enabled", False),
+                "status": stats.get("stanford_encyclopedia", {}).get("stats", {}).get("status", "unknown") if stats.get("stanford_encyclopedia", {}).get("stats") else "unknown"
+            }
+        }
+        
+        return {
+            "current_sources": current_sources,
+            "summary": {
+                "total_enabled": sum(1 for s in current_sources.values() if s.get("enabled")),
+                "active_sources": [name for name, info in current_sources.items() if info.get("enabled") and info.get("status") == "ok"],
+                "inactive_sources": [name for name, info in current_sources.items() if info.get("enabled") and info.get("status") != "ok"]
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting current learning sources: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/sources/stats")
 async def get_source_stats():
     """Get statistics for all enabled sources"""

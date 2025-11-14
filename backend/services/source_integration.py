@@ -13,6 +13,9 @@ from backend.services.arxiv_fetcher import ArxivFetcher
 from backend.services.crossref_fetcher import CrossrefFetcher
 from backend.services.wikipedia_fetcher import WikipediaFetcher
 from backend.services.content_curator import ContentCurator
+from backend.services.papers_with_code_fetcher import PapersWithCodeFetcher
+from backend.services.conference_fetcher import ConferenceFetcher
+from backend.services.stanford_encyclopedia_fetcher import StanfordEncyclopediaFetcher
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +23,9 @@ logger = logging.getLogger(__name__)
 ENABLE_ARXIV = os.getenv("ENABLE_ARXIV", "true").lower() == "true"
 ENABLE_CROSSREF = os.getenv("ENABLE_CROSSREF", "true").lower() == "true"
 ENABLE_WIKIPEDIA = os.getenv("ENABLE_WIKIPEDIA", "true").lower() == "true"
+ENABLE_PAPERS_WITH_CODE = os.getenv("ENABLE_PAPERS_WITH_CODE", "true").lower() == "true"
+ENABLE_CONFERENCES = os.getenv("ENABLE_CONFERENCES", "true").lower() == "true"
+ENABLE_STANFORD_ENCYCLOPEDIA = os.getenv("ENABLE_STANFORD_ENCYCLOPEDIA", "true").lower() == "true"
 
 
 class SourceIntegration:
@@ -37,9 +43,13 @@ class SourceIntegration:
         self.arxiv_fetcher = ArxivFetcher() if ENABLE_ARXIV else None
         self.crossref_fetcher = CrossrefFetcher() if ENABLE_CROSSREF else None
         self.wikipedia_fetcher = WikipediaFetcher() if ENABLE_WIKIPEDIA else None
+        self.papers_with_code_fetcher = PapersWithCodeFetcher() if ENABLE_PAPERS_WITH_CODE else None
+        self.conference_fetcher = ConferenceFetcher() if ENABLE_CONFERENCES else None
+        self.stanford_encyclopedia_fetcher = StanfordEncyclopediaFetcher() if ENABLE_STANFORD_ENCYCLOPEDIA else None
         self.content_curator = content_curator or ContentCurator()
         
-        logger.info(f"Source Integration initialized: arXiv={ENABLE_ARXIV}, CrossRef={ENABLE_CROSSREF}, Wikipedia={ENABLE_WIKIPEDIA}")
+        logger.info(f"Source Integration initialized: arXiv={ENABLE_ARXIV}, CrossRef={ENABLE_CROSSREF}, Wikipedia={ENABLE_WIKIPEDIA}, "
+                   f"PapersWithCode={ENABLE_PAPERS_WITH_CODE}, Conferences={ENABLE_CONFERENCES}, StanfordEncyclopedia={ENABLE_STANFORD_ENCYCLOPEDIA}")
     
     def fetch_all_sources(self,
                          max_items_per_source: int = 5,
@@ -238,6 +248,120 @@ class SourceIntegration:
                     error_count=1
                 )
         
+        # Fetch from Papers with Code
+        if self.papers_with_code_fetcher and ENABLE_PAPERS_WITH_CODE:
+            try:
+                papers_entries = self.papers_with_code_fetcher.fetch_recent_papers(max_results=max_items_per_source)
+                all_entries.extend(papers_entries)
+                logger.info(f"Fetched {len(papers_entries)} entries from Papers with Code")
+                
+                # Update system status tracker
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                papers_stats = self.papers_with_code_fetcher.get_stats()
+                if papers_stats.get("status") == "error":
+                    status_tracker.update_component_status(
+                        component_name="papers_with_code_fetcher",
+                        status="error",
+                        error_message=papers_stats.get("last_error", "Unknown error"),
+                        error_count=papers_stats.get("error_count", 0),
+                        last_success=datetime.fromisoformat(papers_stats["last_success_time"]) if papers_stats.get("last_success_time") else None
+                    )
+                else:
+                    status_tracker.update_component_status(
+                        component_name="papers_with_code_fetcher",
+                        status="ok",
+                        error_message=None,
+                        error_count=0,
+                        last_success=datetime.now()
+                    )
+            except Exception as e:
+                logger.error(f"Error fetching Papers with Code: {e}")
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                status_tracker.update_component_status(
+                    component_name="papers_with_code_fetcher",
+                    status="error",
+                    error_message=str(e),
+                    error_count=1
+                )
+        
+        # Fetch from Conference Proceedings
+        if self.conference_fetcher and ENABLE_CONFERENCES:
+            try:
+                conference_entries = self.conference_fetcher.fetch_recent_papers(max_results=max_items_per_source)
+                all_entries.extend(conference_entries)
+                logger.info(f"Fetched {len(conference_entries)} entries from Conference Proceedings")
+                
+                # Update system status tracker
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                conference_stats = self.conference_fetcher.get_stats()
+                if conference_stats.get("status") == "error":
+                    status_tracker.update_component_status(
+                        component_name="conference_fetcher",
+                        status="error",
+                        error_message=conference_stats.get("last_error", "Unknown error"),
+                        error_count=conference_stats.get("error_count", 0),
+                        last_success=datetime.fromisoformat(conference_stats["last_success_time"]) if conference_stats.get("last_success_time") else None
+                    )
+                else:
+                    status_tracker.update_component_status(
+                        component_name="conference_fetcher",
+                        status="ok",
+                        error_message=None,
+                        error_count=0,
+                        last_success=datetime.now()
+                    )
+            except Exception as e:
+                logger.error(f"Error fetching Conference Proceedings: {e}")
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                status_tracker.update_component_status(
+                    component_name="conference_fetcher",
+                    status="error",
+                    error_message=str(e),
+                    error_count=1
+                )
+        
+        # Fetch from Stanford Encyclopedia of Philosophy
+        if self.stanford_encyclopedia_fetcher and ENABLE_STANFORD_ENCYCLOPEDIA:
+            try:
+                sep_entries = self.stanford_encyclopedia_fetcher.fetch_recent_entries(max_results=max_items_per_source)
+                all_entries.extend(sep_entries)
+                logger.info(f"Fetched {len(sep_entries)} entries from Stanford Encyclopedia")
+                
+                # Update system status tracker
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                sep_stats = self.stanford_encyclopedia_fetcher.get_stats()
+                if sep_stats.get("status") == "error":
+                    status_tracker.update_component_status(
+                        component_name="stanford_encyclopedia_fetcher",
+                        status="error",
+                        error_message=sep_stats.get("last_error", "Unknown error"),
+                        error_count=sep_stats.get("error_count", 0),
+                        last_success=datetime.fromisoformat(sep_stats["last_success_time"]) if sep_stats.get("last_success_time") else None
+                    )
+                else:
+                    status_tracker.update_component_status(
+                        component_name="stanford_encyclopedia_fetcher",
+                        status="ok",
+                        error_message=None,
+                        error_count=0,
+                        last_success=datetime.now()
+                    )
+            except Exception as e:
+                logger.error(f"Error fetching Stanford Encyclopedia: {e}")
+                from backend.services.system_status_tracker import get_system_status_tracker
+                status_tracker = get_system_status_tracker()
+                status_tracker.update_component_status(
+                    component_name="stanford_encyclopedia_fetcher",
+                    status="error",
+                    error_message=str(e),
+                    error_count=1
+                )
+        
         # Apply pre-filter if enabled
         if use_pre_filter and all_entries:
             filtered, rejected = self.content_curator.pre_filter_content(all_entries)
@@ -264,6 +388,18 @@ class SourceIntegration:
             "wikipedia": {
                 "enabled": ENABLE_WIKIPEDIA,
                 "stats": self.wikipedia_fetcher.get_stats() if self.wikipedia_fetcher else None
+            },
+            "papers_with_code": {
+                "enabled": ENABLE_PAPERS_WITH_CODE,
+                "stats": self.papers_with_code_fetcher.get_stats() if self.papers_with_code_fetcher else None
+            },
+            "conferences": {
+                "enabled": ENABLE_CONFERENCES,
+                "stats": self.conference_fetcher.get_stats() if self.conference_fetcher else None
+            },
+            "stanford_encyclopedia": {
+                "enabled": ENABLE_STANFORD_ENCYCLOPEDIA,
+                "stats": self.stanford_encyclopedia_fetcher.get_stats() if self.stanford_encyclopedia_fetcher else None
             }
         }
         return stats
