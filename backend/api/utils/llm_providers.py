@@ -6,7 +6,8 @@ Supports multiple LLM providers: DeepSeek, OpenAI, Claude, Gemini, Ollama, Custo
 import os
 import logging
 import httpx
-from typing import Optional, Dict, Any
+import json
+from typing import Optional, Dict, Any, AsyncIterator
 from backend.api.utils.chat_helpers import build_system_prompt_with_language
 
 logger = logging.getLogger(__name__)
@@ -23,10 +24,80 @@ class LLMProvider:
     async def generate(self, prompt: str, detected_lang: str = 'en') -> str:
         """Generate response - must be implemented by subclasses"""
         raise NotImplementedError
+    
+    async def generate_stream(self, prompt: str, detected_lang: str = 'en') -> AsyncIterator[str]:
+        """
+        Generate streaming response (token-by-token)
+        
+        OPTIMIZATION: Streaming reduces perceived latency by returning tokens as they're generated.
+        Default implementation falls back to non-streaming generate().
+        Subclasses can override for native streaming support.
+        
+        Args:
+            prompt: User prompt
+            detected_lang: Detected language code
+            
+        Yields:
+            Token strings as they're generated
+        """
+        # Default: fallback to non-streaming, then yield full response
+        # Subclasses should override for true streaming
+        full_response = await self.generate(prompt, detected_lang)
+        # Yield response in chunks for backward compatibility
+        chunk_size = 10  # Small chunks to simulate streaming
+        for i in range(0, len(full_response), chunk_size):
+            yield full_response[i:i + chunk_size]
 
 
 class DeepSeekProvider(LLMProvider):
     """DeepSeek API provider"""
+    
+    async def generate_stream(self, prompt: str, detected_lang: str = 'en') -> AsyncIterator[str]:
+        """Generate streaming response from DeepSeek API"""
+        try:
+            system_content = build_system_prompt_with_language(detected_lang)
+            model = self.model_name or "deepseek-chat"
+            
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                async with client.stream(
+                    "POST",
+                    "https://api.deepseek.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": system_content},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "max_tokens": 1500,
+                        "temperature": 0.7,
+                        "stream": True
+                    }
+                ) as response:
+                    if response.status_code == 200:
+                        async for line in response.aiter_lines():
+                            if line.startswith("data: "):
+                                data_str = line[6:]  # Remove "data: " prefix
+                                if data_str.strip() == "[DONE]":
+                                    break
+                                try:
+                                    data = json.loads(data_str)
+                                    if "choices" in data and len(data["choices"]) > 0:
+                                        delta = data["choices"][0].get("delta", {})
+                                        content = delta.get("content", "")
+                                        if content:
+                                            yield content
+                                except json.JSONDecodeError:
+                                    continue
+                    else:
+                        error_text = await response.aread()
+                        yield f"DeepSeek API error: {response.status_code} - {error_text.decode()}"
+        except Exception as e:
+            logger.error(f"DeepSeek streaming error: {e}")
+            yield f"DeepSeek streaming error: {str(e)}"
     
     async def generate(self, prompt: str, detected_lang: str = 'en') -> str:
         """Call DeepSeek API"""
@@ -69,6 +140,53 @@ class DeepSeekProvider(LLMProvider):
 
 class OpenAIProvider(LLMProvider):
     """OpenAI API provider"""
+    
+    async def generate_stream(self, prompt: str, detected_lang: str = 'en') -> AsyncIterator[str]:
+        """Generate streaming response from OpenAI API"""
+        try:
+            system_content = build_system_prompt_with_language(detected_lang)
+            model = self.model_name or "gpt-3.5-turbo"
+            
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                async with client.stream(
+                    "POST",
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json"
+                    },
+                    json={
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": system_content},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "max_tokens": 1500,
+                        "temperature": 0.7,
+                        "stream": True
+                    }
+                ) as response:
+                    if response.status_code == 200:
+                        async for line in response.aiter_lines():
+                            if line.startswith("data: "):
+                                data_str = line[6:]  # Remove "data: " prefix
+                                if data_str.strip() == "[DONE]":
+                                    break
+                                try:
+                                    data = json.loads(data_str)
+                                    if "choices" in data and len(data["choices"]) > 0:
+                                        delta = data["choices"][0].get("delta", {})
+                                        content = delta.get("content", "")
+                                        if content:
+                                            yield content
+                                except json.JSONDecodeError:
+                                    continue
+                    else:
+                        error_text = await response.aread()
+                        yield f"OpenAI API error: {response.status_code} - {error_text.decode()}"
+        except Exception as e:
+            logger.error(f"OpenAI streaming error: {e}")
+            yield f"OpenAI streaming error: {str(e)}"
     
     async def generate(self, prompt: str, detected_lang: str = 'en') -> str:
         """Call OpenAI API"""

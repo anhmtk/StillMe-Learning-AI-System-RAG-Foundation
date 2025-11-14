@@ -2,9 +2,10 @@
 ValidatorChain - Orchestrates multiple validators
 """
 
-from typing import List
+from typing import List, Dict, Set
 from .base import Validator, ValidationResult
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +23,60 @@ class ValidatorChain:
         self.validators = validators
         logger.info(f"ValidatorChain initialized with {len(validators)} validators")
     
+    def _can_run_parallel(self, validator: Validator, validator_name: str) -> bool:
+        """
+        Check if a validator can run in parallel with others.
+        
+        Validators that can run in parallel:
+        - CitationRelevance: Only reads answer and ctx_docs, doesn't modify
+        - EvidenceOverlap: Only reads answer and ctx_docs, doesn't modify
+        - NumericUnitsBasic: Only reads answer, doesn't modify
+        - EthicsAdapter: Only reads answer, doesn't modify
+        
+        Validators that MUST run sequentially:
+        - LanguageValidator: Must run first (highest priority)
+        - CitationRequired: Must run before CitationRelevance (provides citations)
+        - ConfidenceValidator: May depend on other validators' results
+        
+        Args:
+            validator: Validator instance
+            validator_name: Name of validator class
+            
+        Returns:
+            True if validator can run in parallel, False otherwise
+        """
+        # Validators that can run in parallel (read-only, no dependencies)
+        parallel_safe = {
+            "CitationRelevance",
+            "EvidenceOverlap", 
+            "NumericUnitsBasic",
+            "SchemaFormat",
+            "EthicsAdapter"
+        }
+        
+        # Validators that must run sequentially (have dependencies or modify state)
+        sequential_only = {
+            "LanguageValidator",  # Must run first
+            "CitationRequired",   # Must run before CitationRelevance
+            "ConfidenceValidator" # May depend on other results
+        }
+        
+        if validator_name in sequential_only:
+            return False
+        if validator_name in parallel_safe:
+            return True
+        
+        # Default: sequential for safety
+        return False
+    
     def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
         """
-        Run all validators in sequence
+        Run all validators with parallel execution for independent validators
         
-        OPTIMIZATION: Early exit for critical failures (language_mismatch, missing_citation without patch)
-        This reduces latency when validation fails early, avoiding unnecessary validator runs.
+        OPTIMIZATION: 
+        - Early exit for critical failures (language_mismatch, missing_citation without patch)
+        - Parallel execution for independent validators (CitationRelevance, EvidenceOverlap, etc.)
+        This reduces latency when validation fails early and speeds up independent validators.
         
         Args:
             answer: The answer to validate
@@ -41,7 +90,19 @@ class ValidatorChain:
         has_citation = False
         low_overlap_only = False
         
+        # Group validators into sequential and parallel groups
+        sequential_validators = []
+        parallel_validators = []
+        
         for i, validator in enumerate(self.validators):
+            validator_name = type(validator).__name__
+            if self._can_run_parallel(validator, validator_name):
+                parallel_validators.append((i, validator, validator_name))
+            else:
+                sequential_validators.append((i, validator, validator_name))
+        
+        # Run sequential validators first (LanguageValidator, CitationRequired, etc.)
+        for i, validator, validator_name in sequential_validators:
             try:
                 result = validator.run(patched, ctx_docs)
                 
@@ -131,6 +192,61 @@ class ValidatorChain:
                 logger.error(f"Validator {i} ({type(validator).__name__}) error: {e}")
                 reasons.append(f"validator_error:{type(validator).__name__}:{str(e)}")
                 # Continue with next validator on error
+        
+        # OPTIMIZATION: Run parallel validators concurrently (if any)
+        if parallel_validators:
+            logger.debug(f"Running {len(parallel_validators)} validators in parallel...")
+            parallel_results: Dict[int, ValidationResult] = {}
+            
+            try:
+                with ThreadPoolExecutor(max_workers=len(parallel_validators)) as executor:
+                    # Submit all parallel validators
+                    future_to_validator = {
+                        executor.submit(validator.run, patched, ctx_docs): (i, validator_name)
+                        for i, validator, validator_name in parallel_validators
+                    }
+                    
+                    # Collect results as they complete
+                    for future in as_completed(future_to_validator):
+                        i, validator_name = future_to_validator[future]
+                        try:
+                            result = future.result()
+                            parallel_results[i] = result
+                        except Exception as e:
+                            logger.error(f"Parallel validator {i} ({validator_name}) error: {e}")
+                            parallel_results[i] = ValidationResult(
+                                passed=False,
+                                reasons=[f"validator_error:{validator_name}:{str(e)}"]
+                            )
+                
+                # Process parallel results
+                for i, validator, validator_name in parallel_validators:
+                    if i in parallel_results:
+                        result = parallel_results[i]
+                        
+                        if not result.passed:
+                            reasons.extend(result.reasons)
+                            logger.debug(
+                                f"Parallel validator {i} ({validator_name}) failed: {result.reasons}"
+                            )
+                        else:
+                            # Update patched answer if validator provided one
+                            if result.patched_answer:
+                                patched = result.patched_answer
+                                logger.debug(f"Applied patch from parallel validator {i}")
+            except Exception as parallel_error:
+                # Fallback to sequential if parallel execution fails
+                logger.warning(f"Parallel validation failed, falling back to sequential: {parallel_error}")
+                for i, validator, validator_name in parallel_validators:
+                    try:
+                        result = validator.run(patched, ctx_docs)
+                        if not result.passed:
+                            reasons.extend(result.reasons)
+                        if result.patched_answer:
+                            patched = result.patched_answer
+                    except Exception as e:
+                        logger.error(f"Fallback validator {i} ({validator_name}) error: {e}")
+                        reasons.append(f"validator_error:{validator_name}:{str(e)}")
         
         # All validators passed or were patched, or low_overlap was allowed due to citation
         return ValidationResult(
