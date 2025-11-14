@@ -252,31 +252,34 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             if num_knowledge > 0:
                 citation_instruction = f"""
                 
-📚 CITATION REQUIREMENT - MANDATORY:
+📚 CITATION REQUIREMENT - MANDATORY BUT RELEVANCE-FIRST:
 
-You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response.
+You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response, BUT ONLY if the context is RELEVANT to your answer.
 
 CRITICAL RULES:
-1. **ALWAYS cite when context is available** - This is MANDATORY, not optional
-   - Even when expressing uncertainty, you can cite: "Based on the context [1], I don't have sufficient information..."
-   - Even for philosophical reflections, cite relevant context: "The context [1] discusses this paradox, but I recognize..."
-   - Example: "According to [1], quantum entanglement is..." (factual claim)
-   - Example: "Research shows [2] that 80% of hallucinations..." (statistic)
-   - Example: "While the context [1] explores this topic, I don't have a definitive answer..." (uncertainty with citation)
+1. **Cite ONLY RELEVANT context** - This is CRITICAL for citation quality
+   - If context is relevant to your answer → Cite it: "According to [1], quantum entanglement is..."
+   - If context is NOT relevant to your answer → You can still cite to show transparency, but acknowledge: "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]. However, I want to be transparent about what context I reviewed."
+   - DO NOT cite irrelevant context as if it supports your answer - that's misleading
+   - Example GOOD: "According to [1], quantum entanglement is..." (context is relevant)
+   - Example GOOD: "The context [1] discusses AI ethics, but your question is about religion, so I'll answer based on general knowledge." (transparent about relevance)
+   - Example BAD: Citing [1] about "technology access" when answering about "religion" without acknowledging the mismatch
    
-2. **Citation is for transparency** - Show that you've reviewed the available context
+2. **Citation quality over quantity** - Relevance is more important than citation count
    - Cite the MOST RELEVANT source(s) for your key points
-   - Quality over quantity: Better to cite 1 relevant source than 3 irrelevant ones
+   - If context is not relevant, acknowledge it rather than forcing a citation
+   - Better to say "The context doesn't directly address this, but..." than to cite irrelevant context
    - Aim for 1-2 citations per response, NOT every paragraph
    
-3. **Balance honesty with citation**:
-   - You can say "I don't know" AND cite context: "Based on [1], I don't have sufficient information..."
-   - Citations show transparency about what context you reviewed
-   - Being honest about uncertainty does NOT mean skipping citations
+3. **Balance honesty with transparency**:
+   - You can say "I don't know" AND cite relevant context: "Based on [1], I don't have sufficient information..."
+   - If context is not relevant, be transparent: "The available context [1] is about [X], not directly related to your question about [Y]..."
+   - Being honest about uncertainty does NOT mean skipping citations, but it also doesn't mean citing irrelevant context
+   - If you cite irrelevant context, acknowledge the mismatch to maintain transparency
 
 4. Use [1] for the first context document, [2] for the second, [3] for the third, etc.
 
-**REMEMBER: When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response. This is required for transparency, even when expressing uncertainty.**"""
+**REMEMBER: When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency. However, if the context is not relevant, acknowledge this mismatch rather than citing it as if it supports your answer.**"""
             
             # Detect language FIRST - before building prompt
             processing_steps.append("🌐 Detecting language...")
@@ -837,18 +840,99 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             response = validation_result.patched_answer
                             logger.info(f"✅ Using patched answer from validator (auto-fixed). Reasons: {validation_result.reasons}")
                         elif has_critical_failure:
-                            # Use FallbackHandler to generate safe answer for critical failures
-                            fallback_handler = FallbackHandler()
-                            response = fallback_handler.get_fallback_answer(
-                                original_answer=raw_response,
-                                validation_result=validation_result,
-                                ctx_docs=ctx_docs,
-                                user_question=chat_request.message,
-                                detected_lang=detected_lang,
-                                input_language=detected_lang  # Pass input language for language mismatch fallback
-                            )
-                            used_fallback = True
-                            logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")
+                            # For language mismatch, try retry with stronger prompt first
+                            if has_language_mismatch:
+                                logger.warning(f"⚠️ Language mismatch detected, attempting retry with stronger prompt...")
+                                try:
+                                    # Get language name for retry prompt
+                                    language_names = {
+                                        'vi': 'Tiếng Việt',
+                                        'en': 'English',
+                                        'zh': '中文',
+                                        'fr': 'Français',
+                                        'es': 'Español',
+                                        'de': 'Deutsch',
+                                        'ja': '日本語',
+                                        'ko': '한국어',
+                                        'ar': 'العربية',
+                                        'ru': 'Русский',
+                                        'pt': 'Português',
+                                        'it': 'Italiano',
+                                        'hi': 'हिन्दी',
+                                        'th': 'ไทย',
+                                    }
+                                    retry_lang_name = language_names.get(detected_lang, detected_lang.upper())
+                                    
+                                    # Build retry prompt with EXTREMELY STRONG language instruction
+                                    retry_language_instruction = f"""🚨🚨🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - ABSOLUTE HIGHEST PRIORITY 🚨🚨🚨🚨🚨
+
+THE USER'S QUESTION IS IN {retry_lang_name.upper()}.
+
+YOU MUST RESPOND EXCLUSIVELY IN {retry_lang_name.upper()}. 
+
+DO NOT USE VIETNAMESE, ENGLISH, FRENCH, CHINESE, SPANISH, GERMAN, OR ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD MUST BE IN {retry_lang_name.upper()}.
+
+IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {retry_lang_name.upper()} BEFORE RETURNING.
+
+THIS OVERRIDES EVERYTHING - NO EXCEPTIONS.
+
+User Question: {chat_request.message}
+
+Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
+                                    
+                                    # Retry with stronger prompt
+                                    retry_response = await generate_ai_response(retry_language_instruction, detected_lang=detected_lang)
+                                    
+                                    # Validate retry response
+                                    retry_validation = chain.run(retry_response, ctx_docs)
+                                    
+                                    # Check if retry fixed the language issue
+                                    retry_has_lang_mismatch = any("language_mismatch" in r for r in retry_validation.reasons)
+                                    
+                                    if not retry_has_lang_mismatch:
+                                        # Retry successful!
+                                        response = retry_validation.patched_answer or retry_response
+                                        logger.info(f"✅ Language mismatch fixed with retry! Using retry response.")
+                                    else:
+                                        # Retry also failed, use fallback
+                                        logger.warning(f"⚠️ Retry also failed with language mismatch, using fallback")
+                                        fallback_handler = FallbackHandler()
+                                        response = fallback_handler.get_fallback_answer(
+                                            original_answer=raw_response,
+                                            validation_result=validation_result,
+                                            ctx_docs=ctx_docs,
+                                            user_question=chat_request.message,
+                                            detected_lang=detected_lang,
+                                            input_language=detected_lang
+                                        )
+                                        used_fallback = True
+                                except Exception as retry_error:
+                                    logger.error(f"Retry failed: {retry_error}, using fallback")
+                                    fallback_handler = FallbackHandler()
+                                    response = fallback_handler.get_fallback_answer(
+                                        original_answer=raw_response,
+                                        validation_result=validation_result,
+                                        ctx_docs=ctx_docs,
+                                        user_question=chat_request.message,
+                                        detected_lang=detected_lang,
+                                        input_language=detected_lang
+                                    )
+                                    used_fallback = True
+                            else:
+                                # Other critical failures - use fallback
+                                fallback_handler = FallbackHandler()
+                                response = fallback_handler.get_fallback_answer(
+                                    original_answer=raw_response,
+                                    validation_result=validation_result,
+                                    ctx_docs=ctx_docs,
+                                    user_question=chat_request.message,
+                                    detected_lang=detected_lang,
+                                    input_language=detected_lang
+                                )
+                                used_fallback = True
+                                logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")
                         elif has_missing_citation:
                             # Missing citation but no patched answer - use FallbackHandler to add citation
                             fallback_handler = FallbackHandler()
