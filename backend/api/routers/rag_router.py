@@ -7,6 +7,8 @@ from fastapi import APIRouter, Request, HTTPException, Depends
 from backend.api.models import LearningRequest, RAGQueryRequest, RAGQueryResponse
 from backend.api.rate_limiter import limiter, get_rate_limit_key_func
 from backend.api.auth import require_api_key
+from backend.validators.ethics_adapter import EthicsAdapter
+from typing import Optional
 import logging
 import os
 import shutil
@@ -34,14 +36,53 @@ def get_content_curator():
 
 @router.post("/add_knowledge")
 @limiter.limit("20/hour", key_func=get_rate_limit_key_func)  # RAG add: 20 requests per hour (expensive)
-async def add_knowledge_rag(request: Request, learning_request: LearningRequest):
-    """Add knowledge to RAG vector database"""
+async def add_knowledge_rag(
+    request: Request, 
+    learning_request: LearningRequest,
+    api_key: Optional[str] = Depends(require_api_key)
+):
+    """
+    Add knowledge to RAG vector database
+    
+    Security: Requires API key authentication (X-API-Key header) to prevent unauthorized content injection.
+    For self-hosted deployments, users can set STILLME_API_KEY in environment.
+    For shared deployments, only approved users should have API keys.
+    
+    Content is validated for:
+    - Ethics compliance (EthicsAdapter)
+    - Quality (ContentCurator pre-filter)
+    - Format (LearningRequest validation)
+    """
     try:
         rag_retrieval = get_rag_retrieval()
         content_curator = get_content_curator()
         
         if not rag_retrieval:
             raise HTTPException(status_code=503, detail="RAG system not available")
+        
+        # Ethics validation - CRITICAL for preventing malicious content
+        try:
+            from backend.validators.ethics_adapter import EthicsAdapter
+            from backend.services.ethics_guard import check_content_ethics
+            
+            ethics_adapter = EthicsAdapter(guard_callable=check_content_ethics)
+            from backend.validators.base import ValidationResult
+            ethics_result = ethics_adapter.run(learning_request.content, [])
+            
+            if not ethics_result.passed:
+                logger.warning(f"Ethics validation failed for content from source: {learning_request.source}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Content failed ethics validation: {', '.join(ethics_result.reasons)}"
+                )
+        except HTTPException:
+            raise
+        except Exception as ethics_error:
+            # If ethics check fails due to error, log but don't block (fail-open for now)
+            # In production, you may want to fail-closed
+            logger.error(f"Ethics validation error: {ethics_error}")
+            # For now, we'll allow content through if ethics check errors
+            # TODO: Consider making this fail-closed in production
         
         # Calculate importance score for knowledge alert system
         importance_score = 0.5
@@ -57,6 +98,7 @@ async def add_knowledge_rag(request: Request, learning_request: LearningRequest)
         # Merge importance_score into metadata
         enhanced_metadata = learning_request.metadata or {}
         enhanced_metadata["importance_score"] = importance_score
+        enhanced_metadata["added_by"] = "api"  # Track that this was added via API
         if not enhanced_metadata.get("title"):
             # Extract title from content if not provided
             content_lines = learning_request.content.split("\n")
@@ -71,6 +113,7 @@ async def add_knowledge_rag(request: Request, learning_request: LearningRequest)
         )
         
         if success:
+            logger.info(f"Knowledge added successfully from source: {learning_request.source}")
             return {"status": "Knowledge added successfully", "content_type": learning_request.content_type}
         else:
             raise HTTPException(status_code=500, detail="Failed to add knowledge to vector DB")
