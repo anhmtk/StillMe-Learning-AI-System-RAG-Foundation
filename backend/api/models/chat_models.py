@@ -2,7 +2,7 @@
 Chat API request and response models with comprehensive validation
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import Optional, Dict, Any, List
 import re
 from .common_models import sanitize_string
@@ -15,6 +15,12 @@ class ChatRequest(BaseModel):
     use_rag: bool = Field(default=True, description="Whether to use RAG for context")
     context_limit: int = Field(default=3, ge=1, le=5, description="Maximum number of context documents (increased from 2 to 3 for better coverage)")
     conversation_history: Optional[List[Dict[str, Any]]] = Field(default=None, description="Previous conversation messages for context. Format: [{'role': 'user', 'content': '...', 'message_id': '...' (optional)}, {'role': 'assistant', 'content': '...', 'message_id': '...' (optional)}]")
+    # LLM Provider Configuration (optional - for self-hosted deployments)
+    # Allows user to choose any LLM provider: deepseek, openai, claude, gemini, ollama, custom
+    llm_provider: Optional[str] = Field(default=None, description="LLM provider name: 'deepseek', 'openai', 'claude', 'gemini', 'ollama', or 'custom'")
+    llm_api_key: Optional[str] = Field(default=None, description="API key for the LLM provider (required if llm_provider is set)")
+    llm_api_url: Optional[str] = Field(default=None, description="Custom API URL (for Ollama or custom providers)")
+    llm_model_name: Optional[str] = Field(default=None, description="Specific model name (e.g., 'gpt-4', 'claude-3-opus', 'llama2')")
     
     @field_validator('message')
     @classmethod
@@ -62,6 +68,43 @@ class ChatRequest(BaseModel):
             raise ValueError("Context limit must be between 1 and 5")
         
         return v
+    
+    @field_validator('llm_provider')
+    @classmethod
+    def validate_llm_provider(cls, v):
+        """Validate LLM provider name"""
+        if v is None:
+            return v
+        
+        valid_providers = ['deepseek', 'openai', 'claude', 'gemini', 'ollama', 'custom']
+        if v.lower() not in valid_providers:
+            raise ValueError(f"llm_provider must be one of: {', '.join(valid_providers)}")
+        
+        return v.lower()
+    
+    @field_validator('llm_api_key')
+    @classmethod
+    def validate_llm_api_key(cls, v):
+        """Basic validation for API key format"""
+        if v is None:
+            return v
+        
+        if not isinstance(v, str) or len(v.strip()) == 0:
+            raise ValueError("llm_api_key must be a non-empty string")
+        
+        return v
+    
+    @model_validator(mode='after')
+    def validate_llm_config(self):
+        """Validate that API key is provided if provider is set (except Ollama)"""
+        if self.llm_provider:
+            if self.llm_provider == 'ollama':
+                # Ollama doesn't require API key
+                return self
+            elif not self.llm_api_key:
+                raise ValueError(f"llm_api_key is required when llm_provider is '{self.llm_provider}' (except for 'ollama')")
+        
+        return self
     
     @field_validator('conversation_history', mode='before')
     @classmethod

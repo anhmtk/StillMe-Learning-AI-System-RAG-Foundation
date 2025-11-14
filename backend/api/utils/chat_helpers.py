@@ -6,6 +6,7 @@ Shared utilities for chat endpoints (language detection, AI response generation)
 import os
 import logging
 import httpx
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -405,47 +406,88 @@ FAILURE TO CITE SOURCES WHEN CONTEXT IS AVAILABLE IS A CRITICAL ERROR.
     return system_content
 
 
-async def generate_ai_response(prompt: str, detected_lang: str = 'en') -> str:
-    """Generate AI response with automatic model selection
+async def generate_ai_response(
+    prompt: str, 
+    detected_lang: str = 'en',
+    llm_provider: Optional[str] = None,
+    llm_api_key: Optional[str] = None,
+    llm_api_url: Optional[str] = None,
+    llm_model_name: Optional[str] = None
+) -> str:
+    """Generate AI response with flexible LLM provider selection
     
-    This function routes to different AI providers based on available API keys.
-    To add support for new models (Claude, Gemini, Ollama, local, etc.):
-    1. Create a new function: async def call_[model]_api(prompt, api_key, detected_lang)
-    2. Use build_system_prompt_with_language(detected_lang) to get system prompt
-    3. Add the new model check in this function's if/elif chain
+    Supports multiple LLM providers: deepseek, openai, claude, gemini, ollama, custom
     
-    IMPORTANT: All model providers MUST use build_system_prompt_with_language()
-    to ensure consistent language matching behavior.
+    Priority: User-provided config > Environment variables
     
     Args:
         prompt: User prompt
         detected_lang: Detected language code (for system prompt)
+        llm_provider: Provider name ('deepseek', 'openai', 'claude', 'gemini', 'ollama', 'custom')
+        llm_api_key: API key for the provider
+        llm_api_url: Custom API URL (for Ollama or custom providers)
+        llm_model_name: Specific model name (e.g., 'gpt-4', 'claude-3-opus', 'llama2')
         
     Returns:
         AI-generated response string
     """
     try:
-        # Check for API keys (priority order: DeepSeek > OpenAI > others)
+        from backend.api.utils.llm_providers import create_llm_provider
+        
+        # If user provided provider config, use it
+        # Note: Ollama doesn't require API key
+        if llm_provider:
+            if llm_provider == 'ollama':
+                # Ollama doesn't need API key
+                provider = create_llm_provider(
+                    provider=llm_provider,
+                    api_key="",  # Ollama doesn't use API key
+                    model_name=llm_model_name,
+                    api_url=llm_api_url
+                )
+            elif llm_api_key:
+                provider = create_llm_provider(
+                    provider=llm_provider,
+                    api_key=llm_api_key,
+                    model_name=llm_model_name,
+                    api_url=llm_api_url
+                )
+            else:
+                return f"llm_api_key is required for provider '{llm_provider}' (except 'ollama')"
+            
+            return await provider.generate(prompt, detected_lang=detected_lang)
+        
+        # Fallback to environment variables (backward compatibility)
+        # Priority: DeepSeek > OpenAI > Claude > Gemini > Ollama
         deepseek_key = os.getenv("DEEPSEEK_API_KEY")
         openai_key = os.getenv("OPENAI_API_KEY")
-        # TODO: Add support for other models:
-        # anthropic_key = os.getenv("ANTHROPIC_API_KEY")  # Claude
-        # google_key = os.getenv("GOOGLE_API_KEY")  # Gemini
-        # ollama_url = os.getenv("OLLAMA_URL")  # Local Ollama
+        claude_key = os.getenv("ANTHROPIC_API_KEY")
+        gemini_key = os.getenv("GOOGLE_API_KEY")
+        ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
         
         if deepseek_key:
-            return await call_deepseek_api(prompt, deepseek_key, detected_lang=detected_lang)
+            provider = create_llm_provider("deepseek", deepseek_key, model_name=llm_model_name)
+            return await provider.generate(prompt, detected_lang=detected_lang)
         elif openai_key:
-            return await call_openai_api(prompt, openai_key, detected_lang=detected_lang)
-        # TODO: Add other model providers here:
-        # elif anthropic_key:
-        #     return await call_claude_api(prompt, anthropic_key, detected_lang=detected_lang)
-        # elif google_key:
-        #     return await call_gemini_api(prompt, google_key, detected_lang=detected_lang)
-        # elif ollama_url:
-        #     return await call_ollama_api(prompt, ollama_url, detected_lang=detected_lang)
-        else:
-            return "I'm StillMe, but I need API keys to provide real responses. Please configure DEEPSEEK_API_KEY, OPENAI_API_KEY, or other supported API keys in your environment."
+            provider = create_llm_provider("openai", openai_key, model_name=llm_model_name)
+            return await provider.generate(prompt, detected_lang=detected_lang)
+        elif claude_key:
+            provider = create_llm_provider("claude", claude_key, model_name=llm_model_name)
+            return await provider.generate(prompt, detected_lang=detected_lang)
+        elif gemini_key:
+            provider = create_llm_provider("gemini", gemini_key, model_name=llm_model_name)
+            return await provider.generate(prompt, detected_lang=detected_lang)
+        elif ollama_url:
+            # Try Ollama (local, no API key needed)
+            try:
+                provider = create_llm_provider("ollama", api_key="", model_name=llm_model_name, api_url=ollama_url)
+                return await provider.generate(prompt, detected_lang=detected_lang)
+            except Exception:
+                pass  # Ollama not available, continue to error message
+        
+        return "I'm StillMe, but I need API keys to provide real responses. Please configure:\n" \
+               "- llm_provider and llm_api_key in your request, OR\n" \
+               "- Environment variables: DEEPSEEK_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, or OLLAMA_URL"
             
     except Exception as e:
         logger.error(f"AI response error: {e}")

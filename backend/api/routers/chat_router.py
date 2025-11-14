@@ -763,9 +763,18 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             
             # Generate AI response with timing
             # LLM_Inference_Latency: Time from API call start to response received
-            processing_steps.append("🤖 Calling AI model (DeepSeek/OpenAI)...")
+            provider_name = chat_request.llm_provider or "default"
+            processing_steps.append(f"🤖 Calling AI model ({provider_name})...")
             llm_inference_start = time.time()
-            raw_response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
+            # Support user-provided LLM config (for self-hosted deployments)
+            raw_response = await generate_ai_response(
+                enhanced_prompt, 
+                detected_lang=detected_lang,
+                llm_provider=chat_request.llm_provider,
+                llm_api_key=chat_request.llm_api_key,
+                llm_api_url=chat_request.llm_api_url,
+                llm_model_name=chat_request.llm_model_name
+            )
             llm_inference_end = time.time()
             llm_inference_latency = llm_inference_end - llm_inference_start
             timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
@@ -789,6 +798,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     from backend.validators.ethics_adapter import EthicsAdapter
                     from backend.validators.confidence import ConfidenceValidator
                     from backend.validators.fallback_handler import FallbackHandler
+                    from backend.services.ethics_guard import check_content_ethics
                     
                     # Build context docs list for validation
                     ctx_docs = [
@@ -807,7 +817,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
                         ConfidenceValidator(require_uncertainty_when_no_context=True),  # NEW: Check for uncertainty
-                        EthicsAdapter(guard_callable=None)  # TODO: wire existing ethics guard if available
+                        EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
                     ])
                     
                     # Run validation
@@ -1415,11 +1425,12 @@ async def validate_content(request: Request, chat_request: ChatRequest):
         enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
         
         if enable_validators:
+            from backend.services.ethics_guard import check_content_ethics
             chain = ValidatorChain([
                 CitationRequired(),  # Not applicable for input, but included for completeness
                 EvidenceOverlap(threshold=0.01),
                 NumericUnitsBasic(),
-                EthicsAdapter(guard_callable=None)
+                EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
             ])
             
             # Validate the message itself (treating it as "answer" to check)

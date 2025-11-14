@@ -94,7 +94,8 @@ async def respond_to_learning_permission(request: Request, permission_response: 
         # Ethics validation
         if rag_retrieval:
             try:
-                ethics_adapter = EthicsAdapter(guard_callable=None)  # TODO: Wire actual ethics guard if available
+                from backend.services.ethics_guard import check_content_ethics
+                ethics_adapter = EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
                 from backend.validators.base import ValidationResult
                 ethics_result = ethics_adapter.run(content_to_add, [])
                 
