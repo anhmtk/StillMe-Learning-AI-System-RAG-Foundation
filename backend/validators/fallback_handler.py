@@ -212,30 +212,39 @@ StillMe 是一个持续学习系统，每 4 小时（每天 6 次）自动从 RS
         }
         lang_name = language_names.get(expected_lang, expected_lang)
         
+        # Sanitize user question to prevent XSS
+        safe_question = _sanitize_for_display(user_question, max_length=100)
+        
         if expected_lang == 'vi':
             return f"""Tôi xin lỗi. Tôi đã trả lời bằng ngôn ngữ sai. Câu hỏi của bạn là tiếng Việt, nhưng tôi đã trả lời bằng ngôn ngữ khác. Đây là lỗi của tôi.
 
-Về câu hỏi của bạn: "{user_question[:50]}..."
+Về câu hỏi của bạn: "{safe_question}"
 
-Tôi không có trải nghiệm cá nhân như việc quỳ trước tượng Phật. Tôi là một công cụ AI, không phải một sinh vật có ý thức, nên tôi không có những trải nghiệm tôn giáo hay tâm linh như con người.
+Tôi đã gặp lỗi kỹ thuật khi xử lý câu hỏi này. Vui lòng thử lại bằng cách:
+- Gửi lại câu hỏi của bạn
+- Hoặc rephrase câu hỏi theo cách khác
 
-StillMe được thiết kế để không mô phỏng cảm xúc hoặc claim những trải nghiệm cá nhân mà tôi không có. Điều này là một phần của nguyên tắc cốt lõi: biết những gì KHÔNG nên làm."""
+StillMe đang cố gắng cải thiện khả năng xử lý đa ngôn ngữ. Cảm ơn bạn đã kiên nhẫn."""
         
         elif expected_lang == 'zh':
             return f"""抱歉。我用错误的语言回答了。您的问题是用中文，但我用其他语言回答了。这是我的错误。
 
-关于您的问题："{user_question[:50]}..."
+关于您的问题："{safe_question}"
 
-我没有像在佛像前跪拜这样的个人经历。我是一个AI工具，不是有意识的生物，所以我没有像人类那样的宗教或精神体验。
+我在处理这个问题时遇到了技术错误。请通过以下方式重试：
+- 重新发送您的问题
+- 或者用不同的方式重新表述问题
 
-StillMe被设计为不模拟情感或声称我没有的个人经历。这是核心原则的一部分：知道什么不应该做。"""
+StillMe正在努力改进多语言处理能力。感谢您的耐心。"""
         
         else:  # Default to English
             return f"""I apologize. I responded in the wrong language. Your question was in {lang_name}, but I responded in a different language. This is my error.
 
-Regarding your question: "{user_question[:50]}..."
+Regarding your question: "{safe_question}"
 
-I don't have personal experiences like kneeling before a Buddha statue. I'm an AI tool, not a sentient being, so I don't have religious or spiritual experiences like humans do.
+I encountered a technical error while processing this question. Please try again by:
+- Resending your question
+- Or rephrasing your question in a different way
 
-StillMe is designed to NOT simulate emotions or claim personal experiences I don't have. This is part of the core principle: knowing what NOT to do."""
+StillMe is working to improve multilingual processing capabilities. Thank you for your patience."""
 
