@@ -96,9 +96,18 @@ class FallbackHandler:
         """
         import re
         
+        # Edge case: Empty or whitespace-only answer
+        if not answer or len(answer.strip()) == 0:
+            logger.warning("FallbackHandler: Cannot add citation to empty answer")
+            return answer + " [1]" if answer else "[1]"
+        
         # Check if already has citation
         if re.search(r'\[\d+\]', answer):
             return answer
+        
+        # Edge case: Very short answer (< 5 chars) - just add at the end
+        if len(answer.strip()) < 5:
+            return answer.rstrip() + " [1]"
         
         # Find best place to add citation
         # Strategy: Add [1] after first sentence or at natural break point
