@@ -112,11 +112,13 @@ See `env.example` for full list.
 **Core RAG System:**
 - ✅ Vector Database (ChromaDB) - Semantic search and knowledge retrieval
 - ✅ RAG (Retrieval-Augmented Generation) - Context-aware responses
-- ✅ Validator Chain - Reduces hallucinations by 80%
+- ✅ Validator Chain - Reduces hallucinations through multiple validation checks
   - Citation validation
   - Evidence overlap checking
   - Confidence scoring (0.0-1.0)
   - Fallback handling
+  - Language mismatch detection
+  - Ethics validation
 
 **Learning Pipeline:**
 - ✅ Multi-Source Learning - RSS, arXiv, CrossRef, Wikipedia
