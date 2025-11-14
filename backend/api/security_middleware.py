@@ -43,12 +43,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         
         # Add Content-Security-Policy header (basic)
         # Note: This is a basic CSP. Adjust based on your needs
+        # Allow Swagger UI and ReDoc resources (cdn.jsdelivr.net, unpkg.com)
         csp = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "  # Allow inline scripts for Streamlit
-            "style-src 'self' 'unsafe-inline'; "  # Allow inline styles
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com; "  # Allow inline scripts for Streamlit + Swagger UI
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; "  # Allow inline styles + Swagger UI styles
             "img-src 'self' data: https:; "
-            "font-src 'self' data:; "
+            "font-src 'self' data: https://cdn.jsdelivr.net https://unpkg.com; "  # Allow Swagger UI fonts
             "connect-src 'self' https:; "
             "frame-ancestors 'none';"
         )
