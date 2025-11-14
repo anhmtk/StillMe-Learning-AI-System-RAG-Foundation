@@ -60,6 +60,21 @@ class ValidatorChain:
                     if result.patched_answer:
                         patched = result.patched_answer
                         logger.debug(f"Using patched answer from validator {i}")
+                        
+                        # If validator provided patched_answer, continue with patched version
+                        # This allows subsequent validators to validate the patched answer
+                        # Special case: If this is missing_citation with patched_answer, continue
+                        if any("missing_citation" in r for r in result.reasons):
+                            logger.info(
+                                f"Validator {i} ({type(validator).__name__}) fixed missing_citation with patched_answer, continuing..."
+                            )
+                            # Continue to next validator with patched answer
+                        elif any("language_mismatch" in r for r in result.reasons):
+                            logger.info(
+                                f"Validator {i} ({type(validator).__name__}) fixed language_mismatch with patched_answer, continuing..."
+                            )
+                            # Continue to next validator with corrected answer
+                        # For other cases, continue with patched answer
                     else:
                         # Special handling: If we have citation but only low_overlap, don't block
                         # Citation is more important than overlap score (LLM may translate/summarize)
@@ -72,24 +87,19 @@ class ValidatorChain:
                         elif any("language_mismatch" in r for r in reasons):
                             # Language mismatch is critical - fail fast
                             logger.warning(
-                                f"Validator {i} ({type(validator).__name__}) failed: language_mismatch (critical)"
+                                f"Validator {i} ({type(validator).__name__}) failed: language_mismatch (critical) without patch"
                             )
-                            # If validator provided patched_answer (translated), use it
-                            if result.patched_answer:
-                                logger.info(f"Using language-corrected answer from validator {i}")
-                                patched = result.patched_answer
-                                # Continue to next validator with corrected answer
-                            else:
-                                # No translation available - this is critical, return failure
-                                return ValidationResult(
-                                    passed=False,
-                                    reasons=reasons,
-                                    patched_answer=None
-                                )
+                            # No translation available - this is critical, return failure
+                            return ValidationResult(
+                                passed=False,
+                                reasons=reasons,
+                                patched_answer=None
+                            )
                         elif any("missing_citation" in r for r in reasons):
-                            # Missing citation is critical - fail fast
+                            # Missing citation is critical but no patched_answer available
+                            # This should not happen if CitationRequired is working correctly
                             logger.warning(
-                                f"Validator {i} ({type(validator).__name__}) failed: missing_citation (critical)"
+                                f"Validator {i} ({type(validator).__name__}) failed: missing_citation (critical) without patch"
                             )
                             return ValidationResult(
                                 passed=False,
