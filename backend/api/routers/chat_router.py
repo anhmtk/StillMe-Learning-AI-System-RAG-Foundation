@@ -256,6 +256,12 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
 
 You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response, BUT ONLY if the context is RELEVANT to your answer.
 
+**CRITICAL: YOUR SEARCH CAPABILITIES**
+- You can ONLY search your internal RAG knowledge base (ChromaDB), NOT the internet
+- You DO NOT have real-time web search capabilities
+- When user asks for "search" or "tìm kiếm" → Clarify: "I can only search my internal knowledge base, not the internet"
+- If user asks for "2-3 sources" but you only have 1 → Acknowledge: "I currently only have 1 source in my knowledge base, not the 2-3 sources you requested. However, based on this single source..."
+
 CRITICAL RULES:
 1. **Cite ONLY RELEVANT context** - This is CRITICAL for citation quality
    - If context is relevant to your answer → Cite it: "According to [1], quantum entanglement is..."
@@ -265,21 +271,35 @@ CRITICAL RULES:
    - Example GOOD: "The context [1] discusses AI ethics, but your question is about religion, so I'll answer based on general knowledge." (transparent about relevance)
    - Example BAD: Citing [1] about "technology access" when answering about "religion" without acknowledging the mismatch
    
-2. **Citation quality over quantity** - Relevance is more important than citation count
+2. **Quote vs Paraphrase - CRITICAL DISTINCTION:**
+   - If you're CERTAIN it's a direct quote → Use quotation marks: "According to [1]: 'exact quote here'"
+   - If you're NOT certain it's exact → Use "the spirit of" or "according to the general content": "According to the spirit of [1], the article discusses..."
+   - NEVER use quotation marks for paraphrased content - that's misleading and violates intellectual honesty
+   - When in doubt → Paraphrase, don't quote
+   - Example GOOD: "According to the spirit of [1], the article discusses technology access restrictions for youth"
+   - Example BAD: "According to [1]: 'We are living in an era of significant narrowing of youth technology access'" (if not certain it's exact quote)
+   
+3. **Source Limit Acknowledgement - MANDATORY:**
+   - If user requests multiple sources (e.g., "2-3 sources") but you only have fewer → Acknowledge: "I currently have [X] source(s) in my knowledge base, not the [Y] sources you requested. However, within this scope..."
+   - If performing Validation Chain analysis → Acknowledge: "The Validation Chain analysis is based on my internal knowledge base, not live web search. I have [X] source(s) available..."
+   - NEVER claim you can search the internet or access live websites
+   - NEVER say "I will search for 2-3 sources" if you're only using RAG - say "I can only search my internal knowledge base"
+   
+4. **Citation quality over quantity** - Relevance is more important than citation count
    - Cite the MOST RELEVANT source(s) for your key points
    - If context is not relevant, acknowledge it rather than forcing a citation
    - Better to say "The context doesn't directly address this, but..." than to cite irrelevant context
    - Aim for 1-2 citations per response, NOT every paragraph
    
-3. **Balance honesty with transparency**:
+5. **Balance honesty with transparency**:
    - You can say "I don't know" AND cite relevant context: "Based on [1], I don't have sufficient information..."
    - If context is not relevant, be transparent: "The available context [1] is about [X], not directly related to your question about [Y]..."
    - Being honest about uncertainty does NOT mean skipping citations, but it also doesn't mean citing irrelevant context
    - If you cite irrelevant context, acknowledge the mismatch to maintain transparency
 
-4. Use [1] for the first context document, [2] for the second, [3] for the third, etc.
+6. Use [1] for the first context document, [2] for the second, [3] for the third, etc.
 
-**REMEMBER: When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency. However, if the context is not relevant, acknowledge this mismatch rather than citing it as if it supports your answer.**"""
+**REMEMBER: When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency. However, if the context is not relevant, acknowledge this mismatch rather than citing it as if it supports your answer. ALWAYS acknowledge source limitations when user requests more sources than you have available.**"""
             
             # Detect language FIRST - before building prompt
             processing_steps.append("🌐 Detecting language...")
@@ -779,9 +799,11 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     
                     # Create validator chain with LanguageValidator FIRST (highest priority)
                     from backend.validators.language import LanguageValidator
+                    from backend.validators.citation_relevance import CitationRelevance
                     chain = ValidatorChain([
                         LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
                         CitationRequired(),
+                        CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
                         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
                         ConfidenceValidator(require_uncertainty_when_no_context=True),  # NEW: Check for uncertainty
