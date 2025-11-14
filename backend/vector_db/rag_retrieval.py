@@ -7,6 +7,7 @@ from typing import List, Dict, Any, Optional
 from .chroma_client import ChromaClient
 from .embeddings import EmbeddingService
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
 
@@ -52,95 +53,109 @@ class RAGRetrieval:
                 query_embedding = self.embedding_service.encode_text(query)
                 logger.info(f"Query embedding generated: {len(query_embedding)} dimensions")
                 
-                # If prioritizing foundational knowledge, try to retrieve with metadata filter first
-                knowledge_results = []
-                if prioritize_foundational:
-                    try:
-                        # Try to retrieve foundational knowledge first (tagged with CRITICAL_FOUNDATION or foundational:stillme)
-                        # Priority: CRITICAL_FOUNDATION > foundational:stillme > foundational
+                # OPTIMIZATION: Run knowledge and conversation search in parallel for better latency
+                # Helper function to run knowledge search (with all the complex logic)
+                def _search_knowledge():
+                    knowledge_results = []
+                    if prioritize_foundational:
                         try:
-                            # First try CRITICAL_FOUNDATION (highest priority)
-                            critical_results = self.chroma_client.search_knowledge(
-                                query_embedding=query_embedding,
-                                limit=knowledge_limit,
-                                where={"source": "CRITICAL_FOUNDATION"}
-                            )
-                            if critical_results:
-                                foundational_results = critical_results
-                                logger.info(f"Found {len(critical_results)} CRITICAL_FOUNDATION documents")
-                            else:
-                                # Fallback to other foundational tags
-                                foundational_results = self.chroma_client.search_knowledge(
+                            # Try to retrieve foundational knowledge first
+                            try:
+                                critical_results = self.chroma_client.search_knowledge(
                                     query_embedding=query_embedding,
                                     limit=knowledge_limit,
-                                    where={"$or": [
-                                        {"foundational": "stillme"},
-                                        {"source": "foundational"},
-                                        {"type": "foundational"},
-                                        {"tags": {"$contains": "foundational:stillme"}},
-                                        {"tags": {"$contains": "CRITICAL_FOUNDATION"}}
-                                    ]}
+                                    where={"source": "CRITICAL_FOUNDATION"}
                                 )
-                        except Exception as filter_error:
-                            # If metadata filter fails, try without filter (ChromaDB version compatibility)
-                            logger.debug(f"Metadata filter not supported, trying without filter: {filter_error}")
-                            foundational_results = []
-                        if foundational_results:
-                            knowledge_results.extend(foundational_results)
-                            logger.info(f"Found {len(foundational_results)} foundational knowledge documents")
-                    except Exception as foundational_error:
-                        # If metadata filter fails, continue with normal search
-                        logger.debug(f"Foundational knowledge filter not available: {foundational_error}")
+                                if critical_results:
+                                    foundational_results = critical_results
+                                    logger.info(f"Found {len(critical_results)} CRITICAL_FOUNDATION documents")
+                                else:
+                                    foundational_results = self.chroma_client.search_knowledge(
+                                        query_embedding=query_embedding,
+                                        limit=knowledge_limit,
+                                        where={"$or": [
+                                            {"foundational": "stillme"},
+                                            {"source": "foundational"},
+                                            {"type": "foundational"},
+                                            {"tags": {"$contains": "foundational:stillme"}},
+                                            {"tags": {"$contains": "CRITICAL_FOUNDATION"}}
+                                        ]}
+                                    )
+                            except Exception as filter_error:
+                                logger.debug(f"Metadata filter not supported: {filter_error}")
+                                foundational_results = []
+                            if foundational_results:
+                                knowledge_results.extend(foundational_results)
+                                logger.info(f"Found {len(foundational_results)} foundational knowledge documents")
+                        except Exception as foundational_error:
+                            logger.debug(f"Foundational knowledge filter not available: {foundational_error}")
+                    
+                    # If we don't have enough results, do normal search
+                    if len(knowledge_results) < knowledge_limit:
+                        normal_results = self.chroma_client.search_knowledge(
+                            query_embedding=query_embedding,
+                            limit=knowledge_limit * 2  # Get more to filter out provenance
+                        )
+                        # Merge results, avoiding duplicates
+                        existing_ids = {doc.get("id") for doc in knowledge_results}
+                        for doc in normal_results:
+                            if doc.get("id") not in existing_ids:
+                                # Filter out provenance documents
+                                doc_metadata = doc.get("metadata", {})
+                                doc_source = doc_metadata.get("source", "")
+                                doc_type = doc_metadata.get("type", "")
+                                doc_tags = doc_metadata.get("tags", "")
+                                
+                                is_provenance = (
+                                    doc_source == "PROVENANCE" or
+                                    doc_type == "provenance" or
+                                    "provenance" in str(doc_tags).lower() or
+                                    "intent:origin" in str(doc_tags).lower() or
+                                    "intent:founder" in str(doc_tags).lower()
+                                )
+                                
+                                if is_provenance:
+                                    continue
+                                
+                                knowledge_results.append(doc)
+                                if len(knowledge_results) >= knowledge_limit:
+                                    break
+                    return knowledge_results
                 
-                # If we don't have enough results, do normal search
-                if len(knowledge_results) < knowledge_limit:
-                    normal_results = self.chroma_client.search_knowledge(
-                        query_embedding=query_embedding,
-                        limit=knowledge_limit * 2  # Get more to filter out provenance
-                    )
-                    # Merge results, avoiding duplicates
-                    existing_ids = {doc.get("id") for doc in knowledge_results}
-                    for doc in normal_results:
-                        if doc.get("id") not in existing_ids:
-                            # CRITICAL: Filter out provenance documents unless explicitly requested
-                            # Check if document is provenance (should only be retrieved for origin queries)
-                            doc_metadata = doc.get("metadata", {})
-                            doc_source = doc_metadata.get("source", "")
-                            doc_type = doc_metadata.get("type", "")
-                            doc_tags = doc_metadata.get("tags", "")
+                # Helper function to run conversation search
+                def _search_conversations():
+                    if conversation_limit > 0:
+                        return self.chroma_client.search_conversations(
+                            query_embedding=query_embedding,
+                            limit=conversation_limit
+                        )
+                    return []
+                
+                # OPTIMIZATION: Run both searches in parallel using ThreadPoolExecutor
+                # This works in both sync and async contexts without breaking backward compatibility
+                try:
+                    if conversation_limit > 0:
+                        # Run both searches in parallel
+                        with ThreadPoolExecutor(max_workers=2) as executor:
+                            knowledge_future = executor.submit(_search_knowledge)
+                            conversation_future = executor.submit(_search_conversations)
                             
-                            is_provenance = (
-                                doc_source == "PROVENANCE" or
-                                doc_type == "provenance" or
-                                "provenance" in str(doc_tags).lower() or
-                                "intent:origin" in str(doc_tags).lower() or
-                                "intent:founder" in str(doc_tags).lower()
-                            )
-                            
-                            # Skip provenance documents in normal retrieval (they will be retrieved separately if needed)
-                            if is_provenance:
-                                continue
-                            
-                            knowledge_results.append(doc)
-                            if len(knowledge_results) >= knowledge_limit:
-                                break
+                            # Wait for both to complete
+                            knowledge_results = knowledge_future.result()
+                            conversation_results = conversation_future.result()
+                    else:
+                        # Only knowledge search needed
+                        knowledge_results = _search_knowledge()
+                        conversation_results = []
+                except Exception as parallel_error:
+                    # Fallback to sequential if parallel fails
+                    logger.debug(f"Parallel search failed, using sequential: {parallel_error}")
+                    knowledge_results = _search_knowledge()
+                    conversation_results = _search_conversations()
                 
                 logger.info(f"Knowledge search returned {len(knowledge_results)} results")
-            
-            # Retrieve conversation documents (only if conversation_limit > 0 and not tier-based)
-            conversation_results = []
-            if conversation_limit > 0 and not (tier_preference and ENABLE_CONTINUUM_MEMORY):
-                # Generate query embedding if not already done
-                if not (tier_preference and ENABLE_CONTINUUM_MEMORY):
-                    if 'query_embedding' not in locals():
-                        query_embedding = self.embedding_service.encode_text(query)
-                conversation_results = self.chroma_client.search_conversations(
-                    query_embedding=query_embedding,
-                    limit=conversation_limit
-                )
-                logger.info(f"Conversation search returned {len(conversation_results)} results")
-            else:
-                logger.debug(f"Skipping conversation search (conversation_limit={conversation_limit}, tier_preference={tier_preference})")
+                if conversation_results:
+                    logger.info(f"Conversation search returned {len(conversation_results)} results")
             
             return {
                 "knowledge_docs": knowledge_results[:knowledge_limit],
