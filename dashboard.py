@@ -393,6 +393,43 @@ def page_overview():
             else:
                 st.caption("Next run: Not scheduled")
         
+        # Display source statistics for transparency
+        source_stats = scheduler_status.get("source_statistics", {})
+        if source_stats and not source_stats.get("error"):
+            st.markdown("### 📊 Learning Source Statistics")
+            
+            # RSS Statistics
+            if "rss" in source_stats:
+                rss_stats = source_stats["rss"]
+                col_rss1, col_rss2, col_rss3, col_rss4 = st.columns(4)
+                with col_rss1:
+                    st.metric("📡 RSS Feeds", rss_stats.get("feeds_count", 0))
+                with col_rss2:
+                    st.metric("✅ Successful", rss_stats.get("successful_feeds", 0))
+                with col_rss3:
+                    st.metric("❌ Failed", rss_stats.get("failed_feeds", 0))
+                with col_rss4:
+                    status_icon = "🟢" if rss_stats.get("status") == "ok" else "🔴"
+                    st.metric("Status", f"{status_icon} {rss_stats.get('status', 'unknown').upper()}")
+                
+                # Show errors if any
+                if rss_stats.get("failed_feeds", 0) > 0:
+                    with st.expander("⚠️ RSS Feed Errors", expanded=False):
+                        if rss_stats.get("last_error"):
+                            st.error(f"**Last Error:** {rss_stats['last_error']}")
+                        st.caption(f"💡 {rss_stats.get('failed_feeds', 0)} feed(s) failed. Check backend logs for details.")
+            
+            # Other sources (arXiv, CrossRef, Wikipedia, etc.)
+            other_sources = {k: v for k, v in source_stats.items() if k != "rss"}
+            if other_sources:
+                with st.expander("📚 Other Learning Sources", expanded=False):
+                    for source_name, stats in other_sources.items():
+                        if isinstance(stats, dict):
+                            status_icon = "🟢" if stats.get("status") == "ok" else "🔴"
+                            st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} {stats.get('status', 'unknown')}")
+                            if stats.get("error_count", 0) > 0:
+                                st.caption(f"  ⚠️ {stats.get('error_count', 0)} error(s)")
+        
         col_start, col_stop, col_run_now = st.columns(3)
         with col_start:
             if st.button("▶️ Start Scheduler", width='stretch'):

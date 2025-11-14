@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Run comprehensive test suite with thousands of questions
 Tests StillMe with diverse questions and collects feedback
@@ -9,10 +10,17 @@ import asyncio
 import aiohttp
 import time
 import os
+import sys
 from pathlib import Path
 from typing import List, Dict, Optional
 from datetime import datetime, timezone
 import logging
+
+# Fix encoding for Windows console
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -237,16 +245,16 @@ def main():
     print(f"API Base: {API_BASE}")
     print(f"Max concurrent: 10")
     print("="*60)
-    print("\n🔍 Testing API connection...")
+    print("\n[TEST] Testing API connection...")
     
     # Test API connection first
     try:
         import requests
         test_response = requests.get(f"{API_BASE}/api/status", timeout=30)
         if test_response.status_code == 200:
-            print(f"✅ API connection successful!")
+            print(f"[OK] API connection successful!")
         else:
-            print(f"⚠️  API returned status {test_response.status_code}")
+            print(f"[WARN] API returned status {test_response.status_code}")
     except Exception as e:
         print(f"❌ API connection failed: {e}")
         print(f"\nPlease check:")

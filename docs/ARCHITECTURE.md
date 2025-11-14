@@ -125,7 +125,7 @@ graph TB
 
 #### **Validator Chain**
 - **Location**: `backend/validators/chain.py`
-- **Purpose**: Reduce hallucinations by 80%
+- **Purpose**: Reduce hallucinations through multiple validation checks
 - **Components**:
   - Citation validator (`backend/validators/citation.py`)
   - Evidence overlap validator (`backend/validators/evidence_overlap.py`)

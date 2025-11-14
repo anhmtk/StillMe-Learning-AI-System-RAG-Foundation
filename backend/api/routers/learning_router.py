@@ -888,9 +888,21 @@ async def get_scheduler_status():
         status = learning_scheduler.get_status()
         logger.info(f"Scheduler status retrieved successfully: {status}")
         
+        # Add detailed source statistics for transparency
+        source_stats = {}
+        try:
+            from backend.services.source_integration import get_source_integration
+            source_integration = get_source_integration()
+            if source_integration:
+                source_stats = source_integration.get_source_stats()
+        except Exception as e:
+            logger.warning(f"Could not fetch source stats: {e}")
+            source_stats = {"error": str(e)}
+        
         return {
             "status": "ok",
-            **status
+            **status,
+            "source_statistics": source_stats
         }
     except Exception as e:
         logger.error(f"Scheduler status error: {e}", exc_info=True)

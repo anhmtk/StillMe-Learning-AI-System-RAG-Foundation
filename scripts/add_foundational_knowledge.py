@@ -81,7 +81,7 @@ StillMe uses a **ValidatorChain** to ensure response quality and prevent halluci
 - **Content Curation**: Intelligent filtering and prioritization of learning content based on quality and relevance
 - **Pre-Filter System**: Filters content BEFORE embedding to reduce costs by 30-50%
 - **Knowledge Alerts**: Proactively suggests important knowledge to users when StillMe learns something relevant
-- **Validation Chain**: Reduces hallucinations by 80% through citation, evidence overlap, confidence validation, and ethics checks
+- **Validation Chain**: Reduces hallucinations through citation, evidence overlap, confidence validation, and ethics checks
 
 **How StillMe Learns:**
 1. Automated scheduler fetches RSS feeds, arXiv, CrossRef, Wikipedia every 4 hours
