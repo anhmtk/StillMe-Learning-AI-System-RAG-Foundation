@@ -19,7 +19,7 @@ The answer? **Yes, but with a crucial realization:** AI tools are incredibly pow
 Through AI-assisted development, StillMe now has:
 - ✅ **Vector Database (ChromaDB)**: Semantic search and knowledge retrieval
 - ✅ **RAG System**: Retrieval-Augmented Generation for context-aware responses
-- ✅ **Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, and ethics checks
+- ✅ **Validator Chain**: Reduces hallucinations through multiple validation checks (citation, evidence overlap, confidence scoring, ethics validation)
 - ✅ **Multi-Source Learning**: RSS, arXiv, CrossRef, Wikipedia integration
 - ✅ **Continuum Memory System**: Tiered memory architecture (L0-L3)
 - ✅ **Interactive Dashboard**: Complete transparency into learning processes
