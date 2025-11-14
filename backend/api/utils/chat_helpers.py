@@ -27,32 +27,10 @@ def detect_language(text: str) -> str:
     
     text_lower = text.lower()
     
-    # CRITICAL: Check for explicit language requests FIRST (overrides detection)
-    # This allows users to request responses in a different language
-    explicit_language_patterns = {
-        'ru': ['nói bằng tiếng nga', 'speak in russian', 'ответь на русском', 'по-русски', 'tiếng nga', 'russian'],
-        'en': ['nói bằng tiếng anh', 'speak in english', 'english', 'tiếng anh'],
-        'vi': ['nói bằng tiếng việt', 'speak in vietnamese', 'vietnamese', 'tiếng việt'],
-        'zh': ['nói bằng tiếng trung', 'speak in chinese', 'chinese', 'tiếng trung'],
-        'de': ['nói bằng tiếng đức', 'speak in german', 'german', 'tiếng đức'],
-        'fr': ['nói bằng tiếng pháp', 'speak in french', 'french', 'tiếng pháp'],
-        'es': ['nói bằng tiếng tây ban nha', 'speak in spanish', 'spanish', 'tiếng tây ban nha'],
-        'ja': ['nói bằng tiếng nhật', 'speak in japanese', 'japanese', 'tiếng nhật'],
-        'ko': ['nói bằng tiếng hàn', 'speak in korean', 'korean', 'tiếng hàn'],
-        'ar': ['nói bằng tiếng ả rập', 'speak in arabic', 'arabic', 'tiếng ả rập'],
-        'pt': ['nói bằng tiếng bồ đào nha', 'speak in portuguese', 'portuguese', 'tiếng bồ đào nha'],
-        'it': ['nói bằng tiếng ý', 'speak in italian', 'italian', 'tiếng ý'],
-        'hi': ['nói bằng tiếng hindi', 'speak in hindi', 'hindi', 'tiếng hindi'],
-        'th': ['nói bằng tiếng thái', 'speak in thai', 'thai', 'tiếng thái'],
-    }
+    # OPTIMIZATION: Try langdetect FIRST for better accuracy, especially for mixed-language text
+    # Then check for explicit language requests (which override detection)
+    detected_lang = None
     
-    for lang_code, patterns in explicit_language_patterns.items():
-        if any(pattern in text_lower for pattern in patterns):
-            logger.info(f"🌐 Explicit language request detected: {lang_code}")
-            return lang_code
-    
-    # Try langdetect first (more accurate for most languages)
-    # BUT: Only if no explicit language request was found above
     try:
         from langdetect import detect, LangDetectException
         detected = detect(text)
@@ -77,16 +55,46 @@ def detect_language(text: str) -> str:
         
         # Handle Chinese variants
         if detected.startswith('zh'):
-            return 'zh'
-        
-        if detected in lang_map:
-            logger.info(f"🌐 langdetect detected: {detected} -> {lang_map[detected]}")
-            return lang_map[detected]
+            detected_lang = 'zh'
+        elif detected in lang_map:
+            detected_lang = lang_map[detected]
+            logger.info(f"🌐 langdetect detected: {detected} -> {detected_lang}")
             
     except (LangDetectException, ImportError) as e:
-        logger.warning(f"langdetect failed or not available: {e}, falling back to rule-based detection")
+        logger.debug(f"langdetect failed or not available: {e}, will use rule-based detection")
     
-    # Fallback to rule-based detection for edge cases or if langdetect fails
+    # CRITICAL: Check for explicit language requests (only clear requests, not mentions)
+    # This allows users to request responses in a different language
+    # IMPORTANT: Only match explicit request patterns (e.g., "nói bằng", "speak in"), not just mentions
+    # Explicit requests OVERRIDE language detection
+    explicit_language_patterns = {
+        'ru': ['nói bằng tiếng nga', 'speak in russian', 'ответь на русском', 'по-русски', 'respond in russian', 'reply in russian'],
+        'en': ['nói bằng tiếng anh', 'speak in english', 'respond in english', 'reply in english', 'answer in english'],
+        'vi': ['nói bằng tiếng việt', 'speak in vietnamese', 'respond in vietnamese', 'reply in vietnamese', 'answer in vietnamese'],
+        'zh': ['nói bằng tiếng trung', 'speak in chinese', 'respond in chinese', 'reply in chinese'],
+        'de': ['nói bằng tiếng đức', 'speak in german', 'respond in german', 'reply in german'],
+        'fr': ['nói bằng tiếng pháp', 'speak in french', 'respond in french', 'reply in french'],
+        'es': ['nói bằng tiếng tây ban nha', 'speak in spanish', 'respond in spanish', 'reply in spanish'],
+        'ja': ['nói bằng tiếng nhật', 'speak in japanese', 'respond in japanese', 'reply in japanese'],
+        'ko': ['nói bằng tiếng hàn', 'speak in korean', 'respond in korean', 'reply in korean'],
+        'ar': ['nói bằng tiếng ả rập', 'speak in arabic', 'respond in arabic', 'reply in arabic'],
+        'pt': ['nói bằng tiếng bồ đào nha', 'speak in portuguese', 'respond in portuguese', 'reply in portuguese'],
+        'it': ['nói bằng tiếng ý', 'speak in italian', 'respond in italian', 'reply in italian'],
+        'hi': ['nói bằng tiếng hindi', 'speak in hindi', 'respond in hindi', 'reply in hindi'],
+        'th': ['nói bằng tiếng thái', 'speak in thai', 'respond in thai', 'reply in thai'],
+    }
+    
+    # Check for explicit requests (must contain request verbs, not just language mentions)
+    for lang_code, patterns in explicit_language_patterns.items():
+        if any(pattern in text_lower for pattern in patterns):
+            logger.info(f"🌐 Explicit language request detected: {lang_code} (overriding detection: {detected_lang})")
+            return lang_code
+    
+    # If explicit request found, return it; otherwise use detected language
+    if detected_lang:
+        return detected_lang
+    
+    # Fallback to rule-based detection if langdetect failed
     text_lower = text.lower()
     
     # Arabic - Check for Arabic characters
@@ -114,12 +122,14 @@ def detect_language(text: str) -> str:
     if has_chinese:
         return 'zh'
     
-    # Vietnamese - Check for Vietnamese characters
+    # Vietnamese - Check for Vietnamese characters (PRIORITY: Check Vietnamese FIRST in rule-based)
+    # Vietnamese has many unique characters that are strong indicators
     vietnamese_chars = set('àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ')
     has_vietnamese = any(char in vietnamese_chars for char in text_lower)
-    vietnamese_indicators = ['là', 'của', 'và', 'với', 'cho', 'từ', 'trong', 'này', 'đó', 'bạn', 'mình', 'tôi', 'có', 'không', 'được', 'như', 'thế', 'nào', 'gì', 'ai', 'đâu', 'sao']
+    vietnamese_indicators = ['là', 'của', 'và', 'với', 'cho', 'từ', 'trong', 'này', 'đó', 'bạn', 'mình', 'tôi', 'có', 'không', 'được', 'như', 'thế', 'nào', 'gì', 'ai', 'đâu', 'sao', 'nhưng', 'vì', 'nên', 'đã', 'sẽ', 'đang', 'hãy', 'phân tích', 'dự án']
     has_vietnamese_words = any(word in text_lower for word in vietnamese_indicators)
     if has_vietnamese or has_vietnamese_words:
+        logger.info(f"🌐 Rule-based detection: Vietnamese detected (has_vietnamese_chars: {has_vietnamese}, has_vietnamese_words: {has_vietnamese_words})")
         return 'vi'
     
     # German - Check for German-specific characters and common words
