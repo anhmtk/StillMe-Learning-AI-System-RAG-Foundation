@@ -885,7 +885,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                     }
                                     retry_lang_name = language_names.get(detected_lang, detected_lang.upper())
                                     
-                                    # Build retry prompt with EXTREMELY STRONG language instruction
+                                    # Build retry prompt with EXTREMELY STRONG language instruction + context
+                                    # Include context and full prompt to ensure retry can actually answer the question
                                     retry_language_instruction = f"""🚨🚨🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - ABSOLUTE HIGHEST PRIORITY 🚨🚨🚨🚨🚨
 
 THE USER'S QUESTION IS IN {retry_lang_name.upper()}.
@@ -900,11 +901,14 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT T
 
 THIS OVERRIDES EVERYTHING - NO EXCEPTIONS.
 
-User Question: {chat_request.message}
+{context_text if context and context.get("total_context_docs", 0) > 0 else ""}
+{citation_instruction if num_knowledge > 0 else ""}
 
-Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
+User Question (in {retry_lang_name.upper()}): {chat_request.message}
+
+Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANSWER THE QUESTION PROPERLY, NOT JUST ACKNOWLEDGE THE ERROR."""
                                     
-                                    # Retry with stronger prompt
+                                    # Retry with stronger prompt (include context to actually answer the question)
                                     retry_response = await generate_ai_response(retry_language_instruction, detected_lang=detected_lang)
                                     
                                     # Validate retry response
