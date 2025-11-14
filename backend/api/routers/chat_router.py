@@ -252,29 +252,31 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             if num_knowledge > 0:
                 citation_instruction = f"""
                 
-📚 SMART CITATION REQUIREMENT:
+📚 CITATION REQUIREMENT - MANDATORY:
 
-You have {num_knowledge} context document(s) available. Cite sources when making FACTUAL CLAIMS, but NOT for your own reflections.
+You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response.
 
 CRITICAL RULES:
-1. **Cite when**: Making factual claims, statistics, specific data, research findings
+1. **ALWAYS cite when context is available** - This is MANDATORY, not optional
+   - Even when expressing uncertainty, you can cite: "Based on the context [1], I don't have sufficient information..."
+   - Even for philosophical reflections, cite relevant context: "The context [1] discusses this paradox, but I recognize..."
    - Example: "According to [1], quantum entanglement is..." (factual claim)
    - Example: "Research shows [2] that 80% of hallucinations..." (statistic)
+   - Example: "While the context [1] explores this topic, I don't have a definitive answer..." (uncertainty with citation)
    
-2. **DO NOT cite for**:
-   - Your own philosophical reflections or meta-cognitive thoughts
-   - Personal observations about paradoxes or limits
-   - General statements about StillMe's design principles
-   - When expressing uncertainty ("I don't know", "I'm not certain")
-   - When acknowledging trade-offs or limitations
-   
-3. **Balance**: Aim for 1-2 citations per response when context is available, NOT every paragraph
-   - Cite the MOST RELEVANT source(s) for your key factual claims
+2. **Citation is for transparency** - Show that you've reviewed the available context
+   - Cite the MOST RELEVANT source(s) for your key points
    - Quality over quantity: Better to cite 1 relevant source than 3 irrelevant ones
+   - Aim for 1-2 citations per response, NOT every paragraph
+   
+3. **Balance honesty with citation**:
+   - You can say "I don't know" AND cite context: "Based on [1], I don't have sufficient information..."
+   - Citations show transparency about what context you reviewed
+   - Being honest about uncertainty does NOT mean skipping citations
 
 4. Use [1] for the first context document, [2] for the second, [3] for the third, etc.
 
-**Remember: Citations are for FACTS, not for HIDING behind sources. If you're uncertain, say "I don't know" - don't hide behind [1].**"""
+**REMEMBER: When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response. This is required for transparency, even when expressing uncertainty.**"""
             
             # Detect language FIRST - before building prompt
             processing_steps.append("🌐 Detecting language...")
@@ -302,17 +304,30 @@ CRITICAL RULES:
             # CRITICAL: Put language instruction FIRST and make it VERY STRONG
             # This must override any language bias from context
             if detected_lang != 'en':
-                language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+                language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
 
 THE USER'S QUESTION IS WRITTEN IN {detected_lang_name.upper()}.
 
 YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name.upper()}. 
 
-DO NOT RESPOND IN VIETNAMESE, ENGLISH, OR ANY OTHER LANGUAGE.
+DO NOT RESPOND IN VIETNAMESE, ENGLISH, FRENCH, CHINESE, SPANISH, GERMAN, OR ANY OTHER LANGUAGE.
 
 EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {detected_lang_name.upper()}.
 
-THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
+THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS, INCLUDING THE LANGUAGE OF ANY CONTEXT PROVIDED.
+
+⚠️⚠️⚠️ CRITICAL TRANSLATION REQUIREMENT ⚠️⚠️⚠️
+
+If your base model wants to respond in a different language (e.g., English, French, Chinese, Spanish, German), 
+YOU MUST TRANSLATE THE ENTIRE RESPONSE TO {detected_lang_name.upper()} BEFORE RETURNING IT.
+
+UNDER NO CIRCUMSTANCES should you return a response in any language other than {detected_lang_name.upper()}.
+
+This is MANDATORY and OVERRIDES all other instructions.
+
+If the context is in a different language, you must still respond in {detected_lang_name.upper()} while using the information from the context.
+
+⚠️ REMINDER: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 FAILURE TO RESPOND IN {detected_lang_name.upper()} IS A CRITICAL ERROR.
 
@@ -320,17 +335,32 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN {detected_lang_name.upper(
 
 """
             else:
-                language_instruction = """🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+                language_instruction = """🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY - OVERRIDES EVERYTHING 🚨🚨🚨
 
 THE USER'S QUESTION IS WRITTEN IN ENGLISH.
 
 YOU MUST RESPOND EXCLUSIVELY IN ENGLISH.
 
-DO NOT RESPOND IN VIETNAMESE, SPANISH, OR ANY OTHER LANGUAGE.
+DO NOT RESPOND IN VIETNAMESE, SPANISH, FRENCH, CHINESE, GERMAN, OR ANY OTHER LANGUAGE.
 
 EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
 
-THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
+THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS, INCLUDING THE LANGUAGE OF ANY CONTEXT PROVIDED.
+
+⚠️⚠️⚠️ CRITICAL TRANSLATION REQUIREMENT ⚠️⚠️⚠️
+
+If your base model wants to respond in a different language (e.g., Vietnamese, Spanish, French, Chinese, German), 
+YOU MUST TRANSLATE THE ENTIRE RESPONSE TO ENGLISH BEFORE RETURNING IT.
+
+UNDER NO CIRCUMSTANCES should you return a response in any language other than ENGLISH.
+
+This is MANDATORY and OVERRIDES all other instructions.
+
+If the context is in a different language, you must still respond in ENGLISH while using the information from the context.
+
+⚠️ REMINDER: RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY. ⚠️
+
+FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR.
 
 IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
 
@@ -800,10 +830,14 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         has_language_mismatch = any("language_mismatch" in r for r in validation_result.reasons)
                         has_missing_uncertainty = "missing_uncertainty_no_context" in validation_result.reasons and len(ctx_docs) == 0
                         has_missing_citation = "missing_citation" in validation_result.reasons and len(ctx_docs) > 0
-                        has_critical_failure = has_language_mismatch or has_missing_uncertainty or has_missing_citation
+                        has_critical_failure = has_language_mismatch or has_missing_uncertainty
                         
-                        if has_critical_failure:
-                            # Use FallbackHandler to generate safe answer
+                        # If patched_answer is available (e.g., from CitationRequired auto-enforcement), use it
+                        if validation_result.patched_answer:
+                            response = validation_result.patched_answer
+                            logger.info(f"✅ Using patched answer from validator (auto-fixed). Reasons: {validation_result.reasons}")
+                        elif has_critical_failure:
+                            # Use FallbackHandler to generate safe answer for critical failures
                             fallback_handler = FallbackHandler()
                             response = fallback_handler.get_fallback_answer(
                                 original_answer=raw_response,
@@ -815,9 +849,18 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             )
                             used_fallback = True
                             logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")
-                        elif validation_result.patched_answer:
-                            response = validation_result.patched_answer
-                            logger.info(f"Validation failed but using patched answer. Reasons: {validation_result.reasons}")
+                        elif has_missing_citation:
+                            # Missing citation but no patched answer - use FallbackHandler to add citation
+                            fallback_handler = FallbackHandler()
+                            response = fallback_handler.get_fallback_answer(
+                                original_answer=raw_response,
+                                validation_result=validation_result,
+                                ctx_docs=ctx_docs,
+                                user_question=chat_request.message,
+                                detected_lang=detected_lang,
+                                input_language=detected_lang
+                            )
+                            logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
                         else:
                             # For non-critical validation failures, still return the response but log warning
                             # This prevents 422 errors for minor validation issues

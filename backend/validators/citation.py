@@ -27,14 +27,14 @@ class CitationRequired:
     
     def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
         """
-        Check if answer contains citations
+        Check if answer contains citations and auto-enforce if missing
         
         Args:
             answer: The answer to validate
             ctx_docs: List of context documents - if empty, citations are not required
             
         Returns:
-            ValidationResult with passed status
+            ValidationResult with passed status and patched answer if citation was added
         """
         if not self.required:
             return ValidationResult(passed=True)
@@ -52,8 +52,48 @@ class CitationRequired:
             return ValidationResult(passed=True)
         else:
             logger.warning("Missing citation in answer (context documents available but no citations found)")
+            
+            # AUTO-ENFORCE: Add citation to response
+            patched_answer = self._add_citation(answer, ctx_docs)
+            
             return ValidationResult(
-                passed=False,
-                reasons=["missing_citation"]
+                passed=False,  # Still mark as failed to track the issue
+                reasons=["missing_citation"],
+                patched_answer=patched_answer
             )
+    
+    def _add_citation(self, answer: str, ctx_docs: List[str]) -> str:
+        """
+        Automatically add citation to answer when missing
+        
+        Args:
+            answer: Original answer without citation
+            ctx_docs: List of context documents
+            
+        Returns:
+            Answer with citation added
+        """
+        # Find the best place to add citation
+        # Strategy: Add [1] after the first sentence or first paragraph
+        
+        # Try to find first sentence (ends with . ! ?)
+        sentence_end = re.search(r'[.!?]\s+', answer)
+        if sentence_end:
+            # Insert citation after first sentence
+            insert_pos = sentence_end.end()
+            citation = " [1]"
+            patched = answer[:insert_pos] + citation + answer[insert_pos:]
+        else:
+            # If no sentence end found, add at the end of first line or beginning
+            first_newline = answer.find('\n')
+            if first_newline > 0 and first_newline < 100:  # Reasonable paragraph break
+                insert_pos = first_newline
+                citation = " [1]"
+                patched = answer[:insert_pos] + citation + answer[insert_pos:]
+            else:
+                # Add at the end
+                patched = answer.rstrip() + " [1]"
+        
+        logger.info(f"Auto-added citation [1] to response (context docs: {len(ctx_docs)})")
+        return patched
 

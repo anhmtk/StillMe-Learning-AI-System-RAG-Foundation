@@ -68,8 +68,12 @@ class FallbackHandler:
         if "missing_uncertainty_no_context" in reasons:
             return self._get_no_context_fallback(user_question, input_lang)
         
-        if "missing_citation" in reasons and not ctx_docs:
-            return self._get_no_context_fallback(user_question, input_lang)
+        if "missing_citation" in reasons:
+            if ctx_docs:
+                # If we have context but missing citation, add citation to original answer
+                return self._add_citation_to_answer(original_answer, ctx_docs, input_lang)
+            else:
+                return self._get_no_context_fallback(user_question, input_lang)
         
         if "low_overlap" in reasons and not ctx_docs:
             return self._get_no_context_fallback(user_question, input_lang)
@@ -77,6 +81,47 @@ class FallbackHandler:
         # If no specific fallback, return original (may be risky, but better than nothing)
         logger.warning(f"No specific fallback for reasons: {reasons}, returning original answer")
         return original_answer
+    
+    def _add_citation_to_answer(self, answer: str, ctx_docs: List[str], lang: str = 'en') -> str:
+        """
+        Add citation to answer when missing but context is available
+        
+        Args:
+            answer: Original answer without citation
+            ctx_docs: List of context documents
+            lang: Language code
+            
+        Returns:
+            Answer with citation added
+        """
+        import re
+        
+        # Check if already has citation
+        if re.search(r'\[\d+\]', answer):
+            return answer
+        
+        # Find best place to add citation
+        # Strategy: Add [1] after first sentence or at natural break point
+        
+        # Try to find first sentence (ends with . ! ?)
+        sentence_end = re.search(r'[.!?]\s+', answer)
+        if sentence_end:
+            insert_pos = sentence_end.end()
+            citation = " [1]"
+            patched = answer[:insert_pos] + citation + answer[insert_pos:]
+        else:
+            # Add at the end of first paragraph or beginning
+            first_newline = answer.find('\n')
+            if first_newline > 0 and first_newline < 150:  # Reasonable paragraph break
+                insert_pos = first_newline
+                citation = " [1]"
+                patched = answer[:insert_pos] + citation + answer[insert_pos:]
+            else:
+                # Add at the end
+                patched = answer.rstrip() + " [1]"
+        
+        logger.info(f"FallbackHandler: Added citation [1] to answer (context docs: {len(ctx_docs)})")
+        return patched
     
     def _get_no_context_fallback(self, user_question: str, detected_lang: str = 'en') -> str:
         """
