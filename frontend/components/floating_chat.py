@@ -180,24 +180,65 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             .resize-handle {{
                 position: absolute;
                 background: transparent;
-                z-index: 10;
+                z-index: 1000 !important; /* Higher z-index to ensure it's on top */
+                pointer-events: auto !important; /* Ensure handles are clickable */
             }}
             
             /* Corner handles - larger for easier grabbing */
-            .resize-handle.nw {{ top: 0; left: 0; width: 15px; height: 15px; cursor: nw-resize; }}
-            .resize-handle.ne {{ top: 0; right: 0; width: 15px; height: 15px; cursor: ne-resize; }}
-            .resize-handle.sw {{ bottom: 0; left: 0; width: 15px; height: 15px; cursor: sw-resize; }}
-            .resize-handle.se {{ bottom: 0; right: 0; width: 15px; height: 15px; cursor: se-resize; }}
+            .resize-handle.nw {{ top: 0; left: 0; width: 20px; height: 20px; cursor: nw-resize; }}
+            .resize-handle.ne {{ top: 0; right: 0; width: 20px; height: 20px; cursor: ne-resize; }}
+            .resize-handle.sw {{ bottom: 0; left: 0; width: 20px; height: 20px; cursor: sw-resize; }}
+            .resize-handle.se {{ bottom: 0; right: 0; width: 20px; height: 20px; cursor: se-resize; }}
             
             /* Edge handles - wider for easier grabbing */
-            .resize-handle.n {{ top: 0; left: 15px; right: 15px; height: 8px; cursor: n-resize; }}
-            .resize-handle.s {{ bottom: 0; left: 15px; right: 15px; height: 8px; cursor: s-resize; }}
-            .resize-handle.e {{ top: 15px; bottom: 15px; right: 0; width: 8px; cursor: e-resize; }}
-            .resize-handle.w {{ top: 15px; bottom: 15px; left: 0; width: 8px; cursor: w-resize; }}
+            .resize-handle.n {{ top: 0; left: 20px; right: 20px; height: 12px; cursor: n-resize; }}
+            .resize-handle.s {{ bottom: 0; left: 20px; right: 20px; height: 12px; cursor: s-resize; }}
+            .resize-handle.e {{ top: 20px; bottom: 20px; right: 0; width: 12px; cursor: e-resize; }}
+            .resize-handle.w {{ top: 20px; bottom: 20px; left: 0; width: 12px; cursor: w-resize; }}
             
             /* Visual resize indicator - more visible like Cursor */
             .resize-handle:hover {{
-                background: rgba(70, 179, 255, 0.3);
+                background: rgba(70, 179, 255, 0.5) !important; /* More visible on hover */
+            }}
+            
+            /* Show resize handles more clearly - add subtle border on hover */
+            .resize-handle:hover::after {{
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 4px;
+                height: 4px;
+                background: rgba(70, 179, 255, 0.8);
+                border-radius: 50%;
+            }}
+            
+            /* Edge handles show double arrow on hover */
+            .resize-handle.n:hover::after,
+            .resize-handle.s:hover::after {{
+                content: '⇅';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: rgba(70, 179, 255, 0.9);
+                font-size: 14px;
+                width: auto;
+                height: auto;
+            }}
+            
+            .resize-handle.e:hover::after,
+            .resize-handle.w:hover::after {{
+                content: '⇄';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: rgba(70, 179, 255, 0.9);
+                font-size: 14px;
+                width: auto;
+                height: auto;
             }}
             
             /* Disable resize when minimized or fullscreen */
@@ -1496,28 +1537,42 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }});
                     }}
                     
-                    // Setup all resize handles - with error checking
-                    const resizeHandles = {{
-                        nw: document.querySelector('.resize-handle.nw'),
-                        ne: document.querySelector('.resize-handle.ne'),
-                        sw: document.querySelector('.resize-handle.sw'),
-                        se: document.querySelector('.resize-handle.se'),
-                        n: document.querySelector('.resize-handle.n'),
-                        s: document.querySelector('.resize-handle.s'),
-                        e: document.querySelector('.resize-handle.e'),
-                        w: document.querySelector('.resize-handle.w')
-                    }};
-                    
-                    let handlesSetup = 0;
-                    for (const [direction, handle] of Object.entries(resizeHandles)) {{
-                        if (handle) {{
-                            setupResizeHandle(handle, direction);
-                            handlesSetup++;
-                        }} else {{
-                            console.warn(`StillMe Chat: Resize handle ${{direction}} not found!`);
+                    // Setup all resize handles - with error checking and retry
+                    function setupAllResizeHandles() {{
+                        const resizeHandles = {{
+                            nw: document.querySelector('.resize-handle.nw'),
+                            ne: document.querySelector('.resize-handle.ne'),
+                            sw: document.querySelector('.resize-handle.sw'),
+                            se: document.querySelector('.resize-handle.se'),
+                            n: document.querySelector('.resize-handle.n'),
+                            s: document.querySelector('.resize-handle.s'),
+                            e: document.querySelector('.resize-handle.e'),
+                            w: document.querySelector('.resize-handle.w')
+                        }};
+                        
+                        let handlesSetup = 0;
+                        for (const [direction, handle] of Object.entries(resizeHandles)) {{
+                            if (handle) {{
+                                setupResizeHandle(handle, direction);
+                                handlesSetup++;
+                                // Add visual feedback on successful setup
+                                handle.style.pointerEvents = 'auto';
+                                handle.style.userSelect = 'none';
+                            }} else {{
+                                console.warn(`StillMe Chat: Resize handle ${{direction}} not found!`);
+                            }}
+                        }}
+                        console.log(`StillMe Chat: Setup ${{handlesSetup}}/8 resize handles`);
+                        
+                        // If not all handles found, retry after a short delay (DOM might not be ready)
+                        if (handlesSetup < 8) {{
+                            console.warn(`StillMe Chat: Only ${{handlesSetup}}/8 handles found, retrying...`);
+                            setTimeout(setupAllResizeHandles, 100);
                         }}
                     }}
-                    console.log(`StillMe Chat: Setup ${{handlesSetup}}/8 resize handles`);
+                    
+                    // Initial setup
+                    setupAllResizeHandles();
                     
                     // CRITICAL: Verify panel layout
                     const messagesEl = document.querySelector('.stillme-chat-messages');
