@@ -53,8 +53,9 @@ except Exception as e:
 
 # NOW import SentenceTransformer (after env vars are set)
 from sentence_transformers import SentenceTransformer
-from typing import List, Union
+from typing import List, Union, Dict
 import logging
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +69,10 @@ class EmbeddingService:
             model_name: Name of the sentence transformer model to use
         """
         self.model_name = model_name
+        # OPTIMIZATION: Embedding cache for similar queries (reduces redundant encoding)
+        # Cache key: hash of normalized query text, value: embedding vector
+        self._embedding_cache: Dict[str, List[float]] = {}
+        self._cache_max_size = 100  # Limit cache size to prevent memory issues
         
         # CRITICAL: Use global ModelManager for cache verification
         # ModelManager was already initialized at module level to setup environment
@@ -333,8 +338,19 @@ class EmbeddingService:
         )
         return None
     
+    def _normalize_query(self, text: str) -> str:
+        """Normalize query text for cache key (lowercase, strip whitespace)"""
+        return text.lower().strip()
+    
+    def _get_cache_key(self, text: str) -> str:
+        """Generate cache key from normalized text"""
+        normalized = self._normalize_query(text)
+        return hashlib.md5(normalized.encode('utf-8')).hexdigest()
+    
     def encode_text(self, text: Union[str, List[str]]) -> Union[List[float], List[List[float]]]:
         """Generate embeddings for text
+        
+        OPTIMIZATION: Uses cache for single text queries to avoid redundant encoding
         
         Args:
             text: Single text string or list of text strings
@@ -343,7 +359,24 @@ class EmbeddingService:
             Single embedding vector or list of embedding vectors
         """
         try:
+            # OPTIMIZATION: Check cache for single text queries
+            if isinstance(text, str):
+                cache_key = self._get_cache_key(text)
+                if cache_key in self._embedding_cache:
+                    logger.debug(f"Cache hit for query: {text[:50]}...")
+                    return self._embedding_cache[cache_key].copy()  # Return copy to prevent mutation
+            
             embeddings = self.model.encode(text, convert_to_tensor=False)
+            
+            # OPTIMIZATION: Cache single text embeddings
+            if isinstance(text, str):
+                cache_key = self._get_cache_key(text)
+                # Limit cache size (LRU eviction)
+                if len(self._embedding_cache) >= self._cache_max_size:
+                    # Remove oldest entry (simple FIFO, could use LRU but this is simpler)
+                    oldest_key = next(iter(self._embedding_cache))
+                    del self._embedding_cache[oldest_key]
+                self._embedding_cache[cache_key] = embeddings.tolist() if hasattr(embeddings, 'tolist') else list(embeddings)
             
             # After first encode, model files should be cached
             # Verify cache location after first use (only log once)

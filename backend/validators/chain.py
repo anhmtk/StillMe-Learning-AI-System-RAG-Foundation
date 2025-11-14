@@ -26,6 +26,9 @@ class ValidatorChain:
         """
         Run all validators in sequence
         
+        OPTIMIZATION: Early exit for critical failures (language_mismatch, missing_citation without patch)
+        This reduces latency when validation fails early, avoiding unnecessary validator runs.
+        
         Args:
             answer: The answer to validate
             ctx_docs: List of context documents from RAG
@@ -85,21 +88,23 @@ class ValidatorChain:
                             )
                             # Continue - don't fail fast
                         elif any("language_mismatch" in r for r in reasons):
-                            # Language mismatch is critical - fail fast
+                            # OPTIMIZATION: Early exit for language mismatch (critical failure)
+                            # Language mismatch is critical - fail fast to avoid running remaining validators
                             logger.warning(
-                                f"Validator {i} ({type(validator).__name__}) failed: language_mismatch (critical) without patch"
+                                f"Validator {i} ({type(validator).__name__}) failed: language_mismatch (critical) without patch - early exit"
                             )
-                            # No translation available - this is critical, return failure
+                            # No translation available - this is critical, return failure immediately
                             return ValidationResult(
                                 passed=False,
                                 reasons=reasons,
                                 patched_answer=None
                             )
                         elif any("missing_citation" in r for r in reasons):
+                            # OPTIMIZATION: Early exit for missing citation without patch (critical failure)
                             # Missing citation is critical but no patched_answer available
                             # This should not happen if CitationRequired is working correctly
                             logger.warning(
-                                f"Validator {i} ({type(validator).__name__}) failed: missing_citation (critical) without patch"
+                                f"Validator {i} ({type(validator).__name__}) failed: missing_citation (critical) without patch - early exit"
                             )
                             return ValidationResult(
                                 passed=False,
