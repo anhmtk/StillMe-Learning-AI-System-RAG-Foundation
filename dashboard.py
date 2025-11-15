@@ -163,6 +163,8 @@ def get_json(path: str, default: Dict[str, Any] | None = None, timeout: int = 10
 
 
 def page_overview():
+    # Ensure time module is available (avoid UnboundLocalError from shadowing)
+    import time as time_module
     status = get_json("/api/status", {})
     rag_stats = get_json("/api/rag/stats", {}).get("stats", {})
     accuracy = get_json("/api/learning/accuracy_metrics", {}).get("metrics", {})
@@ -501,7 +503,7 @@ def page_overview():
                         job_id = data.get("job_id")
                         st.session_state["learning_job_id"] = job_id
                         st.session_state["learning_job_started"] = True
-                        st.session_state["learning_job_start_time"] = time.time()
+                        st.session_state["learning_job_start_time"] = time_module.time()
                         # IMMEDIATE FEEDBACK
                         st.success("🚀 Learning cycle started! Running in background (2-5 minutes). Results will appear below when complete.")
                     elif r.status_code == 200:
@@ -525,7 +527,7 @@ def page_overview():
                     # Timeout is OK - job is running in background
                     st.session_state["learning_job_id"] = None
                     st.session_state["learning_job_started"] = True
-                    st.session_state["learning_job_start_time"] = time.time()
+                    st.session_state["learning_job_start_time"] = time_module.time()
                     # IMMEDIATE FEEDBACK even on timeout
                     st.success("🚀 Learning cycle started! Running in background (2-5 minutes). Results will appear below when complete.")
                 except Exception as e:
@@ -1322,8 +1324,8 @@ def page_validation():
         if validators_enabled:
             st.info(
                 "✅ **Validators are enabled** (`ENABLE_VALIDATORS=true`)\n\n"
-                "📊 **No validation data yet.** Send a chat message in the sidebar to start collecting metrics.\n\n"
-                "💡 Validation metrics are recorded automatically when you chat with StillMe."
+                "📊 **No validation data yet.** Send a chat message (sidebar or floating widget) to start collecting metrics.\n\n"
+                "💡 Validation metrics are recorded automatically when you chat with StillMe through any interface."
             )
         else:
             st.warning(
