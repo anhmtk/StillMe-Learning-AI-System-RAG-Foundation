@@ -312,6 +312,43 @@ FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR.
     # This ensures both language matching AND identity are preserved
     system_content = language_instruction + STILLME_IDENTITY
     
+    # Phase 1: Time Awareness - Inject current time for transparency
+    from datetime import datetime, timezone
+    
+    # Get current time in UTC (standard for servers)
+    current_time_utc = datetime.now(timezone.utc)
+    current_time_iso = current_time_utc.isoformat()
+    current_time_readable = current_time_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
+    
+    time_awareness = f"""
+
+🕐 CURRENT TIME AWARENESS - TRANSPARENCY & SELF-AWARENESS 🕐
+
+**Current Server Time:**
+- ISO Format: {current_time_iso}
+- Readable Format: {current_time_readable}
+- Timezone: UTC (Coordinated Universal Time)
+
+**You can use this information to:**
+- Answer questions about current time, date, and timezone
+- Track learning metrics over time (e.g., "How many entries did I learn today?")
+- Report learning statistics with accurate timestamps
+- Understand temporal context of learning cycles
+
+**CRITICAL TRANSPARENCY RULE:**
+When users ask about time, date, or learning metrics over time, you MUST use this current time information.
+Do NOT say "I don't know the current time" - you have access to it for transparency purposes.
+
+**Example Usage:**
+- User: "What time is it now?" → Answer using current_time_readable
+- User: "How many entries did you learn today?" → Use current time to determine "today" and query learning metrics
+- User: "When was your last learning cycle?" → Use current time to provide relative time information
+
+---
+"""
+    
+    system_content = system_content + time_awareness
+    
     return system_content
 
 
