@@ -1324,7 +1324,7 @@ def page_validation():
         if validators_enabled:
             st.info(
                 "✅ **Validators are enabled** (`ENABLE_VALIDATORS=true`)\n\n"
-                "📊 **No validation data yet.** Send a chat message (sidebar or floating widget) to start collecting metrics.\n\n"
+                "📊 **No validation data yet.** Send a chat message via the floating widget to start collecting metrics.\n\n"
                 "💡 Validation metrics are recorded automatically when you chat with StillMe through any interface."
             )
         else:
@@ -1630,25 +1630,14 @@ def sidebar(page_for_chat: str | None = None):
 
     st.sidebar.success("Backend Connected")
 
-    # Chat panel now appears on all pages (improved UX)
-    st.sidebar.markdown("---")
-    # Chat mode selector (Sidebar or Floating Widget)
-    chat_mode = st.sidebar.radio(
-        "Chat Mode:",
-        ["Sidebar Chat", "Floating Widget"],
-        horizontal=True,
-        help="Choose between sidebar chat or floating widget"
-    )
-    
     st.sidebar.markdown("---")
     
-    # Initialize chat history service
+    # Initialize chat history service (for floating widget)
     if CHAT_HISTORY_AVAILABLE:
         if "chat_history_service" not in st.session_state:
             try:
                 st.session_state.chat_history_service = ChatHistory()
             except Exception as e:
-                st.sidebar.warning(f"⚠️ Chat history service unavailable: {e}")
                 st.session_state.chat_history_service = None
     else:
         st.session_state.chat_history_service = None
@@ -1686,14 +1675,11 @@ def sidebar(page_for_chat: str | None = None):
                         } if msg.get("validation_passed") is not None else None,
                         "latency_metrics": f"Latency: {msg.get('latency', 0):.2f}s" if msg.get("latency") else None
                     })
-                if db_history:
-                    st.sidebar.success(f"✅ Loaded {len(db_history)} messages from history")
             except Exception as e:
-                st.sidebar.warning(f"⚠️ Failed to load chat history: {e}")
+                pass  # Silent fail - history loading is optional
     
-    # Render floating community button (always visible, not just in chat mode)
-    # Render floating widget if selected and available
-    if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
+    # Render floating chat widget (always enabled, no mode selector)
+    if FLOATING_CHAT_AVAILABLE:
         # Render floating chat widget
         render_floating_chat(
             chat_history=st.session_state.chat_history,
@@ -1702,7 +1688,7 @@ def sidebar(page_for_chat: str | None = None):
         )
         
         # Note: Floating widget handles its own chat logic via JavaScript
-        st.sidebar.success("✅ **Floating Widget Active!**")
+        st.sidebar.success("✅ **Floating Chat Widget Active!**")
         st.sidebar.info("💡 Look for the **💬 chat button** in the **bottom-right corner** of your screen. Click it to open the resizable chat panel!")
         st.sidebar.markdown("---")
         st.sidebar.caption("**Features:** Resize, Drag, Fullscreen, Overlay")
@@ -1715,518 +1701,20 @@ def sidebar(page_for_chat: str | None = None):
         1. **Hard refresh** the page (Ctrl+Shift+R or Cmd+Shift+R)
         2. **Scroll down** to bottom-right corner
         3. **Check browser console** (F12) for errors
-        4. If still not visible, try **Sidebar Chat** mode instead
         """)
+    else:
+        st.sidebar.warning("⚠️ Floating chat widget is not available. Please check frontend components.")
     
-    # Sidebar chat (original implementation)
-    elif chat_mode == "Sidebar Chat":
-        st.sidebar.subheader("💬 Chat with StillMe")
-        
-        # Clear chat button (at top for easy access)
-        if st.session_state.chat_history:
-            if st.sidebar.button("🗑️ Clear Chat", use_container_width=True, key="clear_chat"):
-                st.session_state.chat_history = []
-                # Optionally delete from SQLite (commented out to preserve history)
-                # if st.session_state.chat_history_service:
-                #     try:
-                #         st.session_state.chat_history_service.delete_history(
-                #             session_id=st.session_state.chat_session_id
-                #         )
-                #     except Exception as e:
-                #         import logging
-                #         logging.warning(f"Failed to delete chat history from SQLite: {e}")
-                st.rerun()
-        
-        # Display chat history in a larger, scrollable container
-        if st.session_state.chat_history:
-            # Use container instead of expander to avoid nested expander issues
-            # (Metadata display uses button + container, not expander)
-            st.sidebar.markdown("### 📜 Chat History")
-            with st.sidebar.container():
-                # Create chat messages with better styling
-                for idx, m in enumerate(st.session_state.chat_history[-20:]):  # Show last 20 messages
-                    speaker = "You" if m["role"] == "user" else "StillMe"
-                    speaker_color = "#46b3ff" if m["role"] == "user" else "#ffffff"
-                    bg_color = "#1e3a5f" if m["role"] == "user" else "#262730"
-                    align = "right" if m["role"] == "user" else "left"
-                    
-                    st.markdown(
-                        f'<div style="margin-bottom: 12px; padding: 12px; background-color: {bg_color}; border-radius: 8px; text-align: {align}; max-width: 90%; margin-left: {"auto" if m["role"] == "user" else "0"}; margin-right: {"0" if m["role"] == "user" else "auto"};">'
-                        f'<strong style="color: {speaker_color}; font-size: 0.9em;">{speaker}:</strong><br>'
-                        f'<span style="color: #ffffff; font-size: 0.95em;">{m["content"]}</span>'
-                        f'</div>',
-                        unsafe_allow_html=True
-                    )
-                    
-                    # Display confidence score and validation info for assistant messages
-                    if m["role"] == "assistant":
-                        confidence_score = m.get("confidence_score")
-                        validation_info = m.get("validation_info")
-                        learning_suggestions = m.get("learning_suggestions")
-                        latency_metrics = m.get("latency_metrics")
-                        
-                        # Create collapsible section for metadata using HTML details (can't nest expanders)
-                        if confidence_score is not None or validation_info or learning_suggestions or latency_metrics:
-                            metadata_key = f"metadata_{idx}"
-                            show_metadata = st.session_state.get(metadata_key, False)
-                            
-                            # Toggle button for metadata (use sidebar button to avoid nesting issues)
-                            if st.sidebar.button("📊 Show Metadata", key=f"toggle_{idx}", use_container_width=True):
-                                st.session_state[metadata_key] = not show_metadata
-                                st.rerun()
-                            
-                            # Display metadata if toggled (in sidebar container, not nested expander)
-                            if st.session_state.get(metadata_key, False):
-                                with st.sidebar.container():
-                                    # Confidence Score
-                                    if confidence_score is not None:
-                                        # Color based on confidence level
-                                        if confidence_score >= 0.7:
-                                            conf_color = "#4CAF50"  # Green
-                                            conf_emoji = "🟢"
-                                        elif confidence_score >= 0.4:
-                                            conf_color = "#FF9800"  # Orange
-                                            conf_emoji = "🟡"
-                                        else:
-                                            conf_color = "#F44336"  # Red
-                                            conf_emoji = "🔴"
-                                        
-                                        st.markdown(
-                                            f'{conf_emoji} **Confidence Score:** '
-                                            f'<span style="color: {conf_color}; font-weight: bold;">{confidence_score:.2f}</span> '
-                                            f'({confidence_score*100:.0f}%)',
-                                            unsafe_allow_html=True
-                                        )
-                                    
-                                    # Validation Info
-                                    if validation_info:
-                                        st.markdown("**Validation Status:**")
-                                        passed = validation_info.get("passed", False)
-                                        reasons = validation_info.get("reasons", [])
-                                        used_fallback = validation_info.get("used_fallback", False)
-                                        context_docs_count = validation_info.get("context_docs_count", 0)
-                                        
-                                        if passed:
-                                            st.success("✅ Validation Passed")
-                                        else:
-                                            st.warning("⚠️ Validation Failed")
-                                        
-                                        if used_fallback:
-                                            st.info("🛡️ **Safe Fallback Answer Used** - Original response was replaced with a safe fallback to prevent hallucination.")
-                                        
-                                        if reasons:
-                                            st.markdown(f"**Reasons:** {', '.join(reasons)}")
-                                        
-                                        st.caption(f"Context Documents: {context_docs_count}")
-                                    
-                                    # Learning Suggestions
-                                    if learning_suggestions:
-                                        st.markdown("**💡 Learning Suggestions:**")
-                                        for suggestion in learning_suggestions:
-                                            st.info(f"• {suggestion}")
-                                    
-                                    # Latency Metrics
-                                    if latency_metrics:
-                                        st.markdown("**⏱️ Latency Metrics:**")
-                                        st.code(latency_metrics, language="text")
-                    
-                    # Show permission request if available
-                    if st.session_state.get("learning_proposal") and st.session_state.get("permission_request"):
-                        proposal = st.session_state["learning_proposal"]
-                        permission_msg = st.session_state["permission_request"]
-                        
-                        with st.expander("💡 **Learning Request from Conversation**", expanded=True):
-                            st.markdown(permission_msg)
-                            
-                            col1, col2, col3 = st.columns(3)
-                            
-                            with col1:
-                                if st.button("✅ Đồng ý / Yes", key=f"accept_{proposal.get('proposal_id', 'unknown')}", use_container_width=True):
-                                    # Send acceptance
-                                    try:
-                                        response = requests.post(
-                                            f"{API_BASE}/api/learning/permission/respond",
-                                            json={
-                                                "proposal_id": proposal.get("proposal_id"),
-                                                "user_response": "yes",
-                                                "user_id": st.session_state.get("user_id")
-                                            },
-                                            timeout=10
-                                        )
-                                        response.raise_for_status()
-                                        result = response.json()
-                                        if result.get("status") in ["accepted", "edited"]:
-                                            st.success("✅ " + result.get("message", "Thank you! Information added to knowledge base."))
-                                            # Clear from session state
-                                            del st.session_state["learning_proposal"]
-                                            del st.session_state["permission_request"]
-                                            st.rerun()
-                                        else:
-                                            st.error("❌ " + result.get("message", "Failed to add information."))
-                                    except Exception as e:
-                                        st.error(f"❌ Error: {str(e)}")
-                            
-                            with col2:
-                                if st.button("❌ Từ chối / No", key=f"decline_{proposal.get('proposal_id', 'unknown')}", use_container_width=True):
-                                    # Send decline
-                                    try:
-                                        response = requests.post(
-                                            f"{API_BASE}/api/learning/permission/respond",
-                                            json={
-                                                "proposal_id": proposal.get("proposal_id"),
-                                                "user_response": "no",
-                                                "user_id": st.session_state.get("user_id")
-                                            },
-                                            timeout=10
-                                        )
-                                        response.raise_for_status()
-                                        result = response.json()
-                                        st.info("ℹ️ " + result.get("message", "Permission declined. Information will not be saved."))
-                                        # Clear from session state
-                                        del st.session_state["learning_proposal"]
-                                        del st.session_state["permission_request"]
-                                        st.rerun()
-                                    except Exception as e:
-                                        st.error(f"❌ Error: {str(e)}")
-                            
-                            with col3:
-                                edited_content = st.text_area(
-                                    "✏️ Edit content (optional)",
-                                    value=proposal.get("knowledge_snippet", "")[:500],
-                                    key=f"edit_{proposal.get('proposal_id', 'unknown')}",
-                                    height=100
-                                )
-                                if st.button("📝 Submit Edited", key=f"submit_edit_{proposal.get('proposal_id', 'unknown')}", use_container_width=True):
-                                    if len(edited_content.strip()) > 50:
-                                        try:
-                                            response = requests.post(
-                                                f"{API_BASE}/api/learning/permission/respond",
-                                                json={
-                                                    "proposal_id": proposal.get("proposal_id"),
-                                                    "user_response": edited_content,
-                                                    "user_id": st.session_state.get("user_id")
-                                                },
-                                                timeout=10
-                                            )
-                                            response.raise_for_status()
-                                            result = response.json()
-                                            if result.get("status") in ["accepted", "edited"]:
-                                                st.success("✅ " + result.get("message", "Thank you! Edited content added to knowledge base."))
-                                                # Clear from session state
-                                                del st.session_state["learning_proposal"]
-                                                del st.session_state["permission_request"]
-                                                st.rerun()
-                                            else:
-                                                st.error("❌ " + result.get("message", "Failed to add edited content."))
-                                        except Exception as e:
-                                            st.error(f"❌ Error: {str(e)}")
-                                    else:
-                                        st.warning("⚠️ Edited content must be at least 50 characters.")
-                    
-                    # Show knowledge alert after StillMe's response
-                    if m["role"] == "assistant" and "knowledge_alert" in m:
-                        alert = m["knowledge_alert"]
-                        alert_title = alert.get("title", "Important Knowledge")
-                        alert_source = alert.get("source", "Unknown")
-                        
-                        st.sidebar.info(
-                            f"💡 **StillMe Suggestion:** StillMe has learned new knowledge that may be relevant: "
-                            f"**{alert_title}** (Source: {alert_source}). "
-                            f"Would you like StillMe to explain?"
-                        )
-                        
-                        if st.sidebar.button(f"📖 Explain {alert_title[:30]}...", key=f"explain_{idx}", use_container_width=True):
-                            # Trigger explanation query
-                            explain_query = f"Explain: {alert_title}"
-                            st.session_state.chat_history.append({"role": "user", "content": explain_query})
-                            st.rerun()
-        
-        st.sidebar.markdown("---")
-        
-        # Use form for Enter key support
-        with st.sidebar.form(key="chat_form", clear_on_submit=True):
-            user_msg = st.text_area(
-                "Your message", 
-                height=100,
-                key="chat_input_form",
-                placeholder="Type your message and press Enter (Shift+Enter for new line)...",
-                help="Press Enter to send, Shift+Enter for new line"
-            )
-            
-            send_button = st.form_submit_button("💬 Send", use_container_width=True)
-        
-        # Refresh button outside form (can't have multiple submit buttons in form)
-        if st.sidebar.button("🔄 Refresh", use_container_width=True, key="refresh_chat"):
-            st.rerun()
-        
-        # Process message when form is submitted
-        if send_button and user_msg and user_msg.strip():
-            # Store message before clearing
-            message_to_send = user_msg.strip()
-            
-            # DEBUG: Log that we're about to send a request
-            import logging
-            logging.info(f"📤 Sending chat request to {API_BASE}/api/chat/smart_router")
-            logging.info(f"📤 Message: {message_to_send[:50]}...")
-            
-            # Add user message to history
-            st.session_state.chat_history.append({"role": "user", "content": message_to_send})
-            
-            # Build conversation history for backend (exclude current message, keep last 5 pairs)
-            conversation_history = []
-            if "chat_history" in st.session_state and len(st.session_state.chat_history) > 0:
-                # Get last 5 message pairs (10 messages total) before current message
-                history_slice = st.session_state.chat_history[:-1][-10:]  # Exclude current, get last 10
-                conversation_history = history_slice
-            
-            # Save user message to SQLite (with empty assistant_response, will be updated later)
-            if st.session_state.chat_history_service:
-                try:
-                    st.session_state.chat_history_service.save_message(
-                        user_message=message_to_send,
-                        assistant_response="",  # Will be updated when response arrives
-                        session_id=st.session_state.chat_session_id
-                    )
-                    # Store the message ID for updating later
-                    st.session_state["pending_assistant_response"] = True
-                except Exception as e:
-                    import logging
-                    logging.warning(f"Failed to save user message to SQLite: {e}")
-            
-            # Show loading status (using status instead of spinner in sidebar)
-            status_placeholder = st.sidebar.empty()
-            status_placeholder.info("🤔 StillMe is thinking...")
-            
-            # Initialize knowledge_alert to None (fix UnboundLocalError)
-            knowledge_alert = None
-            reply = None
-            
-            # Initialize variables before try-except to avoid UnboundLocalError
-            confidence_score = None
-            validation_info = None
-            learning_suggestions = None
-            latency_metrics = None
-            processing_steps = []
-            
-            try:
-                # Show initial progress message
-                status_placeholder.info("🤔 StillMe is thinking... This may take 30-90 seconds (AI generation + validation). If this is the first request, the embedding model may be loading (this can take 2-3 minutes).")
-                
-                # DEBUG: Log request details
-                chat_url = f"{API_BASE}/api/chat/smart_router"
-                logging.info(f"📤 POST {chat_url}")
-                logging.info(f"📤 API_BASE: {API_BASE}")
-                logging.info(f"📤 Conversation history: {len(conversation_history)} messages")
-                
-                # Build request payload with conversation history
-                request_payload = {
-                    "message": message_to_send,
-                    "user_id": "dashboard_user",
-                    "use_rag": True,
-                    "context_limit": 3
-                }
-                
-                # Add conversation history if available
-                if conversation_history:
-                    request_payload["conversation_history"] = conversation_history
-                
-                r = requests.post(
-                    chat_url,
-                    json=request_payload,
-                    timeout=300,  # Increased to 300s (5 minutes) to handle first-time model loading
-                )
-                
-                # DEBUG: Log response
-                logging.info(f"📥 Response status: {r.status_code}")
-                logging.info(f"📥 Response received from {chat_url}")
-                r.raise_for_status()
-                data = r.json()
-                # Extract response from ChatResponse model
-                reply = data.get("response") or data.get("message") or str(data)
-                if isinstance(reply, dict):
-                    reply = reply.get("detail", str(reply))
-                
-                # Extract confidence score and validation info
-                confidence_score = data.get("confidence_score")
-                validation_info = data.get("validation_info")
-                learning_suggestions = data.get("learning_suggestions")
-                latency_metrics = data.get("latency_metrics")  # Extract latency metrics
-                processing_steps = data.get("processing_steps", [])  # Extract processing steps
-                
-                # Display processing steps if available
-                if processing_steps:
-                    steps_text = " | ".join(processing_steps[-3:])  # Show last 3 steps
-                    status_placeholder.info(f"🤔 {steps_text}")
-                
-                # Check for learning proposal and permission request
-                learning_proposal = data.get("learning_proposal")
-                permission_request = data.get("permission_request")
-                if learning_proposal and permission_request:
-                    st.session_state["learning_proposal"] = learning_proposal
-                    st.session_state["permission_request"] = permission_request
-                    import logging
-                    logging.info(f"Learning proposal received: {learning_proposal.get('proposal_id', 'unknown')}")
-                
-                # Check for knowledge alert
-                knowledge_alert = data.get("knowledge_alert")
-                if knowledge_alert:
-                    alert_title = knowledge_alert.get("title", "Important Knowledge")
-                    alert_source = knowledge_alert.get("source", "Unknown")
-                    st.session_state["knowledge_alert"] = knowledge_alert
-                    import logging
-                    logging.info(f"Knowledge alert received: {alert_title}")
-                
-                status_placeholder.success("✅ Response received!")
-            except requests.exceptions.HTTPError as e:
-                # Handle HTTP errors (4xx, 5xx) specifically
-                status_code = e.response.status_code if hasattr(e, 'response') else "unknown"
-                if status_code == 502:
-                    reply = "❌ **502 Bad Gateway** - Backend service is not responding. Please check Railway dashboard and restart backend service if needed."
-                    status_placeholder.error("❌ 502 Bad Gateway")
-                    st.error("💡 **Backend is down!** Go to Railway → Service 'stillme-backend' → Check logs and restart if needed.")
-                elif status_code == 422:
-                    error_detail = ""
-                    try:
-                        error_data = e.response.json()
-                        error_detail = error_data.get('detail', str(e))
-                    except Exception:
-                        error_detail = str(e)
-                    reply = f"❌ **422 Unprocessable Entity** - Request format error: {error_detail}"
-                    status_placeholder.error("❌ 422 Error")
-                    st.warning("💡 This is a request format issue. Please refresh the page and try again.")
-                elif status_code == 503:
-                    error_detail = ""
-                    try:
-                        error_data = e.response.json()
-                        error_detail = error_data.get('detail', 'Service unavailable')
-                    except Exception:
-                        error_detail = str(e)
-                    reply = f"❌ **503 Service Unavailable** - {error_detail}"
-                    status_placeholder.error("❌ Service Unavailable")
-                    st.warning("💡 Backend service may be initializing. Please wait a moment and try again.")
-                else:
-                    error_detail = ""
-                    try:
-                        error_data = e.response.json()
-                        error_detail = error_data.get('detail', str(e))
-                    except Exception:
-                        error_detail = str(e)
-                    reply = f"❌ **Error {status_code}** - {error_detail}"
-                    status_placeholder.error(f"❌ HTTP {status_code}")
-                    st.error(f"💡 Backend returned error {status_code}. Check backend logs for details.")
-            except requests.exceptions.Timeout:
-                reply = "❌ Request timed out after 3 minutes. The AI response is taking longer than expected."
-                status_placeholder.error("❌ Timeout")
-                st.warning("💡 **Solutions:**\n1. Try again (AI API may be slow)\n2. Check backend logs\n3. Verify API keys (OPENAI_API_KEY or DEEPSEEK_API_KEY) are set")
-            except requests.exceptions.ConnectionError as e:
-                # DEBUG: Log connection error details
-                import logging
-                logging.error(f"❌ Connection Error: {e}")
-                logging.error(f"❌ API_BASE: {API_BASE}")
-                logging.error(f"❌ Attempted URL: {API_BASE}/api/chat/smart_router")
-                
-                reply = f"❌ **Connection Error** - Cannot connect to backend at `{API_BASE}`. Backend service may be down or restarting. Error: {str(e)}"
-                status_placeholder.error("❌ Connection error")
-                st.error(f"💡 **Backend is unreachable!**\n- API_BASE: `{API_BASE}`\n- Check Railway dashboard → Service 'stillme-backend' → Ensure it's running.\n- Verify `STILLME_API_BASE` environment variable is set correctly in dashboard service.")
-            except requests.exceptions.RequestException as e:
-                reply = f"❌ **Request Error** - {str(e)}"
-                status_placeholder.error("❌ Request error")
-                st.error(f"💡 Request failed: {str(e)}")
-            except Exception as e:
-                # DEBUG: Log all unexpected errors
-                import logging
-                import traceback
-                logging.error(f"❌ Unexpected Error in chat: {e}")
-                logging.error(f"❌ API_BASE: {API_BASE}")
-                logging.error(f"❌ Traceback: {traceback.format_exc()}")
-                
-                reply = f"❌ **Unexpected Error** - {str(e)}"
-                status_placeholder.error("❌ Error occurred")
-                st.error(f"💡 Unexpected error: {str(e)}\n\n**Debug Info:**\n- API_BASE: `{API_BASE}`\n- Check browser console (F12) for more details\n- Check dashboard logs for full traceback")
-            
-            # Add assistant response to history (with knowledge alert if available)
-            # Ensure reply is set (fallback if all exceptions occurred)
-            if reply is None:
-                reply = "❌ **Error** - No response received from backend."
-            
-            message_entry = {"role": "assistant", "content": reply}
-            if knowledge_alert:
-                message_entry["knowledge_alert"] = knowledge_alert
-            # Store confidence and validation info for display
-            if confidence_score is not None:
-                message_entry["confidence_score"] = confidence_score
-            if validation_info:
-                message_entry["validation_info"] = validation_info
-            if learning_suggestions:
-                message_entry["learning_suggestions"] = learning_suggestions
-            if latency_metrics:
-                message_entry["latency_metrics"] = latency_metrics
-            st.session_state.chat_history.append(message_entry)
-            
-            # Save assistant response to SQLite
-            if st.session_state.chat_history_service:
-                try:
-                    # Extract latency from latency_metrics string if available
-                    latency_value = None
-                    if latency_metrics and isinstance(latency_metrics, str):
-                        # Try to extract latency from string like "Latency: 1.23s"
-                        try:
-                            latency_str = latency_metrics.split(":")[1].strip().replace("s", "")
-                            latency_value = float(latency_str)
-                        except (IndexError, ValueError):
-                            pass
-                    
-                    # Try to update the last message with empty assistant_response first
-                    updated = False
-                    if st.session_state.get("pending_assistant_response", False):
-                        try:
-                            st.session_state.chat_history_service.save_message(
-                                user_message=message_to_send,
-                                assistant_response=reply,
-                                session_id=st.session_state.chat_session_id,
-                                confidence_score=confidence_score,
-                                validation_passed=validation_info.get("passed") if validation_info else None,
-                                response_length=len(reply) if reply else None,
-                                context_docs_count=validation_info.get("context_docs_count") if validation_info else None,
-                                latency=latency_value,
-                                update_existing=True
-                            )
-                            updated = True
-                            st.session_state["pending_assistant_response"] = False
-                        except Exception:
-                            pass  # Fall through to insert new message
-                    
-                    # If update failed, insert new message
-                    if not updated:
-                        st.session_state.chat_history_service.save_message(
-                            user_message=message_to_send,
-                            assistant_response=reply,
-                            session_id=st.session_state.chat_session_id,
-                            confidence_score=confidence_score,
-                            validation_passed=validation_info.get("passed") if validation_info else None,
-                            response_length=len(reply) if reply else None,
-                            context_docs_count=validation_info.get("context_docs_count") if validation_info else None,
-                            latency=latency_value
-                        )
-                except Exception as e:
-                    import logging
-                    logging.warning(f"Failed to save assistant message to SQLite: {e}")
-            
-            # Clear knowledge alert from session state after adding to history
-            if "knowledge_alert" in st.session_state:
-                del st.session_state["knowledge_alert"]
-            
-            # Clear status and rerun to show new message
-            status_placeholder.empty()
-            st.rerun()
+    # Sidebar chat removed - using floating widget only
+    # (Old sidebar chat code removed for cleaner UX)
     
     return page
 
 
 def main():
     st.set_page_config(
-        page_title="StillMe", 
-        page_icon="🧠", 
+        page_title="StillMe",
+        page_icon="🧠",
         layout="wide",
         initial_sidebar_state="expanded"
     )
@@ -2241,9 +1729,9 @@ def main():
             # Fallback: Show link in sidebar if floating panel fails
             st.sidebar.error(f"⚠️ Community panel error: {e}")
             st.sidebar.markdown("---")
-            st.sidebar.markdown("### 🤝 Community")
-            st.sidebar.markdown("[Open Community Page](/Community)")
-
+            st.sidebar.markdown("💬 [Join StillMe Community](https://discord.gg/stillme)")
+    
+    # Route to appropriate page
     if page == "Overview":
         page_overview()
     elif page == "RAG":
