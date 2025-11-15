@@ -482,12 +482,29 @@ def page_overview():
             other_sources = {k: v for k, v in source_stats.items() if k != "rss"}
             if other_sources:
                 with st.expander("📚 Other Learning Sources", expanded=False):
-                    for source_name, stats in other_sources.items():
-                        if isinstance(stats, dict):
-                            status_icon = "🟢" if stats.get("status") == "ok" else "🔴"
-                            st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} {stats.get('status', 'unknown')}")
-                            if stats.get("error_count", 0) > 0:
-                                st.caption(f"  ⚠️ {stats.get('error_count', 0)} error(s)")
+                    for source_name, source_data in other_sources.items():
+                        if isinstance(source_data, dict):
+                            # Structure: {"enabled": True, "stats": {"status": "ok", ...}}
+                            # If stats is None, source hasn't been used yet
+                            stats = source_data.get("stats")
+                            if stats is None:
+                                # Source enabled but not used yet - show as "not_used" or "enabled"
+                                status_icon = "🟡" if source_data.get("enabled", False) else "⚪"
+                                status_text = "enabled" if source_data.get("enabled", False) else "disabled"
+                                st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} {status_text}")
+                            elif isinstance(stats, dict):
+                                # Stats available - check status
+                                status = stats.get("status", "unknown")
+                                status_icon = "🟢" if status == "ok" else "🔴"
+                                st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} {status}")
+                                if stats.get("error_count", 0) > 0:
+                                    st.caption(f"  ⚠️ {stats.get('error_count', 0)} error(s)")
+                                if stats.get("last_error"):
+                                    st.caption(f"  📝 Last error: {stats['last_error'][:100]}...")
+                            else:
+                                # Invalid stats format
+                                status_icon = "🔴"
+                                st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} unknown")
         
         col_start, col_stop, col_run_now = st.columns(3)
         with col_start:
