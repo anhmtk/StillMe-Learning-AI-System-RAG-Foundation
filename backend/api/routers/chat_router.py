@@ -130,6 +130,31 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # Get user_id from request (if available)
         user_id = chat_request.user_id or request.client.host if hasattr(request, 'client') else "anonymous"
         
+        # Detect learning metrics queries - auto-query API if user asks about learning today
+        is_learning_metrics_query = False
+        learning_metrics_data = None
+        message_lower = chat_request.message.lower()
+        learning_metrics_keywords = [
+            "ngày hôm nay bạn đã học", "học được bao nhiêu", "learn today", "learned today",
+            "học được gì", "what did you learn", "học được những gì", "nội dung gì",
+            "học từ nguồn nào", "sources", "nguồn học", "learning sources"
+        ]
+        if any(keyword in message_lower for keyword in learning_metrics_keywords):
+            is_learning_metrics_query = True
+            logger.info("Learning metrics query detected - fetching metrics data")
+            try:
+                from backend.services.learning_metrics_tracker import get_learning_metrics_tracker
+                from datetime import datetime, timezone
+                tracker = get_learning_metrics_tracker()
+                # Get today's metrics
+                learning_metrics_data = tracker.get_metrics_for_today()
+                if learning_metrics_data:
+                    logger.info(f"✅ Fetched learning metrics for today: {learning_metrics_data.entries_added} entries added")
+                else:
+                    logger.info("⚠️ No learning metrics available for today yet")
+            except Exception as metrics_error:
+                logger.warning(f"Failed to fetch learning metrics: {metrics_error}")
+        
         # Special Retrieval Rule: Detect StillMe-related queries
         is_stillme_query = False
         is_origin_query = False
@@ -723,6 +748,69 @@ Current message:
 """
                         logger.info(f"Including {len(chat_request.conversation_history)} previous messages in context")
                 
+                # Inject learning metrics data if available
+                learning_metrics_instruction = ""
+                if is_learning_metrics_query and learning_metrics_data:
+                    from datetime import datetime, timezone
+                    today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                    learning_metrics_instruction = f"""
+
+📊 LEARNING METRICS DATA FOR TODAY ({today_date}) - USE THIS DATA IN YOUR RESPONSE:
+
+**Today's Learning Statistics:**
+- **Entries Fetched**: {learning_metrics_data.entries_fetched}
+- **Entries Added**: {learning_metrics_data.entries_added}
+- **Entries Filtered**: {learning_metrics_data.entries_filtered}
+- **Filter Rate**: {(learning_metrics_data.entries_filtered / learning_metrics_data.entries_fetched * 100) if learning_metrics_data.entries_fetched > 0 else 0:.1f}%
+
+**Filter Reasons Breakdown:**
+{chr(10).join(f"- {reason}: {count}" for reason, count in learning_metrics_data.filter_reasons.items()) if learning_metrics_data.filter_reasons else "- No filter reasons available"}
+
+**Learning Sources:**
+{chr(10).join(f"- {source}: {count}" for source, count in learning_metrics_data.sources.items()) if learning_metrics_data.sources else "- No source data available"}
+
+**CRITICAL: You MUST use this actual data in your response:**
+- Provide specific numbers: {learning_metrics_data.entries_fetched} fetched, {learning_metrics_data.entries_added} added, {learning_metrics_data.entries_filtered} filtered
+- Explain filter reasons if available
+- List sources that contributed to learning
+- Format with line breaks, bullet points, headers, and 2-3 emojis
+- DO NOT say "I don't know" or "I cannot track" - you have this data!
+
+**Example response format:**
+"## 📚 Học tập hôm nay ({today_date})
+
+Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
+- **Tìm nạp**: {learning_metrics_data.entries_fetched} nội dung
+- **Thêm vào**: {learning_metrics_data.entries_added} nội dung
+- **Lọc bỏ**: {learning_metrics_data.entries_filtered} nội dung
+
+**Nguồn học tập**: [list sources]"
+
+"""
+                elif is_learning_metrics_query:
+                    from datetime import datetime, timezone
+                    today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                    learning_metrics_instruction = f"""
+
+📊 LEARNING METRICS QUERY DETECTED - NO DATA AVAILABLE YET:
+
+**Today's Date**: {today_date}
+
+**Status**: No learning metrics data available for today yet. This could mean:
+- StillMe hasn't completed a learning cycle today
+- Learning cycle is in progress
+- Metrics are being collected
+
+**CRITICAL: You MUST acknowledge:**
+- StillMe learns every 4 hours from RSS feeds, arXiv, CrossRef, and Wikipedia
+- Learning metrics are tracked via `/api/learning/metrics/daily` API
+- If no data yet, explain that StillMe learns continuously and metrics will be available after the next learning cycle
+- DO NOT say "I cannot track" or "I don't have API" - StillMe HAS these capabilities
+
+**Format with line breaks, bullet points, headers, and 2-3 emojis**
+
+"""
+                
                 # Build prompt with language instruction FIRST (before context)
                 # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
                 # ZERO TOLERANCE: Must translate if needed
@@ -738,7 +826,7 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN A DIFFERENT LANGUAGE, YOU MUST TRANSLATE 
 
 UNDER NO CIRCUMSTANCES return a response in any language other than {detected_lang_name.upper()}.
 
-{conversation_history_text}Context: {context_text}
+{learning_metrics_instruction}{conversation_history_text}Context: {context_text}
 {citation_instruction}
 {confidence_instruction}
 {stillme_instruction}
