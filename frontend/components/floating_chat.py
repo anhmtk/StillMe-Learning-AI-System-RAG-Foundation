@@ -1287,13 +1287,13 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             parentPanelStartX = rect.left;
                                             parentPanelStartY = rect.top;
                                             
-                                            // CRITICAL: Remove transform FIRST, then set position to maintain visual position
+                                            // CRITICAL: Remove transform and set position simultaneously
+                                            // getBoundingClientRect() gives visual position, use it directly
                                             parentPanel.style.setProperty('transform', 'none', 'important');
-                                            // Small delay to ensure transform is removed before setting position
-                                            setTimeout(() => {{
-                                                parentPanel.style.setProperty('left', parentPanelStartX + 'px', 'important');
-                                                parentPanel.style.setProperty('top', parentPanelStartY + 'px', 'important');
-                                            }}, 0);
+                                            parentPanel.style.setProperty('left', parentPanelStartX + 'px', 'important');
+                                            parentPanel.style.setProperty('top', parentPanelStartY + 'px', 'important');
+                                            // Force reflow to ensure styles are applied
+                                            parentPanel.offsetHeight;
                                             
                                             console.log(`StillMe Chat: Parent resize started - direction: ${{direction}}, start size: ${{parentPanelStartWidth}}x${{parentPanelStartHeight}}`);
                                             
