@@ -891,8 +891,7 @@ async def get_scheduler_status():
         # Add detailed source statistics for transparency
         source_stats = {}
         try:
-            from backend.services.source_integration import get_source_integration
-            source_integration = get_source_integration()
+            source_integration = get_source_integration()  # Use local function, not import
             if source_integration:
                 source_stats = source_integration.get_source_stats()
         except Exception as e:

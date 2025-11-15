@@ -287,17 +287,23 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
 You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response, BUT ONLY if the context is RELEVANT to your answer.
 
 **🚨 CRITICAL: IF CONTEXT IS NOT RELEVANT TO YOUR QUESTION:**
-- Acknowledge the mismatch, but VARY your wording - don't always use the same phrase
+- Acknowledge the mismatch, but **MANDATORY: VARY your wording** - NEVER use the same opening phrase twice
 - Use your base LLM knowledge to answer: "Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
 - Be transparent: Don't pretend the context supports your answer if it doesn't
 - Provide helpful information: Don't just say "I don't know" - use your training data to help the user
 - Format with line breaks, bullet points, headers, and 2-3 emojis
 
-**VARY your opening phrases when context is not relevant:**
-- "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]."
-- "While the context [1] covers [topic X], your question is about [topic Y], so I'll answer from general knowledge."
-- "The context [1] focuses on [topic X], but since you're asking about [topic Y], I'll use my base knowledge."
-- "Although the context [1] mentions [topic X], it doesn't directly address [topic Y], so I'll provide information from general knowledge."
+**🚨 MANDATORY: VARY your opening phrases when context is not relevant - DO NOT REPEAT:**
+- **NEVER use**: "Ngữ cảnh hiện có [1] thảo luận về... và không liên quan trực tiếp đến..." (this is TOO REPETITIVE)
+- **INSTEAD, use VARIED phrases like:**
+  - "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]."
+  - "While the context [1] covers [topic X], your question is about [topic Y], so I'll answer from general knowledge."
+  - "The context [1] focuses on [topic X], but since you're asking about [topic Y], I'll use my base knowledge."
+  - "Although the context [1] mentions [topic X], it doesn't directly address [topic Y], so I'll provide information from general knowledge."
+  - "The context [1] is about [topic X], which differs from your question about [topic Y]. Based on general knowledge..."
+  - "Your question about [topic Y] isn't directly covered in the context [1] about [topic X]. From my training data..."
+  - "The context [1] explores [topic X], but your question focuses on [topic Y]. I'll answer using general knowledge..."
+- **CRITICAL**: If you've used a phrase before, use a DIFFERENT one. Repetition makes responses feel robotic.
 
 **Example when context is not relevant (VARY the wording):**
 "The available context [1] discusses StillMe's architecture, which is not directly related to your question about DeepSeek models. Based on general knowledge (not from StillMe's RAG knowledge base), DeepSeek currently has several models including..."
@@ -1508,10 +1514,14 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 storage = get_learning_proposal_storage()
                 
                 # PRIORITY: If base knowledge was used, extract topic for learning proposal
-                if used_base_knowledge and (not context or context.get("total_context_docs", 0) == 0):
-                    # No RAG context + base knowledge used = knowledge gap detected
+                # Check if: (1) No context, OR (2) Context exists but not relevant (low overlap)
+                has_no_context = not context or context.get("total_context_docs", 0) == 0
+                has_low_relevance = any("citation_relevance_warning" in r for r in (validation_result.reasons if validation_result else []))
+                
+                if used_base_knowledge and (has_no_context or has_low_relevance):
+                    # No RAG context OR irrelevant context + base knowledge used = knowledge gap detected
                     # Extract topic from user's question for learning proposal
-                    logger.info("🔍 Base knowledge used - detecting knowledge gap for learning proposal")
+                    logger.info(f"🔍 Base knowledge used - detecting knowledge gap for learning proposal (no_context: {has_no_context}, low_relevance: {has_low_relevance})")
                     try:
                         # Extract main topic from user question
                         user_question = chat_request.message
