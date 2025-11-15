@@ -810,15 +810,37 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     # Create validator chain with LanguageValidator FIRST (highest priority)
                     from backend.validators.language import LanguageValidator
                     from backend.validators.citation_relevance import CitationRelevance
-                    chain = ValidatorChain([
+                    from backend.validators.identity_check import IdentityCheckValidator
+                    
+                    # Enable Identity Check Validator (can be toggled via env var)
+                    enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
+                    identity_validator_strict = os.getenv("IDENTITY_VALIDATOR_STRICT", "true").lower() == "true"
+                    
+                    validators = [
                         LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
                         CitationRequired(),
                         CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
                         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
-                        ConfidenceValidator(require_uncertainty_when_no_context=True),  # NEW: Check for uncertainty
+                        ConfidenceValidator(require_uncertainty_when_no_context=True),  # Check for uncertainty
+                    ]
+                    
+                    # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
+                    if enable_identity_check:
+                        validators.append(
+                            IdentityCheckValidator(
+                                strict_mode=identity_validator_strict,
+                                require_humility_when_no_context=True,
+                                allow_minor_tone_violations=False
+                            )
+                        )
+                    
+                    # Add EthicsAdapter last (most critical - blocks harmful content)
+                    validators.append(
                         EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
-                    ])
+                    )
+                    
+                    chain = ValidatorChain(validators)
                     
                     # Run validation
                     validation_result = chain.run(raw_response, ctx_docs)
@@ -833,6 +855,69 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         validation_result=validation_result,
                         context=context
                     )
+                    
+                    # OpenAI Fallback Mechanism: Retry with OpenAI if confidence is low or validation failed
+                    # This uses the $40 credit efficiently by only using OpenAI when needed
+                    enable_openai_fallback = os.getenv("ENABLE_OPENAI_FALLBACK", "true").lower() == "true"
+                    openai_fallback_threshold = float(os.getenv("OPENAI_FALLBACK_CONFIDENCE_THRESHOLD", "0.5"))
+                    openai_api_key = os.getenv("OPENAI_API_KEY")
+                    
+                    # Check if we should try OpenAI fallback
+                    should_try_openai = (
+                        enable_openai_fallback and
+                        openai_api_key and
+                        (
+                            confidence_score < openai_fallback_threshold or
+                            not validation_result.passed
+                        ) and
+                        chat_request.llm_provider != "openai"  # Don't retry if already using OpenAI
+                    )
+                    
+                    if should_try_openai:
+                        logger.info(f"🔄 Low confidence ({confidence_score:.2f}) or validation failed. Attempting OpenAI fallback...")
+                        processing_steps.append("🔄 Attempting OpenAI fallback for better quality...")
+                        try:
+                            from backend.api.utils.llm_providers import InsufficientQuotaError
+                            from backend.api.utils.chat_helpers import generate_ai_response
+                            
+                            # Retry with OpenAI
+                            openai_response = await generate_ai_response(
+                                enhanced_prompt,
+                                detected_lang=detected_lang,
+                                llm_provider="openai",
+                                llm_api_key=openai_api_key,
+                                llm_model_name="gpt-3.5-turbo"
+                            )
+                            
+                            # Re-validate OpenAI response
+                            openai_validation_result = chain.run(openai_response, ctx_docs)
+                            openai_confidence = _calculate_confidence_score(
+                                context_docs_count=len(ctx_docs),
+                                validation_result=openai_validation_result,
+                                context=context
+                            )
+                            
+                            # Use OpenAI response if it's better
+                            if openai_confidence > confidence_score or openai_validation_result.passed:
+                                raw_response = openai_response
+                                validation_result = openai_validation_result
+                                confidence_score = openai_confidence
+                                logger.info(f"✅ OpenAI fallback succeeded (confidence: {openai_confidence:.2f})")
+                                processing_steps.append(f"✅ OpenAI fallback succeeded (confidence: {openai_confidence:.2f})")
+                            else:
+                                logger.info(f"⚠️ OpenAI fallback didn't improve quality, using original response")
+                                processing_steps.append("⚠️ OpenAI fallback didn't improve quality")
+                                
+                        except InsufficientQuotaError as quota_error:
+                            # OpenAI credit exhausted - gracefully fall back to original response
+                            logger.warning(f"⚠️ OpenAI credit exhausted: {quota_error}. Using original DeepSeek response.")
+                            processing_steps.append("⚠️ OpenAI credit exhausted, using original response")
+                            # Continue with original response - no error thrown
+                        except Exception as openai_error:
+                            # Other OpenAI errors - gracefully fall back
+                            logger.warning(f"⚠️ OpenAI fallback failed: {openai_error}. Using original response.")
+                            processing_steps.append("⚠️ OpenAI fallback failed, using original response")
+                            # Continue with original response - no error thrown
                     
                     # Record metrics
                     try:
