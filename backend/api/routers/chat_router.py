@@ -144,7 +144,6 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             logger.info("Learning metrics query detected - fetching metrics data")
             try:
                 from backend.services.learning_metrics_tracker import get_learning_metrics_tracker
-                from datetime import datetime, timezone
                 tracker = get_learning_metrics_tracker()
                 # Get today's metrics
                 learning_metrics_data = tracker.get_metrics_for_today()
@@ -751,7 +750,6 @@ Current message:
                 # Inject learning metrics data if available
                 learning_metrics_instruction = ""
                 if is_learning_metrics_query and learning_metrics_data:
-                    from datetime import datetime, timezone
                     today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
                     learning_metrics_instruction = f"""
 
@@ -788,7 +786,6 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 
 """
                 elif is_learning_metrics_query:
-                    from datetime import datetime, timezone
                     today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
                     learning_metrics_instruction = f"""
 
