@@ -837,6 +837,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         // CRITICAL: If in iframe, also inject panel into parent window
                         if (window.parent && window.parent !== window) {{
                             const parentDoc = window.parent.document;
+                            const parentWindow = window.parent; // CRITICAL: Define parentWindow for event listeners
                             let parentPanel = parentDoc.getElementById('stillme-chat-panel-parent');
                             let parentOverlay = parentDoc.getElementById('stillme-chat-overlay-parent');
                             
@@ -1298,7 +1299,13 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     }}
                                     
                                     // Mouse move handler for parent panel drag/resize
-                                    parentDoc.addEventListener('mousemove', (e) => {{
+                                    // CRITICAL: Attach to parent window, not parent document, to ensure it works
+                                    const parentMouseMoveHandler = (e) => {{
+                                        // Debug logging
+                                        if (parentIsDragging || parentIsResizing) {{
+                                            console.log(`StillMe Chat: Mouse move - dragging: ${{parentIsDragging}}, resizing: ${{parentIsResizing}}, handle: ${{parentResizeHandle}}`);
+                                        }}
+                                        
                                         if (parentIsDragging && !parentPanel.classList.contains('fullscreen') && !parentPanel.classList.contains('minimized')) {{
                                             const deltaX = e.clientX - parentDragStartX;
                                             const deltaY = e.clientY - parentDragStartY;
@@ -1308,12 +1315,14 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             
                                             const panelWidth = parentPanel.offsetWidth;
                                             const panelHeight = parentPanel.offsetHeight;
-                                            newX = Math.max(-panelWidth + 100, Math.min(newX, window.innerWidth - 100));
-                                            newY = Math.max(0, Math.min(newY, window.innerHeight - 50));
+                                            newX = Math.max(-panelWidth + 100, Math.min(newX, parentWindow.innerWidth - 100));
+                                            newY = Math.max(0, Math.min(newY, parentWindow.innerHeight - 50));
                                             
                                             parentPanel.style.left = newX + 'px';
                                             parentPanel.style.top = newY + 'px';
                                             parentPanel.style.transform = 'none';
+                                            
+                                            console.log(`StillMe Chat: Dragging panel to: ${{newX}}, ${{newY}}`);
                                         }} else if (parentIsResizing && !parentPanel.classList.contains('fullscreen') && !parentPanel.classList.contains('minimized') && parentResizeHandle) {{
                                             const deltaX = e.clientX - parentDragStartX;
                                             const deltaY = e.clientY - parentDragStartY;
@@ -1342,8 +1351,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 newY = parentPanelStartY + deltaY;
                                             }}
                                             
-                                            const maxWidth = window.innerWidth - newX + 50;
-                                            const maxHeight = window.innerHeight - newY + 50;
+                                            const maxWidth = parentWindow.innerWidth - newX + 50;
+                                            const maxHeight = parentWindow.innerHeight - newY + 50;
                                             newWidth = Math.min(newWidth, maxWidth);
                                             newHeight = Math.min(newHeight, maxHeight);
                                             
@@ -1352,15 +1361,28 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             parentPanel.style.left = newX + 'px';
                                             parentPanel.style.top = newY + 'px';
                                             parentPanel.style.transform = 'none';
+                                            
+                                            console.log(`StillMe Chat: Resizing panel to: ${{newWidth}}x${{newHeight}} at (${{newX}}, ${{newY}})`);
                                         }}
-                                    }});
+                                    }};
+                                    
+                                    // CRITICAL: Attach to both document and window to ensure it works
+                                    parentDoc.addEventListener('mousemove', parentMouseMoveHandler, true); // Use capture phase
+                                    parentWindow.addEventListener('mousemove', parentMouseMoveHandler, true); // Also attach to window
                                     
                                     // Mouse up handler for parent panel
-                                    parentDoc.addEventListener('mouseup', () => {{
+                                    const parentMouseUpHandler = () => {{
+                                        if (parentIsDragging || parentIsResizing) {{
+                                            console.log(`StillMe Chat: Mouse up - stopping drag/resize`);
+                                        }}
                                         parentIsDragging = false;
                                         parentIsResizing = false;
                                         parentResizeHandle = null;
-                                    }});
+                                    }};
+                                    
+                                    // CRITICAL: Attach to both document and window to ensure it works
+                                    parentDoc.addEventListener('mouseup', parentMouseUpHandler, true); // Use capture phase
+                                    parentWindow.addEventListener('mouseup', parentMouseUpHandler, true); // Also attach to window
                                     
                                     if (parentDoc.body) {{
                                         parentDoc.body.appendChild(parentOverlay);
