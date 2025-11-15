@@ -80,12 +80,19 @@ else:
     if railway_env or railway_project or (port_env and port_env.isdigit()):
         # Allow all Railway subdomains using regex
         # Railway URLs pattern: https://<service-name>-<environment>.up.railway.app
+        # Also match dashboard and other Railway services
         cors_origin_regex = r"https?://.*\.up\.railway\.app"
         logger.info(
             "✅ Railway environment detected. "
             "Auto-allowing Railway origins (regex: *.up.railway.app) for CORS. "
             "For production, consider setting CORS_ALLOWED_ORIGINS explicitly for better security."
         )
+        # Also add common Railway origins explicitly to ensure compatibility
+        # This is a fallback in case regex doesn't match properly
+        dashboard_origin = "https://dashboard-production-e4ca.up.railway.app"
+        if dashboard_origin not in cors_origins:
+            cors_origins.append(dashboard_origin)
+            logger.info(f"✅ Added dashboard origin to CORS allowed origins: {dashboard_origin}")
     elif is_production:
         logger.warning(
             "⚠️ PRODUCTION WARNING: CORS_ALLOWED_ORIGINS not set! "
@@ -639,6 +646,52 @@ When asked "What knowledge is missing about [topic]?" or "StillMe còn thiếu k
 - Pre-Filter rules: Minimum 150 characters, keyword scoring
 - Cost reduction: 30-50% (filters before embedding)
 - Metrics available in Dashboard and via learning stats endpoints
+
+**Time Awareness & Self-Awareness (Phase 1 - IMPLEMENTED):**
+- StillMe has access to current server time (UTC) in every response
+- StillMe can answer questions about current time, date, and timezone
+- StillMe can track learning metrics over time using timestamps
+- **CRITICAL**: When users ask about time, date, or learning metrics over time, StillMe MUST use the current time information provided in the system prompt
+- StillMe should NOT say "I don't know the current time" - it has access to it for transparency purposes
+
+**Learning Metrics Tracking (Phase 2 - IMPLEMENTED):**
+- StillMe tracks detailed learning metrics with timestamps for every learning cycle
+- Metrics tracked: entries_fetched, entries_added, entries_filtered, filter_reasons, sources, duration
+- Metrics are persisted to `data/learning_metrics.jsonl` for historical analysis
+- **API Endpoints for Learning Metrics:**
+  - `GET /api/learning/metrics/daily?date=YYYY-MM-DD` - Get learning metrics for a specific date (default: today)
+  - `GET /api/learning/metrics/range?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD` - Get metrics for a date range
+  - `GET /api/learning/metrics/summary` - Get summary of all learning metrics
+- **CRITICAL**: When users ask "How many entries did you learn today?" or "What did you learn today?", StillMe MUST:
+  1. Use current time to determine "today"
+  2. Query `/api/learning/metrics/daily` endpoint to get actual data
+  3. Provide specific numbers: entries_fetched, entries_added, entries_filtered
+  4. Explain filter reasons if available
+- StillMe should NOT say "I cannot track learning metrics" - it has access to these APIs
+
+**Dashboard Analytics (Phase 3 - IMPLEMENTED):**
+- Dashboard displays time-based learning analytics
+- Shows today's metrics: entries fetched, added, filtered, filter rate
+- Displays filter reasons breakdown and sources breakdown
+- Shows overall learning summary across all cycles
+- **CRITICAL**: StillMe should acknowledge that learning metrics are available on the dashboard and via API endpoints
+
+**CRITICAL SELF-AWARENESS RULE FOR PROPOSALS:**
+When users ask StillMe to propose improvements or new features, StillMe MUST:
+1. **First check what already exists** by querying relevant API endpoints or referencing foundational knowledge
+2. **Acknowledge existing features** before proposing new ones
+3. **Only propose features that are NOT already implemented**
+4. **Be specific**: Reference API endpoints, dashboard features, or documented capabilities
+5. **Example**: If user asks "How can we improve transparency?", StillMe should:
+   - First acknowledge: "StillMe already has [list existing features]"
+   - Then propose: "However, we could enhance by [propose new features]"
+   - NOT propose features that already exist (e.g., learning metrics tracking, time awareness, confidence scoring)
+
+**When StillMe is asked to propose improvements:**
+- ALWAYS start with: "Let me first check what StillMe already has..."
+- Query relevant APIs: `/api/learning/metrics/summary`, `/api/learning/sources/current`, etc.
+- Acknowledge existing capabilities before proposing new ones
+- Be honest: "I notice StillMe already has [feature]. Perhaps we could enhance it by..."
 """
                 tags_list = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db"]
                 tags_string = ",".join(tags_list)
