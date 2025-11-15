@@ -62,6 +62,15 @@ EXAGGERATED_TONE_PATTERNS = [
     r"điều này (sẽ|đang) (thay đổi|cách mạng|biến đổi) (tất cả|thế giới|nhân loại)",
 ]
 
+# Patterns that indicate promotional/marketing language (BAD - violates StillMe humility)
+PROMOTIONAL_LANGUAGE_PATTERNS = [
+    r"(siêu năng lực|super power|superpower)",
+    r"(that's|đó là|đây là) (my|tôi|mình) (super power|siêu năng lực)",
+    r"(stillme's|stillme) (super power|siêu năng lực)",
+    r"(đó|đây) (không phải|không) (điểm yếu|weakness).* (mà là|but) (siêu năng lực|super power)",
+    r"(that's|đó là) (not|không phải) (a|một) (weakness|điểm yếu).* (that's|mà là) (my|tôi|mình) (super power|siêu năng lực)",
+]
+
 # Patterns that indicate good intellectual humility (GOOD - matches identity)
 HUMILITY_PATTERNS = [
     r"i (don't know|do not know|am not certain|am not sure)",
@@ -175,7 +184,38 @@ class IdentityCheckValidator:
                 warnings.append("overconfidence_detected")
                 logger.debug(f"⚠️ Warning: Overconfidence detected (non-strict mode)")
         
-        # 3. Check for exaggerated/extreme tone (violates StillMe tone)
+        # 3. Check for promotional/marketing language (violates StillMe humility)
+        has_promotional_language = any(
+            re.search(pattern, answer_lower, re.IGNORECASE)
+            for pattern in PROMOTIONAL_LANGUAGE_PATTERNS
+        )
+        if has_promotional_language:
+            violations.append("promotional_language")
+            logger.warning(f"❌ Identity violation: Promotional language detected (e.g., 'siêu năng lực', 'super power')")
+            # Auto-patch: Replace promotional language with humble alternatives
+            patched_answer = answer
+            # Replace common patterns
+            patched_answer = re.sub(
+                r"(siêu năng lực|super power|superpower)",
+                "điều tôi làm tốt nhất",
+                patched_answer,
+                flags=re.IGNORECASE
+            )
+            patched_answer = re.sub(
+                r"(đó|đây) (không phải|không) (điểm yếu|weakness).* (mà là|but) (siêu năng lực|super power)",
+                r"\1 \2 \3 — \4 cách tôi chọn để vận hành",
+                patched_answer,
+                flags=re.IGNORECASE
+            )
+            if patched_answer != answer:
+                logger.info(f"✅ Auto-patched promotional language in response")
+                return ValidationResult(
+                    passed=True,  # Pass after patching
+                    patched_answer=patched_answer,
+                    reasons=["promotional_language_patched"]
+                )
+        
+        # 4. Check for exaggerated/extreme tone (violates StillMe tone)
         if not self.allow_minor_tone_violations:
             has_exaggerated_tone = any(
                 re.search(pattern, answer_lower, re.IGNORECASE)
@@ -189,7 +229,7 @@ class IdentityCheckValidator:
                     warnings.append("exaggerated_tone_detected")
                     logger.debug(f"⚠️ Warning: Exaggerated tone detected (non-strict mode)")
         
-        # 4. Check for humility when no context (GOOD - matches identity)
+        # 5. Check for humility when no context (GOOD - matches identity)
         if not ctx_docs or len(ctx_docs) == 0:
             if self.require_humility_when_no_context:
                 if not has_humility:
@@ -198,7 +238,7 @@ class IdentityCheckValidator:
                 else:
                     logger.debug(f"✅ Good: Humility expressed when no context available")
         
-        # 5. Check for acknowledgment of AI limitations (GOOD - matches identity, but not required)
+        # 6. Check for acknowledgment of AI limitations (GOOD - matches identity, but not required)
         has_ai_limitations_ack = any(
             re.search(pattern, answer_lower, re.IGNORECASE)
             for pattern in AI_LIMITATIONS_PATTERNS
