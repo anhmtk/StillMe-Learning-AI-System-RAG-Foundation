@@ -878,7 +878,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         processing_steps.append("🔄 Attempting OpenAI fallback for better quality...")
                         try:
                             from backend.api.utils.llm_providers import InsufficientQuotaError
-                            from backend.api.utils.chat_helpers import generate_ai_response
+                            # generate_ai_response is already imported at the top of the file
                             
                             # Retry with OpenAI
                             openai_response = await generate_ai_response(

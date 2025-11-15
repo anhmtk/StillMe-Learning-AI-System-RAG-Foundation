@@ -1278,12 +1278,29 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             parentDragStartY = e.clientY;
                                             
                                             const rect = parentPanel.getBoundingClientRect();
-                                            parentPanelStartX = rect.left;
-                                            parentPanelStartY = rect.top;
                                             parentPanelStartWidth = rect.width;
                                             parentPanelStartHeight = rect.height;
                                             
-                                            // CRITICAL: Use setProperty with important flag to override CSS
+                                            // CRITICAL: Calculate actual position accounting for transform
+                                            // When transform is translate(-50%, -50%), getBoundingClientRect() gives the visual position
+                                            // We need to calculate the actual left/top values
+                                            const computedStyle = parentWindow.getComputedStyle(parentPanel);
+                                            const currentLeft = computedStyle.left;
+                                            const currentTop = computedStyle.top;
+                                            
+                                            // If currently centered with transform, calculate actual position
+                                            if (computedStyle.transform && computedStyle.transform !== 'none') {
+                                                // Panel is centered, so left/top are 50%
+                                                // Calculate actual pixel position from center
+                                                parentPanelStartX = rect.left + (rect.width / 2) - (parentPanelStartWidth / 2);
+                                                parentPanelStartY = rect.top + (rect.height / 2) - (parentPanelStartHeight / 2);
+                                            } else {
+                                                // Already using absolute positioning
+                                                parentPanelStartX = rect.left;
+                                                parentPanelStartY = rect.top;
+                                            }
+                                            
+                                            // CRITICAL: Remove transform and use absolute positioning for resize
                                             parentPanel.style.setProperty('transform', 'none', 'important');
                                             parentPanel.style.setProperty('left', parentPanelStartX + 'px', 'important');
                                             parentPanel.style.setProperty('top', parentPanelStartY + 'px', 'important');
