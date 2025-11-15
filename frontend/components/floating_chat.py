@@ -113,8 +113,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 transform: translate(-50%, -50%) !important;
                 width: 600px !important;
                 height: 700px !important;
-                min-width: 400px !important;
-                min-height: 400px !important;
+                min-width: 300px !important; /* Reduced for better screenshot capability */
+                min-height: 300px !important; /* Reduced for better screenshot capability */
                 max-width: 95vw !important;
                 max-height: 95vh !important;
                 background: #1e1e1e !important; /* Cursor-like dark background */
@@ -180,21 +180,22 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             .resize-handle {{
                 position: absolute;
                 background: transparent;
-                z-index: 1000 !important; /* Higher z-index to ensure it's on top */
+                z-index: 1000001 !important; /* CRITICAL: Higher than panel z-index (1000000) to ensure it's always on top */
                 pointer-events: auto !important; /* Ensure handles are clickable */
+                user-select: none !important; /* Prevent text selection when resizing */
             }}
             
-            /* Corner handles - larger for easier grabbing */
-            .resize-handle.nw {{ top: 0; left: 0; width: 20px; height: 20px; cursor: nw-resize; }}
-            .resize-handle.ne {{ top: 0; right: 0; width: 20px; height: 20px; cursor: ne-resize; }}
-            .resize-handle.sw {{ bottom: 0; left: 0; width: 20px; height: 20px; cursor: sw-resize; }}
-            .resize-handle.se {{ bottom: 0; right: 0; width: 20px; height: 20px; cursor: se-resize; }}
+            /* Corner handles - larger for easier grabbing (increased for better UX) */
+            .resize-handle.nw {{ top: 0; left: 0; width: 24px; height: 24px; cursor: nw-resize; }}
+            .resize-handle.ne {{ top: 0; right: 0; width: 24px; height: 24px; cursor: ne-resize; }}
+            .resize-handle.sw {{ bottom: 0; left: 0; width: 24px; height: 24px; cursor: sw-resize; }}
+            .resize-handle.se {{ bottom: 0; right: 0; width: 24px; height: 24px; cursor: se-resize; }}
             
-            /* Edge handles - wider for easier grabbing */
-            .resize-handle.n {{ top: 0; left: 20px; right: 20px; height: 12px; cursor: n-resize; }}
-            .resize-handle.s {{ bottom: 0; left: 20px; right: 20px; height: 12px; cursor: s-resize; }}
-            .resize-handle.e {{ top: 20px; bottom: 20px; right: 0; width: 12px; cursor: e-resize; }}
-            .resize-handle.w {{ top: 20px; bottom: 20px; left: 0; width: 12px; cursor: w-resize; }}
+            /* Edge handles - wider for easier grabbing (increased for better UX) */
+            .resize-handle.n {{ top: 0; left: 24px; right: 24px; height: 16px; cursor: n-resize; }}
+            .resize-handle.s {{ bottom: 0; left: 24px; right: 24px; height: 16px; cursor: s-resize; }}
+            .resize-handle.e {{ top: 24px; bottom: 24px; right: 0; width: 16px; cursor: e-resize; }}
+            .resize-handle.w {{ top: 24px; bottom: 24px; left: 0; width: 16px; cursor: w-resize; }}
             
             /* Visual resize indicator - more visible like Cursor */
             .resize-handle:hover {{
@@ -885,8 +886,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 transform: translate(-50%, -50%) !important;
                                                 width: 600px !important;
                                                 height: 700px !important;
-                                                min-width: 400px !important;
-                                                min-height: 400px !important;
+                                                min-width: 300px !important; /* Reduced for better screenshot capability */
+                                                min-height: 300px !important; /* Reduced for better screenshot capability */
                                                 max-width: 95vw !important;
                                                 max-height: 95vh !important;
                                                 background: #1e1e1e !important;
@@ -929,14 +930,14 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 z-index: 1000001 !important;
                                                 pointer-events: auto !important;
                                             }}
-                                            #stillme-chat-panel-parent .resize-handle.nw {{ top: 0 !important; left: 0 !important; width: 15px !important; height: 15px !important; cursor: nw-resize !important; }}
-                                            #stillme-chat-panel-parent .resize-handle.ne {{ top: 0 !important; right: 0 !important; width: 15px !important; height: 15px !important; cursor: ne-resize !important; }}
-                                            #stillme-chat-panel-parent .resize-handle.sw {{ bottom: 0 !important; left: 0 !important; width: 15px !important; height: 15px !important; cursor: sw-resize !important; }}
-                                            #stillme-chat-panel-parent .resize-handle.se {{ bottom: 0 !important; right: 0 !important; width: 15px !important; height: 15px !important; cursor: se-resize !important; }}
-                                            #stillme-chat-panel-parent .resize-handle.n {{ top: 0 !important; left: 15px !important; right: 15px !important; height: 8px !important; cursor: n-resize !important; }}
-                                            #stillme-chat-panel-parent .resize-handle.s {{ bottom: 0 !important; left: 15px !important; right: 15px !important; height: 8px !important; cursor: s-resize !important; }}
-                                            #stillme-chat-panel-parent .resize-handle.e {{ top: 15px !important; bottom: 15px !important; right: 0 !important; width: 8px !important; cursor: e-resize !important; }}
-                                            #stillme-chat-panel-parent .resize-handle.w {{ top: 15px !important; bottom: 15px !important; left: 0 !important; width: 8px !important; cursor: w-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.nw {{ top: 0 !important; left: 0 !important; width: 24px !important; height: 24px !important; cursor: nw-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.ne {{ top: 0 !important; right: 0 !important; width: 24px !important; height: 24px !important; cursor: ne-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.sw {{ bottom: 0 !important; left: 0 !important; width: 24px !important; height: 24px !important; cursor: sw-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.se {{ bottom: 0 !important; right: 0 !important; width: 24px !important; height: 24px !important; cursor: se-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.n {{ top: 0 !important; left: 24px !important; right: 24px !important; height: 16px !important; cursor: n-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.s {{ bottom: 0 !important; left: 24px !important; right: 24px !important; height: 16px !important; cursor: s-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.e {{ top: 24px !important; bottom: 24px !important; right: 0 !important; width: 16px !important; cursor: e-resize !important; }}
+                                            #stillme-chat-panel-parent .resize-handle.w {{ top: 24px !important; bottom: 24px !important; left: 0 !important; width: 16px !important; cursor: w-resize !important; }}
                                             #stillme-chat-panel-parent .stillme-chat-messages {{
                                                 flex: 1 1 auto !important;
                                                 overflow-y: auto !important;
@@ -1262,7 +1263,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     
                                     // Resize functionality for parent panel
                                     function setupParentResizeHandle(handle, direction) {{
-                                        if (!handle) return;
+                                        if (!handle) {{
+                                            console.warn(`StillMe Chat: Parent resize handle not found for direction: ${{direction}}`);
+                                            return;
+                                        }}
                                         handle.addEventListener('mousedown', (e) => {{
                                             if (parentPanel.classList.contains('fullscreen') || parentPanel.classList.contains('minimized')) return;
                                             
@@ -1281,8 +1285,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             parentPanel.style.left = parentPanelStartX + 'px';
                                             parentPanel.style.top = parentPanelStartY + 'px';
                                             
+                                            console.log(`StillMe Chat: Parent resize started - direction: ${{direction}}, start size: ${{parentPanelStartWidth}}x${{parentPanelStartHeight}}`);
+                                            
+                                            // CRITICAL: Ensure handle is on top
+                                            handle.style.zIndex = '1000001';
+                                            handle.style.pointerEvents = 'auto';
+                                            
                                             e.preventDefault();
                                             e.stopPropagation();
+                                            e.stopImmediatePropagation(); // CRITICAL: Prevent other handlers from interfering
                                         }});
                                     }}
                                     
@@ -1312,18 +1323,22 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             let newX = parentPanelStartX;
                                             let newY = parentPanelStartY;
                                             
+                                            // Reduced min size for better screenshot capability
+                                            const PARENT_MIN_WIDTH = 300; // Reduced from 400
+                                            const PARENT_MIN_HEIGHT = 300; // Reduced from 400
+                                            
                                             if (parentResizeHandle.includes('e')) {{
-                                                newWidth = Math.max(400, parentPanelStartWidth + deltaX);
+                                                newWidth = Math.max(PARENT_MIN_WIDTH, parentPanelStartWidth + deltaX);
                                             }}
                                             if (parentResizeHandle.includes('w')) {{
-                                                newWidth = Math.max(400, parentPanelStartWidth - deltaX);
+                                                newWidth = Math.max(PARENT_MIN_WIDTH, parentPanelStartWidth - deltaX);
                                                 newX = parentPanelStartX + deltaX;
                                             }}
                                             if (parentResizeHandle.includes('s')) {{
-                                                newHeight = Math.max(400, parentPanelStartHeight + deltaY);
+                                                newHeight = Math.max(PARENT_MIN_HEIGHT, parentPanelStartHeight + deltaY);
                                             }}
                                             if (parentResizeHandle.includes('n')) {{
-                                                newHeight = Math.max(400, parentPanelStartHeight - deltaY);
+                                                newHeight = Math.max(PARENT_MIN_HEIGHT, parentPanelStartHeight - deltaY);
                                                 newY = parentPanelStartY + deltaY;
                                             }}
                                             
@@ -1531,9 +1546,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             panel.style.top = panelStartY + 'px';
                             
                             console.log(`StillMe Chat: Resize started - direction: ${{direction}}, start size: ${{panelStartWidth}}x${{panelStartHeight}}`);
+                            console.log(`StillMe Chat: Resize handle element:`, handle);
+                            console.log(`StillMe Chat: Panel element:`, panel);
+                            
+                            // CRITICAL: Ensure handle is on top
+                            handle.style.zIndex = '1000001';
+                            handle.style.pointerEvents = 'auto';
                             
                             e.preventDefault();
                             e.stopPropagation();
+                            e.stopImmediatePropagation(); // CRITICAL: Prevent other handlers from interfering
                         }});
                     }}
                     
@@ -1616,18 +1638,22 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             let newY = panelStartY;
                             
                             // Handle different resize directions
+                            // Reduced min size for better screenshot capability (can see both input and output)
+                            const MIN_WIDTH = 300; // Reduced from 400
+                            const MIN_HEIGHT = 300; // Reduced from 400
+                            
                             if (resizeHandle.includes('e')) {{
-                                newWidth = Math.max(400, panelStartWidth + deltaX);
+                                newWidth = Math.max(MIN_WIDTH, panelStartWidth + deltaX);
                             }}
                             if (resizeHandle.includes('w')) {{
-                                newWidth = Math.max(400, panelStartWidth - deltaX);
+                                newWidth = Math.max(MIN_WIDTH, panelStartWidth - deltaX);
                                 newX = panelStartX + deltaX;
                             }}
                             if (resizeHandle.includes('s')) {{
-                                newHeight = Math.max(400, panelStartHeight + deltaY);
+                                newHeight = Math.max(MIN_HEIGHT, panelStartHeight + deltaY);
                             }}
                             if (resizeHandle.includes('n')) {{
-                                newHeight = Math.max(400, panelStartHeight - deltaY);
+                                newHeight = Math.max(MIN_HEIGHT, panelStartHeight - deltaY);
                                 newY = panelStartY + deltaY;
                             }}
                             
