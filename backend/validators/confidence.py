@@ -75,14 +75,33 @@ class ConfidenceValidator:
             for pattern in OVERCONFIDENCE_PATTERNS
         )
         
-        # If no context, we SHOULD see uncertainty
+        # If no context, check for transparency about knowledge source
         if not ctx_docs or len(ctx_docs) == 0:
             if self.require_uncertainty_when_no_context:
-                if has_uncertainty:
+                # Check if AI acknowledges using base knowledge/training data (transparency)
+                transparency_patterns = [
+                    r"based on (general knowledge|training data|my training)",
+                    r"from (my|general) (training data|knowledge base)",
+                    r"not from (stillme|rag) (knowledge base|knowledge)",
+                    r"general knowledge",
+                    r"training data",
+                    r"không (từ|phải từ) (stillme|rag)",
+                    r"dựa trên (kiến thức|dữ liệu) (chung|huấn luyện)"
+                ]
+                has_transparency = any(
+                    re.search(pattern, answer_lower, re.IGNORECASE)
+                    for pattern in transparency_patterns
+                )
+                
+                # If AI is transparent about using base knowledge, that's acceptable
+                if has_transparency:
+                    logger.debug("✅ Good: AI is transparent about using base knowledge when no RAG context")
+                    return ValidationResult(passed=True)
+                elif has_uncertainty:
                     logger.debug("✅ Good: AI expressed uncertainty when no context available")
                     return ValidationResult(passed=True)
                 else:
-                    logger.warning("❌ AI should express uncertainty when no context is available")
+                    logger.warning("❌ AI should express uncertainty OR acknowledge using base knowledge when no context is available")
                     return ValidationResult(
                         passed=False,
                         reasons=["missing_uncertainty_no_context"]

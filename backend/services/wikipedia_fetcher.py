@@ -124,10 +124,9 @@ class WikipediaFetcher:
             Article entry with content
         """
         try:
-            # Fetch page content using correct REST v1 endpoint
+            # Try REST v1 API first (preferred)
             # URL format: https://{language}.wikipedia.org/w/rest.php/v1/page/summary/{title}
             # Wikipedia page titles use underscores, not spaces
-            # Title from search results may already have underscores, or may have spaces
             from urllib.parse import quote
             
             # Normalize title: replace spaces with underscores (Wikipedia format)
@@ -138,6 +137,52 @@ class WikipediaFetcher:
             encoded_title = quote(normalized_title, safe="_")
             url = f"{self.api_base}/page/summary/{encoded_title}"
             response = self._fetch_with_retry(url)
+            
+            # If REST v1 fails with 404, try MediaWiki Action API as fallback
+            if response and response.status_code == 404:
+                logger.debug(f"REST v1 API returned 404 for '{title}', trying MediaWiki Action API...")
+                # Use MediaWiki Action API to get page content
+                action_api_url = f"https://{self.language}.wikipedia.org/w/api.php"
+                params = {
+                    "action": "query",
+                    "prop": "extracts",
+                    "exintro": "true",
+                    "explaintext": "true",
+                    "titles": normalized_title,
+                    "format": "json",
+                    "formatversion": "2"
+                }
+                response = self._fetch_with_retry(action_api_url, params)
+                if response and response.status_code == 200:
+                    data = response.json()
+                    pages = data.get("query", {}).get("pages", [])
+                    if pages and len(pages) > 0:
+                        page = pages[0]
+                        if "missing" not in page:
+                            # Successfully fetched from Action API
+                            extract = page.get("extract", "")
+                            page_title = page.get("title", title)
+                            content_url = f"https://{self.language}.wikipedia.org/wiki/{quote(page_title.replace(' ', '_'), safe='_')}"
+                            
+                            article_entry = {
+                                "title": page_title,
+                                "summary": extract[:500] if len(extract) > 500 else extract,
+                                "content": extract,
+                                "link": content_url,
+                                "published": datetime.now().isoformat(),
+                                "source": "wikipedia",
+                                "source_url": content_url,
+                                "content_type": "knowledge",
+                                "metadata": {
+                                    "page_id": page.get("pageid"),
+                                    "license": "CC BY-SA 3.0",
+                                    "source_type": "wikipedia",
+                                    "language": self.language,
+                                    "api_used": "mediawiki_action"  # Track which API was used
+                                }
+                            }
+                            logger.info(f"Fetched Wikipedia article via Action API: {page_title}")
+                            return article_entry
             
             # Track success
             if response and response.status_code == 200:
