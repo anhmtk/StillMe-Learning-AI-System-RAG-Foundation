@@ -6,7 +6,13 @@ Combines vector search with knowledge retrieval
 from typing import List, Dict, Any, Optional
 from .chroma_client import ChromaClient
 from .embeddings import EmbeddingService
+from backend.services.cache_service import (
+    get_cache_service,
+    CACHE_PREFIX_RAG,
+    TTL_RAG_RETRIEVAL
+)
 import logging
+import os
 from concurrent.futures import ThreadPoolExecutor
 
 logger = logging.getLogger(__name__)
@@ -44,13 +50,41 @@ class RAGRetrieval:
             import os
             ENABLE_CONTINUUM_MEMORY = os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true"
             
+            # Phase 2: RAG Retrieval Cache - Check cache first
+            cache_service = get_cache_service()
+            cache_enabled = os.getenv("ENABLE_RAG_CACHE", "true").lower() == "true"
+            cached_result = None
+            cache_hit = False
+            cache_key = None
+            
+            if cache_enabled:
+                # Generate cache key from query + parameters
+                # Use query text hash (embedding is expensive, we'll generate it once below)
+                cache_key = cache_service._generate_key(
+                    CACHE_PREFIX_RAG,
+                    query,
+                    knowledge_limit,
+                    conversation_limit,
+                    prioritize_foundational,
+                    tier_preference
+                )
+                
+                # Try to get from cache
+                cached_result = cache_service.get(cache_key)
+                if cached_result:
+                    cache_hit = True
+                    logger.info(f"✅ RAG cache HIT (saved {cached_result.get('latency', 0):.2f}s)")
+                    return cached_result.get("context")
+            
+            # If not in cache, perform retrieval
+            # Generate query embedding (only once, used for both cache key and search)
+            query_embedding = self.embedding_service.encode_text(query)
+            
             # Nested Learning: If tier_preference is specified, use tier-based retrieval
             if tier_preference and ENABLE_CONTINUUM_MEMORY:
                 knowledge_results = self.retrieve_by_tier(query, tier_preference, knowledge_limit)
                 logger.info(f"Using tier-based retrieval (tier={tier_preference}): {len(knowledge_results)} results")
             else:
-                # Generate query embedding
-                query_embedding = self.embedding_service.encode_text(query)
                 logger.info(f"Query embedding generated: {len(query_embedding)} dimensions")
                 
                 # OPTIMIZATION: Run knowledge and conversation search in parallel for better latency
@@ -157,11 +191,28 @@ class RAGRetrieval:
                 if conversation_results:
                     logger.info(f"Conversation search returned {len(conversation_results)} results")
             
-            return {
+            # Build context result
+            context_result = {
                 "knowledge_docs": knowledge_results[:knowledge_limit],
                 "conversation_docs": conversation_results,
                 "total_context_docs": len(knowledge_results[:knowledge_limit]) + len(conversation_results)
             }
+            
+            # Save to cache (only if not a cache hit)
+            if cache_enabled and not cache_hit:
+                try:
+                    import time
+                    cache_value = {
+                        "context": context_result,
+                        "latency": 0.0,  # Could track actual latency if needed
+                        "timestamp": time.time()
+                    }
+                    cache_service.set(cache_key, cache_value, ttl_seconds=TTL_RAG_RETRIEVAL)
+                    logger.debug(f"💾 RAG retrieval cached (key: {cache_key[:50]}...)")
+                except Exception as cache_error:
+                    logger.warning(f"Failed to cache RAG retrieval: {cache_error}")
+            
+            return context_result
         except Exception as e:
             logger.error(f"Error retrieving context: {e}")
             return {

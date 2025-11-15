@@ -255,6 +255,30 @@ async def get_validation_metrics(days: int = None):
             }
         }
 
+@router.get("/api/cache/stats")
+async def get_cache_stats():
+    """Get cache statistics"""
+    try:
+        from backend.services.cache_service import get_cache_service
+        cache_service = get_cache_service()
+        stats = cache_service.get_stats()
+        return {
+            "cache_stats": stats,
+            "cache_enabled": {
+                "llm": os.getenv("ENABLE_LLM_CACHE", "true").lower() == "true",
+                "rag": os.getenv("ENABLE_RAG_CACHE", "true").lower() == "true",
+                "http": os.getenv("ENABLE_HTTP_CACHE", "true").lower() == "true"
+            },
+            "ttl_seconds": {
+                "llm": int(os.getenv("CACHE_TTL_LLM", "3600")),
+                "rag": int(os.getenv("CACHE_TTL_RAG", "21600")),
+                "http": int(os.getenv("CACHE_TTL_HTTP", "300"))
+            }
+        }
+    except Exception as e:
+        logger.error(f"Error getting cache stats: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get cache stats: {str(e)}")
+
 @router.get("/metrics")
 async def prometheus_metrics():
     """

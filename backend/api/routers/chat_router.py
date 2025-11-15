@@ -10,9 +10,15 @@ from backend.api.utils.chat_helpers import (
     generate_ai_response,
     detect_language
 )
+from backend.services.cache_service import (
+    get_cache_service,
+    CACHE_PREFIX_LLM,
+    TTL_LLM_RESPONSE
+)
 import logging
 import os
 from datetime import datetime
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -761,25 +767,69 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             else:
                 enhanced_prompt = base_prompt
             
-            # Generate AI response with timing
+            # Generate AI response with timing and caching
             # LLM_Inference_Latency: Time from API call start to response received
             provider_name = chat_request.llm_provider or "default"
-            processing_steps.append(f"🤖 Calling AI model ({provider_name})...")
-            llm_inference_start = time.time()
-            # Support user-provided LLM config (for self-hosted deployments)
-            raw_response = await generate_ai_response(
-                enhanced_prompt, 
-                detected_lang=detected_lang,
-                llm_provider=chat_request.llm_provider,
-                llm_api_key=chat_request.llm_api_key,
-                llm_api_url=chat_request.llm_api_url,
-                llm_model_name=chat_request.llm_model_name
-            )
-            llm_inference_end = time.time()
-            llm_inference_latency = llm_inference_end - llm_inference_start
-            timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
-            logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
-            processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
+            
+            # Phase 1: LLM Response Cache - Check cache first
+            cache_service = get_cache_service()
+            cache_enabled = os.getenv("ENABLE_LLM_CACHE", "true").lower() == "true"
+            raw_response = None
+            cache_hit = False
+            
+            if cache_enabled:
+                # Generate cache key from query + context + settings
+                cache_key = cache_service._generate_key(
+                    CACHE_PREFIX_LLM,
+                    chat_request.message,
+                    enhanced_prompt[:500] if len(enhanced_prompt) > 500 else enhanced_prompt,  # Truncate for key
+                    detected_lang,
+                    chat_request.llm_provider,
+                    chat_request.llm_model_name,
+                    enable_validators
+                )
+                
+                # Try to get from cache
+                cached_response = cache_service.get(cache_key)
+                if cached_response:
+                    raw_response = cached_response.get("response")
+                    cache_hit = True
+                    logger.info(f"✅ LLM cache HIT (saved {cached_response.get('latency', 0):.2f}s)")
+                    processing_steps.append("⚡ Response from cache (fast!)")
+                    llm_inference_latency = cached_response.get("latency", 0.01)
+                    timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s (cached)"
+            
+            # If not in cache, call LLM
+            if not raw_response:
+                processing_steps.append(f"🤖 Calling AI model ({provider_name})...")
+                llm_inference_start = time.time()
+                # Support user-provided LLM config (for self-hosted deployments)
+                raw_response = await generate_ai_response(
+                    enhanced_prompt, 
+                    detected_lang=detected_lang,
+                    llm_provider=chat_request.llm_provider,
+                    llm_api_key=chat_request.llm_api_key,
+                    llm_api_url=chat_request.llm_api_url,
+                    llm_model_name=chat_request.llm_model_name
+                )
+                llm_inference_end = time.time()
+                llm_inference_latency = llm_inference_end - llm_inference_start
+                timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
+                logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
+                processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
+                
+                # Save to cache (only if not a cache hit)
+                if cache_enabled and not cache_hit:
+                    try:
+                        cache_value = {
+                            "response": raw_response,
+                            "latency": llm_inference_latency,
+                            "timestamp": time.time()
+                        }
+                        cache_service.set(cache_key, cache_value, ttl_seconds=TTL_LLM_RESPONSE)
+                        logger.debug(f"💾 LLM response cached (key: {cache_key[:50]}...)")
+                    except Exception as cache_error:
+                        logger.warning(f"Failed to cache LLM response: {cache_error}")
             
             # Validate response if enabled
             validation_info = None
