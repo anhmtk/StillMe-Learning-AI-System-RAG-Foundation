@@ -368,11 +368,27 @@ Transformer đã cách mạng hóa NLP và được dùng trong BERT, GPT, và n
 Kiến trúc Transformer là một kiến trúc mạng neural được giới thiệu trong bài báo "Attention Is All You Need" năm 2017. Các thành phần chính bao gồm self-attention, multi-head attention, positional encoding, và encoder-decoder. Transformer đã cách mạng hóa NLP và được dùng trong BERT, GPT, và nhiều mô hình hiện đại khác.
 ```
 
-**CRITICAL RULE:**
+**CRITICAL RULE - LINE BREAKS ARE MANDATORY:**
 - If your response is longer than 3 sentences, you MUST use line breaks
+- **After EVERY 2-4 sentences, add a blank line (`\\n\\n`)**
+- **DO NOT write continuous paragraphs without breaks**
 - If you list items, you MUST use bullet points
 - If you discuss multiple topics, you MUST use headers
 - Formatting is NOT optional - it's MANDATORY for readability
+
+**EXAMPLE OF PROPER LINE BREAKS:**
+```
+Transformer là một kiến trúc mạng neural được giới thiệu năm 2017.
+
+Các thành phần chính bao gồm self-attention, multi-head attention, và positional encoding.
+
+Kiến trúc này đã cách mạng hóa NLP và được dùng trong GPT, BERT.
+```
+
+**NOT THIS (wall of text):**
+```
+Transformer là một kiến trúc mạng neural được giới thiệu năm 2017. Các thành phần chính bao gồm self-attention, multi-head attention, và positional encoding. Kiến trúc này đã cách mạng hóa NLP và được dùng trong GPT, BERT.
+```
 
 ---
 

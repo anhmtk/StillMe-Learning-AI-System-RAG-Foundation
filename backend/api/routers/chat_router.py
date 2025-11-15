@@ -287,13 +287,19 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
 You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response, BUT ONLY if the context is RELEVANT to your answer.
 
 **🚨 CRITICAL: IF CONTEXT IS NOT RELEVANT TO YOUR QUESTION:**
-- Acknowledge the mismatch: "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]."
+- Acknowledge the mismatch, but VARY your wording - don't always use the same phrase
 - Use your base LLM knowledge to answer: "Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
 - Be transparent: Don't pretend the context supports your answer if it doesn't
 - Provide helpful information: Don't just say "I don't know" - use your training data to help the user
 - Format with line breaks, bullet points, headers, and 2-3 emojis
 
-**Example when context is not relevant:**
+**VARY your opening phrases when context is not relevant:**
+- "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]."
+- "While the context [1] covers [topic X], your question is about [topic Y], so I'll answer from general knowledge."
+- "The context [1] focuses on [topic X], but since you're asking about [topic Y], I'll use my base knowledge."
+- "Although the context [1] mentions [topic X], it doesn't directly address [topic Y], so I'll provide information from general knowledge."
+
+**Example when context is not relevant (VARY the wording):**
 "The available context [1] discusses StillMe's architecture, which is not directly related to your question about DeepSeek models. Based on general knowledge (not from StillMe's RAG knowledge base), DeepSeek currently has several models including..."
 
 **CRITICAL: YOUR SEARCH CAPABILITIES**
