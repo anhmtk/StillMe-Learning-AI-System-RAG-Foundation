@@ -1281,29 +1281,19 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             parentPanelStartWidth = rect.width;
                                             parentPanelStartHeight = rect.height;
                                             
-                                            // CRITICAL: Calculate actual position accounting for transform
-                                            // When transform is translate(-50%, -50%), getBoundingClientRect() gives the visual position
-                                            // We need to calculate the actual left/top values
-                                            const computedStyle = parentWindow.getComputedStyle(parentPanel);
-                                            const currentLeft = computedStyle.left;
-                                            const currentTop = computedStyle.top;
+                                            // CRITICAL: getBoundingClientRect() returns visual position (after transform)
+                                            // Use this directly as the starting position for resize
+                                            // Remove transform first, then set position to maintain visual position
+                                            parentPanelStartX = rect.left;
+                                            parentPanelStartY = rect.top;
                                             
-                                            // If currently centered with transform, calculate actual position
-                                            if (computedStyle.transform && computedStyle.transform !== 'none') {
-                                                // Panel is centered, so left/top are 50%
-                                                // Calculate actual pixel position from center
-                                                parentPanelStartX = rect.left + (rect.width / 2) - (parentPanelStartWidth / 2);
-                                                parentPanelStartY = rect.top + (rect.height / 2) - (parentPanelStartHeight / 2);
-                                            } else {
-                                                // Already using absolute positioning
-                                                parentPanelStartX = rect.left;
-                                                parentPanelStartY = rect.top;
-                                            }
-                                            
-                                            // CRITICAL: Remove transform and use absolute positioning for resize
+                                            // CRITICAL: Remove transform FIRST, then set position to maintain visual position
                                             parentPanel.style.setProperty('transform', 'none', 'important');
-                                            parentPanel.style.setProperty('left', parentPanelStartX + 'px', 'important');
-                                            parentPanel.style.setProperty('top', parentPanelStartY + 'px', 'important');
+                                            // Small delay to ensure transform is removed before setting position
+                                            setTimeout(() => {{
+                                                parentPanel.style.setProperty('left', parentPanelStartX + 'px', 'important');
+                                                parentPanel.style.setProperty('top', parentPanelStartY + 'px', 'important');
+                                            }}, 0);
                                             
                                             console.log(`StillMe Chat: Parent resize started - direction: ${{direction}}, start size: ${{parentPanelStartWidth}}x${{parentPanelStartHeight}}`);
                                             
