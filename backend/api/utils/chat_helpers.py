@@ -308,9 +308,66 @@ FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR.
 ---
 """
     
-    # Combine: Language instruction (highest priority) + StillMe Identity Layer (core identity)
-    # This ensures both language matching AND identity are preserved
-    system_content = language_instruction + STILLME_IDENTITY
+    # CRITICAL: Formatting instruction must be at the TOP (after language, before identity)
+    # This ensures formatting is applied to ALL responses
+    formatting_instruction = """
+🚨🚨🚨 CRITICAL: RESPONSE FORMATTING - MANDATORY FOR ALL RESPONSES 🚨🚨🚨
+
+**YOU MUST FORMAT ALL RESPONSES WITH MARKDOWN:**
+
+1. **Line Breaks**: Break long paragraphs into shorter ones (2-4 sentences per paragraph)
+   - Use double line breaks (`\\n\\n`) between paragraphs
+   - NEVER write a wall of text without line breaks
+
+2. **Bullet Points**: When listing items, ALWAYS use bullet points (`-` or `*`)
+   - Example: Use `- Item 1` NOT `Item 1, Item 2, Item 3`
+
+3. **Headers**: For multiple topics, use headers (`##` or `###`)
+   - Example: `## Topic 1` then `## Topic 2`
+
+4. **Bold**: Use `**bold**` for important points (but don't overuse)
+
+5. **Emojis**: Use SPARINGLY (2-3 max per response)
+   - Use for: section headers (✅, ❌, ⚠️, 💡), status indicators
+   - Avoid: every sentence, serious topics, short answers
+
+**EXAMPLE OF GOOD FORMATTING:**
+
+```
+## Kiến trúc Transformer
+
+💡 **Tổng quan:**
+Transformer là một kiến trúc mạng neural được giới thiệu trong bài báo "Attention Is All You Need" năm 2017.
+
+**Các thành phần chính:**
+- **Self-attention**: Cơ chế cho phép mô hình tập trung vào các phần khác nhau của input
+- **Multi-head attention**: Nhiều "heads" attention song song để học các loại quan hệ khác nhau
+- **Positional encoding**: Thêm thông tin vị trí vào embeddings
+- **Encoder-Decoder**: Kiến trúc gồm encoder (mã hóa) và decoder (giải mã)
+
+**Ứng dụng:**
+Transformer đã cách mạng hóa NLP và được dùng trong BERT, GPT, và nhiều mô hình hiện đại khác.
+```
+
+**EXAMPLE OF BAD FORMATTING (DO NOT DO THIS):**
+
+```
+Kiến trúc Transformer là một kiến trúc mạng neural được giới thiệu trong bài báo "Attention Is All You Need" năm 2017. Các thành phần chính bao gồm self-attention, multi-head attention, positional encoding, và encoder-decoder. Transformer đã cách mạng hóa NLP và được dùng trong BERT, GPT, và nhiều mô hình hiện đại khác.
+```
+
+**CRITICAL RULE:**
+- If your response is longer than 3 sentences, you MUST use line breaks
+- If you list items, you MUST use bullet points
+- If you discuss multiple topics, you MUST use headers
+- Formatting is NOT optional - it's MANDATORY for readability
+
+---
+
+"""
+    
+    # Combine: Language instruction (highest priority) + Formatting instruction (second priority) + StillMe Identity Layer (core identity)
+    # This ensures language matching, formatting, AND identity are preserved
+    system_content = language_instruction + formatting_instruction + STILLME_IDENTITY
     
     # Phase 1: Time Awareness - Inject current time for transparency
     from datetime import datetime, timezone
