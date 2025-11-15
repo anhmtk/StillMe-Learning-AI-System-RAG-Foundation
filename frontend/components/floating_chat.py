@@ -882,8 +882,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         styleSheet.textContent = `
                                             #stillme-chat-panel-parent {{
                                                 position: fixed !important;
-                                                top: 50% !important;
-                                                left: 50% !important;
+                                                top: 50%; /* No !important - allow inline style override for drag/resize */
+                                                left: 50%; /* No !important - allow inline style override for drag/resize */
                                                 transform: translate(-50%, -50%) !important;
                                                 width: 600px; /* No !important - allow inline style override for resize */
                                                 height: 700px; /* No !important - allow inline style override for resize */
