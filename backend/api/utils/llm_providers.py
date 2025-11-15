@@ -13,6 +13,21 @@ from backend.api.utils.chat_helpers import build_system_prompt_with_language
 logger = logging.getLogger(__name__)
 
 
+class InsufficientQuotaError(Exception):
+    """Raised when OpenAI credit/quota is exhausted"""
+    pass
+
+
+class AuthenticationError(Exception):
+    """Raised when API key is invalid"""
+    pass
+
+
+class AuthorizationError(Exception):
+    """Raised when API access is forbidden"""
+    pass
+
+
 class LLMProvider:
     """Base class for LLM providers"""
     
@@ -220,8 +235,31 @@ class OpenAIProvider(LLMProvider):
                     else:
                         return "OpenAI API returned unexpected response format"
                 else:
-                    return f"OpenAI API error: {response.status_code} - {response.text}"
+                    # Parse error response for better error handling
+                    error_text = response.text
+                    try:
+                        error_data = response.json()
+                        error_code = error_data.get("error", {}).get("code", "")
+                        error_message = error_data.get("error", {}).get("message", error_text)
+                        
+                        # Check for credit/quota exhaustion
+                        if response.status_code == 429 or "insufficient_quota" in error_code.lower() or "billing" in error_message.lower():
+                            raise InsufficientQuotaError(f"OpenAI credit exhausted: {error_message}")
+                        elif response.status_code == 401:
+                            raise AuthenticationError(f"OpenAI API key invalid: {error_message}")
+                        elif response.status_code == 403:
+                            raise AuthorizationError(f"OpenAI API access forbidden: {error_message}")
+                        else:
+                            return f"OpenAI API error: {response.status_code} - {error_message}"
+                    except (ValueError, KeyError):
+                        # If JSON parsing fails, return raw error
+                        if response.status_code == 429 or "quota" in error_text.lower() or "billing" in error_text.lower():
+                            raise InsufficientQuotaError(f"OpenAI credit exhausted: {error_text}")
+                        return f"OpenAI API error: {response.status_code} - {error_text}"
                     
+        except InsufficientQuotaError:
+            # Re-raise to be handled by caller
+            raise
         except Exception as e:
             logger.error(f"OpenAI API error: {e}")
             return f"OpenAI API error: {str(e)}"

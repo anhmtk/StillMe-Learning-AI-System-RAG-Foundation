@@ -15,6 +15,7 @@ from .confidence import ConfidenceValidator
 from .fallback_handler import FallbackHandler
 from .review_adapter import ReviewAdapter
 from .language import LanguageValidator
+from .identity_check import IdentityCheckValidator
 
 __all__ = [
     "Validator",
@@ -30,5 +31,6 @@ __all__ = [
     "FallbackHandler",
     "ReviewAdapter",
     "LanguageValidator",
+    "IdentityCheckValidator",
 ]
 
