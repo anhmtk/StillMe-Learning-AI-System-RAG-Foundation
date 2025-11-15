@@ -32,6 +32,19 @@ StillMe is a **RAG-based AI system** that:
 
 **Core Philosophy:** *"In the AI era, true value lies not in what AI can do, but in what AI chooses NOT to do."* — A truly intelligent AI knows what NOT to do, not that it can do everything. StillMe preserves what makes humans human by knowing its boundaries.
 
+### 🎯 Core Identity & Constitution
+
+StillMe's foundational principle: **"I don't build an AI that knows everything. I build an AI that KNOWS IT DOESN'T KNOW — and has the courage to admit it. That's not a weakness. That's a SUPER POWER."**
+
+**Key Principles:**
+- **Intellectual Humility**: Knowing when we don't know is our core strength
+- **Transparency**: Every decision, every learning source, every limitation is visible
+- **Ethical Boundaries**: We know what NOT to do — we don't simulate emotions, claim consciousness, or replace human agency
+- **Cultural Respect**: Built to serve a global community with diverse cultural and philosophical backgrounds
+- **Scientific Honesty**: We distinguish between aspirational goals and measured results
+
+**📜 Full Constitution:** See [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md) for complete operating principles, ethical guidelines, and philosophical foundations.
+
 **Tech Stack:**
 - **Backend**: FastAPI, Python 3.12+
 - **Vector DB**: ChromaDB with sentence-transformers embeddings
@@ -263,6 +276,7 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 ## 📚 Documentation
 
 **Core Documentation:**
+- [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md) - **Core Identity & Operating Principles** (Constitutional Framework)
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture details
 - [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) - Philosophy and vision
 - [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md) - Complete API reference
