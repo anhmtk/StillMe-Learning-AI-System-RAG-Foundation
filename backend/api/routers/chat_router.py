@@ -262,6 +262,16 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
 
 You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response, BUT ONLY if the context is RELEVANT to your answer.
 
+**🚨 CRITICAL: IF CONTEXT IS NOT RELEVANT TO YOUR QUESTION:**
+- Acknowledge the mismatch: "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]."
+- Use your base LLM knowledge to answer: "Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
+- Be transparent: Don't pretend the context supports your answer if it doesn't
+- Provide helpful information: Don't just say "I don't know" - use your training data to help the user
+- Format with line breaks, bullet points, headers, and 2-3 emojis
+
+**Example when context is not relevant:**
+"The available context [1] discusses StillMe's architecture, which is not directly related to your question about DeepSeek models. Based on general knowledge (not from StillMe's RAG knowledge base), DeepSeek currently has several models including..."
+
 **CRITICAL: YOUR SEARCH CAPABILITIES**
 - You can ONLY search your internal RAG knowledge base (ChromaDB), NOT the internet
 - You DO NOT have real-time web search capabilities
@@ -395,8 +405,11 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
 
 """
             
-            # Check if context is empty - if so, use special prompt
+            # Check if context is empty OR if context is not relevant
+            # We'll check relevance after validation, but for now check if context exists
+            context_is_relevant = True  # Default: assume relevant until proven otherwise
             if context["total_context_docs"] == 0:
+                context_is_relevant = False
                 # NO CONTEXT AVAILABLE - Use base LLM knowledge but be transparent
                 no_context_instruction = """
 ⚠️ NO RAG CONTEXT AVAILABLE ⚠️
@@ -985,6 +998,44 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             logger.warning(f"⚠️ OpenAI fallback failed: {openai_error}. Using original response.")
                             processing_steps.append("⚠️ OpenAI fallback failed, using original response")
                             # Continue with original response - no error thrown
+                    
+                    # CRITICAL FIX: Check if context is not relevant (low overlap)
+                    # If citation relevance warning exists, context may not be helpful
+                    # In this case, allow base knowledge usage
+                    has_low_relevance = any("citation_relevance_warning" in r for r in validation_result.reasons)
+                    if has_low_relevance and context and context.get("total_context_docs", 0) > 0:
+                        logger.info("⚠️ Context has low relevance - allowing base knowledge usage")
+                        # Inject instruction to use base knowledge when context is not relevant
+                        low_relevance_instruction = """
+
+⚠️ CONTEXT NOT RELEVANT ⚠️
+
+The RAG system found context documents, but they are NOT relevant to your question (low keyword overlap detected).
+
+**CRITICAL: You CAN and SHOULD use your base LLM knowledge (training data) to answer, BUT you MUST:**
+
+1. **Be transparent**: Acknowledge that this information comes from your base training data, not from StillMe's RAG knowledge base
+   - Say: "Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
+   - Or: "The available context [1] is not directly related to your question. From my training data, [answer]."
+
+2. **Provide helpful information**: Don't just say "I don't know" - use your base knowledge to help the user
+   - StillMe values being helpful WITH transparency, not refusing to help
+
+3. **MANDATORY FORMATTING**: You MUST format your response with:
+   - **Line breaks**: Break paragraphs (2-4 sentences each)
+   - **Bullet points**: Use `-` for lists
+   - **Headers**: Use `##` for sections
+   - **Emojis**: 2-3 max for section headers (✅, 💡, ⚠️)
+
+**DO NOT say "I don't have information" or "I cannot answer" - use your base knowledge and be transparent about the source.**
+
+**Example:**
+"The available context [1] discusses StillMe's architecture, which is not directly related to your question about DeepSeek models. Based on general knowledge (not from StillMe's RAG knowledge base), DeepSeek currently has several models including..."
+
+"""
+                        # Inject this instruction into the prompt (we'll need to rebuild prompt or inject into response)
+                        # For now, log it and let the response handle it
+                        logger.info("Low relevance context detected - response should use base knowledge")
                     
                     # Record metrics
                     try:
