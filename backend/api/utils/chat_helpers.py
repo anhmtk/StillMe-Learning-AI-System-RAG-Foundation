@@ -337,6 +337,9 @@ FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR.
    ```
    - Tables are great for comparing items, showing metrics, or structured information
    - Use tables when you have multiple rows of similar data
+   - **CRITICAL**: When you say "I'll create a table" or "here's a table", you MUST actually create the markdown table syntax above
+   - **DO NOT** just describe a table - actually write the markdown table with `|` and `-` characters
+   - Frontend WILL render markdown tables correctly - trust the markdown syntax
 
 5. **Bold**: Use `**bold**` for important points (but don't overuse)
 
