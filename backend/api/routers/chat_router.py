@@ -1486,6 +1486,19 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         learning_proposal = None
         permission_request = None
         proposal_id = None
+        
+        # CRITICAL: Detect if base knowledge was used - this indicates a knowledge gap
+        used_base_knowledge = False
+        if response:
+            response_lower = response.lower()
+            base_knowledge_indicators = [
+                "based on general knowledge", "not from stillme", "not from rag",
+                "kiến thức chung", "không từ stillme", "không từ rag",
+                "training data", "dữ liệu huấn luyện", "base knowledge",
+                "general knowledge", "kiến thức nền tảng"
+            ]
+            used_base_knowledge = any(indicator in response_lower for indicator in base_knowledge_indicators)
+        
         if rag_retrieval and chat_request.use_rag:
             try:
                 from backend.services.conversation_learning_extractor import get_conversation_learning_extractor
@@ -1494,20 +1507,56 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 extractor = get_conversation_learning_extractor()
                 storage = get_learning_proposal_storage()
                 
-                # Analyze user message for valuable knowledge
-                learning_proposal = extractor.analyze_conversation_for_learning(
-                    user_message=chat_request.message,
-                    assistant_response=response,
-                    context=context
-                )
+                # PRIORITY: If base knowledge was used, extract topic for learning proposal
+                if used_base_knowledge and (not context or context.get("total_context_docs", 0) == 0):
+                    # No RAG context + base knowledge used = knowledge gap detected
+                    # Extract topic from user's question for learning proposal
+                    logger.info("🔍 Base knowledge used - detecting knowledge gap for learning proposal")
+                    try:
+                        # Extract main topic from user question
+                        user_question = chat_request.message
+                        # Simple topic extraction: use first 200 chars or key phrases
+                        topic_snippet = user_question[:200] if len(user_question) > 200 else user_question
+                        
+                        # Create learning proposal for this knowledge gap
+                        base_knowledge_proposal = {
+                            "knowledge_snippet": f"Topic: {topic_snippet}\n\nStillMe used base LLM knowledge to answer this question, indicating a knowledge gap in RAG. This topic should be prioritized for learning from trusted sources (arXiv, Wikipedia, RSS feeds).",
+                            "source": "knowledge_gap_detection",
+                            "knowledge_score": 0.7,  # High priority - user asked about it
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "reason": f"StillMe used base knowledge to answer about '{topic_snippet[:50]}...'. This indicates RAG knowledge gap - should learn this topic from trusted sources.",
+                            "is_knowledge_gap": True,
+                            "user_question": user_question,
+                            "detected_from": "base_knowledge_usage"
+                        }
+                        
+                        # Store learning proposal
+                        proposal_id = storage.save_proposal(
+                            proposal=base_knowledge_proposal,
+                            user_id=chat_request.user_id
+                        )
+                        base_knowledge_proposal["proposal_id"] = proposal_id
+                        learning_proposal = base_knowledge_proposal
+                        logger.info(f"✅ Knowledge gap learning proposal created (id: {proposal_id}, topic: {topic_snippet[:50]}...)")
+                    except Exception as gap_error:
+                        logger.warning(f"Failed to create knowledge gap proposal: {gap_error}")
+                
+                # Also check for valuable knowledge from user/assistant (existing logic)
+                if not learning_proposal:  # Only if we didn't already create a gap proposal
+                    learning_proposal = extractor.analyze_conversation_for_learning(
+                        user_message=chat_request.message,
+                        assistant_response=response,
+                        context=context
+                    )
                 
                 if learning_proposal:
-                    # Save proposal to storage
-                    proposal_id = storage.save_proposal(
-                        proposal=learning_proposal,
-                        user_id=chat_request.user_id
-                    )
-                    learning_proposal["proposal_id"] = proposal_id
+                    # If we didn't create proposal above, store it now
+                    if "proposal_id" not in learning_proposal:
+                        proposal_id = storage.save_proposal(
+                            proposal=learning_proposal,
+                            user_id=chat_request.user_id
+                        )
+                        learning_proposal["proposal_id"] = proposal_id
                     
                     # Format permission request
                     permission_request = extractor.format_permission_request(
