@@ -397,19 +397,24 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
             
             # Check if context is empty - if so, use special prompt
             if context["total_context_docs"] == 0:
-                # NO CONTEXT AVAILABLE - Use special prompt that encourages uncertainty
+                # NO CONTEXT AVAILABLE - Use base LLM knowledge but be transparent
                 no_context_instruction = """
-⚠️ NO CONTEXT AVAILABLE ⚠️
+⚠️ NO RAG CONTEXT AVAILABLE ⚠️
 
 StillMe's RAG system searched the knowledge base but found NO relevant documents for this question.
 
-YOU MUST:
-1. Acknowledge that you don't have this information in your knowledge base
-2. Explain that StillMe learns from RSS feeds, arXiv, and other sources every 4 hours
-3. Offer alternatives: reformulate question, suggest related topics, or wait for future learning
-4. DO NOT use general knowledge or training data - be honest about the gap
+**CRITICAL: You CAN use your base LLM knowledge (training data) to answer, BUT you MUST:**
+1. **Be transparent**: Acknowledge that this information comes from your base training data, not from StillMe's RAG knowledge base
+2. **Cite appropriately**: Say "Based on general knowledge" or "From my training data" - be honest about the source
+3. **Explain StillMe's learning**: Mention that StillMe learns from RSS feeds, arXiv, and other sources every 4 hours, and this topic may be added in future learning cycles
+4. **Use markdown formatting**: Format your response with line breaks, bullet points, and headers for readability
+5. **Use emojis sparingly**: 2-3 emojis max for section headers or status indicators
 
-Remember: It's better to say "I don't know" than to make up information.
+**Examples of good responses:**
+- "Based on general knowledge (not from StillMe's RAG knowledge base), protein folding is..."
+- "From my training data, transformer architecture is... However, StillMe's knowledge base doesn't currently contain this information, so I'm answering from general knowledge."
+
+**Remember**: It's better to provide helpful information with transparency than to refuse completely. StillMe values honesty about knowledge sources.
 """
                 
                 # Build conversation history context if provided
