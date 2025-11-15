@@ -130,6 +130,10 @@ app.add_middleware(
 # Request tracking middleware (for metrics collection)
 app.add_middleware(RequestTrackingMiddleware)
 
+# HTTP Response Cache Middleware (Phase 3)
+from backend.api.middleware.http_cache_middleware import HTTPCacheMiddleware
+app.add_middleware(HTTPCacheMiddleware)
+
 # Security middleware (HTTPS enforcement, HSTS headers, etc.)
 security_middleware_list = get_security_middleware()
 for middleware_class in security_middleware_list:
