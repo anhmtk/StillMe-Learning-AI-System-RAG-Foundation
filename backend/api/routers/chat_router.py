@@ -17,7 +17,7 @@ from backend.services.cache_service import (
 )
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 logger = logging.getLogger(__name__)
@@ -1523,7 +1523,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 content_type="conversation",
                 metadata={
                     "user_id": chat_request.user_id,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                     "accuracy_score": accuracy_score
                 }
             )
