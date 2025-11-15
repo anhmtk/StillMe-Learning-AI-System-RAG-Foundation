@@ -885,8 +885,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 top: 50% !important;
                                                 left: 50% !important;
                                                 transform: translate(-50%, -50%) !important;
-                                                width: 600px !important;
-                                                height: 700px !important;
+                                                width: 600px; /* No !important - allow inline style override for resize */
+                                                height: 700px; /* No !important - allow inline style override for resize */
                                                 min-width: 300px !important; /* Reduced for better screenshot capability */
                                                 min-height: 300px !important; /* Reduced for better screenshot capability */
                                                 max-width: 95vw !important;
@@ -1254,9 +1254,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         parentPanelStartX = rect.left;
                                         parentPanelStartY = rect.top;
                                         
-                                        parentPanel.style.transform = 'none';
-                                        parentPanel.style.left = parentPanelStartX + 'px';
-                                        parentPanel.style.top = parentPanelStartY + 'px';
+                                        // CRITICAL: Use setProperty with important flag to override CSS
+                                        parentPanel.style.setProperty('transform', 'none', 'important');
+                                        parentPanel.style.setProperty('left', parentPanelStartX + 'px', 'important');
+                                        parentPanel.style.setProperty('top', parentPanelStartY + 'px', 'important');
                                         
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -1282,9 +1283,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             parentPanelStartWidth = rect.width;
                                             parentPanelStartHeight = rect.height;
                                             
-                                            parentPanel.style.transform = 'none';
-                                            parentPanel.style.left = parentPanelStartX + 'px';
-                                            parentPanel.style.top = parentPanelStartY + 'px';
+                                            // CRITICAL: Use setProperty with important flag to override CSS
+                                            parentPanel.style.setProperty('transform', 'none', 'important');
+                                            parentPanel.style.setProperty('left', parentPanelStartX + 'px', 'important');
+                                            parentPanel.style.setProperty('top', parentPanelStartY + 'px', 'important');
                                             
                                             console.log(`StillMe Chat: Parent resize started - direction: ${{direction}}, start size: ${{parentPanelStartWidth}}x${{parentPanelStartHeight}}`);
                                             
@@ -1318,9 +1320,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             newX = Math.max(-panelWidth + 100, Math.min(newX, parentWindow.innerWidth - 100));
                                             newY = Math.max(0, Math.min(newY, parentWindow.innerHeight - 50));
                                             
-                                            parentPanel.style.left = newX + 'px';
-                                            parentPanel.style.top = newY + 'px';
-                                            parentPanel.style.transform = 'none';
+                                            // CRITICAL: Use setProperty with important flag to override CSS
+                                            parentPanel.style.setProperty('left', newX + 'px', 'important');
+                                            parentPanel.style.setProperty('top', newY + 'px', 'important');
+                                            parentPanel.style.setProperty('transform', 'none', 'important');
                                             
                                             console.log(`StillMe Chat: Dragging panel to: ${{newX}}, ${{newY}}`);
                                         }} else if (parentIsResizing && !parentPanel.classList.contains('fullscreen') && !parentPanel.classList.contains('minimized') && parentResizeHandle) {{
@@ -1356,11 +1359,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             newWidth = Math.min(newWidth, maxWidth);
                                             newHeight = Math.min(newHeight, maxHeight);
                                             
-                                            parentPanel.style.width = newWidth + 'px';
-                                            parentPanel.style.height = newHeight + 'px';
-                                            parentPanel.style.left = newX + 'px';
-                                            parentPanel.style.top = newY + 'px';
-                                            parentPanel.style.transform = 'none';
+                                            // CRITICAL: Use setProperty with important flag to override CSS
+                                            parentPanel.style.setProperty('width', newWidth + 'px', 'important');
+                                            parentPanel.style.setProperty('height', newHeight + 'px', 'important');
+                                            parentPanel.style.setProperty('left', newX + 'px', 'important');
+                                            parentPanel.style.setProperty('top', newY + 'px', 'important');
+                                            parentPanel.style.setProperty('transform', 'none', 'important');
                                             
                                             console.log(`StillMe Chat: Resizing panel to: ${{newWidth}}x${{newHeight}} at (${{newX}}, ${{newY}})`);
                                         }}
