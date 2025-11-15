@@ -492,11 +492,67 @@ async def process_data(
 
 ---
 
+## 🎭 Protecting StillMe's Unique Voice (Identity Layer)
+
+**CRITICAL:** StillMe has a unique "voice" that makes it different from other AIs. This voice comes from the **Identity Layer** in `backend/identity/injector.py`.
+
+### What is StillMe's Voice?
+
+StillMe's voice is characterized by:
+- **Intellectual Humility**: Admits uncertainty, doesn't pretend to know everything
+- **Meta-cognition**: Self-questioning, challenges its own answers
+- **Philosophical Courage**: Dares to challenge assumptions, even its own
+- **Transparency**: Honest about AI limitations, not marketing language
+- **Collaborative**: Works with users, not defensive
+
+### Rules for Identity Layer Changes
+
+**⚠️ PROTECTED ZONE:** The Identity Layer (`backend/identity/injector.py`) is a **protected zone**.
+
+**Before modifying Identity Layer:**
+1. **Understand why**: Read `docs/CONSTITUTION.md` and `docs/IDENTITY_VOICE_MAINTENANCE_ANALYSIS.md`
+2. **Test voice consistency**: Run `pytest tests/test_voice_consistency.py -v`
+3. **Propose in issue**: Open GitHub issue explaining the change and rationale
+4. **Get approval**: Wait for maintainer review (this is critical code)
+5. **Verify**: Ensure voice consistency tests still pass
+
+**What you CAN modify:**
+- ✅ Adding new response patterns (e.g., "Future Questions handling")
+- ✅ Refining existing instructions (e.g., replacing "siêu năng lực" with humble alternatives)
+- ✅ Adding examples or clarifications
+
+**What you SHOULD NOT modify without discussion:**
+- ❌ Core principles (Intellectual Humility, Meta-cognition, Philosophical Courage)
+- ❌ Fundamental tone requirements
+- ❌ Identity Check Validator logic (without understanding impact)
+
+**Why this matters:**
+- StillMe's voice is its **core differentiator**
+- Losing this voice = losing what makes StillMe unique
+- Small changes can have big impact on voice consistency
+
+**Testing Voice Consistency:**
+```bash
+# Run voice consistency tests
+pytest tests/test_voice_consistency.py -v
+
+# Test with different LLM providers
+pytest tests/test_voice_consistency.py::test_cross_provider -v
+```
+
+**Resources:**
+- `docs/CONSTITUTION.md` - StillMe's core identity and principles
+- `docs/IDENTITY_VOICE_MAINTENANCE_ANALYSIS.md` - Analysis of voice maintenance strategies
+- `tests/test_voice_consistency.py` - Voice consistency test suite
+
+---
+
 ## 🧪 Testing
 
 - **Add unit tests** for new features in `tests/` directory
 - **Test error handling** and edge cases
 - **Verify language matching** works correctly
+- **Run voice consistency tests** if modifying Identity Layer or response style
 - **Test with different input languages** (English, Vietnamese, etc.)
 - **Aim for 80%+ coverage** for new code
 
