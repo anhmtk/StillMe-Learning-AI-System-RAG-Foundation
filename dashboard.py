@@ -240,6 +240,63 @@ def page_overview():
     gauge.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0))
     st.plotly_chart(gauge, width='stretch')
 
+    # Phase 3: Time-based Learning Analytics
+    st.markdown("### 📈 Learning Metrics (Time-based Analytics)")
+    try:
+        # Get today's metrics
+        today_metrics = get_json("/api/learning/metrics/daily", {}, timeout=10)
+        
+        if today_metrics and today_metrics.get("metrics"):
+            metrics = today_metrics["metrics"]
+            col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+            with col_m1:
+                st.metric("📥 Entries Fetched", metrics.get("total_entries_fetched", 0))
+            with col_m2:
+                st.metric("✅ Entries Added", metrics.get("total_entries_added", 0))
+            with col_m3:
+                st.metric("🚫 Entries Filtered", metrics.get("total_entries_filtered", 0))
+            with col_m4:
+                filter_rate = metrics.get("filter_rate", 0.0)
+                st.metric("📊 Filter Rate", f"{filter_rate}%")
+            
+            # Show filter reasons if available
+            filter_reasons = metrics.get("filter_reasons", {})
+            if filter_reasons:
+                with st.expander("🔍 Filter Reasons Breakdown", expanded=False):
+                    for reason, count in filter_reasons.items():
+                        st.write(f"**{reason}**: {count}")
+            
+            # Show sources breakdown if available
+            sources = metrics.get("sources", {})
+            if sources:
+                with st.expander("📚 Sources Breakdown", expanded=False):
+                    for source, count in sources.items():
+                        st.write(f"**{source.replace('_', ' ').title()}**: {count}")
+            
+            # Show learning cycles for today
+            cycles = metrics.get("cycles", [])
+            if cycles:
+                st.caption(f"📅 Today ({today_metrics.get('date', 'N/A')}): {metrics.get('total_cycles', 0)} learning cycle(s)")
+        else:
+            st.info("📊 No learning metrics available for today yet. Metrics will appear after the first learning cycle completes.")
+            
+        # Get summary metrics
+        summary = get_json("/api/learning/metrics/summary", {}, timeout=10)
+        if summary and summary.get("summary"):
+            summary_data = summary["summary"]
+            if summary_data.get("total_cycles", 0) > 0:
+                with st.expander("📊 Overall Learning Summary", expanded=False):
+                    col_s1, col_s2, col_s3 = st.columns(3)
+                    with col_s1:
+                        st.metric("Total Cycles", summary_data.get("total_cycles", 0))
+                    with col_s2:
+                        st.metric("Total Fetched", summary_data.get("total_entries_fetched", 0))
+                    with col_s3:
+                        st.metric("Total Added", summary_data.get("total_entries_added", 0))
+                    st.caption(f"Filter Rate: {summary_data.get('filter_rate', 0.0)}% | Add Rate: {summary_data.get('add_rate', 0.0)}%")
+    except Exception as e:
+        st.caption(f"💡 Learning metrics will be available after the first learning cycle completes. (Error: {str(e)})")
+
     st.markdown("---")
     
     # Auto-Learning Status Section

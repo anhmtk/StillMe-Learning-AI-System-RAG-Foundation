@@ -11,7 +11,7 @@ from backend.api.job_queue import get_job_queue
 from typing import Optional, Dict, Any, List
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -1311,6 +1311,42 @@ async def _run_learning_cycle_sync():
             f"Automatic: {automatic_items_added} ({AUTOMATIC_ALLOCATION_PERCENTAGE*100}%), "
             f"Total: {total_items} items)"
         )
+        
+        # Phase 2: Track learning metrics with timestamps
+        try:
+            from backend.services.learning_metrics_tracker import get_learning_metrics_tracker
+            import time
+            
+            # Calculate duration if we have start time (approximate)
+            duration_seconds = None
+            if hasattr(result, 'start_time'):
+                duration_seconds = time.time() - result.start_time
+            
+            # Aggregate filter reasons (simplified - can be enhanced)
+            filter_reasons = {
+                "Low quality/Short content": filtered_count,
+                "Duplicate": 0  # Can be enhanced to track actual duplicates
+            }
+            
+            # Aggregate sources (simplified - can be enhanced)
+            sources = {
+                "community_proposals": community_items_added,
+                "automatic_sources": automatic_items_added
+            }
+            
+            tracker = get_learning_metrics_tracker()
+            tracker.record_learning_cycle(
+                cycle_number=cycle_number,
+                entries_fetched=result.get('entries_fetched', 0) + len(all_entries_to_add),
+                entries_added=added_count,
+                entries_filtered=filtered_count,
+                filter_reasons=filter_reasons,
+                sources=sources,
+                duration_seconds=duration_seconds
+            )
+            logger.info(f"Learning metrics recorded for cycle #{cycle_number}")
+        except Exception as e:
+            logger.warning(f"Failed to record learning metrics: {e}")
     
     return result
 
@@ -1361,6 +1397,148 @@ async def get_job_logs(job_id: str):
         raise
     except Exception as e:
         logger.error(f"Get job logs error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# Learning Metrics Endpoints - Phase 2: Time-based Analytics
+# ============================================================================
+
+@router.get("/metrics/daily")
+async def get_daily_learning_metrics(
+    date: Optional[str] = Query(None, description="Date in YYYY-MM-DD format (default: today)")
+):
+    """
+    Get learning metrics for a specific date or today.
+    
+    Phase 2: Time-based analytics for transparency.
+    """
+    try:
+        from backend.services.learning_metrics_tracker import get_learning_metrics_tracker
+        
+        tracker = get_learning_metrics_tracker()
+        
+        if date is None:
+            # Get today's metrics
+            metrics = tracker.get_metrics_for_today()
+        else:
+            # Validate date format
+            try:
+                datetime.strptime(date, "%Y-%m-%d")
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+            
+            metrics = tracker.get_metrics_for_date(date)
+        
+        if metrics is None:
+            return {
+                "date": date or datetime.now(timezone.utc).date().isoformat(),
+                "message": "No learning data available for this date",
+                "metrics": None
+            }
+        
+        return {
+            "date": metrics.date,
+            "metrics": {
+                "total_cycles": metrics.total_cycles,
+                "total_entries_fetched": metrics.total_entries_fetched,
+                "total_entries_added": metrics.total_entries_added,
+                "total_entries_filtered": metrics.total_entries_filtered,
+                "filter_rate": round((metrics.total_entries_filtered / metrics.total_entries_fetched * 100) if metrics.total_entries_fetched > 0 else 0.0, 2),
+                "add_rate": round((metrics.total_entries_added / metrics.total_entries_fetched * 100) if metrics.total_entries_fetched > 0 else 0.0, 2),
+                "filter_reasons": metrics.filter_reasons,
+                "sources": metrics.sources,
+                "cycles": [
+                    {
+                        "cycle_number": c.cycle_number,
+                        "timestamp": c.timestamp,
+                        "entries_fetched": c.entries_fetched,
+                        "entries_added": c.entries_added,
+                        "entries_filtered": c.entries_filtered,
+                        "filter_reasons": c.filter_reasons,
+                        "sources": c.sources,
+                        "duration_seconds": c.duration_seconds,
+                        "error": c.error
+                    }
+                    for c in metrics.cycles
+                ]
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get daily metrics error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/metrics/range")
+async def get_learning_metrics_range(
+    start_date: str = Query(..., description="Start date in YYYY-MM-DD format"),
+    end_date: str = Query(..., description="End date in YYYY-MM-DD format")
+):
+    """
+    Get learning metrics for a date range.
+    
+    Phase 2: Time-based analytics for transparency.
+    """
+    try:
+        from backend.services.learning_metrics_tracker import get_learning_metrics_tracker
+        
+        # Validate date formats
+        try:
+            datetime.strptime(start_date, "%Y-%m-%d")
+            datetime.strptime(end_date, "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
+        
+        tracker = get_learning_metrics_tracker()
+        metrics_list = tracker.get_metrics_range(start_date, end_date)
+        
+        return {
+            "start_date": start_date,
+            "end_date": end_date,
+            "days_with_data": len(metrics_list),
+            "metrics": [
+                {
+                    "date": m.date,
+                    "total_cycles": m.total_cycles,
+                    "total_entries_fetched": m.total_entries_fetched,
+                    "total_entries_added": m.total_entries_added,
+                    "total_entries_filtered": m.total_entries_filtered,
+                    "filter_rate": round((m.total_entries_filtered / m.total_entries_fetched * 100) if m.total_entries_fetched > 0 else 0.0, 2),
+                    "add_rate": round((m.total_entries_added / m.total_entries_fetched * 100) if m.total_entries_fetched > 0 else 0.0, 2),
+                }
+                for m in metrics_list
+            ]
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get metrics range error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/metrics/summary")
+async def get_learning_metrics_summary():
+    """
+    Get summary of all learning metrics.
+    
+    Phase 2: Time-based analytics for transparency.
+    """
+    try:
+        from backend.services.learning_metrics_tracker import get_learning_metrics_tracker
+        
+        tracker = get_learning_metrics_tracker()
+        summary = tracker.get_summary()
+        
+        return {
+            "summary": summary,
+            "latest_cycle": summary.get("latest_cycle")
+        }
+        
+    except Exception as e:
+        logger.error(f"Get metrics summary error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
