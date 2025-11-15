@@ -80,13 +80,19 @@ class ConfidenceValidator:
             if self.require_uncertainty_when_no_context:
                 # Check if AI acknowledges using base knowledge/training data (transparency)
                 transparency_patterns = [
-                    r"based on (general knowledge|training data|my training)",
-                    r"from (my|general) (training data|knowledge base)",
+                    r"based on (general knowledge|training data|my training|base knowledge)",
+                    r"from (my|general|base) (training data|knowledge base|knowledge)",
                     r"not from (stillme|rag) (knowledge base|knowledge)",
-                    r"general knowledge",
+                    r"(general|base) knowledge",
                     r"training data",
+                    r"kiến thức (chung|cơ bản)",
+                    r"dữ liệu (huấn luyện|training)",
                     r"không (từ|phải từ) (stillme|rag)",
-                    r"dựa trên (kiến thức|dữ liệu) (chung|huấn luyện)"
+                    r"dựa trên (kiến thức|dữ liệu) (chung|huấn luyện|cơ bản)",
+                    r"tuy nhiên.*stillme.*không.*có",  # "However, StillMe doesn't have..."
+                    r"however.*stillme.*(doesn't|does not).*have",  # English version
+                    r"dựa trên.*kiến thức.*chung",  # "Based on general knowledge"
+                    r"theo.*kiến thức.*chung"  # "According to general knowledge"
                 ]
                 has_transparency = any(
                     re.search(pattern, answer_lower, re.IGNORECASE)

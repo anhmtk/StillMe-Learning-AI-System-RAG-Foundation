@@ -1012,11 +1012,28 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     if not validation_result.passed:
                         # Check for critical failures that require fallback
                         # language_mismatch: when output language doesn't match input language
-                        # missing_uncertainty_no_context: when no context and no uncertainty expression
+                        # missing_uncertainty_no_context: when no context and no uncertainty expression AND no transparency
                         # missing_citation: when context exists but no citations in answer
                         has_language_mismatch = any("language_mismatch" in r for r in validation_result.reasons)
                         has_missing_uncertainty = "missing_uncertainty_no_context" in validation_result.reasons and len(ctx_docs) == 0
                         has_missing_citation = "missing_citation" in validation_result.reasons and len(ctx_docs) > 0
+                        
+                        # CRITICAL FIX: Check if response already has transparency about base knowledge
+                        # If response mentions "general knowledge", "training data", etc., don't use fallback
+                        response_lower = response.lower()
+                        transparency_indicators = [
+                            "general knowledge", "training data", "my training", "base knowledge",
+                            "kiến thức chung", "dữ liệu huấn luyện", "kiến thức cơ bản",
+                            "not from stillme", "not from rag", "không từ stillme", "không từ rag"
+                        ]
+                        has_transparency_in_response = any(indicator in response_lower for indicator in transparency_indicators)
+                        
+                        # Only treat missing_uncertainty as critical if response doesn't have transparency
+                        # If response has transparency, it's acceptable even without explicit uncertainty
+                        if has_missing_uncertainty and has_transparency_in_response:
+                            logger.info("✅ Response has transparency about base knowledge - accepting despite missing_uncertainty")
+                            has_missing_uncertainty = False  # Don't treat as critical failure
+                        
                         has_critical_failure = has_language_mismatch or has_missing_uncertainty
                         
                         # If patched_answer is available (e.g., from CitationRequired auto-enforcement), use it
