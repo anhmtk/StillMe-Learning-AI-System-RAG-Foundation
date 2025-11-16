@@ -811,25 +811,28 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 html = html.replace(h2Pattern, '<h2>$1</h2>');
                 
                 // Bold: **text** -> <strong>text</strong>
-                // CRITICAL: In Python f-string, \\\\* becomes \\* in JavaScript, which escapes * correctly
-                var boldPattern = new RegExp('\\*\\*([^*]+?)\\*\\*', 'g');
+                // CRITICAL: In Python f-string, \\\\* becomes \\* in JavaScript string, which becomes \* in regex
+                // Need 4 backslashes in Python f-string to get 2 backslashes in JS string, which becomes 1 backslash in regex
+                var boldPattern = new RegExp('\\\\*\\\\*([^*]+?)\\\\*\\\\*', 'g');
                 html = html.replace(boldPattern, '<strong>$1</strong>');
                 
                 // Bullet points: - item -> <li>item</li>
                 var bulletPattern = new RegExp('<p>- (.+?)</p>', 'g');
                 html = html.replace(bulletPattern, '<li>$1</li>');
                 // Wrap consecutive <li> in <ul>
-                // CRITICAL: Escape properly - need \\s in JavaScript string to get \s
+                // In Python f-string, \\\\s becomes \\s in JavaScript string, which becomes \s in regex
                 var listPattern = new RegExp('(<li>.*?</li>\\\\s*)+', 'g');
                 html = html.replace(listPattern, function(match) {{
                     return '<ul style="margin: 8px 0; padding-left: 20px;">' + match + '</ul>';
                 }});
                 
                 // Tables: | col1 | col2 | -> <table>...
-                var tablePattern = new RegExp('<p>\\|(.+?)\\|</p>\\s*<p>\\|([-| ]+?)\\|</p>\\s*((?:<p>\\|.+?\\|</p>\\s*)+)', 'g');
+                // In Python f-string, \\\\| becomes \\| in JavaScript string, which becomes \| in regex
+                // In Python f-string, \\\\s becomes \\s in JavaScript string, which becomes \s in regex
+                var tablePattern = new RegExp('<p>\\\\|(.+?)\\\\|</p>\\\\s*<p>\\\\|([-| ]+?)\\\\|</p>\\\\s*((?:<p>\\\\|.+?\\\\|</p>\\\\s*)+)', 'g');
                 html = html.replace(tablePattern, function(match, header, separator, rows) {{
                     var headers = header.split('|').map(function(h) {{ return h.trim(); }}).filter(function(h) {{ return h; }});
-                    var rowLines = rows.match(new RegExp('<p>\\|.+?\\|</p>', 'g')) || [];
+                    var rowLines = rows.match(new RegExp('<p>\\\\|.+?\\\\|</p>', 'g')) || [];
                     var rowData = rowLines.map(function(row) {{
                         return row.replace(new RegExp('</?p>', 'g'), '').split('|').map(function(c) {{ return c.trim(); }}).filter(function(c) {{ return c; }});
                     }});
