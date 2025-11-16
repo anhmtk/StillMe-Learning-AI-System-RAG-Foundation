@@ -1963,13 +1963,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             
                             const data = await response.json();
                             console.log('StillMe Chat: Received response data:', data);
+                            console.log('StillMe Chat: data.response exists?', 'response' in data);
+                            console.log('StillMe Chat: data.response value:', data.response ? data.response.substring(0, 100) + '...' : 'NULL/EMPTY');
                             
-                            const reply = data.response || data.message || JSON.stringify(data);
-                            console.log('StillMe Chat: Extracted reply:', reply ? reply.substring(0, 100) + '...' : 'EMPTY REPLY');
+                            const reply = data.response || data.message || (data.error ? `Error: ${{data.error}}` : JSON.stringify(data));
+                            console.log('StillMe Chat: Extracted reply length:', reply ? reply.length : 0);
+                            console.log('StillMe Chat: Extracted reply preview:', reply ? reply.substring(0, 100) + '...' : 'EMPTY REPLY');
                             
-                            if (!reply || reply.trim() === '') {{
+                            if (!reply || (typeof reply === 'string' && reply.trim() === '')) {{
                                 console.error('StillMe Chat: Empty reply received!', data);
-                                throw new Error('Empty response from StillMe');
+                                throw new Error('Empty response from StillMe. Check backend logs.');
                             }}
                             
                             // Display processing steps if available (both iframe and parent)
@@ -2196,13 +2199,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         
                         const data = await response.json();
                         console.log('StillMe Chat: Received response data:', data);
+                        console.log('StillMe Chat: data.response exists?', 'response' in data);
+                        console.log('StillMe Chat: data.response value:', data.response ? data.response.substring(0, 100) + '...' : 'NULL/EMPTY');
                         
-                        const reply = data.response || data.message || JSON.stringify(data);
-                        console.log('StillMe Chat: Extracted reply:', reply ? reply.substring(0, 100) + '...' : 'EMPTY REPLY');
+                        const reply = data.response || data.message || (data.error ? `Error: ${{data.error}}` : JSON.stringify(data));
+                        console.log('StillMe Chat: Extracted reply length:', reply ? reply.length : 0);
+                        console.log('StillMe Chat: Extracted reply preview:', reply ? reply.substring(0, 100) + '...' : 'EMPTY REPLY');
                         
-                        if (!reply || reply.trim() === '') {{
+                        if (!reply || (typeof reply === 'string' && reply.trim() === '')) {{
                             console.error('StillMe Chat: Empty reply received!', data);
-                            throw new Error('Empty response from StillMe');
+                            throw new Error('Empty response from StillMe. Check backend logs.');
                         }}
                         
                         // Display processing steps if available (both iframe and parent)
