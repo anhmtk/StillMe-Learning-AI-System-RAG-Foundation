@@ -859,10 +859,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             
                     // Render chat history with auto-scroll
             function renderMessages() {{
+                console.log('StillMe Chat: renderMessages() called, chatHistory length:', chatHistory.length);
                 const messagesContainer = document.getElementById('stillme-chat-messages');
+                if (!messagesContainer) {{
+                    console.error('StillMe Chat: messagesContainer not found!');
+                    return;
+                }}
                 messagesContainer.innerHTML = '';
                 
                 chatHistory.forEach((msg, index) => {{
+                    console.log('StillMe Chat: Rendering message', index, 'role:', msg.role, 'content length:', msg.content ? msg.content.length : 0);
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `stillme-chat-message ${{msg.role}}`;
                     
@@ -1956,7 +1962,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             }}
                             
                             const data = await response.json();
+                            console.log('StillMe Chat: Received response data:', data);
+                            
                             const reply = data.response || data.message || JSON.stringify(data);
+                            console.log('StillMe Chat: Extracted reply:', reply ? reply.substring(0, 100) + '...' : 'EMPTY REPLY');
+                            
+                            if (!reply || reply.trim() === '') {{
+                                console.error('StillMe Chat: Empty reply received!', data);
+                                throw new Error('Empty response from StillMe');
+                            }}
                             
                             // Display processing steps if available (both iframe and parent)
                             const processingSteps = data.processing_steps || [];
@@ -2004,13 +2018,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             }}
                             
                             // Add assistant response
+                            console.log('StillMe Chat: Adding reply to chatHistory, length:', reply ? reply.length : 0);
                             chatHistory.push({{ 
                                 role: 'assistant', 
                                 content: reply,
                                 message_id: data.message_id || null,
                                 question: message
                             }});
+                            console.log('StillMe Chat: chatHistory length after push:', chatHistory.length);
                             renderMessages();
+                            console.log('StillMe Chat: renderMessages() called');
                             
                             // Update parent panel with new messages
                             if (window.parent && window.parent !== window) {{
@@ -2178,7 +2195,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }}
                         
                         const data = await response.json();
+                        console.log('StillMe Chat: Received response data:', data);
+                        
                         const reply = data.response || data.message || JSON.stringify(data);
+                        console.log('StillMe Chat: Extracted reply:', reply ? reply.substring(0, 100) + '...' : 'EMPTY REPLY');
+                        
+                        if (!reply || reply.trim() === '') {{
+                            console.error('StillMe Chat: Empty reply received!', data);
+                            throw new Error('Empty response from StillMe');
+                        }}
                         
                         // Display processing steps if available (both iframe and parent)
                         const processingSteps = data.processing_steps || [];
@@ -2231,13 +2256,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }}
                         
                         // Add assistant response
+                        console.log('StillMe Chat: Adding reply to chatHistory, length:', reply ? reply.length : 0);
                         chatHistory.push({{ 
                             role: 'assistant', 
                             content: reply,
                             message_id: data.message_id || null,
                             question: message
                         }});
-                    renderMessages();
+                        console.log('StillMe Chat: chatHistory length after push:', chatHistory.length);
+                        renderMessages();
+                        console.log('StillMe Chat: renderMessages() called');
                             
                             // Update parent panel with new messages
                             if (window.parent && window.parent !== window) {{
