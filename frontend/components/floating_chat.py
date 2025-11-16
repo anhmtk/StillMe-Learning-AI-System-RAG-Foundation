@@ -799,7 +799,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 let html = String(text);
                 
                 // CRITICAL: Preserve line breaks first
-                // Convert \n\n to paragraph breaks, \n to <br>
+                // Convert double newlines to paragraph breaks, single newlines to br tags
                 html = html.replace(/\n\n+/g, '</p><p>');
                 html = '<p>' + html + '</p>';
                 html = html.replace(/\n/g, '<br>');
@@ -843,9 +843,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     return tableHtml;
                 }});
                 
-                // Clean up empty paragraphs
+                // Clean up empty paragraph tags
                 html = html.replace(/<p><\/p>/g, '');
-                html = html.replace(/<p>(<[^>]+>)<\/p>/g, '$1'); // Remove <p> around block elements
+                html = html.replace(/<p>(<[^>]+>)<\/p>/g, '$1'); // Remove p tags around block elements
                 
                 return html;
             }}
