@@ -811,6 +811,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 html = html.replace(h2Pattern, '<h2>$1</h2>');
                 
                 // Bold: **text** -> <strong>text</strong>
+                // CRITICAL: In Python f-string, \\\\* becomes \\* in JavaScript, which escapes * correctly
                 var boldPattern = new RegExp('\\*\\*([^*]+?)\\*\\*', 'g');
                 html = html.replace(boldPattern, '<strong>$1</strong>');
                 
@@ -818,7 +819,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 var bulletPattern = new RegExp('<p>- (.+?)</p>', 'g');
                 html = html.replace(bulletPattern, '<li>$1</li>');
                 // Wrap consecutive <li> in <ul>
-                var listPattern = new RegExp('(<li>.*?</li>\\s*)+', 'g');
+                // CRITICAL: Escape properly - need \\s in JavaScript string to get \s
+                var listPattern = new RegExp('(<li>.*?</li>\\\\s*)+', 'g');
                 html = html.replace(listPattern, function(match) {{
                     return '<ul style="margin: 8px 0; padding-left: 20px;">' + match + '</ul>';
                 }});
