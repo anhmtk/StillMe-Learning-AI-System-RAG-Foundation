@@ -1111,6 +1111,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     # NEW: Self-consistency checks (Phase 1 - SSR)
                     consistency_info = None
                     enable_consistency_checks = os.getenv("ENABLE_CONSISTENCY_CHECKS", "true").lower() == "true"
+                    logger.info(f"🔍 Consistency checks config: enabled={enable_consistency_checks}")
                     
                     if enable_consistency_checks:
                         try:
@@ -1118,9 +1119,10 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             
                             checker = ConsistencyChecker()
                             claims = checker.extract_claims(raw_response)
+                            logger.info(f"🔍 Extracted {len(claims)} claims from response")
                             
                             if len(claims) > 1:
-                                logger.debug(f"🔍 Checking consistency for {len(claims)} claims")
+                                logger.info(f"🔍 Checking consistency for {len(claims)} claims")
                                 
                                 # Check pairwise consistency
                                 consistency_results = checker.check_pairwise_consistency(claims)
