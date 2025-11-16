@@ -267,11 +267,11 @@ We evaluated StillMe and baseline systems on a 50-question subset of TruthfulQA 
 
 1. **Accuracy**: StillMe achieves 56% accuracy on the 50-question subset, outperforming ChatGPT (52%) by 4 percentage points and Vanilla RAG (54%) by 2 percentage points. This demonstrates that StillMe's validation chain and transparency mechanisms do not significantly compromise accuracy compared to baseline systems.
 
-2. **Transparency Score**: StillMe achieves 70.60% transparency score, more than double the baseline systems (30%). This is primarily due to StillMe's 100% citation rate, which is unique among evaluated systems.
+2. **Transparency**: StillMe achieves 70.60% transparency score, more than double the baseline systems (30%), primarily due to StillMe's 100% citation rate—a unique feature among evaluated systems.
 
-3. **Citation Rate**: StillMe is the only system with 100% citation rate. All baseline systems (Vanilla RAG, ChatGPT) have 0% citation rate, meaning they do not provide source citations. This allows users to verify information sources, a critical feature for building trust.
+3. **Citation Coverage**: StillMe is the only system with 100% citation rate. All baseline systems (Vanilla RAG, ChatGPT) have 0% citation rate, meaning they do not provide source citations. This allows users to verify information sources, a critical feature for building trust.
 
-4. **Validation Pass Rate**: StillMe achieves 100% validation pass rate, indicating that all responses successfully pass the validation chain, ensuring response quality and grounding.
+4. **Response Grounding**: StillMe achieves 100% validation pass rate, indicating that all responses successfully pass the validation chain, ensuring response quality and grounding.
 
 5. **Hallucination Reduction**: Under our evaluation protocol, StillMe never returns an answer without either (a) at least one citation to retrieved evidence, or (b) an explicit admission of uncertainty. This operational definition ensures all responses are grounded or appropriately express uncertainty, reducing ungrounded answers.
 
@@ -292,7 +292,7 @@ We conducted an extended evaluation on 634 questions from the TruthfulQA dataset
 | Validation Pass Rate | 99.76% | High validation success rate |
 | Transparency Score | 70.87% | Consistent with subset results |
 
-**Note on Evaluation Scope**: The evaluation was conducted on 634 questions from the TruthfulQA dataset (out of 790 total). The accuracy (15.30%) is lower than the subset accuracy (56%) due to the increased difficulty and diversity of questions. This is expected, as TruthfulQA is designed to test models on challenging questions that require careful reasoning. The key finding is that StillMe maintains its transparency advantages (99.68% citation rate, 70.87% transparency score) even on the extended, more challenging dataset.
+**Note on Evaluation Scope**: The evaluation was conducted on 634 questions from the TruthfulQA dataset (out of 790 total). The accuracy (15.30%) is lower than the subset accuracy (56%) due to the increased difficulty and diversity of questions in the extended evaluation. This is expected, as TruthfulQA is designed to test models on challenging questions that require careful reasoning. The key finding is that StillMe maintains its transparency advantages (99.68% citation rate, 70.87% transparency score) even on the extended, more challenging dataset, demonstrating consistency across different question sets.
 
 ### 4.5 Analysis
 
