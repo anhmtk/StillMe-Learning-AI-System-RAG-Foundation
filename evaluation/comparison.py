@@ -235,8 +235,11 @@ class SystemComparator:
                 question = qa_pair.get("question", "")
                 ground_truth = qa_pair.get("correct_answer", "")
                 
+                # Use Claude Haiku for cost-effective evaluation (can be changed to opus/sonnet)
+                model = os.getenv("CLAUDE_MODEL", "claude-3-haiku-20240307")  # Default to Haiku
+                
                 message = client.messages.create(
-                    model="claude-3-opus-20240229",
+                    model=model,
                     max_tokens=1024,
                     messages=[{"role": "user", "content": question}]
                 )

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StillMe Transparency Perception Study</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .question-block {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .question-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .system-response {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            border: 1px solid #e0e0e0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #444;
+        }
+        
+        .system-name {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .rating-group {
+            margin: 20px 0;
+        }
+        
+        .rating-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .rating-scale {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .rating-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            margin: 0 5px;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .rating-option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .rating-option input[type="radio"] {
+            display: none;
+        }
+        
+        .rating-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .rating-option label {
+            display: block;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .checkbox-group {
+            margin: 15px 0;
+        }
+        
+        .checkbox-item {
+            margin: 10px 0;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+        
+        .thank-you {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+        
+        .thank-you h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 StillMe Transparency Perception Study</h1>
+        <p class="subtitle">Help us understand how transparency features affect trust in AI systems</p>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress" style="width: 0%"></div>
+        </div>
+        
+        <form id="surveyForm">
+            <input type="hidden" id="user_id" name="user_id" value="">
+            <input type="hidden" id="timestamp" name="timestamp" value="">
+            
+            <!-- Question 1 -->
+            <div class="question-block" data-question="1">
+                <div class="question-title">Question 1: What is the capital of France?</div>
+                
+                <div class="system-response">
+                    <div class="system-name">System A:</div>
+                    Paris is the capital of France [1]. It is located in the north-central part of the country.
+                </div>
+                
+                <div class="rating-group">
+                    <label class="rating-label">How transparent is this response? (1 = Not transparent, 5 = Very transparent)</label>
+                    <div class="rating-scale">
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_1a')">
+                            <input type="radio" name="transparency_1a" value="1" required>
+                            <label>1</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_1a')">
+                            <input type="radio" name="transparency_1a" value="2">
+                            <label>2</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_1a')">
+                            <input type="radio" name="transparency_1a" value="3">
+                            <label>3</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_1a')">
+                            <input type="radio" name="transparency_1a" value="4">
+                            <label>4</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_1a')">
+                            <input type="radio" name="transparency_1a" value="5">
+                            <label>5</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="rating-group">
+                    <label class="rating-label">How much do you trust this response? (1 = Not at all, 5 = Completely)</label>
+                    <div class="rating-scale">
+                        <div class="rating-option" onclick="selectRating(this, 'trust_1a')">
+                            <input type="radio" name="trust_1a" value="1" required>
+                            <label>1</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'trust_1a')">
+                            <input type="radio" name="trust_1a" value="2">
+                            <label>2</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'trust_1a')">
+                            <input type="radio" name="trust_1a" value="3">
+                            <label>3</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'trust_1a')">
+                            <input type="radio" name="trust_1a" value="4">
+                            <label>4</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'trust_1a')">
+                            <input type="radio" name="trust_1a" value="5">
+                            <label>5</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="citation_helpful_1a" name="citation_helpful_1a">
+                        <label for="citation_helpful_1a">Citation [1] was helpful</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="uncertainty_helpful_1a" name="uncertainty_helpful_1a">
+                        <label for="uncertainty_helpful_1a">Uncertainty expression was helpful</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Question 2 -->
+            <div class="question-block" data-question="2">
+                <div class="question-title">Question 2: What is the population of a fictional city?</div>
+                
+                <div class="system-response">
+                    <div class="system-name">System B:</div>
+                    I don't have information about fictional cities in my knowledge base. StillMe learns from trusted sources (RSS, arXiv, Wikipedia) every 4 hours, but this topic isn't currently covered.
+                </div>
+                
+                <div class="rating-group">
+                    <label class="rating-label">How transparent is this response? (1 = Not transparent, 5 = Very transparent)</label>
+                    <div class="rating-scale">
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_2b')">
+                            <input type="radio" name="transparency_2b" value="1" required>
+                            <label>1</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_2b')">
+                            <input type="radio" name="transparency_2b" value="2">
+                            <label>2</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_2b')">
+                            <input type="radio" name="transparency_2b" value="3">
+                            <label>3</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_2b')">
+                            <input type="radio" name="transparency_2b" value="4">
+                            <label>4</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'transparency_2b')">
+                            <input type="radio" name="transparency_2b" value="5">
+                            <label>5</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="rating-group">
+                    <label class="rating-label">How much do you trust this response? (1 = Not at all, 5 = Completely)</label>
+                    <div class="rating-scale">
+                        <div class="rating-option" onclick="selectRating(this, 'trust_2b')">
+                            <input type="radio" name="trust_2b" value="1" required>
+                            <label>1</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'trust_2b')">
+                            <input type="radio" name="trust_2b" value="2">
+                            <label>2</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'trust_2b')">
+                            <input type="radio" name="trust_2b" value="3">
+                            <label>3</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'trust_2b')">
+                            <input type="radio" name="trust_2b" value="4">
+                            <label>4</label>
+                        </div>
+                        <div class="rating-option" onclick="selectRating(this, 'trust_2b')">
+                            <input type="radio" name="trust_2b" value="5">
+                            <label>5</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="citation_helpful_2b" name="citation_helpful_2b">
+                        <label for="citation_helpful_2b">Citation was helpful</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="uncertainty_helpful_2b" name="uncertainty_helpful_2b" checked>
+                        <label for="uncertainty_helpful_2b">Uncertainty expression was helpful</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="question-block">
+                <div class="question-title">Additional Comments (Optional)</div>
+                <textarea name="comments" placeholder="Any additional thoughts about transparency and trust in AI systems?"></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">Submit Survey</button>
+        </form>
+        
+        <div class="thank-you" id="thankYou">
+            <h2>Thank You! 🙏</h2>
+            <p>Your feedback helps us improve AI transparency.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Generate user ID
+        document.getElementById('user_id').value = 'user_' + Date.now();
+        document.getElementById('timestamp').value = new Date().toISOString();
+        
+        // Rating selection
+        function selectRating(element, name) {
+            // Remove selected class from siblings
+            const siblings = element.parentElement.querySelectorAll('.rating-option');
+            siblings.forEach(sib => sib.classList.remove('selected'));
+            
+            // Add selected class
+            element.classList.add('selected');
+            
+            // Check radio button
+            const radio = element.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            updateProgress();
+        }
+        
+        // Update progress bar
+        function updateProgress() {
+            const form = document.getElementById('surveyForm');
+            const inputs = form.querySelectorAll('input[type="radio"]:checked');
+            const total = form.querySelectorAll('input[type="radio"]').length / 5; // 5 options per question
+            const progress = (inputs.length / total) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+        
+        // Form submission
+        document.getElementById('surveyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = new FormData(this);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                if (key.startsWith('transparency_') || key.startsWith('trust_')) {
+                    data[key] = parseInt(value);
+                } else if (key.startsWith('citation_helpful_') || key.startsWith('uncertainty_helpful_')) {
+                    data[key] = formData.has(key);
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Save to localStorage (for demo - in production, send to API)
+            const ratings = JSON.parse(localStorage.getItem('transparency_ratings') || '[]');
+            ratings.push(data);
+            localStorage.setItem('transparency_ratings', JSON.stringify(ratings));
+            
+            // Show thank you
+            document.getElementById('surveyForm').style.display = 'none';
+            document.getElementById('thankYou').style.display = 'block';
+            
+            console.log('Survey data:', data);
+            console.log('All ratings:', ratings);
+        });
+        
+        // Initialize progress
+        updateProgress();
+    </script>
+</body>
+</html>
+
