@@ -51,10 +51,10 @@ class StepDetector:
         for pattern in step_indicators:
             matches = re.findall(pattern, response, re.MULTILINE | re.IGNORECASE)
             if len(matches) >= 2:  # At least 2 steps
-                logger.debug(f"✅ Multi-step detected via pattern '{pattern}': {len(matches)} matches")
+                logger.info(f"✅ Multi-step detected via pattern '{pattern}': {len(matches)} matches")
                 return True
         
-        logger.debug(f"❌ Not detected as multi-step (response length: {len(response)})")
+        logger.info(f"❌ Not detected as multi-step (response length: {len(response)}, checked {len(step_indicators)} patterns)")
         return False
     
     def detect_steps(self, response: str) -> List[Step]:

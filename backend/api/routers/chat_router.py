@@ -1039,7 +1039,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     step_min_steps = int(os.getenv("STEP_VALIDATION_MIN_STEPS", "2"))
                     step_confidence_threshold = float(os.getenv("STEP_CONFIDENCE_THRESHOLD", "0.5"))
                     
-                    logger.debug(f"🔍 Step-level validation config: enabled={enable_step_validation}, min_steps={step_min_steps}, threshold={step_confidence_threshold}")
+                    logger.info(f"🔍 Step-level validation config: enabled={enable_step_validation}, min_steps={step_min_steps}, threshold={step_confidence_threshold}")
                     
                     if enable_step_validation:
                         try:
@@ -1049,18 +1049,23 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             step_detector = StepDetector()
                             
                             # Quick check first (performance optimization)
-                            logger.debug(f"🔍 Checking if response is multi-step (min_steps: {step_min_steps})...")
-                            if step_detector.is_multi_step(raw_response):
+                            logger.info(f"🔍 Checking if response is multi-step (min_steps: {step_min_steps})...")
+                            logger.info(f"🔍 Response preview (first 200 chars): {raw_response[:200]}...")
+                            is_multi = step_detector.is_multi_step(raw_response)
+                            logger.info(f"🔍 is_multi_step result: {is_multi}")
+                            
+                            if is_multi:
                                 steps = step_detector.detect_steps(raw_response)
-                                logger.debug(f"🔍 StepDetector found {len(steps)} steps")
+                                logger.info(f"🔍 StepDetector found {len(steps)} steps")
                                 
                                 if len(steps) >= step_min_steps:
                                     logger.info(f"🔍 Detected {len(steps)} steps - running step-level validation")
                                     processing_steps.append(f"🔍 Step-level validation ({len(steps)} steps)")
                                     
                                     step_validator = StepValidator(confidence_threshold=step_confidence_threshold)
-                                    logger.debug(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold}")
+                                    logger.info(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold}")
                                     step_results = step_validator.validate_all_steps(steps, ctx_docs, chain, parallel=True)
+                                    logger.info(f"🔍 Step validation completed: {len(step_results)} results")
                                     
                                     low_confidence_steps = [
                                         r.step.step_number
