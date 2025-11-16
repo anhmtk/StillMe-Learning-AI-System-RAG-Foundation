@@ -800,31 +800,31 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 
                 // CRITICAL: Preserve line breaks first
                 // Convert \n\n to paragraph breaks, \n to <br>
-                html = html.replace(/\\n\\n+/g, '</p><p>');
+                html = html.replace(/\n\n+/g, '</p><p>');
                 html = '<p>' + html + '</p>';
-                html = html.replace(/\\n/g, '<br>');
+                html = html.replace(/\n/g, '<br>');
                 
                 // Headers: ## Header -> <h2>Header</h2>
-                html = html.replace(/<p>### (.+?)<\\/p>/g, '<h3>$1</h3>');
-                html = html.replace(/<p>## (.+?)<\\/p>/g, '<h2>$1</h2>');
+                html = html.replace(/<p>### (.+?)<\/p>/g, '<h3>$1</h3>');
+                html = html.replace(/<p>## (.+?)<\/p>/g, '<h2>$1</h2>');
                 
                 // Bold: **text** -> <strong>text</strong>
-                html = html.replace(/\\*\\*([^*]+?)\\*\\*/g, '<strong>$1</strong>');
+                html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
                 
                 // Bullet points: - item -> <li>item</li>
-                html = html.replace(/<p>- (.+?)<\\/p>/g, '<li>$1</li>');
+                html = html.replace(/<p>- (.+?)<\/p>/g, '<li>$1</li>');
                 // Wrap consecutive <li> in <ul>
-                html = html.replace(/(<li>.*?<\\/li>\\s*)+/g, function(match) {{
+                html = html.replace(/(<li>.*?<\/li>\s*)+/g, function(match) {{
                     return '<ul style="margin: 8px 0; padding-left: 20px;">' + match + '</ul>';
                 }});
                 
                 // Tables: | col1 | col2 | -> <table>...
-                const tableRegex = /<p>\\|(.+?)\\|<\\/p>\\s*<p>\\|([-| ]+?)\\|<\\/p>\\s*((?:<p>\\|.+?\\|<\\/p>\\s*)+)/g;
+                const tableRegex = /<p>\|(.+?)\|<\/p>\s*<p>\|([-| ]+?)\|<\/p>\s*((?:<p>\|.+?\|<\/p>\s*)+)/g;
                 html = html.replace(tableRegex, function(match, header, separator, rows) {{
                     const headers = header.split('|').map(h => h.trim()).filter(h => h);
-                    const rowLines = rows.match(/<p>\\|.+?\\|<\\/p>/g) || [];
+                    const rowLines = rows.match(/<p>\|.+?\|<\/p>/g) || [];
                     const rowData = rowLines.map(row => {{
-                        return row.replace(/<\\/?p>/g, '').split('|').map(c => c.trim()).filter(c => c);
+                        return row.replace(/<\/?p>/g, '').split('|').map(c => c.trim()).filter(c => c);
                     }});
                     
                     let tableHtml = '<table style="border-collapse: collapse; margin: 10px 0; width: 100%;"><thead><tr>';
@@ -844,8 +844,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 }});
                 
                 // Clean up empty paragraphs
-                html = html.replace(/<p><\\/p>/g, '');
-                html = html.replace(/<p>(<[^>]+>)<\\/p>/g, '$1'); // Remove <p> around block elements
+                html = html.replace(/<p><\/p>/g, '');
+                html = html.replace(/<p>(<[^>]+>)<\/p>/g, '$1'); // Remove <p> around block elements
                 
                 return html;
             }}

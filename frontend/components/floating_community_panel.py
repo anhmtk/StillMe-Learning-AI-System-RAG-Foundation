@@ -200,7 +200,7 @@ def render_floating_community_panel():
                         id="community-iframe" 
                         src="" 
                         style="width: 100%; height: 100%; border: none; background: #1e1e1e; display: none;"
-                        onload="iframeLoaded()">
+                        onload="if (typeof iframeLoaded === 'function') iframeLoaded();">
                     </iframe>
                 </div>
             </div>
