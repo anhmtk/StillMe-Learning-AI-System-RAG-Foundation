@@ -1033,6 +1033,112 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         context=context
                     )
                     
+                    # NEW: Step-level validation (Phase 1 - SSR)
+                    step_validation_info = None
+                    enable_step_validation = os.getenv("ENABLE_STEP_LEVEL_VALIDATION", "true").lower() == "true"
+                    step_min_steps = int(os.getenv("STEP_VALIDATION_MIN_STEPS", "2"))
+                    step_confidence_threshold = float(os.getenv("STEP_CONFIDENCE_THRESHOLD", "0.5"))
+                    
+                    if enable_step_validation:
+                        try:
+                            from backend.validators.step_detector import StepDetector
+                            from backend.validators.step_validator import StepValidator
+                            
+                            step_detector = StepDetector()
+                            
+                            # Quick check first (performance optimization)
+                            if step_detector.is_multi_step(raw_response):
+                                steps = step_detector.detect_steps(raw_response)
+                                
+                                if len(steps) >= step_min_steps:
+                                    logger.info(f"🔍 Detected {len(steps)} steps - running step-level validation")
+                                    processing_steps.append(f"🔍 Step-level validation ({len(steps)} steps)")
+                                    
+                                    step_validator = StepValidator(confidence_threshold=step_confidence_threshold)
+                                    step_results = step_validator.validate_all_steps(steps, ctx_docs, chain, parallel=True)
+                                    
+                                    low_confidence_steps = [
+                                        r.step.step_number
+                                        for r in step_results
+                                        if r.confidence < step_confidence_threshold
+                                    ]
+                                    
+                                    step_validation_info = {
+                                        "is_multi_step": True,
+                                        "total_steps": len(steps),
+                                        "steps": [
+                                            {
+                                                "step_number": r.step.step_number,
+                                                "confidence": round(r.confidence, 2),
+                                                "passed": r.passed,
+                                                "issues": r.issues
+                                            }
+                                            for r in step_results
+                                        ],
+                                        "low_confidence_steps": low_confidence_steps,
+                                        "all_steps_passed": all(r.passed for r in step_results),
+                                        "average_confidence": round(
+                                            sum(r.confidence for r in step_results) / len(step_results), 2
+                                        ) if step_results else 0.0
+                                    }
+                                    
+                                    if low_confidence_steps:
+                                        logger.warning(f"⚠️ Low confidence steps detected: {low_confidence_steps}")
+                                        processing_steps.append(f"⚠️ {len(low_confidence_steps)} step(s) with low confidence")
+                                    else:
+                                        logger.info(f"✅ All {len(steps)} steps passed validation")
+                                        processing_steps.append(f"✅ All steps validated")
+                        except Exception as step_error:
+                            logger.warning(f"Step-level validation error: {step_error}", exc_info=True)
+                            # Don't fail - step validation is optional
+                    
+                    # NEW: Self-consistency checks (Phase 1 - SSR)
+                    consistency_info = None
+                    enable_consistency_checks = os.getenv("ENABLE_CONSISTENCY_CHECKS", "true").lower() == "true"
+                    
+                    if enable_consistency_checks:
+                        try:
+                            from backend.validators.consistency_checker import ConsistencyChecker
+                            
+                            checker = ConsistencyChecker()
+                            claims = checker.extract_claims(raw_response)
+                            
+                            if len(claims) > 1:
+                                logger.debug(f"🔍 Checking consistency for {len(claims)} claims")
+                                
+                                # Check pairwise consistency
+                                consistency_results = checker.check_pairwise_consistency(claims)
+                                
+                                # Check KB consistency for each claim
+                                kb_results = {}
+                                for i, claim in enumerate(claims):
+                                    kb_consistency = checker.check_kb_consistency(claim, ctx_docs)
+                                    kb_results[f"claim_{i}_vs_kb"] = kb_consistency
+                                
+                                contradictions = [
+                                    key for key, value in consistency_results.items()
+                                    if value == "CONTRADICTION"
+                                ]
+                                
+                                kb_inconsistencies = [
+                                    key for key, value in kb_results.items()
+                                    if "INCONSISTENT" in value
+                                ]
+                                
+                                if contradictions or kb_inconsistencies:
+                                    logger.warning(f"⚠️ Consistency issues detected: {len(contradictions)} contradictions, {len(kb_inconsistencies)} KB inconsistencies")
+                                    processing_steps.append(f"⚠️ {len(contradictions)} contradiction(s) detected")
+                                
+                                consistency_info = {
+                                    "total_claims": len(claims),
+                                    "contradictions": contradictions,
+                                    "kb_inconsistencies": kb_inconsistencies,
+                                    "has_issues": len(contradictions) > 0 or len(kb_inconsistencies) > 0
+                                }
+                        except Exception as consistency_error:
+                            logger.warning(f"Consistency check error: {consistency_error}", exc_info=True)
+                            # Don't fail - consistency checks are optional
+                    
                     # OpenAI Fallback Mechanism: Retry with OpenAI if confidence is low or validation failed
                     # This uses the $40 credit efficiently by only using OpenAI when needed
                     enable_openai_fallback = os.getenv("ENABLE_OPENAI_FALLBACK", "true").lower() == "true"
@@ -1313,7 +1419,9 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         "reasons": validation_result.reasons,
                         "used_fallback": used_fallback,
                         "confidence_score": confidence_score,
-                        "context_docs_count": len(ctx_docs)
+                        "context_docs_count": len(ctx_docs),
+                        "step_validation": step_validation_info,  # NEW: Step-level validation info
+                        "consistency": consistency_info  # NEW: Consistency check info
                     }
                     
                 except HTTPException:
