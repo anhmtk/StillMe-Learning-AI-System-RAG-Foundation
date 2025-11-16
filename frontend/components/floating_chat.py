@@ -805,31 +805,31 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 html = html.replace(/\n/g, '<br>');
                 
                 // Headers: ## Header -> <h2>Header</h2>
-                var h3Pattern = /<p>### (.+?)<\\/p>/g;
+                var h3Pattern = new RegExp('<p>### (.+?)</p>', 'g');
                 html = html.replace(h3Pattern, '<h3>$1</h3>');
-                var h2Pattern = /<p>## (.+?)<\\/p>/g;
+                var h2Pattern = new RegExp('<p>## (.+?)</p>', 'g');
                 html = html.replace(h2Pattern, '<h2>$1</h2>');
                 
                 // Bold: **text** -> <strong>text</strong>
-                var boldPattern = /\\*\\*([^*]+?)\\*\\*/g;
+                var boldPattern = new RegExp('\\*\\*([^*]+?)\\*\\*', 'g');
                 html = html.replace(boldPattern, '<strong>$1</strong>');
                 
                 // Bullet points: - item -> <li>item</li>
-                var bulletPattern = /<p>- (.+?)<\\/p>/g;
+                var bulletPattern = new RegExp('<p>- (.+?)</p>', 'g');
                 html = html.replace(bulletPattern, '<li>$1</li>');
                 // Wrap consecutive <li> in <ul>
-                var listPattern = /(<li>.*?<\\/li>\\s*)+/g;
+                var listPattern = new RegExp('(<li>.*?</li>\\s*)+', 'g');
                 html = html.replace(listPattern, function(match) {{
                     return '<ul style="margin: 8px 0; padding-left: 20px;">' + match + '</ul>';
                 }});
                 
                 // Tables: | col1 | col2 | -> <table>...
-                var tablePattern = /<p>\\|(.+?)\\|<\\/p>\\s*<p>\\|([-| ]+?)\\|<\\/p>\\s*((?:<p>\\|.+?\\|<\\/p>\\s*)+)/g;
+                var tablePattern = new RegExp('<p>\\|(.+?)\\|</p>\\s*<p>\\|([-| ]+?)\\|</p>\\s*((?:<p>\\|.+?\\|</p>\\s*)+)', 'g');
                 html = html.replace(tablePattern, function(match, header, separator, rows) {{
                     var headers = header.split('|').map(function(h) {{ return h.trim(); }}).filter(function(h) {{ return h; }});
-                    var rowLines = rows.match(/<p>\\|.+?\\|<\\/p>/g) || [];
+                    var rowLines = rows.match(new RegExp('<p>\\|.+?\\|</p>', 'g')) || [];
                     var rowData = rowLines.map(function(row) {{
-                        return row.replace(/<\\/?p>/g, '').split('|').map(function(c) {{ return c.trim(); }}).filter(function(c) {{ return c; }});
+                        return row.replace(new RegExp('</?p>', 'g'), '').split('|').map(function(c) {{ return c.trim(); }}).filter(function(c) {{ return c; }});
                     }});
                     
                     var tableHtml = '<table style="border-collapse: collapse; margin: 10px 0; width: 100%;"><thead><tr>';
@@ -849,9 +849,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 }});
                 
                 // Clean up empty p tags
-                var emptyP = /<p><\\/p>/g;
+                var emptyP = new RegExp('<p></p>', 'g');
                 html = html.replace(emptyP, '');
-                var blockP = /<p>(<[^>]+>)<\\/p>/g;
+                var blockP = new RegExp('<p>(<[^>]+>)</p>', 'g');
                 html = html.replace(blockP, '$1'); // Remove p tags around block elements
                 
                 return html;
