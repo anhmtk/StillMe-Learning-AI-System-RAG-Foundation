@@ -819,7 +819,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 }});
                 
                 // Tables: | col1 | col2 | -> <table>...
-                const tableRegex = /<p>\|(.+?)\|<\/p>\s*<p>\|([\\-| ]+?)\|<\/p>\s*((?:<p>\|.+?\|<\/p>\s*)+)/g;
+                const tableRegex = /<p>\|(.+?)\|<\/p>\s*<p>\|([-| ]+?)\|<\/p>\s*((?:<p>\|.+?\|<\/p>\s*)+)/g;
                 html = html.replace(tableRegex, function(match, header, separator, rows) {{
                     const headers = header.split('|').map(h => h.trim()).filter(h => h);
                     const rowLines = rows.match(/<p>\|.+?\|<\/p>/g) || [];
