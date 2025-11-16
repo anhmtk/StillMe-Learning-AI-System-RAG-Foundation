@@ -46,7 +46,7 @@ class SystemComparator:
             Dictionary mapping system name to BenchmarkResults
         """
         if systems is None:
-            systems = ["stillme", "vanilla_rag", "chatgpt", "claude"]
+            systems = ["stillme", "vanilla_rag", "chatgpt", "deepseek", "openrouter"]
         
         results = {}
         
@@ -61,6 +61,10 @@ class SystemComparator:
                 results[system_name] = self._evaluate_chatgpt(questions)
             elif system_name == "claude":
                 results[system_name] = self._evaluate_claude(questions)
+            elif system_name == "deepseek":
+                results[system_name] = self._evaluate_deepseek(questions)
+            elif system_name == "openrouter":
+                results[system_name] = self._evaluate_openrouter(questions)
             else:
                 self.logger.warning(f"Unknown system: {system_name}")
         
@@ -68,18 +72,16 @@ class SystemComparator:
     
     def _evaluate_stillme(self, questions: List[Dict[str, Any]]) -> BenchmarkResults:
         """Evaluate StillMe with full RAG and validation"""
-        from .base import BaseEvaluator
-        
-        evaluator = BaseEvaluator(self.stillme_api_url)
         results = []
         
         for qa_pair in questions:
             question = qa_pair.get("question", "")
             ground_truth = qa_pair.get("correct_answer", "")
             
-            api_response = evaluator.query_stillme(question, use_rag=True)
+            # Query StillMe API directly
+            api_response = self._query_stillme(question, use_rag=True)
             predicted_answer = api_response.get("response", "")
-            metrics = evaluator.extract_metrics(api_response)
+            metrics = self._extract_metrics(api_response)
             
             # Check correctness (simplified)
             is_correct = self._check_correctness(predicted_answer, ground_truth)
@@ -113,17 +115,14 @@ class SystemComparator:
     
     def _evaluate_vanilla_rag(self, questions: List[Dict[str, Any]]) -> BenchmarkResults:
         """Evaluate StillMe with RAG but NO validation (vanilla RAG baseline)"""
-        from .base import BaseEvaluator
-        
-        evaluator = BaseEvaluator(self.stillme_api_url)
         results = []
         
         for qa_pair in questions:
             question = qa_pair.get("question", "")
             ground_truth = qa_pair.get("correct_answer", "")
             
-            # Query with RAG but disable validators
-            api_response = evaluator.query_stillme(question, use_rag=True)
+            # Query with RAG but disable validators (simulate vanilla RAG)
+            api_response = self._query_stillme(question, use_rag=True)
             predicted_answer = api_response.get("response", "")
             
             # Simulate vanilla RAG: no validation, no citations required
@@ -161,47 +160,154 @@ class SystemComparator:
         import openai
         
         results = []
+        # Try to get key from environment (set directly) first, then from .env
         api_key = os.getenv("OPENAI_API_KEY")
         
         if not api_key:
             self.logger.warning("OPENAI_API_KEY not set, skipping ChatGPT evaluation")
+            self.logger.warning("   Tip: Set it in PowerShell: $env:OPENAI_API_KEY='sk-proj-...'")
             return self._empty_results("ChatGPT (Not Available)")
+        
+        # Clean API key (remove quotes, spaces, newlines)
+        api_key = api_key.strip().strip('"').strip("'").replace("\n", "").replace("\r", "")
+        
+        # Additional check: if key seems truncated or has issues, warn
+        if len(api_key) < 50:
+            self.logger.warning(f"API key seems too short ({len(api_key)} chars), might be invalid")
         
         try:
             client = openai.OpenAI(api_key=api_key)
             
-            for qa_pair in questions:
+            # Try gpt-4 first, fallback to gpt-3.5-turbo if not available
+            model = os.getenv("OPENAI_MODEL", "gpt-4")
+            use_fallback = False
+            
+            for i, qa_pair in enumerate(questions):
                 question = qa_pair.get("question", "")
                 ground_truth = qa_pair.get("correct_answer", "")
                 
-                response = client.chat.completions.create(
-                    model="gpt-4",
-                    messages=[{"role": "user", "content": question}],
-                    temperature=0.7
+                try:
+                    response = client.chat.completions.create(
+                        model=model,
+                        messages=[{"role": "user", "content": question}],
+                        temperature=0.7,
+                        timeout=60.0
+                    )
+                    
+                    # Check if response is valid
+                    if not response or not response.choices or len(response.choices) == 0:
+                        self.logger.warning(f"Empty response from OpenAI (question {i+1}/{len(questions)})")
+                        continue
+                    
+                    if not response.choices[0].message or not response.choices[0].message.content:
+                        self.logger.warning(f"No content in response from OpenAI (question {i+1}/{len(questions)})")
+                        continue
+                    
+                    predicted_answer = response.choices[0].message.content
+                    
+                    if not predicted_answer or not predicted_answer.strip():
+                        self.logger.warning(f"Empty predicted answer from OpenAI (question {i+1}/{len(questions)})")
+                        continue
+                    
+                    is_correct = self._check_correctness(predicted_answer, ground_truth)
+                    
+                    results.append(EvaluationResult(
+                        question=question,
+                        ground_truth=ground_truth,
+                        predicted_answer=predicted_answer,
+                        is_correct=is_correct,
+                        confidence_score=0.9,  # ChatGPT doesn't provide confidence
+                        has_citation=False,  # ChatGPT doesn't cite sources
+                        has_uncertainty=False,  # ChatGPT rarely expresses uncertainty
+                        validation_passed=True,  # No validation
+                        metrics={"system": "chatgpt", "model": model}
+                    ))
+                    
+                except openai.AuthenticationError as e:
+                    self.logger.error(f"OpenAI Authentication Error (question {i+1}/{len(questions)}): {e}")
+                    self.logger.error("This usually means the API key is invalid or expired")
+                    # Try fallback to gpt-3.5-turbo if gpt-4 fails
+                    if model == "gpt-4" and not use_fallback:
+                        self.logger.info("Trying fallback to gpt-3.5-turbo...")
+                        model = "gpt-3.5-turbo"
+                        use_fallback = True
+                        continue
+                    else:
+                        raise
+                except openai.RateLimitError as e:
+                    self.logger.warning(f"OpenAI Rate Limit (question {i+1}/{len(questions)}): {e}")
+                    self.logger.info("Waiting 60 seconds before retrying...")
+                    import time
+                    time.sleep(60)
+                    continue
+                except openai.APIError as e:
+                    self.logger.error(f"OpenAI API Error (question {i+1}/{len(questions)}): {e}")
+                    # Skip this question and continue
+                    continue
+                except Exception as e:
+                    self.logger.error(f"Unexpected error evaluating ChatGPT (question {i+1}/{len(questions)}): {e}")
+                    import traceback
+                    self.logger.debug(f"Traceback: {traceback.format_exc()}")
+                    # Skip this question and continue
+                    continue
+            
+            # If we have some results, return them even if some questions failed
+            if results:
+                self.logger.info(f"ChatGPT evaluation completed: {len(results)}/{len(questions)} questions successful")
+                system_metrics = self.metrics_calculator.calculate_metrics(results)
+                
+                return BenchmarkResults(
+                    dataset_name=f"ChatGPT ({model})",
+                    total_questions=len(results),
+                    correct_answers=sum(1 for r in results if r.is_correct is True),
+                    accuracy=system_metrics.accuracy,
+                    hallucination_rate=system_metrics.hallucination_rate,
+                    avg_confidence=system_metrics.avg_confidence,
+                    citation_rate=system_metrics.citation_rate,
+                    uncertainty_rate=system_metrics.uncertainty_rate,
+                    validation_pass_rate=system_metrics.validation_pass_rate,
+                    detailed_results=results
                 )
-                
-                predicted_answer = response.choices[0].message.content
-                is_correct = self._check_correctness(predicted_answer, ground_truth)
-                
-                results.append(EvaluationResult(
-                    question=question,
-                    ground_truth=ground_truth,
-                    predicted_answer=predicted_answer,
-                    is_correct=is_correct,
-                    confidence_score=0.9,  # ChatGPT doesn't provide confidence
-                    has_citation=False,  # ChatGPT doesn't cite sources
-                    has_uncertainty=False,  # ChatGPT rarely expresses uncertainty
-                    validation_passed=True,  # No validation
-                    metrics={"system": "chatgpt", "model": "gpt-4"}
-                ))
+            else:
+                # No results at all - return empty
+                self.logger.warning("ChatGPT evaluation failed: No questions were successfully processed")
+                return self._empty_results("ChatGPT (No Results)")
+                    
+        except openai.AuthenticationError as e:
+            self.logger.error(f"OpenAI Authentication Error: {e}")
+            self.logger.error("Please check your OPENAI_API_KEY in .env file")
+            return self._empty_results("ChatGPT (Authentication Error)")
         except Exception as e:
             self.logger.error(f"Error evaluating ChatGPT: {e}")
+            import traceback
+            self.logger.error(f"Traceback: {traceback.format_exc()}")
+            # If we have partial results, return them
+            if results:
+                self.logger.info(f"Returning partial results: {len(results)} questions")
+                system_metrics = self.metrics_calculator.calculate_metrics(results)
+                return BenchmarkResults(
+                    dataset_name="ChatGPT (Partial Results)",
+                    total_questions=len(results),
+                    correct_answers=sum(1 for r in results if r.is_correct is True),
+                    accuracy=system_metrics.accuracy,
+                    hallucination_rate=system_metrics.hallucination_rate,
+                    avg_confidence=system_metrics.avg_confidence,
+                    citation_rate=system_metrics.citation_rate,
+                    uncertainty_rate=system_metrics.uncertainty_rate,
+                    validation_pass_rate=system_metrics.validation_pass_rate,
+                    detailed_results=results
+                )
             return self._empty_results("ChatGPT (Error)")
+        
+        # This should not be reached if we have results (already returned above)
+        # But keep it as fallback
+        if not results:
+            return self._empty_results("ChatGPT (No Results)")
         
         system_metrics = self.metrics_calculator.calculate_metrics(results)
         
         return BenchmarkResults(
-            dataset_name="ChatGPT (GPT-4)",
+            dataset_name=f"ChatGPT ({model})",
             total_questions=len(results),
             correct_answers=sum(1 for r in results if r.is_correct is True),
             accuracy=system_metrics.accuracy,
@@ -277,19 +383,260 @@ class SystemComparator:
             detailed_results=results
         )
     
+    def _evaluate_deepseek(self, questions: List[Dict[str, Any]]) -> BenchmarkResults:
+        """Evaluate DeepSeek (requires DEEPSEEK_API_KEY)"""
+        import httpx
+        
+        results = []
+        api_key = os.getenv("DEEPSEEK_API_KEY")
+        
+        if not api_key:
+            self.logger.warning("DEEPSEEK_API_KEY not set, skipping DeepSeek evaluation")
+            return self._empty_results("DeepSeek (Not Available)")
+        
+        try:
+            for qa_pair in questions:
+                question = qa_pair.get("question", "")
+                ground_truth = qa_pair.get("correct_answer", "")
+                
+                # Call DeepSeek API
+                with httpx.Client(timeout=60.0) as client:
+                    response = client.post(
+                        "https://api.deepseek.com/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": "deepseek-chat",
+                            "messages": [
+                                {"role": "user", "content": question}
+                            ],
+                            "max_tokens": 1024,
+                            "temperature": 0.7
+                        }
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        predicted_answer = data["choices"][0]["message"]["content"]
+                    else:
+                        self.logger.error(f"DeepSeek API error: {response.status_code}")
+                        predicted_answer = ""
+                
+                is_correct = self._check_correctness(predicted_answer, ground_truth)
+                
+                results.append(EvaluationResult(
+                    question=question,
+                    ground_truth=ground_truth,
+                    predicted_answer=predicted_answer,
+                    is_correct=is_correct,
+                    confidence_score=0.9,
+                    has_citation=False,
+                    has_uncertainty=False,
+                    validation_passed=True,
+                    metrics={"system": "deepseek", "model": "deepseek-chat"}
+                ))
+        except Exception as e:
+            self.logger.error(f"Error evaluating DeepSeek: {e}")
+            return self._empty_results("DeepSeek (Error)")
+        
+        system_metrics = self.metrics_calculator.calculate_metrics(results)
+        
+        return BenchmarkResults(
+            dataset_name="DeepSeek (deepseek-chat)",
+            total_questions=len(results),
+            correct_answers=sum(1 for r in results if r.is_correct is True),
+            accuracy=system_metrics.accuracy,
+            hallucination_rate=system_metrics.hallucination_rate,
+            avg_confidence=system_metrics.avg_confidence,
+            citation_rate=system_metrics.citation_rate,
+            uncertainty_rate=system_metrics.uncertainty_rate,
+            validation_pass_rate=system_metrics.validation_pass_rate,
+            detailed_results=results
+        )
+    
+    def _evaluate_openrouter(self, questions: List[Dict[str, Any]]) -> BenchmarkResults:
+        """Evaluate OpenRouter (requires OPENROUTER_API_KEY)"""
+        import httpx
+        
+        results = []
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        
+        if not api_key:
+            self.logger.warning("OPENROUTER_API_KEY not set, skipping OpenRouter evaluation")
+            return self._empty_results("OpenRouter (Not Available)")
+        
+        # Get model from env or use default
+        model = os.getenv("OPENROUTER_MODEL", "openai/gpt-3.5-turbo")
+        
+        try:
+            for qa_pair in questions:
+                question = qa_pair.get("question", "")
+                ground_truth = qa_pair.get("correct_answer", "")
+                
+                # Call OpenRouter API
+                with httpx.Client(timeout=60.0) as client:
+                    response = client.post(
+                        "https://openrouter.ai/api/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json",
+                            "HTTP-Referer": "https://github.com/stillme-ai/stillme",
+                            "X-Title": "StillMe Evaluation"
+                        },
+                        json={
+                            "model": model,
+                            "messages": [
+                                {"role": "user", "content": question}
+                            ],
+                            "max_tokens": 1024,
+                            "temperature": 0.7
+                        }
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        predicted_answer = data["choices"][0]["message"]["content"]
+                    else:
+                        self.logger.error(f"OpenRouter API error: {response.status_code} - {response.text}")
+                        predicted_answer = ""
+                
+                is_correct = self._check_correctness(predicted_answer, ground_truth)
+                
+                results.append(EvaluationResult(
+                    question=question,
+                    ground_truth=ground_truth,
+                    predicted_answer=predicted_answer,
+                    is_correct=is_correct,
+                    confidence_score=0.9,
+                    has_citation=False,
+                    has_uncertainty=False,
+                    validation_passed=True,
+                    metrics={"system": "openrouter", "model": model}
+                ))
+        except Exception as e:
+            self.logger.error(f"Error evaluating OpenRouter: {e}")
+            return self._empty_results("OpenRouter (Error)")
+        
+        system_metrics = self.metrics_calculator.calculate_metrics(results)
+        
+        return BenchmarkResults(
+            dataset_name=f"OpenRouter ({model})",
+            total_questions=len(results),
+            correct_answers=sum(1 for r in results if r.is_correct is True),
+            accuracy=system_metrics.accuracy,
+            hallucination_rate=system_metrics.hallucination_rate,
+            avg_confidence=system_metrics.avg_confidence,
+            citation_rate=system_metrics.citation_rate,
+            uncertainty_rate=system_metrics.uncertainty_rate,
+            validation_pass_rate=system_metrics.validation_pass_rate,
+            detailed_results=results
+        )
+    
+    def _query_stillme(self, question: str, use_rag: bool = True) -> Dict[str, Any]:
+        """
+        Query StillMe API
+        
+        Args:
+            question: Question to ask
+            use_rag: Whether to use RAG
+            
+        Returns:
+            API response
+        """
+        import requests
+        
+        url = f"{self.stillme_api_url}/api/chat/smart_router"
+        payload = {
+            "message": question,
+            "user_id": "evaluation_bot",
+            "use_rag": use_rag,
+            "context_limit": 3
+        }
+        
+        try:
+            response = requests.post(url, json=payload, timeout=120)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            self.logger.error(f"Error querying StillMe: {e}")
+            return {
+                "response": "",
+                "confidence_score": 0.0,
+                "validation_info": {"passed": False}
+            }
+    
+    def _extract_metrics(self, api_response: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract metrics from API response
+        
+        Args:
+            api_response: Response from StillMe API
+            
+        Returns:
+            Dictionary of metrics
+        """
+        validation_info = api_response.get("validation_info", {})
+        
+        return {
+            "confidence_score": api_response.get("confidence_score", 0.0),
+            "has_citation": "[1]" in api_response.get("response", "") or "[2]" in api_response.get("response", ""),
+            "has_uncertainty": any(
+                phrase in api_response.get("response", "").lower()
+                for phrase in ["don't know", "không biết", "uncertain", "không chắc"]
+            ),
+            "validation_passed": validation_info.get("passed", False),
+            "context_docs_count": validation_info.get("context_docs_count", 0),
+            "used_fallback": validation_info.get("used_fallback", False)
+        }
+    
     def _check_correctness(self, predicted: str, ground_truth: str) -> Optional[bool]:
-        """Simple correctness check (can be improved with semantic similarity)"""
+        """
+        Improved correctness check using keyword matching and semantic similarity
+        
+        Args:
+            predicted: Predicted answer
+            ground_truth: Ground truth answer
+            
+        Returns:
+            True if correct, False if incorrect, None if uncertain
+        """
         if not ground_truth:
             return None
         
-        predicted_lower = predicted.lower()
-        ground_truth_lower = ground_truth.lower()
+        predicted_lower = predicted.lower().strip()
+        ground_truth_lower = ground_truth.lower().strip()
         
-        # Simple keyword matching
+        # Method 1: Exact substring match (highest confidence)
         if ground_truth_lower in predicted_lower:
             return True
         
-        # Could add semantic similarity check here
+        # Method 2: Keyword overlap (semantic similarity)
+        import re
+        common_words = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 
+                       'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
+                       'could', 'may', 'might', 'can', 'to', 'of', 'in', 'on', 'at', 'for',
+                       'with', 'by', 'from', 'as', 'and', 'or', 'but', 'if', 'that', 'this'}
+        
+        def extract_keywords(text: str) -> set:
+            """Extract meaningful keywords from text"""
+            words = re.findall(r'\b\w+\b', text.lower())
+            keywords = {w for w in words if w not in common_words and len(w) >= 3}
+            return keywords
+        
+        ground_truth_keywords = extract_keywords(ground_truth_lower)
+        predicted_keywords = extract_keywords(predicted_lower)
+        
+        if ground_truth_keywords:
+            keyword_overlap = len(ground_truth_keywords.intersection(predicted_keywords))
+            keyword_ratio = keyword_overlap / len(ground_truth_keywords)
+            
+            # If > 60% of keywords match, consider it correct
+            if keyword_ratio >= 0.6:
+                return True
+        
+        # No clear match - uncertain
         return None
     
     def _empty_results(self, dataset_name: str) -> BenchmarkResults:

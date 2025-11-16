@@ -281,6 +281,8 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 - [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) - Philosophy and vision
 - [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md) - Complete API reference
 - [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) - Deployment instructions
+- [`docs/PAPER.md`](docs/PAPER.md) - **Research Paper: StillMe Framework for Transparent, Validated RAG Systems**
+- [`docs/PAPER_TABLES_FIGURES.md`](docs/PAPER_TABLES_FIGURES.md) - Tables and figures for the paper
 
 **User Guides:**
 - [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md) - Quick start guide (5 minutes)

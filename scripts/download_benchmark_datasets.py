@@ -102,13 +102,28 @@ def download_halu_eval(output_path: str = "data/benchmarks/halu_eval.json"):
     """
     logger.info("Downloading HaluEval dataset...")
     
-    # HaluEval dataset URL (GitHub)
-    # Note: This is a simplified version - full dataset may require downloading from official source
-    url = "https://raw.githubusercontent.com/RUCAIBox/HaluEval/main/data/halu_data_v2.json"
+    # Try multiple sources for HaluEval dataset
+    urls = [
+        "https://raw.githubusercontent.com/RUCAIBox/HaluEval/main/data/halu_data_v2.json",
+        "https://huggingface.co/datasets/RUCAIBox/HaluEval/resolve/main/data/halu_data_v2.json",
+        "https://raw.githubusercontent.com/RUCAIBox/HaluEval/master/data/halu_data_v2.json"
+    ]
+    
+    response = None
+    for url in urls:
+        try:
+            logger.info(f"Trying URL: {url}")
+            response = requests.get(url, timeout=60)
+            response.raise_for_status()
+            break
+        except Exception as e:
+            logger.warning(f"Failed to download from {url}: {e}")
+            continue
+    
+    if response is None:
+        raise Exception("All download URLs failed")
     
     try:
-        response = requests.get(url, timeout=30)
-        response.raise_for_status()
         
         data = response.json()
         
