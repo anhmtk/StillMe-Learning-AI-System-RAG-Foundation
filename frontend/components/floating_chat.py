@@ -800,9 +800,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 
                 // CRITICAL: Preserve line breaks first
                 // Convert double newlines to p tags, single newlines to br tags
-                html = html.replace(/\n\n+/g, '</p><p>');
+                html = html.replace(new RegExp('\\n\\n+', 'g'), '</p><p>');
                 html = '<p>' + html + '</p>';
-                html = html.replace(/\n/g, '<br>');
+                html = html.replace(new RegExp('\\n', 'g'), '<br>');
                 
                 // Headers: ## Header -> <h2>Header</h2>
                 var h3Pattern = new RegExp('<p>### (.+?)</p>', 'g');
