@@ -1047,14 +1047,17 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             step_detector = StepDetector()
                             
                             # Quick check first (performance optimization)
+                            logger.debug(f"🔍 Checking if response is multi-step (min_steps: {step_min_steps})...")
                             if step_detector.is_multi_step(raw_response):
                                 steps = step_detector.detect_steps(raw_response)
+                                logger.debug(f"🔍 StepDetector found {len(steps)} steps")
                                 
                                 if len(steps) >= step_min_steps:
                                     logger.info(f"🔍 Detected {len(steps)} steps - running step-level validation")
                                     processing_steps.append(f"🔍 Step-level validation ({len(steps)} steps)")
                                     
                                     step_validator = StepValidator(confidence_threshold=step_confidence_threshold)
+                                    logger.debug(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold}")
                                     step_results = step_validator.validate_all_steps(steps, ctx_docs, chain, parallel=True)
                                     
                                     low_confidence_steps = [
@@ -1062,6 +1065,12 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                         for r in step_results
                                         if r.confidence < step_confidence_threshold
                                     ]
+                                    
+                                    if low_confidence_steps:
+                                        logger.warning(f"⚠️ Low confidence steps detected: {low_confidence_steps}")
+                                        logger.warning(f"⚠️ {len(low_confidence_steps)} step(s) with low confidence")
+                                    else:
+                                        logger.info(f"✅ All {len(steps)} steps passed validation")
                                     
                                     step_validation_info = {
                                         "is_multi_step": True,

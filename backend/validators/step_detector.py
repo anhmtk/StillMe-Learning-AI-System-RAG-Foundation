@@ -45,14 +45,16 @@ class StepDetector:
         step_indicators = [
             r"Bước\s+\d+",      # Vietnamese: "Bước 1", "Bước 2"
             r"Step\s+\d+",      # English: "Step 1", "Step 2"
-            r"^\d+\.\s+",       # Numbered: "1.", "2." (at start of line)
+            r"(?:^|\n)\s*\d+\.\s+",  # Numbered: "1.", "2." (at start of line or after newline)
         ]
         
         for pattern in step_indicators:
             matches = re.findall(pattern, response, re.MULTILINE | re.IGNORECASE)
             if len(matches) >= 2:  # At least 2 steps
+                logger.debug(f"✅ Multi-step detected via pattern '{pattern}': {len(matches)} matches")
                 return True
         
+        logger.debug(f"❌ Not detected as multi-step (response length: {len(response)})")
         return False
     
     def detect_steps(self, response: str) -> List[Step]:
