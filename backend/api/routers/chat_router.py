@@ -1039,6 +1039,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     step_min_steps = int(os.getenv("STEP_VALIDATION_MIN_STEPS", "2"))
                     step_confidence_threshold = float(os.getenv("STEP_CONFIDENCE_THRESHOLD", "0.5"))
                     
+                    logger.debug(f"🔍 Step-level validation config: enabled={enable_step_validation}, min_steps={step_min_steps}, threshold={step_confidence_threshold}")
+                    
                     if enable_step_validation:
                         try:
                             from backend.validators.step_detector import StepDetector
