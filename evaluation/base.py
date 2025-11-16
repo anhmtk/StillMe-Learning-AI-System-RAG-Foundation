@@ -150,7 +150,10 @@ class BaseEvaluator(ABC):
         Returns:
             Dictionary of metrics
         """
-        validation_info = api_response.get("validation_info", {})
+        # Ensure validation_info is always a dict, never None
+        validation_info = api_response.get("validation_info")
+        if validation_info is None or not isinstance(validation_info, dict):
+            validation_info = {}
         
         return {
             "confidence_score": api_response.get("confidence_score", 0.0),

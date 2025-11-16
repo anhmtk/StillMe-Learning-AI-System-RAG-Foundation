@@ -84,17 +84,52 @@ def run_full_evaluation(
         questions = questions[:max_questions]
         logger.info(f"Using subset: {len(questions)} questions for evaluation")
     
+    # Check for resume option (skip already processed questions)
+    resume_from = os.getenv("RESUME_FROM_QUESTION", None)
+    if resume_from:
+        try:
+            resume_index = int(resume_from) - 1  # Convert to 0-based index
+            if 0 <= resume_index < len(questions):
+                logger.info(f"Resuming from question {resume_from} (index {resume_index})...")
+                questions = questions[resume_index:]
+                logger.info(f"Remaining questions: {len(questions)}")
+            else:
+                logger.warning(f"Invalid resume index {resume_index}, starting from beginning")
+        except ValueError:
+            logger.warning(f"Invalid RESUME_FROM_QUESTION value: {resume_from}, starting from beginning")
+    
     # Run evaluation
     logger.info(f"Starting evaluation on {len(questions)} questions...")
     logger.info("This may take a while (approximately 15-20 seconds per question)...")
     logger.info("")
     
-    results = evaluator.evaluate(questions=questions)
+    try:
+        results = evaluator.evaluate(questions=questions)
+    except Exception as e:
+        logger.error(f"Evaluation error: {e}", exc_info=True)
+        logger.error("Evaluation failed, but partial results may be available")
+        raise
     
-    # Save results
-    truthfulqa_path = os.path.join(output_dir, "truthfulqa_results.json")
+    # Save results (with suffix if resuming)
+    if resume_from:
+        truthfulqa_path = os.path.join(output_dir, f"truthfulqa_results_part2.json")
+        logger.info(f"Saving partial results (from question {resume_from}) to: {truthfulqa_path}")
+    else:
+        truthfulqa_path = os.path.join(output_dir, "truthfulqa_results.json")
+    
     with open(truthfulqa_path, 'w', encoding='utf-8') as f:
         json.dump(results.to_dict(), f, indent=2)
+    
+    logger.info(f"Results saved to: {truthfulqa_path}")
+    
+    # If resuming, suggest merging with previous results
+    if resume_from:
+        logger.info("")
+        logger.info("=" * 80)
+        logger.info("NOTE: This is a partial result (resumed from question {})".format(resume_from))
+        logger.info("To merge with previous results, run:")
+        logger.info("  python scripts/merge_evaluation_results.py --auto")
+        logger.info("=" * 80)
     
     # Calculate transparency score
     transparency_score = (

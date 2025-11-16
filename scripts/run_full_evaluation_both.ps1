@@ -9,6 +9,10 @@ Write-Host ""
 Write-Host "Step 1/2: Running with GPT-4 (best baseline comparison)..." -ForegroundColor Green
 Write-Host "Estimated cost: ~`$11.85" -ForegroundColor Yellow
 $env:OPENAI_MODEL = "gpt-4"
+# Resume from question 157 if previous run failed
+if ($env:RESUME_FROM_QUESTION) {
+    Write-Host "Resuming from question $env:RESUME_FROM_QUESTION..." -ForegroundColor Yellow
+}
 python scripts/run_full_evaluation.py --api-url https://stillme-backend-production.up.railway.app
 
 Write-Host ""
