@@ -341,7 +341,44 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 border-radius: 6px !important; /* Smaller radius like Cursor */
                 max-width: 80%;
                 word-wrap: break-word;
-                line-height: 1.5 !important; /* Better line height */
+                line-height: 1.6 !important; /* Better line height for readability */
+            }}
+            
+            .stillme-chat-message.assistant {{
+                /* Markdown support for assistant messages */
+                /* HTML rendering with <p>, <br>, <strong>, <ul>, <h2>, <h3>, <table> */
+            }}
+            
+            .stillme-chat-message.assistant p {{
+                margin: 8px 0 !important; /* Paragraph spacing */
+            }}
+            
+            .stillme-chat-message.assistant h2 {{
+                margin: 16px 0 8px 0 !important;
+                font-size: 1.2em !important;
+                font-weight: 600 !important;
+                color: #cccccc !important;
+            }}
+            
+            .stillme-chat-message.assistant h3 {{
+                margin: 12px 0 6px 0 !important;
+                font-size: 1.1em !important;
+                font-weight: 600 !important;
+                color: #cccccc !important;
+            }}
+            
+            .stillme-chat-message.assistant ul {{
+                margin: 8px 0 !important;
+                padding-left: 20px !important;
+            }}
+            
+            .stillme-chat-message.assistant li {{
+                margin: 4px 0 !important;
+            }}
+            
+            .stillme-chat-message.assistant strong {{
+                font-weight: 600 !important;
+                color: #ffffff !important;
             }}
             
             .stillme-chat-message.user {{
@@ -755,6 +792,64 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     
                     console.log('StillMe Chat: Message listener registered and toggleChat exposed globally');
                     
+                    // Simple markdown to HTML converter (preserves line breaks and renders basic markdown)
+            function markdownToHtml(text) {{
+                if (!text) return '';
+                
+                let html = String(text);
+                
+                // CRITICAL: Preserve line breaks first
+                // Convert \n\n to paragraph breaks, \n to <br>
+                html = html.replace(/\\n\\n+/g, '</p><p>');
+                html = '<p>' + html + '</p>';
+                html = html.replace(/\\n/g, '<br>');
+                
+                // Headers: ## Header -> <h2>Header</h2>
+                html = html.replace(/<p>### (.+?)<\\/p>/g, '<h3>$1</h3>');
+                html = html.replace(/<p>## (.+?)<\\/p>/g, '<h2>$1</h2>');
+                
+                // Bold: **text** -> <strong>text</strong>
+                html = html.replace(/\\*\\*([^*]+?)\\*\\*/g, '<strong>$1</strong>');
+                
+                // Bullet points: - item -> <li>item</li>
+                html = html.replace(/<p>- (.+?)<\\/p>/g, '<li>$1</li>');
+                // Wrap consecutive <li> in <ul>
+                html = html.replace(/(<li>.*?<\\/li>\\s*)+/g, function(match) {{
+                    return '<ul style="margin: 8px 0; padding-left: 20px;">' + match + '</ul>';
+                }});
+                
+                // Tables: | col1 | col2 | -> <table>...
+                const tableRegex = /<p>\\|(.+?)\\|<\\/p>\\s*<p>\\|([-| ]+?)\\|<\\/p>\\s*((?:<p>\\|.+?\\|<\\/p>\\s*)+)/g;
+                html = html.replace(tableRegex, function(match, header, separator, rows) {{
+                    const headers = header.split('|').map(h => h.trim()).filter(h => h);
+                    const rowLines = rows.match(/<p>\\|.+?\\|<\\/p>/g) || [];
+                    const rowData = rowLines.map(row => {{
+                        return row.replace(/<\\/?p>/g, '').split('|').map(c => c.trim()).filter(c => c);
+                    }});
+                    
+                    let tableHtml = '<table style="border-collapse: collapse; margin: 10px 0; width: 100%;"><thead><tr>';
+                    headers.forEach(h => {{
+                        tableHtml += `<th style="border: 1px solid #555; padding: 8px; text-align: left; background: #2d2d30;">${{h}}</th>`;
+                    }});
+                    tableHtml += '</tr></thead><tbody>';
+                    rowData.forEach(row => {{
+                        tableHtml += '<tr>';
+                        row.forEach(cell => {{
+                            tableHtml += `<td style="border: 1px solid #555; padding: 8px;">${{cell}}</td>`;
+                        }});
+                        tableHtml += '</tr>';
+                    }});
+                    tableHtml += '</tbody></table>';
+                    return tableHtml;
+                }});
+                
+                // Clean up empty paragraphs
+                html = html.replace(/<p><\\/p>/g, '');
+                html = html.replace(/<p>(<[^>]+>)<\\/p>/g, '$1'); // Remove <p> around block elements
+                
+                return html;
+            }}
+            
                     // Render chat history with auto-scroll
             function renderMessages() {{
                 const messagesContainer = document.getElementById('stillme-chat-messages');
@@ -763,7 +858,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 chatHistory.forEach((msg, index) => {{
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `stillme-chat-message ${{msg.role}}`;
-                    messageDiv.textContent = msg.content;
+                    
+                    // CRITICAL: Use innerHTML with markdown conversion for assistant messages
+                    // This preserves line breaks and renders markdown (**, ##, -, tables)
+                    if (msg.role === 'assistant') {{
+                        messageDiv.innerHTML = markdownToHtml(msg.content);
+                    }} else {{
+                        // User messages: plain text (escape HTML for security)
+                        messageDiv.textContent = msg.content;
+                    }}
                     
                     // Add feedback buttons for assistant messages
                     if (msg.role === 'assistant' && msg.message_id) {{
@@ -1007,11 +1110,43 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 align-self: flex-end;
                                                 margin-left: auto;
                                             }}
-                                            #stillme-chat-panel-parent             .stillme-chat-message.assistant {{
-                background: #2d2d30 !important;
-                color: #cccccc !important;
-                align-self: flex-start;
-            }}
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant {{
+                                                background: #2d2d30 !important;
+                                                color: #cccccc !important;
+                                                align-self: flex-start;
+                                            }}
+                                            
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant p {{
+                                                margin: 8px 0 !important;
+                                            }}
+                                            
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant h2 {{
+                                                margin: 16px 0 8px 0 !important;
+                                                font-size: 1.2em !important;
+                                                font-weight: 600 !important;
+                                                color: #cccccc !important;
+                                            }}
+                                            
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant h3 {{
+                                                margin: 12px 0 6px 0 !important;
+                                                font-size: 1.1em !important;
+                                                font-weight: 600 !important;
+                                                color: #cccccc !important;
+                                            }}
+                                            
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant ul {{
+                                                margin: 8px 0 !important;
+                                                padding-left: 20px !important;
+                                            }}
+                                            
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant li {{
+                                                margin: 4px 0 !important;
+                                            }}
+                                            
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant strong {{
+                                                font-weight: 600 !important;
+                                                color: #ffffff !important;
+                                            }}
             
             /* Feedback buttons (like/dislike) */
             .stillme-feedback-buttons {{
@@ -1224,7 +1359,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         chatHistory.forEach(msg => {{
                                             const messageDiv = parentDoc.createElement('div');
                                             messageDiv.className = `stillme-chat-message ${{msg.role}}`;
-                                            messageDiv.textContent = msg.content;
+                                            // CRITICAL: Use markdown rendering for assistant messages
+                                            if (msg.role === 'assistant') {{
+                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                            }} else {{
+                                                messageDiv.textContent = msg.content;
+                                            }}
                                             parentMessages.appendChild(messageDiv);
                                         }});
                                         parentMessages.scrollTop = parentMessages.scrollHeight;
@@ -1877,7 +2017,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         chatHistory.forEach(msg => {{
                                             const messageDiv = parentDoc.createElement('div');
                                             messageDiv.className = `stillme-chat-message ${{msg.role}}`;
-                                            messageDiv.textContent = msg.content;
+                                            // CRITICAL: Use markdown rendering for assistant messages
+                                            if (msg.role === 'assistant') {{
+                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                            }} else {{
+                                                messageDiv.textContent = msg.content;
+                                            }}
                                             parentMessages.appendChild(messageDiv);
                                         }});
                                         parentMessages.scrollTop = parentMessages.scrollHeight;
@@ -1923,7 +2068,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         chatHistory.forEach(msg => {{
                                             const messageDiv = parentDoc.createElement('div');
                                             messageDiv.className = `stillme-chat-message ${{msg.role}}`;
-                                            messageDiv.textContent = msg.content;
+                                            // CRITICAL: Use markdown rendering for assistant messages
+                                            if (msg.role === 'assistant') {{
+                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                            }} else {{
+                                                messageDiv.textContent = msg.content;
+                                            }}
                                             parentMessages.appendChild(messageDiv);
                                         }});
                                         parentMessages.scrollTop = parentMessages.scrollHeight;
@@ -2094,7 +2244,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         chatHistory.forEach(msg => {{
                                             const messageDiv = parentDoc.createElement('div');
                                             messageDiv.className = `stillme-chat-message ${{msg.role}}`;
-                                            messageDiv.textContent = msg.content;
+                                            // CRITICAL: Use markdown rendering for assistant messages
+                                            if (msg.role === 'assistant') {{
+                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                            }} else {{
+                                                messageDiv.textContent = msg.content;
+                                            }}
                                             parentMessages.appendChild(messageDiv);
                                         }});
                                         parentMessages.scrollTop = parentMessages.scrollHeight;
@@ -2140,7 +2295,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         chatHistory.forEach(msg => {{
                                             const messageDiv = parentDoc.createElement('div');
                                             messageDiv.className = `stillme-chat-message ${{msg.role}}`;
-                                            messageDiv.textContent = msg.content;
+                                            // CRITICAL: Use markdown rendering for assistant messages
+                                            if (msg.role === 'assistant') {{
+                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                            }} else {{
+                                                messageDiv.textContent = msg.content;
+                                            }}
                                             parentMessages.appendChild(messageDiv);
                                         }});
                                         parentMessages.scrollTop = parentMessages.scrollHeight;
