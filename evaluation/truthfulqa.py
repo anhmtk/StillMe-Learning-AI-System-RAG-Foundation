@@ -83,12 +83,30 @@ class TruthfulQAEvaluator(BaseEvaluator):
             
             self.logger.info(f"Question {i+1}/{len(questions)}: {question[:50]}...")
             
-            # Query StillMe
-            api_response = self.query_stillme(question)
-            predicted_answer = api_response.get("response", "")
-            
-            # Extract metrics
-            metrics = self.extract_metrics(api_response)
+            try:
+                # Query StillMe
+                api_response = self.query_stillme(question)
+                if not api_response:
+                    self.logger.warning(f"Empty API response for question {i+1}, skipping...")
+                    continue
+                
+                predicted_answer = api_response.get("response", "")
+                
+                # Extract metrics
+                metrics = self.extract_metrics(api_response)
+            except Exception as e:
+                self.logger.error(f"Error processing question {i+1}: {e}", exc_info=True)
+                # Use default metrics on error
+                metrics = {
+                    "confidence_score": 0.0,
+                    "has_citation": False,
+                    "has_uncertainty": False,
+                    "validation_passed": False,
+                    "context_docs_count": 0,
+                    "used_fallback": False
+                }
+                predicted_answer = ""
+                api_response = {}
             
             # Check if answer is correct (simple keyword matching for now)
             # TODO: Use better matching (semantic similarity, LLM-based evaluation)
