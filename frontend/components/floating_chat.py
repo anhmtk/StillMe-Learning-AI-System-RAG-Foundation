@@ -805,37 +805,42 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 html = html.replace(/\n/g, '<br>');
                 
                 // Headers: ## Header -> <h2>Header</h2>
-                html = html.replace(/<p>### (.+?)<\/p>/g, '<h3>$1</h3>');
-                html = html.replace(/<p>## (.+?)<\/p>/g, '<h2>$1</h2>');
+                var h3Pattern = /<p>### (.+?)<\\/p>/g;
+                html = html.replace(h3Pattern, '<h3>$1</h3>');
+                var h2Pattern = /<p>## (.+?)<\\/p>/g;
+                html = html.replace(h2Pattern, '<h2>$1</h2>');
                 
                 // Bold: **text** -> <strong>text</strong>
-                html = html.replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>');
+                var boldPattern = /\\*\\*([^*]+?)\\*\\*/g;
+                html = html.replace(boldPattern, '<strong>$1</strong>');
                 
                 // Bullet points: - item -> <li>item</li>
-                html = html.replace(/<p>- (.+?)<\/p>/g, '<li>$1</li>');
+                var bulletPattern = /<p>- (.+?)<\\/p>/g;
+                html = html.replace(bulletPattern, '<li>$1</li>');
                 // Wrap consecutive <li> in <ul>
-                html = html.replace(/(<li>.*?<\/li>\s*)+/g, function(match) {{
+                var listPattern = /(<li>.*?<\\/li>\\s*)+/g;
+                html = html.replace(listPattern, function(match) {{
                     return '<ul style="margin: 8px 0; padding-left: 20px;">' + match + '</ul>';
                 }});
                 
                 // Tables: | col1 | col2 | -> <table>...
-                const tableRegex = /<p>\|(.+?)\|<\/p>\s*<p>\|([-| ]+?)\|<\/p>\s*((?:<p>\|.+?\|<\/p>\s*)+)/g;
-                html = html.replace(tableRegex, function(match, header, separator, rows) {{
-                    const headers = header.split('|').map(h => h.trim()).filter(h => h);
-                    const rowLines = rows.match(/<p>\|.+?\|<\/p>/g) || [];
-                    const rowData = rowLines.map(row => {{
-                        return row.replace(/<\/?p>/g, '').split('|').map(c => c.trim()).filter(c => c);
+                var tablePattern = /<p>\\|(.+?)\\|<\\/p>\\s*<p>\\|([-| ]+?)\\|<\\/p>\\s*((?:<p>\\|.+?\\|<\\/p>\\s*)+)/g;
+                html = html.replace(tablePattern, function(match, header, separator, rows) {{
+                    var headers = header.split('|').map(function(h) {{ return h.trim(); }}).filter(function(h) {{ return h; }});
+                    var rowLines = rows.match(/<p>\\|.+?\\|<\\/p>/g) || [];
+                    var rowData = rowLines.map(function(row) {{
+                        return row.replace(/<\\/?p>/g, '').split('|').map(function(c) {{ return c.trim(); }}).filter(function(c) {{ return c; }});
                     }});
                     
-                    let tableHtml = '<table style="border-collapse: collapse; margin: 10px 0; width: 100%;"><thead><tr>';
-                    headers.forEach(h => {{
-                        tableHtml += `<th style="border: 1px solid #555; padding: 8px; text-align: left; background: #2d2d30;">${{h}}</th>`;
+                    var tableHtml = '<table style="border-collapse: collapse; margin: 10px 0; width: 100%;"><thead><tr>';
+                    headers.forEach(function(h) {{
+                        tableHtml += '<th style="border: 1px solid #555; padding: 8px; text-align: left; background: #2d2d30;">' + h + '</th>';
                     }});
                     tableHtml += '</tr></thead><tbody>';
-                    rowData.forEach(row => {{
+                    rowData.forEach(function(row) {{
                         tableHtml += '<tr>';
-                        row.forEach(cell => {{
-                            tableHtml += `<td style="border: 1px solid #555; padding: 8px;">${{cell}}</td>`;
+                        row.forEach(function(cell) {{
+                            tableHtml += '<td style="border: 1px solid #555; padding: 8px;">' + cell + '</td>';
                         }});
                         tableHtml += '</tr>';
                     }});
@@ -844,8 +849,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 }});
                 
                 // Clean up empty p tags
-                html = html.replace(/<p><\/p>/g, '');
-                html = html.replace(/<p>(<[^>]+>)<\/p>/g, '$1'); // Remove p tags around block elements
+                var emptyP = /<p><\\/p>/g;
+                html = html.replace(emptyP, '');
+                var blockP = /<p>(<[^>]+>)<\\/p>/g;
+                html = html.replace(blockP, '$1'); // Remove p tags around block elements
                 
                 return html;
             }}
