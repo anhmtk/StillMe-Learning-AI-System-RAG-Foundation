@@ -17,6 +17,7 @@ from .review_adapter import ReviewAdapter
 from .language import LanguageValidator
 from .identity_check import IdentityCheckValidator
 from .ego_neutrality import EgoNeutralityValidator
+from .self_critic_experience import SelfCriticExperience, self_correct_experience_claims
 from .step_detector import StepDetector, Step
 from .step_validator import StepValidator, StepValidationResult
 from .consistency_checker import ConsistencyChecker, Claim
@@ -37,6 +38,8 @@ __all__ = [
     "LanguageValidator",
     "IdentityCheckValidator",
     "EgoNeutralityValidator",
+    "SelfCriticExperience",
+    "self_correct_experience_claims",
     "StepDetector",
     "Step",
     "StepValidator",
