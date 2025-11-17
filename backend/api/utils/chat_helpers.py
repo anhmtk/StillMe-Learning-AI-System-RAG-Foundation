@@ -469,15 +469,15 @@ Transformer là một kiến trúc mạng neural được giới thiệu năm 20
         return result
     
     # CRITICAL: User prioritizes depth, honesty, citations, humility over speed/cost
-    # Truncate STILLME_IDENTITY to ~5000 tokens (increased to preserve ALL philosophical depth)
+    # Truncate STILLME_IDENTITY to ~4500 tokens (reduced from 5000 to prevent context overflow)
     # System prompt breakdown:
     # - Language instruction: ~500-800 tokens
     # - Formatting instruction: ~500 tokens
-    # - STILLME_IDENTITY (smart truncated): ~5000 tokens (preserves META-COGNITION fully)
+    # - STILLME_IDENTITY (smart truncated): ~4500 tokens (preserves META-COGNITION fully)
     # - Time awareness: ~300 tokens
-    # Total system prompt: ~6300-6600 tokens (safe, leaves ~9k for context/history/user)
+    # Total system prompt: ~5800-6100 tokens (safe, leaves ~10k for context/history/user)
     # User accepts higher latency/cost to ensure: anti-hallucination, honesty, depth, citations, humility
-    truncated_identity = smart_truncate_identity(STILLME_IDENTITY, max_tokens=5000)
+    truncated_identity = smart_truncate_identity(STILLME_IDENTITY, max_tokens=4500)
     
     system_content = language_instruction + formatting_instruction + truncated_identity
     

@@ -245,19 +245,19 @@ class OpenRouterProvider(LLMProvider):
                         user_question = question_section[colon_pos + 1:].strip()
                         prompt_without_question = prompt[:question_start].strip()
             
-            # Truncate system_content to ~4000 tokens (conservative)
-            system_content = truncate_text(system_content, max_tokens=4000)
+            # Truncate system_content to ~3500 tokens (reduced from 4000 to prevent overflow)
+            system_content = truncate_text(system_content, max_tokens=3500)
             
-            # Truncate prompt WITHOUT user question first (7000 tokens for context/instructions)
-            prompt_without_question = truncate_text(prompt_without_question, max_tokens=7000)
+            # Truncate prompt WITHOUT user question first (6000 tokens for context/instructions, reduced from 7000)
+            prompt_without_question = truncate_text(prompt_without_question, max_tokens=6000)
             
-            # Preserve user question (up to 3000 tokens) - CRITICAL for correct answers
+            # Preserve user question (up to 2500 tokens, reduced from 3000) - CRITICAL for correct answers
             if user_question:
-                user_question = truncate_text(user_question, max_tokens=3000)
+                user_question = truncate_text(user_question, max_tokens=2500)
                 prompt = prompt_without_question + "\n\n" + user_question_marker + ": " + user_question
             else:
                 # Fallback: truncate entire prompt if we couldn't extract user question
-                prompt = truncate_text(prompt, max_tokens=8000)
+                prompt = truncate_text(prompt, max_tokens=7000)
             
             # Log token counts for debugging
             system_tokens = estimate_tokens(system_content)
@@ -418,19 +418,19 @@ class OpenAIProvider(LLMProvider):
                         user_question = question_section[colon_pos + 1:].strip()
                         prompt_without_question = prompt[:question_start].strip()
             
-            # Truncate system_content to ~4000 tokens (conservative)
-            system_content = truncate_text(system_content, max_tokens=4000)
+            # Truncate system_content to ~3500 tokens (reduced from 4000 to prevent overflow)
+            system_content = truncate_text(system_content, max_tokens=3500)
             
-            # Truncate prompt WITHOUT user question first (7000 tokens for context/instructions)
-            prompt_without_question = truncate_text(prompt_without_question, max_tokens=7000)
+            # Truncate prompt WITHOUT user question first (6000 tokens for context/instructions, reduced from 7000)
+            prompt_without_question = truncate_text(prompt_without_question, max_tokens=6000)
             
-            # Preserve user question (up to 3000 tokens) - CRITICAL for correct answers
+            # Preserve user question (up to 2500 tokens, reduced from 3000) - CRITICAL for correct answers
             if user_question:
-                user_question = truncate_text(user_question, max_tokens=3000)
+                user_question = truncate_text(user_question, max_tokens=2500)
                 prompt = prompt_without_question + "\n\n" + user_question_marker + ": " + user_question
             else:
                 # Fallback: truncate entire prompt if we couldn't extract user question
-                prompt = truncate_text(prompt, max_tokens=8000)
+                prompt = truncate_text(prompt, max_tokens=7000)
             
             # Log token counts for debugging
             system_tokens = estimate_tokens(system_content)
