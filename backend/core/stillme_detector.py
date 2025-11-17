@@ -304,8 +304,14 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
         return (True, matched_keywords)
     
     # Check for pattern: "ai" + "đã tạo ra/tạo ra" + "bạn" (Vietnamese)
+    # Enhanced to match simpler patterns like "ai tạo ra bạn?"
     if re.search(r'\bai\b.*\b(đã\s+)?(tạo ra|làm ra|xây dựng|phát triển)\b.*\b(bạn|stillme)\b', query_lower):
         matched_keywords.append("ai_tao_ra_ban_pattern")
+        return (True, matched_keywords)
+    
+    # Check for simpler pattern: "ai" + "tạo ra" + "bạn" (without "đã")
+    if re.search(r'\bai\b.*\btạo\s+ra\b.*\bbạn\b', query_lower):
+        matched_keywords.append("ai_tao_ra_ban_simple")
         return (True, matched_keywords)
     
     # Check for pattern: "người sáng lập" / "founder"

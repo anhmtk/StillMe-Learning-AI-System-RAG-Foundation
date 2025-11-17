@@ -224,11 +224,17 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # Detect learning metrics queries - auto-query API if user asks about learning today
         is_learning_metrics_query = False
         learning_metrics_data = None
+        is_learning_sources_query = False
+        current_learning_sources = None
         message_lower = chat_request.message.lower()
         learning_metrics_keywords = [
             "ngày hôm nay bạn đã học", "học được bao nhiêu", "learn today", "learned today",
-            "học được gì", "what did you learn", "học được những gì", "nội dung gì",
-            "học từ nguồn nào", "sources", "nguồn học", "learning sources"
+            "học được gì", "what did you learn", "học được những gì", "nội dung gì"
+        ]
+        learning_sources_keywords = [
+            "học từ nguồn nào", "sources", "nguồn học", "learning sources", "bạn đang học từ",
+            "bạn học từ đâu", "where do you learn", "what sources", "nguồn nào", "từ nguồn nào",
+            "hiện bạn đang học", "bạn học tập cụ thể từ", "chủ đề cụ thể", "đề xuất nguồn"
         ]
         if any(keyword in message_lower for keyword in learning_metrics_keywords):
             is_learning_metrics_query = True
@@ -244,6 +250,21 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     logger.info("⚠️ No learning metrics available for today yet")
             except Exception as metrics_error:
                 logger.warning(f"Failed to fetch learning metrics: {metrics_error}")
+        
+        # Detect learning sources queries - auto-query API to get current sources
+        if any(keyword in message_lower for keyword in learning_sources_keywords):
+            is_learning_sources_query = True
+            logger.info("Learning sources query detected - fetching current sources")
+            try:
+                # Query the learning sources API directly (internal call)
+                from backend.api.routers.learning_router import get_current_learning_sources
+                current_learning_sources = await get_current_learning_sources()
+                if current_learning_sources:
+                    logger.info(f"✅ Fetched current learning sources: {len(current_learning_sources.get('current_sources', {}))} sources")
+                else:
+                    logger.warning("⚠️ Failed to fetch learning sources: empty response")
+            except Exception as sources_error:
+                logger.warning(f"Failed to fetch learning sources: {sources_error}")
         
         # Special Retrieval Rule: Detect StillMe-related queries
         is_stillme_query = False
@@ -900,6 +921,89 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 
 """
                 
+                # Special instruction for learning sources queries
+                learning_sources_instruction = ""
+                if is_learning_sources_query:
+                    if current_learning_sources:
+                        sources_list = current_learning_sources.get("current_sources", {})
+                        active_sources = current_learning_sources.get("summary", {}).get("active_sources", [])
+                        enabled_sources = [name for name, info in sources_list.items() if info.get("enabled")]
+                        
+                        learning_sources_instruction = f"""
+
+📚 LEARNING SOURCES QUERY DETECTED - CURRENT SOURCES DATA AVAILABLE:
+
+**CRITICAL: You MUST list ALL current learning sources from the API data below:**
+
+**Current Learning Sources (from `/api/learning/sources/current` API):**
+{chr(10).join(f"- **{name.upper()}**: {'Enabled' if info.get('enabled') else 'Disabled'} - Status: {info.get('status', 'unknown')}" for name, info in sources_list.items())}
+
+**Active Sources**: {', '.join(active_sources) if active_sources else 'None'}
+**Total Enabled**: {len(enabled_sources)} sources
+
+**MANDATORY RESPONSE REQUIREMENTS:**
+1. **List ALL current sources** - Don't just say "RSS, arXiv, Wikipedia" - list ALL sources from the API data above
+2. **Be specific about topics** - For each source, mention what topics/chủ đề StillMe learns from that source
+3. **When proposing new sources** - You MUST:
+   - First acknowledge what StillMe ALREADY has (from the list above)
+   - Only propose sources that are NOT already enabled
+   - For each proposed source, explain:
+     * **Lợi ích (Benefits)**: What knowledge StillMe would gain
+     * **Thách thức (Challenges)**: Chi phí (cost), bản quyền (copyright/licensing), độ phức tạp (complexity), technical requirements
+     * **Tính khả thi (Feasibility)**: Is it realistic to add this source?
+4. **Be natural and conversational** - Don't be too dry or robotic. StillMe should sound knowledgeable but approachable
+5. **Format with markdown** - Use headers, bullet points, line breaks for readability
+
+**Example structure for proposing new sources:**
+"## Đề Xuất Nguồn Học Mới
+
+### [Source Name]
+- **Lợi ích**: [What StillMe would learn]
+- **Thách thức**: 
+  - Chi phí: [Cost considerations]
+  - Bản quyền: [Copyright/licensing issues]
+  - Độ phức tạp: [Technical complexity]
+- **Tính khả thi**: [Feasibility assessment]"
+
+**DO NOT:**
+- ❌ Propose sources that are already enabled (check the list above first!)
+- ❌ Give generic answers like "Quora, Reddit" without explaining benefits/challenges
+- ❌ Skip the challenges section - StillMe must be honest about trade-offs
+- ❌ Be too dry or robotic - StillMe should sound natural and conversational
+
+**Format with line breaks, bullet points, headers, and 2-3 emojis**
+
+"""
+                    else:
+                        learning_sources_instruction = """
+
+📚 LEARNING SOURCES QUERY DETECTED - NO API DATA AVAILABLE:
+
+**CRITICAL: You MUST acknowledge StillMe's current learning sources:**
+
+**Current Learning Sources (from system configuration):**
+- **RSS Feeds**: Multiple RSS feeds including Nature, Science, Hacker News, Tech Policy blogs (EFF, Brookings, Cato, AEI), Academic blogs (Distill, LessWrong, Alignment Forum, etc.)
+- **Wikipedia**: Enabled - queries on AI, Buddhism, religious studies, philosophy, ethics
+- **arXiv**: Enabled - categories: cs.AI, cs.LG (AI and Machine Learning papers)
+- **CrossRef**: Enabled - searches for AI/ML/NLP related works
+- **Papers with Code**: Enabled - recent papers with code implementations
+- **Conference Proceedings**: Enabled - NeurIPS, ICML, ACL, ICLR (via RSS where available)
+- **Stanford Encyclopedia of Philosophy**: Enabled - philosophy entries on AI, ethics, consciousness, knowledge, truth
+
+**When proposing new sources, you MUST:**
+1. First acknowledge what StillMe ALREADY has (from the list above)
+2. Only propose sources that are NOT already in the list
+3. For each proposed source, explain:
+   - **Lợi ích (Benefits)**: What knowledge StillMe would gain
+   - **Thách thức (Challenges)**: Chi phí (cost), bản quyền (copyright/licensing), độ phức tạp (complexity), technical requirements
+   - **Tính khả thi (Feasibility)**: Is it realistic to add this source?
+
+**Be natural and conversational** - Don't be too dry or robotic. StillMe should sound knowledgeable but approachable.
+
+**Format with line breaks, bullet points, headers, and 2-3 emojis**
+
+"""
+                
                 # Build prompt with language instruction FIRST (before context)
                 # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
                 # ZERO TOLERANCE: Must translate if needed
@@ -915,7 +1019,7 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN A DIFFERENT LANGUAGE, YOU MUST TRANSLATE 
 
 UNDER NO CIRCUMSTANCES return a response in any language other than {detected_lang_name.upper()}.
 
-{learning_metrics_instruction}{conversation_history_text}Context: {context_text}
+{learning_metrics_instruction}{learning_sources_instruction}{conversation_history_text}Context: {context_text}
 {citation_instruction}
 {confidence_instruction}
 {stillme_instruction}
@@ -943,6 +1047,15 @@ User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_re
 - This is more important than analyzing formatting, clarity, or other minor issues
 
 RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. IGNORE THE LANGUAGE OF THE CONTEXT ABOVE.
+
+⚠️⚠️⚠️ FINAL FORMATTING REMINDER ⚠️⚠️⚠️
+
+**BEFORE SENDING YOUR RESPONSE, CHECK:**
+- ✅ Does your response have 2-3 emojis? (📚, 🎯, 💡, ⚠️, ✅, ❌, 🔍, 📊, ⚙️)
+- ✅ Is your response formatted with markdown? (headers, bullet points, line breaks)
+- ✅ Is your response readable and engaging?
+
+**If your response doesn't have emojis, ADD THEM NOW** - StillMe responses should be as readable as ChatGPT, Claude, or Cursor.
 
 Please provide a helpful response based on the context above. Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE MODEL WANTS TO USE A DIFFERENT LANGUAGE.
 """
