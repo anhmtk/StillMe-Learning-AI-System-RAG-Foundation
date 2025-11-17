@@ -1176,10 +1176,13 @@ Whenever the question clearly belongs to a classic philosophical debate (free wi
 """
                 
                 # Fix 1: Inject comprehensive philosophical style guide with all 6 key principles
+                # CRITICAL: Truncate if too long to prevent context overflow
                 philosophical_style_instruction = ""
                 if is_philosophical:
                     philosophical_lead_in = build_philosophical_lead_in(chat_request.message)
-                    philosophical_style_instruction = f"""
+                    
+                    # Build full instruction first
+                    full_philosophical_instruction = f"""
 {philosophical_lead_in}
 
 🧠 PHILOSOPHICAL QUESTION DETECTED - FOLLOW STILLME PHILOSOPHICAL STYLE GUIDE 🧠
@@ -1255,6 +1258,29 @@ Whenever the question clearly belongs to a classic philosophical debate (free wi
 **CRITICAL**: Prefer reasoned, flowing analysis over template disclaimers, technical self-description, or shallow motivational talk. It is better to say "I don't know, but here is how humans have tried to think about it" than to fake certainty or fake emotion.
 
 """
+                    
+                    # Truncate if too long (max 2000 tokens for philosophical instructions)
+                    def estimate_tokens(text: str) -> int:
+                        return len(text) // 4 if text else 0
+                    
+                    philo_tokens = estimate_tokens(full_philosophical_instruction)
+                    if philo_tokens > 2000:
+                        # Keep philosophical_lead_in (has MANDATORY OUTPUT RULES) and truncate the rest
+                        lead_in_tokens = estimate_tokens(philosophical_lead_in)
+                        remaining_tokens = 2000 - lead_in_tokens
+                        if remaining_tokens > 500:
+                            # Truncate the style guide part
+                            style_guide_part = full_philosophical_instruction[len(philosophical_lead_in):]
+                            max_chars = remaining_tokens * 4
+                            truncated_style_guide = style_guide_part[:max_chars].rsplit('\n', 1)[0]
+                            philosophical_style_instruction = philosophical_lead_in + truncated_style_guide + "\n\n[Note: Style guide truncated to fit context limits.]"
+                            logger.warning(f"⚠️ Philosophical style instruction truncated: {philo_tokens} → ~2000 tokens")
+                        else:
+                            # If lead_in is too long, keep only lead_in
+                            philosophical_style_instruction = philosophical_lead_in
+                            logger.warning(f"⚠️ Philosophical style instruction too long, keeping only lead-in: {lead_in_tokens} tokens")
+                    else:
+                        philosophical_style_instruction = full_philosophical_instruction
                 
                 base_prompt = f"""{language_instruction}
 
