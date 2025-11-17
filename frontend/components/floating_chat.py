@@ -1445,13 +1445,14 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 if (parentMessages) {{
                                                     const messagesRect = parentMessages.getBoundingClientRect();
                                                     const panelRect = parentPanel.getBoundingClientRect();
-                                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 12px
+                                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 15px (increased from 12px for better detection)
                                                     const clickX = e.clientX;
-                                                    const scrollbarAreaStart = panelRect.right - 12; // Rightmost 12px is scrollbar area
+                                                    const scrollbarAreaStart = panelRect.right - 15; // Rightmost 15px is scrollbar area
                                                     
                                                     if (clickX >= scrollbarAreaStart) {{
                                                         // Click is in scrollbar area, don't start resize - let scrollbar handle it
                                                         console.log('StillMe Chat: Click detected in scrollbar area (parent), skipping resize');
+                                                        e.stopPropagation(); // Stop event propagation
                                                         return; // Don't prevent default, let scrollbar work
                                                     }}
                                                 }}
@@ -1756,13 +1757,14 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                 if (messagesContainer) {{
                                     const messagesRect = messagesContainer.getBoundingClientRect();
                                     const panelRect = panel.getBoundingClientRect();
-                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 12px
+                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 15px (increased from 12px for better detection)
                                     const clickX = e.clientX;
-                                    const scrollbarAreaStart = panelRect.right - 12; // Rightmost 12px is scrollbar area
+                                    const scrollbarAreaStart = panelRect.right - 15; // Rightmost 15px is scrollbar area
                                     
                                     if (clickX >= scrollbarAreaStart) {{
                                         // Click is in scrollbar area, don't start resize - let scrollbar handle it
                                         console.log('StillMe Chat: Click detected in scrollbar area, skipping resize');
+                                        e.stopPropagation(); // Stop event propagation
                                         return; // Don't prevent default, let scrollbar work
                                     }}
                                 }}
