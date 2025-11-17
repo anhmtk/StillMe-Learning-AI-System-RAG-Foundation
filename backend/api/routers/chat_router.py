@@ -697,12 +697,12 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                 avg_similarity = context.get("avg_similarity_score", None)
                 has_reliable_context = context.get("has_reliable_context", True)
                 
+                # Format avg_similarity safely (handle None case) - MUST be defined before if block
+                avg_similarity_str = f"{avg_similarity:.3f}" if avg_similarity is not None else "N/A"
+                
                 context_quality_warning = ""
                 if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
-                    # Format avg_similarity safely (handle None case)
-                    avg_similarity_str = f"{avg_similarity:.3f}" if avg_similarity is not None else "N/A"
-                
-                context_quality_warning = f"""
+                    context_quality_warning = f"""
 
 ⚠️⚠️⚠️ CRITICAL: CONTEXT QUALITY WARNING ⚠️⚠️⚠️
 
