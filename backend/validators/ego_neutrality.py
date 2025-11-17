@@ -133,6 +133,9 @@ class EgoNeutralityValidator:
             "tôi đã học được": "theo tài liệu",
             "tôi luôn làm": "theo quy trình",
             "tôi biết cảm giác": "dữ liệu chỉ ra",
+            "cảm thấy tự hào": "điều tôi đánh giá cao",
+            "tự hào về": "điều tôi đánh giá cao về",
+            "tự hào nhất": "điều tôi đánh giá cao nhất",
             
             # English
             "in my experience": "based on data",
