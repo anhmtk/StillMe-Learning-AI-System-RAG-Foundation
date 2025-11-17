@@ -41,7 +41,8 @@ class RAGRetrieval:
                         use_mmr: bool = True,  # Tier 3.5: Use MMR for diversity
                         mmr_lambda: float = 0.7,
                         exclude_content_types: Optional[List[str]] = None,
-                        prioritize_style_guide: bool = False) -> Dict[str, Any]:
+                        prioritize_style_guide: bool = False,
+                        is_philosophical: bool = False) -> Dict[str, Any]:
         """Retrieve relevant context for a query
         
         Args:
@@ -55,6 +56,7 @@ class RAGRetrieval:
             mmr_lambda: MMR lambda parameter (0.0-1.0). Higher = more relevance, lower = more diversity. Default: 0.7
             exclude_content_types: List of content_type values to exclude (e.g., ["technical"] for philosophical questions)
             prioritize_style_guide: If True, force retrieve style guide documents (domain="style_guide") for philosophical questions
+            is_philosophical: If True, skip context if similarity is too low (better to answer from pretrained knowledge than feed low-quality context)
         """
         try:
             import os
@@ -81,7 +83,8 @@ class RAGRetrieval:
                     use_mmr,
                     mmr_lambda,
                     exclude_content_types,
-                    prioritize_style_guide
+                    prioritize_style_guide,
+                    is_philosophical
                 )
                 
                 # Try to get from cache
@@ -379,6 +382,24 @@ class RAGRetrieval:
             avg_similarity = 0.0
             if filtered_knowledge:
                 avg_similarity = sum(doc.get("similarity", 0.0) for doc in filtered_knowledge) / len(filtered_knowledge)
+            
+            # Fix 4: For philosophical questions, skip context if similarity is too low
+            # Better to answer from pretrained knowledge than feed low-quality context that distracts the model
+            PHILO_MIN_SCORE = 0.4  # Minimum similarity threshold for philosophical questions
+            if is_philosophical and filtered_knowledge and avg_similarity < PHILO_MIN_SCORE:
+                logger.info(f"⚠️ Philosophical question with low RAG similarity ({avg_similarity:.3f} < {PHILO_MIN_SCORE}). Skipping context - model will answer from pretrained knowledge.")
+                # Return empty context - model can answer from pretrained knowledge
+                return {
+                    "knowledge_docs": [],
+                    "conversation_docs": [],
+                    "total_context_docs": 0,
+                    "avg_similarity_score": avg_similarity,
+                    "context_quality": "low",
+                    "has_reliable_context": False,
+                    "filtered_docs_count": 0,
+                    "original_knowledge_count": len(knowledge_results) if 'knowledge_results' in locals() else 0,
+                    "original_conversation_count": len(conversation_results) if 'conversation_results' in locals() else 0
+                }
             
             # Determine context quality
             if avg_similarity >= 0.6:
