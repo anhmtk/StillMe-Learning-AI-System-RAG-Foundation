@@ -1104,7 +1104,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
                         ConfidenceValidator(require_uncertainty_when_no_context=True),  # Check for uncertainty
-                        EgoNeutralityValidator(strict_mode=True, auto_patch=False),  # Detect "Hallucination of Experience" - novel contribution
+                        EgoNeutralityValidator(strict_mode=True, auto_patch=True),  # Detect and auto-patch "Hallucination of Experience" - novel contribution
                     ]
                     
                     # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
