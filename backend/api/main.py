@@ -455,7 +455,6 @@ def _initialize_rag_components():
             if not foundational_exists:
                 logger.info("⚠️ Foundational knowledge not found. Adding it now...")
                 # Load foundational knowledge from separate files
-                import os
                 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                 technical_path = os.path.join(base_dir, "docs", "rag", "foundational_technical.md")
                 philosophical_path = os.path.join(base_dir, "docs", "rag", "foundational_philosophical.md")
