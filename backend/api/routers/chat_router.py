@@ -713,7 +713,8 @@ CRITICAL RULES:
             logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s) for question: '{chat_request.message[:100]}...'")
             processing_steps.append(f"✅ Language detected: {detected_lang}")
             
-            # Language names mapping
+            # Language names mapping (must match chat_helpers.py for consistency)
+            # Supports: Vietnamese, Chinese, German, French, Spanish, Japanese, Korean, Arabic, Russian, Portuguese, Italian, Hindi, Thai, English
             language_names = {
                 'vi': 'Vietnamese (Tiếng Việt)',
                 'zh': 'Chinese (中文)',
@@ -723,6 +724,11 @@ CRITICAL RULES:
                 'ja': 'Japanese (日本語)',
                 'ko': 'Korean (한국어)',
                 'ar': 'Arabic (العربية)',
+                'ru': 'Russian (Русский)',
+                'pt': 'Portuguese (Português)',
+                'it': 'Italian (Italiano)',
+                'hi': 'Hindi (हिन्दी)',
+                'th': 'Thai (ไทย)',
                 'en': 'English'
             }
             
@@ -2277,6 +2283,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
             logger.info(f"🌐 Detected language (non-RAG): {detected_lang}")
             
             # Language names mapping
+            # Language names mapping (must match chat_helpers.py for consistency)
             language_names = {
                 'vi': 'Vietnamese (Tiếng Việt)',
                 'zh': 'Chinese (中文)',
@@ -2286,6 +2293,11 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 'ja': 'Japanese (日本語)',
                 'ko': 'Korean (한국어)',
                 'ar': 'Arabic (العربية)',
+                'ru': 'Russian (Русский)',
+                'pt': 'Portuguese (Português)',
+                'it': 'Italian (Italiano)',
+                'hi': 'Hindi (हिन्दी)',
+                'th': 'Thai (ไทย)',
                 'en': 'English'
             }
             
