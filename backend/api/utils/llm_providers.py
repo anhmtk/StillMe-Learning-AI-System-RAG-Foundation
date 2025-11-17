@@ -13,6 +13,126 @@ from backend.api.utils.chat_helpers import build_system_prompt_with_language
 logger = logging.getLogger(__name__)
 
 
+def smart_truncate_prompt_for_philosophy(prompt_text: str, max_tokens: int) -> str:
+    """
+    Smart truncation that preserves philosophical instructions and removes provenance/metrics first.
+    
+    For philosophical questions, this function:
+    1. Preserves the entire philosophical instructions block
+    2. Removes provenance/metrics sections first
+    3. Truncates from the end if still too long
+    
+    Args:
+        prompt_text: The prompt text to truncate
+        max_tokens: Maximum tokens allowed
+        
+    Returns:
+        Truncated prompt with philosophical instructions preserved
+    """
+    def estimate_tokens(text: str) -> int:
+        return len(text) // 4 if text else 0
+    
+    def truncate_text(text: str, max_tokens: int) -> str:
+        if not text:
+            return text
+        estimated = estimate_tokens(text)
+        if estimated <= max_tokens:
+            return text
+        max_chars = max_tokens * 4
+        if len(text) <= max_chars:
+            return text
+        truncated = text[:max_chars].rsplit('\n', 1)[0]
+        return truncated + "\n\n[Note: Content truncated to fit context limits.]"
+    
+    # Detect if prompt contains philosophical instructions
+    philo_markers = [
+        "PHILOSOPHICAL FRAMING INSTRUCTION",
+        "PHILOSOPHICAL QUESTION DETECTED",
+        "MANDATORY OUTPUT RULES",
+        "MANDATORY: MINIMUM 2 CONTRASTING POSITIONS"
+    ]
+    
+    has_philosophical = any(marker in prompt_text for marker in philo_markers)
+    
+    if not has_philosophical:
+        # Normal truncation for non-philosophical prompts
+        return truncate_text(prompt_text, max_tokens)
+    
+    # Find philosophical instructions block
+    philo_start = -1
+    philo_end = -1
+    for marker in philo_markers:
+        marker_pos = prompt_text.find(marker)
+        if marker_pos >= 0:
+            philo_start = marker_pos
+            # Find end of philosophical block (before "Context:" or "User Question")
+            end_markers = ["Context:", "User Question", "CRITICAL: USER QUESTION"]
+            for end_marker in end_markers:
+                end_pos = prompt_text.find(end_marker, philo_start)
+                if end_pos > philo_start:
+                    philo_end = end_pos
+                    break
+            if philo_end == -1:
+                philo_end = len(prompt_text)
+            break
+    
+    if philo_start >= 0 and philo_end > philo_start:
+        # Extract philosophical instructions
+        philo_block = prompt_text[philo_start:philo_end]
+        
+        # Remove provenance/metrics sections before philosophical block
+        before_philo = prompt_text[:philo_start]
+        # Remove sections that contain provenance/metrics keywords
+        provenance_keywords = ["PROVENANCE", "provenance", "learning metrics", "Learning Metrics", 
+                              "learning sources", "Learning Sources", "Learning Metrics Instruction",
+                              "Learning Sources Instruction"]
+        lines_before = before_philo.split('\n')
+        filtered_lines = []
+        skip_section = False
+        for i, line in enumerate(lines_before):
+            # Check if line starts a provenance/metrics section
+            if any(keyword in line for keyword in provenance_keywords):
+                skip_section = True
+                continue
+            # Check if line starts a new major section (## or **) - end of provenance/metrics section
+            if (line.strip().startswith('##') or 
+                (line.strip().startswith('**') and line.strip().endswith('**')) or
+                line.strip().startswith('🧠') or  # Philosophical section starts
+                line.strip().startswith('⚠️⚠️⚠️')):  # Warning section
+                skip_section = False
+            if not skip_section:
+                filtered_lines.append(line)
+        before_philo_cleaned = '\n'.join(filtered_lines)
+        
+        # After philosophical block
+        after_philo = prompt_text[philo_end:]
+        
+        # Reconstruct: cleaned before + philosophical block + after
+        reconstructed = before_philo_cleaned + philo_block + after_philo
+        
+        # Now truncate if still too long, but preserve philosophical block
+        estimated = estimate_tokens(reconstructed)
+        if estimated <= max_tokens:
+            return reconstructed
+        
+        # Truncate from end (after philosophical block) first
+        max_chars = max_tokens * 4
+        philo_block_size = len(philo_block)
+        before_size = len(before_philo_cleaned)
+        available_for_after = max_chars - philo_block_size - before_size
+        
+        if available_for_after > 0:
+            truncated_after = after_philo[:available_for_after].rsplit('\n', 1)[0]
+            return before_philo_cleaned + philo_block + truncated_after
+        else:
+            # Even philosophical block is too large, but preserve it anyway (truncate from end of block)
+            truncated_philo = philo_block[:max_chars - before_size].rsplit('\n', 1)[0]
+            return before_philo_cleaned + truncated_philo
+    
+    # Fallback: normal truncation if philosophical block not found
+    return truncate_text(prompt_text, max_tokens)
+
+
 class InsufficientQuotaError(Exception):
     """Raised when OpenAI credit/quota is exhausted"""
     pass
@@ -248,8 +368,8 @@ class OpenRouterProvider(LLMProvider):
             # Truncate system_content to ~3500 tokens (reduced from 4000 to prevent overflow)
             system_content = truncate_text(system_content, max_tokens=3500)
             
-            # Truncate prompt WITHOUT user question first (6000 tokens for context/instructions, reduced from 7000)
-            prompt_without_question = truncate_text(prompt_without_question, max_tokens=6000)
+            # Fix: Smart truncate for philosophical questions - preserve philosophical instructions, remove provenance/metrics first
+            prompt_without_question = smart_truncate_prompt_for_philosophy(prompt_without_question, max_tokens=6000)
             
             # Preserve user question (up to 2500 tokens, reduced from 3000) - CRITICAL for correct answers
             if user_question:
@@ -257,7 +377,7 @@ class OpenRouterProvider(LLMProvider):
                 prompt = prompt_without_question + "\n\n" + user_question_marker + ": " + user_question
             else:
                 # Fallback: truncate entire prompt if we couldn't extract user question
-                prompt = truncate_text(prompt, max_tokens=7000)
+                prompt = smart_truncate_prompt_for_philosophy(prompt, max_tokens=7000)
             
             # Log token counts for debugging
             system_tokens = estimate_tokens(system_content)
@@ -421,8 +541,8 @@ class OpenAIProvider(LLMProvider):
             # Truncate system_content to ~3500 tokens (reduced from 4000 to prevent overflow)
             system_content = truncate_text(system_content, max_tokens=3500)
             
-            # Truncate prompt WITHOUT user question first (6000 tokens for context/instructions, reduced from 7000)
-            prompt_without_question = truncate_text(prompt_without_question, max_tokens=6000)
+            # Fix: Smart truncate for philosophical questions - preserve philosophical instructions, remove provenance/metrics first
+            prompt_without_question = smart_truncate_prompt_for_philosophy(prompt_without_question, max_tokens=6000)
             
             # Preserve user question (up to 2500 tokens, reduced from 3000) - CRITICAL for correct answers
             if user_question:
@@ -430,7 +550,7 @@ class OpenAIProvider(LLMProvider):
                 prompt = prompt_without_question + "\n\n" + user_question_marker + ": " + user_question
             else:
                 # Fallback: truncate entire prompt if we couldn't extract user question
-                prompt = truncate_text(prompt, max_tokens=7000)
+                prompt = smart_truncate_prompt_for_philosophy(prompt, max_tokens=7000)
             
             # Log token counts for debugging
             system_tokens = estimate_tokens(system_content)
