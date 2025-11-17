@@ -55,6 +55,79 @@ def get_style_learner():
         get_style_learner._instance = StyleLearner()
     return get_style_learner._instance
 
+def _format_conversation_history(conversation_history, max_tokens: int = 2000) -> str:
+    """
+    Format conversation history with token limits to prevent context overflow
+    
+    Args:
+        conversation_history: List of message dicts with 'role' and 'content'
+        max_tokens: Maximum tokens for conversation history (default: 2000)
+        
+    Returns:
+        Formatted conversation history text or empty string
+    """
+    if not conversation_history or len(conversation_history) == 0:
+        return ""
+    
+    def estimate_tokens(text: str) -> int:
+        """Estimate token count (~4 chars per token)"""
+        return len(text) // 4 if text else 0
+    
+    def truncate_text(text: str, max_tokens: int) -> str:
+        """Truncate text to fit within max_tokens"""
+        if not text:
+            return text
+        estimated = estimate_tokens(text)
+        if estimated <= max_tokens:
+            return text
+        max_chars = max_tokens * 4
+        if len(text) <= max_chars:
+            return text
+        truncated = text[:max_chars].rsplit(' ', 1)[0]
+        return truncated + "... [truncated]"
+    
+    history_lines = []
+    remaining_tokens = max_tokens
+    
+    # Process last 5 messages (most recent first)
+    recent_messages = conversation_history[-5:]
+    for msg in recent_messages:
+        if remaining_tokens <= 100:  # Stop if too little space
+            logger.warning("Stopped adding conversation history due to token limit")
+            break
+        
+        role = msg.get("role", "user")
+        content = msg.get("content", "")
+        
+        # Allocate tokens per message (distribute remaining)
+        msg_max_tokens = remaining_tokens // max(1, len(recent_messages) - len(history_lines))
+        msg_max_tokens = min(msg_max_tokens, 500)  # Cap each message at 500 tokens
+        
+        truncated_content = truncate_text(content, msg_max_tokens)
+        
+        if role == "user":
+            line = f"User: {truncated_content}"
+        elif role == "assistant":
+            line = f"Assistant: {truncated_content}"
+        else:
+            continue
+        
+        line_tokens = estimate_tokens(line)
+        remaining_tokens -= line_tokens
+        history_lines.append(line)
+    
+    if not history_lines:
+        return ""
+    
+    return f"""
+📜 CONVERSATION HISTORY (Previous messages for context):
+
+{chr(10).join(history_lines)}
+
+---
+Current message:
+"""
+
 def _calculate_confidence_score(
     context_docs_count: int,
     validation_result=None,
@@ -273,7 +346,14 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         if context and context["total_context_docs"] > 0:
             # Use context to enhance response
-            context_text = rag_retrieval.build_prompt_context(context)
+            # Build context with token limits (8000 tokens max to leave room for system prompt and user message)
+            # Model context limit is typically 16385, so we reserve:
+            # - System prompt: ~3000-4000 tokens
+            # - Context: 8000 tokens
+            # - Conversation history: 2000 tokens (already handled separately)
+            # - User message: ~500 tokens
+            # Total: ~13500 tokens (safe margin)
+            context_text = rag_retrieval.build_prompt_context(context, max_context_tokens=8000)
             
             # Build base prompt with citation instructions
             citation_instruction = ""
@@ -478,29 +558,10 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
 **Remember**: It's better to provide helpful information with transparency than to refuse completely. StillMe values honesty about knowledge sources.
 """
                 
-                # Build conversation history context if provided
-                conversation_history_text = ""
-                if chat_request.conversation_history and len(chat_request.conversation_history) > 0:
-                    # Format conversation history for context
-                    history_lines = []
-                    for msg in chat_request.conversation_history[-5:]:  # Keep last 5 messages to avoid token limit
-                        role = msg.get("role", "user")
-                        content = msg.get("content", "")
-                        if role == "user":
-                            history_lines.append(f"User: {content}")
-                        elif role == "assistant":
-                            history_lines.append(f"Assistant: {content}")
-                    
-                    if history_lines:
-                        conversation_history_text = f"""
-📜 CONVERSATION HISTORY (Previous messages for context):
-
-{chr(10).join(history_lines)}
-
----
-Current message:
-"""
-                        logger.info(f"Including {len(chat_request.conversation_history)} previous messages in context")
+                # Build conversation history context if provided (with token limits)
+                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=2000)
+                if conversation_history_text:
+                    logger.info(f"Including conversation history in context (truncated if needed)")
                 
                 base_prompt = f"""{language_instruction}
 
@@ -735,29 +796,10 @@ This is MANDATORY when provenance context is available and user asks about origi
                     # Combine base instruction with error status
                     stillme_instruction = base_stillme_instruction + error_status_message
                 
-                # Build conversation history context if provided
-                conversation_history_text = ""
-                if chat_request.conversation_history and len(chat_request.conversation_history) > 0:
-                    # Format conversation history for context
-                    history_lines = []
-                    for msg in chat_request.conversation_history[-5:]:  # Keep last 5 messages to avoid token limit
-                        role = msg.get("role", "user")
-                        content = msg.get("content", "")
-                        if role == "user":
-                            history_lines.append(f"User: {content}")
-                        elif role == "assistant":
-                            history_lines.append(f"Assistant: {content}")
-                    
-                    if history_lines:
-                        conversation_history_text = f"""
-📜 CONVERSATION HISTORY (Previous messages for context):
-
-{chr(10).join(history_lines)}
-
----
-Current message:
-"""
-                        logger.info(f"Including {len(chat_request.conversation_history)} previous messages in context")
+                # Build conversation history context if provided (with token limits)
+                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=2000)
+                if conversation_history_text:
+                    logger.info(f"Including conversation history in context (truncated if needed)")
                 
                 # Inject learning metrics data if available
                 learning_metrics_instruction = ""
@@ -1498,28 +1540,10 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
             detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
             
             # Build conversation history context if provided
-            conversation_history_text = ""
-            if chat_request.conversation_history and len(chat_request.conversation_history) > 0:
-                # Format conversation history for context
-                history_lines = []
-                for msg in chat_request.conversation_history[-5:]:  # Keep last 5 messages to avoid token limit
-                    role = msg.get("role", "user")
-                    content = msg.get("content", "")
-                    if role == "user":
-                        history_lines.append(f"User: {content}")
-                    elif role == "assistant":
-                        history_lines.append(f"Assistant: {content}")
-                
-                if history_lines:
-                    conversation_history_text = f"""
-📜 CONVERSATION HISTORY (Previous messages for context):
-
-{chr(10).join(history_lines)}
-
----
-Current message:
-"""
-                    logger.info(f"Including {len(chat_request.conversation_history)} previous messages in context (non-RAG)")
+            # Build conversation history context if provided (with token limits)
+            conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=2000)
+            if conversation_history_text:
+                logger.info(f"Including conversation history in context (truncated if needed, non-RAG)")
             
             # Strong language instruction - put FIRST
             if detected_lang != 'en':
