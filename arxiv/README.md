@@ -19,7 +19,13 @@ arxiv/
 
 ## 🚀 Quick Start
 
-### 1. Compile LaTeX
+### Prerequisites
+
+- **LaTeX Distribution**: Install MiKTeX (Windows) or TeX Live (Linux/Mac)
+  - MiKTeX: https://miktex.org/download
+  - TeX Live: https://www.tug.org/texlive/
+
+### Compile LaTeX
 
 **Windows (PowerShell):**
 ```powershell
@@ -32,19 +38,19 @@ chmod +x compile.sh
 ./compile.sh
 ```
 
-### 2. Check Output
+### Check Output
 
 After compilation, you should have:
 - `main.pdf` - Final PDF for arXiv submission
 - `main.aux`, `main.bbl`, `main.blg`, `main.log` - Auxiliary files (can be ignored)
 
-### 3. Verify PDF
+### Verify PDF
 
 Open `main.pdf` and check:
-- ✅ All figures appear correctly
+- ✅ All figures appear correctly (or placeholders if not created yet)
 - ✅ All tables are formatted properly
 - ✅ All references are numbered correctly
-- ✅ No LaTeX errors (check `main.log`)
+- ⚠️ Warnings about missing figures are normal if figures not yet created
 
 ## 📝 arXiv Submission Checklist
 
