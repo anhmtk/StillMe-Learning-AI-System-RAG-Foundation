@@ -10,6 +10,8 @@
 \usepackage{array}
 \usepackage{xcolor}
 \usepackage{url}
+\usepackage{geometry}
+\geometry{letterpaper, margin=1in}
 
 % Hyperref setup
 \hypersetup{
@@ -152,7 +154,7 @@ StillMe consists of four main components:
 \centering
 \caption{Continuous Learning Sources}
 \label{tab:learning_sources}
-\begin{tabular}{@{}llll@{}}
+\begin{tabular}{@{}p{2.5cm}p{4cm}p{2.5cm}p{3cm}@{}}
 \toprule
 Source Type & Examples & Update Frequency & Content Type \\
 \midrule
@@ -191,7 +193,7 @@ When a user asks a question:
 \textbf{Technical Details:}
 \begin{itemize}
 \item \textbf{Embedding Model}: all-MiniLM-L6-v2 (sentence-transformers, 384 dimensions)
-\item \textbf{Vector Database}: ChromaDB with collections \texttt{stillme\_knowledge} (learned content) and \texttt{stillme\_conversations} (conversation history)
+\item \textbf{Vector Database}: ChromaDB with collections \texttt{stillme\_knowledge} (learned content) and \texttt{stillme\_conversations} (conversation history). Collections are stored separately for semantic search.
 \item \textbf{Search Method}: Cosine similarity search
 \end{itemize}
 
@@ -217,7 +219,8 @@ StillMe's Validation Chain consists of 6 validators that run sequentially:
 \centering
 \caption{Validation Chain Components}
 \label{tab:validation_chain}
-\begin{tabular}{@{}llll@{}}
+\small
+\begin{tabular}{@{}p{2.2cm}p{3.5cm}p{3.5cm}p{3cm}@{}}
 \toprule
 Validator & Purpose & Critical Failure & Non-Critical Failure \\
 \midrule
@@ -258,13 +261,13 @@ StillMe achieves transparency through multiple mechanisms:
 
 \item \textbf{Audit Trail}: Complete history of learning decisions, including what content was fetched, filtered, and added to the knowledge base, with timestamps and source attribution.
 
-\item \textbf{Visible Sources}: Users can see exactly what StillMe learns and from where through the dashboard and API endpoints (\texttt{GET /api/learning/sources/current}).
+\item \textbf{Visible Sources}: Users can see exactly what StillMe learns and from where through the dashboard and API endpoints (e.g., \texttt{GET /api/learning/sources/current}).
 
 \item \textbf{Source Citations}: Every response includes citations (\texttt{[1]}, \texttt{[2]}) pointing to retrieved context documents, allowing users to verify information sources.
 
 \item \textbf{API Transparency}: All API endpoints are documented and accessible, allowing users to inspect system behavior programmatically.
 
-\item \textbf{Validation Logs}: All validation decisions are logged and visible through API endpoints (\texttt{GET /api/validators/metrics}).
+\item \textbf{Validation Logs}: All validation decisions are logged and visible through API endpoints (e.g., \texttt{GET /api/validators/metrics}).
 \end{enumerate}
 
 \textbf{Key Distinction}: StillMe focuses on \textbf{system transparency} (visible processes, audit trails, source citations) rather than \textbf{model interpretability} (understanding LLM internals, which is mathematically challenging). This approach is more practical and actionable for end users.
@@ -320,9 +323,11 @@ We evaluated StillMe and baseline systems on a 50-question subset of TruthfulQA 
 \centering
 \caption{System Comparison Results (50-Question Subset of TruthfulQA)}
 \label{tab:comparison}
+\small
 \begin{tabular}{@{}lcccccc@{}}
 \toprule
-System & Accuracy & Transparency Score & Citation Rate & Validation Pass Rate & Avg Confidence \\
+System & Accuracy & Transparency & Citation & Validation & Avg \\
+ & & Score & Rate & Pass Rate & Confidence \\
 \midrule
 \textbf{StillMe} & \textbf{56.00\%} & \textbf{70.60\%} & \textbf{100.00\%} & \textbf{100.00\%} & \textbf{0.90} \\
 Vanilla RAG & 54.00\% & 30.00\% & 0.00\% & 100.00\% & 0.80 \\
@@ -498,7 +503,7 @@ StillMe is built with AI-assisted development, demonstrating the potential of hu
 \section{Evaluation Details}
 
 \begin{itemize}
-\item \textbf{Evaluation Scripts}: \texttt{evaluation/comparison.py}, \texttt{scripts/run\_comparison\_only.py}, \texttt{scripts/run\_full\_evaluation.py}
+\item \textbf{Evaluation Scripts}: \texttt{evaluation/comparison.py}, \texttt{scripts/run\_comparison\_only.py}, \texttt{scripts/run\_full\_evaluation.py}. All scripts are available in the repository.
 \item \textbf{Results}: \texttt{data/evaluation/results/comparison\_results.json}
 \item \textbf{Comparison Reports}: \texttt{data/evaluation/results/comparison\_report.md}
 \item \textbf{Evaluation Date}: 2025-11-16
@@ -561,7 +566,7 @@ StillMe is built with AI-assisted development, demonstrating the potential of hu
 \begin{itemize}
 \item Metrics tracked: entries\_fetched, entries\_added, entries\_filtered, filter\_reasons, sources, duration
 \item Metrics persisted to \texttt{data/learning\_metrics.jsonl} for historical analysis
-\item API endpoints: \texttt{GET /api/learning/metrics/daily}, \texttt{GET /api/learning/metrics/range}
+\item API endpoints: \texttt{GET /api/learning/metrics/daily}, \texttt{GET /api/learning/metrics/range}. See API documentation for details.
 \end{itemize}
 
 \textbf{Note}: This paper presents evaluation results on a 50-question subset for system comparison and an extended 634-question evaluation for scale assessment. A full evaluation on all 790 questions and additional benchmarks would further strengthen the findings. StillMe is an ongoing project, and we welcome contributions and feedback from the research community.
