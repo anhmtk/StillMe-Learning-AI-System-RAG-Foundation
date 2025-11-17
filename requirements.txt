@@ -7,7 +7,7 @@ streamlit==1.51.0
 
 # Database
 sqlalchemy==2.0.44
-alembic==1.17.1
+alembic==1.17.2
 # Note: sqlite3 is built-in Python module, no need to install
 
 # HTTP Requests
