@@ -1989,6 +1989,39 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                     
                     // Mouse move handler for drag and resize - improved like Cursor
                     document.addEventListener('mousemove', (e) => {{
+                        // CRITICAL: Check if mouse is in scrollbar area - disable drag/resize if so
+                        const messagesContainer = document.getElementById('stillme-chat-messages');
+                        if (messagesContainer && (isDragging || isResizing)) {{
+                            // Use messages container rect, not panel rect (more accurate for scrollbar position)
+                            const messagesRect = messagesContainer.getBoundingClientRect();
+                            const mouseX = e.clientX;
+                            const mouseY = e.clientY;
+                            
+                            // Check if mouse is within messages container AND in scrollbar area (rightmost 20px)
+                            const scrollbarAreaStart = messagesRect.right - 20; // Rightmost 20px is scrollbar area
+                            const isInMessagesContainer = (
+                                mouseX >= messagesRect.left &&
+                                mouseX <= messagesRect.right &&
+                                mouseY >= messagesRect.top &&
+                                mouseY <= messagesRect.bottom
+                            );
+                            const isInScrollbarArea = mouseX >= scrollbarAreaStart && mouseX <= messagesRect.right;
+                            
+                            if (isInMessagesContainer && isInScrollbarArea) {{
+                                // Mouse is in scrollbar area - stop drag/resize
+                                if (isDragging) {{
+                                    console.log('StillMe Chat: Mouse in scrollbar area, stopping drag');
+                                    isDragging = false;
+                                }}
+                                if (isResizing) {{
+                                    console.log('StillMe Chat: Mouse in scrollbar area, stopping resize');
+                                    isResizing = false;
+                                    resizeHandle = null;
+                                }}
+                                return; // Don't process drag/resize
+                            }}
+                        }}
+                        
                         if (isDragging && !isFullscreen && !isMinimized) {{
                             const deltaX = e.clientX - dragStartX;
                             const deltaY = e.clientY - dragStartY;
