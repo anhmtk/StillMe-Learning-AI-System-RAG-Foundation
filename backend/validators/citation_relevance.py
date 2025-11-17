@@ -87,15 +87,33 @@ class CitationRelevance:
                 relevance_issues.append(f"Error checking citation [{cite_num}]")
         
         if relevance_issues:
-            # Found relevance issues - log warning but don't fail (prompt should handle this)
-            # This is a warning, not a critical failure, because:
-            # 1. Simple keyword overlap may not capture semantic relevance
-            # 2. Prompt instructions should guide AI to acknowledge relevance issues
-            # 3. We don't want to block responses that might be semantically relevant despite low keyword overlap
+            # Tier 3.5: Remove citations with low relevance instead of just warning
+            # Remove citations from answer
+            patched_answer = answer
+            citations_to_remove = []
+            
+            for issue in relevance_issues:
+                # Extract citation number from issue message
+                cite_match = re.search(r'\[(\d+)\]', issue)
+                if cite_match:
+                    cite_num = cite_match.group(1)
+                    citations_to_remove.append(cite_num)
+            
+            # Remove citations from answer
+            if citations_to_remove:
+                for cite_num in citations_to_remove:
+                    # Remove [N] pattern
+                    patched_answer = re.sub(rf'\[{cite_num}\]', '', patched_answer)
+                    logger.info(f"🗑️ Removed citation [{cite_num}] due to low relevance")
+            
+            # Clean up multiple spaces
+            patched_answer = re.sub(r'\s+', ' ', patched_answer).strip()
+            
             logger.warning(f"Citation relevance issues detected: {relevance_issues}")
             return ValidationResult(
-                passed=True,  # Don't fail, just warn
-                reasons=[f"citation_relevance_warning: {issue}" for issue in relevance_issues]
+                passed=True,  # Don't fail, just remove citations
+                reasons=[f"citation_relevance_warning: {issue}" for issue in relevance_issues],
+                patched_answer=patched_answer if citations_to_remove else None
             )
         
         return ValidationResult(passed=True)

@@ -2,7 +2,7 @@
 ValidatorChain - Orchestrates multiple validators
 """
 
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional
 from .base import Validator, ValidationResult
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -70,7 +70,8 @@ class ValidatorChain:
         # Default: sequential for safety
         return False
     
-    def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
+    def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None,
+            avg_similarity: Optional[float] = None) -> ValidationResult:
         """
         Run all validators with parallel execution for independent validators
         
@@ -82,6 +83,8 @@ class ValidatorChain:
         Args:
             answer: The answer to validate
             ctx_docs: List of context documents from RAG
+            context_quality: Context quality from RAG ("high", "medium", "low") - Tier 3.5
+            avg_similarity: Average similarity score of retrieved context (0.0-1.0) - Tier 3.5
             
         Returns:
             ValidationResult with overall status
@@ -105,7 +108,11 @@ class ValidatorChain:
         # Run sequential validators first (LanguageValidator, CitationRequired, etc.)
         for i, validator, validator_name in sequential_validators:
             try:
-                result = validator.run(patched, ctx_docs)
+                # Tier 3.5: Pass context quality to ConfidenceValidator
+                if validator_name == "ConfidenceValidator":
+                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity)
+                else:
+                    result = validator.run(patched, ctx_docs)
                 
                 # Track citation status
                 if "CitationRequired" in type(validator).__name__:
