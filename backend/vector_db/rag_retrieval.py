@@ -40,7 +40,8 @@ class RAGRetrieval:
                         similarity_threshold: float = 0.3,  # Tier 3.5: Filter low-quality context
                         use_mmr: bool = True,  # Tier 3.5: Use MMR for diversity
                         mmr_lambda: float = 0.7,
-                        exclude_content_types: Optional[List[str]] = None) -> Dict[str, Any]:
+                        exclude_content_types: Optional[List[str]] = None,
+                        prioritize_style_guide: bool = False) -> Dict[str, Any]:
         """Retrieve relevant context for a query
         
         Args:
@@ -53,6 +54,7 @@ class RAGRetrieval:
             use_mmr: If True, use Max Marginal Relevance for diversity. Default: True
             mmr_lambda: MMR lambda parameter (0.0-1.0). Higher = more relevance, lower = more diversity. Default: 0.7
             exclude_content_types: List of content_type values to exclude (e.g., ["technical"] for philosophical questions)
+            prioritize_style_guide: If True, force retrieve style guide documents (domain="style_guide") for philosophical questions
         """
         try:
             import os
@@ -78,7 +80,8 @@ class RAGRetrieval:
                     similarity_threshold,
                     use_mmr,
                     mmr_lambda,
-                    exclude_content_types
+                    exclude_content_types,
+                    prioritize_style_guide
                 )
                 
                 # Try to get from cache
@@ -103,6 +106,41 @@ class RAGRetrieval:
                 # Helper function to run knowledge search (with all the complex logic)
                 def _search_knowledge():
                     knowledge_results = []
+                    
+                    # Fix 2: Force retrieve style guide for philosophical questions
+                    if prioritize_style_guide:
+                        try:
+                            style_guide_results = self.chroma_client.search_knowledge(
+                                query_embedding=query_embedding,
+                                limit=1,  # Force retrieve at least 1 style guide document
+                                where={"domain": "style_guide"}
+                            )
+                            if style_guide_results:
+                                # Prioritize style guide by adding to front of results
+                                existing_ids = {doc.get("id") for doc in knowledge_results}
+                                for doc in style_guide_results:
+                                    if doc.get("id") not in existing_ids:
+                                        knowledge_results.insert(0, doc)  # Insert at front for priority
+                                        logger.info(f"✅ Force retrieved style guide document: {doc.get('metadata', {}).get('title', 'N/A')}")
+                            else:
+                                # Try alternative search if domain filter doesn't work
+                                logger.debug("Style guide not found with domain filter, trying alternative search")
+                                alt_results = self.chroma_client.search_knowledge(
+                                    query_embedding=query_embedding,
+                                    limit=5
+                                )
+                                for doc in alt_results:
+                                    doc_metadata = doc.get("metadata", {})
+                                    if ("style_guide" in str(doc_metadata.get("domain", "")).lower() or
+                                        "philosophical" in str(doc_metadata.get("title", "")).lower() or
+                                        "StillMe_StyleGuide" in str(doc_metadata.get("title", ""))):
+                                        if doc.get("id") not in {d.get("id") for d in knowledge_results}:
+                                            knowledge_results.insert(0, doc)
+                                            logger.info(f"✅ Found style guide via alternative search: {doc.get('metadata', {}).get('title', 'N/A')}")
+                                            break
+                        except Exception as style_guide_error:
+                            logger.debug(f"Style guide retrieval failed: {style_guide_error}")
+                    
                     if prioritize_foundational:
                         try:
                             # Try to retrieve foundational knowledge first
