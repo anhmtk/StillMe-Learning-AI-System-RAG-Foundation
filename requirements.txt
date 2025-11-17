@@ -34,7 +34,7 @@ pydantic==2.12.4
 loguru==0.7.3
 
 # Date & Time
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
 
 # Language Detection
 langdetect==1.0.9
