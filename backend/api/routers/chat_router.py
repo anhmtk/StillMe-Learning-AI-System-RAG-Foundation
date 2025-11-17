@@ -931,13 +931,18 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 processing_steps.append(f"🤖 Calling AI model ({provider_name})...")
                 llm_inference_start = time.time()
                 # Support user-provided LLM config (for self-hosted deployments)
+                # For internal/dashboard calls: use server API keys if llm_provider not provided
+                # For public API: require user-provided API keys
+                use_server_keys = chat_request.llm_provider is None
+                
                 raw_response = await generate_ai_response(
                     enhanced_prompt, 
                     detected_lang=detected_lang,
                     llm_provider=chat_request.llm_provider,
                     llm_api_key=chat_request.llm_api_key,
                     llm_api_url=chat_request.llm_api_url,
-                    llm_model_name=chat_request.llm_model_name
+                    llm_model_name=chat_request.llm_model_name,
+                    use_server_keys=use_server_keys
                 )
                 llm_inference_end = time.time()
                 llm_inference_latency = llm_inference_end - llm_inference_start
@@ -1181,13 +1186,15 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             from backend.api.utils.llm_providers import InsufficientQuotaError
                             # generate_ai_response is already imported at the top of the file
                             
-                            # Retry with OpenAI
+                            # Retry with OpenAI (use server keys for internal calls)
+                            use_server_keys_retry = chat_request.llm_provider is None
                             openai_response = await generate_ai_response(
                                 enhanced_prompt,
                                 detected_lang=detected_lang,
                                 llm_provider="openai",
                                 llm_api_key=openai_api_key,
-                                llm_model_name="gpt-3.5-turbo"
+                                llm_model_name="gpt-3.5-turbo",
+                                use_server_keys=use_server_keys_retry
                             )
                             
                             # Re-validate OpenAI response
@@ -1360,7 +1367,15 @@ User Question (in {retry_lang_name.upper()}): {chat_request.message}
 Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANSWER THE QUESTION PROPERLY, NOT JUST ACKNOWLEDGE THE ERROR."""
                                     
                                     # Retry with stronger prompt (include context to actually answer the question)
-                                    retry_response = await generate_ai_response(retry_language_instruction, detected_lang=detected_lang)
+                                    # Use server keys for internal calls
+                                    use_server_keys_retry = chat_request.llm_provider is None
+                                    retry_response = await generate_ai_response(
+                                        retry_language_instruction, 
+                                        detected_lang=detected_lang,
+                                        llm_provider=chat_request.llm_provider,
+                                        llm_api_key=chat_request.llm_api_key,
+                                        use_server_keys=use_server_keys_retry
+                                    )
                                     
                                     # Validate retry response
                                     retry_validation = chain.run(retry_response, ctx_docs)
@@ -1552,7 +1567,15 @@ Remember: RESPOND IN ENGLISH ONLY."""
             
             # LLM_Inference_Latency: Time from API call start to response received
             llm_inference_start = time.time()
-            response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
+            # Use server keys for internal calls (when use_rag=False)
+            use_server_keys_non_rag = chat_request.llm_provider is None
+            response = await generate_ai_response(
+                enhanced_prompt, 
+                detected_lang=detected_lang,
+                llm_provider=chat_request.llm_provider,
+                llm_api_key=chat_request.llm_api_key,
+                use_server_keys=use_server_keys_non_rag
+            )
             llm_inference_end = time.time()
             llm_inference_latency = llm_inference_end - llm_inference_start
             timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
