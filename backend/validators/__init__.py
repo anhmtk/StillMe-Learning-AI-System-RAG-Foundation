@@ -16,6 +16,7 @@ from .fallback_handler import FallbackHandler
 from .review_adapter import ReviewAdapter
 from .language import LanguageValidator
 from .identity_check import IdentityCheckValidator
+from .ego_neutrality import EgoNeutralityValidator
 from .step_detector import StepDetector, Step
 from .step_validator import StepValidator, StepValidationResult
 from .consistency_checker import ConsistencyChecker, Claim
@@ -35,6 +36,7 @@ __all__ = [
     "ReviewAdapter",
     "LanguageValidator",
     "IdentityCheckValidator",
+    "EgoNeutralityValidator",
     "StepDetector",
     "Step",
     "StepValidator",

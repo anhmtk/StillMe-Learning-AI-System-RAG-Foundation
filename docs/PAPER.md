@@ -156,7 +156,7 @@ When a user asks a question:
 
 ### 3.4 Validation Chain
 
-StillMe's Validation Chain consists of 6 validators that run sequentially:
+StillMe's Validation Chain consists of 7 validators that run sequentially:
 
 1. **CitationRequired**: Ensures responses cite sources from retrieved context using `[1]`, `[2]` format. Critical failure if context is available but citation is missing.
 
@@ -166,9 +166,11 @@ StillMe's Validation Chain consists of 6 validators that run sequentially:
 
 4. **ConfidenceValidator**: Detects when AI should express uncertainty, especially when no context is available. Requires responses to say "I don't know" when no relevant context is found, preventing overconfident responses without evidence. This validator operationalizes StillMe's principle of "intellectual humility" by converting knowledge conflicts into quantified expressions of uncertainty, thereby mitigating overconfidence—a key source of hallucination and ethical concern.
 
-5. **FallbackHandler**: Provides safe fallback answers when validation fails critically. Replaces hallucinated responses with honest "I don't know" messages that explain StillMe's learning mechanism.
+5. **EgoNeutralityValidator**: Detects anthropomorphic language that falsely attributes subjective qualities (experience, emotions, personal opinions) to AI. This validator addresses a novel failure mode we term "Hallucination of Experience"—when AI uses phrases like "in my experience" or "theo kinh nghiệm" that create false impressions of personal experience. This is a subtle but critical form of linguistic hallucination that undermines transparency by making AI appear more human-like than it actually is.
 
-6. **EthicsAdapter**: Ethical content filtering to prevent harmful or biased responses.
+6. **FallbackHandler**: Provides safe fallback answers when validation fails critically. Replaces hallucinated responses with honest "I don't know" messages that explain StillMe's learning mechanism.
+
+7. **EthicsAdapter**: Ethical content filtering to prevent harmful or biased responses.
 
 **Table 3: Validation Chain Components**
 
@@ -178,6 +180,7 @@ StillMe's Validation Chain consists of 6 validators that run sequentially:
 | EvidenceOverlap | Validates content overlaps with context | - | Low overlap with citation → Warning |
 | NumericUnitsBasic | Validates numeric claims and units | - | Numeric errors → Warning |
 | ConfidenceValidator | Detects when AI should express uncertainty | Missing uncertainty with no context → Fallback | - |
+| **EgoNeutralityValidator** | **Detects anthropomorphic language ("Hallucination of Experience")** | **False attribution of subjective qualities → Warning** | **-**
 | FallbackHandler | Provides safe fallback answers | Replaces hallucinated responses | - |
 | EthicsAdapter | Ethical content filtering | Ethical violations → Filtered | - |
 
@@ -358,6 +361,8 @@ StillMe demonstrates that:
 
 5. **Latency**: StillMe's validation chain adds latency compared to direct LLM calls. Optimization could reduce this overhead.
 
+6. **A Novel Failure Mode: The Hallucination of Experience**: During user testing, we identified a blind spot in StillMe's Validation Chain. StillMe failed to flag anthropomorphic language (e.g., "in my experience", "theo kinh nghiệm") used by other LLMs when analyzing their outputs. This highly subtle form of linguistic hallucination, which falsely attributes subjective qualities (experience, emotions, personal opinions) to AI, represents a significant threat to Transparency-First AI. While we have implemented the EgoNeutralityValidator to detect such language in StillMe's own responses, detecting it in external LLM outputs (when StillMe is asked to analyze other systems) remains a challenge. This failure mode highlights the multi-layered nature of transparency: beyond factual accuracy and source citation, we must also address linguistic transparency—ensuring that AI communication style does not create false impressions of human-like experience or subjectivity.
+
 ### 5.3 Future Work
 
 1. **Full Evaluation**: Run evaluation on all 790 TruthfulQA questions and additional benchmarks (HaluEval, MMLU) for stronger statistical significance.
@@ -371,6 +376,8 @@ StillMe demonstrates that:
 5. **Additional Baselines**: Include more baseline systems (Claude, DeepSeek, local LLMs) for comprehensive comparison.
 
 6. **Longitudinal Study**: Evaluate StillMe's continuous learning over time to measure knowledge base growth and accuracy improvements.
+
+7. **Linguistic Transparency Layer**: Enhance the EgoNeutralityValidator to detect anthropomorphic language not only in StillMe's own responses but also in external LLM outputs when StillMe is asked to analyze other systems. This would address the "Hallucination of Experience" failure mode more comprehensively, ensuring that StillMe can identify and flag linguistic transparency violations in any AI system it evaluates. This represents a novel frontier in AI transparency research: moving beyond factual accuracy and source citation to address communication style and self-awareness about anthropomorphism.
 
 ## 6. Conclusion
 
@@ -440,7 +447,7 @@ $$\text{Transparency Score} = (0.0 \times 0.4) + (0.0 \times 0.3) + (1.0 \times 
 ### D. Validation Chain Details
 
 **Validator Execution Order:**
-1. CitationRequired → 2. EvidenceOverlap → 3. NumericUnitsBasic → 4. ConfidenceValidator → 5. FallbackHandler → 6. EthicsAdapter
+1. CitationRequired → 2. EvidenceOverlap → 3. NumericUnitsBasic → 4. ConfidenceValidator → 5. EgoNeutralityValidator → 6. FallbackHandler → 7. EthicsAdapter
 
 **Failure Handling:**
 - **Critical Failures**: Missing citation with available context, missing uncertainty with no context → Response replaced with fallback answer

@@ -1083,6 +1083,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     from backend.validators.language import LanguageValidator
                     from backend.validators.citation_relevance import CitationRelevance
                     from backend.validators.identity_check import IdentityCheckValidator
+                    from backend.validators.ego_neutrality import EgoNeutralityValidator
                     
                     # Enable Identity Check Validator (can be toggled via env var)
                     enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
@@ -1095,6 +1096,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
                         ConfidenceValidator(require_uncertainty_when_no_context=True),  # Check for uncertainty
+                        EgoNeutralityValidator(strict_mode=True, auto_patch=False),  # Detect "Hallucination of Experience" - novel contribution
                     ]
                     
                     # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
