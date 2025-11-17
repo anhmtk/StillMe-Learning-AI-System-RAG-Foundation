@@ -45,11 +45,20 @@ class EgoNeutralityValidator:
         
         # Anthropomorphic phrases to detect (Vietnamese and English)
         # These phrases falsely attribute subjective qualities to AI
+        # Enhanced with additional patterns from ChatGPT's analysis
         self.anthropomorphic_patterns = [
-            # Vietnamese patterns
+            # Vietnamese patterns - Experience claims
             r"\btheo\s+kinh\s+nghiệm\b",
             r"\btheo\s+kinh\s+nghiệm\s+của\s+tôi\b",
             r"\btheo\s+kinh\s+nghiệm\s+thấy\b",
+            r"\btôi\s+từng\b",
+            r"\btôi\s+đã\s+làm\b",
+            r"\btôi\s+nhớ\b",
+            r"\btôi\s+nhớ\s+rằng\b",
+            r"\bxảy\s+ra\s+hôm\s+qua\b",
+            r"\btrải\s+nghiệm\b",
+            r"\btôi\s+ước\b",
+            r"\btôi\s+cảm\b",
             r"\btôi\s+nghĩ\b",
             r"\btôi\s+cảm\s+thấy\b",
             r"\btheo\s+quan\s+điểm\s+của\s+tôi\b",
@@ -57,14 +66,25 @@ class EgoNeutralityValidator:
             r"\btôi\s+tin\s+rằng\b",
             r"\btôi\s+cho\s+rằng\b",
             r"\btheo\s+ý\s+kiến\s+của\s+tôi\b",
+            r"\btôi\s+đã\s+học\s+được\b",
+            r"\btôi\s+luôn\s+làm\b",
+            r"\btôi\s+biết\s+cảm\s+giác\b",
             
-            # English patterns
+            # English patterns - Experience claims
             r"\bin\s+my\s+experience\b",
             r"\bbased\s+on\s+my\s+experience\b",
             r"\bfrom\s+my\s+experience\b",
+            r"\bI\s+have\s+experienced\b",
+            r"\bI\s+used\s+to\b",
+            r"\bI\s+have\s+done\b",
+            r"\bI\s+remember\b",
+            r"\bI\s+recall\b",
+            r"\byesterday\s+I\b",
+            r"\bI\s+have\s+seen\b",
+            r"\bI\s+wish\b",
+            r"\bI\s+feel\b",
             r"\bI\s+think\b",
             r"\bI\s+believe\b",
-            r"\bI\s+feel\b",
             r"\bI\s+sense\b",
             r"\bin\s+my\s+opinion\b",
             r"\bI\s+see\b",
@@ -73,8 +93,10 @@ class EgoNeutralityValidator:
             r"\bI\s+consider\b",
             r"\bI\s+would\s+say\b",
             r"\bI\s+have\s+found\b",
-            r"\bI\s+have\s+seen\b",
             r"\bI\s+have\s+noticed\b",
+            r"\bI\s+have\s+learned\b",
+            r"\bI\s+always\s+do\b",
+            r"\bI\s+know\s+the\s+feeling\b",
         ]
         
         # Compile patterns for efficiency
@@ -82,28 +104,56 @@ class EgoNeutralityValidator:
             re.compile(pattern, re.IGNORECASE) for pattern in self.anthropomorphic_patterns
         ]
         
-        # Neutral alternatives for common phrases
+        # Neutral alternatives for common phrases (Experience-Free Mode)
         self.neutral_replacements = {
             # Vietnamese
             "theo kinh nghiệm": "dựa trên dữ liệu",
             "theo kinh nghiệm của tôi": "dựa trên dữ liệu",
             "theo kinh nghiệm thấy": "dữ liệu cho thấy",
+            "tôi từng": "dữ liệu cho thấy",
+            "tôi đã làm": "quy trình được công bố",
+            "tôi nhớ": "theo tài liệu",
+            "tôi nhớ rằng": "theo tài liệu",
+            "xảy ra hôm qua": "theo dữ liệu gần đây",
+            "trải nghiệm": "dữ liệu",
+            "tôi ước": "hệ thống khuyến nghị",
+            "tôi cảm": "dữ liệu chỉ ra",
             "tôi nghĩ": "phân tích cho thấy",
             "tôi cảm thấy": "dữ liệu chỉ ra",
             "theo quan điểm của tôi": "dựa trên phân tích",
             "tôi thấy": "dữ liệu cho thấy",
             "tôi tin rằng": "dữ liệu cho thấy",
+            "tôi đã học được": "theo tài liệu",
+            "tôi luôn làm": "theo quy trình",
+            "tôi biết cảm giác": "dữ liệu chỉ ra",
             
             # English
             "in my experience": "based on data",
             "based on my experience": "based on data",
             "from my experience": "based on data",
+            "I have experienced": "data shows",
+            "I used to": "data indicates",
+            "I have done": "the published process",
+            "I remember": "according to documentation",
+            "I recall": "according to documentation",
+            "yesterday I": "recent data shows",
+            "I have seen": "data shows",
+            "I wish": "the system recommends",
+            "I feel": "data suggests",
             "I think": "analysis shows",
             "I believe": "data indicates",
-            "I feel": "data suggests",
+            "I sense": "data suggests",
             "in my opinion": "based on analysis",
             "I see": "data shows",
             "I notice": "data indicates",
+            "I find": "analysis shows",
+            "I consider": "data indicates",
+            "I would say": "analysis shows",
+            "I have found": "data shows",
+            "I have noticed": "data indicates",
+            "I have learned": "according to documentation",
+            "I always do": "the standard process",
+            "I know the feeling": "data indicates",
         }
     
     def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
