@@ -69,6 +69,9 @@ class EgoNeutralityValidator:
             r"\btôi\s+đã\s+học\s+được\b",
             r"\btôi\s+luôn\s+làm\b",
             r"\btôi\s+biết\s+cảm\s+giác\b",
+            r"\bcảm\s+thấy\s+tự\s+hào\b",
+            r"\btự\s+hào\s+về\b",
+            r"\btự\s+hào\s+nhất\b",
             
             # English patterns - Experience claims
             r"\bin\s+my\s+experience\b",
@@ -97,6 +100,10 @@ class EgoNeutralityValidator:
             r"\bI\s+have\s+learned\b",
             r"\bI\s+always\s+do\b",
             r"\bI\s+know\s+the\s+feeling\b",
+            r"\bI\s+feel\s+proud\b",
+            r"\bI\s+am\s+proud\b",
+            r"\bwhat\s+makes\s+me\s+proud\b",
+            r"\bI\s+take\s+pride\b",
         ]
         
         # Compile patterns for efficiency
