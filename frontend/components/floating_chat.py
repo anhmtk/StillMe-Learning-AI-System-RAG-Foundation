@@ -199,29 +199,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             
             /* CRITICAL: Fix scrollbar vs resize handle conflict */
             /* Problem: Resize handle .e (right edge, 16px wide) overlaps with scrollbar (6px wide) */
-            /* Solution: Exclude scrollbar area from resize handle using pointer-events */
-            
-            /* Make scrollbar area have higher priority */
-            .stillme-chat-messages {{
-                position: relative;
-                z-index: 2; /* Higher than resize handles */
-            }}
-            
-            /* Scrollbar should always be interactive */
+            /* Solution: JavaScript detects scrollbar area (rightmost 12px) and skips resize if click is in that area */
+            /* CSS: Ensure scrollbar is interactive */
             .stillme-chat-messages::-webkit-scrollbar {{
-                pointer-events: auto !important;
-                z-index: 10 !important; /* Highest priority */
-            }}
-            
-            /* Resize handle on right edge - exclude scrollbar area (rightmost 10px) */
-            .resize-handle.e {{
-                /* Use clip-path to exclude scrollbar area, but keep functionality */
-                /* Better: Use JavaScript to detect scrollbar area (see JS below) */
-            }}
-            
-            /* When messages container is hovered, prioritize scrollbar over resize */
-            .stillme-chat-messages:hover {{
-                z-index: 3 !important;
+                pointer-events: auto !important; /* Ensure scrollbar captures events */
             }}
             
             /* Visual resize indicator - more visible like Cursor */
