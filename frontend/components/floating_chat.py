@@ -195,6 +195,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             .resize-handle.n {{ top: 0; left: 24px; right: 24px; height: 16px; cursor: n-resize; }}
             .resize-handle.s {{ bottom: 0; left: 24px; right: 24px; height: 16px; cursor: s-resize; }}
             .resize-handle.e {{ top: 24px; bottom: 24px; right: 0; width: 16px; cursor: e-resize; }}
+            /* CRITICAL: Disable resize handle when hovering over scrollbar area */
+            .resize-handle.e:hover {{
+                cursor: default !important;
+            }}
             .resize-handle.w {{ top: 24px; bottom: 24px; left: 0; width: 16px; cursor: w-resize; }}
             
             /* CRITICAL: Fix scrollbar vs resize handle conflict */
@@ -1435,6 +1439,31 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             console.warn(`StillMe Chat: Parent resize handle not found for direction: ${{direction}}`);
                                             return;
                                         }}
+                                        // CRITICAL: Disable resize handle when mouse is over scrollbar area (parent window)
+                                        if (direction === 'e') {{
+                                            handle.addEventListener('mouseenter', (e) => {{
+                                                const parentMessages = parentDoc.getElementById('stillme-chat-messages');
+                                                if (parentMessages && !parentPanel.classList.contains('fullscreen') && !parentPanel.classList.contains('minimized')) {{
+                                                    const panelRect = parentPanel.getBoundingClientRect();
+                                                    const mouseX = e.clientX;
+                                                    const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                                    
+                                                    if (mouseX >= scrollbarAreaStart) {{
+                                                        // Mouse is over scrollbar area, disable resize handle
+                                                        handle.style.pointerEvents = 'none';
+                                                        handle.style.cursor = 'default';
+                                                        console.log('StillMe Chat: Mouse over scrollbar area (parent), disabling resize handle');
+                                                    }}
+                                                }}
+                                            }});
+                                            
+                                            handle.addEventListener('mouseleave', (e) => {{
+                                                // Re-enable resize handle when mouse leaves
+                                                handle.style.pointerEvents = 'auto';
+                                                handle.style.cursor = 'e-resize';
+                                            }});
+                                        }}
+                                        
                                         handle.addEventListener('mousedown', (e) => {{
                                             if (parentPanel.classList.contains('fullscreen') || parentPanel.classList.contains('minimized')) return;
                                             
@@ -1443,17 +1472,18 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             if (direction === 'e') {{
                                                 const parentMessages = parentDoc.getElementById('stillme-chat-messages');
                                                 if (parentMessages) {{
-                                                    const messagesRect = parentMessages.getBoundingClientRect();
                                                     const panelRect = parentPanel.getBoundingClientRect();
-                                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 15px (increased from 12px for better detection)
+                                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 20px
                                                     const clickX = e.clientX;
-                                                    const scrollbarAreaStart = panelRect.right - 15; // Rightmost 15px is scrollbar area
+                                                    const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
                                                     
                                                     if (clickX >= scrollbarAreaStart) {{
                                                         // Click is in scrollbar area, don't start resize - let scrollbar handle it
                                                         console.log('StillMe Chat: Click detected in scrollbar area (parent), skipping resize');
+                                                        e.preventDefault(); // Prevent resize
                                                         e.stopPropagation(); // Stop event propagation
-                                                        return; // Don't prevent default, let scrollbar work
+                                                        e.stopImmediatePropagation(); // Stop all handlers
+                                                        return; // Don't start resize
                                                     }}
                                                 }}
                                             }}
@@ -1747,6 +1777,32 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             console.warn(`StillMe Chat: Resize handle not found for direction: ${{direction}}`);
                             return;
                         }}
+                        // CRITICAL: Disable resize handle when mouse is over scrollbar area
+                        // This prevents resize handle from capturing events when user wants to scroll
+                        if (direction === 'e') {{
+                            handle.addEventListener('mouseenter', (e) => {{
+                                const messagesContainer = document.getElementById('stillme-chat-messages');
+                                if (messagesContainer && !isFullscreen && !isMinimized) {{
+                                    const panelRect = panel.getBoundingClientRect();
+                                    const mouseX = e.clientX;
+                                    const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                    
+                                    if (mouseX >= scrollbarAreaStart) {{
+                                        // Mouse is over scrollbar area, disable resize handle
+                                        handle.style.pointerEvents = 'none';
+                                        handle.style.cursor = 'default';
+                                        console.log('StillMe Chat: Mouse over scrollbar area, disabling resize handle');
+                                    }}
+                                }}
+                            }});
+                            
+                            handle.addEventListener('mouseleave', (e) => {{
+                                // Re-enable resize handle when mouse leaves
+                                handle.style.pointerEvents = 'auto';
+                                handle.style.cursor = 'e-resize';
+                            }});
+                        }}
+                        
                         handle.addEventListener('mousedown', (e) => {{
                             if (isFullscreen || isMinimized) return; // Don't resize in fullscreen or minimized
                             
@@ -1755,17 +1811,18 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             if (direction === 'e') {{
                                 const messagesContainer = document.getElementById('stillme-chat-messages');
                                 if (messagesContainer) {{
-                                    const messagesRect = messagesContainer.getBoundingClientRect();
                                     const panelRect = panel.getBoundingClientRect();
-                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 15px (increased from 12px for better detection)
+                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 20px (increased for better detection)
                                     const clickX = e.clientX;
-                                    const scrollbarAreaStart = panelRect.right - 15; // Rightmost 15px is scrollbar area
+                                    const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
                                     
                                     if (clickX >= scrollbarAreaStart) {{
                                         // Click is in scrollbar area, don't start resize - let scrollbar handle it
                                         console.log('StillMe Chat: Click detected in scrollbar area, skipping resize');
+                                        e.preventDefault(); // Prevent resize
                                         e.stopPropagation(); // Stop event propagation
-                                        return; // Don't prevent default, let scrollbar work
+                                        e.stopImmediatePropagation(); // Stop all handlers
+                                        return; // Don't start resize
                                     }}
                                 }}
                             }}
