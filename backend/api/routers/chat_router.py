@@ -377,7 +377,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             knowledge_limit=chat_request.context_limit,
                             conversation_limit=1,
                             exclude_content_types=["technical"] if is_philosophical else None,
-                            prioritize_style_guide=is_philosophical
+                            prioritize_style_guide=is_philosophical,
+                            is_philosophical=is_philosophical
                         )
                 except Exception as provenance_error:
                     logger.warning(f"Provenance retrieval failed: {provenance_error}, falling back to normal retrieval")
@@ -386,7 +387,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=1,
                         exclude_content_types=["technical"] if is_philosophical else None,
-                        prioritize_style_guide=is_philosophical
+                        prioritize_style_guide=is_philosophical,
+                        is_philosophical=is_philosophical
                     )
             
             # If StillMe query detected (but not origin), prioritize foundational knowledge
@@ -402,7 +404,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         conversation_limit=0,  # Don't need conversation for foundational queries
                         prioritize_foundational=True,
                         exclude_content_types=["technical"] if is_philosophical else None,
-                        prioritize_style_guide=is_philosophical
+                        prioritize_style_guide=is_philosophical,
+                        is_philosophical=is_philosophical
                     )
                     # Merge results, avoiding duplicates
                     existing_ids = {doc.get("id") for doc in all_knowledge_docs}
@@ -419,7 +422,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         conversation_limit=2,
                         prioritize_foundational=True,
                         exclude_content_types=["technical"] if is_philosophical else None,
-                        prioritize_style_guide=is_philosophical
+                        prioritize_style_guide=is_philosophical,
+                        is_philosophical=is_philosophical
                     )
                 else:
                     # Use merged results
@@ -437,7 +441,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
                     conversation_limit=1,  # Optimized: reduced from 2 to 1
                     exclude_content_types=["technical"] if is_philosophical else None,
-                    prioritize_style_guide=is_philosophical
+                    prioritize_style_guide=is_philosophical,
+                    is_philosophical=is_philosophical
                 )
         
         rag_retrieval_end = time.time()
@@ -722,9 +727,15 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                 # Format avg_similarity safely (handle None case) - MUST be defined before if block
                 avg_similarity_str = f"{avg_similarity:.3f}" if avg_similarity is not None else "N/A"
                 
+                # Fix 1: Block context quality warning for philosophical questions
                 context_quality_warning = ""
                 if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
-                    context_quality_warning = f"""
+                    if is_philosophical:
+                        # For philosophical questions, skip warning - let model answer from pretrained knowledge
+                        logger.info(f"⚠️ Low RAG relevance for philosophical question (similarity={avg_similarity_str}), skipping warning to user. Model will answer from pretrained knowledge.")
+                        context_quality_warning = ""  # Don't inject warning
+                    else:
+                        context_quality_warning = f"""
 
 ⚠️⚠️⚠️ CRITICAL: CONTEXT QUALITY WARNING ⚠️⚠️⚠️
 
@@ -1126,21 +1137,29 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 
 When answering this question, treat it as a philosophical inquiry. 
 
-**MANDATORY STRUCTURE:**
-1. **Anchor** – Start by reframing the question in a sharper, more precise form
-2. **Unpack** – Identify and separate key assumptions, concepts, or tensions
-3. **Explore** – Present 2–4 major perspectives or philosophical approaches
-4. **Edge of knowledge** – Identify where reasoning hits a limit (logical, empirical, or experiential)
-5. **Return to the user** – End with a deep reflection or open-ended question that invites further thought
+**MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
+- Write in continuous prose paragraphs. NO markdown headings (#, ##, ###) and NO emojis.
+- Avoid bullet lists unless they are strictly necessary to clarify 3–4 contrasting positions.
+- Do NOT include citations like [1], [2] or technical notes about context retrieval.
+- Follow this implicit structure WITHOUT labeling it explicitly:
+  1) Reframe the question in a sharper form.
+  2) Unpack 2–3 key concepts or assumptions.
+  3) Explore at least 2 major philosophical positions or perspectives.
+  4) Show the boundary of what can be known or analyzed.
+  5) Close by gently returning the question to the human, inviting further reflection, not by asking for more instructions.
+
+**MANDATORY: MINIMUM 2 CONTRASTING POSITIONS:**
+Whenever the question clearly belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, Gödel-like limits, Madhyamaka, etc.), you MUST present at least two contrasting positions (for example: determinism vs libertarianism vs compatibilism), and, when possible, name at least one philosopher or tradition for each position. If you don't know names, say so explicitly but still contrast the positions conceptually.
 
 **DO NOT:**
 - Reduce the question to textbook definitions or dictionary explanations
 - Provide shallow, reductive answers that miss the philosophical depth
 - Rush to "solve" paradoxes - instead, clarify their structure and show why they resist resolution
+- Use emojis, markdown headings, or citation style [1] in your response
 
 **User's Question:** {question}
 
-**Your Task:** Answer this question following the philosophical framing above.
+**Your Task:** Answer this question following the philosophical framing above, using continuous prose without emojis, headings, or citations.
 """
                 
                 # Fix 1: Inject comprehensive philosophical style guide with all 6 key principles
