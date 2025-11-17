@@ -1787,6 +1787,20 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             }}
                             
                             if (isFullscreen || isMinimized) return; // Don't drag in fullscreen or minimized
+                            
+                            // CRITICAL: Check if click is in scrollbar area - prevent drag if so
+                            const messagesContainer = document.getElementById('stillme-chat-messages');
+                            if (messagesContainer) {{
+                                const panelRect = panel.getBoundingClientRect();
+                                const clickX = e.clientX;
+                                const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                
+                                if (clickX >= scrollbarAreaStart && clickX <= panelRect.right) {{
+                                    console.log('StillMe Chat: Click in scrollbar area, preventing drag');
+                                    return; // Don't start drag
+                                }}
+                            }}
+                            
                             isDragging = true;
                             dragStartX = e.clientX;
                             dragStartY = e.clientY;
