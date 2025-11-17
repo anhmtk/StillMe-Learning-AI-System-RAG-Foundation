@@ -15,6 +15,10 @@
 ## 📑 Table of Contents
 
 - [What is StillMe?](#-what-is-stillme)
+- [Why StillMe?](#-why-stillme)
+- [About the Founder](#-about-the-founder)
+- [StillMe in Numbers](#-stillme-in-numbers)
+- [Use Cases](#-use-cases)
 - [Quick Start](#-quick-start)
 - [Features](#-features)
 - [API Reference](#-api-reference)
@@ -50,6 +54,81 @@ StillMe's foundational principle: **"I don't build an AI that knows everything. 
 - **Vector DB**: ChromaDB with sentence-transformers embeddings
 - **Frontend**: Streamlit dashboard
 - **LLM**: DeepSeek, OpenAI GPT (configurable)
+
+## 🤔 Why StillMe?
+
+**The Problem:**
+- **ChatGPT/Claude are black boxes** — You can't verify their sources or understand their decision-making
+- **They hallucinate confidently** — No way to catch errors or verify claims
+- **They're frozen in time** — Can't learn from new information published after their training cutoff
+- **No transparency** — Hidden algorithms, hidden data sources, hidden decision-making processes
+
+**StillMe's Solution:**
+- ✅ **100% Transparent** — Every source is cited, every decision is visible, every line of code is public
+- ✅ **Validated Responses** — Multi-layer validation chain reduces hallucinations through citation, evidence overlap, and confidence scoring
+- ✅ **Continuously Learning** — Updates knowledge every 4 hours from trusted sources (RSS, arXiv, CrossRef, Wikipedia)
+- ✅ **Open Source** — You can inspect, modify, and improve everything
+- ✅ **Intellectual Humility** — StillMe knows when it doesn't know and has the courage to admit it
+
+**Perfect for:**
+- 🔬 **Researchers** who need verifiable sources and audit trails
+- 💼 **Developers** building transparent AI applications
+- 🏢 **Organizations** requiring accountability and compliance
+- 🎓 **Educators** teaching students about AI transparency
+- 🌍 **Anyone** who values honesty over false confidence
+
+## 👤 About the Founder
+
+StillMe was initiated by **Anh Nguyễn**, a Vietnamese founder passionate about transparent and responsible AI.
+
+**What makes this story unique:** The founder doesn't have a formal IT background — demonstrating that with passion, vision, and modern AI tools, anyone can meaningfully contribute to the future of AI. This reflects an environment where innovation is not only possible but encouraged, where individuals can pursue ambitious AI projects that contribute to the global open-source community.
+
+**However, StillMe is now a community-driven open-source project.** All knowledge is guided by intellectual humility and evidence-based principles, not personal authority. StillMe adheres to the **"evidence-over-authority"** principle: evidence and citations always take precedence over personal opinions.
+
+> *"I don't build an AI that knows everything. I build an AI that KNOWS IT DOESN'T KNOW — and has the courage to admit it. That's not a weakness. That's a SUPER POWER."*
+
+## 📊 StillMe in Numbers
+
+- **634 questions** evaluated on TruthfulQA benchmark
+- **99.7% citation rate** — Every response cites sources
+- **70.9% transparency score** — Highest among evaluated systems
+- **100% open source** — Every line of code is public
+- **6 learning cycles/day** — Continuously updated knowledge base
+- **30-50% cost reduction** — Pre-filter system reduces embedding costs
+- **56% accuracy** — Competitive with GPT-4 (52%) on 50-question subset
+- **0% ungrounded responses** — All answers are either cited or express uncertainty
+
+## 💼 Use Cases
+
+### Research & Academia
+- Verifiable sources for academic work
+- Audit trails for research assistance
+- Transparent methodology for peer review
+
+### Healthcare
+- Transparent AI for medical information (with proper disclaimers)
+- Source citations for medical claims
+- Confidence scoring for critical decisions
+
+### Legal
+- Audit trail for legal research assistance
+- Citation verification for legal claims
+- Transparent decision-making processes
+
+### Education
+- Teaching students about AI transparency
+- Demonstrating responsible AI development
+- Learning tool with verifiable sources
+
+### Enterprise
+- Building transparent AI applications
+- Compliance and accountability requirements
+- Customizable validation chains
+
+### Open Source Community
+- Inspectable AI systems
+- Community-driven learning
+- Transparent governance
 
 ## 🚀 Quick Start
 
