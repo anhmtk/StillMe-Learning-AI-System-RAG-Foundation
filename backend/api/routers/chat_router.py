@@ -55,13 +55,13 @@ def get_style_learner():
         get_style_learner._instance = StyleLearner()
     return get_style_learner._instance
 
-def _format_conversation_history(conversation_history, max_tokens: int = 2000) -> str:
+def _format_conversation_history(conversation_history, max_tokens: int = 1000) -> str:
     """
     Format conversation history with token limits to prevent context overflow
     
     Args:
         conversation_history: List of message dicts with 'role' and 'content'
-        max_tokens: Maximum tokens for conversation history (default: 2000)
+        max_tokens: Maximum tokens for conversation history (default: 1000, reduced to leave room for system prompt)
         
     Returns:
         Formatted conversation history text or empty string
@@ -346,14 +346,15 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         if context and context["total_context_docs"] > 0:
             # Use context to enhance response
-            # Build context with token limits (8000 tokens max to leave room for system prompt and user message)
-            # Model context limit is typically 16385, so we reserve:
-            # - System prompt: ~3000-4000 tokens
-            # - Context: 8000 tokens
-            # - Conversation history: 2000 tokens (already handled separately)
+            # Build context with token limits (4000 tokens max to leave room for system prompt and user message)
+            # Model context limit is 16385, but system prompt is ~6000-7000 tokens (language + formatting + truncated identity)
+            # So we need to be more conservative:
+            # - System prompt: ~6000-7000 tokens (language + formatting + truncated STILLME_IDENTITY)
+            # - Context: 4000 tokens (reduced from 8000)
+            # - Conversation history: 1000 tokens (reduced from 2000, already handled separately)
             # - User message: ~500 tokens
-            # Total: ~13500 tokens (safe margin)
-            context_text = rag_retrieval.build_prompt_context(context, max_context_tokens=8000)
+            # Total: ~11500-12000 tokens (safe margin under 16385)
+            context_text = rag_retrieval.build_prompt_context(context, max_context_tokens=4000)
             
             # Build base prompt with citation instructions
             citation_instruction = ""
@@ -559,7 +560,8 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
 """
                 
                 # Build conversation history context if provided (with token limits)
-                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=2000)
+                # Reduced from 2000 to 1000 tokens to leave more room for system prompt and context
+                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=1000)
                 if conversation_history_text:
                     logger.info(f"Including conversation history in context (truncated if needed)")
                 
@@ -797,7 +799,8 @@ This is MANDATORY when provenance context is available and user asks about origi
                     stillme_instruction = base_stillme_instruction + error_status_message
                 
                 # Build conversation history context if provided (with token limits)
-                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=2000)
+                # Reduced from 2000 to 1000 tokens to leave more room for system prompt and context
+                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=1000)
                 if conversation_history_text:
                     logger.info(f"Including conversation history in context (truncated if needed)")
                 
@@ -1539,9 +1542,9 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
             
             detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
             
-            # Build conversation history context if provided
             # Build conversation history context if provided (with token limits)
-            conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=2000)
+            # Reduced from 2000 to 1000 tokens to leave more room for system prompt and context
+            conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=1000)
             if conversation_history_text:
                 logger.info(f"Including conversation history in context (truncated if needed, non-RAG)")
             

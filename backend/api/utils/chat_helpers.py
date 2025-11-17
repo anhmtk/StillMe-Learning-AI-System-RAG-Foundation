@@ -399,7 +399,32 @@ Transformer là một kiến trúc mạng neural được giới thiệu năm 20
     
     # Combine: Language instruction (highest priority) + Formatting instruction (second priority) + StillMe Identity Layer (core identity)
     # This ensures language matching, formatting, AND identity are preserved
-    system_content = language_instruction + formatting_instruction + STILLME_IDENTITY
+    
+    # CRITICAL: Truncate STILLME_IDENTITY to prevent context overflow
+    # STILLME_IDENTITY is ~14,434 tokens, which is too long for 16,385 token limit
+    # We need to keep it under ~3000-4000 tokens to leave room for context, history, and user message
+    def estimate_tokens(text: str) -> int:
+        return len(text) // 4 if text else 0
+    
+    def truncate_text_by_tokens(text: str, max_tokens: int) -> str:
+        """Truncate text to fit within max_tokens limit"""
+        if not text:
+            return text
+        estimated = estimate_tokens(text)
+        if estimated <= max_tokens:
+            return text
+        max_chars = max_tokens * 4
+        if len(text) <= max_chars:
+            return text
+        # Truncate at word boundary and add note
+        truncated = text[:max_chars].rsplit('\n', 1)[0]  # Cut at paragraph boundary
+        return truncated + "\n\n[Note: StillMe identity prompt truncated to fit context limits. Core principles preserved.]"
+    
+    # Truncate STILLME_IDENTITY to ~3500 tokens (leaves room for other components)
+    # This preserves the most important parts (intellectual humility, core identity, key principles)
+    truncated_identity = truncate_text_by_tokens(STILLME_IDENTITY, max_tokens=3500)
+    
+    system_content = language_instruction + formatting_instruction + truncated_identity
     
     # Phase 1: Time Awareness - Inject current time for transparency
     from datetime import datetime, timezone
