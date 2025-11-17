@@ -15,10 +15,11 @@ class ChatRequest(BaseModel):
     use_rag: bool = Field(default=True, description="Whether to use RAG for context")
     context_limit: int = Field(default=3, ge=1, le=5, description="Maximum number of context documents (increased from 2 to 3 for better coverage)")
     conversation_history: Optional[List[Dict[str, Any]]] = Field(default=None, description="Previous conversation messages for context. Format: [{'role': 'user', 'content': '...', 'message_id': '...' (optional)}, {'role': 'assistant', 'content': '...', 'message_id': '...' (optional)}]")
-    # LLM Provider Configuration (optional - for self-hosted deployments)
-    # Allows user to choose any LLM provider: deepseek, openai, claude, gemini, ollama, custom
-    llm_provider: Optional[str] = Field(default=None, description="LLM provider name: 'deepseek', 'openai', 'claude', 'gemini', 'ollama', or 'custom'")
-    llm_api_key: Optional[str] = Field(default=None, description="API key for the LLM provider (required if llm_provider is set)")
+    # LLM Provider Configuration (REQUIRED - users must provide their own API keys)
+    # StillMe requires users to provide their own API keys to prevent server cost exhaustion
+    # Supported providers: deepseek, openai, openrouter, claude, gemini, ollama, custom
+    llm_provider: str = Field(..., description="LLM provider name: 'deepseek', 'openai', 'openrouter', 'claude', 'gemini', 'ollama', or 'custom' (REQUIRED)")
+    llm_api_key: Optional[str] = Field(default=None, description="API key for the LLM provider (REQUIRED except for 'ollama')")
     llm_api_url: Optional[str] = Field(default=None, description="Custom API URL (for Ollama or custom providers)")
     llm_model_name: Optional[str] = Field(default=None, description="Specific model name (e.g., 'gpt-4', 'claude-3-opus', 'llama2')")
     
@@ -72,11 +73,11 @@ class ChatRequest(BaseModel):
     @field_validator('llm_provider')
     @classmethod
     def validate_llm_provider(cls, v):
-        """Validate LLM provider name"""
-        if v is None:
-            return v
+        """Validate LLM provider name (REQUIRED)"""
+        if v is None or not isinstance(v, str) or len(v.strip()) == 0:
+            raise ValueError("llm_provider is REQUIRED. Please provide your LLM provider API key. Supported providers: 'deepseek', 'openai', 'openrouter', 'claude', 'gemini', 'ollama', 'custom'")
         
-        valid_providers = ['deepseek', 'openai', 'claude', 'gemini', 'ollama', 'custom']
+        valid_providers = ['deepseek', 'openai', 'openrouter', 'claude', 'gemini', 'ollama', 'custom']
         if v.lower() not in valid_providers:
             raise ValueError(f"llm_provider must be one of: {', '.join(valid_providers)}")
         
@@ -96,13 +97,16 @@ class ChatRequest(BaseModel):
     
     @model_validator(mode='after')
     def validate_llm_config(self):
-        """Validate that API key is provided if provider is set (except Ollama)"""
-        if self.llm_provider:
-            if self.llm_provider == 'ollama':
-                # Ollama doesn't require API key
-                return self
-            elif not self.llm_api_key:
-                raise ValueError(f"llm_api_key is required when llm_provider is '{self.llm_provider}' (except for 'ollama')")
+        """Validate that API key is provided (REQUIRED except for Ollama)"""
+        if self.llm_provider == 'ollama':
+            # Ollama doesn't require API key
+            return self
+        elif not self.llm_api_key or len(self.llm_api_key.strip()) == 0:
+            raise ValueError(
+                f"llm_api_key is REQUIRED for provider '{self.llm_provider}'. "
+                "StillMe requires users to provide their own API keys to prevent server cost exhaustion. "
+                "Please provide your API key in the request."
+            )
         
         return self
     
@@ -141,7 +145,10 @@ class ChatRequest(BaseModel):
                 "message": "What is StillMe?",
                 "user_id": "user123",
                 "use_rag": True,
-                "context_limit": 3
+                "context_limit": 3,
+                "llm_provider": "openai",
+                "llm_api_key": "sk-your-api-key-here",
+                "llm_model_name": "gpt-3.5-turbo"
             }
         }
 
