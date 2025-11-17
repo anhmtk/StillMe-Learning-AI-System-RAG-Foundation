@@ -605,7 +605,7 @@ async def generate_ai_response(
         
         # Fallback to server API keys ONLY if use_server_keys=True (internal/admin use)
         if use_server_keys:
-            from backend.api.utils.llm_providers import InsufficientQuotaError, AuthenticationError
+            from backend.api.utils.llm_providers import InsufficientQuotaError, AuthenticationError, ContextOverflowError
             
             openrouter_key = os.getenv("OPENROUTER_API_KEY")
             openai_key = os.getenv("OPENAI_API_KEY")
@@ -616,6 +616,9 @@ async def generate_ai_response(
                 try:
                     provider = create_llm_provider("openrouter", openrouter_key, model_name=llm_model_name)
                     return await provider.generate(prompt, detected_lang=detected_lang)
+                except ContextOverflowError:
+                    # Re-raise ContextOverflowError to let chat_router.py handle retry with minimal prompt
+                    raise
                 except (InsufficientQuotaError, AuthenticationError, Exception) as e:
                     logger.warning(f"OpenRouter error: {e}, falling back to OpenAI")
             
@@ -624,6 +627,9 @@ async def generate_ai_response(
                 try:
                     provider = create_llm_provider("openai", openai_key, model_name=llm_model_name)
                     return await provider.generate(prompt, detected_lang=detected_lang)
+                except ContextOverflowError:
+                    # Re-raise ContextOverflowError to let chat_router.py handle retry with minimal prompt
+                    raise
                 except (InsufficientQuotaError, AuthenticationError, Exception) as e:
                     logger.warning(f"OpenAI error: {e}, falling back to DeepSeek")
             
