@@ -3,7 +3,7 @@ ConfidenceValidator - Detects when AI should express uncertainty
 """
 
 import re
-from typing import List
+from typing import List, Optional
 from .base import ValidationResult
 import logging
 
@@ -50,18 +50,44 @@ class ConfidenceValidator:
         self.require_uncertainty_when_no_context = require_uncertainty_when_no_context
         logger.info(f"ConfidenceValidator initialized (require_uncertainty_when_no_context={require_uncertainty_when_no_context})")
     
-    def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
+    def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None, 
+            avg_similarity: Optional[float] = None) -> ValidationResult:
         """
         Check if answer appropriately expresses uncertainty
         
         Args:
             answer: The answer to validate
             ctx_docs: List of context documents from RAG
+            context_quality: Context quality from RAG ("high", "medium", "low")
+            avg_similarity: Average similarity score of retrieved context (0.0-1.0)
             
         Returns:
             ValidationResult with passed status and reasons
         """
         answer_lower = answer.lower()
+        
+        # Tier 3.5: Force uncertainty when context quality is low
+        if context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
+            # Check if answer already expresses uncertainty
+            has_uncertainty = any(
+                re.search(pattern, answer_lower, re.IGNORECASE)
+                for pattern in UNCERTAINTY_PATTERNS
+            )
+            
+            if not has_uncertainty:
+                # Force uncertainty template
+                uncertainty_template = (
+                    "I don't have sufficient information to answer this accurately. "
+                    "The retrieved context has low relevance to your question."
+                )
+                # Prepend uncertainty to answer
+                patched_answer = f"{uncertainty_template}\n\n{answer}"
+                logger.warning("⚠️ Forced uncertainty expression due to low context quality")
+                return ValidationResult(
+                    passed=True,
+                    reasons=["forced_uncertainty_low_context_quality"],
+                    patched_answer=patched_answer
+                )
         
         # Check for uncertainty expressions
         has_uncertainty = any(

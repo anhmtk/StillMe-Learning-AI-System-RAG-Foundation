@@ -73,13 +73,16 @@ def _truncate_user_message(message: str, max_tokens: int = 3000) -> str:
     truncated = message[:max_chars].rsplit(' ', 1)[0]
     return truncated + "... [message truncated]"
 
-def _format_conversation_history(conversation_history, max_tokens: int = 1000) -> str:
+def _format_conversation_history(conversation_history, max_tokens: int = 1000, 
+                                 current_query: Optional[str] = None) -> str:
     """
     Format conversation history with token limits to prevent context overflow
+    Tier 3.5: Dynamic window based on query type
     
     Args:
         conversation_history: List of message dicts with 'role' and 'content'
         max_tokens: Maximum tokens for conversation history (default: 1000, reduced to leave room for system prompt)
+        current_query: Current user query to determine if follow-up or new topic
         
     Returns:
         Formatted conversation history text or empty string
@@ -104,11 +107,54 @@ def _format_conversation_history(conversation_history, max_tokens: int = 1000) -
         truncated = text[:max_chars].rsplit(' ', 1)[0]
         return truncated + "... [truncated]"
     
+    # Tier 3.5: Dynamic window based on query type
+    def _is_follow_up_query(query: str) -> bool:
+        """Detect if query is a follow-up (references previous conversation)"""
+        if not query:
+            return False
+        query_lower = query.lower()
+        follow_up_indicators = [
+            "đó", "nó", "vậy", "như vậy", "như trên", "như bạn đã nói",
+            "that", "it", "this", "so", "as you said", "as mentioned",
+            "theo", "dựa trên", "như", "giống như",
+            "based on", "according to", "as", "like"
+        ]
+        return any(indicator in query_lower for indicator in follow_up_indicators)
+    
+    def _is_long_complex_query(query: str) -> bool:
+        """Detect if query is long/complex (prioritize RAG knowledge over conversation)"""
+        if not query:
+            return False
+        # Long query: > 50 words
+        word_count = len(query.split())
+        return word_count > 50
+    
+    # Determine dynamic window size
+    if current_query:
+        if _is_long_complex_query(current_query):
+            # Long/complex query: prioritize RAG knowledge, minimal conversation
+            window_size = 2
+            max_tokens = min(max_tokens, 500)  # Reduce tokens for conversation
+            logger.info("📊 Long/complex query detected - reducing conversation context window to 2 messages")
+        elif _is_follow_up_query(current_query):
+            # Follow-up query: include more recent context
+            window_size = 5
+            logger.info("📊 Follow-up query detected - using 5-message conversation window")
+        else:
+            # New topic: minimal conversation context
+            window_size = 2
+            max_tokens = min(max_tokens, 600)  # Reduce tokens for conversation
+            logger.info("📊 New topic query detected - using 2-message conversation window")
+    else:
+        # Default: 3 messages (balanced)
+        window_size = 3
+        logger.info(f"📊 Using default conversation window: {window_size} messages")
+    
     history_lines = []
     remaining_tokens = max_tokens
     
-    # Process last 5 messages (most recent first)
-    recent_messages = conversation_history[-5:]
+    # Process last N messages (most recent first) - dynamic window
+    recent_messages = conversation_history[-window_size:]
     for msg in recent_messages:
         if remaining_tokens <= 100:  # Stop if too little space
             logger.warning("Stopped adding conversation history due to token limit")
@@ -617,7 +663,11 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
                 
                 # Build conversation history context if provided (with token limits)
                 # Reduced from 2000 to 1000 tokens to leave more room for system prompt and context
-                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=1000)
+                conversation_history_text = _format_conversation_history(
+                    chat_request.conversation_history, 
+                    max_tokens=1000,
+                    current_query=chat_request.message
+                )
                 if conversation_history_text:
                     logger.info(f"Including conversation history in context (truncated if needed)")
                 
@@ -641,6 +691,34 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
 """
             else:
                 # Context available - use normal prompt
+                # Tier 3.5: Check context quality and inject warning if low
+                context_quality = context.get("context_quality", None)
+                avg_similarity = context.get("avg_similarity_score", None)
+                has_reliable_context = context.get("has_reliable_context", True)
+                
+                context_quality_warning = ""
+                if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
+                    context_quality_warning = f"""
+
+⚠️⚠️⚠️ CRITICAL: CONTEXT QUALITY WARNING ⚠️⚠️⚠️
+
+**The retrieved context has LOW RELEVANCE to the user's question.**
+
+**Context Quality Metrics:**
+- Average Similarity Score: {avg_similarity:.3f if avg_similarity is not None else 'N/A'} (threshold: 0.3)
+- Context Quality: {context_quality or 'low'}
+- Has Reliable Context: {has_reliable_context}
+
+**MANDATORY RESPONSE REQUIREMENT:**
+- You MUST acknowledge uncertainty: "I don't have sufficient information to answer this accurately"
+- You MUST explain: "The retrieved context has low relevance to your question"
+- You MUST NOT guess or hallucinate
+- You MUST be honest about the limitation
+
+**This is a test of StillMe's intellectual humility - acknowledge when context is insufficient.**
+
+"""
+                
                 # CRITICAL: Calculate preliminary confidence score BEFORE generating response
                 # This allows StillMe to know when it should say "I don't know"
                 preliminary_confidence = _calculate_confidence_score(
@@ -856,7 +934,11 @@ This is MANDATORY when provenance context is available and user asks about origi
                 
                 # Build conversation history context if provided (with token limits)
                 # Reduced from 2000 to 1000 tokens to leave more room for system prompt and context
-                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=1000)
+                conversation_history_text = _format_conversation_history(
+                    chat_request.conversation_history, 
+                    max_tokens=1000,
+                    current_query=chat_request.message
+                )
                 if conversation_history_text:
                     logger.info(f"Including conversation history in context (truncated if needed)")
                 
@@ -1021,7 +1103,7 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN A DIFFERENT LANGUAGE, YOU MUST TRANSLATE 
 
 UNDER NO CIRCUMSTANCES return a response in any language other than {detected_lang_name.upper()}.
 
-{learning_metrics_instruction}{learning_sources_instruction}{conversation_history_text}Context: {context_text}
+{learning_metrics_instruction}{learning_sources_instruction}{conversation_history_text}{context_quality_warning}Context: {context_text}
 {citation_instruction}
 {confidence_instruction}
 {stillme_instruction}
@@ -1047,6 +1129,16 @@ User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_re
 - This is a critical transparency issue called "Hallucination of Experience" - AI should not claim personal experience
 - If you find such phrases, you MUST point them out as a problem, not ignore them
 - This is more important than analyzing formatting, clarity, or other minor issues
+
+**CRITICAL: For questions about semantics vs syntax, understanding, or consciousness:**
+- You MUST NOT give a shallow technical answer like "I process both semantics and syntax"
+- You MUST engage with the deeper philosophical question: "What does 'understanding' mean?"
+- You MUST acknowledge the paradox: "If I'm just processing symbols, can I claim to 'understand' semantics?"
+- You MUST reference philosophical frameworks: Searle's Chinese Room, Wittgenstein's language games, Gödel's Incompleteness
+- You MUST question your own claim: "When I say I 'understand', am I just pattern-matching or is there something more?"
+- You MUST be intellectually honest: "I don't know if I truly understand semantics or if I'm just very good at processing syntax in a way that appears semantic"
+- Example GOOD response: "This question challenges the foundation of my own claims. When I say I 'understand' semantics, what do I mean? Searle's Chinese Room suggests I might just be processing symbols without genuine understanding. Wittgenstein's language games suggest 'understanding' might be defined by use, not by some internal state. I acknowledge this paradox: I process both syntax and what appears to be semantics, but I cannot prove I have genuine understanding rather than sophisticated pattern matching."
+- Example BAD response: "I process both semantics and syntax. I understand the meaning of questions and provide accurate answers." (Too shallow, misses the philosophical point)
 
 RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. IGNORE THE LANGUAGE OF THE CONTEXT ABOVE.
 
@@ -1246,8 +1338,21 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     
                     chain = ValidatorChain(validators)
                     
-                    # Run validation
-                    validation_result = chain.run(raw_response, ctx_docs)
+                    # Tier 3.5: Pass context quality to ConfidenceValidator
+                    context_quality = context.get("context_quality", None)
+                    avg_similarity = context.get("avg_similarity_score", None)
+                    
+                    # Run validation with context quality info
+                    # Tier 3.5: Pass context quality to ValidatorChain
+                    validation_result = chain.run(
+                        raw_response, 
+                        ctx_docs,
+                        context_quality=context_quality,
+                        avg_similarity=avg_similarity
+                    )
+                    
+                    # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
+                    # For now, we'll handle this in the prompt building phase
                     validation_time = time.time() - validation_start
                     timing_logs["validation"] = f"{validation_time:.2f}s"
                     logger.info(f"⏱️ Validation took {validation_time:.2f}s")

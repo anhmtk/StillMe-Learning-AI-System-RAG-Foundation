@@ -36,7 +36,10 @@ class RAGRetrieval:
                         knowledge_limit: int = 3,  # Increased from 2 to 3 for better coverage
                         conversation_limit: int = 1,  # Optimized: reduced from 2 to 1 for latency
                         prioritize_foundational: bool = False,
-                        tier_preference: Optional[str] = None) -> Dict[str, Any]:
+                        tier_preference: Optional[str] = None,
+                        similarity_threshold: float = 0.3,  # Tier 3.5: Filter low-quality context
+                        use_mmr: bool = True,  # Tier 3.5: Use MMR for diversity
+                        mmr_lambda: float = 0.7) -> Dict[str, Any]:
         """Retrieve relevant context for a query
         
         Args:
@@ -45,6 +48,9 @@ class RAGRetrieval:
             conversation_limit: Number of conversation documents to retrieve
             prioritize_foundational: If True, prioritize foundational knowledge (tagged with 'foundational:stillme')
             tier_preference: Optional tier preference (L0, L1, L2, L3) for Nested Learning retrieval strategy
+            similarity_threshold: Minimum similarity score (0.0-1.0) to include document. Default: 0.3
+            use_mmr: If True, use Max Marginal Relevance for diversity. Default: True
+            mmr_lambda: MMR lambda parameter (0.0-1.0). Higher = more relevance, lower = more diversity. Default: 0.7
         """
         try:
             import os
@@ -66,7 +72,10 @@ class RAGRetrieval:
                     knowledge_limit,
                     conversation_limit,
                     prioritize_foundational,
-                    tier_preference
+                    tier_preference,
+                    similarity_threshold,
+                    use_mmr,
+                    mmr_lambda
                 )
                 
                 # Try to get from cache
@@ -191,12 +200,155 @@ class RAGRetrieval:
                 if conversation_results:
                     logger.info(f"Conversation search returned {len(conversation_results)} results")
             
-            # Build context result
+            # Tier 3.5: Apply similarity threshold and MMR
+            def _distance_to_similarity(distance: float) -> float:
+                """Convert ChromaDB distance (0=identical, 1=different) to similarity (0=different, 1=identical)"""
+                # ChromaDB uses cosine distance: 0 = identical, 1 = completely different
+                # Similarity = 1 - distance
+                return max(0.0, min(1.0, 1.0 - distance))
+            
+            def _apply_mmr(documents: List[Dict[str, Any]], query_embedding: List[float], 
+                          limit: int, lambda_param: float) -> List[Dict[str, Any]]:
+                """Apply Max Marginal Relevance for diversity
+                
+                Args:
+                    documents: List of documents with 'distance' field
+                    query_embedding: Query embedding vector
+                    limit: Number of documents to return
+                    lambda_param: MMR lambda (0.0-1.0). Higher = more relevance, lower = more diversity
+                
+                Returns:
+                    List of diverse documents
+                """
+                if len(documents) <= limit:
+                    return documents
+                
+                # Convert distances to similarities
+                for doc in documents:
+                    doc["similarity"] = _distance_to_similarity(doc.get("distance", 1.0))
+                
+                # Start with highest similarity document
+                selected = []
+                remaining = documents.copy()
+                
+                # Sort by similarity descending
+                remaining.sort(key=lambda x: x.get("similarity", 0.0), reverse=True)
+                
+                # Select first document (highest similarity)
+                if remaining:
+                    selected.append(remaining.pop(0))
+                
+                # Select remaining documents using MMR
+                while len(selected) < limit and remaining:
+                    best_score = -1.0
+                    best_idx = -1
+                    
+                    for i, candidate in enumerate(remaining):
+                        # Relevance score (similarity to query)
+                        relevance = candidate.get("similarity", 0.0)
+                        
+                        # Diversity score (max similarity to already selected)
+                        max_sim_to_selected = 0.0
+                        for selected_doc in selected:
+                            # Simple heuristic: if content is similar, assume high similarity
+                            # For better diversity, we could compute actual embedding similarity
+                            # But that would require additional compute, so we use a simple heuristic
+                            selected_content = selected_doc.get("content", "")
+                            candidate_content = candidate.get("content", "")
+                            
+                            # Simple overlap heuristic (can be improved with actual embedding similarity)
+                            if selected_content and candidate_content:
+                                # Count common words
+                                selected_words = set(selected_content.lower().split()[:50])  # First 50 words
+                                candidate_words = set(candidate_content.lower().split()[:50])
+                                if selected_words and candidate_words:
+                                    overlap = len(selected_words & candidate_words) / len(selected_words | candidate_words)
+                                    max_sim_to_selected = max(max_sim_to_selected, overlap)
+                        
+                        # MMR score: λ * relevance - (1-λ) * max_similarity_to_selected
+                        mmr_score = lambda_param * relevance - (1.0 - lambda_param) * max_sim_to_selected
+                        
+                        if mmr_score > best_score:
+                            best_score = mmr_score
+                            best_idx = i
+                    
+                    if best_idx >= 0:
+                        selected.append(remaining.pop(best_idx))
+                    else:
+                        break
+                
+                return selected
+            
+            # Apply similarity threshold filtering
+            original_knowledge_count = len(knowledge_results)
+            original_conversation_count = len(conversation_results)
+            
+            # Filter knowledge results by similarity threshold
+            filtered_knowledge = []
+            filtered_knowledge_count = 0
+            for doc in knowledge_results:
+                similarity = _distance_to_similarity(doc.get("distance", 1.0))
+                if similarity >= similarity_threshold:
+                    doc["similarity"] = similarity  # Add similarity for metrics
+                    filtered_knowledge.append(doc)
+                else:
+                    filtered_knowledge_count += 1
+            
+            # Filter conversation results by similarity threshold
+            filtered_conversation = []
+            filtered_conversation_count = 0
+            for doc in conversation_results:
+                similarity = _distance_to_similarity(doc.get("distance", 1.0))
+                if similarity >= similarity_threshold:
+                    doc["similarity"] = similarity
+                    filtered_conversation.append(doc)
+                else:
+                    filtered_conversation_count += 1
+            
+            if filtered_knowledge_count > 0:
+                logger.info(f"📊 Filtered {filtered_knowledge_count} knowledge docs below similarity threshold {similarity_threshold}")
+            if filtered_conversation_count > 0:
+                logger.info(f"📊 Filtered {filtered_conversation_count} conversation docs below similarity threshold {similarity_threshold}")
+            
+            # Apply MMR if enabled and we have enough documents
+            if use_mmr and len(filtered_knowledge) > knowledge_limit:
+                # Get more candidates for MMR (2x limit to have diversity to choose from)
+                mmr_candidates = filtered_knowledge[:knowledge_limit * 2] if len(filtered_knowledge) > knowledge_limit * 2 else filtered_knowledge
+                filtered_knowledge = _apply_mmr(mmr_candidates, query_embedding, knowledge_limit, mmr_lambda)
+                logger.info(f"🎯 Applied MMR (λ={mmr_lambda}): Selected {len(filtered_knowledge)} diverse documents from {len(mmr_candidates)} candidates")
+            
+            # Calculate average similarity for metrics
+            avg_similarity = 0.0
+            if filtered_knowledge:
+                avg_similarity = sum(doc.get("similarity", 0.0) for doc in filtered_knowledge) / len(filtered_knowledge)
+            
+            # Determine context quality
+            if avg_similarity >= 0.6:
+                context_quality = "high"
+            elif avg_similarity >= 0.4:
+                context_quality = "medium"
+            else:
+                context_quality = "low"
+            
+            # Check if we have reliable context
+            has_reliable_context = len(filtered_knowledge) > 0 and avg_similarity >= similarity_threshold
+            
+            # Build context result with metrics
             context_result = {
-                "knowledge_docs": knowledge_results[:knowledge_limit],
-                "conversation_docs": conversation_results,
-                "total_context_docs": len(knowledge_results[:knowledge_limit]) + len(conversation_results)
+                "knowledge_docs": filtered_knowledge[:knowledge_limit],
+                "conversation_docs": filtered_conversation[:conversation_limit] if conversation_limit > 0 else [],
+                "total_context_docs": len(filtered_knowledge[:knowledge_limit]) + len(filtered_conversation[:conversation_limit] if conversation_limit > 0 else []),
+                # Tier 3.5: Context quality metrics
+                "avg_similarity_score": avg_similarity,
+                "context_quality": context_quality,
+                "has_reliable_context": has_reliable_context,
+                "filtered_docs_count": filtered_knowledge_count + filtered_conversation_count,
+                "original_knowledge_count": original_knowledge_count,
+                "original_conversation_count": original_conversation_count
             }
+            
+            if not has_reliable_context:
+                logger.warning(f"⚠️ No reliable context found (avg_similarity={avg_similarity:.3f} < threshold={similarity_threshold})")
             
             # Save to cache (only if not a cache hit)
             if cache_enabled and not cache_hit:
