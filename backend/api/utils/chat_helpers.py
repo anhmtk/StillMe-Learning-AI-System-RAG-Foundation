@@ -420,15 +420,62 @@ Transformer là một kiến trúc mạng neural được giới thiệu năm 20
         truncated = text[:max_chars].rsplit('\n', 1)[0]  # Cut at paragraph boundary
         return truncated + "\n\n[Note: StillMe identity prompt truncated to fit context limits. Core principles preserved.]"
     
-    # Truncate STILLME_IDENTITY to ~2000 tokens (more aggressive to leave room for other components)
-    # This preserves the most important parts (intellectual humility, core identity, key principles)
+    # CRITICAL: Smart truncation to preserve philosophical depth
+    # STILLME_IDENTITY is ~14,434 tokens, but we need to preserve META-COGNITION section
+    # Strategy: Extract critical sections first, then truncate the rest
+    def smart_truncate_identity(identity_text: str, max_tokens: int) -> str:
+        """Smart truncation that preserves critical sections (META-COGNITION, PHILOSOPHICAL DEPTH)"""
+        # Extract critical sections that MUST be preserved
+        critical_sections = []
+        
+        # Find META-COGNITION section (most important for philosophical depth)
+        meta_cognition_start = identity_text.find("🧠 META-COGNITION & PHILOSOPHICAL DEPTH 🧠")
+        if meta_cognition_start >= 0:
+            # Extract from META-COGNITION to end (or next major section)
+            # Look for next major section marker (🚨, 📚, etc.)
+            next_section_markers = ["🚨", "📚", "🔒", "⚙️", "🎯", "💡", "🔍"]
+            meta_cognition_end = len(identity_text)
+            for marker in next_section_markers:
+                next_pos = identity_text.find(f"\n{marker}", meta_cognition_start + 1)
+                if next_pos > meta_cognition_start:
+                    meta_cognition_end = min(meta_cognition_end, next_pos)
+            
+            critical_sections.append(("META-COGNITION", identity_text[meta_cognition_start:meta_cognition_end]))
+        
+        # Extract beginning (core identity, intellectual humility)
+        beginning_tokens = max_tokens // 2  # Reserve half for beginning
+        beginning = truncate_text_by_tokens(identity_text, max_tokens=beginning_tokens)
+        
+        # Combine: Beginning + Critical sections
+        result = beginning
+        if critical_sections:
+            for name, section in critical_sections:
+                section_tokens = estimate_tokens(section)
+                remaining = max_tokens - estimate_tokens(result)
+                if section_tokens <= remaining:
+                    result += "\n\n" + section
+                else:
+                    # Truncate section if needed
+                    truncated_section = truncate_text_by_tokens(section, max_tokens=remaining - 100)
+                    result += "\n\n" + truncated_section
+                    result += "\n\n[Note: META-COGNITION section truncated to fit context limits.]"
+        
+        # Final check: if still too long, truncate more aggressively
+        final_tokens = estimate_tokens(result)
+        if final_tokens > max_tokens:
+            result = truncate_text_by_tokens(result, max_tokens=max_tokens)
+            result += "\n\n[Note: StillMe identity prompt truncated to fit context limits. Core principles and philosophical depth preserved.]"
+        
+        return result
+    
+    # Truncate STILLME_IDENTITY to ~3500 tokens (increased to preserve philosophical depth)
     # System prompt breakdown:
     # - Language instruction: ~500-800 tokens
     # - Formatting instruction: ~500 tokens
-    # - STILLME_IDENTITY (truncated): ~2000 tokens
+    # - STILLME_IDENTITY (smart truncated): ~3500 tokens (preserves META-COGNITION)
     # - Time awareness: ~300 tokens
-    # Total system prompt: ~3300-3600 tokens (safe)
-    truncated_identity = truncate_text_by_tokens(STILLME_IDENTITY, max_tokens=2000)
+    # Total system prompt: ~4800-5100 tokens (safe, leaves ~10k for context/history/user)
+    truncated_identity = smart_truncate_identity(STILLME_IDENTITY, max_tokens=3500)
     
     system_content = language_instruction + formatting_instruction + truncated_identity
     
