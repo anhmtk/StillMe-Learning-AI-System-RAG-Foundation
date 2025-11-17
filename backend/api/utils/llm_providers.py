@@ -247,8 +247,11 @@ class OpenRouterProvider(LLMProvider):
                         error_code = error_data.get("error", {}).get("code", "")
                         error_message = error_data.get("error", {}).get("message", error_text)
                         
+                        # Fix: error_code might be int, convert to string
+                        error_code_str = str(error_code).lower() if error_code else ""
+                        
                         # Check for credit/quota exhaustion
-                        if response.status_code == 429 or "insufficient_quota" in error_code.lower() or "billing" in error_message.lower() or "credit" in error_message.lower():
+                        if response.status_code == 429 or "insufficient_quota" in error_code_str or "billing" in error_message.lower() or "credit" in error_message.lower():
                             raise InsufficientQuotaError(f"OpenRouter credit exhausted: {error_message}")
                         elif response.status_code == 401:
                             raise AuthenticationError(f"OpenRouter API key invalid: {error_message}")
