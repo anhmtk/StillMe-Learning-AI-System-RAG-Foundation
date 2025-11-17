@@ -153,6 +153,124 @@ class DeepSeekProvider(LLMProvider):
             return f"DeepSeek API error: {str(e)}"
 
 
+class OpenRouterProvider(LLMProvider):
+    """OpenRouter API provider - Multi-model API aggregator"""
+    
+    async def generate_stream(self, prompt: str, detected_lang: str = 'en') -> AsyncIterator[str]:
+        """Generate streaming response from OpenRouter API"""
+        try:
+            system_content = build_system_prompt_with_language(detected_lang)
+            model = self.model_name or "openai/gpt-3.5-turbo"
+            
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                async with client.stream(
+                    "POST",
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation",
+                        "X-Title": "StillMe RAG System"
+                    },
+                    json={
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": system_content},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "max_tokens": 1500,
+                        "temperature": 0.7,
+                        "stream": True
+                    }
+                ) as response:
+                    if response.status_code == 200:
+                        async for line in response.aiter_lines():
+                            if line.startswith("data: "):
+                                data_str = line[6:]  # Remove "data: " prefix
+                                if data_str.strip() == "[DONE]":
+                                    break
+                                try:
+                                    data = json.loads(data_str)
+                                    if "choices" in data and len(data["choices"]) > 0:
+                                        delta = data["choices"][0].get("delta", {})
+                                        content = delta.get("content", "")
+                                        if content:
+                                            yield content
+                                except json.JSONDecodeError:
+                                    continue
+                    else:
+                        error_text = await response.aread()
+                        yield f"OpenRouter API error: {response.status_code} - {error_text.decode()}"
+        except Exception as e:
+            logger.error(f"OpenRouter streaming error: {e}")
+            yield f"OpenRouter streaming error: {str(e)}"
+    
+    async def generate(self, prompt: str, detected_lang: str = 'en') -> str:
+        """Call OpenRouter API"""
+        try:
+            system_content = build_system_prompt_with_language(detected_lang)
+            # OpenRouter uses model names like "openai/gpt-4", "anthropic/claude-3-opus", etc.
+            # Default to a cost-effective model
+            model = self.model_name or "openai/gpt-3.5-turbo"
+            
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                response = await client.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation",
+                        "X-Title": "StillMe RAG System"
+                    },
+                    json={
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": system_content},
+                            {"role": "user", "content": prompt}
+                        ],
+                        "max_tokens": 1500,
+                        "temperature": 0.7
+                    }
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if "choices" in data and len(data["choices"]) > 0:
+                        return data["choices"][0]["message"]["content"]
+                    else:
+                        return "OpenRouter API returned unexpected response format"
+                else:
+                    # Parse error response for better error handling
+                    error_text = response.text
+                    try:
+                        error_data = response.json()
+                        error_code = error_data.get("error", {}).get("code", "")
+                        error_message = error_data.get("error", {}).get("message", error_text)
+                        
+                        # Check for credit/quota exhaustion
+                        if response.status_code == 429 or "insufficient_quota" in error_code.lower() or "billing" in error_message.lower() or "credit" in error_message.lower():
+                            raise InsufficientQuotaError(f"OpenRouter credit exhausted: {error_message}")
+                        elif response.status_code == 401:
+                            raise AuthenticationError(f"OpenRouter API key invalid: {error_message}")
+                        elif response.status_code == 403:
+                            raise AuthorizationError(f"OpenRouter API access forbidden: {error_message}")
+                        else:
+                            return f"OpenRouter API error: {response.status_code} - {error_message}"
+                    except (ValueError, KeyError):
+                        # If JSON parsing fails, return raw error
+                        if response.status_code == 429 or "quota" in error_text.lower() or "billing" in error_text.lower() or "credit" in error_text.lower():
+                            raise InsufficientQuotaError(f"OpenRouter credit exhausted: {error_text}")
+                        return f"OpenRouter API error: {response.status_code} - {error_text}"
+                    
+        except InsufficientQuotaError:
+            # Re-raise to be handled by caller for fallback
+            raise
+        except Exception as e:
+            logger.error(f"OpenRouter API error: {e}")
+            # Return error string for non-quota errors (will be handled by fallback)
+            raise Exception(f"OpenRouter API error: {str(e)}")
+
+
 class OpenAIProvider(LLMProvider):
     """OpenAI API provider"""
     
@@ -440,6 +558,7 @@ def create_llm_provider(
     provider_map = {
         'deepseek': DeepSeekProvider,
         'openai': OpenAIProvider,
+        'openrouter': OpenRouterProvider,
         'claude': ClaudeProvider,
         'gemini': GeminiProvider,
         'ollama': OllamaProvider,
