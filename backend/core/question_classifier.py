@@ -27,7 +27,15 @@ def is_philosophical_question(text: str) -> bool:
     
     lower = text.lower()
     
-    # PRIORITY CHECK: "Heavy" philosophical concepts/philosophers - 100% philosophical, no doubt
+    # PRIORITY CHECK 1: AI + experience/free will - always philosophical
+    if "ai" in lower and ("trải nghiệm" in lower or "experience" in lower):
+        logger.info(f"Philosophical question detected: True (AI + experience: text='{text[:80]}...')")
+        return True
+    if "ai" in lower and ("tự do ý chí" in lower or "free will" in lower):
+        logger.info(f"Philosophical question detected: True (AI + free will: text='{text[:80]}...')")
+        return True
+    
+    # PRIORITY CHECK 2: "Heavy" philosophical concepts/philosophers - 100% philosophical, no doubt
     # These are unambiguous philosophical markers
     priority_markers = [
         # Philosophers
@@ -42,7 +50,7 @@ def is_philosophical_question(text: str) -> bool:
     
     for marker in priority_markers:
         if marker in lower:
-            logger.info(f"Philosophical question detected: True (priority marker: '{marker}')")
+            logger.info(f"Philosophical question detected: True (priority marker: '{marker}', text='{text[:80]}...')")
             return True
     
     # English keywords
@@ -57,7 +65,12 @@ def is_philosophical_question(text: str) -> bool:
         "what is evil", "what is right", "what is wrong",
         # Additional keywords
         "godel", "gödel", "paradox", "self-reference", "self referential",
-        "liar paradox", "incompleteness", "madhyamaka", "emptiness"
+        "liar paradox", "incompleteness", "madhyamaka", "emptiness",
+        # Experience/subjective keywords
+        "experience", "subjective experience", "feel", "feeling", "emotion",
+        "understand", "understanding", "can you understand", "can you feel",
+        "can you experience", "grief", "sadness", "pain", "suffering",
+        "qualia", "phenomenal", "what it's like"
     ]
     
     # Vietnamese keywords
@@ -72,21 +85,28 @@ def is_philosophical_question(text: str) -> bool:
         "tự tính", "tánh không", "nghịch lý", "nghịch lí",
         "godel", "gödel", "tự quy chiếu",
         "tự do ý chí", "ý chí tự do",
-        "nāgārjuna", "nagarjuna"
+        "nāgārjuna", "nagarjuna",
+        # Experience/subjective keywords
+        "trải nghiệm", "trải nghiệm đau buồn", "đau buồn",
+        "trải nghiệm chủ quan", "chủ quan",
+        "tôi hiểu", "hiểu-không-trải-nghiệm",
+        "cảm nhận", "cảm giác", "cảm xúc",
+        "hiểu được", "hiểu như thế nào", "hiểu được không",
+        "có thể hiểu", "có thể cảm nhận", "có thể trải nghiệm"
     ]
     
     # Check English keywords
     matched_en = [k for k in en_keywords if k in lower]
     if matched_en:
-        logger.info(f"Philosophical question detected: True (English keywords: {matched_en[:3]})")
+        logger.info(f"Philosophical question detected: True (English keywords: {matched_en[:3]}, text='{text[:80]}...')")
         return True
     
     # Check Vietnamese keywords
     matched_vi = [k for k in vi_keywords if k in lower]
     if matched_vi:
-        logger.info(f"Philosophical question detected: True (Vietnamese keywords: {matched_vi[:3]})")
+        logger.info(f"Philosophical question detected: True (Vietnamese keywords: {matched_vi[:3]}, text='{text[:80]}...')")
         return True
     
-    logger.info(f"Philosophical question detected: False")
+    logger.info(f"Philosophical question detected: False (text='{text[:80]}...')")
     return False
 
