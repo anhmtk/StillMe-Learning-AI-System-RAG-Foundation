@@ -1419,12 +1419,21 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         // CRITICAL: Check if click is in scrollbar area - prevent drag if so
                                         const parentMessages = parentDoc.getElementById('stillme-chat-messages');
                                         if (parentMessages) {{
-                                            const panelRect = parentPanel.getBoundingClientRect();
                                             const messagesRect = parentMessages.getBoundingClientRect();
                                             const clickX = e.clientX;
-                                            const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                            const clickY = e.clientY;
                                             
-                                            if (clickX >= scrollbarAreaStart && clickX <= panelRect.right) {{
+                                            // Check if click is within messages container AND in scrollbar area (rightmost 20px)
+                                            const scrollbarAreaStart = messagesRect.right - 20; // Rightmost 20px is scrollbar area
+                                            const isInMessagesContainer = (
+                                                clickX >= messagesRect.left &&
+                                                clickX <= messagesRect.right &&
+                                                clickY >= messagesRect.top &&
+                                                clickY <= messagesRect.bottom
+                                            );
+                                            const isInScrollbarArea = clickX >= scrollbarAreaStart && clickX <= messagesRect.right;
+                                            
+                                            if (isInMessagesContainer && isInScrollbarArea) {{
                                                 console.log('StillMe Chat: Click in scrollbar area (parent), preventing drag');
                                                 return; // Don't start drag
                                             }}
@@ -1543,11 +1552,22 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         // CRITICAL: Check if mouse is in scrollbar area - disable drag/resize if so
                                         const parentMessages = parentDoc.getElementById('stillme-chat-messages');
                                         if (parentMessages && (parentIsDragging || parentIsResizing)) {{
-                                            const panelRect = parentPanel.getBoundingClientRect();
+                                            // Use messages container rect, not panel rect (more accurate for scrollbar position)
+                                            const messagesRect = parentMessages.getBoundingClientRect();
                                             const mouseX = e.clientX;
-                                            const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                            const mouseY = e.clientY;
                                             
-                                            if (mouseX >= scrollbarAreaStart && mouseX <= panelRect.right) {{
+                                            // Check if mouse is within messages container AND in scrollbar area (rightmost 20px)
+                                            const scrollbarAreaStart = messagesRect.right - 20; // Rightmost 20px is scrollbar area
+                                            const isInMessagesContainer = (
+                                                mouseX >= messagesRect.left &&
+                                                mouseX <= messagesRect.right &&
+                                                mouseY >= messagesRect.top &&
+                                                mouseY <= messagesRect.bottom
+                                            );
+                                            const isInScrollbarArea = mouseX >= scrollbarAreaStart && mouseX <= messagesRect.right;
+                                            
+                                            if (isInMessagesContainer && isInScrollbarArea) {{
                                                 // Mouse is in scrollbar area - stop drag/resize
                                                 if (parentIsDragging) {{
                                                     console.log('StillMe Chat: Mouse in scrollbar area (parent), stopping drag');
@@ -1791,11 +1811,21 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                             // CRITICAL: Check if click is in scrollbar area - prevent drag if so
                             const messagesContainer = document.getElementById('stillme-chat-messages');
                             if (messagesContainer) {{
-                                const panelRect = panel.getBoundingClientRect();
+                                const messagesRect = messagesContainer.getBoundingClientRect();
                                 const clickX = e.clientX;
-                                const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                const clickY = e.clientY;
                                 
-                                if (clickX >= scrollbarAreaStart && clickX <= panelRect.right) {{
+                                // Check if click is within messages container AND in scrollbar area (rightmost 20px)
+                                const scrollbarAreaStart = messagesRect.right - 20; // Rightmost 20px is scrollbar area
+                                const isInMessagesContainer = (
+                                    clickX >= messagesRect.left &&
+                                    clickX <= messagesRect.right &&
+                                    clickY >= messagesRect.top &&
+                                    clickY <= messagesRect.bottom
+                                );
+                                const isInScrollbarArea = clickX >= scrollbarAreaStart && clickX <= messagesRect.right;
+                                
+                                if (isInMessagesContainer && isInScrollbarArea) {{
                                     console.log('StillMe Chat: Click in scrollbar area, preventing drag');
                                     return; // Don't start drag
                                 }}
