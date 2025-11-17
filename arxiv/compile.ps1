@@ -25,9 +25,10 @@ try {
 # Compilation steps
 Write-Host ""
 Write-Host "Step 1: First pdflatex pass..." -ForegroundColor Cyan
-pdflatex -interaction=nonstopmode main.tex
+pdflatex -interaction=nonstopmode main.tex | Out-Null
 
-if ($LASTEXITCODE -ne 0) {
+# Check if PDF was created (more reliable than exit code)
+if (-not (Test-Path "main.pdf")) {
     Write-Host "[ERROR] First pdflatex pass failed. Check main.log for errors." -ForegroundColor Red
     exit 1
 }
@@ -35,23 +36,19 @@ if ($LASTEXITCODE -ne 0) {
 if ($useBibtex) {
     Write-Host ""
     Write-Host "Step 2: Running bibtex..." -ForegroundColor Cyan
-    bibtex main
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "[WARNING] BibTeX had warnings. Continuing..." -ForegroundColor Yellow
-    }
+    bibtex main | Out-Null
     
     Write-Host ""
     Write-Host "Step 3: Second pdflatex pass..." -ForegroundColor Cyan
-    pdflatex -interaction=nonstopmode main.tex
+    pdflatex -interaction=nonstopmode main.tex | Out-Null
     
     Write-Host ""
     Write-Host "Step 4: Third pdflatex pass (final)..." -ForegroundColor Cyan
-    pdflatex -interaction=nonstopmode main.tex
+    pdflatex -interaction=nonstopmode main.tex | Out-Null
 } else {
     Write-Host ""
     Write-Host "Step 2: Second pdflatex pass (final)..." -ForegroundColor Cyan
-    pdflatex -interaction=nonstopmode main.tex
+    pdflatex -interaction=nonstopmode main.tex | Out-Null
 }
 
 # Check final result
