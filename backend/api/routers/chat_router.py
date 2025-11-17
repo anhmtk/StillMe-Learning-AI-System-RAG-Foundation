@@ -18,6 +18,7 @@ from backend.services.cache_service import (
 import logging
 import os
 from datetime import datetime, timezone
+from typing import Optional
 import json
 
 logger = logging.getLogger(__name__)
