@@ -700,7 +700,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                 context_quality_warning = ""
                 if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
                     # Format avg_similarity safely (handle None case)
-                avg_similarity_str = f"{avg_similarity:.3f}" if avg_similarity is not None else "N/A"
+                    avg_similarity_str = f"{avg_similarity:.3f}" if avg_similarity is not None else "N/A"
                 
                 context_quality_warning = f"""
 
