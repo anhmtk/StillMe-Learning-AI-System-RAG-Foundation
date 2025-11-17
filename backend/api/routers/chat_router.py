@@ -1471,6 +1471,14 @@ User Question (in {retry_lang_name.upper()}): {_truncate_user_message(chat_reque
 - If the user asks you to analyze something, analyze THAT specific thing
 - If the user asks you to find a problem, look for problems in what they showed you
 
+**SPECIAL INSTRUCTION FOR ANALYZING EXTERNAL AI OUTPUTS:**
+- If the user asks you to analyze another AI's output (ChatGPT, Claude, etc.), you MUST check for anthropomorphic language
+- Look for phrases like "in my experience" / "theo kinh nghiệm", "I think" / "tôi nghĩ", "I feel" / "tôi cảm thấy"
+- These phrases falsely attribute subjective qualities (experience, emotions, personal opinions) to AI
+- This is a critical transparency issue called "Hallucination of Experience" - AI should not claim personal experience
+- If you find such phrases, you MUST point them out as a problem, not ignore them
+- This is more important than analyzing formatting, clarity, or other minor issues
+
 Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANSWER THE QUESTION PROPERLY, NOT JUST ACKNOWLEDGE THE ERROR."""
                                     
                                     # Retry with stronger prompt (include context to actually answer the question)
