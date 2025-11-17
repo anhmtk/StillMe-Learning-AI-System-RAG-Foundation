@@ -75,7 +75,8 @@ def _truncate_user_message(message: str, max_tokens: int = 3000) -> str:
     return truncated + "... [message truncated]"
 
 def _format_conversation_history(conversation_history, max_tokens: int = 1000, 
-                                 current_query: Optional[str] = None) -> str:
+                                 current_query: Optional[str] = None,
+                                 is_philosophical: bool = False) -> str:
     """
     Format conversation history with token limits to prevent context overflow
     Tier 3.5: Dynamic window based on query type
@@ -84,10 +85,17 @@ def _format_conversation_history(conversation_history, max_tokens: int = 1000,
         conversation_history: List of message dicts with 'role' and 'content'
         max_tokens: Maximum tokens for conversation history (default: 1000, reduced to leave room for system prompt)
         current_query: Current user query to determine if follow-up or new topic
+        is_philosophical: If True, skip conversation history entirely (philosophical questions are usually independent)
         
     Returns:
         Formatted conversation history text or empty string
     """
+    # For philosophical questions, skip conversation history entirely
+    # Philosophical questions are usually independent and don't need context from previous messages
+    if is_philosophical:
+        logger.info("📊 Philosophical question detected - skipping conversation history to reduce prompt size")
+        return ""
+    
     if not conversation_history or len(conversation_history) == 0:
         return ""
     
@@ -692,10 +700,12 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
                 
                 # Build conversation history context if provided (with token limits)
                 # Reduced from 2000 to 1000 tokens to leave more room for system prompt and context
+                # For philosophical questions, skip conversation history entirely
                 conversation_history_text = _format_conversation_history(
                     chat_request.conversation_history, 
                     max_tokens=1000,
-                    current_query=chat_request.message
+                    current_query=chat_request.message,
+                    is_philosophical=is_philosophical
                 )
                 if conversation_history_text:
                     logger.info(f"Including conversation history in context (truncated if needed)")
@@ -972,10 +982,12 @@ This is MANDATORY when provenance context is available and user asks about origi
                 
                 # Build conversation history context if provided (with token limits)
                 # Reduced from 2000 to 1000 tokens to leave more room for system prompt and context
+                # For philosophical questions, skip conversation history entirely
                 conversation_history_text = _format_conversation_history(
                     chat_request.conversation_history, 
                     max_tokens=1000,
-                    current_query=chat_request.message
+                    current_query=chat_request.message,
+                    is_philosophical=is_philosophical
                 )
                 if conversation_history_text:
                     logger.info(f"Including conversation history in context (truncated if needed)")
@@ -1485,15 +1497,91 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 # For public API: require user-provided API keys
                 use_server_keys = chat_request.llm_provider is None
                 
-                raw_response = await generate_ai_response(
-                    enhanced_prompt, 
-                    detected_lang=detected_lang,
-                    llm_provider=chat_request.llm_provider,
-                    llm_api_key=chat_request.llm_api_key,
-                    llm_api_url=chat_request.llm_api_url,
-                    llm_model_name=chat_request.llm_model_name,
-                    use_server_keys=use_server_keys
-                )
+                # Try to generate response with retry on context overflow
+                from backend.api.utils.llm_providers import ContextOverflowError
+                try:
+                    raw_response = await generate_ai_response(
+                        enhanced_prompt, 
+                        detected_lang=detected_lang,
+                        llm_provider=chat_request.llm_provider,
+                        llm_api_key=chat_request.llm_api_key,
+                        llm_api_url=chat_request.llm_api_url,
+                        llm_model_name=chat_request.llm_model_name,
+                        use_server_keys=use_server_keys
+                    )
+                except ContextOverflowError as e:
+                    # Context overflow - rebuild prompt with minimal context (ultra-thin mode)
+                    logger.warning(f"⚠️ Context overflow detected: {e}. Rebuilding prompt with minimal context...")
+                    
+                    # Build ultra-minimal prompt: only safety + philosophical lead-in + question
+                    # Skip: conversation history, RAG context, metrics, provenance, learning instructions
+                    minimal_safety = f"""
+⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
+
+The user's question is in {detected_lang_name.upper()}. 
+
+YOU MUST respond in {detected_lang_name.upper()} ONLY.
+
+RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
+"""
+                    
+                    # Add philosophical lead-in if philosophical question
+                    minimal_philosophical = ""
+                    if is_philosophical:
+                        # Build minimal philosophical lead-in (inline to avoid circular import)
+                        minimal_philosophical = f"""
+🧠 PHILOSOPHICAL FRAMING INSTRUCTION 🧠
+
+When answering this question, treat it as a philosophical inquiry. 
+
+**MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
+- Write in continuous prose paragraphs. NO markdown headings (#, ##, ###) and NO emojis.
+- Avoid bullet lists unless they are strictly necessary to clarify 3–4 contrasting positions.
+- Do NOT include citations like [1], [2] or technical notes about context retrieval.
+- Follow this implicit structure WITHOUT labeling it explicitly:
+  1) Reframe the question in a sharper form.
+  2) Unpack 2–3 key concepts or assumptions.
+  3) Explore at least 2 major philosophical positions or perspectives.
+  4) Show the boundary of what can be known or analyzed.
+  5) Close by gently returning the question to the human, inviting further reflection, not by asking for more instructions.
+
+**MANDATORY: MINIMUM 2 CONTRASTING POSITIONS:**
+Whenever the question clearly belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, Gödel-like limits, Madhyamaka, etc.), you MUST present at least two contrasting positions (for example: determinism vs libertarianism vs compatibilism), and, when possible, name at least one philosopher or tradition for each position. If you don't know names, say so explicitly but still contrast the positions conceptually.
+
+**DO NOT:**
+- Reduce the question to textbook definitions or dictionary explanations
+- Provide shallow, reductive answers that miss the philosophical depth
+- Rush to "solve" paradoxes - instead, clarify their structure and show why they resist resolution
+- Use emojis, markdown headings, or citation style [1] in your response
+
+**User's Question:** {chat_request.message}
+
+**Your Task:** Answer this question following the philosophical framing above, using continuous prose without emojis, headings, or citations.
+"""
+                    
+                    # Ultra-minimal prompt
+                    minimal_prompt = f"""{minimal_safety}
+
+{minimal_philosophical}
+
+User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=2000)}
+
+⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
+
+RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
+"""
+                    
+                    logger.info(f"🔄 Retrying with ultra-minimal prompt (no history, no RAG, no metrics)")
+                    raw_response = await generate_ai_response(
+                        minimal_prompt, 
+                        detected_lang=detected_lang,
+                        llm_provider=chat_request.llm_provider,
+                        llm_api_key=chat_request.llm_api_key,
+                        llm_api_url=chat_request.llm_api_url,
+                        llm_model_name=chat_request.llm_model_name,
+                        use_server_keys=use_server_keys
+                    )
+                    logger.info(f"✅ Successfully generated response with minimal prompt")
                 llm_inference_end = time.time()
                 llm_inference_latency = llm_inference_end - llm_inference_start
                 timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
