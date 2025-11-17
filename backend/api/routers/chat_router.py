@@ -699,14 +699,17 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                 
                 context_quality_warning = ""
                 if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
-                    context_quality_warning = f"""
+                    # Format avg_similarity safely (handle None case)
+                avg_similarity_str = f"{avg_similarity:.3f}" if avg_similarity is not None else "N/A"
+                
+                context_quality_warning = f"""
 
 ⚠️⚠️⚠️ CRITICAL: CONTEXT QUALITY WARNING ⚠️⚠️⚠️
 
 **The retrieved context has LOW RELEVANCE to the user's question.**
 
 **Context Quality Metrics:**
-- Average Similarity Score: {avg_similarity:.3f if avg_similarity is not None else 'N/A'} (threshold: 0.3)
+- Average Similarity Score: {avg_similarity_str} (threshold: 0.3)
 - Context Quality: {context_quality or 'low'}
 - Has Reliable Context: {has_reliable_context}
 
