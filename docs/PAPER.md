@@ -428,19 +428,14 @@ StillMe is built with AI-assisted development, demonstrating the potential of hu
 ### C. Transparency Metrics Calculation
 
 **Transparency Score Formula:**
-```
-Transparency Score = (Citation Rate × 0.4) + (Uncertainty Rate × 0.3) + (Validation Pass Rate × 0.3)
-```
+
+$$\text{Transparency Score} = (\text{Citation Rate} \times 0.4) + (\text{Uncertainty Rate} \times 0.3) + (\text{Validation Pass Rate} \times 0.3)$$
 
 **Example for StillMe:**
-```
-Transparency Score = (1.0 × 0.4) + (0.0 × 0.3) + (1.0 × 0.3) = 0.4 + 0.0 + 0.3 = 0.7 (70%)
-```
+$$\text{Transparency Score} = (1.0 \times 0.4) + (0.0 \times 0.3) + (1.0 \times 0.3) = 0.4 + 0.0 + 0.3 = 0.7 \text{ (70%)}$$
 
 **Example for Baseline Systems:**
-```
-Transparency Score = (0.0 × 0.4) + (0.0 × 0.3) + (1.0 × 0.3) = 0.0 + 0.0 + 0.3 = 0.3 (30%)
-```
+$$\text{Transparency Score} = (0.0 \times 0.4) + (0.0 \times 0.3) + (1.0 \times 0.3) = 0.0 + 0.0 + 0.3 = 0.3 \text{ (30%)}$$
 
 ### D. Validation Chain Details
 
