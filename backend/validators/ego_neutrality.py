@@ -164,6 +164,10 @@ class EgoNeutralityValidator:
             "I have learned": "according to documentation",
             "I always do": "the standard process",
             "I know the feeling": "data indicates",
+            "I feel proud": "what I value most",
+            "I am proud": "what I value",
+            "what makes me proud": "what I value most",
+            "I take pride": "I value",
         }
     
     def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
