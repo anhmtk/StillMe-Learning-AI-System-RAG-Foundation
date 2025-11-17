@@ -356,26 +356,107 @@ class RAGRetrieval:
             logger.error(f"Error retrieving important knowledge: {e}")
             return []
     
-    def build_prompt_context(self, context: Dict[str, Any]) -> str:
-        """Build formatted context for LLM prompt"""
+    def _estimate_tokens(self, text: str) -> int:
+        """Estimate token count (rough approximation: ~4 chars per token)"""
+        if not text:
+            return 0
+        # Rough estimate: 1 token ≈ 4 characters (conservative for English)
+        # For mixed languages, this is still a reasonable approximation
+        return len(text) // 4
+    
+    def _truncate_text_by_tokens(self, text: str, max_tokens: int) -> str:
+        """Truncate text to fit within max_tokens limit"""
+        if not text:
+            return text
+        
+        estimated_tokens = self._estimate_tokens(text)
+        if estimated_tokens <= max_tokens:
+            return text
+        
+        # Truncate to approximately max_tokens
+        # Use character-based truncation (max_tokens * 4 chars)
+        max_chars = max_tokens * 4
+        if len(text) <= max_chars:
+            return text
+        
+        # Truncate and add ellipsis
+        truncated = text[:max_chars].rsplit(' ', 1)[0]  # Cut at word boundary
+        return truncated + "... [truncated]"
+    
+    def build_prompt_context(self, context: Dict[str, Any], max_context_tokens: int = 8000) -> str:
+        """
+        Build formatted context for LLM prompt with token limits
+        
+        Args:
+            context: Context dictionary with knowledge_docs and conversation_docs
+            max_context_tokens: Maximum tokens for context (default: 8000 to leave room for system prompt and user message)
+        """
         try:
             context_parts = []
+            remaining_tokens = max_context_tokens
             
             # Add knowledge context
-            if context["knowledge_docs"]:
-                context_parts.append("## Relevant Knowledge:")
+            if context.get("knowledge_docs"):
+                header = "## Relevant Knowledge:"
+                header_tokens = self._estimate_tokens(header)
+                remaining_tokens -= header_tokens
+                context_parts.append(header)
+                
                 for i, doc in enumerate(context["knowledge_docs"], 1):
+                    if remaining_tokens <= 100:  # Stop if too little space left
+                        logger.warning(f"Stopped adding knowledge docs at {i}/{len(context['knowledge_docs'])} due to token limit")
+                        break
+                    
                     source = doc.get("metadata", {}).get("source", "Unknown")
-                    context_parts.append(f"{i}. {doc['content']} (Source: {source})")
+                    content = doc.get("content", "")
+                    
+                    # Allocate tokens per document (distribute remaining tokens)
+                    # Reserve some tokens for formatting
+                    doc_max_tokens = remaining_tokens // max(1, len(context["knowledge_docs"]) - i + 1)
+                    doc_max_tokens = min(doc_max_tokens, 2000)  # Cap each doc at 2000 tokens
+                    
+                    truncated_content = self._truncate_text_by_tokens(content, doc_max_tokens)
+                    doc_text = f"{i}. {truncated_content} (Source: {source})"
+                    
+                    doc_tokens = self._estimate_tokens(doc_text)
+                    remaining_tokens -= doc_tokens
+                    context_parts.append(doc_text)
             
             # Add conversation context
-            if context["conversation_docs"]:
-                context_parts.append("\n## Recent Conversations:")
+            if context.get("conversation_docs") and remaining_tokens > 500:
+                header = "\n## Recent Conversations:"
+                header_tokens = self._estimate_tokens(header)
+                remaining_tokens -= header_tokens
+                context_parts.append(header)
+                
                 for i, doc in enumerate(context["conversation_docs"], 1):
+                    if remaining_tokens <= 100:
+                        logger.warning(f"Stopped adding conversation docs at {i}/{len(context['conversation_docs'])} due to token limit")
+                        break
+                    
                     timestamp = doc.get("metadata", {}).get("timestamp", "Unknown")
-                    context_parts.append(f"{i}. {doc['content']} (Time: {timestamp})")
+                    content = doc.get("content", "")
+                    
+                    # Allocate tokens per conversation doc
+                    conv_max_tokens = remaining_tokens // max(1, len(context["conversation_docs"]) - i + 1)
+                    conv_max_tokens = min(conv_max_tokens, 1000)  # Cap each conversation at 1000 tokens
+                    
+                    truncated_content = self._truncate_text_by_tokens(content, conv_max_tokens)
+                    doc_text = f"{i}. {truncated_content} (Time: {timestamp})"
+                    
+                    doc_tokens = self._estimate_tokens(doc_text)
+                    remaining_tokens -= doc_tokens
+                    context_parts.append(doc_text)
             
-            return "\n".join(context_parts) if context_parts else "No relevant context found."
+            result = "\n".join(context_parts) if context_parts else "No relevant context found."
+            
+            # Final check: if result is still too long, truncate the entire result
+            result_tokens = self._estimate_tokens(result)
+            if result_tokens > max_context_tokens:
+                logger.warning(f"Context still too long ({result_tokens} tokens), truncating entire result")
+                result = self._truncate_text_by_tokens(result, max_context_tokens)
+            
+            return result
             
         except Exception as e:
             logger.error(f"Failed to build prompt context: {e}")
