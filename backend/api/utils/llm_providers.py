@@ -214,6 +214,7 @@ class OpenRouterProvider(LLMProvider):
             model = self.model_name or "openai/gpt-3.5-turbo"
             
             # CRITICAL: Truncate system_content and prompt to prevent context overflow
+            # BUT preserve user question - it's the most important part
             def estimate_tokens(text: str) -> int:
                 return len(text) // 4 if text else 0
             
@@ -229,17 +230,41 @@ class OpenRouterProvider(LLMProvider):
                 truncated = text[:max_chars].rsplit('\n', 1)[0]
                 return truncated + "\n\n[Note: Content truncated to fit context limits.]"
             
+            # CRITICAL: Extract and preserve user question before truncating
+            # User question is usually at the end after "User Question:" marker
+            user_question_marker = "User Question"
+            user_question = ""
+            prompt_without_question = prompt
+            
+            if user_question_marker in prompt:
+                question_start = prompt.find(user_question_marker)
+                if question_start != -1:
+                    question_section = prompt[question_start:]
+                    colon_pos = question_section.find(":")
+                    if colon_pos != -1:
+                        user_question = question_section[colon_pos + 1:].strip()
+                        prompt_without_question = prompt[:question_start].strip()
+            
             # Truncate system_content to ~4000 tokens (conservative)
             system_content = truncate_text(system_content, max_tokens=4000)
             
-            # Truncate prompt to ~8000 tokens (leaves room for system + response)
-            prompt = truncate_text(prompt, max_tokens=8000)
+            # Truncate prompt WITHOUT user question first (7000 tokens for context/instructions)
+            prompt_without_question = truncate_text(prompt_without_question, max_tokens=7000)
+            
+            # Preserve user question (up to 3000 tokens) - CRITICAL for correct answers
+            if user_question:
+                user_question = truncate_text(user_question, max_tokens=3000)
+                prompt = prompt_without_question + "\n\n" + user_question_marker + ": " + user_question
+            else:
+                # Fallback: truncate entire prompt if we couldn't extract user question
+                prompt = truncate_text(prompt, max_tokens=8000)
             
             # Log token counts for debugging
             system_tokens = estimate_tokens(system_content)
             prompt_tokens = estimate_tokens(prompt)
+            user_q_tokens = estimate_tokens(user_question) if user_question else 0
             total_tokens = system_tokens + prompt_tokens
-            logger.info(f"📊 Token counts - System: {system_tokens}, Prompt: {prompt_tokens}, Total: {total_tokens}")
+            logger.info(f"📊 Token counts - System: {system_tokens}, Prompt: {prompt_tokens}, User Question: {user_q_tokens}, Total: {total_tokens}")
             
             if total_tokens > 15000:
                 logger.warning(f"⚠️ Total tokens ({total_tokens}) still high, may cause context overflow")
@@ -362,7 +387,7 @@ class OpenAIProvider(LLMProvider):
             model = self.model_name or "gpt-3.5-turbo"
             
             # CRITICAL: Truncate system_content and prompt to prevent context overflow
-            # Model context limit is 16385, but we need to leave room for response
+            # BUT preserve user question - it's the most important part
             def estimate_tokens(text: str) -> int:
                 return len(text) // 4 if text else 0
             
@@ -378,17 +403,41 @@ class OpenAIProvider(LLMProvider):
                 truncated = text[:max_chars].rsplit('\n', 1)[0]
                 return truncated + "\n\n[Note: Content truncated to fit context limits.]"
             
+            # CRITICAL: Extract and preserve user question before truncating
+            # User question is usually at the end after "User Question:" marker
+            user_question_marker = "User Question"
+            user_question = ""
+            prompt_without_question = prompt
+            
+            if user_question_marker in prompt:
+                question_start = prompt.find(user_question_marker)
+                if question_start != -1:
+                    question_section = prompt[question_start:]
+                    colon_pos = question_section.find(":")
+                    if colon_pos != -1:
+                        user_question = question_section[colon_pos + 1:].strip()
+                        prompt_without_question = prompt[:question_start].strip()
+            
             # Truncate system_content to ~4000 tokens (conservative)
             system_content = truncate_text(system_content, max_tokens=4000)
             
-            # Truncate prompt to ~8000 tokens (leaves room for system + response)
-            prompt = truncate_text(prompt, max_tokens=8000)
+            # Truncate prompt WITHOUT user question first (7000 tokens for context/instructions)
+            prompt_without_question = truncate_text(prompt_without_question, max_tokens=7000)
+            
+            # Preserve user question (up to 3000 tokens) - CRITICAL for correct answers
+            if user_question:
+                user_question = truncate_text(user_question, max_tokens=3000)
+                prompt = prompt_without_question + "\n\n" + user_question_marker + ": " + user_question
+            else:
+                # Fallback: truncate entire prompt if we couldn't extract user question
+                prompt = truncate_text(prompt, max_tokens=8000)
             
             # Log token counts for debugging
             system_tokens = estimate_tokens(system_content)
             prompt_tokens = estimate_tokens(prompt)
+            user_q_tokens = estimate_tokens(user_question) if user_question else 0
             total_tokens = system_tokens + prompt_tokens
-            logger.info(f"📊 Token counts - System: {system_tokens}, Prompt: {prompt_tokens}, Total: {total_tokens}")
+            logger.info(f"📊 Token counts - System: {system_tokens}, Prompt: {prompt_tokens}, User Question: {user_q_tokens}, Total: {total_tokens}")
             
             if total_tokens > 15000:
                 logger.warning(f"⚠️ Total tokens ({total_tokens}) still high, may cause context overflow")

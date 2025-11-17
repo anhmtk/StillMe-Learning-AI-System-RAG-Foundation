@@ -55,8 +55,13 @@ def get_style_learner():
         get_style_learner._instance = StyleLearner()
     return get_style_learner._instance
 
-def _truncate_user_message(message: str, max_tokens: int = 1000) -> str:
-    """Truncate user message if too long"""
+def _truncate_user_message(message: str, max_tokens: int = 3000) -> str:
+    """
+    Truncate user message if too long
+    
+    CRITICAL: User question is the most important part - we need to preserve it as much as possible.
+    Increased from 1000 to 3000 tokens to ensure user questions are not cut off.
+    """
     if not message:
         return message
     estimated = len(message) // 4
@@ -605,7 +610,7 @@ YOU MUST respond in {detected_lang_name.upper()} ONLY.
 
 {conversation_history_text}{no_context_instruction}
 
-User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=1000)}
+User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=3000)}
 
 ⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
 
@@ -915,7 +920,7 @@ UNDER NO CIRCUMSTANCES return a response in any language other than {detected_la
 {confidence_instruction}
 {stillme_instruction}
 
-User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=1000)}
+User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=3000)}
 
 ⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
 
@@ -1437,7 +1442,7 @@ THIS OVERRIDES EVERYTHING - NO EXCEPTIONS.
 {context_text if context and context.get("total_context_docs", 0) > 0 else ""}
 {citation_instruction if num_knowledge > 0 else ""}
 
-User Question (in {retry_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=1000)}
+User Question (in {retry_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=3000)}
 
 Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANSWER THE QUESTION PROPERLY, NOT JUST ACKNOWLEDGE THE ERROR."""
                                     
@@ -1595,7 +1600,7 @@ THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 """
                 base_prompt = f"""{language_instruction}
 
-{conversation_history_text}User Question: {_truncate_user_message(chat_request.message, max_tokens=1000)}
+{conversation_history_text}User Question: {_truncate_user_message(chat_request.message, max_tokens=3000)}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
 """
@@ -1612,7 +1617,7 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
 
 THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
-{conversation_history_text}User Question: {_truncate_user_message(chat_request.message, max_tokens=1000)}
+{conversation_history_text}User Question: {_truncate_user_message(chat_request.message, max_tokens=3000)}
 
 Remember: RESPOND IN ENGLISH ONLY."""
             
