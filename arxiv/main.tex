@@ -12,6 +12,8 @@
 \usepackage{url}
 \usepackage{geometry}
 \geometry{letterpaper, margin=1in}
+\usepackage{microtype}
+\sloppy
 
 % Hyperref setup
 \hypersetup{
@@ -97,7 +99,7 @@ StillMe is positioned as a \textbf{practical framework} rather than a novel algo
 \item \textbf{Transparency-First Approach}: Focus on system transparency (visible processes, audit trails) rather than model interpretability (understanding LLM internals, which is mathematically challenging).
 \end{enumerate}
 
-\textbf{Code Repository}: StillMe is fully open-source and available at \url{https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation}. The system is deployed and operational, demonstrating practical deployability.
+\textbf{Code Repository}: StillMe is fully open-source and available at \href{https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation}{github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation}. The system is deployed and operational, demonstrating practical deployability.
 
 \section{Related Work}
 
@@ -193,7 +195,7 @@ When a user asks a question:
 \textbf{Technical Details:}
 \begin{itemize}
 \item \textbf{Embedding Model}: all-MiniLM-L6-v2 (sentence-transformers, 384 dimensions)
-\item \textbf{Vector Database}: ChromaDB with collections \texttt{stillme\_knowledge} (learned content) and \texttt{stillme\_conversations} (conversation history). Collections are stored separately for semantic search.
+\item \textbf{Vector Database}: ChromaDB with collections \texttt{stillme\_knowledge} (learned content) and \texttt{stillme\_conversations} (conversation history). Collections are stored separately.
 \item \textbf{Search Method}: Cosine similarity search
 \end{itemize}
 
@@ -496,7 +498,7 @@ StillMe is built with AI-assisted development, demonstrating the potential of hu
 \section{Implementation Details}
 
 \begin{itemize}
-\item \textbf{Code Repository}: \url{https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation}
+\item \textbf{Code Repository}: \href{https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation}{github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation}
 \item \textbf{API Documentation}: Available in \texttt{docs/API\_DOCUMENTATION.md}
 \item \textbf{Deployment Guide}: Available in \texttt{docs/DEPLOYMENT\_GUIDE.md}
 \item \textbf{Architecture Documentation}: Available in \texttt{docs/ARCHITECTURE.md}
