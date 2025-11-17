@@ -51,7 +51,8 @@ class ValidatorChain:
             "EvidenceOverlap", 
             "NumericUnitsBasic",
             "SchemaFormat",
-            "EthicsAdapter"
+            "EthicsAdapter",
+            "EgoNeutralityValidator"  # Read-only detection, can run in parallel
         }
         
         # Validators that must run sequentially (have dependencies or modify state)
