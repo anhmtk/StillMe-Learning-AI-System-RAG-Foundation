@@ -420,9 +420,15 @@ Transformer là một kiến trúc mạng neural được giới thiệu năm 20
         truncated = text[:max_chars].rsplit('\n', 1)[0]  # Cut at paragraph boundary
         return truncated + "\n\n[Note: StillMe identity prompt truncated to fit context limits. Core principles preserved.]"
     
-    # Truncate STILLME_IDENTITY to ~3500 tokens (leaves room for other components)
+    # Truncate STILLME_IDENTITY to ~2000 tokens (more aggressive to leave room for other components)
     # This preserves the most important parts (intellectual humility, core identity, key principles)
-    truncated_identity = truncate_text_by_tokens(STILLME_IDENTITY, max_tokens=3500)
+    # System prompt breakdown:
+    # - Language instruction: ~500-800 tokens
+    # - Formatting instruction: ~500 tokens
+    # - STILLME_IDENTITY (truncated): ~2000 tokens
+    # - Time awareness: ~300 tokens
+    # Total system prompt: ~3300-3600 tokens (safe)
+    truncated_identity = truncate_text_by_tokens(STILLME_IDENTITY, max_tokens=2000)
     
     system_content = language_instruction + formatting_instruction + truncated_identity
     

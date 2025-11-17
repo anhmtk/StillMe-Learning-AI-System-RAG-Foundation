@@ -55,6 +55,19 @@ def get_style_learner():
         get_style_learner._instance = StyleLearner()
     return get_style_learner._instance
 
+def _truncate_user_message(message: str, max_tokens: int = 1000) -> str:
+    """Truncate user message if too long"""
+    if not message:
+        return message
+    estimated = len(message) // 4
+    if estimated <= max_tokens:
+        return message
+    max_chars = max_tokens * 4
+    if len(message) <= max_chars:
+        return message
+    truncated = message[:max_chars].rsplit(' ', 1)[0]
+    return truncated + "... [message truncated]"
+
 def _format_conversation_history(conversation_history, max_tokens: int = 1000) -> str:
     """
     Format conversation history with token limits to prevent context overflow
@@ -346,22 +359,39 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         if context and context["total_context_docs"] > 0:
             # Use context to enhance response
-            # Build context with token limits (4000 tokens max to leave room for system prompt and user message)
-            # Model context limit is 16385, but system prompt is ~6000-7000 tokens (language + formatting + truncated identity)
-            # So we need to be more conservative:
-            # - System prompt: ~6000-7000 tokens (language + formatting + truncated STILLME_IDENTITY)
-            # - Context: 4000 tokens (reduced from 8000)
-            # - Conversation history: 1000 tokens (reduced from 2000, already handled separately)
-            # - User message: ~500 tokens
-            # Total: ~11500-12000 tokens (safe margin under 16385)
-            context_text = rag_retrieval.build_prompt_context(context, max_context_tokens=4000)
+            # Build context with token limits (3000 tokens max to leave room for system prompt and user message)
+            # Model context limit is 16385, but we need to be very conservative:
+            # - System prompt: ~3300-3600 tokens (language + formatting + truncated STILLME_IDENTITY + time awareness)
+            # - Context: 3000 tokens (reduced from 4000)
+            # - Citation instruction: ~500-600 tokens (will be truncated if needed)
+            # - Conversation history: 1000 tokens (already handled separately)
+            # - User message: ~500-1000 tokens (will be truncated if needed)
+            # - Other instructions (stillme_instruction, etc.): ~500-1000 tokens
+            # Total: ~8800-9700 tokens (safe margin under 16385)
+            context_text = rag_retrieval.build_prompt_context(context, max_context_tokens=3000)
             
-            # Build base prompt with citation instructions
+            # Build base prompt with citation instructions (truncated to save tokens)
             citation_instruction = ""
             # Count knowledge docs for citation numbering
             num_knowledge = len(context.get("knowledge_docs", []))
             if num_knowledge > 0:
-                citation_instruction = f"""
+                # Truncate citation instruction to ~300 tokens to save space
+                def estimate_tokens(text: str) -> int:
+                    return len(text) // 4 if text else 0
+                
+                def truncate_text(text: str, max_tokens: int) -> str:
+                    if not text:
+                        return text
+                    estimated = estimate_tokens(text)
+                    if estimated <= max_tokens:
+                        return text
+                    max_chars = max_tokens * 4
+                    if len(text) <= max_chars:
+                        return text
+                    truncated = text[:max_chars].rsplit('\n', 1)[0]
+                    return truncated + "\n\n[Note: Citation instructions truncated to fit context limits. Core requirements preserved.]"
+                
+                full_citation_instruction = f"""
                 
 📚 CITATION REQUIREMENT - MANDATORY BUT RELEVANCE-FIRST:
 
@@ -575,7 +605,7 @@ YOU MUST respond in {detected_lang_name.upper()} ONLY.
 
 {conversation_history_text}{no_context_instruction}
 
-User Question (in {detected_lang_name.upper()}): {chat_request.message}
+User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=1000)}
 
 ⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
 
@@ -885,7 +915,7 @@ UNDER NO CIRCUMSTANCES return a response in any language other than {detected_la
 {confidence_instruction}
 {stillme_instruction}
 
-User Question (in {detected_lang_name.upper()}): {chat_request.message}
+User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=1000)}
 
 ⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
 
@@ -1407,7 +1437,7 @@ THIS OVERRIDES EVERYTHING - NO EXCEPTIONS.
 {context_text if context and context.get("total_context_docs", 0) > 0 else ""}
 {citation_instruction if num_knowledge > 0 else ""}
 
-User Question (in {retry_lang_name.upper()}): {chat_request.message}
+User Question (in {retry_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=1000)}
 
 Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANSWER THE QUESTION PROPERLY, NOT JUST ACKNOWLEDGE THE ERROR."""
                                     
@@ -1565,7 +1595,7 @@ THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 """
                 base_prompt = f"""{language_instruction}
 
-{conversation_history_text}User Question: {chat_request.message}
+{conversation_history_text}User Question: {_truncate_user_message(chat_request.message, max_tokens=1000)}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
 """
@@ -1582,7 +1612,7 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
 
 THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
-{conversation_history_text}User Question: {chat_request.message}
+{conversation_history_text}User Question: {_truncate_user_message(chat_request.message, max_tokens=1000)}
 
 Remember: RESPOND IN ENGLISH ONLY."""
             
