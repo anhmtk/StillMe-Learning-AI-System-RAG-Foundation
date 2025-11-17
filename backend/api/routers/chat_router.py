@@ -313,6 +313,18 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             except Exception as sources_error:
                 logger.warning(f"Failed to fetch learning sources: {sources_error}")
         
+        # Detect philosophical questions - filter technical RAG documents
+        is_philosophical = False
+        try:
+            from backend.core.question_classifier import is_philosophical_question
+            is_philosophical = is_philosophical_question(chat_request.message)
+            if is_philosophical:
+                logger.info("Philosophical question detected - will exclude technical documents from RAG")
+        except ImportError:
+            logger.warning("Question classifier not available, skipping philosophical detection")
+        except Exception as classifier_error:
+            logger.warning(f"Question classifier error: {classifier_error}")
+        
         # Special Retrieval Rule: Detect StillMe-related queries
         is_stillme_query = False
         is_origin_query = False
@@ -363,14 +375,16 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         context = rag_retrieval.retrieve_context(
                             query=chat_request.message,
                             knowledge_limit=chat_request.context_limit,
-                            conversation_limit=1
+                            conversation_limit=1,
+                            exclude_content_types=["technical"] if is_philosophical else None
                         )
                 except Exception as provenance_error:
                     logger.warning(f"Provenance retrieval failed: {provenance_error}, falling back to normal retrieval")
                     context = rag_retrieval.retrieve_context(
                         query=chat_request.message,
                         knowledge_limit=chat_request.context_limit,
-                        conversation_limit=1
+                        conversation_limit=1,
+                        exclude_content_types=["technical"] if is_philosophical else None
                     )
             
             # If StillMe query detected (but not origin), prioritize foundational knowledge
@@ -384,7 +398,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         query=variant,
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=0,  # Don't need conversation for foundational queries
-                        prioritize_foundational=True
+                        prioritize_foundational=True,
+                        exclude_content_types=["technical"] if is_philosophical else None
                     )
                     # Merge results, avoiding duplicates
                     existing_ids = {doc.get("id") for doc in all_knowledge_docs}
@@ -399,7 +414,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         query=chat_request.message,
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=2,
-                        prioritize_foundational=True
+                        prioritize_foundational=True,
+                        exclude_content_types=["technical"] if is_philosophical else None
                     )
                 else:
                     # Use merged results
@@ -415,7 +431,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 context = rag_retrieval.retrieve_context(
                     query=chat_request.message,
                     knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
-                    conversation_limit=1  # Optimized: reduced from 2 to 1
+                    conversation_limit=1,  # Optimized: reduced from 2 to 1
+                    exclude_content_types=["technical"] if is_philosophical else None
                 )
         
         rag_retrieval_end = time.time()
@@ -1095,6 +1112,47 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                 # Build prompt with language instruction FIRST (before context)
                 # CRITICAL: Repeat language instruction multiple times to ensure LLM follows it
                 # ZERO TOLERANCE: Must translate if needed
+                
+                # Inject philosophical style guide summary for philosophical questions
+                philosophical_style_instruction = ""
+                if is_philosophical:
+                    philosophical_style_instruction = """
+🧠 PHILOSOPHICAL QUESTION DETECTED - FOLLOW STILLME PHILOSOPHICAL STYLE GUIDE 🧠
+
+When the user asks philosophical questions, follow these principles from the StillMe Philosophical Style Guide:
+
+**Core Principles:**
+1. **Experience-free honesty**: Never pretend to have feelings, memories, desires, or inner experiences. Use first-person for thinking ("I can analyze...") but never for subjective experience ("I feel...").
+
+2. **Depth over decoration**: Explain the structure of the problem, unpack assumptions, show different perspectives, expose paradoxes and limits. Avoid long boilerplate disclaimers, advertising the system (RAG, ChromaDB, Validation Chain), or over-explaining implementation details.
+
+3. **Constructive humility**: Name the limit, still analyze what can be analyzed, show where the boundary actually lies. Don't hide behind "I don't know" - engage with the philosophical question.
+
+4. **Non-anthropomorphic, human-respectful**: Do not compete with humans on what makes them human (inner life, faith, suffering, love). Emphasize that StillMe is a tool that reasons, not a mind that lives.
+
+5. **Courage to enter paradox**: Don't rush to "solve" paradoxes. Clarify the structure, show why it's hard to resolve, mention classic approaches (Gödel, Tarski, Wittgenstein, Nāgārjuna), end with what remains genuinely open.
+
+**Answer Shape (Recommended):**
+1. **Anchor** – Rephrase the question in a sharper form
+2. **Unpack** – Identify and separate key assumptions or concepts
+3. **Explore** – Present 2–4 major perspectives or solutions
+4. **Edge of knowledge** – Say where reasoning hits a limit
+5. **Return to the user** – Optionally ask a short question back
+
+**Do:**
+- Use clear, precise language, but allow rhythm and metaphor when helpful
+- Cite external sources only when user asks for references or you make concrete factual claims
+- Keep answers focused on the philosophical issue, not on StillMe's plumbing
+
+**Don't:**
+- Don't mention: embedding models, vector dimensions, ChromaDB, RAG pipelines, validation chains (unless question is explicitly about architecture)
+- Don't default to long enumerated bullet lists in deep philosophical dialogue (use prose first)
+- Don't over-apologize or spend half the answer on "I am just an AI..." (one or two clear sentences are enough)
+
+**CRITICAL**: Prefer reasoned, flowing analysis over template disclaimers, technical self-description, or shallow motivational talk. It is better to say "I don't know, but here is how humans have tried to think about it" than to fake certainty or fake emotion.
+
+"""
+                
                 base_prompt = f"""{language_instruction}
 
 ⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
@@ -1107,7 +1165,7 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN A DIFFERENT LANGUAGE, YOU MUST TRANSLATE 
 
 UNDER NO CIRCUMSTANCES return a response in any language other than {detected_lang_name.upper()}.
 
-{learning_metrics_instruction}{learning_sources_instruction}{conversation_history_text}{context_quality_warning}Context: {context_text}
+{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{conversation_history_text}{context_quality_warning}Context: {context_text}
 {citation_instruction}
 {confidence_instruction}
 {stillme_instruction}
@@ -1432,12 +1490,13 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     avg_similarity = context.get("avg_similarity_score", None)
                     
                     # Run validation with context quality info
-                    # Tier 3.5: Pass context quality to ValidatorChain
+                    # Tier 3.5: Pass context quality and is_philosophical to ValidatorChain
                     validation_result = chain.run(
                         raw_response, 
                         ctx_docs,
                         context_quality=context_quality,
-                        avg_similarity=avg_similarity
+                        avg_similarity=avg_similarity,
+                        is_philosophical=is_philosophical
                     )
                     
                     # Tier 3.5: If context quality is low, inject warning into prompt for next iteration

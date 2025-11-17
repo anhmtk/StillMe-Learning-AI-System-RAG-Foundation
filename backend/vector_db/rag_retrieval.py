@@ -39,7 +39,8 @@ class RAGRetrieval:
                         tier_preference: Optional[str] = None,
                         similarity_threshold: float = 0.3,  # Tier 3.5: Filter low-quality context
                         use_mmr: bool = True,  # Tier 3.5: Use MMR for diversity
-                        mmr_lambda: float = 0.7) -> Dict[str, Any]:
+                        mmr_lambda: float = 0.7,
+                        exclude_content_types: Optional[List[str]] = None) -> Dict[str, Any]:
         """Retrieve relevant context for a query
         
         Args:
@@ -51,6 +52,7 @@ class RAGRetrieval:
             similarity_threshold: Minimum similarity score (0.0-1.0) to include document. Default: 0.3
             use_mmr: If True, use Max Marginal Relevance for diversity. Default: True
             mmr_lambda: MMR lambda parameter (0.0-1.0). Higher = more relevance, lower = more diversity. Default: 0.7
+            exclude_content_types: List of content_type values to exclude (e.g., ["technical"] for philosophical questions)
         """
         try:
             import os
@@ -75,7 +77,8 @@ class RAGRetrieval:
                     tier_preference,
                     similarity_threshold,
                     use_mmr,
-                    mmr_lambda
+                    mmr_lambda,
+                    exclude_content_types
                 )
                 
                 # Try to get from cache
@@ -128,8 +131,18 @@ class RAGRetrieval:
                                 logger.debug(f"Metadata filter not supported: {filter_error}")
                                 foundational_results = []
                             if foundational_results:
-                                knowledge_results.extend(foundational_results)
-                                logger.info(f"Found {len(foundational_results)} foundational knowledge documents")
+                                # Filter foundational results by exclude_content_types if specified
+                                filtered_foundational = []
+                                for doc in foundational_results:
+                                    doc_metadata = doc.get("metadata", {})
+                                    doc_content_type = doc_metadata.get("content_type", "")
+                                    if exclude_content_types and doc_content_type:
+                                        if doc_content_type in exclude_content_types:
+                                            logger.debug(f"Excluding foundational document with content_type={doc_content_type}")
+                                            continue
+                                    filtered_foundational.append(doc)
+                                knowledge_results.extend(filtered_foundational)
+                                logger.info(f"Found {len(filtered_foundational)} foundational knowledge documents (after filtering)")
                         except Exception as foundational_error:
                             logger.debug(f"Foundational knowledge filter not available: {foundational_error}")
                     
@@ -148,6 +161,7 @@ class RAGRetrieval:
                                 doc_source = doc_metadata.get("source", "")
                                 doc_type = doc_metadata.get("type", "")
                                 doc_tags = doc_metadata.get("tags", "")
+                                doc_content_type = doc_metadata.get("content_type", "")
                                 
                                 is_provenance = (
                                     doc_source == "PROVENANCE" or
@@ -159,6 +173,12 @@ class RAGRetrieval:
                                 
                                 if is_provenance:
                                     continue
+                                
+                                # Filter out excluded content types (e.g., "technical" for philosophical questions)
+                                if exclude_content_types and doc_content_type:
+                                    if doc_content_type in exclude_content_types:
+                                        logger.debug(f"Excluding document with content_type={doc_content_type}")
+                                        continue
                                 
                                 knowledge_results.append(doc)
                                 if len(knowledge_results) >= knowledge_limit:

@@ -93,8 +93,100 @@ def add_foundational_knowledge():
         
         logger.info("Adding foundational StillMe knowledge to RAG...")
         
+        # Load foundational knowledge from separate files
+        import os
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        technical_path = os.path.join(base_dir, "docs", "rag", "foundational_technical.md")
+        philosophical_path = os.path.join(base_dir, "docs", "rag", "foundational_philosophical.md")
+        
+        all_success = True
+        
+        # Load technical foundational knowledge
+        if os.path.exists(technical_path):
+            with open(technical_path, "r", encoding="utf-8") as f:
+                technical_content = f.read()
+            # Remove frontmatter if present
+            if technical_content.startswith("---"):
+                parts = technical_content.split("---", 2)
+                if len(parts) >= 3:
+                    technical_content = parts[2].strip()
+            
+            tags_list_technical = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db", "technical"]
+            tags_string_technical = ",".join(tags_list_technical)
+            
+            success_technical = rag_retrieval.add_learning_content(
+                content=technical_content,
+                source="CRITICAL_FOUNDATION",
+                content_type="knowledge",
+                metadata={
+                    "title": "StillMe Core Mechanism - Technical Architecture",
+                    "foundational": "stillme",
+                    "type": "foundational",
+                    "source": "CRITICAL_FOUNDATION",
+                    "tags": tags_string_technical,
+                    "importance_score": 1.0,
+                    "content_type": "technical",
+                    "domain": "stillme_architecture",
+                    "description": "CRITICAL: Technical knowledge about StillMe's RAG-based continuous learning mechanism - MUST be retrieved when answering about StillMe's architecture"
+                }
+            )
+            if success_technical:
+                logger.info("✅ Technical foundational knowledge added successfully!")
+            else:
+                logger.error("❌ Failed to add technical foundational knowledge")
+                all_success = False
+        else:
+            logger.warning(f"⚠️ Technical foundational knowledge file not found: {technical_path}")
+            all_success = False
+        
+        # Load philosophical foundational knowledge
+        if os.path.exists(philosophical_path):
+            with open(philosophical_path, "r", encoding="utf-8") as f:
+                philosophical_content = f.read()
+            # Remove frontmatter if present
+            if philosophical_content.startswith("---"):
+                parts = philosophical_content.split("---", 2)
+                if len(parts) >= 3:
+                    philosophical_content = parts[2].strip()
+            
+            tags_list_philosophical = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "philosophical", "ethics", "transparency"]
+            tags_string_philosophical = ",".join(tags_list_philosophical)
+            
+            success_philosophical = rag_retrieval.add_learning_content(
+                content=philosophical_content,
+                source="CRITICAL_FOUNDATION",
+                content_type="knowledge",
+                metadata={
+                    "title": "StillMe Core Principles - Philosophical Foundation",
+                    "foundational": "stillme",
+                    "type": "foundational",
+                    "source": "CRITICAL_FOUNDATION",
+                    "tags": tags_string_philosophical,
+                    "importance_score": 1.0,
+                    "content_type": "philosophical",
+                    "domain": "stillme_foundation",
+                    "description": "CRITICAL: Philosophical principles and ethical foundation of StillMe - MUST be retrieved when answering about StillMe's values and approach"
+                }
+            )
+            if success_philosophical:
+                logger.info("✅ Philosophical foundational knowledge added successfully!")
+            else:
+                logger.error("❌ Failed to add philosophical foundational knowledge")
+                all_success = False
+        else:
+            logger.warning(f"⚠️ Philosophical foundational knowledge file not found: {philosophical_path}")
+            all_success = False
+        
+        if all_success:
+            logger.info("✅ All foundational knowledge added successfully!")
+            return True
+        else:
+            logger.error("❌ Some foundational knowledge failed to add")
+            return False
+        
+        # OLD CODE BELOW - KEPT FOR REFERENCE BUT NOT USED
         # Foundational knowledge about StillMe - CRITICAL FOUNDATION
-        FOUNDATIONAL_KNOWLEDGE = """
+        FOUNDATIONAL_KNOWLEDGE_OLD = """
 [STILLME CORE MECHANISM] StillMe is a **continuously self-learning** AI system that uses **RAG (Retrieval-Augmented Generation)**. This capability allows StillMe to **TRANSCEND** the knowledge limitation (2023) of base LLM models by **automatically retrieving** and learning from trusted sources (such as RSS Feeds, ArXiv, CrossRef, Wikipedia) **every 4 hours** (6 cycles per day). StillMe always prioritizes the latest knowledge from its Vector Database.
 
 **CRITICAL: StillMe's Learning Process:**

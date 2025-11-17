@@ -71,7 +71,7 @@ class ValidatorChain:
         return False
     
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None,
-            avg_similarity: Optional[float] = None) -> ValidationResult:
+            avg_similarity: Optional[float] = None, is_philosophical: bool = False) -> ValidationResult:
         """
         Run all validators with parallel execution for independent validators
         
@@ -85,6 +85,7 @@ class ValidatorChain:
             ctx_docs: List of context documents from RAG
             context_quality: Context quality from RAG ("high", "medium", "low") - Tier 3.5
             avg_similarity: Average similarity score of retrieved context (0.0-1.0) - Tier 3.5
+            is_philosophical: If True, relax citation and confidence requirements for philosophical questions
             
         Returns:
             ValidationResult with overall status
@@ -110,7 +111,10 @@ class ValidatorChain:
             try:
                 # Tier 3.5: Pass context quality to ConfidenceValidator
                 if validator_name == "ConfidenceValidator":
-                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity)
+                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical)
+                elif validator_name == "CitationRequired":
+                    # Pass is_philosophical to CitationRequired to relax requirements
+                    result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical)
                 else:
                     result = validator.run(patched, ctx_docs)
                 

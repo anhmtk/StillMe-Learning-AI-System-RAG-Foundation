@@ -25,18 +25,25 @@ class CitationRequired:
         """
         self.required = required
     
-    def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
+    def run(self, answer: str, ctx_docs: List[str], is_philosophical: bool = False) -> ValidationResult:
         """
         Check if answer contains citations and auto-enforce if missing
         
         Args:
             answer: The answer to validate
             ctx_docs: List of context documents - if empty, citations are not required
+            is_philosophical: If True, relax citation requirements for philosophical questions (only require for factual claims)
             
         Returns:
             ValidationResult with passed status and patched answer if citation was added
         """
         if not self.required:
+            return ValidationResult(passed=True)
+        
+        # For philosophical questions, skip citation requirement for pure philosophical analysis
+        # Only require citations for factual claims (e.g., historical facts, scientific data)
+        if is_philosophical:
+            logger.debug("Philosophical question detected - skipping citation requirement for philosophical analysis")
             return ValidationResult(passed=True)
         
         # Only require citations if we have context documents
