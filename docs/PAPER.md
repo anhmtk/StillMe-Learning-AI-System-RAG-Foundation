@@ -44,6 +44,8 @@ StillMe is positioned as a **practical framework** rather than a novel algorithm
 
 4. **Transparency-First Approach**: Focus on system transparency (visible processes, audit trails) rather than model interpretability (understanding LLM internals, which is mathematically challenging).
 
+**Code Repository**: StillMe is fully open-source and available at https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation. The system is deployed and operational, demonstrating practical deployability.
+
 ## 2. Related Work
 
 ### 2.1 Retrieval-Augmented Generation (RAG)
