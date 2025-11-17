@@ -326,9 +326,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             logger.warning(f"Question classifier error: {classifier_error}")
         
         # Special Retrieval Rule: Detect StillMe-related queries
+        # Fix: Disable provenance detection for philosophical questions
         is_stillme_query = False
         is_origin_query = False
-        if rag_retrieval and chat_request.use_rag:
+        if rag_retrieval and chat_request.use_rag and not is_philosophical:  # Skip provenance detection for philosophical questions
             try:
                 from backend.core.stillme_detector import (
                     detect_stillme_query, 
@@ -1554,7 +1555,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
                         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
-                        ConfidenceValidator(require_uncertainty_when_no_context=True),  # Check for uncertainty
+                        # Fix: Disable require_uncertainty_when_no_context for philosophical questions
+                        ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # Check for uncertainty
                         EgoNeutralityValidator(strict_mode=True, auto_patch=True),  # Detect and auto-patch "Hallucination of Experience" - novel contribution
                     ]
                     
