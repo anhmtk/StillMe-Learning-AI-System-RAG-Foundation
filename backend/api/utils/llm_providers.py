@@ -213,6 +213,37 @@ class OpenRouterProvider(LLMProvider):
             # Default to a cost-effective model
             model = self.model_name or "openai/gpt-3.5-turbo"
             
+            # CRITICAL: Truncate system_content and prompt to prevent context overflow
+            def estimate_tokens(text: str) -> int:
+                return len(text) // 4 if text else 0
+            
+            def truncate_text(text: str, max_tokens: int) -> str:
+                if not text:
+                    return text
+                estimated = estimate_tokens(text)
+                if estimated <= max_tokens:
+                    return text
+                max_chars = max_tokens * 4
+                if len(text) <= max_chars:
+                    return text
+                truncated = text[:max_chars].rsplit('\n', 1)[0]
+                return truncated + "\n\n[Note: Content truncated to fit context limits.]"
+            
+            # Truncate system_content to ~4000 tokens (conservative)
+            system_content = truncate_text(system_content, max_tokens=4000)
+            
+            # Truncate prompt to ~8000 tokens (leaves room for system + response)
+            prompt = truncate_text(prompt, max_tokens=8000)
+            
+            # Log token counts for debugging
+            system_tokens = estimate_tokens(system_content)
+            prompt_tokens = estimate_tokens(prompt)
+            total_tokens = system_tokens + prompt_tokens
+            logger.info(f"📊 Token counts - System: {system_tokens}, Prompt: {prompt_tokens}, Total: {total_tokens}")
+            
+            if total_tokens > 15000:
+                logger.warning(f"⚠️ Total tokens ({total_tokens}) still high, may cause context overflow")
+            
             async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(
                     "https://openrouter.ai/api/v1/chat/completions",
@@ -329,6 +360,38 @@ class OpenAIProvider(LLMProvider):
         try:
             system_content = build_system_prompt_with_language(detected_lang)
             model = self.model_name or "gpt-3.5-turbo"
+            
+            # CRITICAL: Truncate system_content and prompt to prevent context overflow
+            # Model context limit is 16385, but we need to leave room for response
+            def estimate_tokens(text: str) -> int:
+                return len(text) // 4 if text else 0
+            
+            def truncate_text(text: str, max_tokens: int) -> str:
+                if not text:
+                    return text
+                estimated = estimate_tokens(text)
+                if estimated <= max_tokens:
+                    return text
+                max_chars = max_tokens * 4
+                if len(text) <= max_chars:
+                    return text
+                truncated = text[:max_chars].rsplit('\n', 1)[0]
+                return truncated + "\n\n[Note: Content truncated to fit context limits.]"
+            
+            # Truncate system_content to ~4000 tokens (conservative)
+            system_content = truncate_text(system_content, max_tokens=4000)
+            
+            # Truncate prompt to ~8000 tokens (leaves room for system + response)
+            prompt = truncate_text(prompt, max_tokens=8000)
+            
+            # Log token counts for debugging
+            system_tokens = estimate_tokens(system_content)
+            prompt_tokens = estimate_tokens(prompt)
+            total_tokens = system_tokens + prompt_tokens
+            logger.info(f"📊 Token counts - System: {system_tokens}, Prompt: {prompt_tokens}, Total: {total_tokens}")
+            
+            if total_tokens > 15000:
+                logger.warning(f"⚠️ Total tokens ({total_tokens}) still high, may cause context overflow")
             
             async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(
