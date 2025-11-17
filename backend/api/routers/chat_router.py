@@ -934,6 +934,14 @@ User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_re
 - Do NOT default to talking about "intellectual humility" or "not knowing" unless the question is specifically about that
 - Answer the user's question FIRST, then add StillMe's transparency principles if relevant
 
+**SPECIAL INSTRUCTION FOR ANALYZING EXTERNAL AI OUTPUTS:**
+- If the user asks you to analyze another AI's output (ChatGPT, Claude, etc.), you MUST check for anthropomorphic language
+- Look for phrases like "in my experience" / "theo kinh nghiệm", "I think" / "tôi nghĩ", "I feel" / "tôi cảm thấy"
+- These phrases falsely attribute subjective qualities (experience, emotions, personal opinions) to AI
+- This is a critical transparency issue called "Hallucination of Experience" - AI should not claim personal experience
+- If you find such phrases, you MUST point them out as a problem, not ignore them
+- This is more important than analyzing formatting, clarity, or other minor issues
+
 RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. IGNORE THE LANGUAGE OF THE CONTEXT ABOVE.
 
 Please provide a helpful response based on the context above. Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE MODEL WANTS TO USE A DIFFERENT LANGUAGE.
@@ -1646,6 +1654,14 @@ User Question: {_truncate_user_message(chat_request.message, max_tokens=3000)}
 - Focus on what the user is actually asking, not on general philosophy
 - If the user asks you to analyze something, analyze THAT specific thing
 - If the user asks you to find a problem, look for problems in what they showed you
+
+**SPECIAL INSTRUCTION FOR ANALYZING EXTERNAL AI OUTPUTS:**
+- If the user asks you to analyze another AI's output (ChatGPT, Claude, etc.), you MUST check for anthropomorphic language
+- Look for phrases like "in my experience" / "theo kinh nghiệm", "I think" / "tôi nghĩ", "I feel" / "tôi cảm thấy"
+- These phrases falsely attribute subjective qualities (experience, emotions, personal opinions) to AI
+- This is a critical transparency issue called "Hallucination of Experience" - AI should not claim personal experience
+- If you find such phrases, you MUST point them out as a problem, not ignore them
+- This is more important than analyzing formatting, clarity, or other minor issues
 
 Remember: RESPOND IN ENGLISH ONLY."""
             
