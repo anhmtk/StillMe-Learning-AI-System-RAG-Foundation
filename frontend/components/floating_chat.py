@@ -197,6 +197,33 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             .resize-handle.e {{ top: 24px; bottom: 24px; right: 0; width: 16px; cursor: e-resize; }}
             .resize-handle.w {{ top: 24px; bottom: 24px; left: 0; width: 16px; cursor: w-resize; }}
             
+            /* CRITICAL: Fix scrollbar vs resize handle conflict */
+            /* Problem: Resize handle .e (right edge, 16px wide) overlaps with scrollbar (6px wide) */
+            /* Solution: Exclude scrollbar area from resize handle using pointer-events */
+            
+            /* Make scrollbar area have higher priority */
+            .stillme-chat-messages {{
+                position: relative;
+                z-index: 2; /* Higher than resize handles */
+            }}
+            
+            /* Scrollbar should always be interactive */
+            .stillme-chat-messages::-webkit-scrollbar {{
+                pointer-events: auto !important;
+                z-index: 10 !important; /* Highest priority */
+            }}
+            
+            /* Resize handle on right edge - exclude scrollbar area (rightmost 10px) */
+            .resize-handle.e {{
+                /* Use clip-path to exclude scrollbar area, but keep functionality */
+                /* Better: Use JavaScript to detect scrollbar area (see JS below) */
+            }}
+            
+            /* When messages container is hovered, prioritize scrollbar over resize */
+            .stillme-chat-messages:hover {{
+                z-index: 3 !important;
+            }}
+            
             /* Visual resize indicator - more visible like Cursor */
             .resize-handle:hover {{
                 background: rgba(70, 179, 255, 0.5) !important; /* More visible on hover */
@@ -1430,6 +1457,25 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         handle.addEventListener('mousedown', (e) => {{
                                             if (parentPanel.classList.contains('fullscreen') || parentPanel.classList.contains('minimized')) return;
                                             
+                                            // CRITICAL: Fix scrollbar vs resize handle conflict
+                                            // If clicking on right edge (.e handle), check if click is in scrollbar area
+                                            if (direction === 'e') {{
+                                                const parentMessages = parentDoc.getElementById('stillme-chat-messages');
+                                                if (parentMessages) {{
+                                                    const messagesRect = parentMessages.getBoundingClientRect();
+                                                    const panelRect = parentPanel.getBoundingClientRect();
+                                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 12px
+                                                    const clickX = e.clientX;
+                                                    const scrollbarAreaStart = panelRect.right - 12; // Rightmost 12px is scrollbar area
+                                                    
+                                                    if (clickX >= scrollbarAreaStart) {{
+                                                        // Click is in scrollbar area, don't start resize - let scrollbar handle it
+                                                        console.log('StillMe Chat: Click detected in scrollbar area (parent), skipping resize');
+                                                        return; // Don't prevent default, let scrollbar work
+                                                    }}
+                                                }}
+                                            }}
+                                            
                                             parentIsResizing = true;
                                             parentResizeHandle = direction;
                                             parentDragStartX = e.clientX;
@@ -1721,6 +1767,26 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                         }}
                         handle.addEventListener('mousedown', (e) => {{
                             if (isFullscreen || isMinimized) return; // Don't resize in fullscreen or minimized
+                            
+                            // CRITICAL: Fix scrollbar vs resize handle conflict
+                            // If clicking on right edge (.e handle), check if click is in scrollbar area
+                            if (direction === 'e') {{
+                                const messagesContainer = document.getElementById('stillme-chat-messages');
+                                if (messagesContainer) {{
+                                    const messagesRect = messagesContainer.getBoundingClientRect();
+                                    const panelRect = panel.getBoundingClientRect();
+                                    // Scrollbar is typically 6-15px wide, check if click is in rightmost 12px
+                                    const clickX = e.clientX;
+                                    const scrollbarAreaStart = panelRect.right - 12; // Rightmost 12px is scrollbar area
+                                    
+                                    if (clickX >= scrollbarAreaStart) {{
+                                        // Click is in scrollbar area, don't start resize - let scrollbar handle it
+                                        console.log('StillMe Chat: Click detected in scrollbar area, skipping resize');
+                                        return; // Don't prevent default, let scrollbar work
+                                    }}
+                                }}
+                            }}
+                            
                             isResizing = true;
                             resizeHandle = direction;
                             dragStartX = e.clientX;
