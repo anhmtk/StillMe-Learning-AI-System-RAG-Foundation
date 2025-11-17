@@ -920,9 +920,19 @@ UNDER NO CIRCUMSTANCES return a response in any language other than {detected_la
 {confidence_instruction}
 {stillme_instruction}
 
+🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
+
 User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=3000)}
 
 ⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
+
+**YOUR PRIMARY TASK IS TO ANSWER THE USER QUESTION ABOVE DIRECTLY AND ACCURATELY.**
+
+- Focus on what the user is actually asking, not on general philosophy or StillMe's identity
+- If the user asks you to analyze something, analyze THAT specific thing
+- If the user asks you to find a problem, look for problems in what they showed you
+- Do NOT default to talking about "intellectual humility" or "not knowing" unless the question is specifically about that
+- Answer the user's question FIRST, then add StillMe's transparency principles if relevant
 
 RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. IGNORE THE LANGUAGE OF THE CONTEXT ABOVE.
 
@@ -1442,7 +1452,14 @@ THIS OVERRIDES EVERYTHING - NO EXCEPTIONS.
 {context_text if context and context.get("total_context_docs", 0) > 0 else ""}
 {citation_instruction if num_knowledge > 0 else ""}
 
+🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
+
 User Question (in {retry_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=3000)}
+
+**YOUR PRIMARY TASK IS TO ANSWER THE USER QUESTION ABOVE DIRECTLY AND ACCURATELY.**
+- Focus on what the user is actually asking, not on general philosophy
+- If the user asks you to analyze something, analyze THAT specific thing
+- If the user asks you to find a problem, look for problems in what they showed you
 
 Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANSWER THE QUESTION PROPERLY, NOT JUST ACKNOWLEDGE THE ERROR."""
                                     
@@ -1617,7 +1634,16 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
 
 THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
-{conversation_history_text}User Question: {_truncate_user_message(chat_request.message, max_tokens=3000)}
+{conversation_history_text}
+
+🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
+
+User Question: {_truncate_user_message(chat_request.message, max_tokens=3000)}
+
+**YOUR PRIMARY TASK IS TO ANSWER THE USER QUESTION ABOVE DIRECTLY AND ACCURATELY.**
+- Focus on what the user is actually asking, not on general philosophy
+- If the user asks you to analyze something, analyze THAT specific thing
+- If the user asks you to find a problem, look for problems in what they showed you
 
 Remember: RESPOND IN ENGLISH ONLY."""
             
