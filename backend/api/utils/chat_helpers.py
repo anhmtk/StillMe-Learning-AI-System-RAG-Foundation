@@ -460,30 +460,50 @@ async def generate_ai_response(
     llm_provider: Optional[str] = None,
     llm_api_key: Optional[str] = None,
     llm_api_url: Optional[str] = None,
-    llm_model_name: Optional[str] = None
+    llm_model_name: Optional[str] = None,
+    use_server_keys: bool = False  # Internal flag for admin/internal calls
 ) -> str:
-    """Generate AI response with flexible LLM provider selection
+    """Generate AI response with user-provided LLM provider and API key
     
-    Supports multiple LLM providers: deepseek, openai, claude, gemini, ollama, custom
+    IMPORTANT: StillMe requires users to provide their own API keys to prevent server cost exhaustion.
+    This function will ONLY use user-provided API keys unless use_server_keys=True (internal use only).
     
-    Priority: User-provided config > Environment variables
+    Supports multiple LLM providers: deepseek, openai, openrouter, claude, gemini, ollama, custom
     
     Args:
         prompt: User prompt
         detected_lang: Detected language code (for system prompt)
-        llm_provider: Provider name ('deepseek', 'openai', 'claude', 'gemini', 'ollama', 'custom')
-        llm_api_key: API key for the provider
+        llm_provider: Provider name (REQUIRED) - 'deepseek', 'openai', 'openrouter', 'claude', 'gemini', 'ollama', 'custom'
+        llm_api_key: API key for the provider (REQUIRED except for 'ollama')
         llm_api_url: Custom API URL (for Ollama or custom providers)
         llm_model_name: Specific model name (e.g., 'gpt-4', 'claude-3-opus', 'llama2')
+        use_server_keys: Internal flag - if True, fallback to server API keys (admin/internal use only)
         
     Returns:
         AI-generated response string
+        
+    Raises:
+        ValueError: If llm_provider or llm_api_key is missing (except for Ollama)
     """
     try:
         from backend.api.utils.llm_providers import create_llm_provider
         
-        # If user provided provider config, use it
-        # Note: Ollama doesn't require API key
+        # Validate that provider and API key are provided (unless use_server_keys is True)
+        if not use_server_keys:
+            if not llm_provider:
+                raise ValueError(
+                    "llm_provider is REQUIRED. StillMe requires users to provide their own API keys "
+                    "to prevent server cost exhaustion. Please provide llm_provider and llm_api_key in your request."
+                )
+            
+            if llm_provider != 'ollama' and (not llm_api_key or len(llm_api_key.strip()) == 0):
+                raise ValueError(
+                    f"llm_api_key is REQUIRED for provider '{llm_provider}'. "
+                    "StillMe requires users to provide their own API keys to prevent server cost exhaustion. "
+                    "Please provide your API key in the request."
+                )
+        
+        # Use user-provided provider config
         if llm_provider:
             if llm_provider == 'ollama':
                 # Ollama doesn't need API key
@@ -493,90 +513,58 @@ async def generate_ai_response(
                     model_name=llm_model_name,
                     api_url=llm_api_url
                 )
-            elif llm_api_key:
+            else:
                 provider = create_llm_provider(
                     provider=llm_provider,
                     api_key=llm_api_key,
                     model_name=llm_model_name,
                     api_url=llm_api_url
                 )
-            else:
-                return f"llm_api_key is required for provider '{llm_provider}' (except 'ollama')"
             
             return await provider.generate(prompt, detected_lang=detected_lang)
         
-        # Fallback to environment variables with automatic fallback chain
-        # Priority: OpenRouter → OpenAI → DeepSeek (to maximize credit usage)
-        # Other providers: Claude, Gemini, Ollama (fallback only)
-        from backend.api.utils.llm_providers import InsufficientQuotaError, AuthenticationError
-        
-        openrouter_key = os.getenv("OPENROUTER_API_KEY")
-        openai_key = os.getenv("OPENAI_API_KEY")
-        deepseek_key = os.getenv("DEEPSEEK_API_KEY")
-        claude_key = os.getenv("ANTHROPIC_API_KEY")
-        gemini_key = os.getenv("GOOGLE_API_KEY")
-        ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
-        
-        # Try OpenRouter first (to use up OpenRouter credit)
-        if openrouter_key:
-            try:
-                provider = create_llm_provider("openrouter", openrouter_key, model_name=llm_model_name)
-                return await provider.generate(prompt, detected_lang=detected_lang)
-            except InsufficientQuotaError:
-                logger.warning("OpenRouter credit exhausted, falling back to OpenAI")
-                # Fall through to OpenAI
-            except (AuthenticationError, Exception) as e:
-                logger.warning(f"OpenRouter error: {e}, falling back to OpenAI")
-                # Fall through to OpenAI
-        
-        # Try OpenAI second (to use up OpenAI credit)
-        if openai_key:
-            try:
-                provider = create_llm_provider("openai", openai_key, model_name=llm_model_name)
-                return await provider.generate(prompt, detected_lang=detected_lang)
-            except InsufficientQuotaError:
-                logger.warning("OpenAI credit exhausted, falling back to DeepSeek")
-                # Fall through to DeepSeek
-            except (AuthenticationError, Exception) as e:
-                logger.warning(f"OpenAI error: {e}, falling back to DeepSeek")
-                # Fall through to DeepSeek
-        
-        # Try DeepSeek third (long-term provider)
-        if deepseek_key:
-            try:
-                provider = create_llm_provider("deepseek", deepseek_key, model_name=llm_model_name)
-                return await provider.generate(prompt, detected_lang=detected_lang)
-            except Exception as e:
-                logger.warning(f"DeepSeek error: {e}, trying other providers")
-                # Fall through to other providers
-        
-        # Fallback to other providers if main chain fails
-        if claude_key:
-            try:
-                provider = create_llm_provider("claude", claude_key, model_name=llm_model_name)
-                return await provider.generate(prompt, detected_lang=detected_lang)
-            except Exception:
-                pass  # Continue to next provider
-        
-        if gemini_key:
-            try:
-                provider = create_llm_provider("gemini", gemini_key, model_name=llm_model_name)
-                return await provider.generate(prompt, detected_lang=detected_lang)
-            except Exception:
-                pass  # Continue to next provider
-        
-        if ollama_url:
-            # Try Ollama (local, no API key needed)
-            try:
-                provider = create_llm_provider("ollama", api_key="", model_name=llm_model_name, api_url=ollama_url)
-                return await provider.generate(prompt, detected_lang=detected_lang)
-            except Exception:
-                pass  # Ollama not available, continue to error message
-        
-        return "I'm StillMe, but I need API keys to provide real responses. Please configure:\n" \
-               "- llm_provider and llm_api_key in your request, OR\n" \
-               "- Environment variables: OPENROUTER_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY, or OLLAMA_URL"
+        # Fallback to server API keys ONLY if use_server_keys=True (internal/admin use)
+        if use_server_keys:
+            from backend.api.utils.llm_providers import InsufficientQuotaError, AuthenticationError
             
+            openrouter_key = os.getenv("OPENROUTER_API_KEY")
+            openai_key = os.getenv("OPENAI_API_KEY")
+            deepseek_key = os.getenv("DEEPSEEK_API_KEY")
+            
+            # Try OpenRouter first
+            if openrouter_key:
+                try:
+                    provider = create_llm_provider("openrouter", openrouter_key, model_name=llm_model_name)
+                    return await provider.generate(prompt, detected_lang=detected_lang)
+                except (InsufficientQuotaError, AuthenticationError, Exception) as e:
+                    logger.warning(f"OpenRouter error: {e}, falling back to OpenAI")
+            
+            # Try OpenAI second
+            if openai_key:
+                try:
+                    provider = create_llm_provider("openai", openai_key, model_name=llm_model_name)
+                    return await provider.generate(prompt, detected_lang=detected_lang)
+                except (InsufficientQuotaError, AuthenticationError, Exception) as e:
+                    logger.warning(f"OpenAI error: {e}, falling back to DeepSeek")
+            
+            # Try DeepSeek third
+            if deepseek_key:
+                try:
+                    provider = create_llm_provider("deepseek", deepseek_key, model_name=llm_model_name)
+                    return await provider.generate(prompt, detected_lang=detected_lang)
+                except Exception as e:
+                    logger.warning(f"DeepSeek error: {e}")
+        
+        # If we reach here, no valid provider was found
+        raise ValueError(
+            "llm_provider and llm_api_key are REQUIRED. "
+            "StillMe requires users to provide their own API keys to prevent server cost exhaustion. "
+            "Please provide llm_provider and llm_api_key in your request."
+        )
+            
+    except ValueError:
+        # Re-raise validation errors
+        raise
     except Exception as e:
         logger.error(f"AI response error: {e}")
         return f"I encountered an error: {str(e)}"
@@ -635,49 +623,16 @@ async def generate_ai_response_stream(
                 yield token
             return
         
-        # Fallback to environment variables with automatic fallback chain
-        # Priority: OpenRouter → OpenAI → DeepSeek (to maximize credit usage)
-        from backend.api.utils.llm_providers import InsufficientQuotaError, AuthenticationError
+        # User must provide API keys - no fallback to server keys
+        if not llm_provider:
+            yield "ERROR: llm_provider is REQUIRED. StillMe requires users to provide their own API keys to prevent server cost exhaustion. Please provide llm_provider and llm_api_key in your request."
+            return
         
-        openrouter_key = os.getenv("OPENROUTER_API_KEY")
-        openai_key = os.getenv("OPENAI_API_KEY")
-        deepseek_key = os.getenv("DEEPSEEK_API_KEY")
+        if llm_provider != 'ollama' and (not llm_api_key or len(llm_api_key.strip()) == 0):
+            yield f"ERROR: llm_api_key is REQUIRED for provider '{llm_provider}'. StillMe requires users to provide their own API keys to prevent server cost exhaustion. Please provide your API key in the request."
+            return
         
-        # Try OpenRouter first (to use up OpenRouter credit)
-        if openrouter_key:
-            try:
-                provider = create_llm_provider("openrouter", openrouter_key, model_name=llm_model_name)
-                async for token in provider.generate_stream(prompt, detected_lang=detected_lang):
-                    yield token
-                return
-            except (InsufficientQuotaError, AuthenticationError, Exception) as e:
-                logger.warning(f"OpenRouter streaming error: {e}, falling back to OpenAI")
-                # Fall through to OpenAI
-        
-        # Try OpenAI second (to use up OpenAI credit)
-        if openai_key:
-            try:
-                provider = create_llm_provider("openai", openai_key, model_name=llm_model_name)
-                async for token in provider.generate_stream(prompt, detected_lang=detected_lang):
-                    yield token
-                return
-            except (InsufficientQuotaError, AuthenticationError, Exception) as e:
-                logger.warning(f"OpenAI streaming error: {e}, falling back to DeepSeek")
-                # Fall through to DeepSeek
-        
-        # Try DeepSeek third (long-term provider)
-        if deepseek_key:
-            try:
-                provider = create_llm_provider("deepseek", deepseek_key, model_name=llm_model_name)
-                async for token in provider.generate_stream(prompt, detected_lang=detected_lang):
-                    yield token
-                return
-            except Exception as e:
-                logger.warning(f"DeepSeek streaming error: {e}")
-        
-        yield "I'm StillMe, but I need API keys to provide real responses. Please configure:\n" \
-              "- llm_provider and llm_api_key in your request, OR\n" \
-              "- Environment variables: OPENROUTER_API_KEY, OPENAI_API_KEY, DEEPSEEK_API_KEY"
+        yield "ERROR: llm_provider and llm_api_key are REQUIRED. StillMe requires users to provide their own API keys to prevent server cost exhaustion. Please provide llm_provider and llm_api_key in your request."
             
     except Exception as e:
         logger.error(f"AI streaming error: {e}")
