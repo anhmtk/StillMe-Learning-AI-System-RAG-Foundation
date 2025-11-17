@@ -441,14 +441,16 @@ class OpenRouterProvider(LLMProvider):
                         elif response.status_code == 400 and ("context length" in error_message.lower() or "maximum context" in error_message.lower()):
                             raise ContextOverflowError(f"OpenRouter context overflow: {error_message}")
                         else:
-                            return f"OpenRouter API error: {response.status_code} - {error_message}"
+                            # Raise exception instead of returning error string to prevent it from passing through validators
+                            raise Exception(f"OpenRouter API error: {response.status_code} - {error_message}")
                     except (ValueError, KeyError):
-                        # If JSON parsing fails, return raw error
+                        # If JSON parsing fails, check for specific errors
                         if response.status_code == 429 or "quota" in error_text.lower() or "billing" in error_text.lower() or "credit" in error_text.lower():
                             raise InsufficientQuotaError(f"OpenRouter credit exhausted: {error_text}")
                         elif response.status_code == 400 and ("context length" in error_text.lower() or "maximum context" in error_text.lower()):
                             raise ContextOverflowError(f"OpenRouter context overflow: {error_text}")
-                        return f"OpenRouter API error: {response.status_code} - {error_text}"
+                        # Raise exception instead of returning error string
+                        raise Exception(f"OpenRouter API error: {response.status_code} - {error_text}")
                     
         except (InsufficientQuotaError, ContextOverflowError):
             # Re-raise to be handled by caller for fallback
@@ -614,14 +616,16 @@ class OpenAIProvider(LLMProvider):
                         elif response.status_code == 400 and ("context length" in error_message.lower() or "maximum context" in error_message.lower()):
                             raise ContextOverflowError(f"OpenAI context overflow: {error_message}")
                         else:
-                            return f"OpenAI API error: {response.status_code} - {error_message}"
+                            # Raise exception instead of returning error string to prevent it from passing through validators
+                            raise Exception(f"OpenAI API error: {response.status_code} - {error_message}")
                     except (ValueError, KeyError):
-                        # If JSON parsing fails, return raw error
+                        # If JSON parsing fails, check for specific errors
                         if response.status_code == 429 or "quota" in error_text.lower() or "billing" in error_text.lower():
                             raise InsufficientQuotaError(f"OpenAI credit exhausted: {error_text}")
                         elif response.status_code == 400 and ("context length" in error_text.lower() or "maximum context" in error_text.lower()):
                             raise ContextOverflowError(f"OpenAI context overflow: {error_text}")
-                        return f"OpenAI API error: {response.status_code} - {error_text}"
+                        # Raise exception instead of returning error string
+                        raise Exception(f"OpenAI API error: {response.status_code} - {error_text}")
                     
         except (InsufficientQuotaError, ContextOverflowError):
             # Re-raise to be handled by caller

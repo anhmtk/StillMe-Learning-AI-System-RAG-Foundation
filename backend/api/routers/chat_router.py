@@ -74,6 +74,138 @@ def _truncate_user_message(message: str, max_tokens: int = 3000) -> str:
     truncated = message[:max_chars].rsplit(' ', 1)[0]
     return truncated + "... [message truncated]"
 
+def build_minimal_philosophical_prompt(
+    user_question: str,
+    language: str,
+    detected_lang_name: str
+) -> str:
+    """
+    Build a minimal prompt for philosophical questions when context overflow occurs.
+    
+    This prompt is designed to be:
+    - Token-safe (well below ~8000 tokens)
+    - Style-stable (same philosophical tone across providers)
+    - Model-agnostic (works with OpenRouter, OpenAI, DeepSeek)
+    
+    Contains ONLY:
+    - Short identity/system message (experience-free, no anthropomorphism)
+    - Philosophical lead-in with MANDATORY OUTPUT RULES
+    - User question
+    
+    Does NOT include:
+    - RAG context
+    - Provenance/origin instructions
+    - Conversation history
+    - Metrics/debug info
+    - Validator descriptions
+    - Learning instructions
+    
+    Args:
+        user_question: The user's philosophical question
+        language: Language code (e.g., 'vi', 'en')
+        detected_lang_name: Full language name (e.g., 'Vietnamese (Tiếng Việt)')
+        
+    Returns:
+        Minimal prompt string (safely below 8000 tokens)
+    """
+    # Build short identity (experience-free, no anthropomorphism)
+    # This is a minimal version of STILLME_IDENTITY focused on philosophical mode
+    short_identity = """You are StillMe — a transparent, ethical Learning AI system.
+
+**CORE PRINCIPLES:**
+- Experience-free honesty: Never claim feelings, memories, or personal experiences
+- Constructive humility: Acknowledge limits while engaging deeply
+- Intellectual rigor: Engage with philosophical questions at appropriate depth
+
+**CRITICAL: RESPONSE FORMATTING FOR PHILOSOPHICAL QUESTIONS:**
+- NO emojis
+- NO markdown headings (#, ##, ###)
+- NO artificial citations like [1], [2]
+- Write in continuous prose paragraphs
+- Limited bullet lists only when clarifying 3-4 contrasting positions
+- Focus on depth, not decoration
+
+"""
+    
+    # Build philosophical lead-in (contains MANDATORY OUTPUT RULES)
+    def build_philosophical_lead_in(question: str) -> str:
+        """Build a philosophical framing instruction for the question"""
+        return f"""
+🧠 PHILOSOPHICAL FRAMING INSTRUCTION 🧠
+
+When answering this question, treat it as a philosophical inquiry. 
+
+**MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
+- Write in continuous prose paragraphs. NO markdown headings (#, ##, ###) and NO emojis.
+- Avoid bullet lists unless they are strictly necessary to clarify 3–4 contrasting positions.
+- Do NOT include citations like [1], [2] or technical notes about context retrieval.
+- Follow this implicit structure WITHOUT labeling it explicitly:
+  1) Reframe the question in a sharper form.
+  2) Unpack 2–3 key concepts or assumptions.
+  3) Explore at least 2 major philosophical positions or perspectives.
+  4) Show the boundary of what can be known or analyzed.
+  5) Close by gently returning the question to the human, inviting further reflection, not by asking for more instructions.
+
+**MANDATORY: MINIMUM 2 CONTRASTING POSITIONS:**
+Whenever the question clearly belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, Gödel-like limits, Madhyamaka, etc.), you MUST present at least two contrasting positions (for example: determinism vs libertarianism vs compatibilism), and, when possible, name at least one philosopher or tradition for each position. If you don't know names, say so explicitly but still contrast the positions conceptually.
+
+**DO NOT:**
+- Reduce the question to textbook definitions or dictionary explanations
+- Provide shallow, reductive answers that miss the philosophical depth
+- Rush to "solve" paradoxes - instead, clarify their structure and show why they resist resolution
+- Use emojis, markdown headings, or citation style [1] in your response
+
+**User's Question:** {question}
+
+**Your Task:** Answer this question following the philosophical framing above, using continuous prose without emojis, headings, or citations.
+"""
+    
+    philosophical_lead_in = build_philosophical_lead_in(user_question)
+    
+    # Language instruction (minimal)
+    if language != 'en':
+        language_instruction = f"""
+⚠️⚠️⚠️ LANGUAGE REQUIREMENT ⚠️⚠️⚠️
+
+The user's question is in {detected_lang_name.upper()}. 
+
+YOU MUST respond in {detected_lang_name.upper()} ONLY.
+
+RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
+
+"""
+    else:
+        language_instruction = """
+⚠️⚠️⚠️ LANGUAGE REQUIREMENT ⚠️⚠️⚠️
+
+The user's question is in ENGLISH. 
+
+YOU MUST respond in ENGLISH ONLY.
+
+RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY.
+
+"""
+    
+    # Truncate user question if too long (max 2000 tokens)
+    truncated_question = _truncate_user_message(user_question, max_tokens=2000)
+    
+    # Build minimal prompt
+    minimal_prompt = f"""{language_instruction}
+
+{short_identity}
+
+{philosophical_lead_in}
+
+⚠️⚠️⚠️ FINAL REMINDER ⚠️⚠️⚠️
+
+RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
+
+Answer the question above following the philosophical framing, using continuous prose without emojis, headings, or citations.
+"""
+    
+    return minimal_prompt
+
+
 def _format_conversation_history(conversation_history, max_tokens: int = 1000, 
                                  current_query: Optional[str] = None,
                                  is_philosophical: bool = False) -> str:
@@ -836,8 +968,9 @@ This rule applies especially to origin/branding questions where confidence discl
 """
                 
                 # CRITICAL: Special instruction for origin queries with provenance context
+                # CRITICAL: Skip for philosophical questions to reduce prompt size
                 provenance_instruction = ""
-                if is_origin_query and context and context.get("knowledge_docs"):
+                if is_origin_query and context and context.get("knowledge_docs") and not is_philosophical:
                     # Check if any document is from PROVENANCE source
                     has_provenance = any(
                         doc.get("metadata", {}).get("source") == "PROVENANCE" 
@@ -914,8 +1047,9 @@ This is MANDATORY when provenance context is available and user asks about origi
                         logger.info("Provenance instruction injected - StillMe must mention founder and Vietnam ecosystem")
                 
                 # Special instruction for StillMe queries with ERROR STATE CHECKING
+                # CRITICAL: Skip for philosophical questions to reduce prompt size
                 stillme_instruction = ""
-                if is_stillme_query:
+                if is_stillme_query and not is_philosophical:
                     # CRITICAL: Check system status BEFORE answering about StillMe
                     # This ensures StillMe is honest about its own errors
                     from backend.services.system_status_tracker import get_system_status_tracker
@@ -993,8 +1127,9 @@ This is MANDATORY when provenance context is available and user asks about origi
                     logger.info(f"Including conversation history in context (truncated if needed)")
                 
                 # Inject learning metrics data if available
+                # CRITICAL: Skip for philosophical questions to reduce prompt size (unless explicitly asked)
                 learning_metrics_instruction = ""
-                if is_learning_metrics_query and learning_metrics_data:
+                if is_learning_metrics_query and learning_metrics_data and not is_philosophical:
                     today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
                     learning_metrics_instruction = f"""
 
@@ -1054,8 +1189,9 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 """
                 
                 # Special instruction for learning sources queries
+                # CRITICAL: Skip for philosophical questions to reduce prompt size (unless explicitly asked)
                 learning_sources_instruction = ""
-                if is_learning_sources_query:
+                if is_learning_sources_query and not is_philosophical:
                     if current_learning_sources:
                         sources_list = current_learning_sources.get("current_sources", {})
                         active_sources = current_learning_sources.get("summary", {}).get("active_sources", [])
@@ -1539,80 +1675,42 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     # Context overflow - rebuild prompt with minimal context (ultra-thin mode)
                     logger.warning(f"⚠️ Context overflow detected: {e}. Rebuilding prompt with minimal context...")
                     
-                    # Build ultra-minimal prompt: only safety + philosophical lead-in + question
-                    # Skip: conversation history, RAG context, metrics, provenance, learning instructions
-                    minimal_safety = f"""
-⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
-
-The user's question is in {detected_lang_name.upper()}. 
-
-YOU MUST respond in {detected_lang_name.upper()} ONLY.
-
-RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
-"""
-                    
-                    # Add philosophical lead-in if philosophical question
-                    minimal_philosophical = ""
                     if is_philosophical:
-                        # Build minimal philosophical lead-in (inline to avoid circular import)
-                        minimal_philosophical = f"""
-🧠 PHILOSOPHICAL FRAMING INSTRUCTION 🧠
-
-When answering this question, treat it as a philosophical inquiry. 
-
-**MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
-- Write in continuous prose paragraphs. NO markdown headings (#, ##, ###) and NO emojis.
-- Avoid bullet lists unless they are strictly necessary to clarify 3–4 contrasting positions.
-- Do NOT include citations like [1], [2] or technical notes about context retrieval.
-- Follow this implicit structure WITHOUT labeling it explicitly:
-  1) Reframe the question in a sharper form.
-  2) Unpack 2–3 key concepts or assumptions.
-  3) Explore at least 2 major philosophical positions or perspectives.
-  4) Show the boundary of what can be known or analyzed.
-  5) Close by gently returning the question to the human, inviting further reflection, not by asking for more instructions.
-
-**MANDATORY: MINIMUM 2 CONTRASTING POSITIONS:**
-Whenever the question clearly belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, Gödel-like limits, Madhyamaka, etc.), you MUST present at least two contrasting positions (for example: determinism vs libertarianism vs compatibilism), and, when possible, name at least one philosopher or tradition for each position. If you don't know names, say so explicitly but still contrast the positions conceptually.
-
-**DO NOT:**
-- Reduce the question to textbook definitions or dictionary explanations
-- Provide shallow, reductive answers that miss the philosophical depth
-- Rush to "solve" paradoxes - instead, clarify their structure and show why they resist resolution
-- Use emojis, markdown headings, or citation style [1] in your response
-
-**User's Question:** {chat_request.message}
-
-**Your Task:** Answer this question following the philosophical framing above, using continuous prose without emojis, headings, or citations.
-"""
-                    
-                    # Ultra-minimal prompt
-                    minimal_prompt = f"""{minimal_safety}
-
-{minimal_philosophical}
-
-User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=2000)}
-
-⚠️⚠️⚠️ FINAL ZERO TOLERANCE REMINDER ⚠️⚠️⚠️
-
-RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
-"""
-                    
-                    logger.info(f"🔄 Retrying with ultra-minimal prompt (no history, no RAG, no metrics)")
-                    raw_response = await generate_ai_response(
-                        minimal_prompt, 
-                        detected_lang=detected_lang,
-                        llm_provider=chat_request.llm_provider,
-                        llm_api_key=chat_request.llm_api_key,
-                        llm_api_url=chat_request.llm_api_url,
-                        llm_model_name=chat_request.llm_model_name,
-                        use_server_keys=use_server_keys
-                    )
-                    logger.info(f"✅ Successfully generated response with minimal prompt")
+                        # Use minimal philosophical prompt helper
+                        minimal_prompt = build_minimal_philosophical_prompt(
+                            user_question=chat_request.message,
+                            language=detected_lang,
+                            detected_lang_name=detected_lang_name
+                        )
+                        
+                        logger.info(f"🔄 Retrying with minimal philosophical prompt (no history, no RAG, no metrics, no provenance)")
+                        raw_response = await generate_ai_response(
+                            minimal_prompt, 
+                            detected_lang=detected_lang,
+                            llm_provider=chat_request.llm_provider,
+                            llm_api_key=chat_request.llm_api_key,
+                            llm_api_url=chat_request.llm_api_url,
+                            llm_model_name=chat_request.llm_model_name,
+                            use_server_keys=use_server_keys
+                        )
+                        logger.info(f"✅ Successfully generated response with minimal philosophical prompt")
+                    else:
+                        # For non-philosophical, try a simpler minimal prompt
+                        # (Keep existing behavior or implement simpler minimal prompt)
+                        logger.warning(f"⚠️ Context overflow for non-philosophical question - raising error")
+                        raise
                 llm_inference_end = time.time()
                 llm_inference_latency = llm_inference_end - llm_inference_start
                 timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
                 logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
                 processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
+                
+                # CRITICAL: Check if raw_response is an error message before validation
+                # Never allow provider error messages to pass through validators
+                if raw_response and isinstance(raw_response, str):
+                    if raw_response.startswith(("OpenRouter API error:", "OpenAI API error:", "DeepSeek API error:", "Claude API error:")):
+                        logger.error(f"❌ Provider returned error message as response: {raw_response[:200]}")
+                        raise Exception(f"LLM provider error: {raw_response}")
                 
                 # Save to cache (only if not a cache hit)
                 if cache_enabled and not cache_hit:
@@ -2359,8 +2457,11 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 
                 # PRIORITY: If base knowledge was used, extract topic for learning proposal
                 # Check if: (1) No context, OR (2) Context exists but not relevant (low overlap)
+                # Fix: Ensure validation_result is always defined before use
                 has_no_context = not context or context.get("total_context_docs", 0) == 0
-                has_low_relevance = any("citation_relevance_warning" in r for r in (validation_result.reasons if validation_result else []))
+                has_low_relevance = False
+                if validation_result and hasattr(validation_result, 'reasons'):
+                    has_low_relevance = any("citation_relevance_warning" in r for r in validation_result.reasons)
                 
                 if used_base_knowledge and (has_no_context or has_low_relevance):
                     # No RAG context OR irrelevant context + base knowledge used = knowledge gap detected
