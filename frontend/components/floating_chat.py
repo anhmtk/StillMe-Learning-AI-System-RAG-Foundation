@@ -1416,6 +1416,20 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                         if (e.target.closest('.stillme-chat-header-btn, .stillme-chat-close')) return;
                                         if (parentPanel.classList.contains('fullscreen') || parentPanel.classList.contains('minimized')) return;
                                         
+                                        // CRITICAL: Check if click is in scrollbar area - prevent drag if so
+                                        const parentMessages = parentDoc.getElementById('stillme-chat-messages');
+                                        if (parentMessages) {{
+                                            const panelRect = parentPanel.getBoundingClientRect();
+                                            const messagesRect = parentMessages.getBoundingClientRect();
+                                            const clickX = e.clientX;
+                                            const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                            
+                                            if (clickX >= scrollbarAreaStart && clickX <= panelRect.right) {{
+                                                console.log('StillMe Chat: Click in scrollbar area (parent), preventing drag');
+                                                return; // Don't start drag
+                                            }}
+                                        }}
+                                        
                                         parentIsDragging = true;
                                         parentDragStartX = e.clientX;
                                         parentDragStartY = e.clientY;
@@ -1526,6 +1540,28 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                     // Mouse move handler for parent panel drag/resize
                                     // CRITICAL: Attach to parent window, not parent document, to ensure it works
                                     const parentMouseMoveHandler = (e) => {{
+                                        // CRITICAL: Check if mouse is in scrollbar area - disable drag/resize if so
+                                        const parentMessages = parentDoc.getElementById('stillme-chat-messages');
+                                        if (parentMessages && (parentIsDragging || parentIsResizing)) {{
+                                            const panelRect = parentPanel.getBoundingClientRect();
+                                            const mouseX = e.clientX;
+                                            const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                            
+                                            if (mouseX >= scrollbarAreaStart && mouseX <= panelRect.right) {{
+                                                // Mouse is in scrollbar area - stop drag/resize
+                                                if (parentIsDragging) {{
+                                                    console.log('StillMe Chat: Mouse in scrollbar area (parent), stopping drag');
+                                                    parentIsDragging = false;
+                                                }}
+                                                if (parentIsResizing) {{
+                                                    console.log('StillMe Chat: Mouse in scrollbar area (parent), stopping resize');
+                                                    parentIsResizing = false;
+                                                    parentResizeHandle = null;
+                                                }}
+                                                return; // Don't process drag/resize
+                                            }}
+                                        }}
+                                        
                                         // Debug logging
                                         if (parentIsDragging || parentIsResizing) {{
                                             console.log(`StillMe Chat: Mouse move - dragging: ${{parentIsDragging}}, resizing: ${{parentIsResizing}}, handle: ${{parentResizeHandle}}`);
