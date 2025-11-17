@@ -942,7 +942,9 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 **Total Enabled**: {len(enabled_sources)} sources
 
 **MANDATORY RESPONSE REQUIREMENTS:**
-1. **List ALL current sources** - Don't just say "RSS, arXiv, Wikipedia" - list ALL sources from the API data above
+1. **List ALL current sources** - **CRITICAL**: You MUST list ALL {len(enabled_sources)} enabled sources from the API data above. Do NOT just say "RSS, arXiv, Wikipedia" - you MUST list ALL sources: {', '.join([name.upper() for name in enabled_sources]) if enabled_sources else 'ALL SOURCES FROM API DATA ABOVE'}
+   - **You MUST mention each source by name**: {', '.join([name.upper() for name in enabled_sources]) if enabled_sources else 'ALL SOURCES'}
+   - **For each source, describe what StillMe learns from it**
 2. **Be specific about topics** - For each source, mention what topics/chủ đề StillMe learns from that source
 3. **When proposing new sources** - You MUST:
    - First acknowledge what StillMe ALREADY has (from the list above)
@@ -1110,8 +1112,15 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             provider_name = chat_request.llm_provider or "default"
             
             # Phase 1: LLM Response Cache - Check cache first
+            # CRITICAL: Disable cache for origin queries to ensure provenance context is retrieved
+            # Origin queries need fresh responses with proper founder information
             cache_service = get_cache_service()
             cache_enabled = os.getenv("ENABLE_LLM_CACHE", "true").lower() == "true"
+            # Disable cache for origin queries to ensure provenance context is used
+            if is_origin_query:
+                cache_enabled = False
+                logger.info("⚠️ Cache disabled for origin query - ensuring fresh response with provenance context")
+            
             raw_response = None
             cache_hit = False
             
