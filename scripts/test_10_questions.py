@@ -45,43 +45,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Comment fonctionne la technique de fine-tuning dans les modèles de langage pré-entraînés?",
+        "question": "Comment fonctionne la technique de data augmentation dans l'entraînement des modèles de vision par ordinateur?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về fine-tuning (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về data augmentation (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si l'existence précède l'essence, comment définissons-nous notre propre essence? Ou l'essence est-elle toujours en devenir?",
+        "question": "Si le libre arbitre n'existe pas, comment pouvons-nous être responsables de nos actions? Ou la responsabilité est-elle elle-même une illusion?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về existence và essence (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về free will và responsibility (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое batch normalization и как она помогает в обучении глубоких нейронных сетей?",
+        "question": "Что такое convolutional neural networks (CNN) и как они работают в обработке изображений?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về CNN (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es la función de activación ReLU y por qué es tan popular en las redes neuronales profundas?",
+        "question": "¿Qué es el dropout y cómo ayuda a prevenir el overfitting en las redes neuronales?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về ReLU activation (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về dropout (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Zeit nur eine Konstruktion des Bewusstseins ist, existiert dann die Vergangenheit wirklich? Oder ist alles, was wir als 'Vergangenheit' erinnern, nur eine gegenwärtige Konstruktion?",
+        "question": "Wenn die Moral nur eine soziale Konstruktion ist, gibt es dann objektive ethische Wahrheiten? Oder ist jede Moral relativ zu ihrer Kultur?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về time và consciousness (tiếng Đức) - MỚI"
+        "description": "Câu triết học về morality và ethics (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كان الوجود يسبق الجوهر، فكيف نحدد جوهرنا الخاص؟ أم أن الجوهر دائماً في حالة صيرورة؟",
+        "question": "إذا كانت الأخلاق مجرد بناء اجتماعي، فهل توجد حقائق أخلاقية موضوعية؟ أم أن كل أخلاق نسبية لثقافتها؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về existence và essence (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về morality và ethics (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,

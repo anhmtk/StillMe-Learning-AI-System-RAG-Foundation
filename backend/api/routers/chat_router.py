@@ -970,16 +970,37 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 logger.info(f"✅ Using patched answer with auto-added citation. Reasons: {validation_result.reasons}")
             else:
                 # No patched answer - use FallbackHandler to add citation
-                fallback_handler = FallbackHandler()
-                response = fallback_handler.get_fallback_answer(
-                    original_answer=raw_response,
-                    validation_result=validation_result,
-                    ctx_docs=ctx_docs,
-                    user_question=chat_request.message,
-                    detected_lang=detected_lang,
-                    input_language=detected_lang
-                )
-                logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
+                # CRITICAL: Ensure raw_response is valid before adding citation
+                if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
+                    logger.error(f"⚠️ raw_response is None or empty when trying to add citation - using fallback")
+                    fallback_handler = FallbackHandler()
+                    response = fallback_handler.get_fallback_answer(
+                        original_answer="",  # Empty since raw_response is invalid
+                        validation_result=validation_result,
+                        ctx_docs=ctx_docs,
+                        user_question=chat_request.message,
+                        detected_lang=detected_lang,
+                        input_language=detected_lang
+                    )
+                    used_fallback = True
+                else:
+                    fallback_handler = FallbackHandler()
+                    response = fallback_handler.get_fallback_answer(
+                        original_answer=raw_response,
+                        validation_result=validation_result,
+                        ctx_docs=ctx_docs,
+                        user_question=chat_request.message,
+                        detected_lang=detected_lang,
+                        input_language=detected_lang
+                    )
+                    # Check if FallbackHandler returned a fallback message (not the patched answer)
+                    # If it's a fallback message, mark as used_fallback
+                    from backend.api.utils.error_detector import is_fallback_message
+                    if is_fallback_message(response):
+                        used_fallback = True
+                        logger.warning(f"⚠️ FallbackHandler returned fallback message instead of patched answer")
+                    else:
+                        logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
         else:
             # For non-critical validation failures, check if they're just warnings (not violations)
             # IdentityCheckValidator can return warnings (identity_warning:*) that shouldn't cause failure
