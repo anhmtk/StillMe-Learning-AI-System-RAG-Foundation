@@ -1048,6 +1048,12 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                             logger.warning(f"⚠️ FallbackHandler returned fallback message instead of patched answer")
                         else:
                             logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
+                    # CRITICAL: Ensure response is not None/empty after adding citation
+                    if not response or not isinstance(response, str) or not response.strip():
+                        logger.error(f"⚠️ Response is None or empty after adding citation - using fallback")
+                        from backend.api.utils.error_detector import get_fallback_message_for_error
+                        response = get_fallback_message_for_error("generic", detected_lang)
+                        used_fallback = True
         else:
             # For non-critical validation failures, check if they're just warnings (not violations)
             # IdentityCheckValidator can return warnings (identity_warning:*) that shouldn't cause failure
@@ -2604,6 +2610,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     # CRITICAL: Ensure raw_response is valid before validation
                     if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
                         logger.error(f"⚠️ raw_response is None or empty before validation - using fallback")
+                        logger.error(f"⚠️ Debug: raw_response type={type(raw_response)}, value={raw_response[:100] if raw_response else 'None'}")
+                        logger.error(f"⚠️ Debug: processing_steps so far: {processing_steps}")
                         from backend.api.utils.error_detector import get_fallback_message_for_error
                         response = get_fallback_message_for_error("generic", detected_lang)
                         validation_info = None

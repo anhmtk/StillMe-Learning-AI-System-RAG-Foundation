@@ -45,43 +45,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Comment fonctionne l'algorithme de gradient stochastique (SGD) dans l'apprentissage profond?",
+        "question": "Comment fonctionne l'attention dans les transformers?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về SGD (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si la réalité est une construction sociale, comment pouvons-nous distinguer la vérité de l'illusion? Ou cette distinction est-elle elle-même une construction?",
+        "question": "Si le libre arbitre n'existe pas, comment pouvons-nous être responsables de nos actions? Ou la responsabilité est-elle elle-même une illusion?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality và truth (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về free will và responsibility (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое долгая краткосрочная память (LSTM) и как она решает проблему исчезающего градиента?",
+        "question": "Что такое генеративно-состязательные сети (GAN) и как они работают?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về LSTM (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về GAN (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es la normalización por lotes (batch normalization) y cómo ayuda en el entrenamiento de redes neuronales?",
+        "question": "¿Qué es el dropout en las redes neuronales y cómo previene el sobreajuste?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về dropout (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Realität nur eine Konstruktion ist, wie können wir dann zwischen Wahrheit und Illusion unterscheiden? Oder ist diese Unterscheidung selbst eine Konstruktion?",
+        "question": "Wenn der freie Wille nicht existiert, wie können wir dann für unsere Handlungen verantwortlich sein? Oder ist Verantwortung selbst eine Illusion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality và truth (tiếng Đức) - MỚI"
+        "description": "Câu triết học về free will và responsibility (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كانت الواقعية مجرد بناء، فكيف يمكننا التمييز بين الحقيقة والوهم؟ أم أن هذا التمييز نفسه بناء؟",
+        "question": "إذا لم يكن هناك إرادة حرة، فكيف يمكننا أن نكون مسؤولين عن أفعالنا؟ أم أن المسؤولية نفسها وهم؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality và truth (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về free will và responsibility (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
