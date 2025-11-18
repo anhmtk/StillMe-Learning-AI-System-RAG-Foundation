@@ -2356,18 +2356,25 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     sanitizer = get_style_sanitizer()
                     sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
                     
-                # CRITICAL: Check if sanitized response is a technical error BEFORE quality evaluation
-                from backend.api.utils.error_detector import is_technical_error
-                is_error, error_type = is_technical_error(sanitized_response)
+                    # CRITICAL: Check if sanitized response is a technical error BEFORE quality evaluation
+                    from backend.api.utils.error_detector import is_technical_error
+                    is_error, error_type = is_technical_error(sanitized_response)
                 
-                if is_error:
-                    # Technical error detected - skip quality evaluation and rewrite
-                    logger.warning(
-                        f"⚠️ Technical error detected in sanitized response (type: {error_type}), "
-                        f"skipping quality evaluation and rewrite"
-                    )
-                    final_response = sanitized_response
-                    processing_steps.append(f"⚠️ Technical error detected - skipping post-processing")
+                    if is_error or is_fallback:
+                        # Technical error or fallback message detected - skip quality evaluation and rewrite
+                        if is_error:
+                            logger.warning(
+                                f"⚠️ Technical error detected in sanitized response (type: {error_type}), "
+                                f"skipping quality evaluation and rewrite"
+                            )
+                            processing_steps.append(f"⚠️ Technical error detected - skipping post-processing")
+                        else:
+                            logger.info(
+                                f"🛑 Fallback meta-answer detected in sanitized response, "
+                                f"skipping quality evaluation and rewrite"
+                            )
+                            processing_steps.append(f"🛑 Fallback message detected - skipping post-processing")
+                        final_response = sanitized_response
                 else:
                     # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
                     # OPTIMIZATION: Check cache first
@@ -2748,20 +2755,28 @@ Remember: RESPOND IN ENGLISH ONLY."""
                     # Stage 2: Hard Filter (0 token) - Style Sanitization
                     sanitizer = get_style_sanitizer()
                     sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
-                
-                # CRITICAL: Check if sanitized response is a technical error BEFORE quality evaluation
-                from backend.api.utils.error_detector import is_technical_error
-                is_error, error_type = is_technical_error(sanitized_response)
-                
-                if is_error:
-                    # Technical error detected - skip quality evaluation and rewrite
-                    logger.warning(
-                        f"⚠️ Technical error detected in sanitized response (non-RAG, type: {error_type}), "
-                        f"skipping quality evaluation and rewrite"
-                    )
-                    final_response = sanitized_response
-                    processing_steps.append(f"⚠️ Technical error detected - skipping post-processing")
-                else:
+                    
+                    # CRITICAL: Check if sanitized response is a technical error or fallback message BEFORE quality evaluation
+                    from backend.api.utils.error_detector import is_technical_error, is_fallback_message
+                    is_error, error_type = is_technical_error(sanitized_response)
+                    is_fallback = is_fallback_message(sanitized_response)
+                    
+                    if is_error or is_fallback:
+                        # Technical error or fallback message detected - skip quality evaluation and rewrite
+                        if is_error:
+                            logger.warning(
+                                f"⚠️ Technical error detected in sanitized response (non-RAG, type: {error_type}), "
+                                f"skipping quality evaluation and rewrite"
+                            )
+                            processing_steps.append(f"⚠️ Technical error detected - skipping post-processing")
+                        else:
+                            logger.info(
+                                f"🛑 Fallback meta-answer detected in sanitized response (non-RAG), "
+                                f"skipping quality evaluation and rewrite"
+                            )
+                            processing_steps.append(f"🛑 Fallback message detected - skipping post-processing")
+                        final_response = sanitized_response
+                    else:
                     # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
                     # OPTIMIZATION: Check cache first
                     evaluator = get_quality_evaluator()
