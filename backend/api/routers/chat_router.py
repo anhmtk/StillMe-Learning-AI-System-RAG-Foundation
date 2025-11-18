@@ -2474,8 +2474,11 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             
             # If not in cache, call LLM
             if not raw_response:
+                logger.info(f"🔍 DEBUG: About to call LLM - raw_response is None, cache_hit={cache_hit}, cache_enabled={cache_enabled}")
                 processing_steps.append(f"🤖 Calling AI model ({provider_name})...")
                 llm_inference_start = time.time()
+            else:
+                logger.warning(f"⚠️ DEBUG: Skipping LLM call - raw_response is not None (type={type(raw_response)}, length={len(raw_response) if raw_response else 0}), cache_hit={cache_hit}")
                 # Support user-provided LLM config (for self-hosted deployments)
                 # For internal/dashboard calls: use server API keys if llm_provider not provided
                 # For public API: require user-provided API keys

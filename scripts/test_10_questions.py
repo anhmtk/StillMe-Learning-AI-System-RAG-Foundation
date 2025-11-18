@@ -45,43 +45,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Comment fonctionne l'attention dans les transformers?",
+        "question": "Comment fonctionne le mécanisme d'attention multi-têtes (multi-head attention) dans les transformers?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về multi-head attention (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si le libre arbitre n'existe pas, comment pouvons-nous être responsables de nos actions? Ou la responsabilité est-elle elle-même une illusion?",
+        "question": "Si la conscience n'est qu'une illusion, comment pouvons-nous distinguer la réalité de l'illusion? Ou cette distinction est-elle elle-même une illusion?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về free will và responsibility (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về consciousness và reality (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое генеративно-состязательные сети (GAN) и как они работают?",
+        "question": "Что такое вариационные автокодировщики (VAE) и как они работают?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về GAN (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về VAE (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es el dropout en las redes neuronales y cómo previene el sobreajuste?",
+        "question": "¿Qué es la regularización L1 y L2 en el aprendizaje automático y cómo previenen el sobreajuste?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về dropout (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về L1/L2 regularization (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn der freie Wille nicht existiert, wie können wir dann für unsere Handlungen verantwortlich sein? Oder ist Verantwortung selbst eine Illusion?",
+        "question": "Wenn das Bewusstsein nur eine Illusion ist, wie können wir dann zwischen Realität und Illusion unterscheiden? Oder ist diese Unterscheidung selbst eine Illusion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về free will và responsibility (tiếng Đức) - MỚI"
+        "description": "Câu triết học về consciousness và reality (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا لم يكن هناك إرادة حرة، فكيف يمكننا أن نكون مسؤولين عن أفعالنا؟ أم أن المسؤولية نفسها وهم؟",
+        "question": "إذا كان الوعي مجرد وهم، فكيف يمكننا التمييز بين الواقع والوهم؟ أم أن هذا التمييز نفسه وهم؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về free will và responsibility (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về consciousness và reality (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
