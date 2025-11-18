@@ -206,9 +206,11 @@ class QualityEvaluator:
             # Exception: If response is long (>1200 chars) and has structure, be more lenient
             if text_length > 1200 and has_structure:
                 quality_threshold = 0.4  # Even more lenient
+                # Fix format string: cannot use conditional in format specifier
+                structure_score_display = f"{structure_score:.2f}" if is_philosophical else "N/A"
                 logger.debug(
                     f"Lenient threshold for long structured response: length={text_length}, "
-                    f"argument_score={argument_score:.2f}, structure_score={structure_score:.2f if is_philosophical else 'N/A'}"
+                    f"argument_score={argument_score:.2f}, structure_score={structure_score_display}"
                 )
         else:
             # For non-philosophical: standard threshold

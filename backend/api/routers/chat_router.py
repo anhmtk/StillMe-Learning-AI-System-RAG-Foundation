@@ -2553,15 +2553,75 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             
             detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
             
+            # Check if this is a philosophical question for non-RAG path
+            is_philosophical_non_rag = False
+            try:
+                from backend.core.question_classifier import is_philosophical_question
+                is_philosophical_non_rag = is_philosophical_question(chat_request.message)
+            except Exception:
+                pass  # If classifier fails, assume non-philosophical
+            
+            # Helper function to estimate tokens
+            def estimate_tokens(text: str) -> int:
+                """Estimate token count (~4 chars per token)"""
+                return len(text) // 4 if text else 0
+            
+            # For philosophical questions: truncate user question to 512 tokens max
+            user_question_for_prompt = chat_request.message
+            if is_philosophical_non_rag:
+                user_question_tokens = estimate_tokens(chat_request.message)
+                if user_question_tokens > 512:
+                    logger.warning(
+                        f"User question too long for philosophical non-RAG ({user_question_tokens} tokens), truncating to 512 tokens"
+                    )
+                    user_question_for_prompt = _truncate_user_message(chat_request.message, max_tokens=512)
+                    user_question_tokens = estimate_tokens(user_question_for_prompt)
+                else:
+                    user_question_tokens = estimate_tokens(chat_request.message)
+            else:
+                user_question_tokens = estimate_tokens(chat_request.message)
+            
             # Build conversation history context if provided (with token limits)
             # Reduced from 2000 to 1000 tokens to leave more room for system prompt and context
-            conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=1000)
-            if conversation_history_text:
-                logger.info(f"Including conversation history in context (truncated if needed, non-RAG)")
+            # For philosophical questions, skip conversation history to reduce prompt size
+            conversation_history_text = ""
+            if not is_philosophical_non_rag:
+                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=1000)
+                if conversation_history_text:
+                    logger.info(f"Including conversation history in context (truncated if needed, non-RAG)")
+            else:
+                logger.info(f"Philosophical question detected (non-RAG) - skipping conversation history to reduce prompt size")
             
-            # Strong language instruction - put FIRST
-            if detected_lang != 'en':
-                language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+            # For philosophical questions: check if we need minimal prompt mode
+            use_minimal_prompt = False
+            if is_philosophical_non_rag:
+                # Estimate system prompt tokens (rough estimate: ~3500 tokens for full identity)
+                system_tokens_estimate = 3500
+                # Estimate prompt tokens (language instruction + conversation history)
+                prompt_tokens_estimate = estimate_tokens(conversation_history_text) + 200  # ~200 for language instruction
+                total_tokens_estimate = system_tokens_estimate + prompt_tokens_estimate + user_question_tokens
+                
+                if total_tokens_estimate > 14000:
+                    use_minimal_prompt = True
+                    logger.warning(
+                        f"Using minimal philosophical prompt to avoid context overflow: "
+                        f"system={system_tokens_estimate}, prompt={prompt_tokens_estimate}, question={user_question_tokens}, "
+                        f"total={total_tokens_estimate}"
+                    )
+            
+            # Build prompt based on mode
+            if use_minimal_prompt:
+                # Use minimal philosophical prompt
+                enhanced_prompt = build_minimal_philosophical_prompt(
+                    user_question=user_question_for_prompt,
+                    language=detected_lang,
+                    detected_lang_name=detected_lang_name
+                )
+            else:
+                # Use full prompt
+                # Strong language instruction - put FIRST
+                if detected_lang != 'en':
+                    language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
 
 THE USER'S QUESTION IS WRITTEN IN {detected_lang_name.upper()}.
 
@@ -2574,14 +2634,14 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {detected_lang_name.upper()}.
 THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
 """
-                base_prompt = f"""{language_instruction}
+                    base_prompt = f"""{language_instruction}
 
-{conversation_history_text}User Question: {_truncate_user_message(chat_request.message, max_tokens=3000)}
+{conversation_history_text}User Question: {user_question_for_prompt}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
 """
-            else:
-                base_prompt = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+                else:
+                    base_prompt = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
 
 THE USER'S QUESTION IS WRITTEN IN ENGLISH.
 
@@ -2597,7 +2657,7 @@ THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
 🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
 
-User Question: {_truncate_user_message(chat_request.message, max_tokens=3000)}
+User Question: {user_question_for_prompt}
 
 **YOUR PRIMARY TASK IS TO ANSWER THE USER QUESTION ABOVE DIRECTLY AND ACCURATELY.**
 - Focus on what the user is actually asking, not on general philosophy
@@ -2613,12 +2673,12 @@ User Question: {_truncate_user_message(chat_request.message, max_tokens=3000)}
 - This is more important than analyzing formatting, clarity, or other minor issues
 
 Remember: RESPOND IN ENGLISH ONLY."""
-            
-            if enable_validators:
-                from backend.identity.injector import inject_identity
-                enhanced_prompt = inject_identity(base_prompt)
-            else:
-                enhanced_prompt = base_prompt
+                
+                if enable_validators:
+                    from backend.identity.injector import inject_identity
+                    enhanced_prompt = inject_identity(base_prompt)
+                else:
+                    enhanced_prompt = base_prompt
             
             # LLM_Inference_Latency: Time from API call start to response received
             llm_inference_start = time.time()
@@ -2757,6 +2817,10 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 pass  # If classifier fails, assume non-philosophical
             
             postprocessing_start = time.time()
+            # Initialize quality_result to prevent UnboundLocalError when fallback is detected
+            quality_result = None
+            final_response = None
+            
             try:
                 from backend.postprocessing.style_sanitizer import get_style_sanitizer
                 from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
@@ -2800,6 +2864,8 @@ Remember: RESPOND IN ENGLISH ONLY."""
                             )
                             processing_steps.append(f"🛑 Fallback message detected - skipping post-processing")
                         final_response = sanitized_response
+                        # Skip all remaining post-processing (quality evaluation, rewrite)
+                        # quality_result remains None, which is fine - we won't use it
                     else:
                         # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
                         # OPTIMIZATION: Check cache first
@@ -2824,50 +2890,55 @@ Remember: RESPOND IN ENGLISH ONLY."""
                             response=sanitized_response,
                             quality_result=quality_result
                         )
-                    
-                    # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
-                    should_rewrite, rewrite_reason = optimizer.should_rewrite(
-                        quality_result=quality_result,
-                        is_philosophical=is_philosophical_non_rag,
-                        response_length=len(sanitized_response)
-                    )
-                    
-                    # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
-                    if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
-                        logger.info(
-                            f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). "
-                            f"Issues: {quality_result['reasons']}, "
-                            f"score: {quality_result.get('overall_score', 'N/A')}, "
-                            f"length: {len(sanitized_response)}"
-                        )
-                        processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
                         
-                        rewrite_llm = get_rewrite_llm()
-                        rewrite_result = await rewrite_llm.rewrite(
-                            text=sanitized_response,
-                            original_question=chat_request.message,
-                            quality_issues=quality_result["reasons"],
+                        # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
+                        # Only call should_rewrite if quality_result is available
+                        should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                            quality_result=quality_result,
                             is_philosophical=is_philosophical_non_rag,
-                            detected_lang=detected_lang
+                            response_length=len(sanitized_response)
                         )
                         
-                        if rewrite_result.was_rewritten:
-                            # Re-sanitize rewritten output (in case rewrite introduced issues)
-                            final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical_non_rag)
-                            logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
-                        else:
-                            # Fallback to sanitized original - rewrite failed
-                            final_response = sanitized_response
-                            logger.warning(
-                                f"⚠️ DeepSeek rewrite failed (non-RAG, error: {rewrite_result.error}), "
-                                f"using sanitized original output"
+                        # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
+                        # Only rewrite if quality_result is available and indicates rewrite needed
+                        if quality_result and should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                            logger.info(
+                                f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). "
+                                f"Issues: {quality_result['reasons']}, "
+                                f"score: {quality_result.get('overall_score', 'N/A')}, "
+                                f"length: {len(sanitized_response)}"
                             )
-                            processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
-                    else:
-                        final_response = sanitized_response
-                        if should_rewrite:
-                            logger.info(f"⏭️ Skipping rewrite (non-RAG): {rewrite_reason}")
-                        logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                            processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                            
+                            rewrite_llm = get_rewrite_llm()
+                            rewrite_result = await rewrite_llm.rewrite(
+                                text=sanitized_response,
+                                original_question=chat_request.message,
+                                quality_issues=quality_result["reasons"],
+                                is_philosophical=is_philosophical_non_rag,
+                                detected_lang=detected_lang
+                            )
+                            
+                            if rewrite_result.was_rewritten:
+                                # Re-sanitize rewritten output (in case rewrite introduced issues)
+                                final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical_non_rag)
+                                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                            else:
+                                # Fallback to sanitized original - rewrite failed
+                                final_response = sanitized_response
+                                logger.warning(
+                                    f"⚠️ DeepSeek rewrite failed (non-RAG, error: {rewrite_result.error}), "
+                                    f"using sanitized original output"
+                                )
+                                processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
+                        else:
+                            final_response = sanitized_response
+                            if should_rewrite and quality_result:
+                                logger.info(f"⏭️ Skipping rewrite (non-RAG): {rewrite_reason}")
+                            if quality_result:
+                                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                            else:
+                                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → passed (no quality evaluation)")
                 
                 response = final_response
                 
