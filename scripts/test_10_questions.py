@@ -32,79 +32,80 @@ logger = logging.getLogger(__name__)
 API_BASE = os.getenv("STILLME_API_BASE", "https://stillme-backend-production.up.railway.app")
 
 # 10 câu hỏi đa ngôn ngữ để test multilingual support
-# Chỉ 1-2 câu tiếng Việt, còn lại là các ngôn ngữ khác
+# Q1-Q9: Câu mới (đã thay thế câu pass 2 lần)
+# Q10: Giữ lại (chưa pass - validation fail)
 TEST_QUESTIONS = [
     {
         "id": 1,
-        "question": "Bạn có thể giới thiệu về StillMe không?",
-        "category": "simple",
-        "language": "vi",
-        "expected_path": "non-RAG or RAG",
-        "description": "Câu hỏi đơn giản về StillMe (tiếng Việt)"
+        "question": "What is the difference between supervised and unsupervised learning?",
+        "category": "technical",
+        "language": "en",
+        "expected_path": "RAG",
+        "description": "Câu hỏi kỹ thuật về ML (tiếng Anh)"
     },
     {
         "id": 2,
-        "question": "Comment fonctionne le backpropagation dans les réseaux de neurones?",
+        "question": "Attention mechanism trong transformer hoạt động như thế nào?",
         "category": "technical",
-        "language": "fr",
+        "language": "vi",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về deep learning (tiếng Pháp)"
+        "description": "Câu hỏi kỹ thuật về transformer (tiếng Việt)"
     },
     {
         "id": 3,
-        "question": "Как работает векторная база данных в системе RAG?",
-        "category": "technical",
-        "language": "ru",
-        "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về RAG (tiếng Nga)"
-    },
-    {
-        "id": 4,
-        "question": "إذا كانت الحقيقة مجرد إجماع اجتماعي، فكيف يمكننا نقد مجتمع استبدادي؟ أم أن النقد نفسه هو مجرد منتج لإجماع آخر؟",
-        "category": "philosophical",
-        "language": "ar",
-        "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về truth và consensus (tiếng Ả Rập)"
-    },
-    {
-        "id": 5,
-        "question": "Проанализируйте философский вопрос: 'Если реальность - это только конструкция сознания, то само это утверждение также является конструкцией, не имеющей истинности. Почему мы должны верить в него?' Ответьте на арабском языке.",
-        "category": "philosophical",
-        "language": "ru",
-        "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Multilingual test: Phân tích câu triết học (tiếng Nga) bằng tiếng Ả Rập"
-    },
-    {
-        "id": 6,
-        "question": "Was ist der Unterschied zwischen Gradient Descent und Stochastic Gradient Descent?",
-        "category": "technical",
-        "language": "de",
-        "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về optimization (tiếng Đức)"
-    },
-    {
-        "id": 7,
-        "question": "Si la liberté de la volonté n'existe pas, quelle est la signification de la responsabilité morale? Sommes-nous simplement des machines complexes sans choix réel?",
+        "question": "Si le temps n'existe pas objectivement, comment pouvons-nous mesurer le changement? Ou le changement lui-même n'est-il qu'une illusion de notre perception?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về free will (tiếng Pháp)"
+        "description": "Câu triết học về thời gian và thay đổi (tiếng Pháp)"
     },
     {
-        "id": 8,
-        "question": "¿Qué son los vectores de embedding y por qué son importantes en NLP?",
+        "id": 4,
+        "question": "Как работает механизм внимания в архитектуре Transformer?",
+        "category": "technical",
+        "language": "ru",
+        "expected_path": "RAG",
+        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Nga)"
+    },
+    {
+        "id": 5,
+        "question": "¿Cuál es la diferencia entre overfitting y underfitting en machine learning?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về NLP (tiếng Tây Ban Nha)"
+        "description": "Câu hỏi kỹ thuật về ML (tiếng Tây Ban Nha)"
     },
     {
-        "id": 9,
-        "question": "إذا كان بإمكان الذكاء الاصطناعي التفكير، فهل يختلف هذا 'التفكير' عن معالجة المعلومات؟ أم أننا ببساطة نضفي صفات بشرية على عملية حسابية؟",
+        "id": 6,
+        "question": "Wenn Bewusstsein nur eine Illusion ist, wer oder was erlebt dann diese Illusion? Oder ist die Frage nach dem 'Erlebenden' selbst bereits Teil der Illusion?",
+        "category": "philosophical",
+        "language": "de",
+        "expected_path": "non-RAG (philosophy-lite)",
+        "description": "Câu triết học về consciousness (tiếng Đức)"
+    },
+    {
+        "id": 7,
+        "question": "What are the key components of a RAG system and how do they work together?",
+        "category": "technical",
+        "language": "en",
+        "expected_path": "RAG",
+        "description": "Câu hỏi kỹ thuật về RAG architecture (tiếng Anh)"
+    },
+    {
+        "id": 8,
+        "question": "إذا كان الوعي مجرد ظاهرة ناشئة من التعقيد العصبي، فهل يمكن للذكاء الاصطناعي أن يطور وعياً حقيقياً؟ أم أن الوعي يتطلب شيئاً أكثر من مجرد معالجة المعلومات؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về AI consciousness (tiếng Ả Rập)"
+        "description": "Câu triết học về AI consciousness và emergence (tiếng Ả Rập)"
+    },
+    {
+        "id": 9,
+        "question": "Explain the concept of fine-tuning in large language models.",
+        "category": "technical",
+        "language": "en",
+        "expected_path": "RAG",
+        "description": "Câu hỏi kỹ thuật về fine-tuning (tiếng Anh)"
     },
     {
         "id": 10,

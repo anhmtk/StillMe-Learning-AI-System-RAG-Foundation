@@ -2359,6 +2359,13 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         llm_model_name=chat_request.llm_model_name,
                         use_server_keys=use_server_keys
                     )
+                    
+                    # CRITICAL: Validate raw_response immediately after LLM call
+                    if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
+                        logger.error(f"⚠️ LLM returned None or empty response for question: {chat_request.message[:100]}")
+                        from backend.api.utils.error_detector import get_fallback_message_for_error
+                        raw_response = get_fallback_message_for_error("generic", detected_lang)
+                        processing_steps.append("⚠️ LLM returned empty response - using fallback")
                 except ContextOverflowError as e:
                     # Context overflow - rebuild prompt with minimal context (ultra-thin mode)
                     logger.warning(f"⚠️ Context overflow detected (RAG path): {e}. Rebuilding prompt with minimal context...")

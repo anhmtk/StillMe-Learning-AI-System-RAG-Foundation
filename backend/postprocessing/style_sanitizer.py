@@ -113,6 +113,10 @@ class StyleSanitizer:
         # Step 5: Normalize spacing and line breaks
         result = self._normalize_spacing(result)
         
+        # Step 5.5: Final pass - remove any remaining markdown headings (safety net)
+        # This catches headings that might have been missed or added after initial sanitization
+        result = re.sub(r'^#{1,6}\s+(.+)$', r'\1', result, flags=re.MULTILINE)
+        
         # Step 6: Remove citation markers if philosophical (they should be prose, not [1])
         if is_philosophical:
             result = self._remove_citation_markers(result)
