@@ -1453,6 +1453,16 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                 # Format avg_similarity safely (handle None case) - MUST be defined before if block
                 avg_similarity_str = f"{avg_similarity:.3f}" if avg_similarity is not None else "N/A"
                 
+                # CRITICAL: For philosophical questions with low RAG relevance, use philosophy-lite mode
+                # This prevents context overflow when RAG context is not helpful
+                use_philosophy_lite_rag = False
+                if is_philosophical and (not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3)):
+                    use_philosophy_lite_rag = True
+                    logger.info(
+                        f"📊 [PHILO-LITE-RAG] Low RAG relevance for philosophical question "
+                        f"(similarity={avg_similarity_str}), using philosophy-lite mode to prevent context overflow"
+                    )
+                
                 # Fix 1: Block context quality warning for philosophical questions
                 context_quality_warning = ""
                 if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
@@ -2001,7 +2011,40 @@ Whenever the question clearly belongs to a classic philosophical debate (free wi
                     else:
                         philosophical_style_instruction = full_philosophical_instruction
                 
-                base_prompt = f"""{language_instruction}
+                # CRITICAL: If using philosophy-lite mode for RAG, skip full prompt building
+                if use_philosophy_lite_rag:
+                    # Helper function to estimate tokens
+                    def estimate_tokens(text: str) -> int:
+                        """Estimate token count (~4 chars per token)"""
+                        return len(text) // 4 if text else 0
+                    
+                    # Use philosophy-lite mode: minimal prompt with user question only
+                    # Truncate user question to 512 tokens for philosophical questions
+                    user_question_for_rag = chat_request.message.strip()
+                    user_question_tokens_rag = estimate_tokens(user_question_for_rag)
+                    if user_question_tokens_rag > 512:
+                        logger.warning(
+                            f"User question too long for philosophical RAG ({user_question_tokens_rag} tokens), truncating to 512 tokens"
+                        )
+                        user_question_for_rag = _truncate_user_message(chat_request.message, max_tokens=512)
+                        user_question_tokens_rag = estimate_tokens(user_question_for_rag)
+                    
+                    # Build minimal prompt (same format as non-RAG path)
+                    base_prompt = f"""User Question: {user_question_for_rag.strip()}"""
+                    
+                    # Log token estimates
+                    system_tokens_estimate_rag = estimate_tokens(PHILOSOPHY_LITE_SYSTEM_PROMPT)
+                    prompt_tokens_estimate_rag = estimate_tokens(base_prompt)
+                    total_tokens_estimate_rag = system_tokens_estimate_rag + prompt_tokens_estimate_rag
+                    
+                    logger.info(
+                        f"📊 [PHILO-LITE-RAG] Token estimates - System: {system_tokens_estimate_rag}, "
+                        f"Prompt: {prompt_tokens_estimate_rag}, User Question: {user_question_tokens_rag}, "
+                        f"Total: {total_tokens_estimate_rag}"
+                    )
+                else:
+                    # Build full prompt (existing logic)
+                    base_prompt = f"""{language_instruction}
 
 ⚠️⚠️⚠️ ZERO TOLERANCE LANGUAGE REMINDER ⚠️⚠️⚠️
 
@@ -2186,7 +2229,12 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     style_learner.update_usage(user_id)
             
             # Inject StillMe identity if validators enabled
-            if enable_validators:
+            # CRITICAL: Skip identity injection for philosophy-lite mode (already using minimal system prompt)
+            if use_philosophy_lite_rag:
+                # Philosophy-lite mode: don't inject identity, use prompt as-is
+                # Provider will detect and use PHILOSOPHY_LITE_SYSTEM_PROMPT
+                enhanced_prompt = base_prompt
+            elif enable_validators:
                 from backend.identity.injector import inject_identity
                 # Add style instruction before injecting identity
                 prompt_with_style = f"{style_instruction}\n\n{base_prompt}" if style_instruction else base_prompt
