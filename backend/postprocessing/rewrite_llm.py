@@ -100,24 +100,59 @@ class RewriteLLM:
     
     def _build_system_prompt(self, is_philosophical: bool, detected_lang: str) -> str:
         """Build minimal system prompt for rewrite"""
-        lang_name = "the same language" if detected_lang == "en" else detected_lang
+        # Get full language name for better clarity
+        language_names = {
+            'vi': 'Vietnamese (Tiếng Việt)',
+            'zh': 'Chinese (中文)',
+            'de': 'German (Deutsch)',
+            'fr': 'French (Français)',
+            'es': 'Spanish (Español)',
+            'ja': 'Japanese (日本語)',
+            'ko': 'Korean (한국어)',
+            'ar': 'Arabic (العربية)',
+            'ru': 'Russian (Русский)',
+            'pt': 'Portuguese (Português)',
+            'it': 'Italian (Italiano)',
+            'hi': 'Hindi (हिन्दी)',
+            'th': 'Thai (ไทย)',
+            'en': 'English'
+        }
+        lang_name = language_names.get(detected_lang, detected_lang.upper())
         
         if is_philosophical:
             return f"""You are rewriting a philosophical response to improve quality.
+
+🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+THE USER'S QUESTION IS IN {lang_name.upper()}.
+YOU MUST RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
+DO NOT RESPOND IN ENGLISH, VIETNAMESE, OR ANY OTHER LANGUAGE.
+EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
+IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()} BEFORE RETURNING.
+UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.upper()}.
+⚠️ REMINDER: RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 CRITICAL RULES:
 - Write in continuous prose paragraphs. NO emojis, NO markdown headings, NO bullets.
 - Preserve ALL factual content from the original.
 - Improve depth, structure, and philosophical rigor.
 - Follow structure: Anchor → Unpack → Explore → Edge → Return.
-- Respond in {lang_name} ONLY."""
+- RESPOND IN {lang_name.upper()} ONLY."""
         else:
             return f"""You are rewriting a response to improve quality.
+
+🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+THE USER'S QUESTION IS IN {lang_name.upper()}.
+YOU MUST RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
+DO NOT RESPOND IN ENGLISH, VIETNAMESE, OR ANY OTHER LANGUAGE.
+EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
+IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()} BEFORE RETURNING.
+UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.upper()}.
+⚠️ REMINDER: RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 CRITICAL RULES:
 - Preserve ALL factual content from the original.
 - Improve clarity, structure, and depth.
-- Respond in {lang_name} ONLY."""
+- RESPOND IN {lang_name.upper()} ONLY."""
     
     def _build_rewrite_prompt(
         self,
@@ -130,6 +165,25 @@ CRITICAL RULES:
         """Build minimal rewrite prompt (<200 tokens)"""
         issues_text = ", ".join(quality_issues[:3])  # Limit to 3 issues
         
+        # Get full language name for better clarity
+        language_names = {
+            'vi': 'Vietnamese (Tiếng Việt)',
+            'zh': 'Chinese (中文)',
+            'de': 'German (Deutsch)',
+            'fr': 'French (Français)',
+            'es': 'Spanish (Español)',
+            'ja': 'Japanese (日本語)',
+            'ko': 'Korean (한국어)',
+            'ar': 'Arabic (العربية)',
+            'ru': 'Russian (Русский)',
+            'pt': 'Portuguese (Português)',
+            'it': 'Italian (Italiano)',
+            'hi': 'Hindi (हिन्दी)',
+            'th': 'Thai (ไทย)',
+            'en': 'English'
+        }
+        lang_name = language_names.get(detected_lang, detected_lang.upper())
+        
         # Truncate text to keep prompt small (max 600 chars for original response)
         truncated_text = text[:600] + "..." if len(text) > 600 else text
         truncated_question = original_question[:100] + "..." if len(original_question) > 100 else original_question
@@ -137,29 +191,45 @@ CRITICAL RULES:
         if is_philosophical:
             prompt = f"""Rewrite this philosophical response to fix: {issues_text}
 
-Q: {truncated_question}
+Q (in {lang_name}): {truncated_question}
 
-Original:
+Original response:
 {truncated_text}
+
+🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
+THE USER'S QUESTION IS IN {lang_name.upper()}.
+YOU MUST RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
+DO NOT RESPOND IN ENGLISH OR ANY OTHER LANGUAGE.
+EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
+IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()}.
+⚠️ RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 REQUIREMENTS:
 - Keep ALL factual content
 - Improve depth and structure
 - Use prose (no emojis, no bullets, no headings)
 - Follow: Anchor → Unpack → Explore → Edge → Return
-- Respond in {detected_lang}"""
+- RESPOND IN {lang_name.upper()} ONLY"""
         else:
             prompt = f"""Rewrite this response to fix: {issues_text}
 
-Q: {truncated_question}
+Q (in {lang_name}): {truncated_question}
 
-Original:
+Original response:
 {truncated_text}
+
+🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
+THE USER'S QUESTION IS IN {lang_name.upper()}.
+YOU MUST RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
+DO NOT RESPOND IN ENGLISH OR ANY OTHER LANGUAGE.
+EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
+IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()}.
+⚠️ RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 REQUIREMENTS:
 - Keep ALL factual content
 - Improve clarity and structure
-- Respond in {detected_lang}"""
+- RESPOND IN {lang_name.upper()} ONLY"""
         
         return prompt
 
