@@ -95,15 +95,24 @@ class RewriteLLM:
                     try:
                         data = response.json()
                         if "choices" in data and len(data["choices"]) > 0:
-                            rewritten = data["choices"][0]["message"]["content"]
+                            rewritten = data["choices"][0]["message"].get("content")
                             
-                            # Validate rewritten output
-                            if not rewritten or len(rewritten.strip()) < 50:
-                                logger.warning(f"DeepSeek rewrite returned empty or too short output ({len(rewritten) if rewritten else 0} chars)")
+                            # CRITICAL: Check if content is None or empty
+                            if not rewritten or not isinstance(rewritten, str):
+                                logger.warning(f"DeepSeek rewrite returned None or invalid content (type: {type(rewritten)})")
                                 return RewriteResult(
                                     text=text,
                                     was_rewritten=False,
-                                    error="Rewrite output too short or empty"
+                                    error="Rewrite returned None or invalid content"
+                                )
+                            
+                            # Validate rewritten output length
+                            if len(rewritten.strip()) < 50:
+                                logger.warning(f"DeepSeek rewrite returned too short output ({len(rewritten)} chars)")
+                                return RewriteResult(
+                                    text=text,
+                                    was_rewritten=False,
+                                    error="Rewrite output too short"
                                 )
                             
                             logger.info(
@@ -127,19 +136,20 @@ class RewriteLLM:
                             error=f"JSON parse error: {str(parse_error)}"
                         )
                 else:
-                    error_msg = f"HTTP {response.status_code}: {response.text[:200]}"
-                    logger.warning(f"DeepSeek rewrite failed: {error_msg}")
+                    error_text = response.text[:500] if response.text else "No error message"
+                    error_msg = f"HTTP {response.status_code}: {error_text}"
+                    logger.warning(f"⚠️ DeepSeek rewrite failed: {error_msg}")
                     return RewriteResult(
                         text=text,
                         was_rewritten=False,
                         error=error_msg
                     )
         except httpx.TimeoutException as timeout_error:
-            logger.error(f"DeepSeek rewrite timeout: {timeout_error}")
+            logger.warning(f"⚠️ DeepSeek rewrite timeout after 30s: {timeout_error}")
             return RewriteResult(
                 text=text,
                 was_rewritten=False,
-                error=f"Timeout: {str(timeout_error)}"
+                error=f"Timeout after 30s: {str(timeout_error)}"
             )
         except httpx.RequestError as request_error:
             logger.error(f"DeepSeek rewrite request error: {request_error}")

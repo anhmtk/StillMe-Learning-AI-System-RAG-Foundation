@@ -2558,11 +2558,12 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                 else:
                                     # Fallback to sanitized original - rewrite failed
                                     final_response = sanitized_response
-                                    logger.warning(
-                                        f"⚠️ DeepSeek rewrite failed (error: {rewrite_result.error}), "
-                                        f"using sanitized original output"
+                                    error_detail = rewrite_result.error or "Unknown error"
+                                    logger.info(
+                                        f"ℹ️ DeepSeek rewrite skipped (error: {error_detail[:100]}), "
+                                        f"using original sanitized response (this is normal if API is unavailable or timeout)"
                                     )
-                                    processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
+                                    processing_steps.append(f"ℹ️ Rewrite skipped, using original (sanitized)")
                             else:
                                 final_response = sanitized_response
                                 if should_rewrite:
@@ -2985,11 +2986,12 @@ Remember: RESPOND IN ENGLISH ONLY."""
                             else:
                                 # Fallback to sanitized original - rewrite failed
                                 final_response = sanitized_response
-                                logger.warning(
-                                    f"⚠️ DeepSeek rewrite failed (non-RAG, error: {rewrite_result.error}), "
-                                    f"using sanitized original output"
+                                error_detail = rewrite_result.error or "Unknown error"
+                                logger.info(
+                                    f"ℹ️ DeepSeek rewrite skipped (non-RAG, error: {error_detail[:100]}), "
+                                    f"using original sanitized response (this is normal if API is unavailable or timeout)"
                                 )
-                                processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
+                                processing_steps.append(f"ℹ️ Rewrite skipped, using original (sanitized)")
                         else:
                             final_response = sanitized_response
                             if should_rewrite and quality_result:
@@ -3202,6 +3204,13 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         # If style learning response exists, prepend it to the response
         if style_learning_response:
             response = f"{style_learning_response}\n\n---\n\n{response}"
+        
+        # CRITICAL: Final safety check - ensure response is never None or empty before returning
+        if not response or not isinstance(response, str) or not response.strip():
+            logger.error("⚠️ Response is None, empty, or invalid before returning ChatResponse - using fallback")
+            from backend.api.utils.error_detector import get_fallback_message_for_error
+            response = get_fallback_message_for_error("generic", detected_lang or "vi")
+            processing_steps.append("⚠️ Response validation failed - using fallback message")
         
         return ChatResponse(
             response=response,

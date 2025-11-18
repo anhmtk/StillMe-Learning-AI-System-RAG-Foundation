@@ -285,7 +285,12 @@ class DeepSeekProvider(LLMProvider):
                 if response.status_code == 200:
                     data = response.json()
                     if "choices" in data and len(data["choices"]) > 0:
-                        return data["choices"][0]["message"]["content"]
+                        content = data["choices"][0]["message"].get("content")
+                        # CRITICAL: Ensure content is never None or empty
+                        if not content or not content.strip():
+                            logger.warning("DeepSeek API returned empty or None content")
+                            return "DeepSeek API returned empty response"
+                        return content
                     else:
                         return "DeepSeek API returned unexpected response format"
                 else:
@@ -464,7 +469,12 @@ class OpenRouterProvider(LLMProvider):
                 if response.status_code == 200:
                     data = response.json()
                     if "choices" in data and len(data["choices"]) > 0:
-                        return data["choices"][0]["message"]["content"]
+                        content = data["choices"][0]["message"].get("content")
+                        # CRITICAL: Ensure content is never None or empty
+                        if not content or not content.strip():
+                            logger.warning("OpenRouter API returned empty or None content")
+                            return "OpenRouter API returned empty response"
+                        return content
                     else:
                         return "OpenRouter API returned unexpected response format"
                 else:
@@ -652,7 +662,12 @@ class OpenAIProvider(LLMProvider):
                 if response.status_code == 200:
                     data = response.json()
                     if "choices" in data and len(data["choices"]) > 0:
-                        return data["choices"][0]["message"]["content"]
+                        content = data["choices"][0]["message"].get("content")
+                        # CRITICAL: Ensure content is never None or empty
+                        if not content or not content.strip():
+                            logger.warning("OpenAI API returned empty or None content")
+                            return "OpenAI API returned empty response"
+                        return content
                     else:
                         return "OpenAI API returned unexpected response format"
                 else:
@@ -845,7 +860,12 @@ class CustomProvider(LLMProvider):
                 if response.status_code == 200:
                     data = response.json()
                     if "choices" in data and len(data["choices"]) > 0:
-                        return data["choices"][0]["message"]["content"]
+                        content = data["choices"][0]["message"].get("content")
+                        # CRITICAL: Ensure content is never None or empty
+                        if not content or not content.strip():
+                            logger.warning("Custom API returned empty or None content")
+                            return "Custom API returned empty response"
+                        return content
                     else:
                         return "Custom API returned unexpected response format"
                 else:
