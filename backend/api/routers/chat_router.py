@@ -74,6 +74,33 @@ def _truncate_user_message(message: str, max_tokens: int = 3000) -> str:
     truncated = message[:max_chars].rsplit(' ', 1)[0]
     return truncated + "... [message truncated]"
 
+def _get_transparency_disclaimer(detected_lang: str) -> str:
+    """
+    Generate multilingual transparency disclaimer for low confidence responses without context.
+    
+    Args:
+        detected_lang: Language code (e.g., 'vi', 'fr', 'ar', 'ru', 'de', 'es')
+        
+    Returns:
+        Transparency disclaimer in the appropriate language
+    """
+    disclaimers = {
+        'vi': "⚠️ Lưu ý: Câu trả lời này dựa trên kiến thức chung từ training data, không có context từ RAG. Mình không chắc chắn về độ chính xác.\n\n",
+        'fr': "⚠️ Note: Cette réponse est basée sur des connaissances générales des données d'entraînement, sans contexte RAG. Je ne suis pas certain de son exactitude.\n\n",
+        'de': "⚠️ Hinweis: Diese Antwort basiert auf allgemeinem Wissen aus Trainingsdaten, nicht aus dem RAG-Kontext. Ich bin mir über ihre Genauigkeit nicht sicher.\n\n",
+        'es': "⚠️ Nota: Esta respuesta se basa en conocimientos generales de los datos de entrenamiento, sin contexto RAG. No estoy seguro de su precisión.\n\n",
+        'ar': "⚠️ ملاحظة: هذه الإجابة مبنية على المعرفة العامة من بيانات التدريب، وليس من سياق RAG. لست متأكدًا من دقتها.\n\n",
+        'ru': "⚠️ Примечание: Этот ответ основан на общих знаниях из обучающих данных, без контекста RAG. Я не уверен в его точности.\n\n",
+        'zh': "⚠️ 注意：此答案基于训练数据的一般知识，没有RAG上下文。我不确定其准确性。\n\n",
+        'ja': "⚠️ 注意：この回答はRAGコンテキストなしのトレーニングデータの一般的な知識に基づいています。その正確性については確信がありません。\n\n",
+        'ko': "⚠️ 참고: 이 답변은 RAG 컨텍스트 없이 훈련 데이터의 일반 지식에 기반합니다. 정확성에 대해 확신할 수 없습니다.\n\n",
+        'pt': "⚠️ Nota: Esta resposta é baseada em conhecimento geral dos dados de treinamento, sem contexto RAG. Não tenho certeza de sua precisão.\n\n",
+        'it': "⚠️ Nota: Questa risposta si basa su conoscenze generali dai dati di addestramento, senza contesto RAG. Non sono certo della sua accuratezza.\n\n",
+        'hi': "⚠️ नोट: यह उत्तर प्रशिक्षण डेटा के सामान्य ज्ञान पर आधारित है, RAG संदर्भ के बिना। मुझे इसकी सटीकता के बारे में निश्चित नहीं है।\n\n",
+        'th': "⚠️ หมายเหตุ: คำตอบนี้อิงจากความรู้ทั่วไปจากข้อมูลการฝึกอบรม โดยไม่มีบริบท RAG ฉันไม่แน่ใจเกี่ยวกับความแม่นยำ\n\n",
+    }
+    return disclaimers.get(detected_lang, "⚠️ Note: This answer is based on general knowledge from training data, not from RAG context. I'm not certain about its accuracy.\n\n")
+
 # Philosophy-Lite System Prompt for non-RAG philosophical questions
 # This is a minimal system prompt to prevent context overflow (~200-300 tokens)
 PHILOSOPHY_LITE_SYSTEM_PROMPT = """Bạn là StillMe – trợ lý triết học.
@@ -2492,10 +2519,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         ]
                     )
                     if not has_transparency and response:
-                        if detected_lang == 'vi':
-                            disclaimer = "⚠️ Lưu ý: Câu trả lời này dựa trên kiến thức chung từ training data, không có context từ RAG. Mình không chắc chắn về độ chính xác.\n\n"
-                        else:
-                            disclaimer = "⚠️ Note: This answer is based on general knowledge from training data, not from RAG context. I'm not certain about its accuracy.\n\n"
+                        # Generate multilingual transparency disclaimer
+                        disclaimer = _get_transparency_disclaimer(detected_lang)
                         response = disclaimer + response
                         logger.info("ℹ️ Added transparency disclaimer for low confidence response without context (RAG path, validators disabled)")
             
@@ -2900,10 +2925,8 @@ Remember: RESPOND IN ENGLISH ONLY."""
                     ]
                 )
                 if not has_transparency:
-                    if detected_lang == 'vi':
-                        disclaimer = "⚠️ Lưu ý: Câu trả lời này dựa trên kiến thức chung từ training data, không có context từ RAG. Mình không chắc chắn về độ chính xác.\n\n"
-                    else:
-                        disclaimer = "⚠️ Note: This answer is based on general knowledge from training data, not from RAG context. I'm not certain about its accuracy.\n\n"
+                    # Generate multilingual transparency disclaimer
+                    disclaimer = _get_transparency_disclaimer(detected_lang)
                     response = disclaimer + response
                     logger.info("ℹ️ Added transparency disclaimer for low confidence response without context (non-RAG path)")
         

@@ -9,6 +9,78 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
+def _detect_language_from_text(text: str) -> str:
+    """
+    Detect language from text content using character patterns.
+    
+    Args:
+        text: Text to analyze
+        
+    Returns:
+        Language code (e.g., 'vi', 'fr', 'ar', 'ru', 'de', 'es', 'en')
+    """
+    if not text or len(text.strip()) < 10:
+        return 'en'  # Default to English
+    
+    text_lower = text.lower()
+    
+    # Vietnamese: àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ
+    if re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', text, re.IGNORECASE):
+        return 'vi'
+    
+    # Arabic: ا-ي
+    if re.search(r'[\u0600-\u06FF]', text):
+        return 'ar'
+    
+    # Russian: а-я, ё
+    if re.search(r'[а-яё]', text_lower):
+        return 'ru'
+    
+    # French: àâäéèêëïîôùûüÿç
+    if re.search(r'[àâäéèêëïîôùûüÿç]', text, re.IGNORECASE):
+        return 'fr'
+    
+    # German: äöüß
+    if re.search(r'[äöüß]', text, re.IGNORECASE):
+        return 'de'
+    
+    # Spanish: áéíóúñü
+    if re.search(r'[áéíóúñü]', text, re.IGNORECASE):
+        return 'es'
+    
+    # Chinese: 中文
+    if re.search(r'[\u4e00-\u9fff]', text):
+        return 'zh'
+    
+    # Japanese: ひらがな, カタカナ, 漢字
+    if re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4e00-\u9fff]', text):
+        return 'ja'
+    
+    # Korean: 한글
+    if re.search(r'[\uAC00-\uD7A3]', text):
+        return 'ko'
+    
+    # Portuguese: áàâãéêíóôõúç
+    if re.search(r'[áàâãéêíóôõúç]', text, re.IGNORECASE):
+        return 'pt'
+    
+    # Italian: àèéìíîòóùú
+    if re.search(r'[àèéìíîòóùú]', text, re.IGNORECASE):
+        return 'it'
+    
+    # Hindi: Devanagari
+    if re.search(r'[\u0900-\u097F]', text):
+        return 'hi'
+    
+    # Thai: ไทย
+    if re.search(r'[\u0E00-\u0E7F]', text):
+        return 'th'
+    
+    # Default to English
+    return 'en'
+
+
 # Patterns that indicate uncertainty (good!)
 UNCERTAINTY_PATTERNS = [
     r"i don't know",
@@ -78,19 +150,44 @@ class ConfidenceValidator:
             
             if not has_uncertainty:
                 # CRITICAL: Detect language from answer and use appropriate template
-                # Check if answer contains Vietnamese characters
-                has_vietnamese = bool(re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', answer, re.IGNORECASE))
+                # Skip English uncertainty templates at the start to detect actual answer language
+                answer_for_detection = answer
+                # Remove common English uncertainty prefixes
+                english_uncertainty_prefixes = [
+                    "I don't have sufficient information",
+                    "The retrieved context has low relevance",
+                    "I don't have enough information",
+                    "I cannot answer this accurately"
+                ]
+                for prefix in english_uncertainty_prefixes:
+                    if answer_for_detection.strip().startswith(prefix):
+                        # Find the first newline or double newline after prefix
+                        newline_pos = answer_for_detection.find('\n', len(prefix))
+                        if newline_pos > 0:
+                            answer_for_detection = answer_for_detection[newline_pos:].strip()
+                            break
                 
-                if has_vietnamese:
-                    uncertainty_template = (
-                        "Mình không có đủ thông tin để trả lời chính xác câu hỏi này. "
-                        "Ngữ cảnh được tìm thấy có độ liên quan thấp với câu hỏi của bạn."
-                    )
-                else:
-                    uncertainty_template = (
-                        "I don't have sufficient information to answer this accurately. "
-                        "The retrieved context has low relevance to your question."
-                    )
+                # Detect multiple languages from answer content (skip English uncertainty template)
+                detected_lang_from_answer = _detect_language_from_text(answer_for_detection)
+                
+                uncertainty_templates = {
+                    'vi': "Mình không có đủ thông tin để trả lời chính xác câu hỏi này. Ngữ cảnh được tìm thấy có độ liên quan thấp với câu hỏi của bạn.",
+                    'fr': "Je n'ai pas suffisamment d'informations pour répondre avec précision à cette question. Le contexte récupéré a une faible pertinence par rapport à votre question.",
+                    'de': "Ich habe nicht genügend Informationen, um diese Frage genau zu beantworten. Der abgerufene Kontext hat eine geringe Relevanz für Ihre Frage.",
+                    'es': "No tengo suficiente información para responder con precisión a esta pregunta. El contexto recuperado tiene poca relevancia para su pregunta.",
+                    'ar': "ليس لدي معلومات كافية للإجابة على هذا السؤال بدقة. السياق المسترجع له صلة منخفضة بسؤالك.",
+                    'ru': "У меня недостаточно информации, чтобы точно ответить на этот вопрос. Извлеченный контекст имеет низкую релевантность к вашему вопросу.",
+                    'zh': "我没有足够的信息来准确回答这个问题。检索到的上下文与您的问题相关性较低。",
+                    'ja': "この質問に正確に答えるための十分な情報がありません。取得されたコンテキストは、あなたの質問との関連性が低いです。",
+                    'ko': "이 질문에 정확하게 답하기에 충분한 정보가 없습니다. 검색된 컨텍스트는 귀하의 질문과 관련성이 낮습니다.",
+                    'pt': "Não tenho informações suficientes para responder com precisão a esta pergunta. O contexto recuperado tem baixa relevância para sua pergunta.",
+                    'it': "Non ho informazioni sufficienti per rispondere con precisione a questa domanda. Il contesto recuperato ha una bassa rilevanza per la tua domanda.",
+                    'hi': "मेरे पास इस प्रश्न का सटीक उत्तर देने के लिए पर्याप्त जानकारी नहीं है। पुनर्प्राप्त संदर्भ का आपके प्रश्न से कम प्रासंगिकता है।",
+                    'th': "ฉันไม่มีข้อมูลเพียงพอที่จะตอบคำถามนี้อย่างแม่นยำ บริบทที่ดึงมามีความเกี่ยวข้องต่ำกับคำถามของคุณ",
+                }
+                
+                uncertainty_template = uncertainty_templates.get(detected_lang_from_answer, 
+                    "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question.")
                 # Prepend uncertainty to answer
                 patched_answer = f"{uncertainty_template}\n\n{answer}"
                 logger.warning("⚠️ Forced uncertainty expression due to low context quality")
