@@ -45,43 +45,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Comment fonctionne l'attention dans les transformers et pourquoi est-ce crucial pour le traitement du langage naturel?",
+        "question": "Comment fonctionne le backpropagation dans les réseaux de neurones?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về backpropagation (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si la conscience n'est qu'un épiphénomène de l'activité neuronale, comment expliquer l'expérience subjective? Ou l'expérience subjective est-elle une illusion?",
+        "question": "Si la vérité est relative à notre perspective, comment pouvons-nous distinguer la connaissance de la croyance? Ou cette distinction est-elle elle-même illusoire?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về consciousness và subjective experience (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về truth và knowledge (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое batch normalization и как она помогает в обучении глубоких нейронных сетей?",
+        "question": "Что такое рекуррентные нейронные сети (RNN) и как они обрабатывают последовательности?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về RNN (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es la regularización L1 y L2 y cómo ayudan a prevenir el overfitting?",
+        "question": "¿Qué es la función de activación ReLU y por qué es popular en las redes neuronales profundas?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về L1/L2 regularization (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về ReLU activation (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Zeit nur eine Illusion ist, wie können wir dann über Kausalität sprechen? Oder ist Kausalität selbst eine Illusion?",
+        "question": "Wenn das Selbst nur eine Illusion ist, wer oder was erlebt dann diese Illusion? Oder ist die Frage nach dem Selbst selbst eine Illusion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về time và causality (tiếng Đức) - MỚI"
+        "description": "Câu triết học về self và identity (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كانت المعرفة مجرد بناء اجتماعي، فهل يمكن أن تكون هناك حقيقة موضوعية؟ أم أن كل معرفة نسبية؟",
+        "question": "إذا كانت الحقيقة نسبية، فكيف يمكننا التمييز بين المعرفة والاعتقاد؟ أم أن هذا التمييز نفسه وهمي؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về knowledge và truth (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về truth và knowledge distinction (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,

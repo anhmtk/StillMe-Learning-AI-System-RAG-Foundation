@@ -2522,8 +2522,19 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 llm_inference_end = time.time()
                 llm_inference_latency = llm_inference_end - llm_inference_start
                 timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
-                logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
-                processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
+                
+                # CRITICAL: Only log "AI response generated" if we actually have a response
+                # If raw_response is None/empty, it means LLM failed and we're using fallback
+                if raw_response and isinstance(raw_response, str) and raw_response.strip():
+                    logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
+                    processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
+                else:
+                    logger.warning(f"⚠️ LLM inference failed or returned empty (took {llm_inference_latency:.2f}s)")
+                    # Ensure raw_response is set to fallback message if still None/empty
+                    if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
+                        from backend.api.utils.error_detector import get_fallback_message_for_error
+                        raw_response = get_fallback_message_for_error("generic", detected_lang)
+                        processing_steps.append("⚠️ LLM failed - using fallback message")
                 
                 # CRITICAL: Check if raw_response is a technical error message before validation
                 # Never allow provider error messages to pass through validators
