@@ -1679,7 +1679,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     )
                 except ContextOverflowError as e:
                     # Context overflow - rebuild prompt with minimal context (ultra-thin mode)
-                    logger.warning(f"⚠️ Context overflow detected: {e}. Rebuilding prompt with minimal context...")
+                    logger.warning(f"⚠️ Context overflow detected (RAG path): {e}. Rebuilding prompt with minimal context...")
                     
                     if is_philosophical:
                         # Use minimal philosophical prompt helper
@@ -1690,33 +1690,47 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         )
                         
                         logger.info(f"🔄 Retrying with minimal philosophical prompt (no history, no RAG, no metrics, no provenance)")
-                        raw_response = await generate_ai_response(
-                            minimal_prompt, 
-                            detected_lang=detected_lang,
-                            llm_provider=chat_request.llm_provider,
-                            llm_api_key=chat_request.llm_api_key,
-                            llm_api_url=chat_request.llm_api_url,
-                            llm_model_name=chat_request.llm_model_name,
-                            use_server_keys=use_server_keys
-                        )
-                        logger.info(f"✅ Successfully generated response with minimal philosophical prompt")
+                        try:
+                            raw_response = await generate_ai_response(
+                                minimal_prompt, 
+                                detected_lang=detected_lang,
+                                llm_provider=chat_request.llm_provider,
+                                llm_api_key=chat_request.llm_api_key,
+                                llm_api_url=chat_request.llm_api_url,
+                                llm_model_name=chat_request.llm_model_name,
+                                use_server_keys=use_server_keys
+                            )
+                            logger.info(f"✅ Successfully generated response with minimal philosophical prompt")
+                        except ContextOverflowError as retry_error:
+                            # Even minimal prompt failed - return fallback message
+                            logger.error(f"⚠️ Even minimal prompt failed (RAG path): {retry_error}")
+                            from backend.api.utils.error_detector import get_fallback_message_for_error
+                            raw_response = get_fallback_message_for_error("context_overflow", detected_lang)
+                            processing_steps.append("⚠️ Context overflow - using fallback message")
                     else:
-                        # For non-philosophical, try a simpler minimal prompt
-                        # (Keep existing behavior or implement simpler minimal prompt)
-                        logger.warning(f"⚠️ Context overflow for non-philosophical question - raising error")
-                        raise
+                        # For non-philosophical, return fallback message
+                        logger.warning(f"⚠️ Context overflow for non-philosophical question (RAG path) - using fallback message")
+                        from backend.api.utils.error_detector import get_fallback_message_for_error
+                        raw_response = get_fallback_message_for_error("context_overflow", detected_lang)
+                        processing_steps.append("⚠️ Context overflow - using fallback message")
                 llm_inference_end = time.time()
                 llm_inference_latency = llm_inference_end - llm_inference_start
                 timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
                 logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
                 processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
                 
-                # CRITICAL: Check if raw_response is an error message before validation
+                # CRITICAL: Check if raw_response is a technical error message before validation
                 # Never allow provider error messages to pass through validators
+                from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
+                
                 if raw_response and isinstance(raw_response, str):
-                    if raw_response.startswith(("OpenRouter API error:", "OpenAI API error:", "DeepSeek API error:", "Claude API error:")):
-                        logger.error(f"❌ Provider returned error message as response: {raw_response[:200]}")
-                        raise Exception(f"LLM provider error: {raw_response}")
+                    is_error, error_type = is_technical_error(raw_response)
+                    if is_error:
+                        logger.error(f"❌ Provider returned technical error as response (type: {error_type}): {raw_response[:200]}")
+                        # Replace with user-friendly fallback message
+                        raw_response = get_fallback_message_for_error(error_type, detected_lang)
+                        processing_steps.append(f"⚠️ Technical error detected - replaced with fallback message")
+                        logger.warning(f"⚠️ Replaced technical error with user-friendly message in {detected_lang}")
                 
                 # Save to cache (only if not a cache hit)
                 if cache_enabled and not cache_hit:
@@ -2015,7 +2029,9 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     # CRITICAL FIX: Check if context is not relevant (low overlap)
                     # If citation relevance warning exists, context may not be helpful
                     # In this case, allow base knowledge usage
-                    has_low_relevance = any("citation_relevance_warning" in r for r in validation_result.reasons)
+                    has_low_relevance = False
+                    if validation_result and hasattr(validation_result, 'reasons') and validation_result.reasons:
+                        has_low_relevance = any("citation_relevance_warning" in r for r in validation_result.reasons)
                     if has_low_relevance and context and context.get("total_context_docs", 0) > 0:
                         logger.info("⚠️ Context has low relevance - allowing base knowledge usage")
                         # Inject instruction to use base knowledge when context is not relevant
@@ -2260,10 +2276,13 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 except HTTPException:
                     raise
                 except Exception as validation_error:
-                    logger.error(f"Validation error: {validation_error}, falling back to raw response")
+                    logger.error(f"Validation error: {validation_error}, falling back to raw response", exc_info=True)
                     response = raw_response
                     # Calculate confidence even on error (low confidence)
                     confidence_score = 0.3 if len(ctx_docs) == 0 else 0.6
+                    # Ensure validation_result is set to None to prevent downstream errors
+                    validation_result = None
+                    validation_info = None
             else:
                 response = raw_response
                 # Calculate basic confidence score even without validators
@@ -2301,6 +2320,19 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     sanitizer = get_style_sanitizer()
                     sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
                     
+                # CRITICAL: Check if sanitized response is a technical error BEFORE quality evaluation
+                from backend.api.utils.error_detector import is_technical_error
+                is_error, error_type = is_technical_error(sanitized_response)
+                
+                if is_error:
+                    # Technical error detected - skip quality evaluation and rewrite
+                    logger.warning(
+                        f"⚠️ Technical error detected in sanitized response (type: {error_type}), "
+                        f"skipping quality evaluation and rewrite"
+                    )
+                    final_response = sanitized_response
+                    processing_steps.append(f"⚠️ Technical error detected - skipping post-processing")
+                else:
                     # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
                     # OPTIMIZATION: Check cache first
                     evaluator = get_quality_evaluator()
@@ -2324,6 +2356,50 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                             response=sanitized_response,
                             quality_result=quality_result
                         )
+                    
+                    # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
+                    should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                        quality_result=quality_result,
+                        is_philosophical=is_philosophical,
+                        response_length=len(sanitized_response)
+                    )
+                    
+                    # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
+                    if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                        logger.info(
+                            f"⚠️ Quality evaluator flagged output for rewrite. "
+                            f"Issues: {quality_result['reasons']}, "
+                            f"score: {quality_result.get('overall_score', 'N/A')}, "
+                            f"length: {len(sanitized_response)}"
+                        )
+                        processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                        
+                        rewrite_llm = get_rewrite_llm()
+                        rewrite_result = await rewrite_llm.rewrite(
+                            text=sanitized_response,
+                            original_question=chat_request.message,
+                            quality_issues=quality_result["reasons"],
+                            is_philosophical=is_philosophical,
+                            detected_lang=detected_lang
+                        )
+                        
+                        if rewrite_result.was_rewritten:
+                            # Re-sanitize rewritten output (in case rewrite introduced issues)
+                            final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
+                            logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
+                        else:
+                            # Fallback to sanitized original - rewrite failed
+                            final_response = sanitized_response
+                            logger.warning(
+                                f"⚠️ DeepSeek rewrite failed (error: {rewrite_result.error}), "
+                                f"using sanitized original output"
+                            )
+                            processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
+                    else:
+                        final_response = sanitized_response
+                        if should_rewrite:
+                            logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
+                        logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
                     
                     # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
                     should_rewrite, rewrite_reason = optimizer.should_rewrite(
@@ -2483,13 +2559,74 @@ Remember: RESPOND IN ENGLISH ONLY."""
             llm_inference_start = time.time()
             # Use server keys for internal calls (when use_rag=False)
             use_server_keys_non_rag = chat_request.llm_provider is None
-            response = await generate_ai_response(
-                enhanced_prompt, 
-                detected_lang=detected_lang,
-                llm_provider=chat_request.llm_provider,
-                llm_api_key=chat_request.llm_api_key,
-                use_server_keys=use_server_keys_non_rag
-            )
+            
+            # Check if this is a philosophical question for context overflow handling
+            is_philosophical_non_rag = False
+            try:
+                from backend.core.question_classifier import is_philosophical_question
+                is_philosophical_non_rag = is_philosophical_question(chat_request.message)
+            except Exception:
+                pass
+            
+            # Try to generate response with retry on context overflow
+            from backend.api.utils.llm_providers import ContextOverflowError
+            from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
+            
+            response = None
+            try:
+                response = await generate_ai_response(
+                    enhanced_prompt, 
+                    detected_lang=detected_lang,
+                    llm_provider=chat_request.llm_provider,
+                    llm_api_key=chat_request.llm_api_key,
+                    use_server_keys=use_server_keys_non_rag
+                )
+            except ContextOverflowError as e:
+                # Context overflow - retry with minimal prompt for philosophical questions
+                logger.warning(f"⚠️ Context overflow detected (non-RAG): {e}")
+                
+                if is_philosophical_non_rag:
+                    # For philosophical questions, use minimal prompt
+                    logger.info("🔄 Retrying with minimal philosophical prompt...")
+                    minimal_prompt = build_minimal_philosophical_prompt(
+                        user_question=chat_request.message,
+                        language=detected_lang,
+                        detected_lang_name=detected_lang_name
+                    )
+                    try:
+                        response = await generate_ai_response(
+                            minimal_prompt,
+                            detected_lang=detected_lang,
+                            llm_provider=chat_request.llm_provider,
+                            llm_api_key=chat_request.llm_api_key,
+                            use_server_keys=use_server_keys_non_rag
+                        )
+                        logger.info("✅ Minimal prompt retry successful")
+                    except ContextOverflowError as retry_error:
+                        # Even minimal prompt failed - return fallback message
+                        logger.error(f"⚠️ Even minimal prompt failed: {retry_error}")
+                        response = get_fallback_message_for_error("context_overflow", detected_lang)
+                        processing_steps.append("⚠️ Context overflow - using fallback message")
+                else:
+                    # For non-philosophical, return fallback message
+                    logger.warning("⚠️ Context overflow for non-philosophical question - using fallback message")
+                    response = get_fallback_message_for_error("context_overflow", detected_lang)
+                    processing_steps.append("⚠️ Context overflow - using fallback message")
+            
+            # CRITICAL: Check if response is a technical error (should not happen, but safety check)
+            if response:
+                is_error, error_type = is_technical_error(response)
+                if is_error:
+                    logger.error(f"⚠️ LLM returned technical error string: {error_type} - {response[:200]}")
+                    # Replace with user-friendly fallback message
+                    response = get_fallback_message_for_error(error_type, detected_lang)
+                    processing_steps.append(f"⚠️ Technical error detected - using fallback message")
+            
+            if not response:
+                # Fallback if response is still None
+                response = get_fallback_message_for_error("generic", detected_lang)
+                processing_steps.append("⚠️ No response received - using fallback message")
+            
             llm_inference_end = time.time()
             llm_inference_latency = llm_inference_end - llm_inference_start
             timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
@@ -2563,73 +2700,86 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 sanitizer = get_style_sanitizer()
                 sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
                 
-                # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
-                # OPTIMIZATION: Check cache first
-                evaluator = get_quality_evaluator()
-                cached_quality = optimizer.get_cached_quality_result(
-                    question=chat_request.message,
-                    response=sanitized_response
-                )
+                # CRITICAL: Check if sanitized response is a technical error BEFORE quality evaluation
+                from backend.api.utils.error_detector import is_technical_error
+                is_error, error_type = is_technical_error(sanitized_response)
                 
-                if cached_quality:
-                    quality_result = cached_quality
-                    logger.debug("✅ Using cached quality evaluation (non-RAG)")
-                else:
-                    quality_result = evaluator.evaluate(
-                        text=sanitized_response,
-                        is_philosophical=is_philosophical_non_rag,
-                        original_question=chat_request.message
+                if is_error:
+                    # Technical error detected - skip quality evaluation and rewrite
+                    logger.warning(
+                        f"⚠️ Technical error detected in sanitized response (non-RAG, type: {error_type}), "
+                        f"skipping quality evaluation and rewrite"
                     )
-                    # Cache the result
-                    optimizer.cache_quality_result(
-                        question=chat_request.message,
-                        response=sanitized_response,
-                        quality_result=quality_result
-                    )
-                
-                # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
-                should_rewrite, rewrite_reason = optimizer.should_rewrite(
-                    quality_result=quality_result,
-                    is_philosophical=is_philosophical_non_rag,
-                    response_length=len(sanitized_response)
-                )
-                
-                # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
-                if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
-                    logger.info(
-                        f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). "
-                        f"Issues: {quality_result['reasons']}, "
-                        f"score: {quality_result.get('overall_score', 'N/A')}, "
-                        f"length: {len(sanitized_response)}"
-                    )
-                    processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
-                    
-                    rewrite_llm = get_rewrite_llm()
-                    rewrite_result = await rewrite_llm.rewrite(
-                        text=sanitized_response,
-                        original_question=chat_request.message,
-                        quality_issues=quality_result["reasons"],
-                        is_philosophical=is_philosophical_non_rag,
-                        detected_lang=detected_lang
-                    )
-                    
-                    if rewrite_result.was_rewritten:
-                        # Re-sanitize rewritten output (in case rewrite introduced issues)
-                        final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical_non_rag)
-                        logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
-                    else:
-                        # Fallback to sanitized original - rewrite failed
-                        final_response = sanitized_response
-                        logger.warning(
-                            f"⚠️ DeepSeek rewrite failed (non-RAG, error: {rewrite_result.error}), "
-                            f"using sanitized original output"
-                        )
-                        processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
-                else:
                     final_response = sanitized_response
-                    if should_rewrite:
-                        logger.info(f"⏭️ Skipping rewrite (non-RAG): {rewrite_reason}")
-                    logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                    processing_steps.append(f"⚠️ Technical error detected - skipping post-processing")
+                else:
+                    # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
+                    # OPTIMIZATION: Check cache first
+                    evaluator = get_quality_evaluator()
+                    cached_quality = optimizer.get_cached_quality_result(
+                        question=chat_request.message,
+                        response=sanitized_response
+                    )
+                    
+                    if cached_quality:
+                        quality_result = cached_quality
+                        logger.debug("✅ Using cached quality evaluation (non-RAG)")
+                    else:
+                        quality_result = evaluator.evaluate(
+                            text=sanitized_response,
+                            is_philosophical=is_philosophical_non_rag,
+                            original_question=chat_request.message
+                        )
+                        # Cache the result
+                        optimizer.cache_quality_result(
+                            question=chat_request.message,
+                            response=sanitized_response,
+                            quality_result=quality_result
+                        )
+                    
+                    # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
+                    should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                        quality_result=quality_result,
+                        is_philosophical=is_philosophical_non_rag,
+                        response_length=len(sanitized_response)
+                    )
+                    
+                    # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
+                    if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                        logger.info(
+                            f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). "
+                            f"Issues: {quality_result['reasons']}, "
+                            f"score: {quality_result.get('overall_score', 'N/A')}, "
+                            f"length: {len(sanitized_response)}"
+                        )
+                        processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                        
+                        rewrite_llm = get_rewrite_llm()
+                        rewrite_result = await rewrite_llm.rewrite(
+                            text=sanitized_response,
+                            original_question=chat_request.message,
+                            quality_issues=quality_result["reasons"],
+                            is_philosophical=is_philosophical_non_rag,
+                            detected_lang=detected_lang
+                        )
+                        
+                        if rewrite_result.was_rewritten:
+                            # Re-sanitize rewritten output (in case rewrite introduced issues)
+                            final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical_non_rag)
+                            logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                        else:
+                            # Fallback to sanitized original - rewrite failed
+                            final_response = sanitized_response
+                            logger.warning(
+                                f"⚠️ DeepSeek rewrite failed (non-RAG, error: {rewrite_result.error}), "
+                                f"using sanitized original output"
+                            )
+                            processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
+                    else:
+                        final_response = sanitized_response
+                        if should_rewrite:
+                            logger.info(f"⏭️ Skipping rewrite (non-RAG): {rewrite_reason}")
+                        logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
                 
                 response = final_response
                 
