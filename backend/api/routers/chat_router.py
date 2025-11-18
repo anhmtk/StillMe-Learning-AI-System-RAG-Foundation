@@ -2272,6 +2272,62 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     validation_result=None,
                     context=context
                 )
+            
+            # ==========================================
+            # PHASE 3: POST-PROCESSING PIPELINE
+            # Unified Style & Quality Enforcement Layer
+            # ==========================================
+            postprocessing_start = time.time()
+            try:
+                from backend.postprocessing.style_sanitizer import get_style_sanitizer
+                from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
+                from backend.postprocessing.rewrite_llm import get_rewrite_llm
+                
+                # Stage 2: Hard Filter (0 token) - Style Sanitization
+                sanitizer = get_style_sanitizer()
+                sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
+                
+                # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
+                evaluator = get_quality_evaluator()
+                quality_result = evaluator.evaluate(
+                    text=sanitized_response,
+                    is_philosophical=is_philosophical,
+                    original_question=chat_request.message
+                )
+                
+                # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if needed
+                if quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                    logger.info(f"⚠️ Quality evaluator flagged output for rewrite. Issues: {quality_result['reasons']}")
+                    processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                    
+                    rewrite_llm = get_rewrite_llm()
+                    final_response = await rewrite_llm.rewrite(
+                        text=sanitized_response,
+                        original_question=chat_request.message,
+                        quality_issues=quality_result["reasons"],
+                        is_philosophical=is_philosophical,
+                        detected_lang=detected_lang
+                    )
+                    
+                    # Re-sanitize rewritten output (in case rewrite introduced issues)
+                    final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical)
+                    logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
+                else:
+                    final_response = sanitized_response
+                    logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                
+                response = final_response
+                
+                postprocessing_time = time.time() - postprocessing_start
+                timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
+                logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
+                
+            except Exception as postprocessing_error:
+                logger.error(f"Post-processing error: {postprocessing_error}", exc_info=True)
+                # Fallback to original response if post-processing fails
+                # Don't break the pipeline - post-processing is enhancement, not critical
+                logger.warning(f"⚠️ Post-processing failed, using original response")
+                timing_logs["postprocessing"] = "failed"
         else:
             # Fallback to regular AI response (no RAG context)
             # Initialize confidence_score for non-RAG path
@@ -2417,6 +2473,70 @@ Remember: RESPOND IN ENGLISH ONLY."""
             except Exception as tone_error:
                 logger.error(f"Tone alignment error: {tone_error}, using original response")
                 # Continue with original response on error
+        
+        # ==========================================
+        # PHASE 3: POST-PROCESSING PIPELINE (Non-RAG path)
+        # Unified Style & Quality Enforcement Layer
+        # ==========================================
+        # Check if question is philosophical for non-RAG path
+        is_philosophical_non_rag = False
+        try:
+            from backend.core.question_classifier import is_philosophical_question
+            is_philosophical_non_rag = is_philosophical_question(chat_request.message)
+        except Exception:
+            pass  # If classifier fails, assume non-philosophical
+        
+        postprocessing_start = time.time()
+        try:
+            from backend.postprocessing.style_sanitizer import get_style_sanitizer
+            from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
+            from backend.postprocessing.rewrite_llm import get_rewrite_llm
+            
+            # Stage 2: Hard Filter (0 token) - Style Sanitization
+            sanitizer = get_style_sanitizer()
+            sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
+            
+            # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
+            evaluator = get_quality_evaluator()
+            quality_result = evaluator.evaluate(
+                text=sanitized_response,
+                is_philosophical=is_philosophical_non_rag,
+                original_question=chat_request.message
+            )
+            
+            # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if needed
+            if quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                logger.info(f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). Issues: {quality_result['reasons']}")
+                processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                
+                rewrite_llm = get_rewrite_llm()
+                final_response = await rewrite_llm.rewrite(
+                    text=sanitized_response,
+                    original_question=chat_request.message,
+                    quality_issues=quality_result["reasons"],
+                    is_philosophical=is_philosophical_non_rag,
+                    detected_lang=detected_lang
+                )
+                
+                # Re-sanitize rewritten output (in case rewrite introduced issues)
+                final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical_non_rag)
+                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+            else:
+                final_response = sanitized_response
+                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+            
+            response = final_response
+            
+            postprocessing_time = time.time() - postprocessing_start
+            timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
+            logger.info(f"⏱️ Post-processing (non-RAG) took {postprocessing_time:.3f}s")
+            
+        except Exception as postprocessing_error:
+            logger.error(f"Post-processing error (non-RAG): {postprocessing_error}", exc_info=True)
+            # Fallback to original response if post-processing fails
+            # Don't break the pipeline - post-processing is enhancement, not critical
+            logger.warning(f"⚠️ Post-processing failed (non-RAG), using original response")
+            timing_logs["postprocessing"] = "failed"
         
         # Calculate total response latency
         # Total_Response_Latency: Time from request received to response returned

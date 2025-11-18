@@ -1,0 +1,325 @@
+"""
+Quality Evaluator - Rule-based quality check (0 token)
+
+Evaluates output quality without calling LLM:
+- Depth score (shallow, mid, deep)
+- Has conceptual unpacking?
+- Has argument structure?
+- Has phenomenology vs metaphysics clarity?
+- Has self-limitations phrased correctly?
+- Has anthropomorphism residue?
+- Missing logic chain?
+- Too short?
+"""
+
+import re
+import logging
+from typing import Dict, List, Optional
+from enum import Enum
+
+logger = logging.getLogger(__name__)
+
+
+class QualityLevel(str, Enum):
+    """Quality levels for output"""
+    GOOD = "good"
+    NEEDS_REWRITE = "needs_rewrite"
+
+
+class QualityEvaluator:
+    """
+    Rule-based quality evaluator - pure Python, 0 token cost
+    
+    Checks if output meets StillMe quality standards:
+    - Philosophical depth
+    - Conceptual unpacking
+    - Argument structure
+    - Self-limitation awareness
+    - No anthropomorphism
+    - Adequate length
+    """
+    
+    def __init__(self):
+        """Initialize quality evaluator"""
+        # Depth indicators (philosophical concepts, meta-cognition)
+        self.depth_indicators = [
+            r'\b(paradox|nghịch lý|contradiction|tension|tension)\b',
+            r'\b(epistemology|ontology|metaphysics|phenomenology)\b',
+            r'\b(consciousness|awareness|qualia|subjective|objective)\b',
+            r'\b(limit|boundary|giới hạn|biên giới|cannot|unable)\b',
+            r'\b(assumption|giả định|presupposition|foundation)\b',
+            r'\b(paradigm|framework|perspective|góc nhìn)\b',
+            r'\b(self-reference|tự quy chiếu|self-referential)\b',
+            r'\b(Gödel|Wittgenstein|Searle|Kant|Moore|Tarski)\b',
+            r'\b(acknowledge|recognize|admit|thừa nhận|nhận ra)\b',
+            r'\b(meta-cognitive|meta-cognition|tự phản tư)\b',
+        ]
+        
+        # Conceptual unpacking indicators
+        self.unpacking_indicators = [
+            r'\b(what do we mean|nghĩa là gì|what does.*mean)\b',
+            r'\b(define|định nghĩa|definition|khái niệm)\b',
+            r'\b(assume|giả định|assumption|presuppose)\b',
+            r'\b(unpack|mở rộng|explore|khám phá)\b',
+            r'\b(concept|khái niệm|notion|idea)\b',
+            r'\b(structure|cấu trúc|framework|khung)\b',
+        ]
+        
+        # Argument structure indicators
+        self.argument_indicators = [
+            r'\b(first|second|third|thứ nhất|thứ hai|thứ ba)\b',
+            r'\b(on one hand|on the other hand|một mặt|mặt khác)\b',
+            r'\b(however|nevertheless|tuy nhiên|nhưng)\b',
+            r'\b(therefore|thus|hence|vì vậy|do đó)\b',
+            r'\b(if.*then|nếu.*thì|implies|kéo theo)\b',
+            r'\b(contrast|đối lập|oppose|phản đối)\b',
+            r'\b(position|quan điểm|perspective|góc nhìn)\b',
+        ]
+        
+        # Self-limitation indicators (good - shows awareness)
+        self.limitation_indicators = [
+            r'\b(I don\'t know|tôi không biết|I cannot|tôi không thể)\b',
+            r'\b(uncertain|không chắc|not certain|không rõ)\b',
+            r'\b(limited|giới hạn|boundary|biên giới)\b',
+            r'\b(acknowledge.*limit|thừa nhận.*giới hạn)\b',
+            r'\b(recognize.*cannot|nhận ra.*không thể)\b',
+            r'\b(beyond.*knowledge|ngoài.*kiến thức)\b',
+        ]
+        
+        # Anthropomorphism residue (bad - should be caught by sanitizer but double-check)
+        self.anthropomorphic_indicators = [
+            r'\b(I|Tôi|Em|Mình)\s+(feel|feel like|cảm thấy|feel that)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(have experienced|đã trải nghiệm|từng trải nghiệm)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(remember|nhớ|remember that)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(believe|tin|believe that)\b',
+            r'\btheo kinh nghiệm\s+(của|tôi|em|mình)\b',
+            r'\bIn my experience\b',
+        ]
+        
+        # Minimum length thresholds
+        self.min_length_philosophical = 200  # Philosophical questions need depth
+        self.min_length_general = 100        # General questions can be shorter
+    
+    def evaluate(
+        self, 
+        text: str, 
+        is_philosophical: bool = False,
+        original_question: Optional[str] = None
+    ) -> Dict[str, any]:
+        """
+        Evaluate output quality
+        
+        Args:
+            text: Sanitized output text
+            is_philosophical: Whether this is a philosophical question
+            original_question: Original user question (for context)
+            
+        Returns:
+            Dict with:
+                - quality: "good" | "needs_rewrite"
+                - reasons: List of reasons if needs_rewrite
+                - depth_score: "shallow" | "mid" | "deep"
+                - scores: Detailed scores for each dimension
+        """
+        if not text or len(text.strip()) < 50:
+            return {
+                "quality": QualityLevel.NEEDS_REWRITE,
+                "reasons": ["Output too short or empty"],
+                "depth_score": "shallow",
+                "scores": {}
+            }
+        
+        text_lower = text.lower()
+        reasons = []
+        scores = {}
+        
+        # Check 1: Length
+        length_score = self._check_length(text, is_philosophical)
+        scores["length"] = length_score
+        if length_score < 0.5:
+            reasons.append(f"Output too short ({len(text)} chars, need {self.min_length_philosophical if is_philosophical else self.min_length_general}+)")
+        
+        # Check 2: Depth
+        depth_score = self._check_depth(text_lower)
+        scores["depth"] = depth_score
+        if depth_score < 0.4:
+            reasons.append("Lacks philosophical depth - missing meta-cognitive reflection or conceptual analysis")
+        
+        # Check 3: Conceptual unpacking (critical for philosophical)
+        if is_philosophical:
+            unpacking_score = self._check_unpacking(text_lower)
+            scores["unpacking"] = unpacking_score
+            if unpacking_score < 0.3:
+                reasons.append("Missing conceptual unpacking - doesn't examine assumptions or definitions")
+        
+        # Check 4: Argument structure
+        argument_score = self._check_argument_structure(text_lower)
+        scores["argument"] = argument_score
+        if argument_score < 0.3:
+            reasons.append("Weak argument structure - lacks logical flow or contrasting positions")
+        
+        # Check 5: Self-limitation awareness (good sign)
+        limitation_score = self._check_limitations(text_lower)
+        scores["limitations"] = limitation_score
+        # Note: Low limitation score is not necessarily bad, but high is good
+        
+        # Check 6: Anthropomorphism residue (bad)
+        anthropo_score = self._check_anthropomorphism(text_lower)
+        scores["anthropomorphism"] = anthropo_score
+        if anthropo_score > 0.1:  # Any anthropomorphism is bad
+            reasons.append("Contains anthropomorphic language - claims experience or feelings")
+        
+        # Check 7: Structure completeness (for philosophical)
+        if is_philosophical:
+            structure_score = self._check_structure_completeness(text)
+            scores["structure"] = structure_score
+            if structure_score < 0.4:
+                reasons.append("Missing philosophical structure - should have Anchor → Unpack → Explore → Edge → Return")
+        
+        # Determine overall quality
+        # Weighted scoring
+        weights = {
+            "length": 0.15,
+            "depth": 0.25,
+            "unpacking": 0.20 if is_philosophical else 0.10,
+            "argument": 0.20,
+            "limitations": 0.10,
+            "anthropomorphism": 0.10,  # Penalty if present
+            "structure": 0.10 if is_philosophical else 0.05,
+        }
+        
+        overall_score = sum(scores.get(k, 0) * weights.get(k, 0) for k in weights.keys())
+        
+        # Penalty for anthropomorphism
+        if scores.get("anthropomorphism", 0) > 0.1:
+            overall_score *= 0.5  # Heavy penalty
+        
+        # Determine quality level
+        quality_threshold = 0.6  # Need 60% to pass
+        if overall_score >= quality_threshold and not reasons:
+            quality = QualityLevel.GOOD
+        else:
+            quality = QualityLevel.NEEDS_REWRITE
+        
+        # Determine depth level
+        if depth_score >= 0.7:
+            depth_level = "deep"
+        elif depth_score >= 0.4:
+            depth_level = "mid"
+        else:
+            depth_level = "shallow"
+        
+        return {
+            "quality": quality.value,
+            "reasons": reasons,
+            "depth_score": depth_level,
+            "overall_score": round(overall_score, 2),
+            "scores": scores
+        }
+    
+    def _check_length(self, text: str, is_philosophical: bool) -> float:
+        """Check if text meets minimum length requirements"""
+        min_length = self.min_length_philosophical if is_philosophical else self.min_length_general
+        actual_length = len(text.strip())
+        
+        if actual_length >= min_length * 1.5:
+            return 1.0
+        elif actual_length >= min_length:
+            return 0.7
+        elif actual_length >= min_length * 0.7:
+            return 0.5
+        else:
+            return 0.2
+    
+    def _check_depth(self, text_lower: str) -> float:
+        """Check philosophical depth indicators"""
+        matches = sum(1 for pattern in self.depth_indicators if re.search(pattern, text_lower, re.IGNORECASE))
+        
+        # Normalize: 0-2 = shallow, 3-5 = mid, 6+ = deep
+        if matches >= 6:
+            return 1.0
+        elif matches >= 3:
+            return 0.6
+        elif matches >= 1:
+            return 0.3
+        else:
+            return 0.1
+    
+    def _check_unpacking(self, text_lower: str) -> float:
+        """Check for conceptual unpacking"""
+        matches = sum(1 for pattern in self.unpacking_indicators if re.search(pattern, text_lower, re.IGNORECASE))
+        
+        # Need at least 2 unpacking indicators
+        if matches >= 3:
+            return 1.0
+        elif matches >= 2:
+            return 0.7
+        elif matches >= 1:
+            return 0.4
+        else:
+            return 0.1
+    
+    def _check_argument_structure(self, text_lower: str) -> float:
+        """Check for argument structure indicators"""
+        matches = sum(1 for pattern in self.argument_indicators if re.search(pattern, text_lower, re.IGNORECASE))
+        
+        # Need at least 2-3 structural indicators
+        if matches >= 4:
+            return 1.0
+        elif matches >= 2:
+            return 0.6
+        elif matches >= 1:
+            return 0.3
+        else:
+            return 0.1
+    
+    def _check_limitations(self, text_lower: str) -> float:
+        """Check for self-limitation awareness (good sign)"""
+        matches = sum(1 for pattern in self.limitation_indicators if re.search(pattern, text_lower, re.IGNORECASE))
+        
+        # Having limitations is good, but not required
+        if matches >= 2:
+            return 1.0
+        elif matches >= 1:
+            return 0.6
+        else:
+            return 0.3  # Not bad, just neutral
+    
+    def _check_anthropomorphism(self, text_lower: str) -> float:
+        """Check for anthropomorphic language (bad - should be 0)"""
+        matches = sum(1 for pattern in self.anthropomorphic_indicators if re.search(pattern, text_lower, re.IGNORECASE))
+        
+        # Any match is bad
+        return min(matches * 0.3, 1.0)  # Scale: 0 = good, 1 = very bad
+    
+    def _check_structure_completeness(self, text: str) -> float:
+        """
+        Check if philosophical structure is complete:
+        Anchor → Unpack → Explore → Edge → Return
+        """
+        # Look for indicators of each stage
+        has_anchor = bool(re.search(r'\b(reframe|rephrase|sharper|precise|chính xác hơn)\b', text, re.IGNORECASE))
+        has_unpack = bool(re.search(r'\b(unpack|assumption|concept|khái niệm|giả định)\b', text, re.IGNORECASE))
+        has_explore = bool(re.search(r'\b(explore|perspective|position|quan điểm|góc nhìn)\b', text, re.IGNORECASE))
+        has_edge = bool(re.search(r'\b(limit|boundary|edge|giới hạn|biên giới|cannot)\b', text, re.IGNORECASE))
+        has_return = bool(re.search(r'\b(reflection|reflect|suy ngẫm|invite|mời)\b', text, re.IGNORECASE))
+        
+        stages_present = sum([has_anchor, has_unpack, has_explore, has_edge, has_return])
+        
+        # Need at least 3-4 stages
+        if stages_present >= 4:
+            return 1.0
+        elif stages_present >= 3:
+            return 0.7
+        elif stages_present >= 2:
+            return 0.4
+        else:
+            return 0.2
+
+
+def get_quality_evaluator() -> QualityEvaluator:
+    """Get singleton instance of QualityEvaluator"""
+    if not hasattr(get_quality_evaluator, '_instance'):
+        get_quality_evaluator._instance = QualityEvaluator()
+    return get_quality_evaluator._instance
+
