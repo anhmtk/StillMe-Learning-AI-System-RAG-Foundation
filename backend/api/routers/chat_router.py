@@ -2407,9 +2407,9 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                             is_philosophical=is_philosophical,
                             response_length=len(sanitized_response)
                         )
-                    
-                    # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
-                    if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                        
+                        # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
+                        if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
                         logger.info(
                             f"⚠️ Quality evaluator flagged output for rewrite. "
                             f"Issues: {quality_result['reasons']}, "
@@ -2445,15 +2445,19 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                             logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
                         logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
                     
-                    # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
-                    should_rewrite, rewrite_reason = optimizer.should_rewrite(
-                        quality_result=quality_result,
-                        is_philosophical=is_philosophical,
-                        response_length=len(sanitized_response)
-                    )
+                    response = final_response
                     
-                    # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
-                    if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                    # CRITICAL: Final check - ensure response is not a technical error
+                    if response:
+                        from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
+                        is_error, error_type = is_technical_error(response)
+                        if is_error:
+                            logger.error(f"⚠️ Final response is still a technical error (type: {error_type}) - replacing with fallback")
+                            response = get_fallback_message_for_error(error_type, detected_lang)
+                    
+                    postprocessing_time = time.time() - postprocessing_start
+                    timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
+                    logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
                         logger.info(
                             f"⚠️ Quality evaluator flagged output for rewrite. "
                             f"Issues: {quality_result['reasons']}, "
