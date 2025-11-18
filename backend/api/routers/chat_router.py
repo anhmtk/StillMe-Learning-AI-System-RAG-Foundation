@@ -1776,7 +1776,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     try:
                         processing_steps.append("🔍 Validating response...")
                         validation_start = time.time()
-                            from backend.validators.chain import ValidatorChain
+                        from backend.validators.chain import ValidatorChain
                         from backend.validators.citation import CitationRequired
                         from backend.validators.evidence_overlap import EvidenceOverlap
                         from backend.validators.numeric import NumericUnitsBasic
@@ -2745,9 +2745,9 @@ Remember: RESPOND IN ENGLISH ONLY."""
                     logger.info(f"⏭️ Skipping post-processing (non-RAG): {skip_reason}")
                     timing_logs["postprocessing"] = "skipped"
                 else:
-                # Stage 2: Hard Filter (0 token) - Style Sanitization
-                sanitizer = get_style_sanitizer()
-                sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
+                    # Stage 2: Hard Filter (0 token) - Style Sanitization
+                    sanitizer = get_style_sanitizer()
+                    sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
                 
                 # CRITICAL: Check if sanitized response is a technical error BEFORE quality evaluation
                 from backend.api.utils.error_detector import is_technical_error
