@@ -2458,16 +2458,6 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         postprocessing_time = time.time() - postprocessing_start
                         timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
                         logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
-                        processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
-                        
-                        rewrite_llm = get_rewrite_llm()
-                        rewrite_result = await rewrite_llm.rewrite(
-                            text=sanitized_response,
-                            original_question=chat_request.message,
-                            quality_issues=quality_result["reasons"],
-                            is_philosophical=is_philosophical,
-                            detected_lang=detected_lang
-                        )
                         
                         if rewrite_result.was_rewritten:
                             # Re-sanitize rewritten output (in case rewrite introduced issues)
