@@ -171,53 +171,43 @@ class StyleSanitizer:
         return re.sub(r'^(I|Tôi|Em|Mình)\s+', '', phrase, flags=re.IGNORECASE)
     
     def _convert_headings_to_prose(self, text: str) -> str:
-        """Convert markdown headings to normal prose sentences"""
-        def heading_to_sentence(match):
+        """
+        Convert markdown headings to normal prose - MINIMAL transformation
+        
+        Only removes the markdown prefix (#), keeps the text as-is.
+        Does NOT add periods or modify punctuation.
+        """
+        def heading_to_text(match):
             heading_text = match.group(1).strip()
-            # Capitalize first letter and add period if needed
-            if not heading_text.endswith(('.', '!', '?')):
-                heading_text += '.'
+            # Just return the text, don't add punctuation
             return heading_text
         
-        return self.heading_pattern.sub(heading_to_sentence, text)
+        return self.heading_pattern.sub(heading_to_text, text)
     
     def _convert_bullets_to_prose(self, text: str) -> str:
-        """Convert bullet points to prose paragraphs"""
+        """
+        Convert bullet points to prose - MINIMAL transformation
+        
+        Only removes bullet markers (-, *, •), keeps text as-is.
+        Does NOT add "and", "or", or other connectors.
+        Does NOT add punctuation.
+        """
         lines = text.split('\n')
         result_lines = []
-        current_paragraph = []
         
         for line in lines:
             bullet_match = self.bullet_pattern.match(line)
             if bullet_match:
-                # Found a bullet point
+                # Found a bullet point - just extract the text, keep as separate line
                 bullet_text = bullet_match.group(1).strip()
-                current_paragraph.append(bullet_text)
+                if bullet_text:  # Only add non-empty lines
+                    result_lines.append(bullet_text)
             else:
-                # Not a bullet - flush current paragraph and add this line
-                if current_paragraph:
-                    # Convert bullet list to prose
-                    if len(current_paragraph) == 1:
-                        result_lines.append(current_paragraph[0] + '.')
-                    else:
-                        # Multiple bullets: create a flowing paragraph
-                        prose = ', '.join(current_paragraph[:-1])
-                        prose += f', and {current_paragraph[-1]}.'
-                        result_lines.append(prose)
-                    current_paragraph = []
-                
+                # Not a bullet - keep line as-is
                 if line.strip():
                     result_lines.append(line)
         
-        # Flush remaining bullets
-        if current_paragraph:
-            if len(current_paragraph) == 1:
-                result_lines.append(current_paragraph[0] + '.')
-            else:
-                prose = ', '.join(current_paragraph[:-1])
-                prose += f', and {current_paragraph[-1]}.'
-                result_lines.append(prose)
-        
+        # Join with newlines (preserve structure), don't force into single paragraph
         return '\n'.join(result_lines)
     
     def _remove_markdown(self, text: str) -> str:

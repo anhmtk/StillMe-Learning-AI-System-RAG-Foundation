@@ -8,10 +8,19 @@ while preserving factual content.
 
 import logging
 import os
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 import httpx
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class RewriteResult:
+    """Result of rewrite operation"""
+    text: str
+    was_rewritten: bool
+    error: Optional[str] = None
 
 
 class RewriteLLM:
@@ -34,7 +43,7 @@ class RewriteLLM:
         quality_issues: list,
         is_philosophical: bool = False,
         detected_lang: str = "en"
-    ) -> str:
+    ) -> RewriteResult:
         """
         Rewrite text to improve quality while preserving factual content
         
@@ -46,11 +55,11 @@ class RewriteLLM:
             detected_lang: Detected language code
             
         Returns:
-            Rewritten text with improved quality
+            RewriteResult with rewritten text and success flag
         """
         if not self.deepseek_api_key:
             logger.warning("DeepSeek API key not available, skipping rewrite")
-            return text
+            return RewriteResult(text=text, was_rewritten=False, error="API key not available")
         
         # Build minimal rewrite prompt (<200 tokens)
         rewrite_prompt = self._build_rewrite_prompt(
@@ -83,20 +92,69 @@ class RewriteLLM:
                 )
                 
                 if response.status_code == 200:
-                    data = response.json()
-                    if "choices" in data and len(data["choices"]) > 0:
-                        rewritten = data["choices"][0]["message"]["content"]
-                        logger.info(f"✅ Successfully rewrote output (original: {len(text)} chars, rewritten: {len(rewritten)} chars)")
-                        return rewritten
-                    else:
-                        logger.warning("DeepSeek rewrite returned unexpected format")
-                        return text
+                    try:
+                        data = response.json()
+                        if "choices" in data and len(data["choices"]) > 0:
+                            rewritten = data["choices"][0]["message"]["content"]
+                            
+                            # Validate rewritten output
+                            if not rewritten or len(rewritten.strip()) < 50:
+                                logger.warning(f"DeepSeek rewrite returned empty or too short output ({len(rewritten) if rewritten else 0} chars)")
+                                return RewriteResult(
+                                    text=text,
+                                    was_rewritten=False,
+                                    error="Rewrite output too short or empty"
+                                )
+                            
+                            logger.info(
+                                "✅ Successfully rewrote output (original: %d chars, rewritten: %d chars)",
+                                len(text),
+                                len(rewritten)
+                            )
+                            return RewriteResult(text=rewritten, was_rewritten=True)
+                        else:
+                            logger.warning("DeepSeek rewrite returned unexpected format: no choices in response")
+                            return RewriteResult(
+                                text=text,
+                                was_rewritten=False,
+                                error="Unexpected response format: no choices"
+                            )
+                    except (ValueError, KeyError) as parse_error:
+                        logger.error(f"Failed to parse DeepSeek response JSON: {parse_error}")
+                        return RewriteResult(
+                            text=text,
+                            was_rewritten=False,
+                            error=f"JSON parse error: {str(parse_error)}"
+                        )
                 else:
-                    logger.warning(f"DeepSeek rewrite failed: {response.status_code} - {response.text}")
-                    return text
+                    error_msg = f"HTTP {response.status_code}: {response.text[:200]}"
+                    logger.warning(f"DeepSeek rewrite failed: {error_msg}")
+                    return RewriteResult(
+                        text=text,
+                        was_rewritten=False,
+                        error=error_msg
+                    )
+        except httpx.TimeoutException as timeout_error:
+            logger.error(f"DeepSeek rewrite timeout: {timeout_error}")
+            return RewriteResult(
+                text=text,
+                was_rewritten=False,
+                error=f"Timeout: {str(timeout_error)}"
+            )
+        except httpx.RequestError as request_error:
+            logger.error(f"DeepSeek rewrite request error: {request_error}")
+            return RewriteResult(
+                text=text,
+                was_rewritten=False,
+                error=f"Request error: {str(request_error)}"
+            )
         except Exception as e:
-            logger.error(f"Error during DeepSeek rewrite: {e}")
-            return text  # Fallback to original
+            logger.error(f"Error during DeepSeek rewrite: {e}", exc_info=True)
+            return RewriteResult(
+                text=text,
+                was_rewritten=False,
+                error=f"Unexpected error: {str(e)}"
+            )
     
     def _build_system_prompt(self, is_philosophical: bool, detected_lang: str) -> str:
         """Build minimal system prompt for rewrite"""

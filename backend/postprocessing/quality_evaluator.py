@@ -194,12 +194,48 @@ class QualityEvaluator:
         if scores.get("anthropomorphism", 0) > 0.1:
             overall_score *= 0.5  # Heavy penalty
         
-        # Determine quality level
-        quality_threshold = 0.6  # Need 60% to pass
-        if overall_score >= quality_threshold and not reasons:
+        # Determine quality level with adaptive thresholds
+        # For philosophical questions: be more lenient if response is long and has structure
+        text_length = len(text.strip())
+        has_structure = argument_score >= 0.4 and (structure_score >= 0.4 if is_philosophical else True)
+        
+        if is_philosophical:
+            # For philosophical: higher threshold, but allow exceptions for long, structured responses
+            quality_threshold = 0.5  # Lowered from 0.6
+            
+            # Exception: If response is long (>1200 chars) and has structure, be more lenient
+            if text_length > 1200 and has_structure:
+                quality_threshold = 0.4  # Even more lenient
+                logger.debug(
+                    f"Lenient threshold for long structured response: length={text_length}, "
+                    f"argument_score={argument_score:.2f}, structure_score={structure_score:.2f if is_philosophical else 'N/A'}"
+                )
+        else:
+            # For non-philosophical: standard threshold
+            quality_threshold = 0.5
+        
+        # Only flag as needs_rewrite if:
+        # 1. Score is below threshold AND
+        # 2. Either has critical issues OR is too short
+        has_critical_issues = any(
+            "anthropomorphic" in r.lower() or 
+            "too short" in r.lower() or
+            (is_philosophical and "structure" in r.lower() and text_length < 800)
+            for r in reasons
+        )
+        
+        is_too_short = text_length < (self.min_length_philosophical if is_philosophical else self.min_length_general)
+        
+        if overall_score >= quality_threshold and not has_critical_issues and not is_too_short:
             quality = QualityLevel.GOOD
         else:
             quality = QualityLevel.NEEDS_REWRITE
+            # Log decision for tuning
+            logger.debug(
+                f"Quality evaluator decision: score={overall_score:.2f}, threshold={quality_threshold:.2f}, "
+                f"length={text_length}, has_structure={has_structure}, critical_issues={has_critical_issues}, "
+                f"reasons={reasons[:2]}"
+            )
         
         # Determine depth level
         if depth_score >= 0.7:

@@ -2334,11 +2334,16 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     
                     # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
                     if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
-                        logger.info(f"⚠️ Quality evaluator flagged output for rewrite. Issues: {quality_result['reasons']}")
+                        logger.info(
+                            f"⚠️ Quality evaluator flagged output for rewrite. "
+                            f"Issues: {quality_result['reasons']}, "
+                            f"score: {quality_result.get('overall_score', 'N/A')}, "
+                            f"length: {len(sanitized_response)}"
+                        )
                         processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
                         
                         rewrite_llm = get_rewrite_llm()
-                        final_response = await rewrite_llm.rewrite(
+                        rewrite_result = await rewrite_llm.rewrite(
                             text=sanitized_response,
                             original_question=chat_request.message,
                             quality_issues=quality_result["reasons"],
@@ -2346,9 +2351,18 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                             detected_lang=detected_lang
                         )
                         
-                        # Re-sanitize rewritten output (in case rewrite introduced issues)
-                        final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical)
-                        logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
+                        if rewrite_result.was_rewritten:
+                            # Re-sanitize rewritten output (in case rewrite introduced issues)
+                            final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
+                            logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
+                        else:
+                            # Fallback to sanitized original - rewrite failed
+                            final_response = sanitized_response
+                            logger.warning(
+                                f"⚠️ DeepSeek rewrite failed (error: {rewrite_result.error}), "
+                                f"using sanitized original output"
+                            )
+                            processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
                     else:
                         final_response = sanitized_response
                         if should_rewrite:
@@ -2582,11 +2596,16 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 
                 # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
                 if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
-                    logger.info(f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). Issues: {quality_result['reasons']}")
+                    logger.info(
+                        f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). "
+                        f"Issues: {quality_result['reasons']}, "
+                        f"score: {quality_result.get('overall_score', 'N/A')}, "
+                        f"length: {len(sanitized_response)}"
+                    )
                     processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
                     
                     rewrite_llm = get_rewrite_llm()
-                    final_response = await rewrite_llm.rewrite(
+                    rewrite_result = await rewrite_llm.rewrite(
                         text=sanitized_response,
                         original_question=chat_request.message,
                         quality_issues=quality_result["reasons"],
@@ -2594,9 +2613,18 @@ Remember: RESPOND IN ENGLISH ONLY."""
                         detected_lang=detected_lang
                     )
                     
-                    # Re-sanitize rewritten output (in case rewrite introduced issues)
-                    final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical_non_rag)
-                    logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                    if rewrite_result.was_rewritten:
+                        # Re-sanitize rewritten output (in case rewrite introduced issues)
+                        final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical_non_rag)
+                        logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                    else:
+                        # Fallback to sanitized original - rewrite failed
+                        final_response = sanitized_response
+                        logger.warning(
+                            f"⚠️ DeepSeek rewrite failed (non-RAG, error: {rewrite_result.error}), "
+                            f"using sanitized original output"
+                        )
+                        processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
                 else:
                     final_response = sanitized_response
                     if should_rewrite:
