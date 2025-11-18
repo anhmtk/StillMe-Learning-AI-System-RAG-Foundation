@@ -1776,7 +1776,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     try:
                         processing_steps.append("🔍 Validating response...")
                         validation_start = time.time()
-                    from backend.validators.chain import ValidatorChain
+                        from backend.validators.chain import ValidatorChain
                     from backend.validators.citation import CitationRequired
                     from backend.validators.evidence_overlap import EvidenceOverlap
                     from backend.validators.numeric import NumericUnitsBasic
@@ -2323,9 +2323,18 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 from backend.api.utils.error_detector import get_fallback_message_for_error
                 response = get_fallback_message_for_error("generic", detected_lang)
             
-            postprocessing_start = time.time()
-            try:
-                from backend.postprocessing.style_sanitizer import get_style_sanitizer
+            # CRITICAL: Check if response is a fallback meta-answer - if so, skip all post-processing
+            from backend.api.utils.error_detector import is_fallback_message
+            is_fallback_meta_answer_rag = False
+            if response and is_fallback_message(response):
+                logger.info("🛑 Fallback meta-answer detected (RAG path) - skipping post-processing (sanitize, quality eval, rewrite)")
+                processing_steps.append("🛑 Fallback message - terminal response, skipping post-processing")
+                is_fallback_meta_answer_rag = True
+                # Skip post-processing entirely - response is already the fallback message
+            else:
+                postprocessing_start = time.time()
+                try:
+                    from backend.postprocessing.style_sanitizer import get_style_sanitizer
                 from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
                 from backend.postprocessing.rewrite_llm import get_rewrite_llm
                 from backend.postprocessing.optimizer import get_postprocessing_optimizer
@@ -2487,11 +2496,11 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
                 
                 except Exception as postprocessing_error:
-                logger.error(f"Post-processing error: {postprocessing_error}", exc_info=True)
-                # Fallback to original response if post-processing fails
-                # Don't break the pipeline - post-processing is enhancement, not critical
-                logger.warning(f"⚠️ Post-processing failed, using original response")
-                timing_logs["postprocessing"] = "failed"
+                    logger.error(f"Post-processing error: {postprocessing_error}", exc_info=True)
+                    # Fallback to original response if post-processing fails
+                    # Don't break the pipeline - post-processing is enhancement, not critical
+                    logger.warning(f"⚠️ Post-processing failed, using original response")
+                    timing_logs["postprocessing"] = "failed"
         else:
             # Fallback to regular AI response (no RAG context)
             # Initialize confidence_score for non-RAG path
@@ -2718,10 +2727,10 @@ Remember: RESPOND IN ENGLISH ONLY."""
             
             postprocessing_start = time.time()
             try:
-            from backend.postprocessing.style_sanitizer import get_style_sanitizer
-            from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
-            from backend.postprocessing.rewrite_llm import get_rewrite_llm
-            from backend.postprocessing.optimizer import get_postprocessing_optimizer
+                from backend.postprocessing.style_sanitizer import get_style_sanitizer
+                from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
+                from backend.postprocessing.rewrite_llm import get_rewrite_llm
+                from backend.postprocessing.optimizer import get_postprocessing_optimizer
             
             optimizer = get_postprocessing_optimizer()
             
@@ -2933,7 +2942,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         logger.warning(f"Failed to create knowledge gap proposal: {gap_error}")
                 
                 # Also check for valuable knowledge from user/assistant (existing logic)
-                if not learning_proposal:  # Only if we didn't already create a gap proposal
+                # CRITICAL: Only analyze if response is NOT a fallback meta-answer
+                if not is_fallback_for_learning and not learning_proposal:  # Only if we didn't already create a gap proposal
                     learning_proposal = extractor.analyze_conversation_for_learning(
                         user_message=chat_request.message,
                         assistant_response=response,
