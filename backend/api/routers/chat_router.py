@@ -989,9 +989,24 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 r.startswith("identity_violation:") for r in validation_result.reasons
             )
             
-            # If only identity warnings (not violations), use response as-is
-            if has_identity_warnings_only:
-                logger.info(f"✅ Validation has only identity warnings (not violations), accepting response. Reasons: {validation_result.reasons}")
+            # Check for other non-critical warnings that shouldn't cause failure
+            # citation_relevance_warning: Low keyword overlap, but not critical
+            # low_overlap: Low overlap between answer and context, but not critical if context exists
+            has_only_warnings = (
+                has_identity_warnings_only or
+                any("citation_relevance_warning" in r for r in validation_result.reasons) or
+                (any("low_overlap" in r for r in validation_result.reasons) and len(ctx_docs) > 0)
+            ) and not any(
+                r.startswith("identity_violation:") or
+                r.startswith("missing_citation") or
+                r.startswith("language_mismatch") or
+                r.startswith("missing_uncertainty")
+                for r in validation_result.reasons
+            )
+            
+            # If only warnings (not violations), use response as-is
+            if has_only_warnings:
+                logger.info(f"✅ Validation has only warnings (not violations), accepting response. Reasons: {validation_result.reasons}")
                 response = raw_response
             else:
                 # For other non-critical validation failures, still return the response but log warning

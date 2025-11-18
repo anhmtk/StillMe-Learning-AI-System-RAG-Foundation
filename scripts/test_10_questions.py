@@ -45,43 +45,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Comment fonctionne la technique de transfer learning dans les modèles de deep learning?",
+        "question": "Comment fonctionne la technique de fine-tuning dans les modèles de langage pré-entraînés?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về transfer learning (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về fine-tuning (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si la vérité n'existe que dans le langage, comment pouvons-nous échapper au relativisme? Ou le relativisme lui-même est-il une vérité absolue?",
+        "question": "Si l'existence précède l'essence, comment définissons-nous notre propre essence? Ou l'essence est-elle toujours en devenir?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về truth và relativism (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về existence và essence (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое residual connections (остаточные связи) в нейронных сетях и зачем они нужны?",
+        "question": "Что такое batch normalization и как она помогает в обучении глубоких нейронных сетей?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về residual connections (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es el early stopping y cómo ayuda a prevenir el overfitting en el entrenamiento de modelos?",
+        "question": "¿Qué es la función de activación ReLU y por qué es tan popular en las redes neuronales profundas?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về early stopping (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về ReLU activation (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn das Selbst nur eine Illusion ist, wer oder was erlebt dann diese Illusion? Ist die Frage nach dem 'Selbst' selbst bereits Teil der Illusion?",
+        "question": "Wenn die Zeit nur eine Konstruktion des Bewusstseins ist, existiert dann die Vergangenheit wirklich? Oder ist alles, was wir als 'Vergangenheit' erinnern, nur eine gegenwärtige Konstruktion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về self và illusion (tiếng Đức) - MỚI"
+        "description": "Câu triết học về time và consciousness (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كانت المعرفة مبنية على اللغة، فكيف يمكننا تجاوز حدود اللغة نفسها؟ أم أن محاولة التجاوز هي نفسها محاولة لغوية؟",
+        "question": "إذا كان الوجود يسبق الجوهر، فكيف نحدد جوهرنا الخاص؟ أم أن الجوهر دائماً في حالة صيرورة؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về knowledge và language (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về existence và essence (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
