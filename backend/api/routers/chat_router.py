@@ -981,10 +981,23 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 )
                 logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
         else:
-            # For non-critical validation failures, still return the response but log warning
-            # This prevents 422 errors for minor validation issues
-            logger.warning(f"Validation failed but returning response anyway. Reasons: {validation_result.reasons}")
-            response = raw_response
+            # For non-critical validation failures, check if they're just warnings (not violations)
+            # IdentityCheckValidator can return warnings (identity_warning:*) that shouldn't cause failure
+            has_identity_warnings_only = any(
+                r.startswith("identity_warning:") for r in validation_result.reasons
+            ) and not any(
+                r.startswith("identity_violation:") for r in validation_result.reasons
+            )
+            
+            # If only identity warnings (not violations), use response as-is
+            if has_identity_warnings_only:
+                logger.info(f"✅ Validation has only identity warnings (not violations), accepting response. Reasons: {validation_result.reasons}")
+                response = raw_response
+            else:
+                # For other non-critical validation failures, still return the response but log warning
+                # This prevents 422 errors for minor validation issues
+                logger.warning(f"Validation failed but returning response anyway. Reasons: {validation_result.reasons}")
+                response = raw_response
     else:
         # Validation passed - use patched answer if available, otherwise use raw response
         response = validation_result.patched_answer or raw_response

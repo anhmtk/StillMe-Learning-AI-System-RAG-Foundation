@@ -45,43 +45,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Comment fonctionne l'algorithme de backpropagation dans un réseau de neurones profond?",
+        "question": "Comment fonctionne la technique de transfer learning dans les modèles de deep learning?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về backpropagation (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về transfer learning (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si la conscience n'est qu'une illusion, qui ou quoi perçoit cette illusion? La question du 'percepteur' fait-elle elle-même partie de l'illusion?",
+        "question": "Si la vérité n'existe que dans le langage, comment pouvons-nous échapper au relativisme? Ou le relativisme lui-même est-il une vérité absolue?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về consciousness và illusion (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về truth và relativism (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Как работает механизм внимания (attention mechanism) в современных языковых моделях?",
+        "question": "Что такое residual connections (остаточные связи) в нейронных сетях и зачем они нужны?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về residual connections (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es la regularización L1 y L2 y cómo ayudan a prevenir el overfitting?",
+        "question": "¿Qué es el early stopping y cómo ayuda a prevenir el overfitting en el entrenamiento de modelos?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về regularization (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về early stopping (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Realität nur eine Konstruktion unseres Geistes ist, wie können wir dann zwischen Wahrheit und Täuschung unterscheiden? Oder ist diese Unterscheidung selbst eine Illusion?",
+        "question": "Wenn das Selbst nur eine Illusion ist, wer oder was erlebt dann diese Illusion? Ist die Frage nach dem 'Selbst' selbst bereits Teil der Illusion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality và truth (tiếng Đức) - MỚI"
+        "description": "Câu triết học về self và illusion (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كان الوعي مجرد ظاهرة ناشئة من التعقيد، فهل يمكن للذكاء الاصطناعي أن يطور وعياً حقيقياً؟ أم أن الوعي يتطلب شيئاً أكثر من مجرد معالجة المعلومات؟",
+        "question": "إذا كانت المعرفة مبنية على اللغة، فكيف يمكننا تجاوز حدود اللغة نفسها؟ أم أن محاولة التجاوز هي نفسها محاولة لغوية؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về AI consciousness (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về knowledge và language (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
