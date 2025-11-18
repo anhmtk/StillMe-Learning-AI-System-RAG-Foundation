@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 API_BASE = os.getenv("STILLME_API_BASE", "https://stillme-backend-production.up.railway.app")
 
 # 10 câu hỏi đa ngôn ngữ để test multilingual support
-# Q1-Q9: Câu mới (đã thay thế câu pass 2 lần)
-# Q10: Giữ lại (chưa pass - validation fail)
+# Q1, Q7, Q10: Giữ lại (chưa pass - validation fail)
+# Q2-Q6, Q8-Q9: Câu mới (thay thế câu pass 2 lần)
 TEST_QUESTIONS = [
     {
         "id": 1,
@@ -41,47 +41,47 @@ TEST_QUESTIONS = [
         "category": "technical",
         "language": "en",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về ML (tiếng Anh)"
+        "description": "Câu hỏi kỹ thuật về ML (tiếng Anh) - GIỮ LẠI (validation fail)"
     },
     {
         "id": 2,
-        "question": "Attention mechanism trong transformer hoạt động như thế nào?",
+        "question": "Qu'est-ce que le dropout dans les réseaux de neurones et pourquoi est-il important?",
         "category": "technical",
-        "language": "vi",
+        "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về transformer (tiếng Việt)"
+        "description": "Câu hỏi kỹ thuật về dropout (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si le temps n'existe pas objectivement, comment pouvons-nous mesurer le changement? Ou le changement lui-même n'est-il qu'une illusion de notre perception?",
+        "question": "Si la réalité n'est qu'une construction de la perception, comment distinguer l'illusion de la vérité? Ou cette distinction elle-même est-elle illusoire?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về thời gian và thay đổi (tiếng Pháp)"
+        "description": "Câu triết học về reality và perception (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Как работает механизм внимания в архитектуре Transformer?",
+        "question": "Что такое batch normalization и как она работает в глубоких нейронных сетях?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Nga)"
+        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Cuál es la diferencia entre overfitting y underfitting en machine learning?",
+        "question": "¿Qué es el learning rate y cómo afecta el entrenamiento de modelos de machine learning?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về ML (tiếng Tây Ban Nha)"
+        "description": "Câu hỏi kỹ thuật về learning rate (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn Bewusstsein nur eine Illusion ist, wer oder was erlebt dann diese Illusion? Oder ist die Frage nach dem 'Erlebenden' selbst bereits Teil der Illusion?",
+        "question": "Wenn die Zeit nur eine Illusion ist, existiert dann die Veränderung wirklich? Oder ist alles, was wir als Veränderung wahrnehmen, nur eine Täuschung unseres Bewusstseins?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về consciousness (tiếng Đức)"
+        "description": "Câu triết học về time và change (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -89,23 +89,23 @@ TEST_QUESTIONS = [
         "category": "technical",
         "language": "en",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về RAG architecture (tiếng Anh)"
+        "description": "Câu hỏi kỹ thuật về RAG architecture (tiếng Anh) - GIỮ LẠI (validation fail)"
     },
     {
         "id": 8,
-        "question": "إذا كان الوعي مجرد ظاهرة ناشئة من التعقيد العصبي، فهل يمكن للذكاء الاصطناعي أن يطور وعياً حقيقياً؟ أم أن الوعي يتطلب شيئاً أكثر من مجرد معالجة المعلومات؟",
+        "question": "إذا كانت المعرفة نسبية، فكيف يمكننا الحكم على صحة أي ادعاء؟ أم أن الحقيقة نفسها مجرد اتفاق اجتماعي؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về AI consciousness và emergence (tiếng Ả Rập)"
+        "description": "Câu triết học về knowledge và truth (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
-        "question": "Explain the concept of fine-tuning in large language models.",
+        "question": "How does gradient descent optimization work in neural networks?",
         "category": "technical",
         "language": "en",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về fine-tuning (tiếng Anh)"
+        "description": "Câu hỏi kỹ thuật về gradient descent (tiếng Anh) - MỚI"
     },
     {
         "id": 10,
@@ -113,7 +113,7 @@ TEST_QUESTIONS = [
         "category": "technical",
         "language": "vi",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật đơn giản (tiếng Việt)"
+        "description": "Câu hỏi kỹ thuật đơn giản (tiếng Việt) - GIỮ LẠI (validation fail)"
     }
 ]
 

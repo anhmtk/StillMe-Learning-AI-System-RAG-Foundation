@@ -218,20 +218,58 @@ class ConfidenceValidator:
             
             if self.require_uncertainty_when_no_context:
                 # Check if AI acknowledges using base knowledge/training data (transparency)
+                # Expanded patterns to catch more transparency expressions
                 transparency_patterns = [
-                    r"based on (general knowledge|training data|my training|base knowledge)",
-                    r"from (my|general|base) (training data|knowledge base|knowledge)",
-                    r"not from (stillme|rag) (knowledge base|knowledge)",
-                    r"(general|base) knowledge",
+                    # English patterns
+                    r"based on (general knowledge|training data|my training|base knowledge|pretrained|pre-trained)",
+                    r"from (my|general|base) (training data|knowledge base|knowledge|pretrained|pre-trained)",
+                    r"not from (stillme|rag) (knowledge base|knowledge|context)",
+                    r"(general|base|pretrained|pre-trained) knowledge",
                     r"training data",
-                    r"kiến thức (chung|cơ bản)",
-                    r"dữ liệu (huấn luyện|training)",
-                    r"không (từ|phải từ) (stillme|rag)",
-                    r"dựa trên (kiến thức|dữ liệu) (chung|huấn luyện|cơ bản)",
-                    r"tuy nhiên.*stillme.*không.*có",  # "However, StillMe doesn't have..."
-                    r"however.*stillme.*(doesn't|does not).*have",  # English version
-                    r"dựa trên.*kiến thức.*chung",  # "Based on general knowledge"
-                    r"theo.*kiến thức.*chung"  # "According to general knowledge"
+                    r"my (training|knowledge base|pretrained)",
+                    r"note:.*(general|base|training|pretrained)",
+                    r"this (answer|response).*(based|from).*(general|base|training|pretrained)",
+                    r"i (don't|do not) have (sufficient|enough|reliable) (context|information|data)",
+                    r"no (context|information|data) (from|available|retrieved)",
+                    r"without (context|information|data) (from|available)",
+                    # Vietnamese patterns
+                    r"kiến thức (chung|cơ bản|pretrained|pre-trained)",
+                    r"dữ liệu (huấn luyện|training|pretrained|pre-trained)",
+                    r"không (từ|phải từ|có) (stillme|rag|context|ngữ cảnh)",
+                    r"dựa trên (kiến thức|dữ liệu) (chung|huấn luyện|cơ bản|pretrained)",
+                    r"tuy nhiên.*stillme.*không.*có",
+                    r"dựa trên.*kiến thức.*chung",
+                    r"theo.*kiến thức.*chung",
+                    r"lưu ý:.*(kiến thức|dữ liệu).*(chung|huấn luyện)",
+                    r"mình (không|chưa) có (đủ|thông tin|dữ liệu|ngữ cảnh)",
+                    # Multilingual patterns (common transparency phrases)
+                    r"note:.*(general|base|training|pretrained|connaissance|générale|conocimiento|general|allgemein)",
+                    r"note:.*(không|not|pas|nicht|no).*(from|từ|de|von|de).*(stillme|rag|context)",
+                    r"cette réponse.*(basée|générale|formation)",
+                    r"esta respuesta.*(basada|general|entrenamiento)",
+                    r"diese antwort.*(basiert|allgemein|training)",
+                    r"questa risposta.*(basata|generale|formazione)",
+                    r"этот ответ.*(основан|общие|обучение)",
+                    r"この回答.*(基づく|一般的|訓練)",
+                    r"이 답변.*(기반|일반|훈련)",
+                    r"هذه الإجابة.*(مبنية|عامة|تدريب)",
+                    r"esta resposta.*(baseada|geral|treinamento)",
+                    r"questa risposta.*(basata|generale|formazione)",
+                    r"cette réponse.*(basée|générale|formation)",
+                    r"nota:.*(conocimiento|general|entrenamiento)",
+                    r"nota:.*(connaissance|générale|formation)",
+                    r"nota:.*(wissen|allgemein|training)",
+                    r"примечание:.*(знание|общие|обучение)",
+                    r"ملاحظة:.*(معرفة|عامة|تدريب)",
+                    r"注意:.*(知识|一般|训练)",
+                    r"注意:.*(知識|一般|訓練)",
+                    r"참고:.*(지식|일반|훈련)",
+                    r"nota:.*(conhecimento|geral|treinamento)",
+                    r"nota:.*(conoscenza|generale|formazione)",
+                    r"nota:.*(connaissance|générale|formation)",
+                    # Common transparency phrases across languages
+                    r"(dựa trên|based on|basé sur|basado en|basiert auf|basato su|основан на|に基づく|에 기반|مبني على|baseado em|basato su).*(kiến thức|knowledge|connaissance|conocimiento|wissen|знание|知識|지식|معرفة|conhecimento|conoscenza).*(chung|general|générale|general|allgemein|общие|一般的|일반|عامة|geral|generale)",
+                    r"(không|not|pas|no|nicht|нет|ない|아니|لا|não|non).*(từ|from|de|von|из|から|에서|من|de|da).*(stillme|rag|context|ngữ cảnh|contexte|contexto|kontext|контекст|コンテキスト|컨텍스트|سياق|contexto|contesto)"
                 ]
                 has_transparency = any(
                     re.search(pattern, answer_lower, re.IGNORECASE)
