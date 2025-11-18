@@ -2630,7 +2630,10 @@ Remember: RESPOND IN ENGLISH ONLY."""
             
             # Try to generate response with retry on context overflow
             from backend.api.utils.llm_providers import ContextOverflowError
-            from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
+            from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error, is_fallback_message
+            
+            # Initialize fallback flag for non-RAG path
+            is_fallback_meta_answer_non_rag = False
             
             response = None
             try:
@@ -2686,6 +2689,12 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 # Fallback if response is still None
                 response = get_fallback_message_for_error("generic", detected_lang)
                 processing_steps.append("⚠️ No response received - using fallback message")
+            
+            # CRITICAL: Check if response is a fallback meta-answer (terminal response)
+            if response and isinstance(response, str) and is_fallback_message(response):
+                logger.info("🛑 Fallback meta-answer detected (non-RAG) - skipping post-processing")
+                is_fallback_meta_answer_non_rag = True
+                processing_steps.append("🛑 Fallback message - terminal response, skipping all post-processing")
             
             llm_inference_end = time.time()
             llm_inference_latency = llm_inference_end - llm_inference_start
