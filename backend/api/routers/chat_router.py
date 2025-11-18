@@ -2455,44 +2455,53 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 used_fallback = False
                 
                 if enable_validators:
-                    try:
-                        response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, ctx_docs = await _handle_validation_with_fallback(
-                            raw_response=raw_response,
-                            context=context,
-                            detected_lang=detected_lang,
-                            is_philosophical=is_philosophical,
-                            chat_request=chat_request,
-                            enhanced_prompt=enhanced_prompt,
-                            context_text=context_text,
-                            citation_instruction=citation_instruction,
-                            num_knowledge=num_knowledge,
-                            processing_steps=processing_steps,
-                            timing_logs=timing_logs
-                        )
-                    except HTTPException:
-                        raise
-                    except Exception as validation_error:
-                        logger.error(f"Validation error: {validation_error}, falling back to raw response", exc_info=True)
-                        logger.error(f"⚠️ Validation exception details - raw_response length: {len(raw_response) if raw_response else 0}, context docs: {len(context.get('knowledge_docs', [])) + len(context.get('conversation_docs', []))}")
-                        response = raw_response
-                        # Calculate confidence even on error (low confidence)
-                        # Build ctx_docs for confidence calculation
-                        ctx_docs = [
-                            doc["content"] for doc in context.get("knowledge_docs", [])
-                        ] + [
-                            doc["content"] for doc in context.get("conversation_docs", [])
-                        ]
-                        confidence_score = 0.3 if len(ctx_docs) == 0 else 0.6
-                        # Ensure validation_result is set to None to prevent downstream errors
-                        validation_result = None
+                    # CRITICAL: Ensure raw_response is valid before validation
+                    if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
+                        logger.error(f"⚠️ raw_response is None or empty before validation - using fallback")
+                        from backend.api.utils.error_detector import get_fallback_message_for_error
+                        response = get_fallback_message_for_error("generic", detected_lang)
                         validation_info = None
-                        
-                        # CRITICAL: Check if response is None or empty after validation error
-                        if not response or not isinstance(response, str) or not response.strip():
-                            logger.error(f"⚠️ Response is None or empty after validation error - using fallback")
-                            from backend.api.utils.error_detector import get_fallback_message_for_error
-                            response = get_fallback_message_for_error("generic", detected_lang)
-                            processing_steps.append("⚠️ Response validation failed - using fallback message")
+                        confidence_score = 0.3
+                        processing_steps.append("⚠️ Response validation failed - using fallback message")
+                    else:
+                        try:
+                            response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, ctx_docs = await _handle_validation_with_fallback(
+                                raw_response=raw_response,
+                                context=context,
+                                detected_lang=detected_lang,
+                                is_philosophical=is_philosophical,
+                                chat_request=chat_request,
+                                enhanced_prompt=enhanced_prompt,
+                                context_text=context_text,
+                                citation_instruction=citation_instruction,
+                                num_knowledge=num_knowledge,
+                                processing_steps=processing_steps,
+                                timing_logs=timing_logs
+                            )
+                        except HTTPException:
+                            raise
+                        except Exception as validation_error:
+                            logger.error(f"Validation error: {validation_error}, falling back to raw response", exc_info=True)
+                            logger.error(f"⚠️ Validation exception details - raw_response length: {len(raw_response) if raw_response else 0}, context docs: {len(context.get('knowledge_docs', [])) + len(context.get('conversation_docs', []))}")
+                            response = raw_response
+                            # Calculate confidence even on error (low confidence)
+                            # Build ctx_docs for confidence calculation
+                            ctx_docs = [
+                                doc["content"] for doc in context.get("knowledge_docs", [])
+                            ] + [
+                                doc["content"] for doc in context.get("conversation_docs", [])
+                            ]
+                            confidence_score = 0.3 if len(ctx_docs) == 0 else 0.6
+                            # Ensure validation_result is set to None to prevent downstream errors
+                            validation_result = None
+                            validation_info = None
+                            
+                            # CRITICAL: Check if response is None or empty after validation error
+                            if not response or not isinstance(response, str) or not response.strip():
+                                logger.error(f"⚠️ Response is None or empty after validation error - using fallback")
+                                from backend.api.utils.error_detector import get_fallback_message_for_error
+                                response = get_fallback_message_for_error("generic", detected_lang)
+                                processing_steps.append("⚠️ Response validation failed - using fallback message")
                 else:
                     response = raw_response
                     # Build ctx_docs for transparency check
