@@ -2296,6 +2296,12 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
             # PHASE 3: POST-PROCESSING PIPELINE
             # Unified Style & Quality Enforcement Layer (Optimized)
             # ==========================================
+            # CRITICAL: Ensure response is set and not None
+            if not response:
+                logger.error("⚠️ Response is None or empty before post-processing - using fallback")
+                from backend.api.utils.error_detector import get_fallback_message_for_error
+                response = get_fallback_message_for_error("generic", detected_lang)
+            
             postprocessing_start = time.time()
             try:
                 from backend.postprocessing.style_sanitizer import get_style_sanitizer
@@ -2446,6 +2452,14 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
                     
                     response = final_response
+                    
+                    # CRITICAL: Final check - ensure response is not a technical error
+                    if response:
+                        from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
+                        is_error, error_type = is_technical_error(response)
+                        if is_error:
+                            logger.error(f"⚠️ Final response is still a technical error (type: {error_type}) - replacing with fallback")
+                            response = get_fallback_message_for_error(error_type, detected_lang)
                     
                     postprocessing_time = time.time() - postprocessing_start
                     timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
@@ -2782,6 +2796,13 @@ Remember: RESPOND IN ENGLISH ONLY."""
                         logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
                 
                 response = final_response
+                
+                # CRITICAL: Final check - ensure response is not a technical error
+                if response:
+                    is_error, error_type = is_technical_error(response)
+                    if is_error:
+                        logger.error(f"⚠️ Final response (non-RAG) is still a technical error (type: {error_type}) - replacing with fallback")
+                        response = get_fallback_message_for_error(error_type, detected_lang)
                 
                 postprocessing_time = time.time() - postprocessing_start
                 timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
