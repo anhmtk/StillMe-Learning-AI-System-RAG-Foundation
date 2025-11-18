@@ -1,0 +1,271 @@
+"""
+Style Sanitizer - Hard filter (0 token) for style normalization
+
+Pure Python rules to normalize output from any LLM provider:
+- Remove emojis
+- Convert bullets to prose
+- Convert headings to normal sentences
+- Remove anthropomorphism
+- Normalize spacing/line breaks
+- Remove markdown formatting
+- Normalize unicode quotes
+- Preserve semantics
+"""
+
+import re
+import logging
+from typing import Optional
+
+logger = logging.getLogger(__name__)
+
+
+class StyleSanitizer:
+    """
+    Hard filter for style normalization - pure Python, 0 token cost
+    """
+    
+    def __init__(self):
+        """Initialize style sanitizer"""
+        # Emoji pattern (covers most common emojis)
+        self.emoji_pattern = re.compile(
+            r'[\U0001F600-\U0001F64F]|'  # Emoticons
+            r'[\U0001F300-\U0001F5FF]|'  # Misc Symbols and Pictographs
+            r'[\U0001F680-\U0001F6FF]|'  # Transport and Map
+            r'[\U0001F1E0-\U0001F1FF]|'  # Flags
+            r'[\U00002702-\U000027B0]|'  # Dingbats
+            r'[\U000024C2-\U0001F251]|'  # Enclosed characters
+            r'[\U0001F900-\U0001F9FF]|'  # Supplemental Symbols and Pictographs
+            r'[\U0001FA00-\U0001FA6F]|'  # Chess Symbols
+            r'[\U0001FA70-\U0001FAFF]|'  # Symbols and Pictographs Extended-A
+            r'[\U00002600-\U000026FF]|'  # Miscellaneous Symbols
+            r'[\U00002700-\U000027BF]'   # Dingbats
+        )
+        
+        # Anthropomorphic patterns (common phrases that claim experience/feelings)
+        self.anthropomorphic_patterns = [
+            r'\b(I|Tôi|Em|Mình)\s+(feel|feel like|cảm thấy|cảm nhận|feel that|feel as if)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(have experienced|đã trải nghiệm|từng trải nghiệm|đã từng)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(remember|nhớ|nhớ lại|remember that)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(believe|tin|tin rằng|believe that)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(think|nghĩ|nghĩ rằng|think that)\s+(that|rằng)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(am|đang|is)\s+(happy|sad|excited|worried|vui|buồn|lo lắng)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(hope|hy vọng|hope that)\b',
+            r'\b(I|Tôi|Em|Mình)\s+(wish|ước|wish that)\b',
+            r'\btheo kinh nghiệm\s+(của|tôi|em|mình)\b',
+            r'\bIn my experience\b',
+            r'\bFrom my experience\b',
+            r'\bI have seen\b',
+            r'\bTôi từng thấy\b',
+        ]
+        
+        # Markdown heading patterns
+        self.heading_pattern = re.compile(r'^#{1,6}\s+(.+)$', re.MULTILINE)
+        
+        # Bullet point patterns
+        self.bullet_pattern = re.compile(r'^[\s]*[-*•]\s+(.+)$', re.MULTILINE)
+        
+        # Unicode quote normalization
+        self.unicode_quotes = {
+            '"': '"',  # Left double quotation mark
+            '"': '"',  # Right double quotation mark
+            ''': "'",  # Left single quotation mark
+            ''': "'",  # Right single quotation mark
+            '„': '"',  # Double low-9 quotation mark
+            '‚': "'",  # Single low-9 quotation mark
+        }
+    
+    def sanitize(self, text: str, is_philosophical: bool = False) -> str:
+        """
+        Sanitize text according to StillMe style rules
+        
+        Args:
+            text: Raw output from LLM
+            is_philosophical: If True, apply stricter rules (no emojis, no bullets, prose only)
+            
+        Returns:
+            Sanitized text preserving semantics but normalized style
+        """
+        if not text:
+            return text
+        
+        result = text
+        
+        # Step 1: Remove emojis (always, especially for philosophical)
+        result = self._remove_emojis(result)
+        
+        # Step 2: Normalize unicode quotes
+        result = self._normalize_quotes(result)
+        
+        # Step 3: Remove anthropomorphic language
+        result = self._remove_anthropomorphism(result)
+        
+        # Step 4: Convert markdown to prose
+        if is_philosophical:
+            # For philosophical: convert headings and bullets to prose
+            result = self._convert_headings_to_prose(result)
+            result = self._convert_bullets_to_prose(result)
+            # Remove all markdown formatting
+            result = self._remove_markdown(result)
+        else:
+            # For non-philosophical: keep some structure but normalize
+            result = self._normalize_markdown(result)
+        
+        # Step 5: Normalize spacing and line breaks
+        result = self._normalize_spacing(result)
+        
+        # Step 6: Remove citation markers if philosophical (they should be prose, not [1])
+        if is_philosophical:
+            result = self._remove_citation_markers(result)
+        
+        return result.strip()
+    
+    def _remove_emojis(self, text: str) -> str:
+        """Remove all emojis from text"""
+        return self.emoji_pattern.sub('', text)
+    
+    def _normalize_quotes(self, text: str) -> str:
+        """Normalize unicode quotes to standard ASCII"""
+        result = text
+        for unicode_quote, ascii_quote in self.unicode_quotes.items():
+            result = result.replace(unicode_quote, ascii_quote)
+        return result
+    
+    def _remove_anthropomorphism(self, text: str) -> str:
+        """Remove anthropomorphic language patterns"""
+        result = text
+        for pattern in self.anthropomorphic_patterns:
+            # Replace with neutral alternatives
+            result = re.sub(
+                pattern,
+                lambda m: self._neutralize_anthropomorphism(m.group(0)),
+                result,
+                flags=re.IGNORECASE
+            )
+        return result
+    
+    def _neutralize_anthropomorphism(self, phrase: str) -> str:
+        """Convert anthropomorphic phrase to neutral alternative"""
+        phrase_lower = phrase.lower()
+        
+        # Map common patterns to neutral alternatives
+        replacements = {
+            'i feel': 'analysis suggests',
+            'tôi cảm thấy': 'phân tích cho thấy',
+            'i have experienced': 'data indicates',
+            'tôi từng trải nghiệm': 'dữ liệu cho thấy',
+            'i remember': 'records show',
+            'tôi nhớ': 'tài liệu cho thấy',
+            'i believe': 'evidence suggests',
+            'tôi tin': 'bằng chứng cho thấy',
+            'i think': 'analysis indicates',
+            'tôi nghĩ': 'phân tích chỉ ra',
+            'theo kinh nghiệm': 'dựa trên dữ liệu',
+            'in my experience': 'based on available data',
+        }
+        
+        for pattern, replacement in replacements.items():
+            if pattern in phrase_lower:
+                return replacement
+        
+        # Default: remove first person, keep the rest
+        return re.sub(r'^(I|Tôi|Em|Mình)\s+', '', phrase, flags=re.IGNORECASE)
+    
+    def _convert_headings_to_prose(self, text: str) -> str:
+        """Convert markdown headings to normal prose sentences"""
+        def heading_to_sentence(match):
+            heading_text = match.group(1).strip()
+            # Capitalize first letter and add period if needed
+            if not heading_text.endswith(('.', '!', '?')):
+                heading_text += '.'
+            return heading_text
+        
+        return self.heading_pattern.sub(heading_to_sentence, text)
+    
+    def _convert_bullets_to_prose(self, text: str) -> str:
+        """Convert bullet points to prose paragraphs"""
+        lines = text.split('\n')
+        result_lines = []
+        current_paragraph = []
+        
+        for line in lines:
+            bullet_match = self.bullet_pattern.match(line)
+            if bullet_match:
+                # Found a bullet point
+                bullet_text = bullet_match.group(1).strip()
+                current_paragraph.append(bullet_text)
+            else:
+                # Not a bullet - flush current paragraph and add this line
+                if current_paragraph:
+                    # Convert bullet list to prose
+                    if len(current_paragraph) == 1:
+                        result_lines.append(current_paragraph[0] + '.')
+                    else:
+                        # Multiple bullets: create a flowing paragraph
+                        prose = ', '.join(current_paragraph[:-1])
+                        prose += f', and {current_paragraph[-1]}.'
+                        result_lines.append(prose)
+                    current_paragraph = []
+                
+                if line.strip():
+                    result_lines.append(line)
+        
+        # Flush remaining bullets
+        if current_paragraph:
+            if len(current_paragraph) == 1:
+                result_lines.append(current_paragraph[0] + '.')
+            else:
+                prose = ', '.join(current_paragraph[:-1])
+                prose += f', and {current_paragraph[-1]}.'
+                result_lines.append(prose)
+        
+        return '\n'.join(result_lines)
+    
+    def _remove_markdown(self, text: str) -> str:
+        """Remove all markdown formatting"""
+        # Remove bold/italic
+        text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # Bold
+        text = re.sub(r'\*(.+?)\*', r'\1', text)      # Italic
+        text = re.sub(r'_(.+?)_', r'\1', text)        # Italic underscore
+        
+        # Remove code blocks
+        text = re.sub(r'```[\s\S]*?```', '', text)    # Code blocks
+        text = re.sub(r'`(.+?)`', r'\1', text)        # Inline code
+        
+        # Remove links
+        text = re.sub(r'\[(.+?)\]\(.+?\)', r'\1', text)  # Markdown links
+        
+        return text
+    
+    def _normalize_markdown(self, text: str) -> str:
+        """Normalize markdown (keep structure but clean up)"""
+        # Keep headings and bullets but normalize spacing
+        # Remove excessive bold/italic
+        text = re.sub(r'\*\*\*(.+?)\*\*\*', r'\1', text)  # Bold+italic
+        return text
+    
+    def _normalize_spacing(self, text: str) -> str:
+        """Normalize spacing and line breaks"""
+        # Remove excessive blank lines (more than 2 consecutive)
+        text = re.sub(r'\n{3,}', '\n\n', text)
+        
+        # Normalize spaces (multiple spaces to single)
+        text = re.sub(r' +', ' ', text)
+        
+        # Remove trailing spaces
+        text = re.sub(r' +$', '', text, flags=re.MULTILINE)
+        
+        return text.strip()
+    
+    def _remove_citation_markers(self, text: str) -> str:
+        """Remove citation markers like [1], [2] for philosophical mode"""
+        # Remove standalone citation markers
+        text = re.sub(r'\[(\d+)\]', '', text)
+        return text
+
+
+def get_style_sanitizer() -> StyleSanitizer:
+    """Get singleton instance of StyleSanitizer"""
+    if not hasattr(get_style_sanitizer, '_instance'):
+        get_style_sanitizer._instance = StyleSanitizer()
+    return get_style_sanitizer._instance
+
