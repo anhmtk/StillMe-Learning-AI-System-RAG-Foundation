@@ -1776,73 +1776,73 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     try:
                         processing_steps.append("🔍 Validating response...")
                         validation_start = time.time()
-                        from backend.validators.chain import ValidatorChain
+                            from backend.validators.chain import ValidatorChain
                         from backend.validators.citation import CitationRequired
-                    from backend.validators.evidence_overlap import EvidenceOverlap
-                    from backend.validators.numeric import NumericUnitsBasic
-                    from backend.validators.ethics_adapter import EthicsAdapter
-                    from backend.validators.confidence import ConfidenceValidator
-                    from backend.validators.fallback_handler import FallbackHandler
-                    from backend.services.ethics_guard import check_content_ethics
-                    
-                    # Build context docs list for validation
-                    ctx_docs = [
-                        doc["content"] for doc in context["knowledge_docs"]
-                    ] + [
-                        doc["content"] for doc in context["conversation_docs"]
-                    ]
-                    
-                    # Create validator chain with LanguageValidator FIRST (highest priority)
-                    from backend.validators.language import LanguageValidator
-                    from backend.validators.citation_relevance import CitationRelevance
-                    from backend.validators.identity_check import IdentityCheckValidator
-                    from backend.validators.ego_neutrality import EgoNeutralityValidator
-                    
-                    # Enable Identity Check Validator (can be toggled via env var)
-                    enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
-                    identity_validator_strict = os.getenv("IDENTITY_VALIDATOR_STRICT", "true").lower() == "true"
-                    
-                    validators = [
-                        LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
-                        CitationRequired(),
-                        CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
-                        EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
-                        NumericUnitsBasic(),
-                        # Fix: Disable require_uncertainty_when_no_context for philosophical questions
-                        ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # Check for uncertainty
-                        EgoNeutralityValidator(strict_mode=True, auto_patch=True),  # Detect and auto-patch "Hallucination of Experience" - novel contribution
-                    ]
-                    
-                    # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
-                    if enable_identity_check:
-                        validators.append(
-                            IdentityCheckValidator(
-                                strict_mode=identity_validator_strict,
-                                require_humility_when_no_context=True,
-                                allow_minor_tone_violations=False
+                        from backend.validators.evidence_overlap import EvidenceOverlap
+                        from backend.validators.numeric import NumericUnitsBasic
+                        from backend.validators.ethics_adapter import EthicsAdapter
+                        from backend.validators.confidence import ConfidenceValidator
+                        from backend.validators.fallback_handler import FallbackHandler
+                        from backend.services.ethics_guard import check_content_ethics
+                        
+                        # Build context docs list for validation
+                        ctx_docs = [
+                            doc["content"] for doc in context["knowledge_docs"]
+                        ] + [
+                            doc["content"] for doc in context["conversation_docs"]
+                        ]
+                        
+                        # Create validator chain with LanguageValidator FIRST (highest priority)
+                        from backend.validators.language import LanguageValidator
+                        from backend.validators.citation_relevance import CitationRelevance
+                        from backend.validators.identity_check import IdentityCheckValidator
+                        from backend.validators.ego_neutrality import EgoNeutralityValidator
+                        
+                        # Enable Identity Check Validator (can be toggled via env var)
+                        enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
+                        identity_validator_strict = os.getenv("IDENTITY_VALIDATOR_STRICT", "true").lower() == "true"
+                        
+                        validators = [
+                            LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
+                            CitationRequired(),
+                            CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
+                            EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
+                            NumericUnitsBasic(),
+                            # Fix: Disable require_uncertainty_when_no_context for philosophical questions
+                            ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # Check for uncertainty
+                            EgoNeutralityValidator(strict_mode=True, auto_patch=True),  # Detect and auto-patch "Hallucination of Experience" - novel contribution
+                        ]
+                        
+                        # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
+                        if enable_identity_check:
+                            validators.append(
+                                IdentityCheckValidator(
+                                    strict_mode=identity_validator_strict,
+                                    require_humility_when_no_context=True,
+                                    allow_minor_tone_violations=False
+                                )
                             )
+                        
+                        # Add EthicsAdapter last (most critical - blocks harmful content)
+                        validators.append(
+                            EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
                         )
-                    
-                    # Add EthicsAdapter last (most critical - blocks harmful content)
-                    validators.append(
-                        EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
-                    )
-                    
-                    chain = ValidatorChain(validators)
-                    
-                    # Tier 3.5: Pass context quality to ConfidenceValidator
-                    context_quality = context.get("context_quality", None)
-                    avg_similarity = context.get("avg_similarity_score", None)
-                    
-                    # Run validation with context quality info
-                    # Tier 3.5: Pass context quality and is_philosophical to ValidatorChain
-                    validation_result = chain.run(
-                        raw_response, 
-                        ctx_docs,
-                        context_quality=context_quality,
-                        avg_similarity=avg_similarity,
-                        is_philosophical=is_philosophical
-                    )
+                        
+                        chain = ValidatorChain(validators)
+                        
+                        # Tier 3.5: Pass context quality to ConfidenceValidator
+                        context_quality = context.get("context_quality", None)
+                        avg_similarity = context.get("avg_similarity_score", None)
+                        
+                        # Run validation with context quality info
+                        # Tier 3.5: Pass context quality and is_philosophical to ValidatorChain
+                        validation_result = chain.run(
+                            raw_response, 
+                            ctx_docs,
+                            context_quality=context_quality,
+                            avg_similarity=avg_similarity,
+                            is_philosophical=is_philosophical
+                        )
                     
                     # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
                     # For now, we'll handle this in the prompt building phase
@@ -2340,13 +2340,13 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     from backend.postprocessing.optimizer import get_postprocessing_optimizer
                     
                     optimizer = get_postprocessing_optimizer()
-                
-                # OPTIMIZATION: Check if we should skip post-processing
-                should_skip, skip_reason = optimizer.should_skip_postprocessing(
-                    question=chat_request.message,
-                    response=response,
-                    is_philosophical=is_philosophical
-                )
+                    
+                    # OPTIMIZATION: Check if we should skip post-processing
+                    should_skip, skip_reason = optimizer.should_skip_postprocessing(
+                        question=chat_request.message,
+                        response=response,
+                        is_philosophical=is_philosophical
+                    )
                 
                 if should_skip:
                     logger.info(f"⏭️ Skipping post-processing: {skip_reason}")
@@ -2736,15 +2736,15 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 
                 # OPTIMIZATION: Check if we should skip post-processing
                 should_skip, skip_reason = optimizer.should_skip_postprocessing(
-                question=chat_request.message,
-                response=response,
-                is_philosophical=is_philosophical_non_rag
-            )
-            
-            if should_skip:
-                logger.info(f"⏭️ Skipping post-processing (non-RAG): {skip_reason}")
-                timing_logs["postprocessing"] = "skipped"
-            else:
+                    question=chat_request.message,
+                    response=response,
+                    is_philosophical=is_philosophical_non_rag
+                )
+                
+                if should_skip:
+                    logger.info(f"⏭️ Skipping post-processing (non-RAG): {skip_reason}")
+                    timing_logs["postprocessing"] = "skipped"
+                else:
                 # Stage 2: Hard Filter (0 token) - Style Sanitization
                 sanitizer = get_style_sanitizer()
                 sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
