@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 API_BASE = os.getenv("STILLME_API_BASE", "https://stillme-backend-production.up.railway.app")
 
 # 10 câu hỏi đa ngôn ngữ để test multilingual support
-# Q1, Q7, Q10: Giữ lại (chưa pass - validation fail)
-# Q2-Q6, Q8-Q9: Câu mới (thay thế câu pass 2 lần)
+# Q1, Q7, Q9, Q10: Giữ lại (chưa pass - validation fail)
+# Q2-Q6, Q8: Câu mới (thay thế câu pass 2 lần)
 TEST_QUESTIONS = [
     {
         "id": 1,
@@ -45,43 +45,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Qu'est-ce que le dropout dans les réseaux de neurones et pourquoi est-il important?",
+        "question": "Comment fonctionne l'algorithme de backpropagation dans un réseau de neurones profond?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về dropout (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về backpropagation (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si la réalité n'est qu'une construction de la perception, comment distinguer l'illusion de la vérité? Ou cette distinction elle-même est-elle illusoire?",
+        "question": "Si la conscience n'est qu'une illusion, qui ou quoi perçoit cette illusion? La question du 'percepteur' fait-elle elle-même partie de l'illusion?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality và perception (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về consciousness và illusion (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое batch normalization и как она работает в глубоких нейронных сетях?",
+        "question": "Как работает механизм внимания (attention mechanism) в современных языковых моделях?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es el learning rate y cómo afecta el entrenamiento de modelos de machine learning?",
+        "question": "¿Qué es la regularización L1 y L2 y cómo ayudan a prevenir el overfitting?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về learning rate (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về regularization (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Zeit nur eine Illusion ist, existiert dann die Veränderung wirklich? Oder ist alles, was wir als Veränderung wahrnehmen, nur eine Täuschung unseres Bewusstseins?",
+        "question": "Wenn die Realität nur eine Konstruktion unseres Geistes ist, wie können wir dann zwischen Wahrheit und Täuschung unterscheiden? Oder ist diese Unterscheidung selbst eine Illusion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về time và change (tiếng Đức) - MỚI"
+        "description": "Câu triết học về reality và truth (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كانت المعرفة نسبية، فكيف يمكننا الحكم على صحة أي ادعاء؟ أم أن الحقيقة نفسها مجرد اتفاق اجتماعي؟",
+        "question": "إذا كان الوعي مجرد ظاهرة ناشئة من التعقيد، فهل يمكن للذكاء الاصطناعي أن يطور وعياً حقيقياً؟ أم أن الوعي يتطلب شيئاً أكثر من مجرد معالجة المعلومات؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về knowledge và truth (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về AI consciousness (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
@@ -105,7 +105,7 @@ TEST_QUESTIONS = [
         "category": "technical",
         "language": "en",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về gradient descent (tiếng Anh) - MỚI"
+        "description": "Câu hỏi kỹ thuật về gradient descent (tiếng Anh) - GIỮ LẠI (pass lần 1, fail lần 2)"
     },
     {
         "id": 10,

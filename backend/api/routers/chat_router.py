@@ -804,10 +804,22 @@ The RAG system found context documents, but they are NOT relevant to your questi
         # Initialize response with raw_response for transparency check
         response = raw_response
         response_lower = response.lower()
+        # Expanded transparency indicators to match ConfidenceValidator patterns
         transparency_indicators = [
-            "general knowledge", "training data", "my training", "base knowledge",
+            # English
+            "general knowledge", "training data", "my training", "base knowledge", "pretrained", "pre-trained",
+            "not from stillme", "not from rag", "without context", "no context",
+            "based on general", "from my training", "from general knowledge",
+            "note:", "this answer", "this response",
+            # Vietnamese
             "kiến thức chung", "dữ liệu huấn luyện", "kiến thức cơ bản",
-            "not from stillme", "not from rag", "không từ stillme", "không từ rag"
+            "không từ stillme", "không từ rag", "không có context", "không có ngữ cảnh",
+            "dựa trên kiến thức chung", "từ dữ liệu huấn luyện",
+            "lưu ý:", "câu trả lời này",
+            # Multilingual common patterns
+            "note:", "nota:", "ملاحظة:", "примечание:", "注意:", "참고:",
+            "connaissance générale", "données d'entraînement", "conocimiento general", "dados de entrenamiento",
+            "allgemeines wissen", "trainingsdaten", "conhecimento geral", "dados de treinamento"
         ]
         has_transparency_in_response = any(indicator in response_lower for indicator in transparency_indicators)
         
@@ -820,9 +832,15 @@ The RAG system found context documents, but they are NOT relevant to your questi
         has_critical_failure = has_language_mismatch or has_missing_uncertainty
         
         # If patched_answer is available (e.g., from CitationRequired auto-enforcement), use it
+        # CRITICAL: If patched_answer exists, it means validator auto-fixed the issue (e.g., added citation)
+        # In this case, we should use the patched answer and NOT treat it as a failure
         if validation_result.patched_answer:
             response = validation_result.patched_answer
             logger.info(f"✅ Using patched answer from validator (auto-fixed). Reasons: {validation_result.reasons}")
+            # If only issue was missing_citation and it was auto-fixed, don't treat as failure
+            if has_missing_citation and not has_critical_failure:
+                logger.info(f"✅ Citation was auto-added, validation should pass")
+                # Don't set used_fallback, response is valid
         elif has_critical_failure:
             # For language mismatch, try retry with stronger prompt first
             if has_language_mismatch:
@@ -945,17 +963,23 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 used_fallback = True
                 logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")
         elif has_missing_citation:
-            # Missing citation but no patched answer - use FallbackHandler to add citation
-            fallback_handler = FallbackHandler()
-            response = fallback_handler.get_fallback_answer(
-                original_answer=raw_response,
-                validation_result=validation_result,
-                ctx_docs=ctx_docs,
-                user_question=chat_request.message,
-                detected_lang=detected_lang,
-                input_language=detected_lang
-            )
-            logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
+            # Missing citation - check if patched_answer was already created by CitationRequired
+            if validation_result.patched_answer:
+                # CitationRequired already auto-added citation, use patched answer
+                response = validation_result.patched_answer
+                logger.info(f"✅ Using patched answer with auto-added citation. Reasons: {validation_result.reasons}")
+            else:
+                # No patched answer - use FallbackHandler to add citation
+                fallback_handler = FallbackHandler()
+                response = fallback_handler.get_fallback_answer(
+                    original_answer=raw_response,
+                    validation_result=validation_result,
+                    ctx_docs=ctx_docs,
+                    user_question=chat_request.message,
+                    detected_lang=detected_lang,
+                    input_language=detected_lang
+                )
+                logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
         else:
             # For non-critical validation failures, still return the response but log warning
             # This prevents 422 errors for minor validation issues
