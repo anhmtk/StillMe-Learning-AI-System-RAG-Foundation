@@ -45,43 +45,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Comment fonctionne le backpropagation dans les réseaux de neurones?",
+        "question": "Comment fonctionne l'algorithme de gradient stochastique (SGD) dans l'apprentissage profond?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về backpropagation (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về SGD (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si la vérité est relative à notre perspective, comment pouvons-nous distinguer la connaissance de la croyance? Ou cette distinction est-elle elle-même illusoire?",
+        "question": "Si la réalité est une construction sociale, comment pouvons-nous distinguer la vérité de l'illusion? Ou cette distinction est-elle elle-même une construction?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về truth và knowledge (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về reality và truth (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое рекуррентные нейронные сети (RNN) и как они обрабатывают последовательности?",
+        "question": "Что такое долгая краткосрочная память (LSTM) и как она решает проблему исчезающего градиента?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về RNN (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về LSTM (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es la función de activación ReLU y por qué es popular en las redes neuronales profundas?",
+        "question": "¿Qué es la normalización por lotes (batch normalization) y cómo ayuda en el entrenamiento de redes neuronales?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về ReLU activation (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn das Selbst nur eine Illusion ist, wer oder was erlebt dann diese Illusion? Oder ist die Frage nach dem Selbst selbst eine Illusion?",
+        "question": "Wenn die Realität nur eine Konstruktion ist, wie können wir dann zwischen Wahrheit und Illusion unterscheiden? Oder ist diese Unterscheidung selbst eine Konstruktion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về self và identity (tiếng Đức) - MỚI"
+        "description": "Câu triết học về reality và truth (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كانت الحقيقة نسبية، فكيف يمكننا التمييز بين المعرفة والاعتقاد؟ أم أن هذا التمييز نفسه وهمي؟",
+        "question": "إذا كانت الواقعية مجرد بناء، فكيف يمكننا التمييز بين الحقيقة والوهم؟ أم أن هذا التمييز نفسه بناء؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về truth và knowledge distinction (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về reality và truth (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,

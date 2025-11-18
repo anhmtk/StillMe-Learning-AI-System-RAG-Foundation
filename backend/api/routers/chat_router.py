@@ -875,6 +875,9 @@ The RAG system found context documents, but they are NOT relevant to your questi
             if has_missing_citation and not has_critical_failure:
                 logger.info(f"✅ Citation was auto-added, validation should pass")
                 # Don't set used_fallback, response is valid
+                # CRITICAL: Mark validation as passed if only issue was missing_citation and it was fixed
+                validation_result.passed = True
+                validation_result.reasons = [r for r in validation_result.reasons if r != "missing_citation"]
         elif has_critical_failure:
             # For language mismatch, try retry with stronger prompt first
             if has_language_mismatch:
@@ -2448,12 +2451,20 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 # Try to get from cache
                 cached_response = cache_service.get(cache_key)
                 if cached_response:
-                    raw_response = cached_response.get("response")
-                    cache_hit = True
-                    logger.info(f"✅ LLM cache HIT (saved {cached_response.get('latency', 0):.2f}s)")
-                    processing_steps.append("⚡ Response from cache (fast!)")
-                    llm_inference_latency = cached_response.get("latency", 0.01)
-                    timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s (cached)"
+                    cached_raw_response = cached_response.get("response")
+                    # CRITICAL: Only use cache if response is valid (not None/empty)
+                    if cached_raw_response and isinstance(cached_raw_response, str) and cached_raw_response.strip():
+                        raw_response = cached_raw_response
+                        cache_hit = True
+                        logger.info(f"✅ LLM cache HIT (saved {cached_response.get('latency', 0):.2f}s)")
+                        processing_steps.append("⚡ Response from cache (fast!)")
+                        llm_inference_latency = cached_response.get("latency", 0.01)
+                        timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s (cached)"
+                    else:
+                        # Cache contains invalid response (None/empty) - ignore cache and call LLM
+                        logger.warning(f"⚠️ Cache contains invalid response (None/empty), ignoring cache and calling LLM")
+                        raw_response = None
+                        cache_hit = False
             
             # If not in cache, call LLM
             if not raw_response:
