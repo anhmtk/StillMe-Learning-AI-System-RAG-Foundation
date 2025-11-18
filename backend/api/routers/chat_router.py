@@ -380,6 +380,560 @@ def _calculate_confidence_score(
     
     return max(0.0, min(1.0, confidence))  # Clamp between 0.0 and 1.0
 
+async def _handle_validation_with_fallback(
+    raw_response: str,
+    context: dict,
+    detected_lang: str,
+    is_philosophical: bool,
+    chat_request,
+    enhanced_prompt: str,
+    context_text: str,
+    citation_instruction: str,
+    num_knowledge: int,
+    processing_steps: list,
+    timing_logs: dict
+) -> tuple:
+    """
+    Handle validation logic with fallback mechanisms.
+    
+    This function encapsulates the entire validation pipeline including:
+    - Validator chain execution
+    - Step-level validation
+    - Consistency checks
+    - OpenAI fallback
+    - Validation failure handling with FallbackHandler
+    
+    Returns:
+        tuple: (response, validation_info, confidence_score, used_fallback, 
+                step_validation_info, consistency_info, ctx_docs)
+    """
+    from backend.validators.chain import ValidatorChain
+    from backend.validators.citation import CitationRequired
+    from backend.validators.evidence_overlap import EvidenceOverlap
+    from backend.validators.numeric import NumericUnitsBasic
+    from backend.validators.ethics_adapter import EthicsAdapter
+    from backend.validators.confidence import ConfidenceValidator
+    from backend.validators.fallback_handler import FallbackHandler
+    from backend.services.ethics_guard import check_content_ethics
+    from backend.validators.language import LanguageValidator
+    from backend.validators.citation_relevance import CitationRelevance
+    from backend.validators.identity_check import IdentityCheckValidator
+    from backend.validators.ego_neutrality import EgoNeutralityValidator
+    from backend.api.utils.chat_helpers import generate_ai_response
+    import time
+    import os
+    
+    processing_steps.append("🔍 Validating response...")
+    validation_start = time.time()
+    
+    # Build context docs list for validation
+    ctx_docs = [
+        doc["content"] for doc in context["knowledge_docs"]
+    ] + [
+        doc["content"] for doc in context["conversation_docs"]
+    ]
+    
+    # Enable Identity Check Validator (can be toggled via env var)
+    enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
+    identity_validator_strict = os.getenv("IDENTITY_VALIDATOR_STRICT", "true").lower() == "true"
+    
+    validators = [
+        LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
+        CitationRequired(),
+        CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
+        EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
+        NumericUnitsBasic(),
+        # Fix: Disable require_uncertainty_when_no_context for philosophical questions
+        ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # Check for uncertainty
+        EgoNeutralityValidator(strict_mode=True, auto_patch=True),  # Detect and auto-patch "Hallucination of Experience" - novel contribution
+    ]
+    
+    # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
+    if enable_identity_check:
+        validators.append(
+            IdentityCheckValidator(
+                strict_mode=identity_validator_strict,
+                require_humility_when_no_context=True,
+                allow_minor_tone_violations=False
+            )
+        )
+    
+    # Add EthicsAdapter last (most critical - blocks harmful content)
+    validators.append(
+        EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
+    )
+    
+    chain = ValidatorChain(validators)
+    
+    # Tier 3.5: Pass context quality to ConfidenceValidator
+    context_quality = context.get("context_quality", None)
+    avg_similarity = context.get("avg_similarity_score", None)
+    
+    # Run validation with context quality info
+    # Tier 3.5: Pass context quality and is_philosophical to ValidatorChain
+    validation_result = chain.run(
+        raw_response, 
+        ctx_docs,
+        context_quality=context_quality,
+        avg_similarity=avg_similarity,
+        is_philosophical=is_philosophical
+    )
+    
+    # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
+    # For now, we'll handle this in the prompt building phase
+    validation_time = time.time() - validation_start
+    timing_logs["validation"] = f"{validation_time:.2f}s"
+    logger.info(f"⏱️ Validation took {validation_time:.2f}s")
+    processing_steps.append(f"✅ Validation completed ({validation_time:.2f}s)")
+    
+    # Calculate confidence score based on context quality and validation
+    confidence_score = _calculate_confidence_score(
+        context_docs_count=len(ctx_docs),
+        validation_result=validation_result,
+        context=context
+    )
+    
+    # NEW: Step-level validation (Phase 1 - SSR)
+    step_validation_info = None
+    enable_step_validation = os.getenv("ENABLE_STEP_LEVEL_VALIDATION", "true").lower() == "true"
+    step_min_steps = int(os.getenv("STEP_VALIDATION_MIN_STEPS", "2"))
+    step_confidence_threshold = float(os.getenv("STEP_CONFIDENCE_THRESHOLD", "0.5"))
+    
+    logger.info(f"🔍 Step-level validation config: enabled={enable_step_validation}, min_steps={step_min_steps}, threshold={step_confidence_threshold}")
+    
+    if enable_step_validation:
+        try:
+            from backend.validators.step_detector import StepDetector
+            from backend.validators.step_validator import StepValidator
+            
+            step_detector = StepDetector()
+            
+            # Quick check first (performance optimization)
+            logger.info(f"🔍 Checking if response is multi-step (min_steps: {step_min_steps})...")
+            logger.info(f"🔍 Response preview (first 200 chars): {raw_response[:200]}...")
+            is_multi = step_detector.is_multi_step(raw_response)
+            logger.info(f"🔍 is_multi_step result: {is_multi}")
+            
+            if is_multi:
+                steps = step_detector.detect_steps(raw_response)
+                logger.info(f"🔍 StepDetector found {len(steps)} steps")
+                
+                if len(steps) >= step_min_steps:
+                    logger.info(f"🔍 Detected {len(steps)} steps - running step-level validation")
+                    processing_steps.append(f"🔍 Step-level validation ({len(steps)} steps)")
+                    
+                    step_validator = StepValidator(confidence_threshold=step_confidence_threshold)
+                    logger.info(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold}")
+                    step_results = step_validator.validate_all_steps(steps, ctx_docs, chain, parallel=True)
+                    logger.info(f"🔍 Step validation completed: {len(step_results)} results")
+                    
+                    low_confidence_steps = [
+                        r.step.step_number
+                        for r in step_results
+                        if r.confidence < step_confidence_threshold
+                    ]
+                    
+                    if low_confidence_steps:
+                        logger.warning(f"⚠️ Low confidence steps detected: {low_confidence_steps}")
+                        logger.warning(f"⚠️ {len(low_confidence_steps)} step(s) with low confidence")
+                    else:
+                        logger.info(f"✅ All {len(steps)} steps passed validation")
+                    
+                    step_validation_info = {
+                        "is_multi_step": True,
+                        "total_steps": len(steps),
+                        "steps": [
+                            {
+                                "step_number": r.step.step_number,
+                                "confidence": round(r.confidence, 2),
+                                "passed": r.passed,
+                                "issues": r.issues
+                            }
+                            for r in step_results
+                        ],
+                        "low_confidence_steps": low_confidence_steps,
+                        "all_steps_passed": all(r.passed for r in step_results),
+                        "average_confidence": round(
+                            sum(r.confidence for r in step_results) / len(step_results), 2
+                        ) if step_results else 0.0
+                    }
+                    
+                    if low_confidence_steps:
+                        logger.warning(f"⚠️ Low confidence steps detected: {low_confidence_steps}")
+                        processing_steps.append(f"⚠️ {len(low_confidence_steps)} step(s) with low confidence")
+                    else:
+                        logger.info(f"✅ All {len(steps)} steps passed validation")
+                        processing_steps.append(f"✅ All steps validated")
+        except Exception as step_error:
+            logger.warning(f"Step-level validation error: {step_error}", exc_info=True)
+            # Don't fail - step validation is optional
+    
+    # NEW: Self-consistency checks (Phase 1 - SSR)
+    consistency_info = None
+    enable_consistency_checks = os.getenv("ENABLE_CONSISTENCY_CHECKS", "true").lower() == "true"
+    logger.info(f"🔍 Consistency checks config: enabled={enable_consistency_checks}")
+    
+    if enable_consistency_checks:
+        try:
+            from backend.validators.consistency_checker import ConsistencyChecker
+            
+            checker = ConsistencyChecker()
+            claims = checker.extract_claims(raw_response)
+            logger.info(f"🔍 Extracted {len(claims)} claims from response")
+            
+            if len(claims) > 1:
+                logger.info(f"🔍 Checking consistency for {len(claims)} claims")
+                
+                # Check pairwise consistency
+                consistency_results = checker.check_pairwise_consistency(claims)
+                
+                # Check KB consistency for each claim
+                kb_results = {}
+                for i, claim in enumerate(claims):
+                    kb_consistency = checker.check_kb_consistency(claim, ctx_docs)
+                    kb_results[f"claim_{i}_vs_kb"] = kb_consistency
+                
+                contradictions = [
+                    key for key, value in consistency_results.items()
+                    if value == "CONTRADICTION"
+                ]
+                
+                kb_inconsistencies = [
+                    key for key, value in kb_results.items()
+                    if "INCONSISTENT" in value
+                ]
+                
+                if contradictions or kb_inconsistencies:
+                    logger.warning(f"⚠️ Consistency issues detected: {len(contradictions)} contradictions, {len(kb_inconsistencies)} KB inconsistencies")
+                    processing_steps.append(f"⚠️ {len(contradictions)} contradiction(s) detected")
+                
+                consistency_info = {
+                    "total_claims": len(claims),
+                    "contradictions": contradictions,
+                    "kb_inconsistencies": kb_inconsistencies,
+                    "has_issues": len(contradictions) > 0 or len(kb_inconsistencies) > 0
+                }
+        except Exception as consistency_error:
+            logger.warning(f"Consistency check error: {consistency_error}", exc_info=True)
+            # Don't fail - consistency checks are optional
+    
+    # OpenAI Fallback Mechanism: Retry with OpenAI if confidence is low or validation failed
+    # This uses the $40 credit efficiently by only using OpenAI when needed
+    enable_openai_fallback = os.getenv("ENABLE_OPENAI_FALLBACK", "true").lower() == "true"
+    openai_fallback_threshold = float(os.getenv("OPENAI_FALLBACK_CONFIDENCE_THRESHOLD", "0.5"))
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    
+    # Check if we should try OpenAI fallback
+    should_try_openai = (
+        enable_openai_fallback and
+        openai_api_key and
+        (
+            confidence_score < openai_fallback_threshold or
+            not validation_result.passed
+        ) and
+        chat_request.llm_provider != "openai"  # Don't retry if already using OpenAI
+    )
+    
+    if should_try_openai:
+        logger.info(f"🔄 Low confidence ({confidence_score:.2f}) or validation failed. Attempting OpenAI fallback...")
+        processing_steps.append("🔄 Attempting OpenAI fallback for better quality...")
+        try:
+            from backend.api.utils.llm_providers import InsufficientQuotaError
+            
+            # Retry with OpenAI (use server keys for internal calls)
+            use_server_keys_retry = chat_request.llm_provider is None
+            openai_response = await generate_ai_response(
+                enhanced_prompt,
+                detected_lang=detected_lang,
+                llm_provider="openai",
+                llm_api_key=openai_api_key,
+                llm_model_name="gpt-3.5-turbo",
+                use_server_keys=use_server_keys_retry
+            )
+            
+            # Re-validate OpenAI response
+            openai_validation_result = chain.run(openai_response, ctx_docs)
+            openai_confidence = _calculate_confidence_score(
+                context_docs_count=len(ctx_docs),
+                validation_result=openai_validation_result,
+                context=context
+            )
+            
+            # Use OpenAI response if it's better
+            if openai_confidence > confidence_score or openai_validation_result.passed:
+                raw_response = openai_response
+                validation_result = openai_validation_result
+                confidence_score = openai_confidence
+                logger.info(f"✅ OpenAI fallback succeeded (confidence: {openai_confidence:.2f})")
+                processing_steps.append(f"✅ OpenAI fallback succeeded (confidence: {openai_confidence:.2f})")
+            else:
+                logger.info(f"⚠️ OpenAI fallback didn't improve quality, using original response")
+                processing_steps.append("⚠️ OpenAI fallback didn't improve quality")
+                
+        except InsufficientQuotaError as quota_error:
+            # OpenAI credit exhausted - gracefully fall back to original response
+            logger.warning(f"⚠️ OpenAI credit exhausted: {quota_error}. Using original DeepSeek response.")
+            processing_steps.append("⚠️ OpenAI credit exhausted, using original response")
+            # Continue with original response - no error thrown
+        except Exception as openai_error:
+            # Other OpenAI errors - gracefully fall back
+            logger.warning(f"⚠️ OpenAI fallback failed: {openai_error}. Using original response.")
+            processing_steps.append("⚠️ OpenAI fallback failed, using original response")
+            # Continue with original response - no error thrown
+    
+    # CRITICAL FIX: Check if context is not relevant (low overlap)
+    # If citation relevance warning exists, context may not be helpful
+    # In this case, allow base knowledge usage
+    has_low_relevance = False
+    if validation_result and hasattr(validation_result, 'reasons') and validation_result.reasons:
+        has_low_relevance = any("citation_relevance_warning" in r for r in validation_result.reasons)
+    if has_low_relevance and context and context.get("total_context_docs", 0) > 0:
+        logger.info("⚠️ Context has low relevance - allowing base knowledge usage")
+    # Inject instruction to use base knowledge when context is not relevant
+    low_relevance_instruction = """
+
+⚠️ CONTEXT NOT RELEVANT ⚠️
+
+The RAG system found context documents, but they are NOT relevant to your question (low keyword overlap detected).
+
+**CRITICAL: You CAN and SHOULD use your base LLM knowledge (training data) to answer, BUT you MUST:**
+
+1. **Be transparent**: Acknowledge that this information comes from your base training data, not from StillMe's RAG knowledge base
+   - Say: "Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
+   - Or: "The available context [1] is not directly related to your question. From my training data, [answer]."
+
+2. **Provide helpful information**: Don't just say "I don't know" - use your base knowledge to help the user
+   - StillMe values being helpful WITH transparency, not refusing to help
+
+3. **MANDATORY FORMATTING**: You MUST format your response with:
+   - **Line breaks**: Break paragraphs (2-4 sentences each)
+   - **Bullet points**: Use `-` for lists
+   - **Headers**: Use `##` for sections
+   - **Emojis**: 2-3 max for section headers (✅, 💡, ⚠️)
+
+**DO NOT say "I don't have information" or "I cannot answer" - use your base knowledge and be transparent about the source.**
+
+**Example:**
+"The available context [1] discusses StillMe's architecture, which is not directly related to your question about DeepSeek models. Based on general knowledge (not from StillMe's RAG knowledge base), DeepSeek currently has several models including..."
+
+"""
+    # Inject this instruction into the prompt (we'll need to rebuild prompt or inject into response)
+    # For now, log it and let the response handle it
+    logger.info("Low relevance context detected - response should use base knowledge")
+    
+    # Record metrics
+    try:
+        from backend.validators.metrics import get_metrics
+        metrics = get_metrics()
+        # Extract overlap score from reasons if available
+        overlap_score = 0.0
+        for reason in validation_result.reasons:
+            if reason.startswith("low_overlap:"):
+                try:
+                    overlap_score = float(reason.split(":")[1])
+                except (ValueError, IndexError):
+                    pass
+        metrics.record_validation(
+            passed=validation_result.passed,
+            reasons=validation_result.reasons,
+            overlap_score=overlap_score,
+            confidence_score=confidence_score,
+            used_fallback=False  # Will be updated below if fallback is used
+        )
+    except Exception as metrics_error:
+        logger.warning(f"Failed to record metrics: {metrics_error}")
+    
+    # Handle validation failures with FallbackHandler
+    used_fallback = False
+    if not validation_result.passed:
+        # Check for critical failures that require fallback
+        # language_mismatch: when output language doesn't match input language
+        # missing_uncertainty_no_context: when no context and no uncertainty expression AND no transparency
+        # missing_citation: when context exists but no citations in answer
+        has_language_mismatch = any("language_mismatch" in r for r in validation_result.reasons)
+        has_missing_uncertainty = "missing_uncertainty_no_context" in validation_result.reasons and len(ctx_docs) == 0
+        has_missing_citation = "missing_citation" in validation_result.reasons and len(ctx_docs) > 0
+        
+        # CRITICAL FIX: Check if response already has transparency about base knowledge
+        # If response mentions "general knowledge", "training data", etc., don't use fallback
+        # Initialize response with raw_response for transparency check
+        response = raw_response
+        response_lower = response.lower()
+        transparency_indicators = [
+            "general knowledge", "training data", "my training", "base knowledge",
+            "kiến thức chung", "dữ liệu huấn luyện", "kiến thức cơ bản",
+            "not from stillme", "not from rag", "không từ stillme", "không từ rag"
+        ]
+        has_transparency_in_response = any(indicator in response_lower for indicator in transparency_indicators)
+        
+        # Only treat missing_uncertainty as critical if response doesn't have transparency
+        # If response has transparency, it's acceptable even without explicit uncertainty
+        if has_missing_uncertainty and has_transparency_in_response:
+            logger.info("✅ Response has transparency about base knowledge - accepting despite missing_uncertainty")
+            has_missing_uncertainty = False  # Don't treat as critical failure
+        
+        has_critical_failure = has_language_mismatch or has_missing_uncertainty
+        
+        # If patched_answer is available (e.g., from CitationRequired auto-enforcement), use it
+        if validation_result.patched_answer:
+            response = validation_result.patched_answer
+            logger.info(f"✅ Using patched answer from validator (auto-fixed). Reasons: {validation_result.reasons}")
+        elif has_critical_failure:
+            # For language mismatch, try retry with stronger prompt first
+            if has_language_mismatch:
+                logger.warning(f"⚠️ Language mismatch detected, attempting retry with stronger prompt...")
+                try:
+                    # Get language name for retry prompt
+                    language_names = {
+                        'vi': 'Tiếng Việt',
+                        'en': 'English',
+                        'zh': '中文',
+                        'fr': 'Français',
+                        'es': 'Español',
+                        'de': 'Deutsch',
+                        'ja': '日本語',
+                        'ko': '한국어',
+                        'ar': 'العربية',
+                        'ru': 'Русский',
+                        'pt': 'Português',
+                        'it': 'Italiano',
+                        'hi': 'हिन्दी',
+                        'th': 'ไทย',
+                    }
+                    retry_lang_name = language_names.get(detected_lang, detected_lang.upper())
+                    
+                    # Build retry prompt with EXTREMELY STRONG language instruction + context
+                    # Include context and full prompt to ensure retry can actually answer the question
+                    retry_language_instruction = f"""🚨🚨🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - ABSOLUTE HIGHEST PRIORITY 🚨🚨🚨🚨🚨
+
+THE USER'S QUESTION IS IN {retry_lang_name.upper()}.
+
+YOU MUST RESPOND EXCLUSIVELY IN {retry_lang_name.upper()}. 
+
+DO NOT USE VIETNAMESE, ENGLISH, FRENCH, CHINESE, SPANISH, GERMAN, OR ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD MUST BE IN {retry_lang_name.upper()}.
+
+IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {retry_lang_name.upper()} BEFORE RETURNING.
+
+THIS OVERRIDES EVERYTHING - NO EXCEPTIONS.
+
+{context_text if context and context.get("total_context_docs", 0) > 0 else ""}
+{citation_instruction if num_knowledge > 0 else ""}
+
+🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
+
+User Question (in {retry_lang_name.upper()}): {chat_request.message[:3000]}
+
+**YOUR PRIMARY TASK IS TO ANSWER THE USER QUESTION ABOVE DIRECTLY AND ACCURATELY.**
+- Focus on what the user is actually asking, not on general philosophy
+- If the user asks you to analyze something, analyze THAT specific thing
+- If the user asks you to find a problem, look for problems in what they showed you
+
+**SPECIAL INSTRUCTION FOR ANALYZING EXTERNAL AI OUTPUTS:**
+- If the user asks you to analyze another AI's output (ChatGPT, Claude, etc.), you MUST check for anthropomorphic language
+- Look for phrases like "in my experience" / "theo kinh nghiệm", "I think" / "tôi nghĩ", "I feel" / "tôi cảm thấy"
+- These phrases falsely attribute subjective qualities (experience, emotions, personal opinions) to AI
+- This is a critical transparency issue called "Hallucination of Experience" - AI should not claim personal experience
+- If you find such phrases, you MUST point them out as a problem, not ignore them
+- This is more important than analyzing formatting, clarity, or other minor issues
+
+Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANSWER THE QUESTION PROPERLY, NOT JUST ACKNOWLEDGE THE ERROR."""
+                    
+                    # Retry with stronger prompt (include context to actually answer the question)
+                    # Use server keys for internal calls
+                    use_server_keys_retry = chat_request.llm_provider is None
+                    retry_response = await generate_ai_response(
+                        retry_language_instruction, 
+                        detected_lang=detected_lang,
+                        llm_provider=chat_request.llm_provider,
+                        llm_api_key=chat_request.llm_api_key,
+                        use_server_keys=use_server_keys_retry
+                    )
+                    
+                    # Validate retry response
+                    retry_validation = chain.run(retry_response, ctx_docs)
+                    
+                    # Check if retry fixed the language issue
+                    retry_has_lang_mismatch = any("language_mismatch" in r for r in retry_validation.reasons)
+                    
+                    if not retry_has_lang_mismatch:
+                        # Retry successful!
+                        response = retry_validation.patched_answer or retry_response
+                        logger.info(f"✅ Language mismatch fixed with retry! Using retry response.")
+                    else:
+                        # Retry also failed, use fallback
+                        logger.warning(f"⚠️ Retry also failed with language mismatch, using fallback")
+                        fallback_handler = FallbackHandler()
+                        response = fallback_handler.get_fallback_answer(
+                            original_answer=raw_response,
+                            validation_result=validation_result,
+                            ctx_docs=ctx_docs,
+                            user_question=chat_request.message,
+                            detected_lang=detected_lang,
+                            input_language=detected_lang
+                        )
+                        used_fallback = True
+                except Exception as retry_error:
+                    logger.error(f"Retry failed: {retry_error}, using fallback")
+                    fallback_handler = FallbackHandler()
+                    response = fallback_handler.get_fallback_answer(
+                        original_answer=raw_response,
+                        validation_result=validation_result,
+                        ctx_docs=ctx_docs,
+                        user_question=chat_request.message,
+                        detected_lang=detected_lang,
+                        input_language=detected_lang
+                    )
+                    used_fallback = True
+            else:
+                # Other critical failures (has_missing_uncertainty) - use fallback
+                fallback_handler = FallbackHandler()
+                response = fallback_handler.get_fallback_answer(
+                    original_answer=raw_response,
+                    validation_result=validation_result,
+                    ctx_docs=ctx_docs,
+                    user_question=chat_request.message,
+                    detected_lang=detected_lang,
+                    input_language=detected_lang
+                )
+                used_fallback = True
+                logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")
+        elif has_missing_citation:
+            # Missing citation but no patched answer - use FallbackHandler to add citation
+            fallback_handler = FallbackHandler()
+            response = fallback_handler.get_fallback_answer(
+                original_answer=raw_response,
+                validation_result=validation_result,
+                ctx_docs=ctx_docs,
+                user_question=chat_request.message,
+                detected_lang=detected_lang,
+                input_language=detected_lang
+            )
+            logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
+        else:
+            # For non-critical validation failures, still return the response but log warning
+            # This prevents 422 errors for minor validation issues
+            logger.warning(f"Validation failed but returning response anyway. Reasons: {validation_result.reasons}")
+            response = raw_response
+    else:
+        # Validation passed - use patched answer if available, otherwise use raw response
+        response = validation_result.patched_answer or raw_response
+        logger.debug(f"✅ Validation passed. Reasons: {validation_result.reasons}")
+    
+    # Build validation info for response
+    validation_info = {
+        "passed": validation_result.passed,
+        "reasons": validation_result.reasons,
+        "used_fallback": used_fallback,
+        "confidence_score": confidence_score,
+        "context_docs_count": len(ctx_docs),
+        "step_validation": step_validation_info,  # NEW: Step-level validation info
+        "consistency": consistency_info  # NEW: Consistency check info
+    }
+    
+    return response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, ctx_docs
+
 @router.post("/rag", response_model=ChatResponse)
 @limiter.limit("10/minute", key_func=get_rate_limit_key_func)  # Chat: 10 requests per minute
 async def chat_with_rag(request: Request, chat_request: ChatRequest):
@@ -1774,538 +2328,37 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 
                 if enable_validators:
                     try:
-                        processing_steps.append("🔍 Validating response...")
-                        validation_start = time.time()
-                        from backend.validators.chain import ValidatorChain
-                        from backend.validators.citation import CitationRequired
-                        from backend.validators.evidence_overlap import EvidenceOverlap
-                        from backend.validators.numeric import NumericUnitsBasic
-                        from backend.validators.ethics_adapter import EthicsAdapter
-                        from backend.validators.confidence import ConfidenceValidator
-                        from backend.validators.fallback_handler import FallbackHandler
-                        from backend.services.ethics_guard import check_content_ethics
-                        
-                        # Build context docs list for validation
-                        ctx_docs = [
-                            doc["content"] for doc in context["knowledge_docs"]
-                        ] + [
-                            doc["content"] for doc in context["conversation_docs"]
-                        ]
-                        
-                        # Create validator chain with LanguageValidator FIRST (highest priority)
-                        from backend.validators.language import LanguageValidator
-                        from backend.validators.citation_relevance import CitationRelevance
-                        from backend.validators.identity_check import IdentityCheckValidator
-                        from backend.validators.ego_neutrality import EgoNeutralityValidator
-                        
-                        # Enable Identity Check Validator (can be toggled via env var)
-                        enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
-                        identity_validator_strict = os.getenv("IDENTITY_VALIDATOR_STRICT", "true").lower() == "true"
-                        
-                        validators = [
-                            LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
-                            CitationRequired(),
-                            CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
-                            EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
-                            NumericUnitsBasic(),
-                            # Fix: Disable require_uncertainty_when_no_context for philosophical questions
-                            ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # Check for uncertainty
-                            EgoNeutralityValidator(strict_mode=True, auto_patch=True),  # Detect and auto-patch "Hallucination of Experience" - novel contribution
-                        ]
-                        
-                        # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
-                        if enable_identity_check:
-                            validators.append(
-                                IdentityCheckValidator(
-                                    strict_mode=identity_validator_strict,
-                                    require_humility_when_no_context=True,
-                                    allow_minor_tone_violations=False
-                                )
-                            )
-                        
-                        # Add EthicsAdapter last (most critical - blocks harmful content)
-                        validators.append(
-                            EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
+                        response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, ctx_docs = await _handle_validation_with_fallback(
+                            raw_response=raw_response,
+                            context=context,
+                            detected_lang=detected_lang,
+                            is_philosophical=is_philosophical,
+                            chat_request=chat_request,
+                            enhanced_prompt=enhanced_prompt,
+                            context_text=context_text,
+                            citation_instruction=citation_instruction,
+                            num_knowledge=num_knowledge,
+                            processing_steps=processing_steps,
+                            timing_logs=timing_logs
                         )
-                        
-                        chain = ValidatorChain(validators)
-                        
-                        # Tier 3.5: Pass context quality to ConfidenceValidator
-                        context_quality = context.get("context_quality", None)
-                        avg_similarity = context.get("avg_similarity_score", None)
-                        
-                        # Run validation with context quality info
-                        # Tier 3.5: Pass context quality and is_philosophical to ValidatorChain
-                        validation_result = chain.run(
-                            raw_response, 
-                            ctx_docs,
-                            context_quality=context_quality,
-                            avg_similarity=avg_similarity,
-                            is_philosophical=is_philosophical
-                        )
-                    
-                    # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
-                    # For now, we'll handle this in the prompt building phase
-                    validation_time = time.time() - validation_start
-                    timing_logs["validation"] = f"{validation_time:.2f}s"
-                    logger.info(f"⏱️ Validation took {validation_time:.2f}s")
-                    processing_steps.append(f"✅ Validation completed ({validation_time:.2f}s)")
-                    
-                    # Calculate confidence score based on context quality and validation
-                    confidence_score = _calculate_confidence_score(
-                        context_docs_count=len(ctx_docs),
-                        validation_result=validation_result,
-                        context=context
-                    )
-                    
-                    # NEW: Step-level validation (Phase 1 - SSR)
-                    step_validation_info = None
-                    enable_step_validation = os.getenv("ENABLE_STEP_LEVEL_VALIDATION", "true").lower() == "true"
-                    step_min_steps = int(os.getenv("STEP_VALIDATION_MIN_STEPS", "2"))
-                    step_confidence_threshold = float(os.getenv("STEP_CONFIDENCE_THRESHOLD", "0.5"))
-                    
-                    logger.info(f"🔍 Step-level validation config: enabled={enable_step_validation}, min_steps={step_min_steps}, threshold={step_confidence_threshold}")
-                    
-                    if enable_step_validation:
-                        try:
-                            from backend.validators.step_detector import StepDetector
-                            from backend.validators.step_validator import StepValidator
-                            
-                            step_detector = StepDetector()
-                            
-                            # Quick check first (performance optimization)
-                            logger.info(f"🔍 Checking if response is multi-step (min_steps: {step_min_steps})...")
-                            logger.info(f"🔍 Response preview (first 200 chars): {raw_response[:200]}...")
-                            is_multi = step_detector.is_multi_step(raw_response)
-                            logger.info(f"🔍 is_multi_step result: {is_multi}")
-                            
-                            if is_multi:
-                                steps = step_detector.detect_steps(raw_response)
-                                logger.info(f"🔍 StepDetector found {len(steps)} steps")
-                                
-                                if len(steps) >= step_min_steps:
-                                    logger.info(f"🔍 Detected {len(steps)} steps - running step-level validation")
-                                    processing_steps.append(f"🔍 Step-level validation ({len(steps)} steps)")
-                                    
-                                    step_validator = StepValidator(confidence_threshold=step_confidence_threshold)
-                                    logger.info(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold}")
-                                    step_results = step_validator.validate_all_steps(steps, ctx_docs, chain, parallel=True)
-                                    logger.info(f"🔍 Step validation completed: {len(step_results)} results")
-                                    
-                                    low_confidence_steps = [
-                                        r.step.step_number
-                                        for r in step_results
-                                        if r.confidence < step_confidence_threshold
-                                    ]
-                                    
-                                    if low_confidence_steps:
-                                        logger.warning(f"⚠️ Low confidence steps detected: {low_confidence_steps}")
-                                        logger.warning(f"⚠️ {len(low_confidence_steps)} step(s) with low confidence")
-                                    else:
-                                        logger.info(f"✅ All {len(steps)} steps passed validation")
-                                    
-                                    step_validation_info = {
-                                        "is_multi_step": True,
-                                        "total_steps": len(steps),
-                                        "steps": [
-                                            {
-                                                "step_number": r.step.step_number,
-                                                "confidence": round(r.confidence, 2),
-                                                "passed": r.passed,
-                                                "issues": r.issues
-                                            }
-                                            for r in step_results
-                                        ],
-                                        "low_confidence_steps": low_confidence_steps,
-                                        "all_steps_passed": all(r.passed for r in step_results),
-                                        "average_confidence": round(
-                                            sum(r.confidence for r in step_results) / len(step_results), 2
-                                        ) if step_results else 0.0
-                                    }
-                                    
-                                    if low_confidence_steps:
-                                        logger.warning(f"⚠️ Low confidence steps detected: {low_confidence_steps}")
-                                        processing_steps.append(f"⚠️ {len(low_confidence_steps)} step(s) with low confidence")
-                                    else:
-                                        logger.info(f"✅ All {len(steps)} steps passed validation")
-                                        processing_steps.append(f"✅ All steps validated")
-                        except Exception as step_error:
-                            logger.warning(f"Step-level validation error: {step_error}", exc_info=True)
-                            # Don't fail - step validation is optional
-                    
-                    # NEW: Self-consistency checks (Phase 1 - SSR)
-                    consistency_info = None
-                    enable_consistency_checks = os.getenv("ENABLE_CONSISTENCY_CHECKS", "true").lower() == "true"
-                    logger.info(f"🔍 Consistency checks config: enabled={enable_consistency_checks}")
-                    
-                    if enable_consistency_checks:
-                        try:
-                            from backend.validators.consistency_checker import ConsistencyChecker
-                            
-                            checker = ConsistencyChecker()
-                            claims = checker.extract_claims(raw_response)
-                            logger.info(f"🔍 Extracted {len(claims)} claims from response")
-                            
-                            if len(claims) > 1:
-                                logger.info(f"🔍 Checking consistency for {len(claims)} claims")
-                                
-                                # Check pairwise consistency
-                                consistency_results = checker.check_pairwise_consistency(claims)
-                                
-                                # Check KB consistency for each claim
-                                kb_results = {}
-                                for i, claim in enumerate(claims):
-                                    kb_consistency = checker.check_kb_consistency(claim, ctx_docs)
-                                    kb_results[f"claim_{i}_vs_kb"] = kb_consistency
-                                
-                                contradictions = [
-                                    key for key, value in consistency_results.items()
-                                    if value == "CONTRADICTION"
-                                ]
-                                
-                                kb_inconsistencies = [
-                                    key for key, value in kb_results.items()
-                                    if "INCONSISTENT" in value
-                                ]
-                                
-                                if contradictions or kb_inconsistencies:
-                                    logger.warning(f"⚠️ Consistency issues detected: {len(contradictions)} contradictions, {len(kb_inconsistencies)} KB inconsistencies")
-                                    processing_steps.append(f"⚠️ {len(contradictions)} contradiction(s) detected")
-                                
-                                consistency_info = {
-                                    "total_claims": len(claims),
-                                    "contradictions": contradictions,
-                                    "kb_inconsistencies": kb_inconsistencies,
-                                    "has_issues": len(contradictions) > 0 or len(kb_inconsistencies) > 0
-                                }
-                        except Exception as consistency_error:
-                            logger.warning(f"Consistency check error: {consistency_error}", exc_info=True)
-                            # Don't fail - consistency checks are optional
-                    
-                    # OpenAI Fallback Mechanism: Retry with OpenAI if confidence is low or validation failed
-                    # This uses the $40 credit efficiently by only using OpenAI when needed
-                    enable_openai_fallback = os.getenv("ENABLE_OPENAI_FALLBACK", "true").lower() == "true"
-                    openai_fallback_threshold = float(os.getenv("OPENAI_FALLBACK_CONFIDENCE_THRESHOLD", "0.5"))
-                    openai_api_key = os.getenv("OPENAI_API_KEY")
-                    
-                    # Check if we should try OpenAI fallback
-                    should_try_openai = (
-                        enable_openai_fallback and
-                        openai_api_key and
-                        (
-                            confidence_score < openai_fallback_threshold or
-                            not validation_result.passed
-                        ) and
-                        chat_request.llm_provider != "openai"  # Don't retry if already using OpenAI
-                    )
-                    
-                    if should_try_openai:
-                        logger.info(f"🔄 Low confidence ({confidence_score:.2f}) or validation failed. Attempting OpenAI fallback...")
-                        processing_steps.append("🔄 Attempting OpenAI fallback for better quality...")
-                        try:
-                            from backend.api.utils.llm_providers import InsufficientQuotaError
-                            # generate_ai_response is already imported at the top of the file
-                            
-                            # Retry with OpenAI (use server keys for internal calls)
-                            use_server_keys_retry = chat_request.llm_provider is None
-                            openai_response = await generate_ai_response(
-                                enhanced_prompt,
-                                detected_lang=detected_lang,
-                                llm_provider="openai",
-                                llm_api_key=openai_api_key,
-                                llm_model_name="gpt-3.5-turbo",
-                                use_server_keys=use_server_keys_retry
-                            )
-                            
-                            # Re-validate OpenAI response
-                            openai_validation_result = chain.run(openai_response, ctx_docs)
-                            openai_confidence = _calculate_confidence_score(
-                                context_docs_count=len(ctx_docs),
-                                validation_result=openai_validation_result,
-                                context=context
-                            )
-                            
-                            # Use OpenAI response if it's better
-                            if openai_confidence > confidence_score or openai_validation_result.passed:
-                                raw_response = openai_response
-                                validation_result = openai_validation_result
-                                confidence_score = openai_confidence
-                                logger.info(f"✅ OpenAI fallback succeeded (confidence: {openai_confidence:.2f})")
-                                processing_steps.append(f"✅ OpenAI fallback succeeded (confidence: {openai_confidence:.2f})")
-                            else:
-                                logger.info(f"⚠️ OpenAI fallback didn't improve quality, using original response")
-                                processing_steps.append("⚠️ OpenAI fallback didn't improve quality")
-                                
-                        except InsufficientQuotaError as quota_error:
-                            # OpenAI credit exhausted - gracefully fall back to original response
-                            logger.warning(f"⚠️ OpenAI credit exhausted: {quota_error}. Using original DeepSeek response.")
-                            processing_steps.append("⚠️ OpenAI credit exhausted, using original response")
-                            # Continue with original response - no error thrown
-                        except Exception as openai_error:
-                            # Other OpenAI errors - gracefully fall back
-                            logger.warning(f"⚠️ OpenAI fallback failed: {openai_error}. Using original response.")
-                            processing_steps.append("⚠️ OpenAI fallback failed, using original response")
-                            # Continue with original response - no error thrown
-                    
-                    # CRITICAL FIX: Check if context is not relevant (low overlap)
-                    # If citation relevance warning exists, context may not be helpful
-                    # In this case, allow base knowledge usage
-                    has_low_relevance = False
-                    if validation_result and hasattr(validation_result, 'reasons') and validation_result.reasons:
-                        has_low_relevance = any("citation_relevance_warning" in r for r in validation_result.reasons)
-                    if has_low_relevance and context and context.get("total_context_docs", 0) > 0:
-                        logger.info("⚠️ Context has low relevance - allowing base knowledge usage")
-                        # Inject instruction to use base knowledge when context is not relevant
-                        low_relevance_instruction = """
-
-⚠️ CONTEXT NOT RELEVANT ⚠️
-
-The RAG system found context documents, but they are NOT relevant to your question (low keyword overlap detected).
-
-**CRITICAL: You CAN and SHOULD use your base LLM knowledge (training data) to answer, BUT you MUST:**
-
-1. **Be transparent**: Acknowledge that this information comes from your base training data, not from StillMe's RAG knowledge base
-   - Say: "Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
-   - Or: "The available context [1] is not directly related to your question. From my training data, [answer]."
-
-2. **Provide helpful information**: Don't just say "I don't know" - use your base knowledge to help the user
-   - StillMe values being helpful WITH transparency, not refusing to help
-
-3. **MANDATORY FORMATTING**: You MUST format your response with:
-   - **Line breaks**: Break paragraphs (2-4 sentences each)
-   - **Bullet points**: Use `-` for lists
-   - **Headers**: Use `##` for sections
-   - **Emojis**: 2-3 max for section headers (✅, 💡, ⚠️)
-
-**DO NOT say "I don't have information" or "I cannot answer" - use your base knowledge and be transparent about the source.**
-
-**Example:**
-"The available context [1] discusses StillMe's architecture, which is not directly related to your question about DeepSeek models. Based on general knowledge (not from StillMe's RAG knowledge base), DeepSeek currently has several models including..."
-
-"""
-                        # Inject this instruction into the prompt (we'll need to rebuild prompt or inject into response)
-                        # For now, log it and let the response handle it
-                        logger.info("Low relevance context detected - response should use base knowledge")
-                    
-                    # Record metrics
-                    try:
-                        from backend.validators.metrics import get_metrics
-                        metrics = get_metrics()
-                        # Extract overlap score from reasons if available
-                        overlap_score = 0.0
-                        for reason in validation_result.reasons:
-                            if reason.startswith("low_overlap:"):
-                                try:
-                                    overlap_score = float(reason.split(":")[1])
-                                except (ValueError, IndexError):
-                                    pass
-                        metrics.record_validation(
-                            passed=validation_result.passed,
-                            reasons=validation_result.reasons,
-                            overlap_score=overlap_score,
-                            confidence_score=confidence_score,
-                            used_fallback=used_fallback
-                        )
-                    except Exception as metrics_error:
-                        logger.warning(f"Failed to record metrics: {metrics_error}")
-                    
-                    # Handle validation failures with FallbackHandler
-                    if not validation_result.passed:
-                        # Check for critical failures that require fallback
-                        # language_mismatch: when output language doesn't match input language
-                        # missing_uncertainty_no_context: when no context and no uncertainty expression AND no transparency
-                        # missing_citation: when context exists but no citations in answer
-                        has_language_mismatch = any("language_mismatch" in r for r in validation_result.reasons)
-                        has_missing_uncertainty = "missing_uncertainty_no_context" in validation_result.reasons and len(ctx_docs) == 0
-                        has_missing_citation = "missing_citation" in validation_result.reasons and len(ctx_docs) > 0
-                        
-                        # CRITICAL FIX: Check if response already has transparency about base knowledge
-                        # If response mentions "general knowledge", "training data", etc., don't use fallback
-                        response_lower = response.lower()
-                        transparency_indicators = [
-                            "general knowledge", "training data", "my training", "base knowledge",
-                            "kiến thức chung", "dữ liệu huấn luyện", "kiến thức cơ bản",
-                            "not from stillme", "not from rag", "không từ stillme", "không từ rag"
-                        ]
-                        has_transparency_in_response = any(indicator in response_lower for indicator in transparency_indicators)
-                        
-                        # Only treat missing_uncertainty as critical if response doesn't have transparency
-                        # If response has transparency, it's acceptable even without explicit uncertainty
-                        if has_missing_uncertainty and has_transparency_in_response:
-                            logger.info("✅ Response has transparency about base knowledge - accepting despite missing_uncertainty")
-                            has_missing_uncertainty = False  # Don't treat as critical failure
-                        
-                        has_critical_failure = has_language_mismatch or has_missing_uncertainty
-                        
-                        # If patched_answer is available (e.g., from CitationRequired auto-enforcement), use it
-                        if validation_result.patched_answer:
-                            response = validation_result.patched_answer
-                            logger.info(f"✅ Using patched answer from validator (auto-fixed). Reasons: {validation_result.reasons}")
-                        elif has_critical_failure:
-                            # For language mismatch, try retry with stronger prompt first
-                            if has_language_mismatch:
-                                logger.warning(f"⚠️ Language mismatch detected, attempting retry with stronger prompt...")
-                                try:
-                                    # Get language name for retry prompt
-                                    language_names = {
-                                        'vi': 'Tiếng Việt',
-                                        'en': 'English',
-                                        'zh': '中文',
-                                        'fr': 'Français',
-                                        'es': 'Español',
-                                        'de': 'Deutsch',
-                                        'ja': '日本語',
-                                        'ko': '한국어',
-                                        'ar': 'العربية',
-                                        'ru': 'Русский',
-                                        'pt': 'Português',
-                                        'it': 'Italiano',
-                                        'hi': 'हिन्दी',
-                                        'th': 'ไทย',
-                                    }
-                                    retry_lang_name = language_names.get(detected_lang, detected_lang.upper())
-                                    
-                                    # Build retry prompt with EXTREMELY STRONG language instruction + context
-                                    # Include context and full prompt to ensure retry can actually answer the question
-                                    retry_language_instruction = f"""🚨🚨🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - ABSOLUTE HIGHEST PRIORITY 🚨🚨🚨🚨🚨
-
-THE USER'S QUESTION IS IN {retry_lang_name.upper()}.
-
-YOU MUST RESPOND EXCLUSIVELY IN {retry_lang_name.upper()}. 
-
-DO NOT USE VIETNAMESE, ENGLISH, FRENCH, CHINESE, SPANISH, GERMAN, OR ANY OTHER LANGUAGE.
-
-EVERY SINGLE WORD MUST BE IN {retry_lang_name.upper()}.
-
-IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {retry_lang_name.upper()} BEFORE RETURNING.
-
-THIS OVERRIDES EVERYTHING - NO EXCEPTIONS.
-
-{context_text if context and context.get("total_context_docs", 0) > 0 else ""}
-{citation_instruction if num_knowledge > 0 else ""}
-
-🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
-
-User Question (in {retry_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=3000)}
-
-**YOUR PRIMARY TASK IS TO ANSWER THE USER QUESTION ABOVE DIRECTLY AND ACCURATELY.**
-- Focus on what the user is actually asking, not on general philosophy
-- If the user asks you to analyze something, analyze THAT specific thing
-- If the user asks you to find a problem, look for problems in what they showed you
-
-**SPECIAL INSTRUCTION FOR ANALYZING EXTERNAL AI OUTPUTS:**
-- If the user asks you to analyze another AI's output (ChatGPT, Claude, etc.), you MUST check for anthropomorphic language
-- Look for phrases like "in my experience" / "theo kinh nghiệm", "I think" / "tôi nghĩ", "I feel" / "tôi cảm thấy"
-- These phrases falsely attribute subjective qualities (experience, emotions, personal opinions) to AI
-- This is a critical transparency issue called "Hallucination of Experience" - AI should not claim personal experience
-- If you find such phrases, you MUST point them out as a problem, not ignore them
-- This is more important than analyzing formatting, clarity, or other minor issues
-
-Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANSWER THE QUESTION PROPERLY, NOT JUST ACKNOWLEDGE THE ERROR."""
-                                    
-                                    # Retry with stronger prompt (include context to actually answer the question)
-                                    # Use server keys for internal calls
-                                    use_server_keys_retry = chat_request.llm_provider is None
-                                    retry_response = await generate_ai_response(
-                                        retry_language_instruction, 
-                                        detected_lang=detected_lang,
-                                        llm_provider=chat_request.llm_provider,
-                                        llm_api_key=chat_request.llm_api_key,
-                                        use_server_keys=use_server_keys_retry
-                                    )
-                                    
-                                    # Validate retry response
-                                    retry_validation = chain.run(retry_response, ctx_docs)
-                                    
-                                    # Check if retry fixed the language issue
-                                    retry_has_lang_mismatch = any("language_mismatch" in r for r in retry_validation.reasons)
-                                    
-                                    if not retry_has_lang_mismatch:
-                                        # Retry successful!
-                                        response = retry_validation.patched_answer or retry_response
-                                        logger.info(f"✅ Language mismatch fixed with retry! Using retry response.")
-                                    else:
-                                        # Retry also failed, use fallback
-                                        logger.warning(f"⚠️ Retry also failed with language mismatch, using fallback")
-                                        fallback_handler = FallbackHandler()
-                                        response = fallback_handler.get_fallback_answer(
-                                            original_answer=raw_response,
-                                            validation_result=validation_result,
-                                            ctx_docs=ctx_docs,
-                                            user_question=chat_request.message,
-                                            detected_lang=detected_lang,
-                                            input_language=detected_lang
-                                        )
-                                        used_fallback = True
-                                except Exception as retry_error:
-                                    logger.error(f"Retry failed: {retry_error}, using fallback")
-                                    fallback_handler = FallbackHandler()
-                                    response = fallback_handler.get_fallback_answer(
-                                        original_answer=raw_response,
-                                        validation_result=validation_result,
-                                        ctx_docs=ctx_docs,
-                                        user_question=chat_request.message,
-                                        detected_lang=detected_lang,
-                                        input_language=detected_lang
-                                    )
-                                    used_fallback = True
-                            else:
-                                # Other critical failures - use fallback
-                                fallback_handler = FallbackHandler()
-                                response = fallback_handler.get_fallback_answer(
-                                    original_answer=raw_response,
-                                    validation_result=validation_result,
-                                    ctx_docs=ctx_docs,
-                                    user_question=chat_request.message,
-                                    detected_lang=detected_lang,
-                                    input_language=detected_lang
-                                )
-                                used_fallback = True
-                                logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")
-                        elif has_missing_citation:
-                            # Missing citation but no patched answer - use FallbackHandler to add citation
-                            fallback_handler = FallbackHandler()
-                            response = fallback_handler.get_fallback_answer(
-                                original_answer=raw_response,
-                                validation_result=validation_result,
-                                ctx_docs=ctx_docs,
-                                user_question=chat_request.message,
-                                detected_lang=detected_lang,
-                                input_language=detected_lang
-                            )
-                            logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
-                        else:
-                            # For non-critical validation failures, still return the response but log warning
-                            # This prevents 422 errors for minor validation issues
-                            logger.warning(f"Validation failed but returning response anyway. Reasons: {validation_result.reasons}")
-                            response = raw_response
-                    else:
-                        response = validation_result.patched_answer or raw_response
-                        logger.debug(f"✅ Validation passed. Reasons: {validation_result.reasons}")
-                    
-                    # Build validation info for response
-                    validation_info = {
-                        "passed": validation_result.passed,
-                        "reasons": validation_result.reasons,
-                        "used_fallback": used_fallback,
-                        "confidence_score": confidence_score,
-                        "context_docs_count": len(ctx_docs),
-                        "step_validation": step_validation_info,  # NEW: Step-level validation info
-                        "consistency": consistency_info  # NEW: Consistency check info
-                    }
-                    
                     except HTTPException:
                         raise
                     except Exception as validation_error:
                         logger.error(f"Validation error: {validation_error}, falling back to raw response", exc_info=True)
                         response = raw_response
                         # Calculate confidence even on error (low confidence)
+                        # Build ctx_docs for confidence calculation
+                        ctx_docs = [
+                            doc["content"] for doc in context.get("knowledge_docs", [])
+                        ] + [
+                            doc["content"] for doc in context.get("conversation_docs", [])
+                        ]
                         confidence_score = 0.3 if len(ctx_docs) == 0 else 0.6
                         # Ensure validation_result is set to None to prevent downstream errors
                         validation_result = None
                         validation_info = None
                 else:
-                response = raw_response
+                    response = raw_response
                 # Calculate basic confidence score even without validators
                 confidence_score = _calculate_confidence_score(
                     context_docs_count=len(context.get("knowledge_docs", [])) + len(context.get("conversation_docs", [])),
@@ -2347,118 +2400,117 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         response=response,
                         is_philosophical=is_philosophical
                     )
-                
-                if should_skip:
-                    logger.info(f"⏭️ Skipping post-processing: {skip_reason}")
-                    timing_logs["postprocessing"] = "skipped"
-                else:
-                    # Stage 2: Hard Filter (0 token) - Style Sanitization
-                    sanitizer = get_style_sanitizer()
-                    sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
                     
-                    # CRITICAL: Check if sanitized response is a technical error or fallback message BEFORE quality evaluation
-                    from backend.api.utils.error_detector import is_technical_error, is_fallback_message
-                    is_error, error_type = is_technical_error(sanitized_response)
-                    is_fallback = is_fallback_message(sanitized_response)
-                    
-                    if is_error or is_fallback:
-                        # Technical error or fallback message detected - skip quality evaluation and rewrite
-                        if is_error:
-                            logger.warning(
-                                f"⚠️ Technical error detected in sanitized response (type: {error_type}), "
-                                f"skipping quality evaluation and rewrite"
-                            )
-                            processing_steps.append(f"⚠️ Technical error detected - skipping post-processing")
-                        else:
-                            logger.info(
-                                f"🛑 Fallback meta-answer detected in sanitized response, "
-                                f"skipping quality evaluation and rewrite"
-                            )
-                            processing_steps.append(f"🛑 Fallback message detected - skipping post-processing")
-                        final_response = sanitized_response
+                    if should_skip:
+                        logger.info(f"⏭️ Skipping post-processing: {skip_reason}")
+                        timing_logs["postprocessing"] = "skipped"
                     else:
-                        # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
-                        # OPTIMIZATION: Check cache first
-                        evaluator = get_quality_evaluator()
-                        cached_quality = optimizer.get_cached_quality_result(
-                            question=chat_request.message,
-                            response=sanitized_response
-                        )
+                        # Stage 2: Hard Filter (0 token) - Style Sanitization
+                        sanitizer = get_style_sanitizer()
+                        sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
                         
-                        if cached_quality:
-                            quality_result = cached_quality
-                            logger.debug("✅ Using cached quality evaluation")
-                        else:
-                            quality_result = evaluator.evaluate(
-                                text=sanitized_response,
-                                is_philosophical=is_philosophical,
-                                original_question=chat_request.message
-                            )
-                            # Cache the result
-                            optimizer.cache_quality_result(
-                                question=chat_request.message,
-                                response=sanitized_response,
-                                quality_result=quality_result
-                            )
+                        # CRITICAL: Check if sanitized response is a technical error or fallback message BEFORE quality evaluation
+                        from backend.api.utils.error_detector import is_technical_error, is_fallback_message
+                        is_error, error_type = is_technical_error(sanitized_response)
+                        is_fallback = is_fallback_message(sanitized_response)
                         
-                        # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
-                        should_rewrite, rewrite_reason = optimizer.should_rewrite(
-                            quality_result=quality_result,
-                            is_philosophical=is_philosophical,
-                            response_length=len(sanitized_response)
-                        )
-                        
-                        # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
-                        if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
-                            logger.info(
-                                f"⚠️ Quality evaluator flagged output for rewrite. "
-                                f"Issues: {quality_result['reasons']}, "
-                                f"score: {quality_result.get('overall_score', 'N/A')}, "
-                                f"length: {len(sanitized_response)}"
-                            )
-                            processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
-                            
-                            rewrite_llm = get_rewrite_llm()
-                            rewrite_result = await rewrite_llm.rewrite(
-                                text=sanitized_response,
-                                original_question=chat_request.message,
-                                quality_issues=quality_result["reasons"],
-                                is_philosophical=is_philosophical,
-                                detected_lang=detected_lang
-                            )
-                            
-                            if rewrite_result.was_rewritten:
-                                # Re-sanitize rewritten output (in case rewrite introduced issues)
-                                final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
-                                logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
-                            else:
-                                # Fallback to sanitized original - rewrite failed
-                                final_response = sanitized_response
-                                logger.warning(
-                                    f"⚠️ DeepSeek rewrite failed (error: {rewrite_result.error}), "
-                                    f"using sanitized original output"
-                                )
-                                processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
-                        else:
-                            final_response = sanitized_response
-                            if should_rewrite:
-                                logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
-                            logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
-                        
-                        response = final_response
-                        
-                        # CRITICAL: Final check - ensure response is not a technical error
-                        if response:
-                            from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
-                            is_error, error_type = is_technical_error(response)
+                        if is_error or is_fallback:
+                            # Technical error or fallback message detected - skip quality evaluation and rewrite
                             if is_error:
-                                logger.error(f"⚠️ Final response is still a technical error (type: {error_type}) - replacing with fallback")
-                                response = get_fallback_message_for_error(error_type, detected_lang)
-                        
-                        postprocessing_time = time.time() - postprocessing_start
-                        timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
-                        logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
-                
+                                logger.warning(
+                                    f"⚠️ Technical error detected in sanitized response (type: {error_type}), "
+                                    f"skipping quality evaluation and rewrite"
+                                )
+                                processing_steps.append(f"⚠️ Technical error detected - skipping post-processing")
+                            else:
+                                logger.info(
+                                    f"🛑 Fallback meta-answer detected in sanitized response, "
+                                    f"skipping quality evaluation and rewrite"
+                                )
+                                processing_steps.append(f"🛑 Fallback message detected - skipping post-processing")
+                            final_response = sanitized_response
+                        else:
+                            # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
+                            # OPTIMIZATION: Check cache first
+                            evaluator = get_quality_evaluator()
+                            cached_quality = optimizer.get_cached_quality_result(
+                                question=chat_request.message,
+                                response=sanitized_response
+                            )
+                            
+                            if cached_quality:
+                                quality_result = cached_quality
+                                logger.debug("✅ Using cached quality evaluation")
+                            else:
+                                quality_result = evaluator.evaluate(
+                                    text=sanitized_response,
+                                    is_philosophical=is_philosophical,
+                                    original_question=chat_request.message
+                                )
+                                # Cache the result
+                                optimizer.cache_quality_result(
+                                    question=chat_request.message,
+                                    response=sanitized_response,
+                                    quality_result=quality_result
+                                )
+                            
+                            # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
+                            should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                                quality_result=quality_result,
+                                is_philosophical=is_philosophical,
+                                response_length=len(sanitized_response)
+                            )
+                            
+                            # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
+                            if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                                logger.info(
+                                    f"⚠️ Quality evaluator flagged output for rewrite. "
+                                    f"Issues: {quality_result['reasons']}, "
+                                    f"score: {quality_result.get('overall_score', 'N/A')}, "
+                                    f"length: {len(sanitized_response)}"
+                                )
+                                processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                                
+                                rewrite_llm = get_rewrite_llm()
+                                rewrite_result = await rewrite_llm.rewrite(
+                                    text=sanitized_response,
+                                    original_question=chat_request.message,
+                                    quality_issues=quality_result["reasons"],
+                                    is_philosophical=is_philosophical,
+                                    detected_lang=detected_lang
+                                )
+                                
+                                if rewrite_result.was_rewritten:
+                                    # Re-sanitize rewritten output (in case rewrite introduced issues)
+                                    final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
+                                    logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
+                                else:
+                                    # Fallback to sanitized original - rewrite failed
+                                    final_response = sanitized_response
+                                    logger.warning(
+                                        f"⚠️ DeepSeek rewrite failed (error: {rewrite_result.error}), "
+                                        f"using sanitized original output"
+                                    )
+                                    processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
+                            else:
+                                final_response = sanitized_response
+                                if should_rewrite:
+                                    logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
+                                logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                            
+                            response = final_response
+                            
+                            # CRITICAL: Final check - ensure response is not a technical error
+                            if response:
+                                from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
+                                is_error, error_type = is_technical_error(response)
+                                if is_error:
+                                    logger.error(f"⚠️ Final response is still a technical error (type: {error_type}) - replacing with fallback")
+                                    response = get_fallback_message_for_error(error_type, detected_lang)
+                            
+                            postprocessing_time = time.time() - postprocessing_start
+                            timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
+                            logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
                 except Exception as postprocessing_error:
                     logger.error(f"Post-processing error: {postprocessing_error}", exc_info=True)
                     # Fallback to original response if post-processing fails
@@ -2814,13 +2866,12 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 postprocessing_time = time.time() - postprocessing_start
                 timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
                 logger.info(f"⏱️ Post-processing (non-RAG) took {postprocessing_time:.3f}s")
-            
-        except Exception as postprocessing_error:
-            logger.error(f"Post-processing error (non-RAG): {postprocessing_error}", exc_info=True)
-            # Fallback to original response if post-processing fails
-            # Don't break the pipeline - post-processing is enhancement, not critical
-            logger.warning(f"⚠️ Post-processing failed (non-RAG), using original response")
-            timing_logs["postprocessing"] = "failed"
+            except Exception as postprocessing_error:
+                logger.error(f"Post-processing error (non-RAG): {postprocessing_error}", exc_info=True)
+                # Fallback to original response if post-processing fails
+                # Don't break the pipeline - post-processing is enhancement, not critical
+                logger.warning(f"⚠️ Post-processing failed (non-RAG), using original response")
+                timing_logs["postprocessing"] = "failed"
         
         # Calculate total response latency
         # Total_Response_Latency: Time from request received to response returned
