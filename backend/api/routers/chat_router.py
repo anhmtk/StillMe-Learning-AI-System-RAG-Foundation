@@ -1721,7 +1721,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 
                 # CRITICAL: Check if raw_response is a technical error message before validation
                 # Never allow provider error messages to pass through validators
-                from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
+                from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error, is_fallback_message
                 
                 if raw_response and isinstance(raw_response, str):
                     is_error, error_type = is_technical_error(raw_response)
@@ -1731,6 +1731,20 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         raw_response = get_fallback_message_for_error(error_type, detected_lang)
                         processing_steps.append(f"⚠️ Technical error detected - replaced with fallback message")
                         logger.warning(f"⚠️ Replaced technical error with user-friendly message in {detected_lang}")
+                
+                # CRITICAL: Check if response is a fallback message - if so, skip validation/post-processing
+                if raw_response and isinstance(raw_response, str) and is_fallback_message(raw_response):
+                    logger.info("🛑 Fallback meta-answer detected - skipping validation, quality evaluation, and rewrite")
+                    response = raw_response
+                    # Skip validation, quality evaluator, rewrite, and learning
+                    validation_info = None
+                    confidence_score = 0.3  # Low confidence for fallback messages
+                    processing_steps.append("🛑 Fallback message - terminal response, skipping all post-processing")
+                    # Skip to end of function (skip validation, post-processing, learning)
+                    # We'll handle this by setting a flag and checking it before validation
+                    is_fallback_meta_answer = True
+                else:
+                    is_fallback_meta_answer = False
                 
                 # Save to cache (only if not a cache hit)
                 if cache_enabled and not cache_hit:
@@ -1745,16 +1759,23 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     except Exception as cache_error:
                         logger.warning(f"Failed to cache LLM response: {cache_error}")
             
-            # Validate response if enabled
-            validation_info = None
-            # confidence_score already initialized at function start (line 104)
-            # Don't reassign here to avoid UnboundLocalError
-            used_fallback = False
-            
-            if enable_validators:
-                try:
-                    processing_steps.append("🔍 Validating response...")
-                    validation_start = time.time()
+            # CRITICAL: If response is a fallback meta-answer, skip validation and post-processing entirely
+            if is_fallback_meta_answer:
+                logger.info("🛑 Skipping validation and post-processing for fallback meta-answer")
+                # response already set above
+                # validation_info already set to None
+                # confidence_score already set to 0.3
+            else:
+                # Validate response if enabled
+                validation_info = None
+                # confidence_score already initialized at function start (line 104)
+                # Don't reassign here to avoid UnboundLocalError
+                used_fallback = False
+                
+                if enable_validators:
+                    try:
+                        processing_steps.append("🔍 Validating response...")
+                        validation_start = time.time()
                     from backend.validators.chain import ValidatorChain
                     from backend.validators.citation import CitationRequired
                     from backend.validators.evidence_overlap import EvidenceOverlap
@@ -2465,7 +2486,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
                     logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
                 
-            except Exception as postprocessing_error:
+                except Exception as postprocessing_error:
                 logger.error(f"Post-processing error: {postprocessing_error}", exc_info=True)
                 # Fallback to original response if post-processing fails
                 # Don't break the pipeline - post-processing is enhancement, not critical
@@ -2682,16 +2703,21 @@ Remember: RESPOND IN ENGLISH ONLY."""
         # PHASE 3: POST-PROCESSING PIPELINE (Non-RAG path)
         # Unified Style & Quality Enforcement Layer (Optimized)
         # ==========================================
-        # Check if question is philosophical for non-RAG path
-        is_philosophical_non_rag = False
-        try:
-            from backend.core.question_classifier import is_philosophical_question
-            is_philosophical_non_rag = is_philosophical_question(chat_request.message)
-        except Exception:
-            pass  # If classifier fails, assume non-philosophical
-        
-        postprocessing_start = time.time()
-        try:
+        # CRITICAL: If response is a fallback meta-answer, skip all post-processing
+        if is_fallback_meta_answer_non_rag:
+            logger.info("🛑 Skipping post-processing for fallback meta-answer (non-RAG)")
+            # response already set, skip post-processing entirely
+        else:
+            # Check if question is philosophical for non-RAG path
+            is_philosophical_non_rag = False
+            try:
+                from backend.core.question_classifier import is_philosophical_question
+                is_philosophical_non_rag = is_philosophical_question(chat_request.message)
+            except Exception:
+                pass  # If classifier fails, assume non-philosophical
+            
+            postprocessing_start = time.time()
+            try:
             from backend.postprocessing.style_sanitizer import get_style_sanitizer
             from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
             from backend.postprocessing.rewrite_llm import get_rewrite_llm
@@ -2872,7 +2898,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 if validation_result and hasattr(validation_result, 'reasons'):
                     has_low_relevance = any("citation_relevance_warning" in r for r in validation_result.reasons)
                 
-                if used_base_knowledge and (has_no_context or has_low_relevance):
+                # CRITICAL: Only analyze for learning if response is NOT a fallback meta-answer
+                if not is_fallback_for_learning and used_base_knowledge and (has_no_context or has_low_relevance):
                     # No RAG context OR irrelevant context + base knowledge used = knowledge gap detected
                     # Extract topic from user's question for learning proposal
                     logger.info(f"🔍 Base knowledge used - detecting knowledge gap for learning proposal (no_context: {has_no_context}, low_relevance: {has_low_relevance})")
