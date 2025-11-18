@@ -1777,7 +1777,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         processing_steps.append("🔍 Validating response...")
                         validation_start = time.time()
                         from backend.validators.chain import ValidatorChain
-                    from backend.validators.citation import CitationRequired
+                        from backend.validators.citation import CitationRequired
                     from backend.validators.evidence_overlap import EvidenceOverlap
                     from backend.validators.numeric import NumericUnitsBasic
                     from backend.validators.ethics_adapter import EthicsAdapter
@@ -2335,11 +2335,11 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 postprocessing_start = time.time()
                 try:
                     from backend.postprocessing.style_sanitizer import get_style_sanitizer
-                from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
-                from backend.postprocessing.rewrite_llm import get_rewrite_llm
-                from backend.postprocessing.optimizer import get_postprocessing_optimizer
-                
-                optimizer = get_postprocessing_optimizer()
+                    from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
+                    from backend.postprocessing.rewrite_llm import get_rewrite_llm
+                    from backend.postprocessing.optimizer import get_postprocessing_optimizer
+                    
+                    optimizer = get_postprocessing_optimizer()
                 
                 # OPTIMIZATION: Check if we should skip post-processing
                 should_skip, skip_reason = optimizer.should_skip_postprocessing(
@@ -2731,11 +2731,11 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
                 from backend.postprocessing.rewrite_llm import get_rewrite_llm
                 from backend.postprocessing.optimizer import get_postprocessing_optimizer
-            
-            optimizer = get_postprocessing_optimizer()
-            
-            # OPTIMIZATION: Check if we should skip post-processing
-            should_skip, skip_reason = optimizer.should_skip_postprocessing(
+                
+                optimizer = get_postprocessing_optimizer()
+                
+                # OPTIMIZATION: Check if we should skip post-processing
+                should_skip, skip_reason = optimizer.should_skip_postprocessing(
                 question=chat_request.message,
                 response=response,
                 is_philosophical=is_philosophical_non_rag
