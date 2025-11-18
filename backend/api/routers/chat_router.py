@@ -478,6 +478,40 @@ async def _handle_validation_with_fallback(
         doc["content"] for doc in context["conversation_docs"]
     ]
     
+    # CRITICAL FIX: Add transparency disclaimer BEFORE validation if no context
+    # This prevents missing_uncertainty_no_context failures for responses without RAG context
+    # Only add if response doesn't already have transparency and not philosophical
+    if len(ctx_docs) == 0 and not is_philosophical and raw_response:
+        response_lower = raw_response.lower()
+        # Check if response already has transparency disclaimer
+        transparency_indicators = [
+            # English
+            "general knowledge", "training data", "my training", "base knowledge", "pretrained", "pre-trained",
+            "not from stillme", "not from rag", "without context", "no context",
+            "based on general", "from my training", "from general knowledge",
+            "note:", "this answer", "this response",
+            # Vietnamese
+            "kiến thức chung", "dữ liệu huấn luyện", "kiến thức cơ bản",
+            "không từ stillme", "không từ rag", "không có context", "không có ngữ cảnh",
+            "dựa trên kiến thức chung", "từ dữ liệu huấn luyện",
+            "lưu ý:", "câu trả lời này",
+            # Multilingual common patterns
+            "note:", "nota:", "ملاحظة:", "примечание:", "注意:", "참고:",
+            "connaissance générale", "données d'entraînement", "conocimiento general", "dados de entrenamiento",
+            "allgemeines wissen", "trainingsdaten", "conhecimento geral", "dados de treinamento"
+        ]
+        has_transparency = any(indicator in response_lower for indicator in transparency_indicators)
+        
+        if not has_transparency:
+            # Prepend transparency disclaimer BEFORE validation
+            if detected_lang == 'vi':
+                disclaimer = "⚠️ Lưu ý: Câu trả lời này dựa trên kiến thức chung từ training data, không có context từ RAG. Mình không chắc chắn về độ chính xác.\n\n"
+            else:
+                disclaimer = "⚠️ Note: This answer is based on general knowledge from training data, not from RAG context. I'm not certain about its accuracy.\n\n"
+            
+            raw_response = disclaimer + raw_response
+            logger.info("ℹ️ Added transparency disclaimer BEFORE validation for response without context")
+    
     # Enable Identity Check Validator (can be toggled via env var)
     enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
     identity_validator_strict = os.getenv("IDENTITY_VALIDATOR_STRICT", "true").lower() == "true"
@@ -984,23 +1018,33 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     )
                     used_fallback = True
                 else:
-                    fallback_handler = FallbackHandler()
-                    response = fallback_handler.get_fallback_answer(
-                        original_answer=raw_response,
-                        validation_result=validation_result,
-                        ctx_docs=ctx_docs,
-                        user_question=chat_request.message,
-                        detected_lang=detected_lang,
-                        input_language=detected_lang
-                    )
-                    # Check if FallbackHandler returned a fallback message (not the patched answer)
-                    # If it's a fallback message, mark as used_fallback
-                    from backend.api.utils.error_detector import is_fallback_message
-                    if is_fallback_message(response):
-                        used_fallback = True
-                        logger.warning(f"⚠️ FallbackHandler returned fallback message instead of patched answer")
+                    # CRITICAL FIX: Use CitationRequired directly to add citation instead of FallbackHandler
+                    # This ensures we get a proper patched answer, not a fallback message
+                    from backend.validators.citation import CitationRequired
+                    citation_validator = CitationRequired(required=True)
+                    # Re-run citation validator to get patched answer
+                    citation_result = citation_validator.run(raw_response, ctx_docs, is_philosophical=is_philosophical)
+                    if citation_result.patched_answer:
+                        response = citation_result.patched_answer
+                        logger.info(f"✅ Added citation via CitationRequired. Reasons: {validation_result.reasons}")
                     else:
-                        logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
+                        # Fallback to FallbackHandler if CitationRequired didn't patch
+                        fallback_handler = FallbackHandler()
+                        response = fallback_handler.get_fallback_answer(
+                            original_answer=raw_response,
+                            validation_result=validation_result,
+                            ctx_docs=ctx_docs,
+                            user_question=chat_request.message,
+                            detected_lang=detected_lang,
+                            input_language=detected_lang
+                        )
+                        # Check if FallbackHandler returned a fallback message (not the patched answer)
+                        from backend.api.utils.error_detector import is_fallback_message
+                        if is_fallback_message(response):
+                            used_fallback = True
+                            logger.warning(f"⚠️ FallbackHandler returned fallback message instead of patched answer")
+                        else:
+                            logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
         else:
             # For non-critical validation failures, check if they're just warnings (not violations)
             # IdentityCheckValidator can return warnings (identity_warning:*) that shouldn't cause failure
