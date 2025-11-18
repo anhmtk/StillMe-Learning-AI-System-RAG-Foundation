@@ -438,7 +438,12 @@ class OpenRouterProvider(LLMProvider):
                             raise AuthenticationError(f"OpenRouter API key invalid: {error_message}")
                         elif response.status_code == 403:
                             raise AuthorizationError(f"OpenRouter API access forbidden: {error_message}")
-                        elif response.status_code == 400 and ("context length" in error_message.lower() or "maximum context" in error_message.lower()):
+                        elif response.status_code == 400 and (
+                            "context length" in error_message.lower() or 
+                            "maximum context" in error_message.lower() or
+                            "context length is" in error_message.lower() or
+                            "requested about" in error_message.lower() and "tokens" in error_message.lower()
+                        ):
                             raise ContextOverflowError(f"OpenRouter context overflow: {error_message}")
                         else:
                             # Raise exception instead of returning error string to prevent it from passing through validators
@@ -447,7 +452,12 @@ class OpenRouterProvider(LLMProvider):
                         # If JSON parsing fails, check for specific errors
                         if response.status_code == 429 or "quota" in error_text.lower() or "billing" in error_text.lower() or "credit" in error_text.lower():
                             raise InsufficientQuotaError(f"OpenRouter credit exhausted: {error_text}")
-                        elif response.status_code == 400 and ("context length" in error_text.lower() or "maximum context" in error_text.lower()):
+                        elif response.status_code == 400 and (
+                            "context length" in error_text.lower() or 
+                            "maximum context" in error_text.lower() or
+                            "context length is" in error_text.lower() or
+                            "requested about" in error_text.lower() and "tokens" in error_text.lower()
+                        ):
                             raise ContextOverflowError(f"OpenRouter context overflow: {error_text}")
                         # Raise exception instead of returning error string
                         raise Exception(f"OpenRouter API error: {response.status_code} - {error_text}")
@@ -613,7 +623,12 @@ class OpenAIProvider(LLMProvider):
                             raise AuthenticationError(f"OpenAI API key invalid: {error_message}")
                         elif response.status_code == 403:
                             raise AuthorizationError(f"OpenAI API access forbidden: {error_message}")
-                        elif response.status_code == 400 and ("context length" in error_message.lower() or "maximum context" in error_message.lower()):
+                        elif response.status_code == 400 and (
+                            "context length" in error_message.lower() or 
+                            "maximum context" in error_message.lower() or
+                            "context length is" in error_message.lower() or
+                            "requested about" in error_message.lower() and "tokens" in error_message.lower()
+                        ):
                             raise ContextOverflowError(f"OpenAI context overflow: {error_message}")
                         else:
                             # Raise exception instead of returning error string to prevent it from passing through validators
@@ -622,7 +637,12 @@ class OpenAIProvider(LLMProvider):
                         # If JSON parsing fails, check for specific errors
                         if response.status_code == 429 or "quota" in error_text.lower() or "billing" in error_text.lower():
                             raise InsufficientQuotaError(f"OpenAI credit exhausted: {error_text}")
-                        elif response.status_code == 400 and ("context length" in error_text.lower() or "maximum context" in error_text.lower()):
+                        elif response.status_code == 400 and (
+                            "context length" in error_text.lower() or 
+                            "maximum context" in error_text.lower() or
+                            "context length is" in error_text.lower() or
+                            "requested about" in error_text.lower() and "tokens" in error_text.lower()
+                        ):
                             raise ContextOverflowError(f"OpenAI context overflow: {error_text}")
                         # Raise exception instead of returning error string
                         raise Exception(f"OpenAI API error: {response.status_code} - {error_text}")
