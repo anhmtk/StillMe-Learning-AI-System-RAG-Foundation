@@ -2275,52 +2275,91 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
             
             # ==========================================
             # PHASE 3: POST-PROCESSING PIPELINE
-            # Unified Style & Quality Enforcement Layer
+            # Unified Style & Quality Enforcement Layer (Optimized)
             # ==========================================
             postprocessing_start = time.time()
             try:
                 from backend.postprocessing.style_sanitizer import get_style_sanitizer
                 from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
                 from backend.postprocessing.rewrite_llm import get_rewrite_llm
+                from backend.postprocessing.optimizer import get_postprocessing_optimizer
                 
-                # Stage 2: Hard Filter (0 token) - Style Sanitization
-                sanitizer = get_style_sanitizer()
-                sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
+                optimizer = get_postprocessing_optimizer()
                 
-                # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
-                evaluator = get_quality_evaluator()
-                quality_result = evaluator.evaluate(
-                    text=sanitized_response,
-                    is_philosophical=is_philosophical,
-                    original_question=chat_request.message
+                # OPTIMIZATION: Check if we should skip post-processing
+                should_skip, skip_reason = optimizer.should_skip_postprocessing(
+                    question=chat_request.message,
+                    response=response,
+                    is_philosophical=is_philosophical
                 )
                 
-                # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if needed
-                if quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
-                    logger.info(f"⚠️ Quality evaluator flagged output for rewrite. Issues: {quality_result['reasons']}")
-                    processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                if should_skip:
+                    logger.info(f"⏭️ Skipping post-processing: {skip_reason}")
+                    timing_logs["postprocessing"] = "skipped"
+                else:
+                    # Stage 2: Hard Filter (0 token) - Style Sanitization
+                    sanitizer = get_style_sanitizer()
+                    sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
                     
-                    rewrite_llm = get_rewrite_llm()
-                    final_response = await rewrite_llm.rewrite(
-                        text=sanitized_response,
-                        original_question=chat_request.message,
-                        quality_issues=quality_result["reasons"],
-                        is_philosophical=is_philosophical,
-                        detected_lang=detected_lang
+                    # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
+                    # OPTIMIZATION: Check cache first
+                    evaluator = get_quality_evaluator()
+                    cached_quality = optimizer.get_cached_quality_result(
+                        question=chat_request.message,
+                        response=sanitized_response
                     )
                     
-                    # Re-sanitize rewritten output (in case rewrite introduced issues)
-                    final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical)
-                    logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
-                else:
-                    final_response = sanitized_response
-                    logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
-                
-                response = final_response
-                
-                postprocessing_time = time.time() - postprocessing_start
-                timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
-                logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
+                    if cached_quality:
+                        quality_result = cached_quality
+                        logger.debug("✅ Using cached quality evaluation")
+                    else:
+                        quality_result = evaluator.evaluate(
+                            text=sanitized_response,
+                            is_philosophical=is_philosophical,
+                            original_question=chat_request.message
+                        )
+                        # Cache the result
+                        optimizer.cache_quality_result(
+                            question=chat_request.message,
+                            response=sanitized_response,
+                            quality_result=quality_result
+                        )
+                    
+                    # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
+                    should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                        quality_result=quality_result,
+                        is_philosophical=is_philosophical,
+                        response_length=len(sanitized_response)
+                    )
+                    
+                    # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
+                    if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                        logger.info(f"⚠️ Quality evaluator flagged output for rewrite. Issues: {quality_result['reasons']}")
+                        processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                        
+                        rewrite_llm = get_rewrite_llm()
+                        final_response = await rewrite_llm.rewrite(
+                            text=sanitized_response,
+                            original_question=chat_request.message,
+                            quality_issues=quality_result["reasons"],
+                            is_philosophical=is_philosophical,
+                            detected_lang=detected_lang
+                        )
+                        
+                        # Re-sanitize rewritten output (in case rewrite introduced issues)
+                        final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical)
+                        logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
+                    else:
+                        final_response = sanitized_response
+                        if should_rewrite:
+                            logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
+                        logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                    
+                    response = final_response
+                    
+                    postprocessing_time = time.time() - postprocessing_start
+                    timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
+                    logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
                 
             except Exception as postprocessing_error:
                 logger.error(f"Post-processing error: {postprocessing_error}", exc_info=True)
@@ -2476,7 +2515,7 @@ Remember: RESPOND IN ENGLISH ONLY."""
         
         # ==========================================
         # PHASE 3: POST-PROCESSING PIPELINE (Non-RAG path)
-        # Unified Style & Quality Enforcement Layer
+        # Unified Style & Quality Enforcement Layer (Optimized)
         # ==========================================
         # Check if question is philosophical for non-RAG path
         is_philosophical_non_rag = False
@@ -2491,45 +2530,84 @@ Remember: RESPOND IN ENGLISH ONLY."""
             from backend.postprocessing.style_sanitizer import get_style_sanitizer
             from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
             from backend.postprocessing.rewrite_llm import get_rewrite_llm
+            from backend.postprocessing.optimizer import get_postprocessing_optimizer
             
-            # Stage 2: Hard Filter (0 token) - Style Sanitization
-            sanitizer = get_style_sanitizer()
-            sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
+            optimizer = get_postprocessing_optimizer()
             
-            # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
-            evaluator = get_quality_evaluator()
-            quality_result = evaluator.evaluate(
-                text=sanitized_response,
-                is_philosophical=is_philosophical_non_rag,
-                original_question=chat_request.message
+            # OPTIMIZATION: Check if we should skip post-processing
+            should_skip, skip_reason = optimizer.should_skip_postprocessing(
+                question=chat_request.message,
+                response=response,
+                is_philosophical=is_philosophical_non_rag
             )
             
-            # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if needed
-            if quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
-                logger.info(f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). Issues: {quality_result['reasons']}")
-                processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+            if should_skip:
+                logger.info(f"⏭️ Skipping post-processing (non-RAG): {skip_reason}")
+                timing_logs["postprocessing"] = "skipped"
+            else:
+                # Stage 2: Hard Filter (0 token) - Style Sanitization
+                sanitizer = get_style_sanitizer()
+                sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
                 
-                rewrite_llm = get_rewrite_llm()
-                final_response = await rewrite_llm.rewrite(
-                    text=sanitized_response,
-                    original_question=chat_request.message,
-                    quality_issues=quality_result["reasons"],
-                    is_philosophical=is_philosophical_non_rag,
-                    detected_lang=detected_lang
+                # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
+                # OPTIMIZATION: Check cache first
+                evaluator = get_quality_evaluator()
+                cached_quality = optimizer.get_cached_quality_result(
+                    question=chat_request.message,
+                    response=sanitized_response
                 )
                 
-                # Re-sanitize rewritten output (in case rewrite introduced issues)
-                final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical_non_rag)
-                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
-            else:
-                final_response = sanitized_response
-                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
-            
-            response = final_response
-            
-            postprocessing_time = time.time() - postprocessing_start
-            timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
-            logger.info(f"⏱️ Post-processing (non-RAG) took {postprocessing_time:.3f}s")
+                if cached_quality:
+                    quality_result = cached_quality
+                    logger.debug("✅ Using cached quality evaluation (non-RAG)")
+                else:
+                    quality_result = evaluator.evaluate(
+                        text=sanitized_response,
+                        is_philosophical=is_philosophical_non_rag,
+                        original_question=chat_request.message
+                    )
+                    # Cache the result
+                    optimizer.cache_quality_result(
+                        question=chat_request.message,
+                        response=sanitized_response,
+                        quality_result=quality_result
+                    )
+                
+                # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
+                should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                    quality_result=quality_result,
+                    is_philosophical=is_philosophical_non_rag,
+                    response_length=len(sanitized_response)
+                )
+                
+                # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
+                if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                    logger.info(f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). Issues: {quality_result['reasons']}")
+                    processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                    
+                    rewrite_llm = get_rewrite_llm()
+                    final_response = await rewrite_llm.rewrite(
+                        text=sanitized_response,
+                        original_question=chat_request.message,
+                        quality_issues=quality_result["reasons"],
+                        is_philosophical=is_philosophical_non_rag,
+                        detected_lang=detected_lang
+                    )
+                    
+                    # Re-sanitize rewritten output (in case rewrite introduced issues)
+                    final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical_non_rag)
+                    logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                else:
+                    final_response = sanitized_response
+                    if should_rewrite:
+                        logger.info(f"⏭️ Skipping rewrite (non-RAG): {rewrite_reason}")
+                    logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                
+                response = final_response
+                
+                postprocessing_time = time.time() - postprocessing_start
+                timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
+                logger.info(f"⏱️ Post-processing (non-RAG) took {postprocessing_time:.3f}s")
             
         except Exception as postprocessing_error:
             logger.error(f"Post-processing error (non-RAG): {postprocessing_error}", exc_info=True)
