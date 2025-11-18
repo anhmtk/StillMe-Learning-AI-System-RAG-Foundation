@@ -2446,6 +2446,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         raise
                     except Exception as validation_error:
                         logger.error(f"Validation error: {validation_error}, falling back to raw response", exc_info=True)
+                        logger.error(f"⚠️ Validation exception details - raw_response length: {len(raw_response) if raw_response else 0}, context docs: {len(context.get('knowledge_docs', [])) + len(context.get('conversation_docs', []))}")
                         response = raw_response
                         # Calculate confidence even on error (low confidence)
                         # Build ctx_docs for confidence calculation
@@ -2458,14 +2459,45 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         # Ensure validation_result is set to None to prevent downstream errors
                         validation_result = None
                         validation_info = None
+                        
+                        # CRITICAL: Check if response is None or empty after validation error
+                        if not response or not isinstance(response, str) or not response.strip():
+                            logger.error(f"⚠️ Response is None or empty after validation error - using fallback")
+                            from backend.api.utils.error_detector import get_fallback_message_for_error
+                            response = get_fallback_message_for_error("generic", detected_lang)
+                            processing_steps.append("⚠️ Response validation failed - using fallback message")
                 else:
                     response = raw_response
+                    # Build ctx_docs for transparency check
+                    ctx_docs = [
+                        doc["content"] for doc in context.get("knowledge_docs", [])
+                    ] + [
+                        doc["content"] for doc in context.get("conversation_docs", [])
+                    ]
                 # Calculate basic confidence score even without validators
                 confidence_score = _calculate_confidence_score(
                     context_docs_count=len(context.get("knowledge_docs", [])) + len(context.get("conversation_docs", [])),
                     validation_result=None,
                     context=context
                 )
+                
+                # CRITICAL: Add transparency warning for low confidence responses without context (RAG path, validators disabled)
+                if confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical:
+                    response_lower = response.lower() if response else ""
+                    has_transparency = any(
+                        phrase in response_lower for phrase in [
+                            "không có dữ liệu", "không có thông tin", "kiến thức chung", "dựa trên kiến thức",
+                            "don't have data", "don't have information", "general knowledge", "based on knowledge",
+                            "không từ stillme", "not from stillme", "không từ rag", "not from rag"
+                        ]
+                    )
+                    if not has_transparency and response:
+                        if detected_lang == 'vi':
+                            disclaimer = "⚠️ Lưu ý: Câu trả lời này dựa trên kiến thức chung từ training data, không có context từ RAG. Mình không chắc chắn về độ chính xác.\n\n"
+                        else:
+                            disclaimer = "⚠️ Note: This answer is based on general knowledge from training data, not from RAG context. I'm not certain about its accuracy.\n\n"
+                        response = disclaimer + response
+                        logger.info("ℹ️ Added transparency disclaimer for low confidence response without context (RAG path, validators disabled)")
             
             # ==========================================
             # PHASE 3: POST-PROCESSING PIPELINE
@@ -2856,6 +2888,24 @@ Remember: RESPOND IN ENGLISH ONLY."""
             llm_inference_latency = llm_inference_end - llm_inference_start
             timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
             logger.info(f"⏱️ LLM inference (non-RAG) took {llm_inference_latency:.2f}s")
+            
+            # CRITICAL: Add transparency warning for low confidence responses without context (non-RAG path)
+            if confidence_score < 0.5 and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and response:
+                response_lower = response.lower()
+                has_transparency = any(
+                    phrase in response_lower for phrase in [
+                        "không có dữ liệu", "không có thông tin", "kiến thức chung", "dựa trên kiến thức",
+                        "don't have data", "don't have information", "general knowledge", "based on knowledge",
+                        "không từ stillme", "not from stillme", "không từ rag", "not from rag"
+                    ]
+                )
+                if not has_transparency:
+                    if detected_lang == 'vi':
+                        disclaimer = "⚠️ Lưu ý: Câu trả lời này dựa trên kiến thức chung từ training data, không có context từ RAG. Mình không chắc chắn về độ chính xác.\n\n"
+                    else:
+                        disclaimer = "⚠️ Note: This answer is based on general knowledge from training data, not from RAG context. I'm not certain about its accuracy.\n\n"
+                    response = disclaimer + response
+                    logger.info("ℹ️ Added transparency disclaimer for low confidence response without context (non-RAG path)")
         
         # Score the response
         accuracy_score = None

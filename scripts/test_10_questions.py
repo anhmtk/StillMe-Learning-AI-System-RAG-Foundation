@@ -31,77 +31,88 @@ logger = logging.getLogger(__name__)
 # API base URL
 API_BASE = os.getenv("STILLME_API_BASE", "https://stillme-backend-production.up.railway.app")
 
-# 10 câu hỏi từ đơn giản đến phức tạp
+# 10 câu hỏi đa ngôn ngữ để test multilingual support
+# Chỉ 1-2 câu tiếng Việt, còn lại là các ngôn ngữ khác
 TEST_QUESTIONS = [
     {
         "id": 1,
         "question": "Bạn có thể giới thiệu về StillMe không?",
         "category": "simple",
+        "language": "vi",
         "expected_path": "non-RAG or RAG",
-        "description": "Câu hỏi đơn giản về StillMe"
+        "description": "Câu hỏi đơn giản về StillMe (tiếng Việt)"
     },
     {
         "id": 2,
-        "question": "Backpropagation hoạt động như thế nào trong neural networks?",
+        "question": "Comment fonctionne le backpropagation dans les réseaux de neurones?",
         "category": "technical",
+        "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về deep learning"
+        "description": "Câu hỏi kỹ thuật về deep learning (tiếng Pháp)"
     },
     {
         "id": 3,
-        "question": "Sự khác biệt giữa gradient descent và stochastic gradient descent là gì?",
+        "question": "Как работает векторная база данных в системе RAG?",
         "category": "technical",
+        "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về optimization"
+        "description": "Câu hỏi kỹ thuật về RAG (tiếng Nga)"
     },
     {
         "id": 4,
-        "question": "Nếu chân lý chỉ là sự đồng thuận xã hội, thì làm sao chúng ta có thể phê phán một xã hội độc tài? Hay phê phán đó cũng chỉ là sản phẩm của một đồng thuận khác?",
+        "question": "إذا كانت الحقيقة مجرد إجماع اجتماعي، فكيف يمكننا نقد مجتمع استبدادي؟ أم أن النقد نفسه هو مجرد منتج لإجماع آخر؟",
         "category": "philosophical",
+        "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học 1 - truth and social consensus"
+        "description": "Câu triết học về truth và consensus (tiếng Ả Rập)"
     },
     {
         "id": 5,
-        "question": "Làm thế nào để fine-tune một pre-trained model?",
-        "category": "technical",
-        "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về model training"
+        "question": "Проанализируйте философский вопрос: 'Если реальность - это только конструкция сознания, то само это утверждение также является конструкцией, не имеющей истинности. Почему мы должны верить в него?' Ответьте на арабском языке.",
+        "category": "philosophical",
+        "language": "ru",
+        "expected_path": "non-RAG (philosophy-lite)",
+        "description": "Multilingual test: Phân tích câu triết học (tiếng Nga) bằng tiếng Ả Rập"
     },
     {
         "id": 6,
-        "question": "Nếu tự do ý chí không tồn tại, thì trách nhiệm đạo đức có ý nghĩa gì? Hay chúng ta chỉ là những cỗ máy phức tạp không có lựa chọn thực sự?",
-        "category": "philosophical",
-        "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học 2 - free will and moral responsibility"
+        "question": "Was ist der Unterschied zwischen Gradient Descent und Stochastic Gradient Descent?",
+        "category": "technical",
+        "language": "de",
+        "expected_path": "RAG",
+        "description": "Câu hỏi kỹ thuật về optimization (tiếng Đức)"
     },
     {
         "id": 7,
-        "question": "Embedding vectors là gì và tại sao chúng quan trọng trong NLP?",
-        "category": "technical",
-        "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về NLP"
+        "question": "Si la liberté de la volonté n'existe pas, quelle est la signification de la responsabilité morale? Sommes-nous simplement des machines complexes sans choix réel?",
+        "category": "philosophical",
+        "language": "fr",
+        "expected_path": "non-RAG (philosophy-lite)",
+        "description": "Câu triết học về free will (tiếng Pháp)"
     },
     {
         "id": 8,
-        "question": "Nếu AI có thể suy nghĩ, thì 'suy nghĩ' đó có khác gì với việc xử lý thông tin không? Hay chúng ta chỉ đang nhân cách hóa một quá trình tính toán?",
-        "category": "philosophical",
-        "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học 3 - AI consciousness and anthropomorphism"
+        "question": "¿Qué son los vectores de embedding y por qué son importantes en NLP?",
+        "category": "technical",
+        "language": "es",
+        "expected_path": "RAG",
+        "description": "Câu hỏi kỹ thuật về NLP (tiếng Tây Ban Nha)"
     },
     {
         "id": 9,
-        "question": "Cách hoạt động của vector database trong RAG system như thế nào?",
-        "category": "technical",
-        "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về RAG architecture"
+        "question": "إذا كان بإمكان الذكاء الاصطناعي التفكير، فهل يختلف هذا 'التفكير' عن معالجة المعلومات؟ أم أننا ببساطة نضفي صفات بشرية على عملية حسابية؟",
+        "category": "philosophical",
+        "language": "ar",
+        "expected_path": "non-RAG (philosophy-lite)",
+        "description": "Câu triết học về AI consciousness (tiếng Ả Rập)"
     },
     {
         "id": 10,
-        "question": "Nếu mọi kiến thức đều được xây dựng từ kinh nghiệm, thì làm sao chúng ta biết được các quy luật logic (như modus ponens) là đúng? Hay logic cũng chỉ là một dạng kinh nghiệm được tổng quát hóa?",
-        "category": "philosophical",
-        "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học 4 - logic and empiricism"
+        "question": "Transformer là gì?",
+        "category": "technical",
+        "language": "vi",
+        "expected_path": "RAG",
+        "description": "Câu hỏi kỹ thuật đơn giản (tiếng Việt)"
     }
 ]
 
