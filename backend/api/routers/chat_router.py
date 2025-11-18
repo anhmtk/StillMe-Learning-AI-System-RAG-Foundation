@@ -2294,17 +2294,17 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         "consistency": consistency_info  # NEW: Consistency check info
                     }
                     
-                except HTTPException:
-                    raise
-                except Exception as validation_error:
-                    logger.error(f"Validation error: {validation_error}, falling back to raw response", exc_info=True)
-                    response = raw_response
-                    # Calculate confidence even on error (low confidence)
-                    confidence_score = 0.3 if len(ctx_docs) == 0 else 0.6
-                    # Ensure validation_result is set to None to prevent downstream errors
-                    validation_result = None
-                    validation_info = None
-            else:
+                    except HTTPException:
+                        raise
+                    except Exception as validation_error:
+                        logger.error(f"Validation error: {validation_error}, falling back to raw response", exc_info=True)
+                        response = raw_response
+                        # Calculate confidence even on error (low confidence)
+                        confidence_score = 0.3 if len(ctx_docs) == 0 else 0.6
+                        # Ensure validation_result is set to None to prevent downstream errors
+                        validation_result = None
+                        validation_info = None
+                else:
                 response = raw_response
                 # Calculate basic confidence score even without validators
                 confidence_score = _calculate_confidence_score(
@@ -2458,38 +2458,6 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         postprocessing_time = time.time() - postprocessing_start
                         timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
                         logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
-                        
-                        if rewrite_result.was_rewritten:
-                            # Re-sanitize rewritten output (in case rewrite introduced issues)
-                            final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
-                            logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
-                        else:
-                            # Fallback to sanitized original - rewrite failed
-                            final_response = sanitized_response
-                            logger.warning(
-                                f"⚠️ DeepSeek rewrite failed (error: {rewrite_result.error}), "
-                                f"using sanitized original output"
-                            )
-                            processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
-                    else:
-                        final_response = sanitized_response
-                        if should_rewrite:
-                            logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
-                        logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
-                    
-                    response = final_response
-                    
-                    # CRITICAL: Final check - ensure response is not a technical error
-                    if response:
-                        from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
-                        is_error, error_type = is_technical_error(response)
-                        if is_error:
-                            logger.error(f"⚠️ Final response is still a technical error (type: {error_type}) - replacing with fallback")
-                            response = get_fallback_message_for_error(error_type, detected_lang)
-                    
-                    postprocessing_time = time.time() - postprocessing_start
-                    timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
-                    logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
                 
                 except Exception as postprocessing_error:
                     logger.error(f"Post-processing error: {postprocessing_error}", exc_info=True)
