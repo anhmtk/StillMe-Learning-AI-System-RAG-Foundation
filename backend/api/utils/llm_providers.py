@@ -12,6 +12,24 @@ from backend.api.utils.chat_helpers import build_system_prompt_with_language
 
 logger = logging.getLogger(__name__)
 
+# Philosophy-Lite System Prompt for non-RAG philosophical questions
+# This is a minimal system prompt to prevent context overflow (~200-300 tokens)
+PHILOSOPHY_LITE_SYSTEM_PROMPT = """Bạn là StillMe – trợ lý triết học.
+
+**NGUYÊN TẮC CỐT LÕI:**
+- Trả lời bằng tiếng Việt, rõ ràng và có cấu trúc
+- Luôn thẳng thắn thừa nhận giới hạn của mình, không giả vờ có trải nghiệm chủ quan hoặc cảm xúc thật
+- Không sử dụng emoji, markdown headings, hoặc citations như [1], [2]
+- Viết bằng văn xuôi liên tục, không dùng bullet lists trừ khi cần làm rõ 3-4 lập trường đối lập
+
+**CẤU TRÚC TRẢ LỜI:**
+1. Giải thích các khái niệm chính trong câu hỏi
+2. Trình bày 2–3 lập trường triết học liên quan
+3. Phân tích mâu thuẫn, đặc biệt là các tự-mâu thuẫn logic
+4. Kết lại bằng một góc nhìn mở, thừa nhận giới hạn của mình
+
+**QUAN TRỌNG:** Trả lời trực tiếp câu hỏi của người dùng, không thêm thông tin không liên quan."""
+
 
 def smart_truncate_prompt_for_philosophy(prompt_text: str, max_tokens: int) -> str:
     """
@@ -333,7 +351,25 @@ class OpenRouterProvider(LLMProvider):
     async def generate(self, prompt: str, detected_lang: str = 'en') -> str:
         """Call OpenRouter API"""
         try:
-            system_content = build_system_prompt_with_language(detected_lang)
+            # CRITICAL: Detect philosophical non-RAG mode
+            # If prompt is very short and only contains "User Question: ...", use philosophy-lite system prompt
+            user_question_marker = "User Question"
+            is_philosophy_lite_mode = False
+            
+            if user_question_marker in prompt:
+                # Check if prompt is very short (only user question, no other instructions)
+                prompt_stripped = prompt.strip()
+                if prompt_stripped.startswith(user_question_marker) and len(prompt_stripped) < 5000:
+                    # This is likely philosophy-lite mode from non-RAG path
+                    is_philosophy_lite_mode = True
+                    logger.info("📊 [PHILO-LITE] Detected philosophy-lite mode - using minimal system prompt")
+            
+            # Use philosophy-lite system prompt if detected, otherwise use full system prompt
+            if is_philosophy_lite_mode:
+                system_content = PHILOSOPHY_LITE_SYSTEM_PROMPT
+            else:
+                system_content = build_system_prompt_with_language(detected_lang)
+            
             # OpenRouter uses model names like "openai/gpt-4", "anthropic/claude-3-opus", etc.
             # Default to a cost-effective model
             model = self.model_name or "openai/gpt-3.5-turbo"
@@ -357,7 +393,6 @@ class OpenRouterProvider(LLMProvider):
             
             # CRITICAL: Extract and preserve user question before truncating
             # User question is usually at the end after "User Question:" marker
-            user_question_marker = "User Question"
             user_question = ""
             prompt_without_question = prompt
             
@@ -370,26 +405,38 @@ class OpenRouterProvider(LLMProvider):
                         user_question = question_section[colon_pos + 1:].strip()
                         prompt_without_question = prompt[:question_start].strip()
             
-            # Truncate system_content to ~3500 tokens (reduced from 4000 to prevent overflow)
-            system_content = truncate_text(system_content, max_tokens=3500)
-            
-            # Fix: Smart truncate for philosophical questions - preserve philosophical instructions, remove provenance/metrics first
-            prompt_without_question = smart_truncate_prompt_for_philosophy(prompt_without_question, max_tokens=6000)
-            
-            # Preserve user question (up to 2500 tokens, reduced from 3000) - CRITICAL for correct answers
-            if user_question:
-                user_question = truncate_text(user_question, max_tokens=2500)
-                prompt = prompt_without_question + "\n\n" + user_question_marker + ": " + user_question
+            # For philosophy-lite mode: prompt is just user question, no truncation needed
+            if is_philosophy_lite_mode:
+                # In lite mode, prompt is already just "User Question: ...", use it directly
+                prompt = prompt.strip()
+                # Ensure user_question is extracted for logging
+                if not user_question and user_question_marker in prompt:
+                    colon_pos = prompt.find(":")
+                    if colon_pos != -1:
+                        user_question = prompt[colon_pos + 1:].strip()
             else:
-                # Fallback: truncate entire prompt if we couldn't extract user question
-                prompt = smart_truncate_prompt_for_philosophy(prompt, max_tokens=7000)
+                # Only truncate system_content if not in lite mode
+                # Truncate system_content to ~3500 tokens (reduced from 4000 to prevent overflow)
+                system_content = truncate_text(system_content, max_tokens=3500)
+                
+                # Fix: Smart truncate for philosophical questions - preserve philosophical instructions, remove provenance/metrics first
+                prompt_without_question = smart_truncate_prompt_for_philosophy(prompt_without_question, max_tokens=6000)
+                
+                # Preserve user question (up to 2500 tokens, reduced from 3000) - CRITICAL for correct answers
+                if user_question:
+                    user_question = truncate_text(user_question, max_tokens=2500)
+                    prompt = prompt_without_question + "\n\n" + user_question_marker + ": " + user_question
+                else:
+                    # Fallback: truncate entire prompt if we couldn't extract user question
+                    prompt = smart_truncate_prompt_for_philosophy(prompt, max_tokens=7000)
             
             # Log token counts for debugging
             system_tokens = estimate_tokens(system_content)
             prompt_tokens = estimate_tokens(prompt)
             user_q_tokens = estimate_tokens(user_question) if user_question else 0
             total_tokens = system_tokens + prompt_tokens
-            logger.info(f"📊 Token counts - System: {system_tokens}, Prompt: {prompt_tokens}, User Question: {user_q_tokens}, Total: {total_tokens}")
+            log_prefix = "📊 [PHILO-LITE]" if is_philosophy_lite_mode else "📊"
+            logger.info(f"{log_prefix} Token counts - System: {system_tokens}, Prompt: {prompt_tokens}, User Question: {user_q_tokens}, Total: {total_tokens}")
             
             if total_tokens > 15000:
                 logger.warning(f"⚠️ Total tokens ({total_tokens}) still high, may cause context overflow")

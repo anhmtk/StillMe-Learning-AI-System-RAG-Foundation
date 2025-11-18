@@ -74,6 +74,24 @@ def _truncate_user_message(message: str, max_tokens: int = 3000) -> str:
     truncated = message[:max_chars].rsplit(' ', 1)[0]
     return truncated + "... [message truncated]"
 
+# Philosophy-Lite System Prompt for non-RAG philosophical questions
+# This is a minimal system prompt to prevent context overflow (~200-300 tokens)
+PHILOSOPHY_LITE_SYSTEM_PROMPT = """Bạn là StillMe – trợ lý triết học.
+
+**NGUYÊN TẮC CỐT LÕI:**
+- Trả lời bằng tiếng Việt, rõ ràng và có cấu trúc
+- Luôn thẳng thắn thừa nhận giới hạn của mình, không giả vờ có trải nghiệm chủ quan hoặc cảm xúc thật
+- Không sử dụng emoji, markdown headings, hoặc citations như [1], [2]
+- Viết bằng văn xuôi liên tục, không dùng bullet lists trừ khi cần làm rõ 3-4 lập trường đối lập
+
+**CẤU TRÚC TRẢ LỜI:**
+1. Giải thích các khái niệm chính trong câu hỏi
+2. Trình bày 2–3 lập trường triết học liên quan
+3. Phân tích mâu thuẫn, đặc biệt là các tự-mâu thuẫn logic
+4. Kết lại bằng một góc nhìn mở, thừa nhận giới hạn của mình
+
+**QUAN TRỌNG:** Trả lời trực tiếp câu hỏi của người dùng, không thêm thông tin không liên quan."""
+
 def build_minimal_philosophical_prompt(
     user_question: str,
     language: str,
@@ -2592,30 +2610,23 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             else:
                 logger.info(f"Philosophical question detected (non-RAG) - skipping conversation history to reduce prompt size")
             
-            # For philosophical questions: check if we need minimal prompt mode
-            use_minimal_prompt = False
+            # For philosophical non-RAG: ALWAYS use philosophy-lite mode to prevent context overflow
+            # This ensures prompt stays small (~500-1000 tokens) instead of ~16-17k tokens
             if is_philosophical_non_rag:
-                # Estimate system prompt tokens (rough estimate: ~3500 tokens for full identity)
-                system_tokens_estimate = 3500
-                # Estimate prompt tokens (language instruction + conversation history)
-                prompt_tokens_estimate = estimate_tokens(conversation_history_text) + 200  # ~200 for language instruction
-                total_tokens_estimate = system_tokens_estimate + prompt_tokens_estimate + user_question_tokens
+                # Use philosophy-lite mode: minimal system prompt + user question only
+                # Build simple prompt string that provider will parse correctly
+                # Format: system prompt (will be replaced by provider) + user question marker + user question
+                enhanced_prompt = f"""User Question: {user_question_for_prompt.strip()}"""
                 
-                if total_tokens_estimate > 14000:
-                    use_minimal_prompt = True
-                    logger.warning(
-                        f"Using minimal philosophical prompt to avoid context overflow: "
-                        f"system={system_tokens_estimate}, prompt={prompt_tokens_estimate}, question={user_question_tokens}, "
-                        f"total={total_tokens_estimate}"
-                    )
-            
-            # Build prompt based on mode
-            if use_minimal_prompt:
-                # Use minimal philosophical prompt
-                enhanced_prompt = build_minimal_philosophical_prompt(
-                    user_question=user_question_for_prompt,
-                    language=detected_lang,
-                    detected_lang_name=detected_lang_name
+                # Log token estimates for philosophy-lite mode
+                system_tokens_estimate = estimate_tokens(PHILOSOPHY_LITE_SYSTEM_PROMPT)
+                prompt_tokens_estimate = estimate_tokens(enhanced_prompt)
+                total_tokens_estimate = system_tokens_estimate + prompt_tokens_estimate
+                
+                logger.info(
+                    f"📊 [PHILO-LITE] Token estimates - System: {system_tokens_estimate}, "
+                    f"Prompt: {prompt_tokens_estimate}, User Question: {user_question_tokens}, "
+                    f"Total: {total_tokens_estimate}"
                 )
             else:
                 # Use full prompt
