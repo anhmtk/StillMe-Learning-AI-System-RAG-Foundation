@@ -2914,6 +2914,61 @@ Remember: RESPOND IN ENGLISH ONLY."""
             timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
             logger.info(f"⏱️ LLM inference (non-RAG) took {llm_inference_latency:.2f}s")
             
+            # CRITICAL: Check language mismatch for non-RAG path (if validators enabled)
+            if enable_validators and response and not is_fallback_meta_answer_non_rag:
+                from backend.api.utils.chat_helpers import detect_language as detect_lang_func
+                detected_output_lang = detect_lang_func(response)
+                if detected_output_lang != detected_lang:
+                    logger.warning(f"⚠️ Language mismatch detected (non-RAG): output={detected_output_lang}, expected={detected_lang}")
+                    # Try to retry with stronger language instruction
+                    try:
+                        language_names = {
+                            'vi': 'Tiếng Việt', 'en': 'English', 'zh': '中文', 'fr': 'Français',
+                            'es': 'Español', 'de': 'Deutsch', 'ja': '日本語', 'ko': '한국어',
+                            'ar': 'العربية', 'ru': 'Русский', 'pt': 'Português', 'it': 'Italiano',
+                            'hi': 'हिन्दी', 'th': 'ไทย',
+                        }
+                        retry_lang_name = language_names.get(detected_lang, detected_lang.upper())
+                        
+                        retry_prompt = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - ABSOLUTE HIGHEST PRIORITY 🚨🚨🚨
+
+THE USER'S QUESTION IS IN {retry_lang_name.upper()}.
+
+YOU MUST RESPOND EXCLUSIVELY IN {retry_lang_name.upper()}. 
+
+DO NOT USE VIETNAMESE, ENGLISH, FRENCH, CHINESE, SPANISH, GERMAN, OR ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD MUST BE IN {retry_lang_name.upper()}.
+
+IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {retry_lang_name.upper()} BEFORE RETURNING.
+
+THIS OVERRIDES EVERYTHING - NO EXCEPTIONS.
+
+User Question (in {retry_lang_name.upper()}): {chat_request.message[:3000]}
+
+**YOUR PRIMARY TASK IS TO ANSWER THE USER QUESTION ABOVE DIRECTLY AND ACCURATELY IN {retry_lang_name.upper()} ONLY.**
+
+Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
+                        
+                        retry_response = await generate_ai_response(
+                            retry_prompt,
+                            detected_lang=detected_lang,
+                            llm_provider=chat_request.llm_provider,
+                            llm_api_key=chat_request.llm_api_key,
+                            use_server_keys=use_server_keys_non_rag
+                        )
+                        
+                        # Check if retry fixed the language issue
+                        retry_output_lang = detect_lang_func(retry_response)
+                        if retry_output_lang == detected_lang:
+                            logger.info(f"✅ Language mismatch fixed after retry (non-RAG)")
+                            response = retry_response
+                        else:
+                            logger.warning(f"⚠️ Language mismatch persists after retry (non-RAG): output={retry_output_lang}, expected={detected_lang}")
+                    except Exception as retry_error:
+                        logger.error(f"⚠️ Language retry failed (non-RAG): {retry_error}")
+                        # Continue with original response
+            
             # CRITICAL: Add transparency warning for low confidence responses without context (non-RAG path)
             if confidence_score < 0.5 and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and response:
                 response_lower = response.lower()

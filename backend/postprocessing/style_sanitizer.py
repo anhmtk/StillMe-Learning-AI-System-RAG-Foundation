@@ -227,10 +227,20 @@ class StyleSanitizer:
         return text
     
     def _normalize_markdown(self, text: str) -> str:
-        """Normalize markdown (keep structure but clean up)"""
-        # Keep headings and bullets but normalize spacing
-        # Remove excessive bold/italic
+        """Normalize markdown (remove headings and bold, keep structure)"""
+        # Remove markdown headings (##, ###, etc.) - convert to plain text
+        text = self.heading_pattern.sub(r'\1', text)  # Remove # prefix, keep text
+        
+        # Remove bold formatting (**text** -> text)
+        text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # Bold
+        
+        # Remove excessive bold+italic
         text = re.sub(r'\*\*\*(.+?)\*\*\*', r'\1', text)  # Bold+italic
+        
+        # Remove italic (but keep structure)
+        text = re.sub(r'\*(.+?)\*', r'\1', text)      # Italic (single *)
+        text = re.sub(r'_(.+?)_', r'\1', text)        # Italic underscore
+        
         return text
     
     def _normalize_spacing(self, text: str) -> str:
