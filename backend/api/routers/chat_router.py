@@ -952,6 +952,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     processing_steps = []  # Track processing steps for real-time status
     style_learning_response = None  # Initialize for style learning
     
+    # Initialize fallback flags for both RAG and non-RAG paths to prevent UnboundLocalError
+    is_fallback_meta_answer = False  # Used in RAG path
+    is_fallback_meta_answer_rag = False  # Used in RAG path post-processing
+    is_fallback_meta_answer_non_rag = False  # Used in non-RAG path
+    
     try:
         # Get services
         rag_retrieval = get_rag_retrieval()
@@ -2632,7 +2637,8 @@ Remember: RESPOND IN ENGLISH ONLY."""
             from backend.api.utils.llm_providers import ContextOverflowError
             from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error, is_fallback_message
             
-            # Initialize fallback flag for non-RAG path
+            # Note: is_fallback_meta_answer_non_rag already initialized at function start
+            # Reset to False for this non-RAG path execution
             is_fallback_meta_answer_non_rag = False
             
             response = None
