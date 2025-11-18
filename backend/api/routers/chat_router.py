@@ -2356,10 +2356,11 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     sanitizer = get_style_sanitizer()
                     sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
                     
-                    # CRITICAL: Check if sanitized response is a technical error BEFORE quality evaluation
-                    from backend.api.utils.error_detector import is_technical_error
+                    # CRITICAL: Check if sanitized response is a technical error or fallback message BEFORE quality evaluation
+                    from backend.api.utils.error_detector import is_technical_error, is_fallback_message
                     is_error, error_type = is_technical_error(sanitized_response)
-                
+                    is_fallback = is_fallback_message(sanitized_response)
+                    
                     if is_error or is_fallback:
                         # Technical error or fallback message detected - skip quality evaluation and rewrite
                         if is_error:
@@ -2375,37 +2376,37 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                             )
                             processing_steps.append(f"🛑 Fallback message detected - skipping post-processing")
                         final_response = sanitized_response
-                else:
-                    # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
-                    # OPTIMIZATION: Check cache first
-                    evaluator = get_quality_evaluator()
-                    cached_quality = optimizer.get_cached_quality_result(
-                        question=chat_request.message,
-                        response=sanitized_response
-                    )
-                    
-                    if cached_quality:
-                        quality_result = cached_quality
-                        logger.debug("✅ Using cached quality evaluation")
                     else:
-                        quality_result = evaluator.evaluate(
-                            text=sanitized_response,
-                            is_philosophical=is_philosophical,
-                            original_question=chat_request.message
-                        )
-                        # Cache the result
-                        optimizer.cache_quality_result(
+                        # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
+                        # OPTIMIZATION: Check cache first
+                        evaluator = get_quality_evaluator()
+                        cached_quality = optimizer.get_cached_quality_result(
                             question=chat_request.message,
-                            response=sanitized_response,
-                            quality_result=quality_result
+                            response=sanitized_response
                         )
-                    
-                    # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
-                    should_rewrite, rewrite_reason = optimizer.should_rewrite(
-                        quality_result=quality_result,
-                        is_philosophical=is_philosophical,
-                        response_length=len(sanitized_response)
-                    )
+                        
+                        if cached_quality:
+                            quality_result = cached_quality
+                            logger.debug("✅ Using cached quality evaluation")
+                        else:
+                            quality_result = evaluator.evaluate(
+                                text=sanitized_response,
+                                is_philosophical=is_philosophical,
+                                original_question=chat_request.message
+                            )
+                            # Cache the result
+                            optimizer.cache_quality_result(
+                                question=chat_request.message,
+                                response=sanitized_response,
+                                quality_result=quality_result
+                            )
+                        
+                        # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
+                        should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                            quality_result=quality_result,
+                            is_philosophical=is_philosophical,
+                            response_length=len(sanitized_response)
+                        )
                     
                     # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
                     if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
@@ -2777,23 +2778,23 @@ Remember: RESPOND IN ENGLISH ONLY."""
                             processing_steps.append(f"🛑 Fallback message detected - skipping post-processing")
                         final_response = sanitized_response
                     else:
-                    # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
-                    # OPTIMIZATION: Check cache first
-                    evaluator = get_quality_evaluator()
-                    cached_quality = optimizer.get_cached_quality_result(
-                        question=chat_request.message,
-                        response=sanitized_response
-                    )
-                    
-                    if cached_quality:
-                        quality_result = cached_quality
-                        logger.debug("✅ Using cached quality evaluation (non-RAG)")
-                    else:
-                        quality_result = evaluator.evaluate(
-                            text=sanitized_response,
-                            is_philosophical=is_philosophical_non_rag,
-                            original_question=chat_request.message
+                        # Stage 3: Quality Evaluator (0 token) - Rule-based Quality Check
+                        # OPTIMIZATION: Check cache first
+                        evaluator = get_quality_evaluator()
+                        cached_quality = optimizer.get_cached_quality_result(
+                            question=chat_request.message,
+                            response=sanitized_response
                         )
+                        
+                        if cached_quality:
+                            quality_result = cached_quality
+                            logger.debug("✅ Using cached quality evaluation (non-RAG)")
+                        else:
+                            quality_result = evaluator.evaluate(
+                                text=sanitized_response,
+                                is_philosophical=is_philosophical_non_rag,
+                                original_question=chat_request.message
+                            )
                         # Cache the result
                         optimizer.cache_quality_result(
                             question=chat_request.message,
