@@ -2410,60 +2410,54 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         
                         # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
                         if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
-                        logger.info(
-                            f"⚠️ Quality evaluator flagged output for rewrite. "
-                            f"Issues: {quality_result['reasons']}, "
-                            f"score: {quality_result.get('overall_score', 'N/A')}, "
-                            f"length: {len(sanitized_response)}"
-                        )
-                        processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
-                        
-                        rewrite_llm = get_rewrite_llm()
-                        rewrite_result = await rewrite_llm.rewrite(
-                            text=sanitized_response,
-                            original_question=chat_request.message,
-                            quality_issues=quality_result["reasons"],
-                            is_philosophical=is_philosophical,
-                            detected_lang=detected_lang
-                        )
-                        
-                        if rewrite_result.was_rewritten:
-                            # Re-sanitize rewritten output (in case rewrite introduced issues)
-                            final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
-                            logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
-                        else:
-                            # Fallback to sanitized original - rewrite failed
-                            final_response = sanitized_response
-                            logger.warning(
-                                f"⚠️ DeepSeek rewrite failed (error: {rewrite_result.error}), "
-                                f"using sanitized original output"
+                            logger.info(
+                                f"⚠️ Quality evaluator flagged output for rewrite. "
+                                f"Issues: {quality_result['reasons']}, "
+                                f"score: {quality_result.get('overall_score', 'N/A')}, "
+                                f"length: {len(sanitized_response)}"
                             )
-                            processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
-                    else:
-                        final_response = sanitized_response
-                        if should_rewrite:
-                            logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
-                        logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
-                    
-                    response = final_response
-                    
-                    # CRITICAL: Final check - ensure response is not a technical error
-                    if response:
-                        from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
-                        is_error, error_type = is_technical_error(response)
-                        if is_error:
-                            logger.error(f"⚠️ Final response is still a technical error (type: {error_type}) - replacing with fallback")
-                            response = get_fallback_message_for_error(error_type, detected_lang)
-                    
-                    postprocessing_time = time.time() - postprocessing_start
-                    timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
-                    logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
-                        logger.info(
-                            f"⚠️ Quality evaluator flagged output for rewrite. "
-                            f"Issues: {quality_result['reasons']}, "
-                            f"score: {quality_result.get('overall_score', 'N/A')}, "
-                            f"length: {len(sanitized_response)}"
-                        )
+                            processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                            
+                            rewrite_llm = get_rewrite_llm()
+                            rewrite_result = await rewrite_llm.rewrite(
+                                text=sanitized_response,
+                                original_question=chat_request.message,
+                                quality_issues=quality_result["reasons"],
+                                is_philosophical=is_philosophical,
+                                detected_lang=detected_lang
+                            )
+                            
+                            if rewrite_result.was_rewritten:
+                                # Re-sanitize rewritten output (in case rewrite introduced issues)
+                                final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
+                                logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
+                            else:
+                                # Fallback to sanitized original - rewrite failed
+                                final_response = sanitized_response
+                                logger.warning(
+                                    f"⚠️ DeepSeek rewrite failed (error: {rewrite_result.error}), "
+                                    f"using sanitized original output"
+                                )
+                                processing_steps.append(f"⚠️ Rewrite failed, using original (sanitized)")
+                        else:
+                            final_response = sanitized_response
+                            if should_rewrite:
+                                logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
+                            logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                        
+                        response = final_response
+                        
+                        # CRITICAL: Final check - ensure response is not a technical error
+                        if response:
+                            from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
+                            is_error, error_type = is_technical_error(response)
+                            if is_error:
+                                logger.error(f"⚠️ Final response is still a technical error (type: {error_type}) - replacing with fallback")
+                                response = get_fallback_message_for_error(error_type, detected_lang)
+                        
+                        postprocessing_time = time.time() - postprocessing_start
+                        timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
+                        logger.info(f"⏱️ Post-processing took {postprocessing_time:.3f}s")
                         processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
                         
                         rewrite_llm = get_rewrite_llm()
