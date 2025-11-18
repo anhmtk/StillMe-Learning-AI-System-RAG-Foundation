@@ -79,6 +79,11 @@ class FallbackHandler:
             return self._get_no_context_fallback(user_question, input_lang)
         
         # If no specific fallback, return original (may be risky, but better than nothing)
+        # CRITICAL: Ensure we never return None or empty
+        if not original_answer or not isinstance(original_answer, str) or not original_answer.strip():
+            logger.error(f"⚠️ Original answer is None or empty, using generic fallback")
+            return self._get_no_context_fallback(user_question, input_lang)
+        
         logger.warning(f"No specific fallback for reasons: {reasons}, returning original answer")
         return original_answer
     

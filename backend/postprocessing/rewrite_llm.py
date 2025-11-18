@@ -67,7 +67,8 @@ class RewriteLLM:
         )
         
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            # Reduced timeout from 30s to 10s to improve latency
+            async with httpx.AsyncClient(timeout=10.0) as client:
                 response = await client.post(
                     self.deepseek_base_url,
                     headers={

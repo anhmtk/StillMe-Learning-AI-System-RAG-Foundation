@@ -939,6 +939,36 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
         response = validation_result.patched_answer or raw_response
         logger.debug(f"✅ Validation passed. Reasons: {validation_result.reasons}")
     
+    # CRITICAL: Ensure response is never None or empty after validation
+    if not response or not isinstance(response, str) or not response.strip():
+        logger.error(f"⚠️ Response is None or empty after validation (raw_response length: {len(raw_response) if raw_response else 0}) - using fallback")
+        from backend.api.utils.error_detector import get_fallback_message_for_error
+        response = get_fallback_message_for_error("generic", detected_lang)
+        used_fallback = True
+    
+    # CRITICAL: Add transparency warning for low confidence responses without context
+    # This improves honesty when answering from base knowledge
+    if confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical:
+        # Check if response already has transparency disclaimer
+        response_lower = response.lower()
+        has_transparency = any(
+            phrase in response_lower for phrase in [
+                "không có dữ liệu", "không có thông tin", "kiến thức chung", "dựa trên kiến thức",
+                "don't have data", "don't have information", "general knowledge", "based on knowledge",
+                "không từ stillme", "not from stillme", "không từ rag", "not from rag"
+            ]
+        )
+        
+        if not has_transparency:
+            # Prepend transparency disclaimer
+            if detected_lang == 'vi':
+                disclaimer = "⚠️ Lưu ý: Câu trả lời này dựa trên kiến thức chung từ training data, không có context từ RAG. Mình không chắc chắn về độ chính xác.\n\n"
+            else:
+                disclaimer = "⚠️ Note: This answer is based on general knowledge from training data, not from RAG context. I'm not certain about its accuracy.\n\n"
+            
+            response = disclaimer + response
+            logger.info("ℹ️ Added transparency disclaimer for low confidence response without context")
+    
     # Build validation info for response
     validation_info = {
         "passed": validation_result.passed,

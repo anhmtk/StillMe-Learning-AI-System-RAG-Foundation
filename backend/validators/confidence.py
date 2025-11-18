@@ -77,11 +77,20 @@ class ConfidenceValidator:
             )
             
             if not has_uncertainty:
-                # Force uncertainty template
-                uncertainty_template = (
-                    "I don't have sufficient information to answer this accurately. "
-                    "The retrieved context has low relevance to your question."
-                )
+                # CRITICAL: Detect language from answer and use appropriate template
+                # Check if answer contains Vietnamese characters
+                has_vietnamese = bool(re.search(r'[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]', answer, re.IGNORECASE))
+                
+                if has_vietnamese:
+                    uncertainty_template = (
+                        "Mình không có đủ thông tin để trả lời chính xác câu hỏi này. "
+                        "Ngữ cảnh được tìm thấy có độ liên quan thấp với câu hỏi của bạn."
+                    )
+                else:
+                    uncertainty_template = (
+                        "I don't have sufficient information to answer this accurately. "
+                        "The retrieved context has low relevance to your question."
+                    )
                 # Prepend uncertainty to answer
                 patched_answer = f"{uncertainty_template}\n\n{answer}"
                 logger.warning("⚠️ Forced uncertainty expression due to low context quality")
