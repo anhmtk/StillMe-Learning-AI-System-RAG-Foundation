@@ -152,49 +152,90 @@ def classify_philosophical_intent(text: str) -> QuestionType:
             return QuestionType.MIXED
         return QuestionType.MIXED
     
-    # Special handling: Questions with "hiểu" should prioritize Type C
-    # Even if they mention "ý thức", if "hiểu" appears, it's about understanding
-    has_understanding_keyword = any(re.search(pattern, text_lower) for pattern in [
-        r"\bhiểu\b",
-        r"\bunderstand\b",
-        r"\blàm\s+sao\s+.*\s+hiểu\b",
-        r"\bhow\s+.*\s+understand\b",
-        r"\btheo\s+nghĩa\s+nào\s+.*\s+hiểu\b",  # "theo nghĩa nào ... hiểu"
-        r"\bin\s+what\s+sense\s+.*\s+understand\b",  # "in what sense ... understand"
-    ])
+    # AUTOMATIC HEURISTIC-BASED CLASSIFICATION
+    # Instead of hardcoding each pattern, use heuristics to automatically handle edge cases
     
-    # CRITICAL: If question contains "hiểu" (understanding keyword), prioritize Type C
-    # Even if it also mentions "ý thức" (consciousness), the question is about HOW understanding works
-    if has_understanding_keyword:
-        # Check for specific patterns that indicate understanding question
-        understanding_patterns = [
-            r"làm\s+sao.*hiểu",  # "làm sao ... hiểu"
-            r"how.*understand",  # "how ... understand"
-            r"theo\s+nghĩa\s+nào.*hiểu",  # "theo nghĩa nào ... hiểu"
-            r"in\s+what\s+sense.*understand",  # "in what sense ... understand"
-        ]
+    # Heuristic 1: Position-based priority
+    # The keyword that appears LATER in the question is usually the focus
+    # Example: "Nếu không có ý thức, bạn làm sao hiểu được?" → "hiểu" is focus
+    keyword_positions = {}
+    for qtype, keywords_list in [
+        (QuestionType.CONSCIOUSNESS, consciousness_keywords),
+        (QuestionType.EMOTION, emotion_keywords),
+        (QuestionType.UNDERSTANDING, understanding_keywords),
+    ]:
+        positions = []
+        for pattern in keywords_list:
+            match = re.search(pattern, text_lower)
+            if match:
+                positions.append(match.start())
+        if positions:
+            keyword_positions[qtype] = max(positions)  # Latest position
+    
+    # Heuristic 2: Proximity to question words
+    # Keywords closer to question words (nào, sao, gì, how, what) are more important
+    question_word_patterns = [
+        r"\bnào\b", r"\bsao\b", r"\bgì\b", r"\bhow\b", r"\bwhat\b",
+        r"\btheo\s+nghĩa\s+nào\b", r"\blàm\s+sao\b", r"\bin\s+what\s+sense\b"
+    ]
+    question_word_positions = [m.start() for pattern in question_word_patterns 
+                              for m in re.finditer(pattern, text_lower)]
+    
+    # Heuristic 3: If multiple types have scores, use heuristics to decide
+    if len([s for s in [consciousness_score, emotion_score, understanding_score] if s > 0]) > 1:
+        # Multiple types detected - use heuristics
         
-        # If any understanding pattern matches, it's Type C
-        if any(re.search(pattern, text_lower) for pattern in understanding_patterns):
-            return QuestionType.UNDERSTANDING
-        
-        # Even without specific pattern, if "hiểu" appears and understanding_score > 0,
-        # prioritize Type C over Type A (consciousness)
-        if understanding_score > 0:
-            # If understanding_score >= consciousness_score, it's Type C
-            # This handles cases like "Nếu không có ý thức, bạn làm sao hiểu được?"
-            if understanding_score >= consciousness_score:
-                return QuestionType.UNDERSTANDING
-            # Even if consciousness_score is higher, if "hiểu" is the main question word,
-            # it's still about understanding
-            # Check if "hiểu" appears after "ý thức" (indicating question is about understanding, not consciousness)
-            if "ý thức" in text_lower and "hiểu" in text_lower:
-                # Find positions
-                consciousness_pos = text_lower.find("ý thức")
-                understanding_pos = text_lower.find("hiểu")
-                # If "hiểu" comes after "ý thức", question is about understanding
-                if understanding_pos > consciousness_pos:
+        # Priority 1: If understanding keyword appears after consciousness keyword, it's about understanding
+        if understanding_score > 0 and consciousness_score > 0:
+            if QuestionType.UNDERSTANDING in keyword_positions and QuestionType.CONSCIOUSNESS in keyword_positions:
+                if keyword_positions[QuestionType.UNDERSTANDING] > keyword_positions[QuestionType.CONSCIOUSNESS]:
                     return QuestionType.UNDERSTANDING
+        
+        # Priority 2: If keyword is close to question word, it's the focus
+        if question_word_positions:
+            min_distance = float('inf')
+            closest_type = None
+            for qtype, pos in keyword_positions.items():
+                for qw_pos in question_word_positions:
+                    distance = abs(pos - qw_pos)
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_type = qtype
+            if closest_type and min_distance < 50:  # Within 50 chars
+                return closest_type
+        
+        # Priority 3: If understanding keyword appears, and it's in a question structure, prioritize it
+        understanding_keywords_list = [r"\bhiểu\b", r"\bunderstand\b"]
+        for pattern in understanding_keywords_list:
+            match = re.search(pattern, text_lower)
+            if match:
+                # Check if it's in a question context (near question words or at end)
+                understanding_pos = match.start()
+                # If near question word or in second half of sentence
+                if any(abs(understanding_pos - qw_pos) < 30 for qw_pos in question_word_positions) or \
+                   understanding_pos > len(text_lower) / 2:
+                    if understanding_score > 0:
+                        return QuestionType.UNDERSTANDING
+        
+        # Priority 4: If scores are equal, use position (later = more important)
+        max_score = max(consciousness_score, emotion_score, understanding_score)
+        types_with_max_score = [
+            (QuestionType.CONSCIOUSNESS, consciousness_score),
+            (QuestionType.EMOTION, emotion_score),
+            (QuestionType.UNDERSTANDING, understanding_score),
+        ]
+        types_with_max_score = [(t, s) for t, s in types_with_max_score if s == max_score]
+        
+        if len(types_with_max_score) > 1:
+            # Multiple types with same score - pick the one with latest position
+            latest_type = None
+            latest_pos = -1
+            for qtype, score in types_with_max_score:
+                if qtype in keyword_positions and keyword_positions[qtype] > latest_pos:
+                    latest_pos = keyword_positions[qtype]
+                    latest_type = qtype
+            if latest_type:
+                return latest_type
     
     # Determine type based on scores
     scores = {
