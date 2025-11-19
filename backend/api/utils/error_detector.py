@@ -45,7 +45,12 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
         r"openai api error",
         r"deepseek api error",
         r"claude api error",
+        r"gemini api error",
+        r"ollama api error",
         r"api error:",
+        r"api returned.*error",  # Catch "API returned unexpected response format" etc.
+        r"api returned.*empty",  # Catch "API returned empty or None content" etc.
+        r"api returned.*unexpected",  # Catch "API returned unexpected response format" etc.
         r"http/1\.1 \d{3}",
         r"bad request",
         r"internal server error",
