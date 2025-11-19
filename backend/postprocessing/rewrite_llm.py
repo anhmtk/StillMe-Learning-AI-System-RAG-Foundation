@@ -80,28 +80,28 @@ class RewriteLLM:
                 )
                 
                 async with httpx.AsyncClient(timeout=timeout_duration) as client:
-                response = await client.post(
-                    self.deepseek_base_url,
-                    headers={
-                        "Authorization": f"Bearer {self.deepseek_api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": "deepseek-chat",
-                        "messages": [
-                            {
-                                "role": "system",
-                                "content": self._build_system_prompt(is_philosophical, detected_lang)
-                            },
-                            {
-                                "role": "user",
-                                "content": rewrite_prompt
-                            }
-                        ],
-                        "max_tokens": 2000,
-                        "temperature": 0.7
-                    }
-                )
+                    response = await client.post(
+                        self.deepseek_base_url,
+                        headers={
+                            "Authorization": f"Bearer {self.deepseek_api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": "deepseek-chat",
+                            "messages": [
+                                {
+                                    "role": "system",
+                                    "content": self._build_system_prompt(is_philosophical, detected_lang)
+                                },
+                                {
+                                    "role": "user",
+                                    "content": rewrite_prompt
+                                }
+                            ],
+                            "max_tokens": 2000,
+                            "temperature": 0.7
+                        }
+                    )
                 
                 if response.status_code == 200:
                     try:
