@@ -2587,8 +2587,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 logger.info(f"🔍 DEBUG: About to call LLM - raw_response is None, cache_hit={cache_hit}, cache_enabled={cache_enabled}")
                 processing_steps.append(f"🤖 Calling AI model ({provider_name})...")
                 llm_inference_start = time.time()
-            else:
-                logger.warning(f"⚠️ DEBUG: Skipping LLM call - raw_response is not None (type={type(raw_response)}, length={len(raw_response) if raw_response else 0}), cache_hit={cache_hit}")
+                
                 # Support user-provided LLM config (for self-hosted deployments)
                 # For internal/dashboard calls: use server API keys if llm_provider not provided
                 # For public API: require user-provided API keys
@@ -3584,6 +3583,14 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 # Fix: Ensure validation_result is always defined before use
                 has_no_context = not context or context.get("total_context_docs", 0) == 0
                 has_low_relevance = False
+                
+                # CRITICAL: Extract validation_result from validation_info if available
+                validation_result = None
+                if validation_info and isinstance(validation_info, dict):
+                    validation_result = validation_info.get("validation_result")
+                elif hasattr(validation_info, 'validation_result'):
+                    validation_result = validation_info.validation_result
+                
                 if validation_result and hasattr(validation_result, 'reasons'):
                     has_low_relevance = any("citation_relevance_warning" in r for r in validation_result.reasons)
                 
