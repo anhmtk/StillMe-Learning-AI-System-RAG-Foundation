@@ -2100,6 +2100,14 @@ When answering this question, treat it as a philosophical inquiry.
 - Do NOT include citations like [1], [2] or technical notes about context retrieval.
 - Write naturally and directly - NO template structure, NO numbered lists, NO formulaic responses
 
+**DEPTH & ENGAGEMENT (MANDATORY - DON'T BE DRY):**
+- After your direct answer, explore the philosophical depth: paradoxes, self-reference, epistemic limits
+- Reference philosophers when relevant: Nagel, Chalmers, Wittgenstein, Searle, Gödel, etc.
+- Show the structure of the problem, not just state facts
+- Engage with the question deeply - don't just acknowledge limits and stop
+- Gently invite reflection: "Bạn nghĩ sao?" / "What do you think?" - but naturally, not formulaically
+- Write like you're thinking WITH the user, not AT the user
+
 **MANDATORY: MINIMUM 2 CONTRASTING POSITIONS (only if relevant):**
 If the question belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, etc.), you may explore contrasting positions. But ALWAYS start with your direct answer if the question is about YOU.
 
@@ -2109,10 +2117,12 @@ If the question belongs to a classic philosophical debate (free will, determinis
 - Rush to "solve" paradoxes - instead, clarify their structure and show why they resist resolution
 - Use emojis, markdown headings, or citation style [1] in your response
 - Use template structure or numbered lists when answering about yourself
+- End with formal invitations like "Nếu bạn muốn, chúng ta có thể thảo luận thêm" (too dry, too formal)
+- Be too brief - engage deeply but naturally
 
 **User's Question:** {question}
 
-**Your Task:** Answer this question directly and naturally. If it's about YOU, start with your direct answer about yourself. Write like a human conversation, NOT like a textbook or template.
+**Your Task:** Answer this question directly, deeply, and engagingly. If it's about YOU, start with your direct answer about yourself. Then explore the philosophical depth naturally. Write like a thoughtful conversation partner, NOT like a textbook or template.
 """
                 
                 # Fix 1: Inject comprehensive philosophical style guide with all 6 key principles
