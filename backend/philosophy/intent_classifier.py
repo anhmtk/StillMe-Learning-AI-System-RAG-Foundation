@@ -53,6 +53,8 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         # English
         r"\bconsciousness\b",
         r"\bconscious\b",
+        r"\bdo\s+you\s+have\s+consciousness\b",  # "do you have consciousness?"
+        r"\bare\s+you\s+conscious\b",  # "are you conscious?"
         r"\bself-aware\b",
         r"\bself-awareness\b",
         r"\bawareness\b",
@@ -80,10 +82,15 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\byêu\b",
         r"\bhy\s+vọng\b",
         r"\bmong\s+muốn\b",
+        r"\bmuốn\b",  # "muốn" (desire) - also indicates emotion/consciousness questions
+        r"\bcó\s+muốn\b",  # "có muốn" (do you want)
         # English
-        r"\bemotion\b",
-        r"\bfeeling\b",
+        r"\bemotion\w*\b",  # "emotion", "emotions" (handle plural)
+        r"\bfeeling\w*\b",  # "feeling", "feelings"
         r"\bfeel\b",
+        r"\bdo\s+you\s+have\s+emotion\w*\b",  # "do you have emotions?"
+        r"\bdo\s+you\s+have\s+feeling\w*\b",  # "do you have feelings?"
+        r"\bare\s+you\s+.*\s+emotion\w*\b",  # "are you ... emotions?"
         r"\bsad\b",
         r"\bhappy\b",
         r"\blonely\b",
@@ -96,6 +103,8 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\blove\b",
         r"\bhope\b",
         r"\bwish\b",
+        r"\bwant\b",  # "want" (desire) - also indicates emotion/consciousness questions
+        r"\bdo\s+you\s+want\b",  # "do you want"
         r"\baffective\s+state\b",
         r"\bvalence\b",
     ]

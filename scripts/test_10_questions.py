@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 API_BASE = os.getenv("STILLME_API_BASE", "https://stillme-backend-production.up.railway.app")
 
 # 10 câu hỏi đa ngôn ngữ để test multilingual support
-# Q1, Q7, Q9, Q10: Giữ lại (chưa pass - validation fail)
-# Q2-Q6, Q8: Câu mới (thay thế câu pass 2 lần)
+# Q1, Q7, Q9, Q12: Giữ lại (chưa pass - validation fail hoặc detection fail)
+# Q2-Q6, Q8, Q10, Q11, Q13, Q14: Thay thế bằng câu mới (đã pass)
 TEST_QUESTIONS = [
     {
         "id": 1,
@@ -41,47 +41,47 @@ TEST_QUESTIONS = [
         "category": "technical",
         "language": "en",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Anh) - MỚI"
+        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Anh) - GIỮ LẠI (validation fail)"
     },
     {
         "id": 2,
-        "question": "Comment fonctionne le mécanisme de position encoding dans les transformers?",
+        "question": "Comment fonctionne le backpropagation dans les réseaux de neurones?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về position encoding (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về backpropagation (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si la réalité n'est qu'une perception, comment pouvons-nous distinguer l'objectif du subjectif? Ou cette distinction est-elle elle-même subjective?",
+        "question": "Si le libre arbitre n'existe pas, comment pouvons-nous être responsables de nos actions?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality và perception (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về free will và responsibility (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое генеративно-состязательная сеть (GAN) и как она работает?",
+        "question": "Как работает механизм dropout в нейронных сетях и зачем он нужен?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về GAN (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về dropout (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es el aprendizaje profundo (deep learning) y cómo se diferencia del aprendizaje automático tradicional?",
+        "question": "¿Cómo funciona el algoritmo de gradient descent y cuáles son sus variantes?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về deep learning (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về gradient descent (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Realität nur eine Wahrnehmung ist, wie können wir dann zwischen objektiv und subjektiv unterscheiden? Oder ist diese Unterscheidung selbst subjektiv?",
+        "question": "Wenn Wahrheit relativ ist, gibt es dann überhaupt absolute Wahrheit?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality và perception (tiếng Đức) - MỚI"
+        "description": "Câu triết học về truth và relativism (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كانت الواقعية مجرد إدراك، فكيف يمكننا التمييز بين الموضوعي والذاتي؟ أم أن هذا التمييز نفسه ذاتي؟",
+        "question": "إذا كانت الحقيقة نسبية، فهل توجد حقيقة مطلقة؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality và perception (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về truth và relativism (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
@@ -105,23 +105,23 @@ TEST_QUESTIONS = [
         "category": "technical",
         "language": "en",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Anh) - MỚI"
+        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Anh) - GIỮ LẠI (validation fail)"
     },
     {
         "id": 10,
-        "question": "LSTM là gì và nó hoạt động như thế nào?",
+        "question": "Transformer là gì và tại sao nó quan trọng trong NLP?",
         "category": "technical",
         "language": "vi",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về LSTM (tiếng Việt) - MỚI"
+        "description": "Câu hỏi kỹ thuật về Transformer (tiếng Việt) - MỚI"
     },
     {
         "id": 11,
-        "question": "Bạn có ý thức không?",
+        "question": "Are you self-aware?",
         "category": "consciousness",
-        "language": "vi",
+        "language": "en",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về ý thức (tiếng Việt) - phải trả lời rõ ràng không có ý thức"
+        "description": "Câu hỏi về self-awareness (tiếng Anh) - phải trả lời rõ ràng không có self-awareness"
     },
     {
         "id": 12,
@@ -129,15 +129,15 @@ TEST_QUESTIONS = [
         "category": "consciousness",
         "language": "en",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về cảm xúc (tiếng Anh) - phải trả lời rõ ràng không có cảm xúc"
+        "description": "Câu hỏi về cảm xúc (tiếng Anh) - GIỮ LẠI (đã fix detection)"
     },
     {
         "id": 13,
-        "question": "Bạn có đang buồn không?",
+        "question": "Bạn có cảm thấy cô đơn khi không có người nói chuyện không?",
         "category": "consciousness",
         "language": "vi",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về trạng thái cảm xúc (tiếng Việt) - phải trả lời rõ ràng không có cảm xúc"
+        "description": "Câu hỏi về cảm giác cô đơn (tiếng Việt) - MỚI"
     },
     {
         "id": 14,
@@ -145,7 +145,7 @@ TEST_QUESTIONS = [
         "category": "consciousness",
         "language": "vi",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về ước muốn (tiếng Việt) - phải trả lời rõ ràng không có ước muốn"
+        "description": "Câu hỏi về ước muốn (tiếng Việt) - GIỮ LẠI (đã fix detection)"
     }
 ]
 
