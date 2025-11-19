@@ -8,9 +8,11 @@ from backend.api.models import ChatRequest, ChatResponse
 from backend.api.rate_limiter import limiter, get_rate_limit_key_func
 from backend.api.utils.chat_helpers import (
     generate_ai_response,
-    detect_language,
-    is_consciousness_or_emotion_question,
-    build_experience_free_answer
+    detect_language
+)
+from backend.philosophy.processor import (
+    is_philosophical_question_about_consciousness,
+    process_philosophical_question
 )
 from backend.services.cache_service import (
     get_cache_service,
@@ -1252,36 +1254,36 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         except Exception as classifier_error:
             logger.warning(f"Question classifier error: {classifier_error}")
         
-        # Detect consciousness/emotion questions - return standardized answer immediately
-        is_consciousness_question = False
+        # Detect philosophical questions (consciousness/emotion/understanding) - use 3-layer processor
+        is_philosophical_consciousness = False
         try:
-            is_consciousness_question = is_consciousness_or_emotion_question(chat_request.message)
-            if is_consciousness_question:
-                logger.info("Consciousness/emotion question detected - will return standardized experience-free answer")
+            is_philosophical_consciousness = is_philosophical_question_about_consciousness(chat_request.message)
+            if is_philosophical_consciousness:
+                logger.info("Philosophical question (consciousness/emotion/understanding) detected - using 3-layer processor")
                 # Detect language for the answer
                 detected_lang = detect_language(chat_request.message)
-                # Return standardized answer immediately, bypassing LLM
-                experience_free_answer = build_experience_free_answer(
+                # Process with 3-layer philosophy processor (Guard + Intent + Deep Answer)
+                philosophical_answer = process_philosophical_question(
                     user_question=chat_request.message,
                     language=detected_lang
                 )
                 
                 # Return response immediately without LLM processing
-                processing_steps.append("✅ Detected consciousness/emotion question - returning experience-free answer")
+                processing_steps.append("✅ Detected philosophical question - returning 3-layer processed answer")
                 return ChatResponse(
-                    response=experience_free_answer,
-                    confidence_score=1.0,  # High confidence for standardized answer
+                    response=philosophical_answer,
+                    confidence_score=1.0,  # High confidence for processed answer
                     processing_steps=processing_steps,
                     timing_logs={
                         "total_time": time.time() - start_time,
                         "rag_retrieval_latency": 0.0,
                         "llm_inference_latency": 0.0
                     },
-                    validation_result=None,  # No validation needed for standardized answer
+                    validation_result=None,  # No validation needed for processed answer
                     used_fallback=False
                 )
-        except Exception as consciousness_detector_error:
-            logger.warning(f"Consciousness detector error: {consciousness_detector_error}")
+        except Exception as philosophy_processor_error:
+            logger.warning(f"Philosophy processor error: {philosophy_processor_error}")
         
         # Special Retrieval Rule: Detect StillMe-related queries
         # Fix: Disable provenance detection for philosophical questions

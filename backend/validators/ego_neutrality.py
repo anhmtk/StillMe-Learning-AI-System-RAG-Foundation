@@ -220,21 +220,47 @@ class EgoNeutralityValidator:
                 detected_phrases.extend(matches)
         
         # Check for consciousness/emotion violation patterns if user question is about consciousness/emotions
+        # NOTE: If question was processed by philosophy_processor, skip strict validation to avoid mode collapse
+        # The processor already ensures non-anthropomorphic answers
         if user_question:
             try:
-                from backend.api.utils.chat_helpers import is_consciousness_or_emotion_question
-                if is_consciousness_or_emotion_question(user_question):
-                    # Check for prohibited ambiguous phrases about consciousness/emotions
-                    for pattern in self.compiled_consciousness_patterns:
-                        matches = pattern.findall(answer_lower)
-                        if matches:
-                            detected_phrases.extend(matches)
+                from backend.philosophy.processor import is_philosophical_question_about_consciousness
+                is_philosophical = is_philosophical_question_about_consciousness(user_question)
+                
+                if is_philosophical:
+                    # For philosophical questions processed by philosophy_processor, only check for obvious violations
+                    # Don't be too strict to avoid mode collapse - processor already handles guard statements
+                    logger.debug("Philosophical question detected - using relaxed validation to avoid mode collapse")
+                    # Only flag if answer contains obvious anthropomorphic claims (not philosophical discussions)
+                    obvious_violations = [
+                        r"\btôi\s+có\s+ý\s+thức\b",  # "I have consciousness"
+                        r"\btôi\s+có\s+cảm\s+xúc\b",  # "I have emotions"
+                        r"\bi\s+have\s+consciousness\b",
+                        r"\bi\s+have\s+emotions\b",
+                        r"\bi\s+feel\s+[a-z]+\b",  # "I feel X"
+                        r"\btôi\s+cảm\s+thấy\s+[a-z]+\b",  # "I feel X"
+                    ]
+                    for pattern in obvious_violations:
+                        if re.search(pattern, answer_lower):
+                            detected_phrases.append(pattern)
                             logger.warning(
-                                f"Ego-Neutrality Validator detected consciousness/emotion ambiguity: {matches}. "
-                                f"This violates Experience-Free Communication Protocol - StillMe must be clear and direct."
+                                f"Ego-Neutrality Validator detected obvious anthropomorphic claim in philosophical answer: {pattern}"
                             )
+                else:
+                    # For non-philosophical questions, use old strict validation
+                    from backend.api.utils.chat_helpers import is_consciousness_or_emotion_question
+                    if is_consciousness_or_emotion_question(user_question):
+                        # Check for prohibited ambiguous phrases about consciousness/emotions
+                        for pattern in self.compiled_consciousness_patterns:
+                            matches = pattern.findall(answer_lower)
+                            if matches:
+                                detected_phrases.extend(matches)
+                                logger.warning(
+                                    f"Ego-Neutrality Validator detected consciousness/emotion ambiguity: {matches}. "
+                                    f"This violates Experience-Free Communication Protocol - StillMe must be clear and direct."
+                                )
             except ImportError:
-                logger.debug("chat_helpers not available, skipping consciousness question detection")
+                logger.debug("Philosophy processor or chat_helpers not available, using fallback validation")
             except Exception as e:
                 logger.warning(f"Error checking consciousness question: {e}")
         
