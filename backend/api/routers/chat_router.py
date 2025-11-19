@@ -2497,6 +2497,20 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         use_server_keys=use_server_keys
                     )
                     
+                    # CRITICAL: Check if raw_response is an error message BEFORE validation
+                    # This prevents error messages from passing through validators
+                    if raw_response and isinstance(raw_response, str):
+                        from backend.api.utils.error_detector import is_technical_error
+                        is_error, error_type = is_technical_error(raw_response)
+                        if is_error:
+                            logger.error(
+                                f"❌ LLM returned technical error as response (type: {error_type}): {raw_response[:200]}. "
+                                f"Question: {chat_request.message[:100]}"
+                            )
+                            from backend.api.utils.error_detector import get_fallback_message_for_error
+                            raw_response = get_fallback_message_for_error(error_type, detected_lang)
+                            processing_steps.append(f"⚠️ LLM returned technical error - replaced with fallback message")
+                    
                     # CRITICAL: Validate raw_response immediately after LLM call
                     if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
                         logger.error(f"⚠️ LLM returned None or empty response for question: {chat_request.message[:100]}")
@@ -2539,6 +2553,18 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         from backend.api.utils.error_detector import get_fallback_message_for_error
                         raw_response = get_fallback_message_for_error("context_overflow", detected_lang)
                         processing_steps.append("⚠️ Context overflow - using fallback message")
+                except ValueError as ve:
+                    # ValueError from generate_ai_response (missing API keys, etc.)
+                    logger.error(f"❌ ValueError from generate_ai_response: {ve}")
+                    from backend.api.utils.error_detector import get_fallback_message_for_error
+                    raw_response = get_fallback_message_for_error("generic", detected_lang)
+                    processing_steps.append("⚠️ LLM configuration error - using fallback message")
+                except Exception as e:
+                    # Catch any other unexpected exceptions (must be after ContextOverflowError)
+                    logger.error(f"❌ Unexpected exception from generate_ai_response: {e}", exc_info=True)
+                    from backend.api.utils.error_detector import get_fallback_message_for_error
+                    raw_response = get_fallback_message_for_error("generic", detected_lang)
+                    processing_steps.append("⚠️ LLM call exception - using fallback message")
                 llm_inference_end = time.time()
                 llm_inference_latency = llm_inference_end - llm_inference_start
                 timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
