@@ -2487,6 +2487,13 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 # Try to generate response with retry on context overflow
                 from backend.api.utils.llm_providers import ContextOverflowError
                 try:
+                    # CRITICAL: Log RAG context info before LLM call to help debug Q1, Q2, Q7, Q9
+                    logger.info(
+                        f"🔍 DEBUG Q1/Q2/Q7/Q9: About to call LLM with RAG context. "
+                        f"num_knowledge={num_knowledge}, context_text_length={len(context_text) if context_text else 0}, "
+                        f"enhanced_prompt_length={len(enhanced_prompt) if enhanced_prompt else 0}"
+                    )
+                    
                     raw_response = await generate_ai_response(
                         enhanced_prompt, 
                         detected_lang=detected_lang,
@@ -2495,6 +2502,16 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         llm_api_url=chat_request.llm_api_url,
                         llm_model_name=chat_request.llm_model_name,
                         use_server_keys=use_server_keys
+                    )
+                    
+                    # CRITICAL: Log raw_response immediately after LLM call
+                    logger.info(
+                        f"🔍 DEBUG Q1/Q2/Q7/Q9: LLM call completed. "
+                        f"raw_response type={type(raw_response)}, "
+                        f"is None={raw_response is None}, "
+                        f"is str={isinstance(raw_response, str)}, "
+                        f"length={len(raw_response) if raw_response else 0}, "
+                        f"preview={raw_response[:200] if raw_response else 'None'}"
                     )
                     
                     # CRITICAL: Check if raw_response is an error message BEFORE validation
@@ -2513,7 +2530,10 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     
                     # CRITICAL: Validate raw_response immediately after LLM call
                     if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
-                        logger.error(f"⚠️ LLM returned None or empty response for question: {chat_request.message[:100]}")
+                        logger.error(
+                            f"⚠️ LLM returned None or empty response for question: {chat_request.message[:100]}. "
+                            f"num_knowledge={num_knowledge}, context_text_length={len(context_text) if context_text else 0}"
+                        )
                         from backend.api.utils.error_detector import get_fallback_message_for_error
                         raw_response = get_fallback_message_for_error("generic", detected_lang)
                         processing_steps.append("⚠️ LLM returned empty response - using fallback")

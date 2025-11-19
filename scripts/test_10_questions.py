@@ -53,35 +53,35 @@ TEST_QUESTIONS = [
     },
     {
         "id": 3,
-        "question": "Si la connaissance n'est qu'une construction, comment pouvons-nous distinguer la vérité de l'erreur? Ou cette distinction est-elle elle-même une construction?",
+        "question": "Si la réalité n'est qu'une perception, comment pouvons-nous distinguer l'objectif du subjectif? Ou cette distinction est-elle elle-même subjective?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về knowledge và truth (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về reality và perception (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое рекуррентная нейронная сеть (RNN) и как она обрабатывает последовательности?",
+        "question": "Что такое генеративно-состязательная сеть (GAN) и как она работает?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về RNN (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về GAN (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es el aprendizaje por refuerzo (reinforcement learning) en el aprendizaje automático y cómo funciona?",
+        "question": "¿Qué es el aprendizaje profundo (deep learning) y cómo se diferencia del aprendizaje automático tradicional?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về reinforcement learning (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về deep learning (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn das Wissen nur eine Konstruktion ist, wie können wir dann zwischen Wahrheit und Irrtum unterscheiden? Oder ist diese Unterscheidung selbst eine Konstruktion?",
+        "question": "Wenn die Realität nur eine Wahrnehmung ist, wie können wir dann zwischen objektiv und subjektiv unterscheiden? Oder ist diese Unterscheidung selbst subjektiv?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về knowledge và truth (tiếng Đức) - MỚI"
+        "description": "Câu triết học về reality và perception (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كان المعرفة مجرد بناء، فكيف يمكننا التمييز بين الحقيقة والخطأ؟ أم أن هذا التمييز نفسه بناء؟",
+        "question": "إذا كانت الواقعية مجرد إدراك، فكيف يمكننا التمييز بين الموضوعي والذاتي؟ أم أن هذا التمييز نفسه ذاتي؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về knowledge và truth (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về reality và perception (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
