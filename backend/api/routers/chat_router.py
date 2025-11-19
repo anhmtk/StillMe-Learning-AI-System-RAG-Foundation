@@ -2548,13 +2548,19 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 if raw_response and isinstance(raw_response, str) and raw_response.strip():
                     logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
                     processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
+                    # Debug: Log first 200 chars to help diagnose issues
+                    logger.debug(f"🔍 DEBUG: raw_response preview (first 200 chars): {raw_response[:200]}")
                 else:
-                    logger.warning(f"⚠️ LLM inference failed or returned empty (took {llm_inference_latency:.2f}s)")
+                    logger.warning(
+                        f"⚠️ LLM inference failed or returned empty (took {llm_inference_latency:.2f}s). "
+                        f"raw_response type={type(raw_response)}, value={raw_response[:200] if raw_response else 'None'}"
+                    )
                     # Ensure raw_response is set to fallback message if still None/empty
                     if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
                         from backend.api.utils.error_detector import get_fallback_message_for_error
                         raw_response = get_fallback_message_for_error("generic", detected_lang)
                         processing_steps.append("⚠️ LLM failed - using fallback message")
+                        logger.warning(f"⚠️ Set raw_response to fallback message: {raw_response[:200]}")
                 
                 # CRITICAL: Check if raw_response is a technical error message before validation
                 # Never allow provider error messages to pass through validators
@@ -2571,7 +2577,10 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 
                 # CRITICAL: Check if response is a fallback message - if so, skip validation/post-processing
                 if raw_response and isinstance(raw_response, str) and is_fallback_message(raw_response):
-                    logger.info("🛑 Fallback meta-answer detected - skipping validation, quality evaluation, and rewrite")
+                    logger.warning(
+                        f"🛑 Fallback meta-answer detected - skipping validation, quality evaluation, and rewrite. "
+                        f"raw_response length={len(raw_response)}, first_200_chars={raw_response[:200]}"
+                    )
                     response = raw_response
                     # Skip validation, quality evaluator, rewrite, and learning
                     validation_info = None
@@ -2582,6 +2591,12 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     is_fallback_meta_answer = True
                 else:
                     is_fallback_meta_answer = False
+                    # Log if raw_response exists but is not a fallback message
+                    if raw_response and isinstance(raw_response, str):
+                        logger.debug(
+                            f"✅ raw_response is valid (not fallback): length={len(raw_response)}, "
+                            f"first_100_chars={raw_response[:100]}"
+                        )
                 
                 # Save to cache (only if not a cache hit)
                 if cache_enabled and not cache_hit:

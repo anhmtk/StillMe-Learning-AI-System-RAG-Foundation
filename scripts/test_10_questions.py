@@ -53,35 +53,35 @@ TEST_QUESTIONS = [
     },
     {
         "id": 3,
-        "question": "Si le temps n'est qu'une illusion, comment pouvons-nous distinguer le passé du futur? Ou cette distinction est-elle elle-même une illusion?",
+        "question": "Si la causalité n'existe pas, comment pouvons-nous expliquer les événements? Ou l'explication elle-même est-elle une illusion?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về time và temporal distinction (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về causality và explanation (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое автокодировщики (autoencoders) и как они работают для сжатия данных?",
+        "question": "Что такое перцептрон (perceptron) и как он работает для классификации?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về autoencoders (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về perceptron (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es el early stopping en el aprendizaje automático y cómo previene el sobreajuste?",
+        "question": "¿Qué es la validación cruzada (cross-validation) en el aprendizaje automático y cómo previene el sobreajuste?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về early stopping (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về cross-validation (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Zeit nur eine Illusion ist, wie können wir dann zwischen Vergangenheit und Zukunft unterscheiden? Oder ist diese Unterscheidung selbst eine Illusion?",
+        "question": "Wenn die Kausalität nicht existiert, wie können wir dann Ereignisse erklären? Oder ist die Erklärung selbst eine Illusion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về time và temporal distinction (tiếng Đức) - MỚI"
+        "description": "Câu triết học về causality và explanation (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كان الوقت مجرد وهم، فكيف يمكننا التمييز بين الماضي والمستقبل؟ أم أن هذا التمييز نفسه وهم؟",
+        "question": "إذا لم تكن هناك علاقة سببية، فكيف يمكننا تفسير الأحداث؟ أم أن التفسير نفسه وهم؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về time và temporal distinction (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về causality và explanation (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
