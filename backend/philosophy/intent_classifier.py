@@ -27,6 +27,9 @@ def classify_philosophical_intent(text: str) -> QuestionType:
     - Type B (EMOTION): Questions about emotions, feelings, affective states
     - Type C (UNDERSTANDING): Questions about understanding, meaning, comprehension
     
+    CRITICAL: Only classify as philosophical if question is about StillMe's OWN consciousness/emotions,
+    NOT about consciousness/emotions as scientific concepts, theories, or research topics.
+    
     Args:
         text: User's question text
         
@@ -37,6 +40,92 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         return QuestionType.UNKNOWN
     
     text_lower = text.lower().strip()
+    
+    # CRITICAL: Exclude questions about consciousness/emotions as SCIENTIFIC CONCEPTS or THEORIES
+    # These are NOT questions about StillMe's own consciousness/emotions
+    scientific_concept_indicators = [
+        # Theory/research patterns
+        r"\blý\s+thuyết\b",  # "lý thuyết"
+        r"\btheory\b",  # "theory"
+        r"\bresearch\b",  # "research"
+        r"\bstudy\b",  # "study"
+        r"\bstudies\b",  # "studies"
+        r"\bđề\s+xuất\b",  # "đề xuất" (proposed)
+        r"\bproposed\b",  # "proposed"
+        r"\bpropose\b",  # "propose"
+        r"\bconcept\b",  # "concept"
+        r"\bkhái\s+niệm\b",  # "khái niệm"
+        r"\bfield\b",  # "field" (e.g., "consciousness field")
+        r"\btrường\b",  # "trường" (e.g., "trường ý thức")
+        r"\bmodel\b",  # "model"
+        r"\bframework\b",  # "framework"
+        r"\bhypothesis\b",  # "hypothesis"
+        r"\bgiả\s+thuyết\b",  # "giả thuyết"
+        # Author/researcher patterns
+        r"\bdr\.\b",  # "Dr."
+        r"\bdoctor\b",  # "doctor"
+        r"\bprofessor\b",  # "professor"
+        r"\bprof\.\b",  # "Prof."
+        r"\bph\.d\.\b",  # "Ph.D."
+        r"\btiến\s+sĩ\b",  # "tiến sĩ"
+        r"\bby\s+[a-z]+\b",  # "by [author name]"
+        r"\bdo\s+[a-z]+\b",  # "do [author name]" (Vietnamese)
+        # Publication patterns
+        r"\bbook\b",  # "book"
+        r"\bcuốn\s+sách\b",  # "cuốn sách"
+        r"\bpaper\b",  # "paper"
+        r"\barticle\b",  # "article"
+        r"\bpublication\b",  # "publication"
+        r"\bjournal\b",  # "journal"
+        r"\bđược\s+đón\s+nhận\b",  # "được đón nhận" (received/accepted)
+        r"\bđược\s+cộng\s+đồng\b",  # "được cộng đồng" (by community)
+        r"\bcommunity\b",  # "community"
+        r"\bscientific\s+community\b",  # "scientific community"
+        r"\bcộng\s+đồng\s+khoa\s+học\b",  # "cộng đồng khoa học"
+        # Year/date patterns (often indicate research/publication)
+        r"\b\d{4}\b",  # Year (e.g., "1998")
+        r"\bthập\s+kỷ\b",  # "thập kỷ" (decade)
+        r"\bdecade\b",  # "decade"
+        # Academic/scientific terms
+        r"\bacademic\b",  # "academic"
+        r"\bacademic\s+research\b",  # "academic research"
+        r"\bnghiên\s+cứu\s+học\s+thuật\b",  # "nghiên cứu học thuật"
+        r"\bimpact\b",  # "impact"
+        r"\btác\s+động\b",  # "tác động"
+        r"\bmechanism\b",  # "mechanism"
+        r"\bcơ\s+chế\b",  # "cơ chế"
+        r"\bso\s+sánh\b",  # "so sánh" (compare)
+        r"\bcompare\b",  # "compare"
+        r"\bcomparison\b",  # "comparison"
+    ]
+    
+    # Check if question is about consciousness/emotions as a SCIENTIFIC CONCEPT or THEORY
+    # If so, it's NOT about StillMe's own consciousness/emotions - return UNKNOWN
+    has_scientific_indicator = any(re.search(pattern, text_lower) for pattern in scientific_concept_indicators)
+    
+    # Also check for personal pronouns that indicate question is about StillMe
+    personal_pronouns_about_stillme = [
+        r"\bbạn\b",  # "bạn" (you)
+        r"\byou\b",  # "you"
+        r"\byour\b",  # "your"
+        r"\bstillme\b",  # "StillMe"
+        r"\bstill\s+me\b",  # "Still Me"
+        r"\btôi\b",  # "tôi" (I - when StillMe refers to itself)
+        r"\bi\b",  # "I" (when StillMe refers to itself)
+        r"\bdo\s+you\b",  # "do you"
+        r"\bare\s+you\b",  # "are you"
+        r"\bcan\s+you\b",  # "can you"
+        r"\bbạn\s+có\b",  # "bạn có" (do you have)
+        r"\bbạn\s+là\b",  # "bạn là" (you are)
+    ]
+    
+    has_personal_pronoun = any(re.search(pattern, text_lower) for pattern in personal_pronouns_about_stillme)
+    
+    # If question has scientific indicators but NO personal pronouns about StillMe,
+    # it's about consciousness/emotions as a CONCEPT, not about StillMe - return UNKNOWN
+    if has_scientific_indicator and not has_personal_pronoun:
+        logger.debug(f"Question about consciousness/emotion as scientific concept, not about StillMe: {text[:100]}")
+        return QuestionType.UNKNOWN
     
     # Type A - Consciousness keywords
     consciousness_keywords = [
@@ -264,6 +353,7 @@ def classify_philosophical_intent(text: str) -> QuestionType:
     high_scores = [k for k, v in scores.items() if v == max_score]
     if len(high_scores) > 1 and max_score > 0:
         # If understanding is one of them and "hiểu" appears, prioritize understanding
+        has_understanding_keyword = any(re.search(r"\bhiểu\b|\bunderstand\b", text_lower))
         if QuestionType.UNDERSTANDING in high_scores and has_understanding_keyword:
             return QuestionType.UNDERSTANDING
         return QuestionType.MIXED
