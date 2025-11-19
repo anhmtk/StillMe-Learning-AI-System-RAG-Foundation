@@ -21,6 +21,7 @@ from backend.services.cache_service import (
 )
 import logging
 import os
+import re
 from datetime import datetime, timezone
 from typing import Optional
 import json
@@ -104,6 +105,102 @@ def _get_transparency_disclaimer(detected_lang: str) -> str:
         'th': "⚠️ หมายเหตุ: คำตอบนี้อิงจากความรู้ทั่วไปจากข้อมูลการฝึกอบรม โดยไม่มีบริบท RAG ฉันไม่แน่ใจเกี่ยวกับความแม่นยำ\n\n",
     }
     return disclaimers.get(detected_lang, "⚠️ Note: This answer is based on general knowledge from training data, not from RAG context. I'm not certain about its accuracy.\n\n")
+
+def _is_factual_question(question: str) -> bool:
+    """
+    Detect if a question is about factual/historical/scientific topics.
+    
+    These questions require reliable sources and should trigger hallucination guard
+    when no context is available and confidence is low.
+    
+    Args:
+        question: User question text
+        
+    Returns:
+        True if question is about factual topics (history, science, events, etc.)
+    """
+    question_lower = question.lower()
+    
+    # Keywords that indicate factual questions
+    factual_indicators = [
+        # History
+        r"\b(năm|year|thế kỷ|century|thập niên|decade|thời kỳ|period|era)\s+\d+",
+        r"\b(chiến tranh|war|battle|trận|conflict|cuộc|event|sự kiện)",
+        r"\b(hiệp ước|treaty|hiệp định|agreement|conference|hội nghị)",
+        r"\b(đế chế|empire|vương quốc|kingdom|quốc gia|nation|country)",
+        r"\b(tổng thống|president|vua|king|hoàng đế|emperor|chính trị gia|politician)",
+        
+        # Science
+        r"\b(lý thuyết|theory|định luật|law|nguyên lý|principle)",
+        r"\b(nghiên cứu|research|study|thí nghiệm|experiment|quan sát|observation)",
+        r"\b(phát minh|invention|khám phá|discovery|bằng sáng chế|patent)",
+        r"\b(hội chứng|syndrome|bệnh|disease|phản ứng|reaction|mechanism)",
+        r"\b(tiến sĩ|dr\.|doctor|professor|giáo sư|scientist|nhà khoa học)",
+        r"\b(paper|bài báo|journal|tạp chí|publication|công bố)",
+        
+        # Specific entities
+        r"\b(tổ chức|organization|liên minh|alliance|phong trào|movement)",
+        r"\b(hiện tượng|phenomenon|khái niệm|concept|thực thể|entity)",
+    ]
+    
+    # Check if question contains factual indicators
+    for pattern in factual_indicators:
+        if re.search(pattern, question_lower):
+            return True
+    
+    return False
+
+def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_entity: Optional[str] = None) -> str:
+    """
+    Build a safe, honest refusal answer when hallucination is detected.
+    
+    This is used when:
+    - No RAG context available
+    - Low confidence
+    - Factual question detected
+    - LLM might hallucinate
+    
+    Args:
+        question: User question
+        detected_lang: Language code
+        suspicious_entity: Optional entity/concept that triggered the guard
+        
+    Returns:
+        Safe refusal answer in appropriate language
+    """
+    # Extract entity from question if not provided
+    if not suspicious_entity:
+        # Try to extract capitalized terms or quoted terms
+        entity_match = re.search(r'"([^"]+)"|([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)', question)
+        if entity_match:
+            suspicious_entity = entity_match.group(1) or entity_match.group(2)
+        else:
+            suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
+    
+    # Build answer based on language
+    if detected_lang == "vi":
+        answer = (
+            f"Mình không tìm thấy bằng chứng đáng tin cậy nào về khái niệm/sự kiện có tên là \"{suspicious_entity}\" trong dữ liệu hiện có của mình.\n\n"
+            f"Có thể đây là:\n"
+            f"- một thuật ngữ giả định,\n"
+            f"- một khái niệm mới/chưa phổ biến,\n"
+            f"- hoặc một tên gọi khác với tên chuẩn trong tài liệu học thuật.\n\n"
+            f"Vì không có nguồn xác thực, mình **không dám khẳng định** về tác động kinh tế-xã hội hay các nghiên cứu học thuật liên quan.\n\n"
+            f"Nếu bạn có nguồn tham khảo cụ thể (link bài báo, sách, tác giả), bạn có thể gửi thêm, mình sẽ chỉ giúp phân tích nội dung dựa trên nguồn đó – chứ không tự tạo ra thông tin mới."
+        )
+    else:
+        # English fallback
+        answer = (
+            f"I cannot find reliable evidence for a concept/event named \"{suspicious_entity}\" in my current data.\n\n"
+            f"This might be:\n"
+            f"- a hypothetical term,\n"
+            f"- a new/uncommon concept,\n"
+            f"- or a different name from standard academic terminology.\n\n"
+            f"As there is no verified source, I **cannot confirm** any socio-economic impacts or related academic research.\n\n"
+            f"If you have specific references (article link, book, author), you can provide them, and I will help analyze the content based on that source – without generating new information myself."
+        )
+    
+    return answer
 
 # Philosophy-Lite System Prompt for non-RAG philosophical questions
 # This is a minimal system prompt to prevent context overflow (~200-300 tokens)
@@ -3442,6 +3539,44 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     except Exception as retry_error:
                         logger.error(f"⚠️ Language retry failed (non-RAG): {retry_error}")
                         # Continue with original response
+            
+            # CRITICAL: Hallucination Guard for non-RAG path
+            # If factual question + no context + low confidence → override with safe refusal
+            # This prevents LLM from hallucinating about non-existent concepts/events
+            if (response and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and
+                confidence_score < 0.5 and _is_factual_question(chat_request.message)):
+                # Check if response contains suspicious patterns (fake citations, fabricated details)
+                response_lower = response.lower()
+                suspicious_patterns = [
+                    r"\[1\]|\[2\]|\[3\]",  # Fake citations
+                    r"et al\.|et\. al\.",  # Fake author citations
+                    r"\d{4}\)",  # Fake year citations like "(1975)"
+                    r"according to research|theo nghiên cứu",
+                    r"smith,|jones,|brown,",  # Common fake author names
+                    r"journal of|tạp chí",
+                ]
+                
+                has_suspicious_pattern = any(re.search(pattern, response_lower) for pattern in suspicious_patterns)
+                
+                # If suspicious patterns detected OR confidence is very low (< 0.3), override response
+                if has_suspicious_pattern or confidence_score < 0.3:
+                    # Extract suspicious entity from question
+                    suspicious_entity = None
+                    entity_match = re.search(r'"([^"]+)"|([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)', chat_request.message)
+                    if entity_match:
+                        suspicious_entity = entity_match.group(1) or entity_match.group(2)
+                    
+                    # Override with safe refusal answer
+                    response = _build_safe_refusal_answer(chat_request.message, detected_lang, suspicious_entity)
+                    logger.warning(
+                        f"🛡️ Hallucination Guard triggered (non-RAG): "
+                        f"factual_question=True, confidence={confidence_score:.2f}, "
+                        f"suspicious_patterns={has_suspicious_pattern}, "
+                        f"entity={suspicious_entity or 'unknown'}"
+                    )
+                    processing_steps.append("🛡️ Hallucination Guard: Overrode response with safe refusal")
+                    # Mark as fallback to skip post-processing
+                    is_fallback_meta_answer_non_rag = True
             
             # CRITICAL: Add transparency warning for low confidence responses without context (non-RAG path)
             if confidence_score < 0.5 and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and response:
