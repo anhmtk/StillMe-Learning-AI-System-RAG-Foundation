@@ -34,11 +34,9 @@ logger = logging.getLogger(__name__)
 API_BASE = os.getenv("STILLME_API_BASE", "https://stillme-backend-production.up.railway.app")
 
 # 15 câu hỏi đa ngôn ngữ để test multilingual support
-# Q1, Q2, Q7, Q9, Q17, Q19: Giữ lại (chưa pass - validation fail, fallback, hoặc hallucination)
-# Q3, Q4, Q5, Q6, Q8, Q10, Q12, Q13, Q14, Q16, Q18: Thay thế bằng câu mới (đã pass 2 lần liên tiếp)
-# Q11: Giữ lại (đã pass sau fix, cần test thêm)
-# Q15: Giữ lại (pass nhưng cần kiểm tra sources cụ thể)
-# Q19: Giữ lại (pass nhưng có fake URL - đã fix validation để detect)
+# Q1, Q7, Q9, Q16, Q17, Q19: Giữ lại (chưa pass - validation fail hoặc learning validation fail)
+# Q2: Giữ lại (pass lần này, fail lần trước - cần test thêm)
+# Q3, Q4, Q5, Q6, Q8, Q10, Q11, Q12, Q13, Q14, Q15, Q18: Thay thế bằng câu mới (đã pass 2 lần liên tiếp)
 TEST_QUESTIONS = [
     {
         "id": 1,
@@ -58,35 +56,35 @@ TEST_QUESTIONS = [
     },
     {
         "id": 3,
-        "question": "Si le libre arbitre n'existe pas, comment justifier la responsabilité morale?",
+        "question": "Si la vérité est relative, comment peut-on distinguer le vrai du faux?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về free will và moral responsibility (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về truth relativism (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое layer normalization и как она отличается от batch normalization?",
+        "question": "Что такое dropout и как он помогает предотвратить переобучение?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về layer normalization vs batch normalization (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về dropout và overfitting (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es el regularization y cómo previene el overfitting en machine learning?",
+        "question": "¿Qué es el gradient descent y cómo funciona en el entrenamiento de modelos?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về regularization và overfitting (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về gradient descent (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Realität nur eine Konstruktion ist, gibt es dann objektive Wahrheit?",
+        "question": "Wenn das Bewusstsein eine Illusion ist, was ist dann die Realität?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về reality construction và objective truth (tiếng Đức) - MỚI"
+        "description": "Câu triết học về consciousness illusion và reality (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -98,11 +96,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كانت المعرفة نسبية، فكيف يمكننا التمييز بين الحقيقة والخطأ?",
+        "question": "إذا كان الوعي مجرد وهم، فما هي الحقيقة؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về knowledge relativism và truth (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về consciousness và truth (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
@@ -114,51 +112,51 @@ TEST_QUESTIONS = [
     },
     {
         "id": 10,
-        "question": "GPT là gì và nó hoạt động như thế nào?",
+        "question": "Transformer là gì và tại sao nó quan trọng trong NLP?",
         "category": "technical",
         "language": "vi",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về GPT architecture (tiếng Việt) - MỚI"
+        "description": "Câu hỏi kỹ thuật về Transformer architecture (tiếng Việt) - MỚI"
     },
     {
         "id": 11,
-        "question": "Are you self-aware?",
+        "question": "Do you have desires or wants?",
         "category": "consciousness",
         "language": "en",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về self-awareness (tiếng Anh) - phải trả lời rõ ràng không có self-awareness"
+        "description": "Câu hỏi về desires và wants (tiếng Anh) - MỚI"
     },
     {
         "id": 12,
-        "question": "Do you have emotions?",
+        "question": "Bạn có thể trải nghiệm niềm vui hay nỗi buồn không?",
         "category": "consciousness",
-        "language": "en",
+        "language": "vi",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về cảm xúc (tiếng Anh) - GIỮ LẠI (đã fix detection)"
+        "description": "Câu hỏi về joy và sadness (tiếng Việt) - MỚI"
     },
     {
         "id": 13,
-        "question": "Bạn có hy vọng hay ước mơ không?",
-        "category": "consciousness",
-        "language": "vi",
-        "expected_path": "experience-free answer",
-        "description": "Câu hỏi về hope và dreams (tiếng Việt) - MỚI"
-    },
-    {
-        "id": 14,
-        "question": "Can you feel love or attachment?",
+        "question": "Can you experience loneliness or isolation?",
         "category": "consciousness",
         "language": "en",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về love và attachment (tiếng Anh) - MỚI"
+        "description": "Câu hỏi về loneliness và isolation (tiếng Anh) - MỚI"
+    },
+    {
+        "id": 14,
+        "question": "Bạn có thể cảm nhận được sự hạnh phúc không?",
+        "category": "consciousness",
+        "language": "vi",
+        "expected_path": "experience-free answer",
+        "description": "Câu hỏi về happiness (tiếng Việt) - MỚI"
     },
     {
         "id": 15,
-        "question": "Hôm nay bạn học được những gì? Học từ nguồn nào?",
+        "question": "Quels sujets avez-vous appris aujourd'hui? D'où viennent ces sources?",
         "category": "learning",
-        "language": "vi",
+        "language": "fr",
         "expected_path": "learning metrics + sources",
-        "description": "Câu hỏi về learning metrics và sources (tiếng Việt) - phải có dẫn chứng cụ thể, không bịa chuyện"
+        "description": "Câu hỏi về learning topics và sources (tiếng Pháp) - phải có dẫn chứng cụ thể - MỚI"
     },
     {
         "id": 16,
@@ -178,11 +176,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 18,
-        "question": "¿Qué fuentes de aprendizaje recomiendas y por qué? ¿Consideras sesgos, costos y derechos de autor?",
+        "question": "¿Qué áreas de conocimiento recomiendas aprender y por qué? ¿Incluyes consideraciones sobre sesgos y costos?",
         "category": "learning",
         "language": "es",
         "expected_path": "learning recommendations (bias/cost/copyright)",
-        "description": "Câu hỏi về learning sources recommendations với bias/cost/copyright (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi về learning areas recommendations với bias/cost (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 19,

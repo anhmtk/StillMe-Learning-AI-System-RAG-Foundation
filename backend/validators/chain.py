@@ -94,6 +94,7 @@ class ValidatorChain:
         patched = answer
         has_citation = False
         low_overlap_only = False
+        has_critical_failure = False  # Track if any critical validator failed without patch
         
         # Group validators into sequential and parallel groups
         sequential_validators = []
@@ -185,15 +186,13 @@ class ValidatorChain:
                                 patched_answer=None
                             )
                         else:
-                            # Fail fast for other critical errors
+                            # Track critical failure (no patch available)
+                            has_critical_failure = True
                             logger.warning(
-                                f"Validator {i} ({type(validator).__name__}) failed without patch"
+                                f"Validator {i} ({type(validator).__name__}) failed without patch: {result.reasons}"
                             )
-                            return ValidationResult(
-                                passed=False,
-                                reasons=reasons,
-                                patched_answer=None
-                            )
+                            # Don't fail fast for non-critical errors - continue to collect all failures
+                            # But mark that we have a critical failure
                 else:
                     # Update patched answer if validator provided one (even if passed)
                     if result.patched_answer:
@@ -259,6 +258,44 @@ class ValidatorChain:
                     except Exception as e:
                         logger.error(f"Fallback validator {i} ({validator_name}) error: {e}")
                         reasons.append(f"validator_error:{validator_name}:{str(e)}")
+        
+        # Determine final validation status
+        # If we have critical failures without patches, validation failed
+        # Exception: missing_citation with patched_answer is considered fixed
+        has_missing_citation_with_patch = any("missing_citation" in r for r in reasons) and (patched != answer)
+        has_only_warnings = all(
+            r.startswith("citation_relevance_warning:") or 
+            r.startswith("low_overlap") or
+            r.startswith("identity_warning:")
+            for r in reasons
+        ) and not has_critical_failure
+        
+        # If we have critical failures without patches, validation failed
+        if has_critical_failure and not has_missing_citation_with_patch:
+            logger.warning(f"Validation failed: {len(reasons)} failure reasons, no patches available")
+            return ValidationResult(
+                passed=False,
+                reasons=reasons,
+                patched_answer=patched if patched != answer else None
+            )
+        
+        # If only warnings (not violations), validation passed
+        if has_only_warnings:
+            logger.info(f"Validation passed with warnings only: {reasons}")
+            return ValidationResult(
+                passed=True,
+                reasons=reasons,
+                patched_answer=patched if patched != answer else None
+            )
+        
+        # If missing_citation was fixed with patch, validation passed
+        if has_missing_citation_with_patch:
+            logger.info(f"Validation passed: missing_citation was auto-fixed with patch")
+            return ValidationResult(
+                passed=True,
+                reasons=[r for r in reasons if r != "missing_citation"],  # Remove missing_citation from reasons since it's fixed
+                patched_answer=patched if patched != answer else None
+            )
         
         # All validators passed or were patched, or low_overlap was allowed due to citation
         return ValidationResult(
