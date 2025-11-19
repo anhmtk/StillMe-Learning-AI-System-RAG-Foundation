@@ -347,6 +347,53 @@ class QualityEvaluator:
         # Any match is bad
         return min(matches * 0.3, 1.0)  # Scale: 0 = good, 1 = very bad
     
+    def _check_template_like(self, text: str, text_lower: str, original_question: Optional[str] = None) -> float:
+        """
+        Check if response is template-like (numbered lists, formulaic structure)
+        Returns: 1.0 = good (no template), 0.0 = bad (strong template pattern)
+        """
+        # Check for numbered lists at start (strong indicator of template)
+        numbered_list_pattern = r'^\s*[0-9]+\.\s+[A-ZÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴĐ]'
+        if re.search(numbered_list_pattern, text, re.MULTILINE):
+            # Count how many numbered items
+            numbered_items = len(re.findall(r'^\s*[0-9]+\.', text, re.MULTILINE))
+            if numbered_items >= 3:
+                logger.warning(f"Template-like response detected: {numbered_items} numbered items")
+                return 0.0  # Strong template pattern
+        
+        # Check for template keywords in Vietnamese
+        template_keywords_vn = [
+            r'lập trường\s*1',
+            r'lập trường\s*2',
+            r'mâu thuẫn',
+            r'kết luận',
+            r'giải thích.*khái niệm',
+        ]
+        template_matches = sum(1 for pattern in template_keywords_vn if re.search(pattern, text_lower))
+        if template_matches >= 3:
+            logger.warning(f"Template-like response detected: {template_matches} template keywords")
+            return 0.0  # Strong template pattern
+        
+        # Check if user asks about StillMe but response starts with dictionary definition
+        if original_question:
+            question_lower = original_question.lower()
+            # Check if question is about StillMe ("bạn", "you", "your" referring to StillMe)
+            is_about_stillme = bool(re.search(r'\b(bạn|you|your|stillme)\b', question_lower))
+            if is_about_stillme:
+                # Check if response starts with definition instead of "Tôi" / "I"
+                starts_with_definition = bool(re.search(r'^(ý thức|consciousness|emotion|cảm xúc|ai|artificial intelligence)\s+(là|is|are|được định nghĩa|is defined)', text_lower))
+                if starts_with_definition:
+                    logger.warning("Template-like response: User asks about StillMe but response starts with definition")
+                    return 0.0  # Strong template pattern
+        
+        # Check for formulaic structure (multiple numbered items in sequence)
+        numbered_sequence = re.findall(r'^\s*[0-9]+\.', text, re.MULTILINE)
+        if len(numbered_sequence) >= 4:
+            logger.warning(f"Template-like response detected: {len(numbered_sequence)} numbered items in sequence")
+            return 0.2  # Weak template pattern but still concerning
+        
+        return 1.0  # No template pattern detected
+    
     def _check_structure_completeness(self, text: str) -> float:
         """
         Check if philosophical structure is complete:
