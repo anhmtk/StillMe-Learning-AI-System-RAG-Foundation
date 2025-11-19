@@ -105,6 +105,7 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         # Vietnamese - prioritize "hiểu" patterns
         r"\bhiểu\b",
         r"\bhiểu\s+theo\s+nghĩa\b",
+        r"\btheo\s+nghĩa\s+nào\s+.*\s+hiểu\b",  # "theo nghĩa nào ... hiểu"
         r"\bhiểu\s+ra\s+sao\b",
         r"\bhiểu\s+kiểu\s+gì\b",
         r"\blàm\s+sao\s+.*\s+hiểu\b",  # "làm sao ... hiểu"
@@ -117,6 +118,7 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\bunderstand\b",
         r"\bunderstanding\b",
         r"\bhow\s+.*\s+understand\b",  # "how ... understand"
+        r"\bin\s+what\s+sense\s+.*\s+understand\b",  # "in what sense ... understand"
         r"\bcomprehend\b",
         r"\bcomprehension\b",
         r"\bmeaning\b",
@@ -157,21 +159,42 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\bunderstand\b",
         r"\blàm\s+sao\s+.*\s+hiểu\b",
         r"\bhow\s+.*\s+understand\b",
-        r"\blàm\s+sao\s+.*\s+.*\s+hiểu\b",  # "làm sao ... hiểu" with more words
+        r"\btheo\s+nghĩa\s+nào\s+.*\s+hiểu\b",  # "theo nghĩa nào ... hiểu"
+        r"\bin\s+what\s+sense\s+.*\s+understand\b",  # "in what sense ... understand"
     ])
     
-    # Special case: "Nếu không có ý thức, bạn làm sao 'hiểu' được ngôn ngữ?"
-    # This is about understanding, not consciousness (even though it mentions "ý thức")
+    # CRITICAL: If question contains "hiểu" (understanding keyword), prioritize Type C
+    # Even if it also mentions "ý thức" (consciousness), the question is about HOW understanding works
     if has_understanding_keyword:
-        # If question structure is "làm sao ... hiểu" or "how ... understand", it's Type C
-        if re.search(r"làm\s+sao.*hiểu|how.*understand", text_lower):
+        # Check for specific patterns that indicate understanding question
+        understanding_patterns = [
+            r"làm\s+sao.*hiểu",  # "làm sao ... hiểu"
+            r"how.*understand",  # "how ... understand"
+            r"theo\s+nghĩa\s+nào.*hiểu",  # "theo nghĩa nào ... hiểu"
+            r"in\s+what\s+sense.*understand",  # "in what sense ... understand"
+        ]
+        
+        # If any understanding pattern matches, it's Type C
+        if any(re.search(pattern, text_lower) for pattern in understanding_patterns):
             return QuestionType.UNDERSTANDING
-    
-    if has_understanding_keyword and understanding_score > 0:
-        # If "hiểu" appears and understanding score > 0, prioritize Type C
-        # Even if consciousness score is also > 0
-        if understanding_score >= consciousness_score:
-            return QuestionType.UNDERSTANDING
+        
+        # Even without specific pattern, if "hiểu" appears and understanding_score > 0,
+        # prioritize Type C over Type A (consciousness)
+        if understanding_score > 0:
+            # If understanding_score >= consciousness_score, it's Type C
+            # This handles cases like "Nếu không có ý thức, bạn làm sao hiểu được?"
+            if understanding_score >= consciousness_score:
+                return QuestionType.UNDERSTANDING
+            # Even if consciousness_score is higher, if "hiểu" is the main question word,
+            # it's still about understanding
+            # Check if "hiểu" appears after "ý thức" (indicating question is about understanding, not consciousness)
+            if "ý thức" in text_lower and "hiểu" in text_lower:
+                # Find positions
+                consciousness_pos = text_lower.find("ý thức")
+                understanding_pos = text_lower.find("hiểu")
+                # If "hiểu" comes after "ý thức", question is about understanding
+                if understanding_pos > consciousness_pos:
+                    return QuestionType.UNDERSTANDING
     
     # Determine type based on scores
     scores = {
