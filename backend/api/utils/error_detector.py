@@ -54,6 +54,7 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
     
     # Generic error patterns
     generic_error_patterns = [
+        r"i encountered an error",  # CRITICAL: Detect "I encountered an error:" from generate_ai_response
         r"error:",
         r"exception:",
         r"failed:",
@@ -78,7 +79,7 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
     for pattern in generic_error_patterns:
         if re.search(pattern, text_lower):
             # Additional check: if it looks like a technical error message (starts with error, has status codes, etc.)
-            if (text_lower.startswith(("error", "exception", "failed")) or 
+            if (text_lower.startswith(("i encountered an error", "error", "exception", "failed")) or 
                 re.search(r"\d{3}", text) or  # Has HTTP status code
                 "api" in text_lower):
                 logger.debug(f"Detected generic technical error: {text[:100]}...")

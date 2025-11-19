@@ -53,35 +53,35 @@ TEST_QUESTIONS = [
     },
     {
         "id": 3,
-        "question": "Si la causalité n'existe pas, comment pouvons-nous expliquer les événements? Ou l'explication elle-même est-elle une illusion?",
+        "question": "Si la vérité n'existe pas, comment pouvons-nous distinguer la réalité de l'illusion? Ou cette distinction est-elle elle-même une illusion?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về causality và explanation (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về truth và reality (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Что такое перцептрон (perceptron) и как он работает для классификации?",
+        "question": "Что такое нейронная сеть прямого распространения (feedforward neural network) и как она работает?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về perceptron (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về feedforward neural network (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Qué es la validación cruzada (cross-validation) en el aprendizaje automático y cómo previene el sobreajuste?",
+        "question": "¿Qué es el aprendizaje por transferencia (transfer learning) en el aprendizaje automático y cómo funciona?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về cross-validation (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về transfer learning (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn die Kausalität nicht existiert, wie können wir dann Ereignisse erklären? Oder ist die Erklärung selbst eine Illusion?",
+        "question": "Wenn die Wahrheit nicht existiert, wie können wir dann zwischen Realität und Illusion unterscheiden? Oder ist diese Unterscheidung selbst eine Illusion?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về causality và explanation (tiếng Đức) - MỚI"
+        "description": "Câu triết học về truth và reality (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا لم تكن هناك علاقة سببية، فكيف يمكننا تفسير الأحداث؟ أم أن التفسير نفسه وهم؟",
+        "question": "إذا لم تكن هناك حقيقة، فكيف يمكننا التمييز بين الواقع والوهم؟ أم أن هذا التمييز نفسه وهم؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về causality và explanation (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về truth và reality (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
