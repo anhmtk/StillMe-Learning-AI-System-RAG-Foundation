@@ -3556,7 +3556,12 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     r"journal of|tạp chí",
                 ]
                 
-                has_suspicious_pattern = any(re.search(pattern, response_lower) for pattern in suspicious_patterns)
+                # Use loop instead of generator expression to avoid closure issue with 're'
+                has_suspicious_pattern = False
+                for pattern in suspicious_patterns:
+                    if re.search(pattern, response_lower):
+                        has_suspicious_pattern = True
+                        break
                 
                 # If suspicious patterns detected OR confidence is very low (< 0.3), override response
                 if has_suspicious_pattern or confidence_score < 0.3:
