@@ -58,14 +58,26 @@ $localCommit = git rev-parse HEAD
 $remoteCommit = git rev-parse "origin/$currentBranch" 2>$null
 
 if ($remoteCommit -and $localCommit -ne $remoteCommit) {
-    Write-Host "⚠️ Remote branch has new commits. Pulling and merging..." -ForegroundColor Yellow
-    git pull origin $currentBranch --no-edit 2>&1 | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ Pull failed. Please resolve conflicts manually." -ForegroundColor Red
-        git remote set-url origin "https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation.git"
-        exit 1
+    # Check if local is ahead (can fast-forward) or if remote has new commits
+    $mergeBase = git merge-base HEAD "origin/$currentBranch" 2>$null
+    $localAhead = git rev-list --count "$mergeBase..HEAD" 2>$null
+    $remoteAhead = git rev-list --count "$mergeBase..origin/$currentBranch" 2>$null
+    
+    if ($remoteAhead -gt 0) {
+        Write-Host "⚠️ Remote branch has new commits. Pulling and merging..." -ForegroundColor Yellow
+        git pull origin $currentBranch --no-edit 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "❌ Pull failed. Please resolve conflicts manually." -ForegroundColor Red
+            Write-Host "   You can try: git pull --rebase origin $currentBranch" -ForegroundColor Yellow
+            git remote set-url origin "https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation.git"
+            exit 1
+        }
+        Write-Host "✅ Pull and merge successful" -ForegroundColor Green
+    } else {
+        Write-Host "✅ Local branch is ahead, no need to pull" -ForegroundColor Green
     }
-    Write-Host "✅ Pull and merge successful" -ForegroundColor Green
+} else {
+    Write-Host "✅ Local and remote are in sync (or local is ahead)" -ForegroundColor Green
 }
 
 # Push branch

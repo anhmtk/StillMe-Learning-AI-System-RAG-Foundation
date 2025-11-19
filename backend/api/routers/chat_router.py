@@ -2576,6 +2576,14 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
                     # Debug: Log first 200 chars to help diagnose issues
                     logger.debug(f"🔍 DEBUG: raw_response preview (first 200 chars): {raw_response[:200]}")
+                    
+                    # CRITICAL: Check if this is actually a fallback message (shouldn't happen but double-check)
+                    from backend.api.utils.error_detector import is_fallback_message
+                    if is_fallback_message(raw_response):
+                        logger.error(
+                            f"❌ CRITICAL: LLM returned what looks like a fallback message! "
+                            f"This should not happen. raw_response[:200]={raw_response[:200]}"
+                        )
                 else:
                     logger.warning(
                         f"⚠️ LLM inference failed or returned empty (took {llm_inference_latency:.2f}s). "
@@ -2606,6 +2614,13 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     logger.warning(
                         f"🛑 Fallback meta-answer detected - skipping validation, quality evaluation, and rewrite. "
                         f"raw_response length={len(raw_response)}, first_200_chars={raw_response[:200]}"
+                    )
+                    # CRITICAL: Log why this is a fallback message to help debug Q2, Q7
+                    logger.error(
+                        f"🔍 DEBUG Q2/Q7: Detected fallback message. "
+                        f"Question: {chat_request.message[:100]}, "
+                        f"LLM call completed: {llm_inference_latency:.2f}s, "
+                        f"Response preview: {raw_response[:200]}"
                     )
                     response = raw_response
                     # Skip validation, quality evaluator, rewrite, and learning

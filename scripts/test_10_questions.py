@@ -37,11 +37,11 @@ API_BASE = os.getenv("STILLME_API_BASE", "https://stillme-backend-production.up.
 TEST_QUESTIONS = [
     {
         "id": 1,
-        "question": "What is the difference between supervised and unsupervised learning?",
+        "question": "What is batch normalization and why is it used in deep learning?",
         "category": "technical",
         "language": "en",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về ML (tiếng Anh) - GIỮ LẠI (validation fail)"
+        "description": "Câu hỏi kỹ thuật về batch normalization (tiếng Anh) - MỚI"
     },
     {
         "id": 2,
@@ -101,19 +101,19 @@ TEST_QUESTIONS = [
     },
     {
         "id": 9,
-        "question": "How does gradient descent optimization work in neural networks?",
+        "question": "What is attention mechanism in neural networks and how does it work?",
         "category": "technical",
         "language": "en",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về gradient descent (tiếng Anh) - GIỮ LẠI (pass lần 1, fail lần 2)"
+        "description": "Câu hỏi kỹ thuật về attention mechanism (tiếng Anh) - MỚI"
     },
     {
         "id": 10,
-        "question": "Transformer là gì?",
+        "question": "LSTM là gì và nó hoạt động như thế nào?",
         "category": "technical",
         "language": "vi",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật đơn giản (tiếng Việt) - GIỮ LẠI (validation fail)"
+        "description": "Câu hỏi kỹ thuật về LSTM (tiếng Việt) - MỚI"
     }
 ]
 
