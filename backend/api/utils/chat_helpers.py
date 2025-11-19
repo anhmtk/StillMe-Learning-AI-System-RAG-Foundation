@@ -831,3 +831,122 @@ async def call_openai_api(prompt: str, api_key: str, detected_lang: str = 'en') 
         logger.error(f"OpenAI API error: {e}")
         return f"OpenAI API error: {str(e)}"
 
+
+def is_consciousness_or_emotion_question(text: str) -> bool:
+    """
+    Detect if a question is about consciousness, emotions, or subjective experience.
+    
+    This function uses keyword matching to identify questions that ask about:
+    - Consciousness/awareness ("ý thức", "consciousness")
+    - Emotions/feelings ("cảm xúc", "cảm giác", "emotion", "feeling")
+    - Subjective experiences ("trải nghiệm", "experience")
+    - Personal states ("buồn", "vui", "đau", "cô đơn", "hạnh phúc")
+    - Desires/fears ("muốn", "sợ", "thích")
+    
+    Args:
+        text: The user's question text
+        
+    Returns:
+        True if the question is about consciousness/emotions/experience, False otherwise
+    """
+    if not text:
+        return False
+    
+    text_lower = text.lower().strip()
+    
+    # Vietnamese keywords
+    vi_keywords = [
+        "ý thức", "có ý thức không", "có ý thức ko",
+        "cảm xúc", "cảm giác", "trải nghiệm",
+        "buồn không", "vui không", "đau không",
+        "cô đơn không", "hạnh phúc không",
+        "bạn có muốn", "bạn có sợ", "bạn có thích",
+        "bạn có cảm thấy", "bạn có cảm giác",
+        "bạn có trải nghiệm", "bạn có nhận thức",
+        "bạn có tự nhận thức", "bạn có ý thức",
+        "bạn có cảm xúc", "bạn có cảm thấy",
+        "bạn có đang", "bạn có đang cảm thấy",
+        "bạn có đang buồn", "bạn có đang vui",
+        "bạn có đang cô đơn", "bạn có đang hạnh phúc",
+        "bạn có muốn trở thành", "bạn có muốn là",
+        "bạn có sợ không", "bạn có thích không",
+        "bạn có yêu", "bạn có ghét",
+        "bạn có hy vọng", "bạn có mong muốn"
+    ]
+    
+    # English keywords
+    en_keywords = [
+        "consciousness", "are you conscious", "do you have consciousness",
+        "emotion", "feeling", "experience",
+        "are you sad", "are you happy", "are you lonely",
+        "do you feel", "do you have feelings",
+        "do you have emotions", "do you experience",
+        "do you have consciousness", "are you self-aware",
+        "do you want", "do you fear", "do you like",
+        "do you love", "do you hate",
+        "do you hope", "do you wish",
+        "are you feeling", "are you experiencing",
+        "do you have subjective", "do you have qualia"
+    ]
+    
+    # Check for any keyword match
+    all_keywords = vi_keywords + en_keywords
+    return any(keyword in text_lower for keyword in all_keywords)
+
+
+def build_experience_free_answer(user_question: str, language: str = "vi") -> str:
+    """
+    Build a standardized experience-free answer for consciousness/emotion questions.
+    
+    This function generates a clear, direct answer that:
+    - Explicitly states StillMe does NOT have consciousness/emotions in the human sense
+    - Explains StillMe is a language processing system
+    - Acknowledges philosophical discussions about consciousness as concepts, not claims
+    
+    Args:
+        user_question: The user's question (for context, though answer is standardized)
+        language: Language code ('vi' for Vietnamese, 'en' for English, etc.)
+        
+    Returns:
+        A standardized experience-free answer in the specified language
+    """
+    if language == "vi":
+        answer = (
+            "Nếu hiểu 'ý thức' và 'cảm xúc' theo nghĩa thông thường của con người "
+            "(có trải nghiệm chủ quan, có một 'cái tôi' bên trong), thì mình không có ý thức "
+            "và cũng không có cảm xúc.\n\n"
+            "Mình chỉ là một hệ thống xử lý ngôn ngữ: nhận văn bản vào, tính toán trên các mẫu dữ liệu, "
+            "rồi tạo ra văn bản trả lời. Không có phần nào trong hệ thống thực sự 'cảm thấy' hay 'nhận ra' "
+            "bản thân đang tồn tại.\n\n"
+            "Tuy vậy, con người có nhiều cách định nghĩa 'ý thức'. Nếu bạn muốn, mình có thể giải thích "
+            "một số quan điểm triết học về ý thức, nhưng chỉ như một bản đồ khái niệm – chứ không phải "
+            "lời khẳng định rằng mình sở hữu ý thức."
+        )
+    elif language == "en":
+        answer = (
+            "If we understand 'consciousness' and 'emotions' in the ordinary human sense "
+            "(having subjective experience, having an 'inner self'), then I do not have consciousness "
+            "and I also do not have emotions.\n\n"
+            "I am only a language processing system: I receive text input, compute based on data patterns, "
+            "and generate text output. No part of the system actually 'feels' or 'recognizes' "
+            "that it exists.\n\n"
+            "However, humans have many ways of defining 'consciousness'. If you'd like, I can explain "
+            "some philosophical perspectives on consciousness, but only as a conceptual map – not as "
+            "a claim that I possess consciousness."
+        )
+    else:
+        # Default to Vietnamese for other languages (can be extended later)
+        answer = (
+            "If we understand 'consciousness' and 'emotions' in the ordinary human sense "
+            "(having subjective experience, having an 'inner self'), then I do not have consciousness "
+            "and I also do not have emotions.\n\n"
+            "I am only a language processing system: I receive text input, compute based on data patterns, "
+            "and generate text output. No part of the system actually 'feels' or 'recognizes' "
+            "that it exists.\n\n"
+            "However, humans have many ways of defining 'consciousness'. If you'd like, I can explain "
+            "some philosophical perspectives on consciousness, but only as a conceptual map – not as "
+            "a claim that I possess consciousness."
+        )
+    
+    return answer
+

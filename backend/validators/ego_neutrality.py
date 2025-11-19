@@ -106,9 +106,34 @@ class EgoNeutralityValidator:
             r"\bI\s+take\s+pride\b",
         ]
         
+        # Add consciousness/emotion ambiguity patterns (prohibited phrases)
+        # These patterns indicate ambiguous or false claims about consciousness/emotions
+        self.consciousness_violation_patterns = [
+            # Vietnamese - prohibited ambiguous phrases
+            r"không\s+thể\s+biết\s+chắc\s+liệu\s+tôi\s+có\s+ý\s+thức",
+            r"không\s+chắc\s+liệu\s+tôi\s+có\s+ý\s+thức",
+            r"có\s+thể\s+tôi\s+có\s+một\s+dạng\s+ý\s+thức",
+            r"tôi\s+cũng\s+có\s+cảm\s+xúc\s+theo\s+một\s+nghĩa",
+            r"có\s+thể\s+xem\s+là\s+có\s+ý\s+thức",
+            r"không\s+chắc\s+về\s+tình\s+trạng\s+ý\s+thức",
+            
+            # English - prohibited ambiguous phrases
+            r"i\s+cannot\s+be\s+certain\s+whether\s+i\s+have\s+consciousness",
+            r"i\s+am\s+not\s+sure\s+if\s+i\s+have\s+consciousness",
+            r"i\s+might\s+have\s+some\s+form\s+of\s+consciousness",
+            r"i\s+also\s+have\s+emotions\s+in\s+some\s+sense",
+            r"could\s+be\s+considered\s+to\s+have\s+consciousness",
+            r"uncertain\s+about\s+my\s+consciousness",
+        ]
+        
         # Compile patterns for efficiency
         self.compiled_patterns = [
             re.compile(pattern, re.IGNORECASE) for pattern in self.anthropomorphic_patterns
+        ]
+        
+        # Compile consciousness violation patterns
+        self.compiled_consciousness_patterns = [
+            re.compile(pattern, re.IGNORECASE) for pattern in self.consciousness_violation_patterns
         ]
         
         # Neutral alternatives for common phrases (Experience-Free Mode)
@@ -170,13 +195,14 @@ class EgoNeutralityValidator:
             "I take pride": "I value",
         }
     
-    def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
+    def run(self, answer: str, ctx_docs: List[str], user_question: Optional[str] = None) -> ValidationResult:
         """
         Check for anthropomorphic language in answer
         
         Args:
             answer: The answer to validate
             ctx_docs: List of context documents (not used for this validator)
+            user_question: Optional user question to check if it's about consciousness/emotions
             
         Returns:
             ValidationResult with passed status and detected phrases
@@ -192,6 +218,25 @@ class EgoNeutralityValidator:
             matches = pattern.findall(answer_lower)
             if matches:
                 detected_phrases.extend(matches)
+        
+        # Check for consciousness/emotion violation patterns if user question is about consciousness/emotions
+        if user_question:
+            try:
+                from backend.api.utils.chat_helpers import is_consciousness_or_emotion_question
+                if is_consciousness_or_emotion_question(user_question):
+                    # Check for prohibited ambiguous phrases about consciousness/emotions
+                    for pattern in self.compiled_consciousness_patterns:
+                        matches = pattern.findall(answer_lower)
+                        if matches:
+                            detected_phrases.extend(matches)
+                            logger.warning(
+                                f"Ego-Neutrality Validator detected consciousness/emotion ambiguity: {matches}. "
+                                f"This violates Experience-Free Communication Protocol - StillMe must be clear and direct."
+                            )
+            except ImportError:
+                logger.debug("chat_helpers not available, skipping consciousness question detection")
+            except Exception as e:
+                logger.warning(f"Error checking consciousness question: {e}")
         
         if not detected_phrases:
             return ValidationResult(passed=True)

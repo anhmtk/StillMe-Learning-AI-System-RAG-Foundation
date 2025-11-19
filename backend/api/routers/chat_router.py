@@ -8,7 +8,9 @@ from backend.api.models import ChatRequest, ChatResponse
 from backend.api.rate_limiter import limiter, get_rate_limit_key_func
 from backend.api.utils.chat_helpers import (
     generate_ai_response,
-    detect_language
+    detect_language,
+    is_consciousness_or_emotion_question,
+    build_experience_free_answer
 )
 from backend.services.cache_service import (
     get_cache_service,
@@ -1249,6 +1251,37 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             logger.warning("Question classifier not available, skipping philosophical detection")
         except Exception as classifier_error:
             logger.warning(f"Question classifier error: {classifier_error}")
+        
+        # Detect consciousness/emotion questions - return standardized answer immediately
+        is_consciousness_question = False
+        try:
+            is_consciousness_question = is_consciousness_or_emotion_question(chat_request.message)
+            if is_consciousness_question:
+                logger.info("Consciousness/emotion question detected - will return standardized experience-free answer")
+                # Detect language for the answer
+                detected_lang = detect_language(chat_request.message)
+                # Return standardized answer immediately, bypassing LLM
+                experience_free_answer = build_experience_free_answer(
+                    user_question=chat_request.message,
+                    language=detected_lang
+                )
+                
+                # Return response immediately without LLM processing
+                processing_steps.append("✅ Detected consciousness/emotion question - returning experience-free answer")
+                return ChatResponse(
+                    response=experience_free_answer,
+                    confidence_score=1.0,  # High confidence for standardized answer
+                    processing_steps=processing_steps,
+                    timing_logs={
+                        "total_time": time.time() - start_time,
+                        "rag_retrieval_latency": 0.0,
+                        "llm_inference_latency": 0.0
+                    },
+                    validation_result=None,  # No validation needed for standardized answer
+                    used_fallback=False
+                )
+        except Exception as consciousness_detector_error:
+            logger.warning(f"Consciousness detector error: {consciousness_detector_error}")
         
         # Special Retrieval Rule: Detect StillMe-related queries
         # Fix: Disable provenance detection for philosophical questions
