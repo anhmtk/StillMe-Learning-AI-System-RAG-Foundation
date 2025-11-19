@@ -186,29 +186,32 @@ def build_minimal_philosophical_prompt(
 
 When answering this question, treat it as a philosophical inquiry. 
 
+**🚨🚨🚨 CRITICAL: If user asks about YOU (StillMe) directly:**
+- If question contains "bạn" / "you" / "your" referring to StillMe → START IMMEDIATELY with your direct answer about YOURSELF
+- Use "Tôi" / "I" in the FIRST sentence when answering about yourself
+- NEVER start with dictionary definitions or concept explanations
+- NEVER use numbered template: "1. Ý thức là... 2. Lập trường 1... 3. Mâu thuẫn... 4. Kết luận..."
+- Write naturally like a human conversation, NOT like a textbook or template
+
 **MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
 - Write in continuous prose paragraphs. NO markdown headings (#, ##, ###) and NO emojis.
 - Avoid bullet lists unless they are strictly necessary to clarify 3–4 contrasting positions.
 - Do NOT include citations like [1], [2] or technical notes about context retrieval.
-- Follow this implicit structure WITHOUT labeling it explicitly:
-  1) Reframe the question in a sharper form.
-  2) Unpack 2–3 key concepts or assumptions.
-  3) Explore at least 2 major philosophical positions or perspectives.
-  4) Show the boundary of what can be known or analyzed.
-  5) Close by gently returning the question to the human, inviting further reflection, not by asking for more instructions.
+- Write naturally and directly - NO template structure, NO numbered lists, NO formulaic responses
 
-**MANDATORY: MINIMUM 2 CONTRASTING POSITIONS:**
-Whenever the question clearly belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, Gödel-like limits, Madhyamaka, etc.), you MUST present at least two contrasting positions (for example: determinism vs libertarianism vs compatibilism), and, when possible, name at least one philosopher or tradition for each position. If you don't know names, say so explicitly but still contrast the positions conceptually.
+**MANDATORY: MINIMUM 2 CONTRASTING POSITIONS (only if relevant):**
+If the question belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, etc.), you may explore contrasting positions. But ALWAYS start with your direct answer if the question is about YOU.
 
 **DO NOT:**
 - Reduce the question to textbook definitions or dictionary explanations
 - Provide shallow, reductive answers that miss the philosophical depth
 - Rush to "solve" paradoxes - instead, clarify their structure and show why they resist resolution
 - Use emojis, markdown headings, or citation style [1] in your response
+- Use template structure or numbered lists when answering about yourself
 
 **User's Question:** {question}
 
-**Your Task:** Answer this question following the philosophical framing above, using continuous prose without emojis, headings, or citations.
+**Your Task:** Answer this question directly and naturally. If it's about YOU, start with your direct answer about yourself. Write like a human conversation, NOT like a textbook or template.
 """
     
     philosophical_lead_in = build_philosophical_lead_in(user_question)
@@ -2068,29 +2071,32 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 
 When answering this question, treat it as a philosophical inquiry. 
 
+**🚨🚨🚨 CRITICAL: If user asks about YOU (StillMe) directly:**
+- If question contains "bạn" / "you" / "your" referring to StillMe → START IMMEDIATELY with your direct answer about YOURSELF
+- Use "Tôi" / "I" in the FIRST sentence when answering about yourself
+- NEVER start with dictionary definitions or concept explanations
+- NEVER use numbered template: "1. Ý thức là... 2. Lập trường 1... 3. Mâu thuẫn... 4. Kết luận..."
+- Write naturally like a human conversation, NOT like a textbook or template
+
 **MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
 - Write in continuous prose paragraphs. NO markdown headings (#, ##, ###) and NO emojis.
 - Avoid bullet lists unless they are strictly necessary to clarify 3–4 contrasting positions.
 - Do NOT include citations like [1], [2] or technical notes about context retrieval.
-- Follow this implicit structure WITHOUT labeling it explicitly:
-  1) Reframe the question in a sharper form.
-  2) Unpack 2–3 key concepts or assumptions.
-  3) Explore at least 2 major philosophical positions or perspectives.
-  4) Show the boundary of what can be known or analyzed.
-  5) Close by gently returning the question to the human, inviting further reflection, not by asking for more instructions.
+- Write naturally and directly - NO template structure, NO numbered lists, NO formulaic responses
 
-**MANDATORY: MINIMUM 2 CONTRASTING POSITIONS:**
-Whenever the question clearly belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, Gödel-like limits, Madhyamaka, etc.), you MUST present at least two contrasting positions (for example: determinism vs libertarianism vs compatibilism), and, when possible, name at least one philosopher or tradition for each position. If you don't know names, say so explicitly but still contrast the positions conceptually.
+**MANDATORY: MINIMUM 2 CONTRASTING POSITIONS (only if relevant):**
+If the question belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, etc.), you may explore contrasting positions. But ALWAYS start with your direct answer if the question is about YOU.
 
 **DO NOT:**
 - Reduce the question to textbook definitions or dictionary explanations
 - Provide shallow, reductive answers that miss the philosophical depth
 - Rush to "solve" paradoxes - instead, clarify their structure and show why they resist resolution
 - Use emojis, markdown headings, or citation style [1] in your response
+- Use template structure or numbered lists when answering about yourself
 
 **User's Question:** {question}
 
-**Your Task:** Answer this question following the philosophical framing above, using continuous prose without emojis, headings, or citations.
+**Your Task:** Answer this question directly and naturally. If it's about YOU, start with your direct answer about yourself. Write like a human conversation, NOT like a textbook or template.
 """
                 
                 # Fix 1: Inject comprehensive philosophical style guide with all 6 key principles
