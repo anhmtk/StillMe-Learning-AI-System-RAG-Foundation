@@ -66,9 +66,20 @@ class RewriteLLM:
             text, original_question, quality_issues, is_philosophical, detected_lang
         )
         
-        try:
-            # Reduced timeout from 30s to 10s to improve latency
-            async with httpx.AsyncClient(timeout=10.0) as client:
+        # Retry logic: try up to 2 times (initial + 1 retry)
+        max_retries = 2
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                # Increased timeout from 10s to 45s to handle slow responses
+                timeout_duration = 45.0
+                logger.info(
+                    f"🔄 Rewrite attempt {attempt + 1}/{max_retries}: "
+                    f"timeout={timeout_duration}s, length={len(text)}, issues={len(quality_issues)}"
+                )
+                
+                async with httpx.AsyncClient(timeout=timeout_duration) as client:
                 response = await client.post(
                     self.deepseek_base_url,
                     headers={
@@ -117,9 +128,9 @@ class RewriteLLM:
                                 )
                             
                             logger.info(
-                                "✅ Successfully rewrote output (original: %d chars, rewritten: %d chars)",
-                                len(text),
-                                len(rewritten)
+                                f"✅ Successfully rewrote output (attempt {attempt + 1}/{max_retries}): "
+                                f"original={len(text)} chars, rewritten={len(rewritten)} chars, "
+                                f"issues={quality_issues[:2] if quality_issues else 'none'}"
                             )
                             return RewriteResult(text=rewritten, was_rewritten=True)
                         else:
@@ -139,33 +150,73 @@ class RewriteLLM:
                 else:
                     error_text = response.text[:500] if response.text else "No error message"
                     error_msg = f"HTTP {response.status_code}: {error_text}"
-                    logger.warning(f"⚠️ DeepSeek rewrite failed: {error_msg}")
+                    logger.warning(f"⚠️ DeepSeek rewrite failed (attempt {attempt + 1}/{max_retries}): {error_msg}")
+                    last_error = error_msg
+                    # Retry on HTTP errors (except 4xx client errors)
+                    if response.status_code >= 500 or response.status_code == 429:
+                        if attempt < max_retries - 1:
+                            logger.info(f"🔄 Retrying rewrite due to server error (attempt {attempt + 1}/{max_retries})")
+                            continue
+                    # Don't retry on client errors (4xx)
                     return RewriteResult(
                         text=text,
                         was_rewritten=False,
                         error=error_msg
                     )
-        except httpx.TimeoutException as timeout_error:
-            logger.warning(f"⚠️ DeepSeek rewrite timeout after 30s: {timeout_error}")
-            return RewriteResult(
-                text=text,
-                was_rewritten=False,
-                error=f"Timeout after 30s: {str(timeout_error)}"
-            )
-        except httpx.RequestError as request_error:
-            logger.error(f"DeepSeek rewrite request error: {request_error}")
-            return RewriteResult(
-                text=text,
-                was_rewritten=False,
-                error=f"Request error: {str(request_error)}"
-            )
-        except Exception as e:
-            logger.error(f"Error during DeepSeek rewrite: {e}", exc_info=True)
-            return RewriteResult(
-                text=text,
-                was_rewritten=False,
-                error=f"Unexpected error: {str(e)}"
-            )
+            except httpx.TimeoutException as timeout_error:
+                last_error = f"Timeout after {timeout_duration}s"
+                logger.warning(
+                    f"⚠️ DeepSeek rewrite timeout (attempt {attempt + 1}/{max_retries}): {timeout_error}"
+                )
+                # Retry on timeout
+                if attempt < max_retries - 1:
+                    logger.info(f"🔄 Retrying rewrite after timeout (attempt {attempt + 1}/{max_retries})")
+                    continue
+                # Last attempt failed
+                return RewriteResult(
+                    text=text,
+                    was_rewritten=False,
+                    error=last_error
+                )
+            except httpx.RequestError as request_error:
+                last_error = f"Request error: {str(request_error)}"
+                logger.error(
+                    f"❌ DeepSeek rewrite request error (attempt {attempt + 1}/{max_retries}): {request_error}"
+                )
+                # Retry on request errors
+                if attempt < max_retries - 1:
+                    logger.info(f"🔄 Retrying rewrite after request error (attempt {attempt + 1}/{max_retries})")
+                    continue
+                # Last attempt failed
+                return RewriteResult(
+                    text=text,
+                    was_rewritten=False,
+                    error=last_error
+                )
+            except Exception as e:
+                last_error = f"Unexpected error: {str(e)}"
+                logger.error(
+                    f"❌ DeepSeek rewrite error (attempt {attempt + 1}/{max_retries}): {e}",
+                    exc_info=True
+                )
+                # Retry on unexpected errors
+                if attempt < max_retries - 1:
+                    logger.info(f"🔄 Retrying rewrite after error (attempt {attempt + 1}/{max_retries})")
+                    continue
+                # Last attempt failed
+                return RewriteResult(
+                    text=text,
+                    was_rewritten=False,
+                    error=last_error
+                )
+        
+        # All retries failed
+        logger.error(f"❌ All rewrite attempts failed. Last error: {last_error}")
+        return RewriteResult(
+            text=text,
+            was_rewritten=False,
+            error=f"All {max_retries} attempts failed. Last error: {last_error}"
+        )
     
     def _build_system_prompt(self, is_philosophical: bool, detected_lang: str) -> str:
         """Build minimal system prompt for rewrite"""

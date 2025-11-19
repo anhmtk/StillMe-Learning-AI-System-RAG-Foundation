@@ -200,12 +200,12 @@ class QualityEvaluator:
         has_structure = argument_score >= 0.4 and (structure_score >= 0.4 if is_philosophical else True)
         
         if is_philosophical:
-            # For philosophical: higher threshold, but allow exceptions for long, structured responses
-            quality_threshold = 0.5  # Lowered from 0.6
+            # For philosophical: only rewrite if score is very low (<0.3)
+            quality_threshold = 0.3  # Changed from 0.5 - only rewrite when really needed
             
             # Exception: If response is long (>1200 chars) and has structure, be more lenient
             if text_length > 1200 and has_structure:
-                quality_threshold = 0.4  # Even more lenient
+                quality_threshold = 0.25  # Even more lenient for long structured responses
                 # Fix format string: cannot use conditional in format specifier
                 structure_score_display = f"{structure_score:.2f}" if is_philosophical else "N/A"
                 logger.debug(
@@ -213,8 +213,8 @@ class QualityEvaluator:
                     f"argument_score={argument_score:.2f}, structure_score={structure_score_display}"
                 )
         else:
-            # For non-philosophical: standard threshold
-            quality_threshold = 0.5
+            # For non-philosophical: only rewrite if score is very low (<0.3)
+            quality_threshold = 0.3  # Changed from 0.5 - only rewrite when really needed
         
         # Only flag as needs_rewrite if:
         # 1. Score is below threshold AND

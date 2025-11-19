@@ -166,21 +166,25 @@ class PostProcessingOptimizer:
         if quality == "good":
             return False, "quality_good"
         
-        # For non-philosophical questions, be more lenient
-        if not is_philosophical:
-            # Only rewrite if score is very low (<0.4) or has critical issues
-            critical_issues = [
-                "Contains anthropomorphic language",
-                "Output too short",
-            ]
-            has_critical = any(issue in reasons for issue in critical_issues)
-            
-            if overall_score >= 0.5 and not has_critical:
-                return False, "score_acceptable_non_philosophical"
+        # CRITICAL: Only rewrite when score is very low (<0.3) or has critical issues
+        # This prevents unnecessary rewrites for acceptable responses (score >= 0.3)
+        critical_issues = [
+            "Contains anthropomorphic language",
+            "Output too short",
+        ]
+        has_critical = any(issue in reasons for issue in critical_issues)
         
-        # For philosophical questions, be stricter
+        # For non-philosophical questions: only rewrite if score < 0.3 or has critical issues
+        if not is_philosophical:
+            if overall_score >= 0.3 and not has_critical:
+                logger.info(
+                    f"⏭️ Skipping rewrite: score={overall_score:.2f} >= 0.3 (threshold), "
+                    f"length={response_length}, critical_issues={has_critical}"
+                )
+                return False, f"score_acceptable_non_philosophical_{overall_score:.2f}"
+        
+        # For philosophical questions: only rewrite if score < 0.3 or has critical issues
         if is_philosophical:
-            # Rewrite if score < 0.6 or has depth/structure issues
             depth_issues = [
                 "Lacks philosophical depth",
                 "Missing conceptual unpacking",
@@ -189,8 +193,12 @@ class PostProcessingOptimizer:
             ]
             has_depth_issue = any(issue in reasons for issue in depth_issues)
             
-            if overall_score >= 0.65 and not has_depth_issue:
-                return False, "score_acceptable_philosophical"
+            if overall_score >= 0.3 and not has_critical and not has_depth_issue:
+                logger.info(
+                    f"⏭️ Skipping rewrite: score={overall_score:.2f} >= 0.3 (threshold), "
+                    f"length={response_length}, critical_issues={has_critical}, depth_issues={has_depth_issue}"
+                )
+                return False, f"score_acceptable_philosophical_{overall_score:.2f}"
         
         # Rewrite needed
         return True, "quality_insufficient"
