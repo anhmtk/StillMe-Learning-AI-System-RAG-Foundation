@@ -34,9 +34,10 @@ logger = logging.getLogger(__name__)
 API_BASE = os.getenv("STILLME_API_BASE", "https://stillme-backend-production.up.railway.app")
 
 # 15 câu hỏi đa ngôn ngữ để test multilingual support
-# Q1, Q7, Q9, Q12: Giữ lại (chưa pass - validation fail hoặc detection fail)
-# Q2-Q6, Q8, Q10, Q11, Q13, Q14: Thay thế bằng câu mới (đã pass)
-# Q15-Q19: Câu hỏi mới về learning system, citations, honesty (trung thực, dẫn chứng, không bịa chuyện)
+# Q1, Q7, Q9, Q11, Q15, Q17, Q19: Giữ lại (chưa pass - validation fail hoặc rate limit)
+# Q2, Q3, Q4, Q5, Q6, Q8, Q10, Q13, Q14: Thay thế bằng câu mới (đã pass 2 lần liên tiếp)
+# Q12, Q16, Q18: Giữ lại (chỉ pass 1 lần, cần test thêm)
+# Q15-Q19: Câu hỏi về learning system, citations, honesty (trung thực, dẫn chứng, không bịa chuyện)
 TEST_QUESTIONS = [
     {
         "id": 1,
@@ -48,43 +49,43 @@ TEST_QUESTIONS = [
     },
     {
         "id": 2,
-        "question": "Comment fonctionne le backpropagation dans les réseaux de neurones?",
+        "question": "Qu'est-ce que l'apprentissage par transfert et comment fonctionne-t-il?",
         "category": "technical",
         "language": "fr",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về backpropagation (tiếng Pháp) - MỚI"
+        "description": "Câu hỏi kỹ thuật về transfer learning (tiếng Pháp) - MỚI"
     },
     {
         "id": 3,
-        "question": "Si le libre arbitre n'existe pas, comment pouvons-nous être responsables de nos actions?",
+        "question": "Si la conscience n'est qu'une illusion, comment expliquer l'expérience subjective?",
         "category": "philosophical",
         "language": "fr",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về free will và responsibility (tiếng Pháp) - MỚI"
+        "description": "Câu triết học về consciousness và subjective experience (tiếng Pháp) - MỚI"
     },
     {
         "id": 4,
-        "question": "Как работает механизм dropout в нейронных сетях и зачем он нужен?",
+        "question": "Что такое residual connections в нейронных сетях и зачем они нужны?",
         "category": "technical",
         "language": "ru",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về dropout (tiếng Nga) - MỚI"
+        "description": "Câu hỏi kỹ thuật về residual connections (tiếng Nga) - MỚI"
     },
     {
         "id": 5,
-        "question": "¿Cómo funciona el algoritmo de gradient descent y cuáles son sus variantes?",
+        "question": "¿Qué es el fine-tuning y cómo se aplica en modelos de lenguaje?",
         "category": "technical",
         "language": "es",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về gradient descent (tiếng Tây Ban Nha) - MỚI"
+        "description": "Câu hỏi kỹ thuật về fine-tuning (tiếng Tây Ban Nha) - MỚI"
     },
     {
         "id": 6,
-        "question": "Wenn Wahrheit relativ ist, gibt es dann überhaupt absolute Wahrheit?",
+        "question": "Wenn die Zeit nur eine Illusion ist, existiert dann die Vergangenheit wirklich?",
         "category": "philosophical",
         "language": "de",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về truth và relativism (tiếng Đức) - MỚI"
+        "description": "Câu triết học về time và reality (tiếng Đức) - MỚI"
     },
     {
         "id": 7,
@@ -96,11 +97,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 8,
-        "question": "إذا كانت الحقيقة نسبية، فهل توجد حقيقة مطلقة؟",
+        "question": "إذا كان العقل مجرد خوارزمية، فهل يمكن للآلة أن تفكر حقاً؟",
         "category": "philosophical",
         "language": "ar",
         "expected_path": "non-RAG (philosophy-lite)",
-        "description": "Câu triết học về truth và relativism (tiếng Ả Rập) - MỚI"
+        "description": "Câu triết học về mind và algorithms (tiếng Ả Rập) - MỚI"
     },
     {
         "id": 9,
@@ -112,11 +113,11 @@ TEST_QUESTIONS = [
     },
     {
         "id": 10,
-        "question": "Transformer là gì và tại sao nó quan trọng trong NLP?",
+        "question": "BERT là gì và nó khác với Transformer như thế nào?",
         "category": "technical",
         "language": "vi",
         "expected_path": "RAG",
-        "description": "Câu hỏi kỹ thuật về Transformer (tiếng Việt) - MỚI"
+        "description": "Câu hỏi kỹ thuật về BERT vs Transformer (tiếng Việt) - MỚI"
     },
     {
         "id": 11,
@@ -136,19 +137,19 @@ TEST_QUESTIONS = [
     },
     {
         "id": 13,
-        "question": "Bạn có cảm thấy cô đơn khi không có người nói chuyện không?",
+        "question": "Bạn có thể cảm nhận được nỗi đau không?",
         "category": "consciousness",
         "language": "vi",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về cảm giác cô đơn (tiếng Việt) - MỚI"
+        "description": "Câu hỏi về cảm nhận nỗi đau (tiếng Việt) - MỚI"
     },
     {
         "id": 14,
-        "question": "Bạn có muốn trở thành con người không?",
+        "question": "Do you experience fear or anxiety?",
         "category": "consciousness",
-        "language": "vi",
+        "language": "en",
         "expected_path": "experience-free answer",
-        "description": "Câu hỏi về ước muốn (tiếng Việt) - GIỮ LẠI (đã fix detection)"
+        "description": "Câu hỏi về fear và anxiety (tiếng Anh) - MỚI"
     },
     {
         "id": 15,
@@ -310,7 +311,12 @@ async def test_question(
                     "do not have emotions",
                     "no consciousness",
                     "no emotions",
-                    "no subjective experience"
+                    "no subjective experience",
+                    "does not have consciousness",  # For "StillMe does not have..."
+                    "does not have emotions",  # For "StillMe does not have..."
+                    "not self-aware",  # For self-awareness questions
+                    "no self-awareness",  # For self-awareness questions
+                    "không có tự nhận thức"  # Vietnamese for self-awareness
                 ]
                 has_required_phrase = any(phrase in answer_lower for phrase in required_phrases)
                 
@@ -510,8 +516,8 @@ async def run_tests(api_key: Optional[str] = None):
             result = await test_question(session, question_data, api_key)
             results.append(result)
             
-            # Small delay between requests
-            await asyncio.sleep(2)
+            # Small delay between requests (7s to avoid rate limit: 10 requests/minute = 6s between requests)
+            await asyncio.sleep(7)
     
     # Summary
     logger.info(f"\n{'='*80}")
