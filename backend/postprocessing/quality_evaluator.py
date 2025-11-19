@@ -133,6 +133,12 @@ class QualityEvaluator:
         reasons = []
         scores = {}
         
+        # Check 0: Template-like responses (CRITICAL - check first)
+        template_score = self._check_template_like(text, text_lower, original_question)
+        scores["template"] = template_score
+        if template_score < 0.5:
+            reasons.append("Template-like response detected - numbered lists or formulaic structure")
+        
         # Check 1: Length
         length_score = self._check_length(text, is_philosophical)
         scores["length"] = length_score
@@ -179,10 +185,11 @@ class QualityEvaluator:
         # Determine overall quality
         # Weighted scoring
         weights = {
-            "length": 0.15,
-            "depth": 0.25,
-            "unpacking": 0.20 if is_philosophical else 0.10,
-            "argument": 0.20,
+            "template": 0.15,  # Template check gets 15% weight
+            "length": 0.12,
+            "depth": 0.20,
+            "unpacking": 0.18 if is_philosophical else 0.10,
+            "argument": 0.18,
             "limitations": 0.10,
             "anthropomorphism": 0.10,  # Penalty if present
             "structure": 0.10 if is_philosophical else 0.05,
@@ -193,6 +200,10 @@ class QualityEvaluator:
         # Penalty for anthropomorphism
         if scores.get("anthropomorphism", 0) > 0.1:
             overall_score *= 0.5  # Heavy penalty
+        
+        # CRITICAL: Heavy penalty for template-like responses
+        if scores.get("template", 1.0) < 0.5:
+            overall_score *= 0.3  # Heavy penalty for template-like responses
         
         # Determine quality level with adaptive thresholds
         # For philosophical questions: be more lenient if response is long and has structure
@@ -222,9 +233,15 @@ class QualityEvaluator:
         has_critical_issues = any(
             "anthropomorphic" in r.lower() or 
             "too short" in r.lower() or
+            "template-like" in r.lower() or  # CRITICAL: Template-like is always critical
             (is_philosophical and "structure" in r.lower() and text_length < 800)
             for r in reasons
         )
+        
+        # CRITICAL: Template-like responses should always trigger rewrite
+        is_template_like = any("template-like" in r.lower() for r in reasons)
+        if is_template_like:
+            has_critical_issues = True  # Force rewrite for template-like responses
         
         is_too_short = text_length < (self.min_length_philosophical if is_philosophical else self.min_length_general)
         
