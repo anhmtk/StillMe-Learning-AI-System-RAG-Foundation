@@ -3967,7 +3967,6 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                             learning_suggestions = [suggestion]
                         else:
                             # Extract key terms from query for learning suggestions
-                            import re
                             words = re.findall(r'\b\w+\b', chat_request.message.lower())
                             # Filter out common words
                             common_words = {'the', 'a', 'an', 'is', 'are', 'was', 'were', 'what', 'how', 'why', 'when', 'where', 'who', 'which', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'to', 'of', 'in', 'on', 'at', 'for', 'with', 'by', 'from', 'as', 'about', 'into', 'through', 'during', 'including', 'against', 'among', 'throughout', 'despite', 'towards', 'upon', 'concerning', 'to', 'of', 'in', 'on', 'at', 'for', 'with', 'by', 'from', 'as', 'about', 'into', 'through', 'during', 'including', 'against', 'among', 'throughout', 'despite', 'towards', 'upon', 'concerning'}
