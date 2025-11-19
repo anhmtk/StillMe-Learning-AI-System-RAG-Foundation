@@ -493,6 +493,7 @@ async def _handle_validation_with_fallback(
     from backend.validators.citation_relevance import CitationRelevance
     from backend.validators.identity_check import IdentityCheckValidator
     from backend.validators.ego_neutrality import EgoNeutralityValidator
+    from backend.validators.factual_hallucination import FactualHallucinationValidator
     from backend.api.utils.chat_helpers import generate_ai_response
     import time
     import os
@@ -554,6 +555,7 @@ async def _handle_validation_with_fallback(
         # Fix: Disable require_uncertainty_when_no_context for philosophical questions
         ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # Check for uncertainty
         EgoNeutralityValidator(strict_mode=True, auto_patch=True),  # Detect and auto-patch "Hallucination of Experience" - novel contribution
+        FactualHallucinationValidator(),  # CRITICAL: Detect hallucinations in history/science questions
     ]
     
     # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
@@ -584,7 +586,8 @@ async def _handle_validation_with_fallback(
         ctx_docs,
         context_quality=context_quality,
         avg_similarity=avg_similarity,
-        is_philosophical=is_philosophical
+        is_philosophical=is_philosophical,
+        user_question=chat_request.message  # Pass user question for FactualHallucinationValidator
     )
     
     # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
@@ -1284,6 +1287,59 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 )
         except Exception as philosophy_processor_error:
             logger.warning(f"Philosophy processor error: {philosophy_processor_error}")
+        
+        # CRITICAL: Factual Plausibility Scanner (FPS) - Check for non-existent concepts BEFORE RAG
+        fps_result = None
+        fps_should_block = False
+        try:
+            from backend.knowledge.factual_scanner import scan_question
+            fps_result = scan_question(chat_request.message)
+            
+            # If FPS detects non-existent concepts with high confidence, block and return honest response
+            if not fps_result.is_plausible and fps_result.confidence < 0.3:
+                fps_should_block = True
+                logger.warning(
+                    f"FPS detected non-existent concept: {fps_result.reason}, "
+                    f"confidence={fps_result.confidence:.2f}, entities={fps_result.detected_entities}"
+                )
+                
+                # Extract the suspicious entity for the response
+                suspicious_entity = fps_result.detected_entities[0] if fps_result.detected_entities else "khái niệm này"
+                
+                # Detect language for response
+                detected_lang = detect_language(chat_request.message)
+                
+                # Create honest response
+                if detected_lang == "vi":
+                    honest_response = (
+                        f"Tôi không tìm thấy bằng chứng rằng \"{suspicious_entity}\" là một khái niệm/sự kiện "
+                        f"được ghi nhận trong khoa học/lịch sử.\n\n"
+                        f"Có thể bạn đang nhắc đến một thuật ngữ khác hoặc một giả thuyết chưa được xác nhận.\n\n"
+                        f"Bạn có thể cung cấp nguồn hoặc giải thích thêm không?"
+                    )
+                else:
+                    honest_response = (
+                        f"I cannot find evidence that \"{suspicious_entity}\" is a recognized concept/event "
+                        f"in science/history.\n\n"
+                        f"You may be referring to a different term or an unconfirmed hypothesis.\n\n"
+                        f"Could you provide a source or explain further?"
+                    )
+                
+                processing_steps.append("⚠️ FPS detected non-existent concept - returning honest response")
+                return ChatResponse(
+                    response=honest_response,
+                    confidence_score=1.0,  # High confidence in honesty
+                    processing_steps=processing_steps,
+                    timing_logs={
+                        "total_time": time.time() - start_time,
+                        "rag_retrieval_latency": 0.0,
+                        "llm_inference_latency": 0.0
+                    },
+                    validation_result=None,
+                    used_fallback=False
+                )
+        except Exception as fps_error:
+            logger.warning(f"FPS error: {fps_error}, continuing with normal flow")
         
         # Special Retrieval Rule: Detect StillMe-related queries
         # Fix: Disable provenance detection for philosophical questions

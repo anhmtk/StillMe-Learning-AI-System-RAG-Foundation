@@ -71,7 +71,8 @@ class ValidatorChain:
         return False
     
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None,
-            avg_similarity: Optional[float] = None, is_philosophical: bool = False) -> ValidationResult:
+            avg_similarity: Optional[float] = None, is_philosophical: bool = False,
+            user_question: Optional[str] = None) -> ValidationResult:
         """
         Run all validators with parallel execution for independent validators
         
@@ -116,6 +117,9 @@ class ValidatorChain:
                 elif validator_name == "CitationRequired":
                     # Pass is_philosophical to CitationRequired to relax requirements
                     result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical)
+                elif validator_name == "FactualHallucinationValidator":
+                    # Pass user_question to FactualHallucinationValidator
+                    result = validator.run(patched, ctx_docs, user_question=user_question)
                 else:
                     result = validator.run(patched, ctx_docs)
                 
@@ -250,7 +254,11 @@ class ValidatorChain:
                 logger.warning(f"Parallel validation failed, falling back to sequential: {parallel_error}")
                 for i, validator, validator_name in parallel_validators:
                     try:
-                        result = validator.run(patched, ctx_docs)
+                        # Pass user_question if available
+                        if validator_name == "FactualHallucinationValidator":
+                            result = validator.run(patched, ctx_docs, user_question=user_question)
+                        else:
+                            result = validator.run(patched, ctx_docs)
                         if not result.passed:
                             reasons.extend(result.reasons)
                         if result.patched_answer:
