@@ -50,8 +50,8 @@ class RSSFetcher:
             # Religious Studies & Philosophy
             "https://aeon.co/feed.rss",  # Aeon Magazine - Philosophy, Religion, Culture
             "https://www.theguardian.com/world/religion/rss",  # The Guardian - Religion
-            # Removed: "https://tricycle.org/feed/" - 403 Forbidden
             "https://www.lionsroar.com/feed/",  # Lion's Roar - Buddhist Wisdom for Our Time
+            "https://tricycle.org/feed/",  # Tricycle - Buddhist Magazine (previously 403, now available)
             "https://iep.utm.edu/feed/",  # Internet Encyclopedia of Philosophy - Academic philosophy reference
             # Note: Some religious studies feeds may be empty - will be monitored and replaced if needed
             
