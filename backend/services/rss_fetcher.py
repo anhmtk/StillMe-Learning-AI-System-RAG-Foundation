@@ -36,6 +36,7 @@ class RSSFetcher:
             
             # Biology
             "https://www.nature.com/nature.rss",
+            "https://www.nature.com/natmachintell.rss",  # Nature Machine Intelligence - AI research & ethics
             "https://www.sciencedaily.com/rss/matter_energy.xml",  # ScienceDaily Biology
             
             # Physics
@@ -51,6 +52,7 @@ class RSSFetcher:
             "https://www.theguardian.com/world/religion/rss",  # The Guardian - Religion
             # Removed: "https://tricycle.org/feed/" - 403 Forbidden
             "https://www.lionsroar.com/feed/",  # Lion's Roar - Buddhist Wisdom for Our Time
+            "https://iep.utm.edu/feed/",  # Internet Encyclopedia of Philosophy - Academic philosophy reference
             # Note: Some religious studies feeds may be empty - will be monitored and replaced if needed
             
             # NEW: Academic & Research Sources (as suggested by StillMe in user conversation)
@@ -65,6 +67,10 @@ class RSSFetcher:
             "https://www.brookings.edu/feed/",  # Brookings main feed (fallback for tech-innovation)
             "https://www.cato.org/feed/",  # Cato main feed (fallback for blog/technology - 403)
             # Removed: "https://www.aei.org/technology/feed/" - 403 Forbidden, no reliable alternative
+            
+            # AI Ethics & Technology (NEW - Verified 2025-01-XX)
+            "https://www.technologyreview.com/topic/artificial-intelligence/feed/",  # MIT Technology Review - AI Ethics
+            "https://aiethicslab.com/feed/",  # AI Ethics Lab - AI ethics research and analysis
             
             # Academic Blogs
             "https://distill.pub/rss.xml",  # Distill - ML research blog
