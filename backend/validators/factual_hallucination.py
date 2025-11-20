@@ -142,7 +142,21 @@ class FactualHallucinationValidator(Validator):
                     reasons.append(f"fake_url_detected: {pattern}")
                     logger.warning(f"FactualHallucinationValidator detected fake URL: {pattern}")
             
-            # 3. Check answer against FPS
+            # 3. Check for fake source references (History.com, Britannica, etc. when no context)
+            if len(ctx_docs) == 0:
+                fake_source_patterns = [
+                    r"History\.com",
+                    r"Britannica",
+                    r"theo\s+nghiên\s+cứu",
+                    r"theo\s+tài\s+liệu",
+                    r"tham\s+khảo\s+nguồn",
+                ]
+                for pattern in fake_source_patterns:
+                    if re.search(pattern, answer_lower):
+                        reasons.append(f"fake_source_reference_detected: {pattern}")
+                        logger.warning(f"FactualHallucinationValidator detected fake source reference: {pattern}")
+            
+            # 4. Check answer against FPS
             if user_question:
                 fps_result = self.fps.scan(user_question)
                 

@@ -1908,11 +1908,24 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
             # Check if context is empty OR if context is not relevant
             # We'll check relevance after validation, but for now check if context exists
             context_is_relevant = True  # Default: assume relevant until proven otherwise
-            if context["total_context_docs"] == 0:
+            context_quality = context.get("context_quality", None)
+            avg_similarity = context.get("avg_similarity_score", None)
+            has_reliable_context = context.get("has_reliable_context", True)
+            
+            # CRITICAL: Check if context is actually reliable
+            # If no context OR low similarity OR unreliable context → treat as no context
+            has_no_reliable_context = (
+                context["total_context_docs"] == 0 or
+                (avg_similarity is not None and avg_similarity < 0.3) or
+                not has_reliable_context or
+                context_quality == "low"
+            )
+            
+            if has_no_reliable_context:
                 context_is_relevant = False
                 
-                # CRITICAL: Pre-LLM Hallucination Guard for RAG path with no context
-                # If factual question + no context + suspicious entity → block and return honest response
+                # CRITICAL: Pre-LLM Hallucination Guard for RAG path with no reliable context
+                # If factual question + no reliable context + suspicious entity → block and return honest response
                 # This prevents LLM from hallucinating about non-existent concepts/events
                 if _is_factual_question(chat_request.message):
                     # Check for suspicious named entities using FPS
