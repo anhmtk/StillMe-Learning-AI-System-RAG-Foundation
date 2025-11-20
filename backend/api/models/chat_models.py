@@ -19,6 +19,7 @@ class ChatRequest(BaseModel):
     use_rag: bool = Field(default=True, description="Whether to use RAG for context")
     context_limit: int = Field(default=3, ge=1, le=5, description="Maximum number of context documents (increased from 2 to 3 for better coverage)")
     conversation_history: Optional[List[Dict[str, Any]]] = Field(default=None, description="Previous conversation messages for context. Format: [{'role': 'user', 'content': '...', 'message_id': '...' (optional)}, {'role': 'assistant', 'content': '...', 'message_id': '...' (optional)}]")
+    use_option_b: bool = Field(default=False, description="Enable Option B pipeline (zero-tolerance hallucination + deep philosophy). Accepts 2-3x latency increase (10-20s) for absolute honesty and depth.")
     # LLM Provider Configuration
     # For public API: REQUIRED - users must provide their own API keys
     # For internal/dashboard: Optional - will use server API keys if not provided

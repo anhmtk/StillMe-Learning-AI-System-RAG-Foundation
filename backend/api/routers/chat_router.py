@@ -1391,6 +1391,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     is_fallback_for_learning = False  # Used to skip learning extraction for fallback meta-answers
     use_philosophy_lite_rag = False  # Initialize to prevent UnboundLocalError
     
+    # OPTION B PIPELINE: Check if enabled
+    use_option_b = getattr(chat_request, 'use_option_b', False) or os.getenv("STILLME_USE_OPTION_B_PIPELINE", "false").lower() == "true"
+    
     try:
         # Get services
         rag_retrieval = get_rag_retrieval()
@@ -3032,15 +3035,95 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         f"enhanced_prompt_length={len(enhanced_prompt) if enhanced_prompt else 0}"
                     )
                     
-                    raw_response = await generate_ai_response(
-                        enhanced_prompt, 
-                        detected_lang=detected_lang,
-                        llm_provider=chat_request.llm_provider,
-                        llm_api_key=chat_request.llm_api_key,
-                        llm_api_url=chat_request.llm_api_url,
-                        llm_model_name=chat_request.llm_model_name,
-                        use_server_keys=use_server_keys
-                    )
+                    # OPTION B PIPELINE: Check if enabled
+                    if use_option_b:
+                        logger.info("🚀 Option B Pipeline enabled - processing with zero-tolerance hallucination + deep philosophy")
+                        processing_steps.append("🚀 Option B Pipeline: Enabled")
+                        
+                        # Step 1-3: Pre-LLM processing (Question Classifier, FPS, RAG)
+                        from backend.core.option_b_pipeline import process_with_option_b, process_llm_response_with_option_b
+                        from backend.core.question_classifier_v2 import get_question_classifier_v2
+                        
+                        # Classify question
+                        classifier = get_question_classifier_v2()
+                        question_type_result, confidence, _ = classifier.classify(chat_request.message)
+                        question_type_str = question_type_result.value if hasattr(question_type_result, 'value') else str(question_type_result)
+                        
+                        # Check FPS (already done earlier, but check again for Option B)
+                        if fps_result and not fps_result.is_plausible and fps_result.confidence < 0.3:
+                            # FPS blocked - return EPD-Fallback immediately
+                            logger.warning(f"🛡️ Option B: FPS blocked question - returning EPD-Fallback")
+                            from backend.guards.epistemic_fallback import get_epistemic_fallback_generator
+                            generator = get_epistemic_fallback_generator()
+                            suspicious_entity = fps_result.detected_entities[0] if fps_result.detected_entities else None
+                            fallback_text = generator.generate_epd_fallback(
+                                question=chat_request.message,
+                                detected_lang=detected_lang,
+                                suspicious_entity=suspicious_entity,
+                                fps_result=fps_result
+                            )
+                            processing_steps.append("🛡️ Option B: FPS blocked - EPD-Fallback returned")
+                            return ChatResponse(
+                                response=fallback_text,
+                                confidence_score=1.0,
+                                processing_steps=processing_steps,
+                                timing_logs={
+                                    "total_time": time.time() - start_time,
+                                    "rag_retrieval_latency": rag_retrieval_latency,
+                                    "llm_inference_latency": 0.0
+                                },
+                                validation_result=None,
+                                used_fallback=True
+                            )
+                        
+                        # Generate LLM response (Step 4)
+                        raw_response = await generate_ai_response(
+                            enhanced_prompt, 
+                            detected_lang=detected_lang,
+                            llm_provider=chat_request.llm_provider,
+                            llm_api_key=chat_request.llm_api_key,
+                            llm_api_url=chat_request.llm_api_url,
+                            llm_model_name=chat_request.llm_model_name,
+                            use_server_keys=use_server_keys
+                        )
+                        
+                        # Validate raw_response
+                        if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
+                            logger.error("⚠️ Option B: LLM returned empty response")
+                            from backend.api.utils.error_detector import get_fallback_message_for_error
+                            raw_response = get_fallback_message_for_error("generic", detected_lang)
+                        
+                        # Step 5-8: Post-LLM processing (Hallucination Guard V2, Rewrite 1, Rewrite 2)
+                        option_b_result = await process_llm_response_with_option_b(
+                            llm_response=raw_response,
+                            question=chat_request.message,
+                            question_type=question_type_str,
+                            ctx_docs=context.get("knowledge_docs", []) if context else [],
+                            detected_lang=detected_lang,
+                            fps_result=fps_result
+                        )
+                        
+                        # Use Option B processed response
+                        raw_response = option_b_result["response"]
+                        processing_steps.extend(option_b_result.get("processing_steps", []))
+                        timing_logs.update(option_b_result.get("timing_logs", {}))
+                        
+                        # Mark as Option B processed
+                        is_option_b_processed = True
+                        logger.info(f"✅ Option B Pipeline completed: {len(option_b_result.get('processing_steps', []))} steps")
+                    else:
+                        # EXISTING PIPELINE (legacy)
+                        raw_response = await generate_ai_response(
+                            enhanced_prompt, 
+                            detected_lang=detected_lang,
+                            llm_provider=chat_request.llm_provider,
+                            llm_api_key=chat_request.llm_api_key,
+                            llm_api_url=chat_request.llm_api_url,
+                            llm_model_name=chat_request.llm_model_name,
+                            use_server_keys=use_server_keys
+                        )
+                        
+                        is_option_b_processed = False
                     
                     # CRITICAL: Log raw_response immediately after LLM call
                     logger.info(
@@ -3049,7 +3132,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         f"is None={raw_response is None}, "
                         f"is str={isinstance(raw_response, str)}, "
                         f"length={len(raw_response) if raw_response else 0}, "
-                        f"preview={raw_response[:200] if raw_response else 'None'}"
+                        f"preview={raw_response[:200] if raw_response else 'None'}, "
+                        f"option_b={is_option_b_processed}"
                     )
                     
                     # CRITICAL: Check if raw_response is an error message BEFORE validation
