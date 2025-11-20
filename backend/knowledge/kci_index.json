@@ -152,6 +152,7 @@
     "paris peace conference",
     "paris peace conference 1919",
     "bretton woods conference",
+    "bretton woods conference 1944",
     "san francisco conference",
     "bandung conference",
     "geneva conference",
@@ -192,7 +193,29 @@
     "geneva conventions",
     "rome statute",
     "maastricht treaty",
-    "lisbon treaty"
+    "lisbon treaty",
+    "bretton woods agreement"
+  ],
+  "philosophy_terms": [
+    "kuhn",
+    "thomas kuhn",
+    "paradigm shift",
+    "lakatos",
+    "imre lakatos",
+    "research programme",
+    "feyerabend",
+    "paul feyerabend",
+    "epistemological anarchism",
+    "popper",
+    "karl popper",
+    "falsificationism",
+    "putnam",
+    "hilary putnam",
+    "internal realism",
+    "scientific realism",
+    "anti-realism",
+    "underdetermination",
+    "underdetermination of theory by data"
   ],
   "wars": [
     "world war i",

@@ -1389,7 +1389,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     is_fallback_meta_answer_rag = False  # Used in RAG path post-processing
     is_fallback_meta_answer_non_rag = False  # Used in non-RAG path
     is_fallback_for_learning = False  # Used to skip learning extraction for fallback meta-answers
-    is_fallback_for_learning = False  # Used to skip learning extraction for fallback meta-answers
+    use_philosophy_lite_rag = False  # Initialize to prevent UnboundLocalError
     
     try:
         # Get services
@@ -2091,6 +2091,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                 
                 # CRITICAL: For philosophical questions with low RAG relevance, use philosophy-lite mode
                 # This prevents context overflow when RAG context is not helpful
+                # Initialize BEFORE any conditional blocks to avoid UnboundLocalError
                 use_philosophy_lite_rag = False
                 if is_philosophical and (not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
                     use_philosophy_lite_rag = True

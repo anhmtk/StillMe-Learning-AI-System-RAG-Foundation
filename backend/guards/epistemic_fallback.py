@@ -253,27 +253,63 @@ class EpistemicFallbackGenerator:
             return self._generate_english_epd(question, suspicious_entity, analysis)
     
     def _extract_entity(self, question: str) -> Optional[str]:
-        """Extract full named entity from question"""
-        # Priority 1: Quoted terms
+        """
+        Extract full named entity from question.
+        
+        Uses the same robust logic as _extract_full_named_entity in chat_router.py
+        to ensure consistent entity extraction.
+        """
+        # Priority 1: Extract quoted terms (most reliable)
         quoted_match = re.search(r'["\']([^"\']+)["\']', question)
         if quoted_match:
             entity = quoted_match.group(1).strip()
-            if len(entity) > 2:
+            if len(entity) > 2:  # Must be meaningful (not just "Hi")
                 return entity
         
-        # Priority 2: Parenthetical terms
-        parenthetical_match = re.search(r'\(([^)]+)\)', question)
-        if parenthetical_match:
-            entity = parenthetical_match.group(1).strip()
-            if len(entity) > 5 and not re.match(r'^\d{4}$', entity):
-                if re.search(r'[A-Z]', entity):
+        # Priority 2: Extract parenthetical terms (e.g., "(Diluted Nuclear Fusion)")
+        # CRITICAL: Extract ALL parenthetical terms and pick the longest/most meaningful one
+        parenthetical_matches = re.findall(r'\(([^)]+)\)', question)
+        if parenthetical_matches:
+            # Filter and prioritize: longer terms, has capital letters, not just years
+            valid_parentheticals = []
+            for match in parenthetical_matches:
+                entity = match.strip()
+                # Filter out years, short abbreviations
+                if len(entity) > 5 and not re.match(r'^\d{4}$', entity):
+                    # Prioritize terms with capital letters (proper nouns/concepts)
+                    if re.search(r'[A-Z]', entity):
+                        valid_parentheticals.append(entity)
+            
+            if valid_parentheticals:
+                # Return the longest one (most likely to be the full concept name)
+                return max(valid_parentheticals, key=len)
+        
+        # Priority 3: Extract full phrases starting with Vietnamese keywords
+        vietnamese_keywords = [
+            r"hiệp\s+ước", r"hội\s+nghị", r"hội\s+chứng", r"định\s+đề", r"học\s+thuyết",
+            r"chủ\s+nghĩa", r"lý\s+thuyết", r"khái\s+niệm", r"phong\s+trào", r"liên\s+minh"
+        ]
+        
+        for keyword_pattern in vietnamese_keywords:
+            # Match: keyword + optional words + optional year
+            pattern = rf'\b{keyword_pattern}\s+[^\.\?\!\n]+?(?:\s+\d{{4}})?(?=[\.\?\!\n]|$)'
+            match = re.search(pattern, question, re.IGNORECASE)
+            if match:
+                entity = match.group(0).strip()
+                # Remove trailing punctuation
+                entity = re.sub(r'[\.\?\!]+$', '', entity).strip()
+                if len(entity) > 5:  # Must be meaningful
                     return entity
         
-        # Priority 3: Vietnamese entity patterns
-        vietnamese_patterns = [
-            r"(?:Hiệp\s+ước|Hội\s+nghị|Hội\s+chứng|Định\s+đề|Học\s+thuyết|Chủ\s+nghĩa)\s+[^\.\?\!\n]+?(?:\s+\d{4})?",
+        # Priority 4: Extract English patterns
+        english_keywords = [
+            r"treaty", r"conference", r"syndrome", r"postulate", r"theory", r"doctrine",
+            r"alliance", r"movement", r"organization"
         ]
-        for pattern in vietnamese_patterns:
+        
+        for keyword_pattern in english_keywords:
+            # Match: keyword + optional words + optional year
+            pattern = rf'\b{keyword_pattern}\s+[^\.\?\!\n]+?(?:\s+\d{{4}})?(?=[\.\?\!\n]|$)'
             match = re.search(pattern, question, re.IGNORECASE)
             if match:
                 entity = match.group(0).strip()
@@ -281,17 +317,12 @@ class EpistemicFallbackGenerator:
                 if len(entity) > 5:
                     return entity
         
-        # Priority 4: English patterns
-        english_patterns = [
-            r"(?:Treaty|Conference|Syndrome|Postulate|Doctrine|Theory)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*(?:\s+\d{4})?",
-        ]
-        for pattern in english_patterns:
-            match = re.search(pattern, question, re.IGNORECASE)
-            if match:
-                entity = match.group(0).strip()
-                entity = re.sub(r'[\.\?\!]+$', '', entity).strip()
-                if len(entity) > 5:
-                    return entity
+        # Priority 5: Extract capitalized multi-word phrases (English)
+        capitalized_match = re.search(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,})\b', question)
+        if capitalized_match:
+            entity = capitalized_match.group(1).strip()
+            if len(entity) > 5:
+                return entity
         
         return None
     
