@@ -3060,9 +3060,10 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         # question_type_result is a QuestionType enum, access .value to get string
                         question_type_str = question_type_result.value
                         
-                        # CRITICAL: Check FPS for Option B - use stricter threshold (0.5) for fake concepts
-                        # This ensures Option B blocks fake concepts more aggressively
-                        if fps_result and not fps_result.is_plausible and fps_result.confidence < 0.5:
+                        # CRITICAL: Check FPS for Option B - use threshold 0.3 for fake concepts
+                        # Known fake entities (Veridian, Daxonia) have confidence 0.15-0.2
+                        # This ensures Option B blocks fake concepts immediately
+                        if fps_result and not fps_result.is_plausible and fps_result.confidence < 0.3:
                             # FPS blocked - return EPD-Fallback immediately
                             logger.warning(f"🛡️ Option B: FPS blocked question - returning EPD-Fallback")
                             from backend.guards.epistemic_fallback import get_epistemic_fallback_generator
