@@ -36,7 +36,7 @@ class PapersWithCodeFetcher:
         entries = []
         
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
                 # Try to fetch from API
                 response = await client.get(
                     f"{self.api_url}",
@@ -71,7 +71,7 @@ class PapersWithCodeFetcher:
                 import feedparser
                 rss_url = f"{self.base_url}/latest"
                 try:
-                    rss_response = await client.get(rss_url)
+                    rss_response = await client.get(rss_url, follow_redirects=True)
                     if rss_response.status_code == 200:
                         feed = feedparser.parse(rss_response.text)
                         for entry_data in feed.entries[:max_results]:

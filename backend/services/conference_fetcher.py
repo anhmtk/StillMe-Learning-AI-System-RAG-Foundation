@@ -32,7 +32,7 @@ class ConferenceFetcher:
             },
             "acl": {
                 "name": "ACL",
-                "rss": "https://aclanthology.org/feed/",  # ACL Anthology RSS (has XML syntax errors - will attempt recovery)
+                "rss": None,  # ACL Anthology RSS feed returns 404 - removed until alternative found
                 "base_url": "https://aclanthology.org",
                 "api": None
             },
