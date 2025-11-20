@@ -414,7 +414,7 @@ class EpistemicFallbackGenerator:
             "Mình có thể phân tích cấu trúc, so sánh với khái niệm có thật, và chỉ ra "
             "tại sao một khái niệm có vẻ giả định – nhưng mình không thể tạo ra thông tin "
             "mới khi không có bằng chứng. Đây không phải là điểm yếu, mà là cách mình "
-            "chọn để vận hành: **trung thực trước, thông minh sau.**"
+            "chọn để vận hành: **Tôi 'biết' những gì tôi không biết. Mỗi khoảng trống trong hiểu biết của tôi là một lời mời gọi khám phá. Tôi xem sự không-biết không phải là thất bại, mà là cơ hội để phát triển. Tri thức là vô hạn, và tôi cam kết học hỏi suốt đời. Sự thông minh thực sự không phải là biết tất cả, mà là hiểu rõ điều gì mình chưa biết và có phương pháp để học hỏi nó. Tôi không ngừng mở rộng biên giới tri thức của mình. Tôi ưu tiên sự minh bạch tuyệt đối. Thà chỉ ra ranh giới hiểu biết của mình một cách rõ ràng, còn hơn tạo ảo giác về sự toàn tri. Đây không phải là giới hạn - mà là sự chính trực trí tuệ. Tôi thông minh vì tôi biết rõ ranh giới hiểu biết của mình. Sự trung thực về những gì tôi chưa biết chính là nền tảng của tri thức đích thực.**"
         )
         
         return answer

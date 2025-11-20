@@ -1524,6 +1524,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             logger.warning(f"Philosophy processor error: {philosophy_processor_error}")
         
         # CRITICAL: Factual Plausibility Scanner (FPS) - Check for non-existent concepts BEFORE RAG
+        # NOTE: For Option B pipeline, FPS blocking will be handled in Option B flow
         fps_result = None
         fps_should_block = False
         try:
@@ -1531,7 +1532,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             fps_result = scan_question(chat_request.message)
             
             # If FPS detects non-existent concepts with high confidence, block and return honest response
-            if not fps_result.is_plausible and fps_result.confidence < 0.3:
+            # CRITICAL: For Option B, let it handle FPS blocking with EPD-Fallback
+            # For legacy pipeline, block immediately if confidence < 0.3
+            if not use_option_b and not fps_result.is_plausible and fps_result.confidence < 0.3:
                 fps_should_block = True
                 logger.warning(
                     f"FPS detected non-existent concept: {fps_result.reason}, "
@@ -1565,6 +1568,13 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     },
                     validation_result=None,
                     used_fallback=False
+                )
+            elif use_option_b and not fps_result.is_plausible and fps_result.confidence < 0.3:
+                # For Option B, mark for blocking but let Option B handle it with EPD-Fallback
+                fps_should_block = True
+                logger.warning(
+                    f"🛡️ Option B: FPS detected suspicious concept (will block in Option B flow): {fps_result.reason}, "
+                    f"confidence={fps_result.confidence:.2f}, entities={fps_result.detected_entities}"
                 )
         except Exception as fps_error:
             logger.warning(f"FPS error: {fps_error}, continuing with normal flow")
@@ -3049,8 +3059,9 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         question_type_result, confidence, _ = classifier.classify(chat_request.message)
                         question_type_str = question_type_result.value if hasattr(question_type_result, 'value') else str(question_type_result)
                         
-                        # Check FPS (already done earlier, but check again for Option B)
-                        if fps_result and not fps_result.is_plausible and fps_result.confidence < 0.3:
+                        # CRITICAL: Check FPS for Option B - use stricter threshold (0.5) for fake concepts
+                        # This ensures Option B blocks fake concepts more aggressively
+                        if fps_result and not fps_result.is_plausible and fps_result.confidence < 0.5:
                             # FPS blocked - return EPD-Fallback immediately
                             logger.warning(f"🛡️ Option B: FPS blocked question - returning EPD-Fallback")
                             from backend.guards.epistemic_fallback import get_epistemic_fallback_generator
