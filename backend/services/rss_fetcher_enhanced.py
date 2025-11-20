@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 import logging
 import time
 import asyncio
+import re
+import html
 from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
