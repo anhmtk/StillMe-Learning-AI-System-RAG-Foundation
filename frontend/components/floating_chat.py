@@ -1461,8 +1461,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             const clickX = e.clientX;
                                             const clickY = e.clientY;
                                             
-                                            // Check if click is within messages container AND in scrollbar area (rightmost 20px)
-                                            const scrollbarAreaStart = messagesRect.right - 20; // Rightmost 20px is scrollbar area
+                                            // Check if click is within messages container AND in scrollbar area (rightmost 12px)
+                                            // Scrollbar is 6px wide, but we check 12px to be safe (includes scrollbar + padding)
+                                            const scrollbarAreaStart = messagesRect.right - 12; // Rightmost 12px is scrollbar area
                                             const isInMessagesContainer = (
                                                 clickX >= messagesRect.left &&
                                                 clickX <= messagesRect.right &&
@@ -1595,8 +1596,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             const mouseX = e.clientX;
                                             const mouseY = e.clientY;
                                             
-                                            // Check if mouse is within messages container AND in scrollbar area (rightmost 20px)
-                                            const scrollbarAreaStart = messagesRect.right - 20; // Rightmost 20px is scrollbar area
+                                            // Check if mouse is within messages container AND in scrollbar area (rightmost 12px)
+                                            // Scrollbar is 6px wide, but we check 12px to be safe
+                                            const scrollbarAreaStart = messagesRect.right - 12; // Rightmost 12px is scrollbar area
                                             const isInMessagesContainer = (
                                                 mouseX >= messagesRect.left &&
                                                 mouseX <= messagesRect.right &&
