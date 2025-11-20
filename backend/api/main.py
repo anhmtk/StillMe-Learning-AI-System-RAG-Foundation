@@ -982,6 +982,56 @@ async def startup_event():
         logger.warning(f"⚠️ Service started with initialization errors: {_initialization_error}")
     elif not _rag_initialization_complete and not _rag_initialization_started:
         logger.info("ℹ️ RAG initialization starting in background - /health endpoint is ready")
+    
+    # Auto-start scheduler after RAG components are initialized
+    async def auto_start_scheduler_after_init():
+        """Wait for RAG initialization to complete, then auto-start scheduler if enabled"""
+        # Wait for RAG initialization to complete (max 5 minutes)
+        max_wait_time = 300  # 5 minutes
+        wait_interval = 2  # Check every 2 seconds
+        elapsed = 0
+        
+        while not _rag_initialization_complete and elapsed < max_wait_time:
+            await asyncio.sleep(wait_interval)
+            elapsed += wait_interval
+        
+        if not _rag_initialization_complete:
+            logger.warning("⚠️ RAG initialization not completed after 5 minutes - skipping auto-start scheduler")
+            return
+        
+        # Check if auto-start is enabled
+        auto_start_enabled = os.getenv("AUTO_START_SCHEDULER", "true").lower() == "true"
+        
+        if not auto_start_enabled:
+            logger.info("ℹ️ AUTO_START_SCHEDULER is disabled - scheduler will not auto-start")
+            return
+        
+        # Wait a bit more to ensure all components are ready
+        await asyncio.sleep(2)
+        
+        # Check if scheduler is available and not already running
+        if learning_scheduler:
+            if learning_scheduler.is_running:
+                logger.info("ℹ️ Scheduler is already running - skipping auto-start")
+            else:
+                try:
+                    await learning_scheduler.start()
+                    logger.info("✅ Scheduler auto-started on application startup")
+                    logger.info(f"📅 Scheduler will run every {learning_scheduler.interval_hours} hours")
+                except Exception as e:
+                    logger.error(f"❌ Failed to auto-start scheduler: {e}")
+        else:
+            logger.warning("⚠️ Learning scheduler not available - cannot auto-start")
+    
+    # Start auto-start task in background
+    asyncio.create_task(auto_start_scheduler_after_init())
+    
+    # Log component integration status
+    logger.info("🔗 Component Integration Status:")
+    logger.info(f"  - RAG System: {'✓ Ready' if rag_retrieval and knowledge_retention else '⏳ Initializing...'}")
+    logger.info(f"  - Learning System: {'✓ Ready' if learning_scheduler and source_integration else '⏳ Initializing...'}")
+    logger.info(f"  - Memory Health: {'✓ Ready' if continuum_memory else '⊘ Disabled (ENABLE_CONTINUUM_MEMORY=false)'}")
+    logger.info(f"  - Nested Learning: {'✓ Ready' if continuum_memory and os.getenv('ENABLE_CONTINUUM_MEMORY', 'false').lower() == 'true' else '⊘ Disabled'}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
