@@ -20,7 +20,7 @@ class ConferenceFetcher:
         self.conferences = {
             "neurips": {
                 "name": "NeurIPS",
-                "rss": "https://papers.nips.cc/rss",  # If available
+                "rss": None,  # papers.nips.cc/rss returns wrong content-type (HTML)
                 "base_url": "https://papers.nips.cc",
                 "api": None  # May require API key
             },
@@ -32,7 +32,7 @@ class ConferenceFetcher:
             },
             "acl": {
                 "name": "ACL",
-                "rss": "https://aclanthology.org/feed/",  # ACL Anthology RSS
+                "rss": "https://aclanthology.org/feed/",  # ACL Anthology RSS (has XML syntax errors - will attempt recovery)
                 "base_url": "https://aclanthology.org",
                 "api": None
             },
@@ -96,30 +96,63 @@ class ConferenceFetcher:
         return all_entries
     
     def _fetch_from_rss(self, rss_url: str, conference_name: str, max_results: int) -> List[Dict[str, Any]]:
-        """Fetch papers from RSS feed"""
+        """Fetch papers from RSS feed with error recovery"""
         entries = []
         
         try:
-            feed = feedparser.parse(rss_url)
-            
-            if feed.bozo and feed.bozo_exception:
-                raise Exception(f"RSS parse error: {feed.bozo_exception}")
-            
-            for entry in feed.entries[:max_results]:
-                entry_data = {
-                    "title": entry.get("title", ""),
-                    "summary": entry.get("summary", entry.get("description", "")),
-                    "link": entry.get("link", ""),
-                    "published": entry.get("published", datetime.now().isoformat()),
-                    "source": f"conference_{conference_name.lower()}",
-                    "content_type": "knowledge",
-                    "metadata": {
-                        "conference": conference_name,
-                        "authors": entry.get("authors", []) if hasattr(entry, "authors") else []
-                    }
-                }
-                entries.append(entry_data)
+            # Fetch with httpx to check content-type
+            import httpx
+            with httpx.Client(timeout=30.0, follow_redirects=True) as client:
+                response = client.get(rss_url)
                 
+                # Check content-type
+                content_type = response.headers.get("content-type", "").lower()
+                if "text/html" in content_type:
+                    logger.warning(f"RSS feed {rss_url} returned HTML instead of XML - may need HTML scraping")
+                    # Try to parse anyway (some feeds return HTML with RSS content)
+                
+                # Try to parse as RSS/XML
+                feed = feedparser.parse(response.text)
+                
+                # Handle parse errors with recovery
+                if feed.bozo and feed.bozo_exception:
+                    error_type = type(feed.bozo_exception).__name__
+                    error_msg = str(feed.bozo_exception)
+                    
+                    # Try to recover from common XML errors
+                    if "not well-formed" in error_msg.lower() or "malformed" in error_msg.lower():
+                        logger.warning(f"Malformed XML for {rss_url}, attempting recovery...")
+                        # Try sanitizing XML
+                        from backend.services.rss_fetcher_enhanced import sanitize_xml
+                        sanitized = sanitize_xml(response.text)
+                        feed = feedparser.parse(sanitized)
+                        if feed.bozo:
+                            raise Exception(f"RSS parse error (recovery failed): {feed.bozo_exception}")
+                    elif "mismatched tag" in error_msg.lower():
+                        logger.warning(f"Mismatched tag for {rss_url}, attempting recovery...")
+                        from backend.services.rss_fetcher_enhanced import sanitize_xml
+                        sanitized = sanitize_xml(response.text)
+                        feed = feedparser.parse(sanitized)
+                        if feed.bozo:
+                            raise Exception(f"RSS parse error (recovery failed): {feed.bozo_exception}")
+                    else:
+                        raise Exception(f"RSS parse error: {feed.bozo_exception}")
+                
+                for entry in feed.entries[:max_results]:
+                    entry_data = {
+                        "title": entry.get("title", ""),
+                        "summary": entry.get("summary", entry.get("description", "")),
+                        "link": entry.get("link", ""),
+                        "published": entry.get("published", datetime.now().isoformat()),
+                        "source": f"conference_{conference_name.lower()}",
+                        "content_type": "knowledge",
+                        "metadata": {
+                            "conference": conference_name,
+                            "authors": entry.get("authors", []) if hasattr(entry, "authors") else []
+                        }
+                    }
+                    entries.append(entry_data)
+                    
         except Exception as e:
             logger.error(f"Error fetching RSS from {rss_url}: {e}")
             raise

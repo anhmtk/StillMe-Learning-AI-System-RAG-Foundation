@@ -40,7 +40,8 @@ class RSSFetcher:
             
             # Physics
             "https://physicsworld.com/feed/",
-            "https://phys.org/rss-feed/physics-news/",  # Phys.org Physics
+            # Removed: "https://phys.org/rss-feed/physics-news/" - 400 Bad request
+            "https://phys.org/rss-feed/",  # Phys.org main feed (fallback)
             
             # Chemistry
             # Note: Some chemistry feeds may be empty - will be monitored and replaced if needed
@@ -48,7 +49,7 @@ class RSSFetcher:
             # Religious Studies & Philosophy
             "https://aeon.co/feed.rss",  # Aeon Magazine - Philosophy, Religion, Culture
             "https://www.theguardian.com/world/religion/rss",  # The Guardian - Religion
-            "https://tricycle.org/feed/",  # Tricycle - The Buddhist Review
+            # Removed: "https://tricycle.org/feed/" - 403 Forbidden
             "https://www.lionsroar.com/feed/",  # Lion's Roar - Buddhist Wisdom for Our Time
             # Note: Some religious studies feeds may be empty - will be monitored and replaced if needed
             
@@ -56,18 +57,20 @@ class RSSFetcher:
             # Added based on StillMe's analysis of reliable, peer-reviewed, and up-to-date sources
             "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science",  # Science Magazine - Peer-reviewed research breakthroughs
             "https://www.nature.com/nature.rss",  # Nature - Already exists, keeping for clarity
-            "https://feeds.reuters.com/reuters/topNews",  # Reuters - Top News (reliable, up-to-date)
+            # Reuters - Use alternative feeds (topNews has DNS issues)
+            "https://feeds.reuters.com/reuters/businessNews",  # Reuters Business (fallback for topNews)
+            "https://feeds.reuters.com/reuters/technologyNews",  # Reuters Technology
             "https://feeds.bloomberg.com/markets/news.rss",  # Bloomberg Markets - Economic & financial analysis
             
             # Tech Policy & AI Governance Blogs
             "https://www.eff.org/rss/updates.xml",  # Electronic Frontier Foundation - Tech policy
-            "https://www.brookings.edu/topic/technology-innovation/feed/",  # Brookings - Tech policy
-            "https://www.cato.org/rss/blog/technology",  # Cato Institute - Tech policy
-            "https://www.aei.org/technology/feed/",  # American Enterprise Institute - Tech policy
+            "https://www.brookings.edu/feed/",  # Brookings main feed (fallback for tech-innovation)
+            "https://www.cato.org/feed/",  # Cato main feed (fallback for blog/technology - 403)
+            # Removed: "https://www.aei.org/technology/feed/" - 403 Forbidden, no reliable alternative
             
             # Academic Blogs
             "https://distill.pub/rss.xml",  # Distill - ML research blog
-            "https://lilianweng.github.io/feed.xml",  # Lilian Weng's blog - ML research
+            # Removed: "https://lilianweng.github.io/feed.xml" - 404 + XML error, no reliable alternative
             "https://www.lesswrong.com/feed.xml",  # LessWrong - Rationality & AI safety
             "https://www.alignmentforum.org/feed.xml",  # Alignment Forum - AI alignment
             "https://www.overcomingbias.com/feed",  # Overcoming Bias - Rationality

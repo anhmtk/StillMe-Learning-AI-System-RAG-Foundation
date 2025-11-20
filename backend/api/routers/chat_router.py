@@ -1958,7 +1958,7 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
             # If no context OR low similarity OR unreliable context → treat as no context
             has_no_reliable_context = (
                 context["total_context_docs"] == 0 or
-                (avg_similarity is not None and avg_similarity < 0.3) or
+                (avg_similarity is not None and avg_similarity < 0.1) or
                 not has_reliable_context or
                 context_quality == "low"
             )
@@ -2139,7 +2139,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                 # CRITICAL: For philosophical questions with low RAG relevance, use philosophy-lite mode
                 # This prevents context overflow when RAG context is not helpful
                 use_philosophy_lite_rag = False
-                if is_philosophical and (not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3)):
+                if is_philosophical and (not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
                     use_philosophy_lite_rag = True
                     logger.info(
                         f"📊 [PHILO-LITE-RAG] Low RAG relevance for philosophical question "
@@ -2161,7 +2161,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
 **The retrieved context has LOW RELEVANCE to the user's question.**
 
 **Context Quality Metrics:**
-- Average Similarity Score: {avg_similarity_str} (threshold: 0.3)
+- Average Similarity Score: {avg_similarity_str} (threshold: 0.1)
 - Context Quality: {context_quality or 'low'}
 - Has Reliable Context: {has_reliable_context}
 

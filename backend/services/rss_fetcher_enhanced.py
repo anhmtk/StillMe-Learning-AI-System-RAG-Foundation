@@ -19,23 +19,33 @@ logger = logging.getLogger(__name__)
 FALLBACK_FEEDS = {
     "https://feeds.reuters.com/reuters/topNews": [
         "https://feeds.reuters.com/reuters/businessNews",
-        "https://feeds.reuters.com/reuters/technologyNews"
+        "https://feeds.reuters.com/reuters/technologyNews",
+        "https://feeds.reuters.com/reuters/worldNews"
     ],
     "https://www.brookings.edu/topic/technology-innovation/feed/": [
         "https://www.brookings.edu/feed/",
-        "https://www.brookings.edu/topic/artificial-intelligence/feed/"
+        "https://www.brookings.edu/topic/artificial-intelligence/feed/",
+        "https://www.brookings.edu/topic/tech-innovation/feed/"
     ],
     "https://www.cato.org/rss/blog/technology": [
         "https://www.cato.org/rss/blog",
-        "https://www.cato.org/feed/"
+        "https://www.cato.org/feed/",
+        "https://www.cato.org/research/feed/"
     ],
     "https://www.aei.org/technology/feed/": [
         "https://www.aei.org/feed/",
-        "https://www.aei.org/research/feed/"
+        "https://www.aei.org/research/feed/",
+        "https://www.aei.org/policy-areas/technology/feed/"
     ],
     "https://lilianweng.github.io/feed.xml": [
-        "https://lilianweng.github.io/posts/",
-        # No direct fallback, but we can skip this feed
+        # No reliable fallback - feed removed from main list
+    ],
+    "https://phys.org/rss-feed/physics-news/": [
+        "https://phys.org/rss-feed/",
+        "https://phys.org/rss-feed/breaking/"
+    ],
+    "https://tricycle.org/feed/": [
+        # No reliable fallback - feed removed from main list
     ]
 }
 

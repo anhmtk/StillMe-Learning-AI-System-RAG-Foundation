@@ -141,7 +141,7 @@ class ConfidenceValidator:
         
         # Tier 3.5: Force uncertainty when context quality is low
         # BUT: Skip for philosophical questions (theoretical reasoning doesn't need context)
-        if not is_philosophical and (context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3)):
+        if not is_philosophical and (context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
             # Check if answer already expresses uncertainty
             has_uncertainty = any(
                 re.search(pattern, answer_lower, re.IGNORECASE)

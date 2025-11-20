@@ -34,8 +34,10 @@ class WikipediaFetcher:
             language: Wikipedia language code (default: en)
         """
         self.language = language
-        # Use correct REST v1 endpoint base URL
-        self.api_base = f"https://{language}.wikipedia.org/w/rest.php/v1"
+        # Use MediaWiki Action API as primary (more reliable than REST v1)
+        # REST v1 endpoint: https://{language}.wikipedia.org/api/rest_v1 (alternative)
+        self.api_base = f"https://{language}.wikipedia.org/api/rest_v1"
+        self.action_api_base = f"https://{language}.wikipedia.org/w/api.php"
         self.last_request_time: Optional[datetime] = None
         self.request_count = 0
         # Track error states for self-diagnosis
@@ -124,21 +126,64 @@ class WikipediaFetcher:
             Article entry with content
         """
         try:
-            # Try REST v1 API first (preferred)
-            # URL format: https://{language}.wikipedia.org/w/rest.php/v1/page/summary/{title}
-            # Wikipedia page titles use underscores, not spaces
             from urllib.parse import quote
             
             # Normalize title: replace spaces with underscores (Wikipedia format)
-            # But preserve existing underscores
             normalized_title = title.replace(" ", "_")
-            # URL encode special characters, but keep underscores and alphanumeric
-            # safe="_" means underscores won't be encoded
+            
+            # Try MediaWiki Action API first (more reliable)
+            action_api_url = self.action_api_base
+            params = {
+                "action": "query",
+                "prop": "extracts|info",
+                "exintro": "true",
+                "explaintext": "true",
+                "titles": normalized_title,
+                "format": "json",
+                "formatversion": "2"
+            }
+            response = self._fetch_with_retry(action_api_url, params)
+            
+            # If Action API succeeds, use it
+            if response and response.status_code == 200:
+                data = response.json()
+                pages = data.get("query", {}).get("pages", [])
+                if pages and len(pages) > 0:
+                    page = pages[0]
+                    if "missing" not in page:
+                        extract = page.get("extract", "")
+                        page_title = page.get("title", title)
+                        page_id = page.get("pageid")
+                        content_url = f"https://{self.language}.wikipedia.org/wiki/{quote(page_title.replace(' ', '_'), safe='_')}"
+                        
+                        article_entry = {
+                            "title": page_title,
+                            "summary": extract[:500] if len(extract) > 500 else extract,
+                            "content": extract,
+                            "link": content_url,
+                            "published": datetime.now().isoformat(),
+                            "source": "wikipedia",
+                            "source_url": content_url,
+                            "content_type": "knowledge",
+                            "metadata": {
+                                "page_id": page_id,
+                                "license": "CC BY-SA 3.0",
+                                "source_type": "wikipedia",
+                                "language": self.language,
+                                "api_used": "mediawiki_action"
+                            }
+                        }
+                        self.last_success_time = datetime.now()
+                        self.last_error = None
+                        logger.info(f"Fetched Wikipedia article via Action API: {page_title}")
+                        return article_entry
+            
+            # Fallback: Try REST v1 API
             encoded_title = quote(normalized_title, safe="_")
             url = f"{self.api_base}/page/summary/{encoded_title}"
             response = self._fetch_with_retry(url)
             
-            # If REST v1 fails with 404, try MediaWiki Action API as fallback
+            # If REST v1 also fails with 404
             if response and response.status_code == 404:
                 logger.debug(f"REST v1 API returned 404 for '{title}', trying MediaWiki Action API...")
                 # Use MediaWiki Action API to get page content

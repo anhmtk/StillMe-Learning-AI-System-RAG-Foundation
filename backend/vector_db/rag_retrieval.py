@@ -37,7 +37,7 @@ class RAGRetrieval:
                         conversation_limit: int = 1,  # Optimized: reduced from 2 to 1 for latency
                         prioritize_foundational: bool = False,
                         tier_preference: Optional[str] = None,
-                        similarity_threshold: float = 0.3,  # Tier 3.5: Filter low-quality context
+                        similarity_threshold: float = 0.1,  # Reduced from 0.3 to 0.1 for better context retrieval
                         use_mmr: bool = True,  # Tier 3.5: Use MMR for diversity
                         mmr_lambda: float = 0.7,
                         exclude_content_types: Optional[List[str]] = None,
@@ -51,7 +51,7 @@ class RAGRetrieval:
             conversation_limit: Number of conversation documents to retrieve
             prioritize_foundational: If True, prioritize foundational knowledge (tagged with 'foundational:stillme')
             tier_preference: Optional tier preference (L0, L1, L2, L3) for Nested Learning retrieval strategy
-            similarity_threshold: Minimum similarity score (0.0-1.0) to include document. Default: 0.3
+            similarity_threshold: Minimum similarity score (0.0-1.0) to include document. Default: 0.1
             use_mmr: If True, use Max Marginal Relevance for diversity. Default: True
             mmr_lambda: MMR lambda parameter (0.0-1.0). Higher = more relevance, lower = more diversity. Default: 0.7
             exclude_content_types: List of content_type values to exclude (e.g., ["technical"] for philosophical questions)

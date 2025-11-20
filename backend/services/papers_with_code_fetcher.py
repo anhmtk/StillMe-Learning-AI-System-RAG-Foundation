@@ -116,18 +116,31 @@ class PapersWithCodeFetcher:
         """
         try:
             import asyncio
+            import concurrent.futures
+            
+            # Check if we're in an async context
             try:
-                return asyncio.run(self.fetch_recent_papers_async(max_results))
+                loop = asyncio.get_running_loop()
+                # Event loop is already running - use thread executor
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(self._run_async_in_thread, max_results)
+                    return future.result(timeout=60.0)
             except RuntimeError:
-                # If event loop already running, create new one
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                result = loop.run_until_complete(self.fetch_recent_papers_async(max_results))
-                loop.close()
-                return result
+                # No event loop running - safe to use asyncio.run
+                return asyncio.run(self.fetch_recent_papers_async(max_results))
         except Exception as e:
             logger.error(f"Error in fetch_recent_papers: {e}")
             return []
+    
+    def _run_async_in_thread(self, max_results: int) -> List[Dict[str, Any]]:
+        """Run async function in a new thread with its own event loop"""
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(self.fetch_recent_papers_async(max_results))
+        finally:
+            loop.close()
     
     def get_stats(self) -> Dict[str, Any]:
         """Get fetcher statistics"""

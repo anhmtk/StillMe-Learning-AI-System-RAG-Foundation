@@ -44,84 +44,81 @@ class StanfordEncyclopediaFetcher:
             topics = ["artificial-intelligence", "ethics", "consciousness", "knowledge", "truth"]
         
         try:
-            async def fetch_async():
-                async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-                    # Fetch entry list page
-                    response = await client.get(self.entries_url)
+            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+                # Fetch entry list page
+                response = await client.get(self.entries_url)
+                
+                if response.status_code == 200:
+                    soup = BeautifulSoup(response.text, 'html.parser')
                     
-                    if response.status_code == 200:
-                        soup = BeautifulSoup(response.text, 'html.parser')
-                        
-                        # Find all entry links
-                        entry_links = []
-                        for link in soup.find_all('a', href=True):
-                            href = link.get('href', '')
-                            # Match SEP entry URLs: /entries/topic-name/
-                            if '/entries/' in href and href.count('/') >= 3:
-                                entry_name = href.split('/entries/')[-1].rstrip('/')
-                                if entry_name and entry_name not in ['', 'index.html']:
-                                    entry_links.append({
-                                        "name": entry_name,
-                                        "url": f"{self.base_url}{href}" if not href.startswith('http') else href,
-                                        "title": link.get_text(strip=True)
-                                    })
-                        
-                        # Filter by topics if provided
-                        if topics:
-                            filtered_links = [
-                                link for link in entry_links
-                                if any(topic.lower() in link["name"].lower() or topic.lower() in link["title"].lower() 
-                                       for topic in topics)
-                            ]
-                            entry_links = filtered_links[:max_results] if filtered_links else entry_links[:max_results]
-                        else:
-                            entry_links = entry_links[:max_results]
-                        
-                        # Fetch content for each entry
-                        for entry_link in entry_links:
-                            try:
-                                entry_response = await client.get(entry_link["url"])
-                                if entry_response.status_code == 200:
-                                    entry_soup = BeautifulSoup(entry_response.text, 'html.parser')
-                                    
-                                    # Extract main content
-                                    main_content = entry_soup.find('div', {'id': 'main-text'}) or entry_soup.find('div', class_='entry-content')
-                                    if not main_content:
-                                        main_content = entry_soup.find('article') or entry_soup.find('main')
-                                    
-                                    if main_content:
-                                        # Get text content (first 2000 chars for summary)
-                                        text_content = main_content.get_text(separator=' ', strip=True)
-                                        summary = text_content[:2000] + "..." if len(text_content) > 2000 else text_content
-                                        
-                                        entry = {
-                                            "title": entry_link["title"] or entry_link["name"].replace('-', ' ').title(),
-                                            "summary": summary,
-                                            "link": entry_link["url"],
-                                            "published": datetime.now().isoformat(),  # SEP doesn't provide publish dates
-                                            "source": "stanford_encyclopedia",
-                                            "content_type": "knowledge",
-                                            "metadata": {
-                                                "entry_name": entry_link["name"],
-                                                "topic": entry_link["name"]
-                                            }
-                                        }
-                                        entries.append(entry)
-                                        
-                            except Exception as e:
-                                logger.warning(f"Failed to fetch entry {entry_link['url']}: {e}")
-                                continue
-                        
-                        return entries
+                    # Find all entry links
+                    entry_links = []
+                    for link in soup.find_all('a', href=True):
+                        href = link.get('href', '')
+                        # Match SEP entry URLs: /entries/topic-name/
+                        if '/entries/' in href and href.count('/') >= 3:
+                            entry_name = href.split('/entries/')[-1].rstrip('/')
+                            if entry_name and entry_name not in ['', 'index.html']:
+                                entry_links.append({
+                                    "name": entry_name,
+                                    "url": f"{self.base_url}{href}" if not href.startswith('http') else href,
+                                    "title": link.get_text(strip=True)
+                                })
+                    
+                    # Filter by topics if provided
+                    if topics:
+                        filtered_links = [
+                            link for link in entry_links
+                            if any(topic.lower() in link["name"].lower() or topic.lower() in link["title"].lower() 
+                                   for topic in topics)
+                        ]
+                        entry_links = filtered_links[:max_results] if filtered_links else entry_links[:max_results]
                     else:
-                        raise Exception(f"HTTP {response.status_code}")
-            
-            if entries:
-                self.successful_fetches += 1
-                self.last_success_time = datetime.now()
-                logger.info(f"Fetched {len(entries)} entries from Stanford Encyclopedia")
-            
-            return entries
+                        entry_links = entry_links[:max_results]
+                    
+                    # Fetch content for each entry
+                    for entry_link in entry_links:
+                        try:
+                            entry_response = await client.get(entry_link["url"])
+                            if entry_response.status_code == 200:
+                                entry_soup = BeautifulSoup(entry_response.text, 'html.parser')
+                                
+                                # Extract main content
+                                main_content = entry_soup.find('div', {'id': 'main-text'}) or entry_soup.find('div', class_='entry-content')
+                                if not main_content:
+                                    main_content = entry_soup.find('article') or entry_soup.find('main')
+                                
+                                if main_content:
+                                    # Get text content (first 2000 chars for summary)
+                                    text_content = main_content.get_text(separator=' ', strip=True)
+                                    summary = text_content[:2000] + "..." if len(text_content) > 2000 else text_content
+                                    
+                                    entry = {
+                                        "title": entry_link["title"] or entry_link["name"].replace('-', ' ').title(),
+                                        "summary": summary,
+                                        "link": entry_link["url"],
+                                        "published": datetime.now().isoformat(),  # SEP doesn't provide publish dates
+                                        "source": "stanford_encyclopedia",
+                                        "content_type": "knowledge",
+                                        "metadata": {
+                                            "entry_name": entry_link["name"],
+                                            "topic": entry_link["name"]
+                                        }
+                                    }
+                                    entries.append(entry)
+                                    
+                        except Exception as e:
+                            logger.warning(f"Failed to fetch entry {entry_link['url']}: {e}")
+                            continue
+                    
+                    if entries:
+                        self.successful_fetches += 1
+                        self.last_success_time = datetime.now()
+                        logger.info(f"Fetched {len(entries)} entries from Stanford Encyclopedia")
+                    
+                    return entries
+                else:
+                    raise Exception(f"HTTP {response.status_code}")
                 
         except Exception as e:
             error_msg = f"Failed to fetch Stanford Encyclopedia: {e}"
@@ -144,17 +141,31 @@ class StanfordEncyclopediaFetcher:
         """
         try:
             import asyncio
+            import concurrent.futures
+            
+            # Check if we're in an async context
             try:
-                return asyncio.run(self.fetch_recent_entries_async(max_results, topics))
+                loop = asyncio.get_running_loop()
+                # Event loop is already running - use thread executor
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(self._run_async_in_thread, max_results, topics)
+                    return future.result(timeout=60.0)
             except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                result = loop.run_until_complete(self.fetch_recent_entries_async(max_results, topics))
-                loop.close()
-                return result
+                # No event loop running - safe to use asyncio.run
+                return asyncio.run(self.fetch_recent_entries_async(max_results, topics))
         except Exception as e:
             logger.error(f"Error in fetch_recent_entries: {e}")
             return []
+    
+    def _run_async_in_thread(self, max_results: int, topics: Optional[List[str]]) -> List[Dict[str, Any]]:
+        """Run async function in a new thread with its own event loop"""
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(self.fetch_recent_entries_async(max_results, topics))
+        finally:
+            loop.close()
     
     def get_stats(self) -> Dict[str, Any]:
         """Get fetcher statistics"""
