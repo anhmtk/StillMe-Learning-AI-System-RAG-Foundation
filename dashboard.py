@@ -7,6 +7,7 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
+import pandas as pd
 
 # Import floating chat widget
 try:
@@ -527,40 +528,8 @@ def page_overview():
                                 status_icon = "🔴"
                                 st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} unknown")
         
-        col_start, col_stop, col_run_now = st.columns(3)
-        with col_start:
-            if st.button("▶️ Start Scheduler", width='stretch'):
-                try:
-                    # Increased timeout to 30s to handle network latency (Railway deployment)
-                    r = requests.post(
-                        f"{API_BASE}/api/learning/scheduler/start",
-                        headers=get_api_headers(),
-                        timeout=30
-                    )
-                    if r.status_code == 200:
-                        st.session_state["last_action"] = "✅ Scheduler started successfully!"
-                        st.rerun()
-                except requests.exceptions.Timeout:
-                    # Timeout doesn't mean failure - scheduler may have started in background
-                    # Check status to confirm
-                    try:
-                        status_check = get_json("/api/learning/scheduler/status", {}, timeout=10)
-                        if status_check.get("is_running", False):
-                            st.session_state["last_action"] = "✅ Scheduler started successfully! (Confirmed via status check)"
-                            st.rerun()
-                        else:
-                            st.session_state["last_error"] = "⏱️ Request timed out. Please check scheduler status - it may have started in background."
-                    except:
-                        st.session_state["last_error"] = "⏱️ Request timed out. Scheduler may have started - please refresh to check status."
-                except requests.exceptions.HTTPError as e:
-                    if e.response.status_code == 401:
-                        st.session_state["last_error"] = f"❌ 401 Unauthorized: API key missing or invalid. Please set STILLME_API_KEY in Railway dashboard service variables."
-                    elif e.response.status_code == 403:
-                        st.session_state["last_error"] = f"❌ 403 Forbidden: Invalid API key. Please verify STILLME_API_KEY matches backend key."
-                    else:
-                        st.session_state["last_error"] = f"❌ Failed to start scheduler: {e}"
-                except Exception as e:
-                    st.session_state["last_error"] = f"❌ Failed to start scheduler: {e}"
+        # Scheduler controls: Stop and Run Now (Start removed - scheduler auto-starts)
+        col_stop, col_run_now, col_stats = st.columns(3)
         with col_stop:
             if st.button("⏹️ Stop Scheduler", width='stretch'):
                 try:
@@ -654,6 +623,133 @@ def page_overview():
                 
                 # Rerun to show progress section
                 st.rerun()
+        
+        with col_stats:
+            if st.button("📊 Learning Statistics", width='stretch', help="View detailed learning statistics (what StillMe learned/didn't learn and why)"):
+                st.session_state["show_learning_stats"] = True
+                st.rerun()
+        
+        # Display Learning Statistics Dialog (Task Manager style)
+        if st.session_state.get("show_learning_stats", False):
+            st.markdown("---")
+            with st.expander("📊 Learning Statistics (Task Manager Style)", expanded=True):
+                try:
+                    # Get RSS fetch history
+                    fetch_history = get_json("/api/learning/rss/fetch-history", {"limit": 200}, timeout=30)
+                    items = fetch_history.get("items", [])
+                    
+                    if items:
+                        st.markdown("### 📋 Learning Activity Table")
+                        st.caption(f"Showing {len(items)} most recent learning items")
+                        
+                        # Create Task Manager style table
+                        from datetime import datetime
+                        
+                        # Prepare data for table
+                        table_data = []
+                        for item in items:
+                            source = item.get("source_url", item.get("source", "Unknown"))
+                            title = item.get("title", "No title")[:60] + "..." if len(item.get("title", "")) > 60 else item.get("title", "No title")
+                            status = item.get("status", "Unknown")
+                            reason = item.get("status_reason", "")
+                            timestamp = item.get("fetch_timestamp", item.get("timestamp", ""))
+                            
+                            # Format timestamp
+                            try:
+                                if timestamp:
+                                    if isinstance(timestamp, str):
+                                        if timestamp.endswith('Z'):
+                                            timestamp = timestamp[:-1] + '+00:00'
+                                        dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                                        formatted_time = dt.strftime("%Y-%m-%d %H:%M:%S")
+                                    else:
+                                        formatted_time = str(timestamp)
+                                else:
+                                    formatted_time = "N/A"
+                            except:
+                                formatted_time = str(timestamp) if timestamp else "N/A"
+                            
+                            # Determine status icon and color
+                            if "Added" in status or "added" in status.lower():
+                                status_icon = "✅"
+                                status_color = "green"
+                            elif "Filtered" in status or "filtered" in status.lower():
+                                status_icon = "⚠️"
+                                status_color = "orange"
+                            elif "Failed" in status or "failed" in status.lower():
+                                status_icon = "❌"
+                                status_color = "red"
+                            else:
+                                status_icon = "ℹ️"
+                                status_color = "gray"
+                            
+                            table_data.append({
+                                "Source": source[:40] + "..." if len(source) > 40 else source,
+                                "Title": title,
+                                "Status": f"{status_icon} {status}",
+                                "Reason": reason[:50] + "..." if len(reason) > 50 else reason,
+                                "Timestamp": formatted_time
+                            })
+                        
+                        # Create DataFrame and display
+                        df = pd.DataFrame(table_data)
+                        
+                        # Style the DataFrame
+                        def highlight_status(row):
+                            if "✅" in str(row["Status"]):
+                                return ['background-color: #1e3a2e'] * len(row)
+                            elif "⚠️" in str(row["Status"]):
+                                return ['background-color: #3a2e1e'] * len(row)
+                            elif "❌" in str(row["Status"]):
+                                return ['background-color: #3a1e1e'] * len(row)
+                            return [''] * len(row)
+                        
+                        st.dataframe(
+                            df.style.apply(highlight_status, axis=1),
+                            use_container_width=True,
+                            height=400
+                        )
+                        
+                        # Summary statistics
+                        st.markdown("### 📈 Summary")
+                        col_sum1, col_sum2, col_sum3, col_sum4 = st.columns(4)
+                        
+                        added_count = sum(1 for item in items if "Added" in item.get("status", ""))
+                        filtered_count = sum(1 for item in items if "Filtered" in item.get("status", ""))
+                        failed_count = sum(1 for item in items if "Failed" in item.get("status", ""))
+                        total = len(items)
+                        
+                        with col_sum1:
+                            st.metric("Total Items", total)
+                        with col_sum2:
+                            st.metric("✅ Learned", added_count, delta=f"{round(added_count/total*100, 1)}%" if total > 0 else "0%")
+                        with col_sum3:
+                            st.metric("⚠️ Filtered", filtered_count, delta=f"{round(filtered_count/total*100, 1)}%" if total > 0 else "0%")
+                        with col_sum4:
+                            st.metric("❌ Failed", failed_count, delta=f"{round(failed_count/total*100, 1)}%" if total > 0 else "0%")
+                        
+                        # Filter reasons breakdown
+                        filter_reasons = {}
+                        for item in items:
+                            if "Filtered" in item.get("status", ""):
+                                reason = item.get("status_reason", "Unknown reason")
+                                filter_reasons[reason] = filter_reasons.get(reason, 0) + 1
+                        
+                        if filter_reasons:
+                            st.markdown("### 🔍 Filter Reasons Breakdown")
+                            for reason, count in sorted(filter_reasons.items(), key=lambda x: x[1], reverse=True):
+                                st.write(f"- **{reason}**: {count} items")
+                    else:
+                        st.info("📭 No learning history available yet. Run a learning cycle to see statistics.")
+                        
+                except Exception as e:
+                    st.error(f"❌ Failed to load learning statistics: {e}")
+                    st.caption("💡 Make sure backend is running and RSS fetch history is enabled.")
+                
+                # Close button
+                if st.button("❌ Close Statistics", use_container_width=True):
+                    st.session_state["show_learning_stats"] = False
+                    st.rerun()
         
         # Display learning cycle progress if job is running
         if st.session_state.get("learning_job_started"):
