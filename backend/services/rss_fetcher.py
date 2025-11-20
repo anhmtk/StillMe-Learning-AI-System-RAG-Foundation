@@ -1,12 +1,18 @@
 """
 RSS Feed Fetcher for StillMe
-Simple RSS fetching service to populate knowledge base
+Enhanced RSS fetching service with retry mechanism, XML validation, and fallback feeds
 """
 
 import feedparser
+import asyncio
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
+
+from backend.services.rss_fetcher_enhanced import (
+    fetch_feed_with_fallback,
+    fetch_feed_with_retry
+)
 
 logger = logging.getLogger(__name__)
 
@@ -80,8 +86,8 @@ class RSSFetcher:
         self.successful_feeds = 0
         self.failed_feeds = 0
     
-    def fetch_feeds(self, max_items_per_feed: int = 5) -> List[Dict[str, Any]]:
-        """Fetch entries from all RSS feeds
+    async def fetch_feeds_async(self, max_items_per_feed: int = 5) -> List[Dict[str, Any]]:
+        """Fetch entries from all RSS feeds (async version with retry and fallback)
         
         Args:
             max_items_per_feed: Maximum items to fetch per feed
@@ -94,9 +100,28 @@ class RSSFetcher:
         self.failed_feeds = 0
         errors = []
         
-        for feed_url in self.feeds:
+        # Fetch all feeds concurrently with retry and fallback
+        tasks = [fetch_feed_with_fallback(feed_url) for feed_url in self.feeds]
+        feeds = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        for feed_url, feed_result in zip(self.feeds, feeds):
             try:
-                feed = feedparser.parse(feed_url)
+                if isinstance(feed_result, Exception):
+                    error_msg = f"Failed to fetch {feed_url}: {feed_result}"
+                    errors.append(error_msg)
+                    self.failed_feeds += 1
+                    self.error_count += 1
+                    logger.error(error_msg)
+                    continue
+                
+                if feed_result is None:
+                    error_msg = f"Failed to fetch {feed_url}: All retries and fallbacks exhausted"
+                    errors.append(error_msg)
+                    self.failed_feeds += 1
+                    logger.warning(error_msg)
+                    continue
+                
+                feed = feed_result
                 
                 # Check if feed parsing was successful
                 if feed.bozo and feed.bozo_exception:
@@ -106,6 +131,7 @@ class RSSFetcher:
                     logger.warning(error_msg)
                     continue
                 
+                # Extract entries
                 for entry in feed.entries[:max_items_per_feed]:
                     entry_data = {
                         "title": entry.get("title", ""),
@@ -118,10 +144,10 @@ class RSSFetcher:
                     all_entries.append(entry_data)
                 
                 self.successful_feeds += 1
-                logger.info(f"Fetched {len(feed.entries[:max_items_per_feed])} items from {feed_url}")
+                logger.info(f"✅ Fetched {len(feed.entries[:max_items_per_feed])} items from {feed_url}")
                 
             except Exception as e:
-                error_msg = f"Failed to fetch {feed_url}: {e}"
+                error_msg = f"Failed to process {feed_url}: {e}"
                 errors.append(error_msg)
                 self.failed_feeds += 1
                 self.error_count += 1
@@ -134,8 +160,41 @@ class RSSFetcher:
             self.last_error = None
             self.last_success_time = datetime.now()
         
-        logger.info(f"Total entries fetched: {len(all_entries)} (successful: {self.successful_feeds}, failed: {self.failed_feeds})")
+        # Calculate failure rate
+        total_feeds = len(self.feeds)
+        failure_rate = (self.failed_feeds / total_feeds * 100) if total_feeds > 0 else 0
+        
+        logger.info(f"📊 RSS Feed Summary: {len(all_entries)} entries (successful: {self.successful_feeds}/{total_feeds}, failed: {self.failed_feeds}/{total_feeds}, failure rate: {failure_rate:.1f}%)")
+        
+        # Alert if failure rate is high
+        if failure_rate > 10:
+            logger.warning(f"⚠️ HIGH RSS FEED FAILURE RATE: {failure_rate:.1f}% ({self.failed_feeds}/{total_feeds} feeds failed)")
+        
         return all_entries
+    
+    def fetch_feeds(self, max_items_per_feed: int = 5) -> List[Dict[str, Any]]:
+        """Fetch entries from all RSS feeds (synchronous wrapper)
+        
+        Args:
+            max_items_per_feed: Maximum items to fetch per feed
+            
+        Returns:
+            List of feed entries
+        """
+        # Run async version in event loop
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If loop is already running, create a new task
+                import concurrent.futures
+                with concurrent.futures.ThreadPoolExecutor() as executor:
+                    future = executor.submit(asyncio.run, self.fetch_feeds_async(max_items_per_feed))
+                    return future.result()
+            else:
+                return loop.run_until_complete(self.fetch_feeds_async(max_items_per_feed))
+        except RuntimeError:
+            # No event loop, create one
+            return asyncio.run(self.fetch_feeds_async(max_items_per_feed))
     
     def fetch_single_feed(self, feed_url: str, max_items: int = 5) -> List[Dict[str, Any]]:
         """Fetch entries from a single RSS feed"""
@@ -165,14 +224,19 @@ class RSSFetcher:
     
     def get_stats(self) -> Dict[str, Any]:
         """Get fetcher statistics"""
+        total_feeds = len(self.feeds)
+        failure_rate = (self.failed_feeds / total_feeds * 100) if total_feeds > 0 else 0
+        
         return {
             "source": "rss",
-            "feeds_count": len(self.feeds),
+            "feeds_count": total_feeds,
             "successful_feeds": self.successful_feeds,
             "failed_feeds": self.failed_feeds,
+            "failure_rate": round(failure_rate, 2),
             "error_count": self.error_count,
             "last_error": self.last_error,
             "last_success_time": self.last_success_time.isoformat() if self.last_success_time else None,
-            "status": "error" if self.last_error and (not self.last_success_time or self.failed_feeds > 0) else "ok"
+            "status": "error" if self.last_error and (not self.last_success_time or self.failed_feeds > 0) else "ok",
+            "alert_threshold_exceeded": failure_rate > 10
         }
 

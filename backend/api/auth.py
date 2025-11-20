@@ -9,21 +9,38 @@ from typing import Optional
 import os
 import logging
 
+from backend.config.security import get_api_key as get_secure_api_key, validate_api_key_config
+
 logger = logging.getLogger(__name__)
 
 # API Key Header name
 API_KEY_HEADER_NAME = "X-API-Key"
 api_key_header = APIKeyHeader(name=API_KEY_HEADER_NAME, auto_error=False)
 
+# Validate configuration on module load
+_config_status = validate_api_key_config()
+if _config_status["warnings"]:
+    for warning in _config_status["warnings"]:
+        logger.warning(f"⚠️ {warning}")
+if _config_status["recommendations"]:
+    for rec in _config_status["recommendations"]:
+        logger.info(f"💡 {rec}")
+
 
 def get_api_key() -> Optional[str]:
     """
     Get API key from environment variable.
+    Uses secure config module for validation and warnings.
     
     Returns:
         API key string if set, None otherwise
     """
-    return os.getenv("STILLME_API_KEY")
+    # Check if we're in production
+    env = os.getenv("ENV", "development").lower()
+    is_production = env == "production"
+    
+    # In production, require auth. In development, allow no auth with warning
+    return get_secure_api_key(require_auth=is_production)
 
 
 def constant_time_compare(a: bytes, b: bytes) -> bool:
@@ -58,12 +75,27 @@ def verify_api_key(api_key: Optional[str] = Security(api_key_header)) -> str:
     """
     expected_key = get_api_key()
     
-    # If no API key is configured, allow access (for development)
-    # In production, this should always be set
+    # Check environment
+    env = os.getenv("ENV", "development").lower()
+    is_production = env == "production"
+    
+    # If no API key is configured
     if not expected_key:
-        logger.warning("⚠️ STILLME_API_KEY not set in environment. Authentication disabled.")
-        logger.warning("⚠️ SECURITY WARNING: This should only be used in development!")
-        return "no_auth_configured"
+        if is_production:
+            # In production, authentication is REQUIRED
+            logger.error("❌ CRITICAL SECURITY ERROR: STILLME_API_KEY not set in PRODUCTION!")
+            logger.error("❌ Authentication is REQUIRED in production - blocking request")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="API authentication is not configured. Service unavailable.",
+                headers={"WWW-Authenticate": "ApiKey"},
+            )
+        else:
+            # In development, allow access with strong warning
+            logger.warning("⚠️ STILLME_API_KEY not set in environment. Authentication disabled.")
+            logger.warning("⚠️ SECURITY WARNING: This should only be used in development!")
+            logger.warning("⚠️ For production, set STILLME_API_KEY environment variable")
+            return "no_auth_configured"
     
     # If API key is provided but doesn't match
     if not api_key:

@@ -38,8 +38,10 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
             "/api/learning/metrics/daily",
             "/api/learning/metrics/range",
             "/api/learning/metrics/summary",
+            "/api/learning/scheduler/status",  # Added for performance
             "/api/learning/sources/current",
             "/api/learning/sources/stats",
+            "/api/rag/stats",  # Added for performance
             "/api/validators/metrics",
             "/api/system/status",
             "/api/system/health"
@@ -152,14 +154,18 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
                     "latency": time.time() - start_time
                 }
                 
-                # Use endpoint-specific TTL if available
+                # Use endpoint-specific TTL if available (increased for performance)
                 ttl = TTL_HTTP_RESPONSE
                 if "/metrics/daily" in request.url.path:
-                    ttl = 300  # 5 minutes for daily metrics
+                    ttl = 600  # 10 minutes for daily metrics (increased from 5)
                 elif "/metrics/range" in request.url.path:
-                    ttl = 600  # 10 minutes for range metrics
+                    ttl = 900  # 15 minutes for range metrics (increased from 10)
                 elif "/metrics/summary" in request.url.path:
-                    ttl = 180  # 3 minutes for summary
+                    ttl = 300  # 5 minutes for summary (increased from 3)
+                elif "/scheduler/status" in request.url.path:
+                    ttl = 60  # 1 minute for scheduler status
+                elif "/rag/stats" in request.url.path:
+                    ttl = 120  # 2 minutes for RAG stats
                 
                 self.cache_service.set(cache_key, cache_value, ttl_seconds=ttl)
                 logger.debug(f"💾 HTTP response cached: {request.url.path}")

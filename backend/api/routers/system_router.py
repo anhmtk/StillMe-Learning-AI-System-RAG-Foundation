@@ -226,6 +226,192 @@ async def get_status():
             "validators_enabled": False
         }
 
+@router.get("/api/health/detailed")
+async def detailed_health_check():
+    """
+    Detailed health check endpoint with component-level status.
+    Includes RSS feed performance, database health, and system metrics.
+    """
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "components": {}
+    }
+    
+    # Check RSS Fetcher
+    try:
+        import backend.api.main as main_module
+        if main_module.rss_fetcher:
+            rss_stats = main_module.rss_fetcher.get_stats()
+            health_status["components"]["rss_fetcher"] = {
+                "status": rss_stats.get("status", "unknown"),
+                "feeds_count": rss_stats.get("feeds_count", 0),
+                "successful_feeds": rss_stats.get("successful_feeds", 0),
+                "failed_feeds": rss_stats.get("failed_feeds", 0),
+                "failure_rate": rss_stats.get("failure_rate", 0),
+                "alert_threshold_exceeded": rss_stats.get("alert_threshold_exceeded", False),
+                "last_success_time": rss_stats.get("last_success_time"),
+                "last_error": rss_stats.get("last_error")
+            }
+            
+            # Alert if failure rate > 10%
+            if rss_stats.get("alert_threshold_exceeded", False):
+                health_status["status"] = "degraded"
+                health_status["alerts"] = health_status.get("alerts", [])
+                health_status["alerts"].append({
+                    "component": "rss_fetcher",
+                    "severity": "warning",
+                    "message": f"RSS feed failure rate is {rss_stats.get('failure_rate', 0):.1f}% (threshold: 10%)"
+                })
+        else:
+            health_status["components"]["rss_fetcher"] = {
+                "status": "not_initialized",
+                "message": "RSS fetcher not initialized"
+            }
+    except Exception as e:
+        health_status["components"]["rss_fetcher"] = {
+            "status": "error",
+            "error": str(e)
+        }
+    
+    # Check Database
+    try:
+        db_paths = [
+            "data/knowledge_retention.db",
+            "data/continuum_memory.db",
+            "data/rss_fetch_history.db",
+            "data/accuracy_scores.db"
+        ]
+        
+        db_status = []
+        for db_path in db_paths:
+            try:
+                conn = sqlite3.connect(db_path, timeout=1.0)
+                cursor = conn.cursor()
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+                conn.close()
+                db_status.append({"path": db_path, "status": "ok"})
+            except Exception as db_error:
+                db_status.append({"path": db_path, "status": "error", "error": str(db_error)})
+        
+        health_status["components"]["database"] = {
+            "status": "ok" if all(db["status"] == "ok" for db in db_status) else "degraded",
+            "databases": db_status
+        }
+    except Exception as e:
+        health_status["components"]["database"] = {
+            "status": "error",
+            "error": str(e)
+        }
+    
+    # Check ChromaDB
+    try:
+        rag_retrieval = get_rag_retrieval()
+        if rag_retrieval and rag_retrieval.chroma_client:
+            health_status["components"]["vector_db"] = {
+                "status": "ok",
+                "message": "ChromaDB client available"
+            }
+        else:
+            health_status["components"]["vector_db"] = {
+                "status": "not_initialized",
+                "message": "ChromaDB not initialized"
+            }
+    except Exception as e:
+        health_status["components"]["vector_db"] = {
+            "status": "error",
+            "error": str(e)
+        }
+    
+    # Check Embedding Service
+    try:
+        rag_retrieval = get_rag_retrieval()
+        if rag_retrieval and rag_retrieval.embedding_service:
+            health_status["components"]["embedding_service"] = {
+                "status": "ok",
+                "message": "Embedding service available"
+            }
+        else:
+            health_status["components"]["embedding_service"] = {
+                "status": "not_initialized",
+                "message": "Embedding service not initialized"
+            }
+    except Exception as e:
+        health_status["components"]["embedding_service"] = {
+            "status": "error",
+            "error": str(e)
+        }
+    
+    # Check Learning Scheduler
+    try:
+        import backend.api.main as main_module
+        if main_module.learning_scheduler:
+            scheduler_status = main_module.learning_scheduler.get_status()
+            health_status["components"]["learning_scheduler"] = {
+                "status": scheduler_status.get("status", "unknown"),
+                "is_running": scheduler_status.get("is_running", False),
+                "next_run": scheduler_status.get("next_run_time"),
+                "last_run": scheduler_status.get("last_run_time"),
+                "interval_hours": scheduler_status.get("interval_hours", 4)
+            }
+        else:
+            health_status["components"]["learning_scheduler"] = {
+                "status": "not_initialized",
+                "message": "Learning scheduler not initialized"
+            }
+    except Exception as e:
+        health_status["components"]["learning_scheduler"] = {
+            "status": "error",
+            "error": str(e)
+        }
+    
+    return health_status
+
+@router.get("/api/monitoring/rss-feeds")
+async def rss_feeds_monitoring():
+    """
+    RSS Feeds monitoring endpoint with detailed performance metrics.
+    """
+    try:
+        import backend.api.main as main_module
+        if not main_module.rss_fetcher:
+            return {
+                "status": "error",
+                "message": "RSS fetcher not initialized"
+            }
+        
+        rss_stats = main_module.rss_fetcher.get_stats()
+        
+        return {
+            "status": "ok",
+            "timestamp": datetime.now().isoformat(),
+            "metrics": {
+                "total_feeds": rss_stats.get("feeds_count", 0),
+                "successful_feeds": rss_stats.get("successful_feeds", 0),
+                "failed_feeds": rss_stats.get("failed_feeds", 0),
+                "failure_rate": rss_stats.get("failure_rate", 0),
+                "success_rate": round(100 - rss_stats.get("failure_rate", 0), 2),
+                "error_count": rss_stats.get("error_count", 0),
+                "last_success_time": rss_stats.get("last_success_time"),
+                "last_error": rss_stats.get("last_error"),
+                "alert_threshold_exceeded": rss_stats.get("alert_threshold_exceeded", False)
+            },
+            "alerts": [
+                {
+                    "severity": "warning",
+                    "message": f"RSS feed failure rate is {rss_stats.get('failure_rate', 0):.1f}% (threshold: 10%)"
+                }
+            ] if rss_stats.get("alert_threshold_exceeded", False) else []
+        }
+    except Exception as e:
+        logger.error(f"RSS feeds monitoring error: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }
+
 @router.get("/api/validators/metrics")
 async def get_validation_metrics(days: int = None):
     """

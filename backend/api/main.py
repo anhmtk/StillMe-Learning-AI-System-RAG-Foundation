@@ -39,6 +39,7 @@ from backend.api.request_tracking_middleware import RequestTrackingMiddleware
 from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
 from backend.api.routers import debug_router, learning_permission_router, community_router
 from backend.api.routers import feedback_router
+from backend.config.security import validate_api_key_config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -133,6 +134,10 @@ app.add_middleware(RequestTrackingMiddleware)
 # HTTP Response Cache Middleware (Phase 3)
 from backend.api.middleware.http_cache_middleware import HTTPCacheMiddleware
 app.add_middleware(HTTPCacheMiddleware)
+
+# Request Deduplication Middleware (Performance optimization)
+from backend.api.middleware.request_deduplication import RequestDeduplicationMiddleware
+app.add_middleware(RequestDeduplicationMiddleware)
 
 # Security middleware (HTTPS enforcement, HSTS headers, etc.)
 security_middleware_list = get_security_middleware()
@@ -930,6 +935,23 @@ async def startup_event():
     logger.info("🚀 FastAPI application startup event triggered")
     logger.info("🌐 Uvicorn server is ready to accept connections")
     logger.info("📋 /health endpoint is available immediately")
+    
+    # Validate security configuration
+    logger.info("🔐 Validating security configuration...")
+    security_status = validate_api_key_config()
+    if security_status["configured"]:
+        logger.info("✅ API authentication is configured")
+    else:
+        if security_status["is_production"]:
+            logger.error("❌ CRITICAL: API authentication is NOT configured in PRODUCTION!")
+            logger.error("❌ Set STILLME_API_KEY environment variable immediately")
+        else:
+            logger.warning("⚠️ API authentication is not configured (development mode)")
+    for warning in security_status["warnings"]:
+        logger.warning(f"⚠️ {warning}")
+    for rec in security_status["recommendations"]:
+        logger.info(f"💡 {rec}")
+    
     logger.info("⏳ Starting RAG components initialization in background...")
     
     # Initialize RAG components lazily (non-blocking)
