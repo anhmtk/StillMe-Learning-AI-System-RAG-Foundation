@@ -373,6 +373,17 @@ class FactualPlausibilityScanner:
                         confidence = min(confidence, 0.2)
                         reason = "known_fake_entity_detected: Hội chứng Veridian (direct pattern match)"
                         break
+                
+                # CRITICAL: Check for "Lisbon 1943" or "Hội nghị Hòa bình Lisbon 1943" (known fake event)
+                if ("lisbon" in question_lower_for_check and "1943" in question_lower_for_check) or \
+                   re.search(r'hội\s+nghị\s+hòa\s+bình\s+lisbon\s+1943', question_lower_for_check, re.IGNORECASE) or \
+                   re.search(r'lisbon\s+conference\s+1943', question_lower_for_check, re.IGNORECASE):
+                    if not self.kci.check_term("lisbon conference 1943") and \
+                       not self.kci.check_term("hội nghị hòa bình lisbon 1943"):
+                        is_plausible = False
+                        confidence = min(confidence, 0.2)
+                        reason = "known_fake_historical_event: Lisbon Conference 1943 (no such conference)"
+                        break
         
         # If we have historical events that don't exist in KCI
         # Check for patterns like "conference 1943", "hội nghị 1943", "Lisbon Conference 1943", "Hội nghị Hòa bình Lisbon 1943"
