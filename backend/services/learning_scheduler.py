@@ -128,7 +128,7 @@ class LearningScheduler:
                         total_to_process = len(filtered_entries)
                         logger.info(f"🔄 Starting RAG processing for {total_to_process} entries...")
                         
-                        batch_size = 10  # Process in batches for better progress visibility
+                        batch_size = 20  # Increased batch size for better performance (was 10)
                         for batch_idx in range(0, total_to_process, batch_size):
                             batch = filtered_entries[batch_idx:batch_idx + batch_size]
                             batch_num = (batch_idx // batch_size) + 1

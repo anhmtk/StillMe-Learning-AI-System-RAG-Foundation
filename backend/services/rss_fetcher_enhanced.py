@@ -102,7 +102,7 @@ def sanitize_xml(xml_content: str) -> str:
 async def fetch_feed_with_retry(
     feed_url: str,
     max_retries: int = MAX_RETRIES,
-    timeout: float = 10.0
+    timeout: float = 15.0  # Increased from 10.0 to 15.0 for slow feeds
 ) -> Optional[feedparser.FeedParserDict]:
     """
     Fetch RSS feed with exponential backoff retry mechanism.

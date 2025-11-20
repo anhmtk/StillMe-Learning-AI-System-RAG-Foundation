@@ -347,13 +347,26 @@ class RAGRetrieval:
             # Filter knowledge results by similarity threshold
             filtered_knowledge = []
             filtered_knowledge_count = 0
+            distance_values = []  # Track distance values for debugging
             for doc in knowledge_results:
-                similarity = _distance_to_similarity(doc.get("distance", 1.0))
+                distance = doc.get("distance", 1.0)
+                distance_values.append(distance)
+                similarity = _distance_to_similarity(distance)
                 if similarity >= similarity_threshold:
                     doc["similarity"] = similarity  # Add similarity for metrics
                     filtered_knowledge.append(doc)
                 else:
                     filtered_knowledge_count += 1
+            
+            # Log distance statistics for debugging similarity = 0.0 issues
+            if distance_values:
+                avg_distance = sum(distance_values) / len(distance_values)
+                min_distance = min(distance_values)
+                max_distance = max(distance_values)
+                if avg_distance >= 0.95:  # If average distance is very high (low similarity)
+                    logger.warning(f"⚠️ High average distance ({avg_distance:.3f}) detected - all documents may be irrelevant. "
+                                 f"Distance range: [{min_distance:.3f}, {max_distance:.3f}]. "
+                                 f"This may indicate: (1) Database is new/empty, (2) Embedding model mismatch, or (3) Query is unrelated to stored content.")
             
             # Filter conversation results by similarity threshold
             filtered_conversation = []
@@ -382,6 +395,11 @@ class RAGRetrieval:
             avg_similarity = 0.0
             if filtered_knowledge:
                 avg_similarity = sum(doc.get("similarity", 0.0) for doc in filtered_knowledge) / len(filtered_knowledge)
+                logger.debug(f"📊 RAG retrieval: {len(filtered_knowledge)} docs, avg_similarity={avg_similarity:.3f}, threshold={similarity_threshold}")
+            elif knowledge_results:
+                # If we have results but all were filtered out, log warning
+                logger.warning(f"⚠️ All {len(knowledge_results)} retrieved documents were filtered out (similarity < {similarity_threshold}). "
+                             f"This may indicate: (1) Database is new/empty, (2) Embedding model mismatch, or (3) Query is unrelated to stored content.")
             
             # Fix 4: For philosophical questions, skip context if similarity is too low
             # Better to answer from pretrained knowledge than feed low-quality context that distracts the model

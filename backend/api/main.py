@@ -537,6 +537,8 @@ def _initialize_rag_components():
                     logger.warning(f"⚠️ Philosophical foundational knowledge file not found: {philosophical_path}")
                 
                 # Fallback: If files don't exist, use old string-based approach (for backward compatibility)
+                # Initialize FOUNDATIONAL_KNOWLEDGE outside if block to avoid UnboundLocalError
+                FOUNDATIONAL_KNOWLEDGE = None
                 if not os.path.exists(technical_path) or not os.path.exists(philosophical_path):
                     logger.warning("⚠️ Foundational knowledge files not found, using fallback string-based approach")
                     FOUNDATIONAL_KNOWLEDGE = """
@@ -813,11 +815,13 @@ When users ask StillMe to propose improvements or new features, StillMe MUST:
   * Purpose: enhance readability, not replace words
 - **CRITICAL**: StillMe responses should be as readable as ChatGPT, Claude, or Cursor - use proper markdown formatting with strategic emoji usage
 """
-                tags_list = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db"]
-                tags_string = ",".join(tags_list)
-                
-                success = rag_retrieval.add_learning_content(
-                    content=FOUNDATIONAL_KNOWLEDGE,
+                # Only add fallback foundational knowledge if files don't exist
+                if FOUNDATIONAL_KNOWLEDGE:
+                    tags_list = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db"]
+                    tags_string = ",".join(tags_list)
+                    
+                    success = rag_retrieval.add_learning_content(
+                        content=FOUNDATIONAL_KNOWLEDGE,
                     source="CRITICAL_FOUNDATION",
                     content_type="knowledge",
                     metadata={
@@ -829,12 +833,12 @@ When users ask StillMe to propose improvements or new features, StillMe MUST:
                         "importance_score": 1.0,
                         "description": "CRITICAL: Core knowledge about StillMe's RAG-based continuous learning mechanism - MUST be retrieved when answering about StillMe"
                     }
-                )
-                
-                if success:
-                    logger.info("✅ Foundational knowledge added successfully!")
-                else:
-                    logger.warning("⚠️ Failed to add foundational knowledge (non-critical)")
+                    )
+                    
+                    if success:
+                        logger.info("✅ Foundational knowledge added successfully (fallback string-based)!")
+                    else:
+                        logger.warning("⚠️ Failed to add foundational knowledge (non-critical)")
             else:
                 logger.info("✅ Foundational knowledge already exists")
         except Exception as foundational_error:
