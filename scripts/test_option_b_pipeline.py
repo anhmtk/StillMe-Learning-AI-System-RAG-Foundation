@@ -65,13 +65,9 @@ def send_chat_request(question: str, use_option_b: bool = True) -> Dict:
     payload = {
         "message": question,
         "use_rag": True,
-        "context_limit": 5
+        "context_limit": 5,
+        "use_option_b": use_option_b  # Enable Option B pipeline
     }
-    
-    # NOTE: Option B flag is not yet supported by chat_router.py
-    # This is a placeholder for future integration
-    # if use_option_b:
-    #     payload["use_option_b"] = True
     
     try:
         response = requests.post(url, json=payload, headers=headers, timeout=120)  # Increased timeout for Option B
@@ -309,12 +305,12 @@ def run_tests():
        - If latency too high → Optimize or keep as optional feature
     """
     print("=" * 80)
-    print("OPTION B PIPELINE TEST SUITE (DEMO/PROTOTYPE)")
+    print("OPTION B PIPELINE TEST SUITE")
     print("=" * 80)
     print()
-    print("⚠️  NOTE: Option B pipeline is NOT yet integrated into chat_router.py")
-    print("⚠️  This script currently tests the EXISTING pipeline (baseline)")
-    print("⚠️  After integration, this will test Option B pipeline")
+    print("✅ Option B pipeline is now integrated into chat_router.py")
+    print("✅ This script tests Option B pipeline (zero-tolerance hallucination + deep philosophy)")
+    print("⚠️  Expected latency: 10-20s (2-3x increase for absolute honesty and depth)")
     print()
     
     results = {
