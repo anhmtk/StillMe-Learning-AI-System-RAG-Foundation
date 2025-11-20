@@ -194,19 +194,42 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
             /* Edge handles - wider for easier grabbing (increased for better UX) */
             .resize-handle.n {{ top: 0; left: 24px; right: 24px; height: 16px; cursor: n-resize; }}
             .resize-handle.s {{ bottom: 0; left: 24px; right: 24px; height: 16px; cursor: s-resize; }}
-            .resize-handle.e {{ top: 24px; bottom: 24px; right: 0; width: 16px; cursor: e-resize; }}
-            /* CRITICAL: Disable resize handle when hovering over scrollbar area */
-            .resize-handle.e:hover {{
-                cursor: default !important;
+            /* CRITICAL: Reduce right edge handle width to avoid overlap with scrollbar */
+            /* Scrollbar is 6px wide, so we only use 8px for resize handle (leaving 6px for scrollbar) */
+            .resize-handle.e {{ top: 24px; bottom: 24px; right: 0; width: 8px; cursor: e-resize; }}
+            /* CRITICAL: Exclude scrollbar area (rightmost 6px) from resize handle */
+            /* Use clip-path to exclude the scrollbar area */
+            .resize-handle.e::before {{
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 6px;
+                height: 100%;
+                pointer-events: none;
             }}
             .resize-handle.w {{ top: 24px; bottom: 24px; left: 0; width: 16px; cursor: w-resize; }}
             
             /* CRITICAL: Fix scrollbar vs resize handle conflict */
-            /* Problem: Resize handle .e (right edge, 16px wide) overlaps with scrollbar (6px wide) */
-            /* Solution: JavaScript detects scrollbar area (rightmost 12px) and skips resize if click is in that area */
-            /* CSS: Ensure scrollbar is interactive */
+            /* Problem: Resize handle .e (right edge) overlaps with scrollbar (6px wide) */
+            /* Solution: 
+               1. Reduced resize handle width to 8px (scrollbar is 6px)
+               2. Scrollbar has higher z-index in its area
+               3. JavaScript detects scrollbar area and disables resize
+            */
+            .stillme-chat-messages {{
+                position: relative;
+            }}
             .stillme-chat-messages::-webkit-scrollbar {{
+                width: 6px;
                 pointer-events: auto !important; /* Ensure scrollbar captures events */
+                z-index: 1000002 !important; /* Higher than resize handle (1000001) */
+            }}
+            .stillme-chat-messages::-webkit-scrollbar-track {{
+                pointer-events: auto !important;
+            }}
+            .stillme-chat-messages::-webkit-scrollbar-thumb {{
+                pointer-events: auto !important;
             }}
             
             /* Visual resize indicator - more visible like Cursor */
@@ -1070,7 +1093,9 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                             #stillme-chat-panel-parent .resize-handle.se {{ bottom: 0 !important; right: 0 !important; width: 24px !important; height: 24px !important; cursor: se-resize !important; }}
                                             #stillme-chat-panel-parent .resize-handle.n {{ top: 0 !important; left: 24px !important; right: 24px !important; height: 16px !important; cursor: n-resize !important; }}
                                             #stillme-chat-panel-parent .resize-handle.s {{ bottom: 0 !important; left: 24px !important; right: 24px !important; height: 16px !important; cursor: s-resize !important; }}
-                                            #stillme-chat-panel-parent .resize-handle.e {{ top: 24px !important; bottom: 24px !important; right: 0 !important; width: 16px !important; cursor: e-resize !important; }}
+                                            /* CRITICAL: Reduce right edge handle width to avoid overlap with scrollbar */
+                                            /* Scrollbar is 6px wide, so we only use 8px for resize handle */
+                                            #stillme-chat-panel-parent .resize-handle.e {{ top: 24px !important; bottom: 24px !important; right: 0 !important; width: 8px !important; cursor: e-resize !important; }}
                                             #stillme-chat-panel-parent .resize-handle.w {{ top: 24px !important; bottom: 24px !important; left: 0 !important; width: 16px !important; cursor: w-resize !important; }}
                                             #stillme-chat-panel-parent .stillme-chat-messages {{
                                                 flex: 1 1 auto !important;
@@ -1082,6 +1107,19 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 background: #1e1e1e !important;
                                                 min-height: 0 !important;
                                                 order: 2 !important;
+                                                position: relative !important;
+                                            }}
+                                            /* CRITICAL: Ensure scrollbar has higher z-index than resize handle */
+                                            #stillme-chat-panel-parent .stillme-chat-messages::-webkit-scrollbar {{
+                                                width: 6px !important;
+                                                pointer-events: auto !important;
+                                                z-index: 1000002 !important; /* Higher than resize handle (1000001) */
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-messages::-webkit-scrollbar-track {{
+                                                pointer-events: auto !important;
+                                            }}
+                                            #stillme-chat-panel-parent .stillme-chat-messages::-webkit-scrollbar-thumb {{
+                                                pointer-events: auto !important;
                                             }}
                                             #stillme-chat-panel-parent .stillme-chat-input-container {{
                                                 padding: 12px 16px !important;
@@ -1469,7 +1507,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                 if (parentMessages && !parentPanel.classList.contains('fullscreen') && !parentPanel.classList.contains('minimized')) {{
                                                     const panelRect = parentPanel.getBoundingClientRect();
                                                     const mouseX = e.clientX;
-                                                    const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                                    const scrollbarAreaStart = panelRect.right - 12; // Rightmost 12px is scrollbar area (scrollbar 6px + padding)
                                                     
                                                     if (mouseX >= scrollbarAreaStart) {{
                                                         // Mouse is over scrollbar area, disable resize handle
@@ -1498,7 +1536,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                                                     const panelRect = parentPanel.getBoundingClientRect();
                                                     // Scrollbar is typically 6-15px wide, check if click is in rightmost 20px
                                                     const clickX = e.clientX;
-                                                    const scrollbarAreaStart = panelRect.right - 20; // Rightmost 20px is scrollbar area
+                                                    const scrollbarAreaStart = panelRect.right - 12; // Rightmost 12px is scrollbar area (scrollbar 6px + padding)
                                                     
                                                     if (clickX >= scrollbarAreaStart) {{
                                                         // Click is in scrollbar area, don't start resize - let scrollbar handle it
