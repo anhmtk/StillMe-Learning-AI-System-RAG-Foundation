@@ -146,29 +146,88 @@ class FactualHallucinationValidator(Validator):
             if user_question:
                 fps_result = self.fps.scan(user_question)
                 
-                # If question contains non-existent concepts, check if answer describes them with certainty
-                if not fps_result.is_plausible:
-                    # Check if answer describes these concepts assertively
-                    for entity in fps_result.detected_entities:
-                        if entity.lower() in answer_lower:
-                            # Check if answer uses assertive phrases about this entity
-                            for phrase_pattern in self.assertive_phrases:
-                                # Check if assertive phrase appears near the entity
-                                entity_pos = answer_lower.find(entity.lower())
-                                if entity_pos != -1:
-                                    # Look for assertive phrases in a window around the entity
-                                    window_start = max(0, entity_pos - 200)
-                                    window_end = min(len(answer_lower), entity_pos + 200)
-                                    window_text = answer_lower[window_start:window_end]
-                                    
-                                    if re.search(phrase_pattern, window_text):
+                # CRITICAL: If question contains non-existent concepts, check if answer describes them
+                # This includes ANY description (not just assertive), because describing non-existent concepts
+                # is a form of hallucination, even with disclaimers
+                # Also check if answer describes entities that are NOT in KCI (unknown concepts)
+                should_check_entities = (
+                    not fps_result.is_plausible or 
+                    fps_result.confidence < 0.5 or
+                    len(ctx_docs) == 0  # No context = higher risk of hallucination
+                )
+                
+                if should_check_entities:
+                    # Extract entities from question (use FPS detected entities or extract from question)
+                    question_entities = fps_result.detected_entities if fps_result.detected_entities else self.fps.extract_entities(user_question)
+                    
+                    # Check if answer describes these entities in detail
+                    for entity in question_entities:
+                        if not entity or len(entity) < 3:
+                            continue
+                            
+                        entity_lower = entity.lower()
+                        if entity_lower in answer_lower:
+                            # CRITICAL: Check if answer describes the entity in detail
+                            # Patterns that indicate detailed description (even with disclaimer):
+                            detail_patterns = [
+                                r"tác\s+động",  # "tác động" (impact)
+                                r"lập\s+luận",  # "lập luận" (arguments)
+                                r"hậu\s+quả",  # "hậu quả" (consequences)
+                                r"ảnh\s+hưởng",  # "ảnh hưởng" (influence)
+                                r"kết\s+quả",  # "kết quả" (results)
+                                r"nguyên\s+nhân",  # "nguyên nhân" (causes)
+                                r"impact",  # "impact"
+                                r"effect",  # "effect"
+                                r"consequence",  # "consequence"
+                                r"result",  # "result"
+                                r"cause",  # "cause"
+                                r"argument",  # "argument"
+                                r"helped",  # "helped"
+                                r"reduced",  # "reduced"
+                                r"created",  # "created"
+                                r"giúp",  # "giúp" (helped)
+                                r"giảm",  # "giảm" (reduced)
+                                r"tạo",  # "tạo" (created)
+                            ]
+                            
+                            # Find entity position in answer
+                            entity_pos = answer_lower.find(entity_lower)
+                            if entity_pos != -1:
+                                # Look for detail patterns in a window around the entity
+                                window_start = max(0, entity_pos - 300)
+                                window_end = min(len(answer_lower), entity_pos + 300)
+                                window_text = answer_lower[window_start:window_end]
+                                
+                                # Check if any detail pattern appears near the entity
+                                has_detail_description = any(
+                                    re.search(pattern, window_text) for pattern in detail_patterns
+                                )
+                                
+                                # CRITICAL: If answer describes details about non-existent concept,
+                                # this is hallucination, even with disclaimer
+                                if has_detail_description:
+                                    # Check if entity is NOT in KCI (unknown concept)
+                                    if not self.fps.kci.check_term(entity):
                                         reasons.append(
-                                            f"assertive_description_of_non_existent_concept: {entity}"
+                                            f"detailed_description_of_non_existent_concept: {entity}"
                                         )
                                         logger.warning(
                                             f"FactualHallucinationValidator: Answer describes non-existent "
-                                            f"concept '{entity}' with certainty"
+                                            f"concept '{entity}' in detail (even with disclaimer). "
+                                            f"This is hallucination and must be blocked."
                                         )
+                                        
+                                        # Also check for assertive phrases (original logic)
+                                        for phrase_pattern in self.assertive_phrases:
+                                            if re.search(phrase_pattern, window_text):
+                                                reasons.append(
+                                                    f"assertive_description_of_non_existent_concept: {entity}"
+                                                )
+                                                logger.warning(
+                                                    f"FactualHallucinationValidator: Answer describes non-existent "
+                                                    f"concept '{entity}' with certainty"
+                                                )
+                                                break  # Don't duplicate reasons
             
             # 4. Check for assertive phrases without citations (when describing specific concepts)
             # This catches cases where answer makes strong claims without evidence
@@ -221,24 +280,49 @@ class FactualHallucinationValidator(Validator):
         """
         Create an honest response when hallucination is detected
         
+        CRITICAL: This response must be strong, clear, and honest - no ambiguity.
+        "Thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh."
+        
         Returns:
-            Template response acknowledging uncertainty
+            Safe refusal answer that completely replaces hallucinated narrative
         """
+        # Try to extract the suspicious entity using improved extraction
+        suspicious_entity = None
         if user_question:
-            # Try to extract the suspicious entity
+            # Use FPS to extract entities
             entities = self.fps.extract_entities(user_question)
             if entities:
-                entity = entities[0]
-                return (
-                    f"Tôi không thể xác nhận tính xác thực của thông tin về '{entity}'. "
-                    f"Dấu hiệu cho thấy đây có thể là khái niệm/sự kiện không có thật hoặc "
-                    f"chưa được xác nhận trong các nguồn đáng tin cậy. "
-                    f"Vui lòng cung cấp thêm nguồn hoặc mô tả rõ hơn."
-                )
+                suspicious_entity = entities[0]
+            else:
+                # Fallback: try to extract from question using regex
+                import re
+                # Look for quoted terms first
+                quoted_match = re.search(r'["\']([^"\']+)["\']', user_question)
+                if quoted_match:
+                    suspicious_entity = quoted_match.group(1).strip()
+                else:
+                    # Look for Vietnamese patterns
+                    vietnamese_patterns = [
+                        r"(?:Hiệp ước|Hội nghị|Hội chứng|Định đề|Học thuyết|Chủ nghĩa)\s+[^\\.\\?\\!\\n]+",
+                    ]
+                    for pattern in vietnamese_patterns:
+                        match = re.search(pattern, user_question, re.IGNORECASE)
+                        if match:
+                            suspicious_entity = match.group(0).strip()
+                            break
         
-        return (
-            "Tôi không thể xác nhận tính xác thực của thông tin này vì dấu hiệu cho thấy "
-            "đây có thể là khái niệm/sự kiện không có thật. "
-            "Vui lòng cung cấp thêm nguồn hoặc mô tả rõ hơn."
+        if not suspicious_entity:
+            suspicious_entity = "khái niệm này"
+        
+        # Build strong, clear refusal answer (same format as _build_safe_refusal_answer)
+        answer = (
+            f"Mình không tìm thấy bất kỳ nguồn đáng tin cậy nào trong hệ thống về sự kiện/khái niệm có tên là \"{suspicious_entity}\".\n\n"
+            f"Có một số khả năng:\n"
+            f"- Đây là ví dụ giả định, tên tưởng tượng, hoặc một khái niệm chưa được ghi nhận rộng rãi trong các nguồn mà mình có.\n"
+            f"- Hoặc nó trùng với một tên gọi khác trong lịch sử nhưng mình không đủ dữ liệu để khẳng định.\n\n"
+            f"Vì không có bằng chứng, mình **không thể mô tả** \"các lập luận chính\" hay \"tác động lịch sử\" của \"{suspicious_entity}\" mà vẫn trung thực được.\n\n"
+            f"Nếu bạn có nguồn cụ thể (bài báo, sách, link), bạn có thể gửi, mình sẽ chỉ phân tích nội dung dựa trên nguồn đó – chứ không tự tạo thêm chi tiết."
         )
+        
+        return answer
 

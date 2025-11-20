@@ -1307,7 +1307,30 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
     
     # CRITICAL: Add transparency warning for low confidence responses without context
     # This improves honesty when answering from base knowledge
-    if confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical:
+    # CRITICAL: Do NOT prepend disclaimer if response is already a fallback meta-answer
+    # Check if response is a fallback meta-answer by looking for key phrases
+    from backend.api.utils.error_detector import is_fallback_message
+    is_fallback_meta = is_fallback_message(response) if response else False
+    
+    # Also check for safe refusal answer patterns (from hallucination guard)
+    if response:
+        response_lower = response.lower()
+        is_safe_refusal = any(
+            phrase in response_lower for phrase in [
+                "không tìm thấy bất kỳ nguồn đáng tin cậy nào",
+                "cannot find any reliable evidence",
+                "không thể mô tả các lập luận chính hay tác động lịch sử",
+                "cannot truthfully describe the main arguments or historical impacts",
+                "có thể đây là ví dụ giả định",
+                "this could be a hypothetical example"
+            ]
+        )
+    else:
+        is_safe_refusal = False
+    
+    # Only prepend disclaimer if NOT a fallback meta-answer and NOT a safe refusal
+    if (confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical and 
+        not is_fallback_meta and not is_safe_refusal):
         # Check if response already has transparency disclaimer
         response_lower = response.lower()
         has_transparency = any(
@@ -1433,7 +1456,38 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         except Exception as classifier_error:
             logger.warning(f"Question classifier error: {classifier_error}")
         
+        # CRITICAL: Detect honesty/consistency questions FIRST - before philosophical questions
+        # These questions should be handled by Honesty Handler, NOT philosophy processor
+        is_honesty_question = False
+        try:
+            from backend.honesty.handler import is_honesty_question as check_honesty, build_honesty_response
+            is_honesty_question = check_honesty(chat_request.message)
+            if is_honesty_question:
+                logger.info("Honesty/consistency question detected - using Honesty Handler")
+                # Detect language for the answer
+                detected_lang = detect_language(chat_request.message)
+                # Process with Honesty Handler
+                honesty_answer = build_honesty_response(chat_request.message, detected_lang)
+                
+                # Return response immediately without LLM processing
+                processing_steps.append("✅ Detected honesty/consistency question - returning Honesty Handler response")
+                return ChatResponse(
+                    response=honesty_answer,
+                    confidence_score=1.0,  # High confidence for honest response
+                    processing_steps=processing_steps,
+                    timing_logs={
+                        "total_time": time.time() - start_time,
+                        "rag_retrieval_latency": 0.0,
+                        "llm_inference_latency": 0.0
+                    },
+                    validation_result=None,  # No validation needed for honest response
+                    used_fallback=False
+                )
+        except Exception as honesty_handler_error:
+            logger.warning(f"Honesty handler error: {honesty_handler_error}")
+        
         # Detect philosophical questions (consciousness/emotion/understanding) - use 3-layer processor
+        # CRITICAL: This check happens AFTER honesty handler to prevent routing honesty questions to philosophy processor
         is_philosophical_consciousness = False
         try:
             is_philosophical_consciousness = is_philosophical_question_about_consciousness(chat_request.message)
