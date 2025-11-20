@@ -3057,7 +3057,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         # Classify question
                         classifier = get_question_classifier_v2()
                         question_type_result, confidence, _ = classifier.classify(chat_request.message)
-                        question_type_str = question_type_result.value if hasattr(question_type_result, 'value') else str(question_type_result)
+                        # question_type_result is a QuestionType enum, access .value to get string
+                        question_type_str = question_type_result.value
                         
                         # CRITICAL: Check FPS for Option B - use stricter threshold (0.5) for fake concepts
                         # This ensures Option B blocks fake concepts more aggressively
