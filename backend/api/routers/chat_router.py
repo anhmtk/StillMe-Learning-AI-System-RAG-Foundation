@@ -154,11 +154,13 @@ def _extract_full_named_entity(question: str) -> Optional[str]:
     """
     Extract full named entity from question, prioritizing:
     1. Quoted terms: '...' or "..."
-    2. Full phrases starting with keywords: "Hiệp ước ...", "Định đề ...", etc.
-    3. Capitalized multi-word phrases
+    2. Parenthetical terms: (...)
+    3. Full phrases starting with keywords: "Hiệp ước ...", "Định đề ...", etc.
+    4. Capitalized multi-word phrases
     
     CRITICAL: This function must extract FULL phrases, not just first word.
     Example: "Hiệp ước Hòa giải Daxonia 1956" → "Hiệp ước Hòa giải Daxonia 1956" (NOT "Hi")
+    Example: "'Diluted Nuclear Fusion'" → "Diluted Nuclear Fusion" (NOT "Phản")
     
     Args:
         question: User question text
@@ -172,6 +174,16 @@ def _extract_full_named_entity(question: str) -> Optional[str]:
         entity = quoted_match.group(1).strip()
         if len(entity) > 2:  # Must be meaningful (not just "Hi")
             return entity
+    
+    # Priority 2: Extract parenthetical terms (e.g., "(Diluted Nuclear Fusion)")
+    parenthetical_match = re.search(r'\(([^)]+)\)', question)
+    if parenthetical_match:
+        entity = parenthetical_match.group(1).strip()
+        # Filter out common parenthetical content (years, abbreviations)
+        if len(entity) > 5 and not re.match(r'^\d{4}$', entity):  # Not just a year
+            # Check if it looks like a proper noun/concept (has capital letters)
+            if re.search(r'[A-Z]', entity):
+                return entity
     
     # Priority 2: Extract full phrases starting with Vietnamese keywords
     # Pattern: "Hiệp ước ... [year?]" or "Định đề ..." or "Hội chứng ..."
@@ -1934,11 +1946,23 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                         fps_result = scan_question(chat_request.message)
                         
                         # If FPS detects non-existent concepts with low confidence, block and return honest response
-                        if not fps_result.is_plausible and fps_result.confidence < 0.3:
-                            # Extract full entity using improved extraction
+                        # CRITICAL: Also check if confidence < 0.5 for suspicious entities (not just < 0.3)
+                        if not fps_result.is_plausible and fps_result.confidence < 0.5:
+                            # Extract full entity using improved extraction (prioritizes quoted/parenthetical terms)
                             suspicious_entity = _extract_full_named_entity(chat_request.message)
+                            
+                            # If extraction failed, try to get from FPS detected entities (filter out common words)
                             if not suspicious_entity and fps_result.detected_entities:
-                                suspicious_entity = fps_result.detected_entities[0]
+                                # Filter out common words like "Phản", "Hãy", etc.
+                                common_words = {"phản", "hãy", "các", "của", "và", "the", "a", "an", "is", "are", "was", "were"}
+                                filtered_entities = [
+                                    e for e in fps_result.detected_entities 
+                                    if e.lower() not in common_words and len(e) > 3
+                                ]
+                                if filtered_entities:
+                                    # Prioritize longer entities (more likely to be full phrases)
+                                    suspicious_entity = max(filtered_entities, key=len)
+                            
                             if not suspicious_entity:
                                 suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
                             

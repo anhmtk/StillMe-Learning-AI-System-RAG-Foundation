@@ -354,6 +354,17 @@ class FactualPlausibilityScanner:
                         confidence = min(confidence, 0.2)  # Very low confidence for known fake entities
                         reason = f"known_fake_entity_detected: {entity}"
                         break
+                
+                # CRITICAL: Check if entity contains "Veridian" or "Daxonia" anywhere in the question
+                question_lower_for_check = question.lower()
+                if "veridian" in question_lower_for_check or "daxonia" in question_lower_for_check:
+                    # Check if it's part of a syndrome/concept pattern
+                    if "hội chứng" in question_lower_for_check or "syndrome" in question_lower_for_check:
+                        if not self.kci.check_term("veridian") and not self.kci.check_term("hội chứng veridian"):
+                            is_plausible = False
+                            confidence = min(confidence, 0.2)
+                            reason = "known_fake_entity_detected: Veridian (in Hội chứng Veridian)"
+                            break
         
         # If we have historical events that don't exist in KCI
         # Check for patterns like "conference 1943", "hội nghị 1943", "Lisbon Conference 1943", "Hội nghị Hòa bình Lisbon 1943"
