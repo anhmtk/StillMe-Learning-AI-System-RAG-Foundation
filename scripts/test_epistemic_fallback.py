@@ -24,6 +24,31 @@ from datetime import datetime
 API_BASE = "http://localhost:8000"  # Change to your backend URL
 API_KEY = None  # Set if required
 
+def normalize_api_base(url: str) -> str:
+    """
+    Normalize API base URL - add https:// if no scheme provided.
+    
+    Args:
+        url: URL string (with or without scheme)
+        
+    Returns:
+        Normalized URL with scheme
+    """
+    if not url:
+        return "http://localhost:8000"
+    
+    url = url.strip()
+    
+    # If no scheme provided, add https://
+    if not url.startswith(("http://", "https://")):
+        # Default to https:// for production URLs (railway.app, etc.)
+        if any(domain in url for domain in [".railway.app", ".vercel.app", ".netlify.app", ".herokuapp.com"]):
+            url = f"https://{url}"
+        else:
+            url = f"http://{url}"
+    
+    return url
+
 # Test Questions
 FAKE_QUESTIONS = [
     # 3 Science/Physics fake
@@ -116,8 +141,12 @@ def test_question(question: str, category: str, expected: str) -> Dict:
         if API_KEY:
             headers["X-API-Key"] = API_KEY
         
+        # Normalize API_BASE to ensure it has scheme
+        api_url = normalize_api_base(API_BASE)
+        endpoint = f"{api_url}/api/chat/smart_router"
+        
         response = requests.post(
-            f"{API_BASE}/api/chat/smart_router",
+            endpoint,
             json={"message": question, "use_rag": True},
             headers=headers,
             timeout=60
@@ -365,8 +394,16 @@ if __name__ == "__main__":
     
     if len(sys.argv) > 1:
         API_BASE = sys.argv[1]
+        # Normalize API_BASE immediately
+        API_BASE = normalize_api_base(API_BASE)
     if len(sys.argv) > 2:
         API_KEY = sys.argv[2]
+    
+    print(f"Using API Base: {API_BASE}")
+    if API_KEY:
+        print(f"API Key: {'*' * (len(API_KEY) - 4)}{API_KEY[-4:]}")
+    else:
+        print("API Key: Not set")
     
     run_test_suite()
 
