@@ -976,6 +976,21 @@ async def _run_learning_cycle_sync():
     cycle_number = result.get("cycle_number", 0)
     cycle_id_str = f"cycle_{cycle_number}"
     
+    # Check if entries were already processed by run_learning_cycle()
+    entries_already_added = result.get("entries_added_to_rag", 0)
+    if entries_already_added > 0:
+        logger.info(f"✅ Learning cycle already processed {entries_already_added} entries via run_learning_cycle()")
+        # Return result directly - no need for duplicate processing
+        return {
+            "status": "success",
+            "cycle_number": cycle_number,
+            "entries_fetched": result.get("entries_fetched", 0),
+            "entries_added_to_rag": entries_already_added,
+            "entries_filtered": result.get("entries_filtered", 0),
+            "processing_time_seconds": result.get("processing_time_seconds", 0),
+            "message": "Learning cycle completed (processed by run_learning_cycle)"
+        }
+    
     # Create fetch cycle for tracking
     cycle_id = None
     if rss_fetch_history:

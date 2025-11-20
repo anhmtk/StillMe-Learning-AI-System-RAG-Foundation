@@ -46,10 +46,24 @@ async def run_learning_cycle_background(job_id: str):
             raise Exception("Scheduler not available")
         
         # Phase 1: Fetching
+        # NOTE: run_learning_cycle() now handles RAG processing internally
+        # We still call it to get cycle_number, but it will already process entries
         job.update_progress("fetching", entries_fetched=0)
-        job.add_log("Fetching entries from all sources...")
+        job.add_log("Starting learning cycle (fetching and processing)...")
         result = await learning_scheduler.run_learning_cycle()
         cycle_number = result.get("cycle_number", 0)
+        
+        # Check if entries were already processed by run_learning_cycle()
+        entries_already_added = result.get("entries_added_to_rag", 0)
+        if entries_already_added > 0:
+            job.add_log(f"✅ Learning cycle already processed {entries_already_added} entries via run_learning_cycle()")
+            # Skip duplicate processing - run_learning_cycle() already handled it
+            job.status = JobStatus.DONE
+            job.completed_at = datetime.now()
+            job.result = result
+            job.update_progress("done", entries_added=entries_already_added)
+            job.add_log("Learning cycle completed successfully (processed by run_learning_cycle)")
+            return
         
         # Initialize Tiered Update Isolation for Nested Learning
         update_isolation = None
