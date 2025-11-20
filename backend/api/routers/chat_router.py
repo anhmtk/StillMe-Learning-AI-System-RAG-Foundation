@@ -1374,6 +1374,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     start_time = time.time()
     timing_logs = {}
     
+    # DEBUG: Log request received (very early)
+    logger.info(f"📥 Received chat request: message_length={len(chat_request.message)}, use_option_b={getattr(chat_request, 'use_option_b', 'NOT_SET')}")
+    
     # Initialize latency variables (will be set during processing)
     rag_retrieval_latency = 0.0
     llm_inference_latency = 0.0
