@@ -279,6 +279,15 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
     # CRITICAL: Message must be natural, deep, honest - not robotic or shallow
     # Philosophy: "Nó không biết mọi thứ, nhưng nó nghĩ rất đàng hoàng."
     # (It doesn't know everything, but it thinks very properly/decently)
+    # 
+    # CONSTRUCTIVE HUMILITY (from Style Guide):
+    # - Bad humility: "I don't know." → rồi im lặng
+    # - Good humility: 
+    #   1. Name the limit
+    #   2. Still analyze what can be analyzed
+    #   3. Show where the boundary actually lies
+    # 
+    # Example: "I don't know, but here is how humans have tried to think about it."
     if detected_lang == "vi":
         answer = (
             f"Mình đã tìm kiếm trong cơ sở tri thức của mình, nhưng không tìm thấy bất kỳ nguồn đáng tin cậy nào về \"{suspicious_entity}\".\n\n"
@@ -288,12 +297,14 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
             f"- Hoặc nó có thể trùng với một tên gọi khác trong lịch sử/khoa học, nhưng mình không đủ dữ liệu để xác nhận.\n\n"
             f"**Vì sao mình không thể trả lời chi tiết?**\n\n"
             f"Vì không có bằng chứng đáng tin cậy, mình **không thể mô tả các lập luận chính, cơ chế hoạt động, hay tác động lịch sử** của \"{suspicious_entity}\" mà vẫn trung thực được.\n\n"
-            f"**Mình có thể làm gì?**\n\n"
+            f"**Nhưng mình có thể làm gì?**\n\n"
+            f"Mình có thể phân tích cấu trúc của câu hỏi: nếu \"{suspicious_entity}\" là một khái niệm thật, nó sẽ thuộc về lĩnh vực nào? Các khái niệm tương tự trong lịch sử/khoa học thường có đặc điểm gì? Ranh giới giữa những gì mình biết và không biết nằm ở đâu?\n\n"
             f"Nếu bạn có nguồn cụ thể (bài báo, sách, link) về \"{suspicious_entity}\", bạn có thể gửi cho mình. Mình sẽ phân tích nội dung dựa trên nguồn đó – chứ không tự tạo thêm chi tiết.\n\n"
-            f"Đây không phải là sự từ chối, mà là cam kết của mình về tính trung thực: **thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh.**"
+            f"Đây không phải là sự từ chối, mà là cam kết của mình về tính trung thực: **thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh.** Nhưng mình vẫn có thể phân tích những gì có thể phân tích, và chỉ ra ranh giới thực sự nằm ở đâu."
         )
     else:
         # English fallback
+        # CONSTRUCTIVE HUMILITY: Not just "I don't know" but also analyze what can be analyzed
         answer = (
             f"I've searched my knowledge base, but I cannot find any reliable evidence about \"{suspicious_entity}\".\n\n"
             f"**What does this mean?**\n\n"
@@ -302,9 +313,10 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
             f"- Or it might coincide with a different historical/scientific name, but I lack sufficient data to confirm.\n\n"
             f"**Why can't I provide detailed information?**\n\n"
             f"Without reliable evidence, I **cannot truthfully describe the main arguments, mechanisms, or historical impacts** of \"{suspicious_entity}\".\n\n"
-            f"**What can I do?**\n\n"
+            f"**But what can I do?**\n\n"
+            f"I can analyze the structure of the question: if \"{suspicious_entity}\" were a real concept, what field would it belong to? What characteristics do similar concepts in history/science typically have? Where does the boundary between what I know and don't know actually lie?\n\n"
             f"If you have specific sources (articles, books, links) about \"{suspicious_entity}\", you can share them with me. I will analyze the content based on those sources – without generating new details myself.\n\n"
-            f"This is not a refusal, but my commitment to honesty: **I'd rather say 'I don't know' 100 times than fabricate once to appear knowledgeable.**"
+            f"This is not a refusal, but my commitment to honesty: **I'd rather say 'I don't know' 100 times than fabricate once to appear knowledgeable.** But I can still analyze what can be analyzed, and show where the boundary actually lies."
         )
     
     return answer
