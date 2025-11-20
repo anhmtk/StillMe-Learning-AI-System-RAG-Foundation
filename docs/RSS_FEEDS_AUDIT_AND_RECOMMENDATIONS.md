@@ -343,7 +343,7 @@ Tech Policy:        ████████░░ 80% (3/4 recommended)
 Religion:           ██░░░░░░░░ 20% (2/10 recommended) ⚠️ STILL GAP
 ```
 
-**Total Feeds:** 28 (was 24, +4 new)
+**Total Feeds:** 27 (was 24, +3 new: MIT Tech Review AI, Nature Machine Intelligence, AI Ethics Lab, IEP, Tricycle)
 
 ---
 
