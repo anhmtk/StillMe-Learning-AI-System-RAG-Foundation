@@ -57,9 +57,7 @@ class RSSFetcher:
             # Added based on StillMe's analysis of reliable, peer-reviewed, and up-to-date sources
             "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science",  # Science Magazine - Peer-reviewed research breakthroughs
             "https://www.nature.com/nature.rss",  # Nature - Already exists, keeping for clarity
-            # Reuters - Use alternative feeds (topNews has DNS issues)
-            "https://feeds.reuters.com/reuters/businessNews",  # Reuters Business (fallback for topNews)
-            "https://feeds.reuters.com/reuters/technologyNews",  # Reuters Technology
+            # Removed: Reuters feeds (businessNews, technologyNews) - Permanent DNS errors ([Errno -2] Name or service not known)
             "https://feeds.bloomberg.com/markets/news.rss",  # Bloomberg Markets - Economic & financial analysis
             
             # Tech Policy & AI Governance Blogs
