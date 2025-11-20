@@ -668,7 +668,10 @@ def page_overview():
                             source = item.get("source_url", item.get("source", "Unknown"))
                             title = item.get("title", "No title")[:60] + "..." if len(item.get("title", "")) > 60 else item.get("title", "No title")
                             status = item.get("status", "Unknown")
-                            reason = item.get("status_reason", "")
+                            # Ensure reason is always a string (never None)
+                            reason = item.get("status_reason") or ""
+                            if reason is None:
+                                reason = ""
                             timestamp = item.get("fetch_timestamp", item.get("timestamp", ""))
                             
                             # Format timestamp
@@ -704,7 +707,7 @@ def page_overview():
                                 "Source": source[:40] + "..." if len(source) > 40 else source,
                                 "Title": title,
                                 "Status": f"{status_icon} {status}",
-                                "Reason": reason[:50] + "..." if len(reason) > 50 else reason,
+                                "Reason": (reason[:50] + "..." if len(reason) > 50 else reason) if reason else "",
                                 "Timestamp": formatted_time
                             })
                         
