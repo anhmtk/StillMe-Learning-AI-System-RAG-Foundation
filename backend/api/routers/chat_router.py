@@ -1394,6 +1394,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     # OPTION B PIPELINE: Check if enabled
     use_option_b = getattr(chat_request, 'use_option_b', False) or os.getenv("STILLME_USE_OPTION_B_PIPELINE", "false").lower() == "true"
     
+    # DEBUG: Log Option B status
+    logger.info(f"🔍 Option B check: use_option_b={use_option_b}, request_attr={getattr(chat_request, 'use_option_b', 'NOT_SET')}, env_var={os.getenv('STILLME_USE_OPTION_B_PIPELINE', 'NOT_SET')}")
+    
     try:
         # Get services
         rag_retrieval = get_rag_retrieval()
