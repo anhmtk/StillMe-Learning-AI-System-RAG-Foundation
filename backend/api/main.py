@@ -419,8 +419,19 @@ def _initialize_rag_components():
         
         # CRITICAL: Auto-add foundational knowledge if missing
         # This ensures StillMe can answer questions about itself on Railway deployment
+        # MUST run BEFORE any RAG queries to ensure database has content
         try:
-            logger.info("Checking for foundational knowledge in ChromaDB...")
+            logger.info("🔍 Checking for foundational knowledge in ChromaDB...")
+            
+            # First, check database state
+            try:
+                stats = chroma_client.get_collection_stats()
+                total_docs = stats.get("total_documents", 0)
+                knowledge_docs = stats.get("knowledge_documents", 0)
+                logger.info(f"📊 Database state: {knowledge_docs} knowledge docs, {total_docs} total docs")
+            except Exception as stats_error:
+                logger.warning(f"Could not get database stats: {stats_error}")
+            
             query_embedding = embedding_service.encode_text("StillMe RAG continuous learning embedding model")
             
             # Check if foundational knowledge exists

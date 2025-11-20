@@ -31,6 +31,56 @@ class RAGRetrieval:
         self.embedding_service = embedding_service
         logger.info("RAG Retrieval service initialized")
     
+    def _calculate_adaptive_threshold(self, base_threshold: float) -> float:
+        """
+        Calculate adaptive similarity threshold based on database state.
+        
+        Strategy:
+        - New/empty database (< 10 docs): Use very low threshold (0.01-0.05)
+        - Small database (10-50 docs): Use low threshold (0.05-0.08)
+        - Medium database (50-200 docs): Use normal threshold (0.08-0.1)
+        - Mature database (> 200 docs): Use base threshold (0.1)
+        
+        Args:
+            base_threshold: Base threshold from caller
+            
+        Returns:
+            Adjusted threshold based on database state
+        """
+        try:
+            stats = self.chroma_client.get_collection_stats()
+            total_docs = stats.get("total_documents", 0)
+            knowledge_docs = stats.get("knowledge_documents", 0)
+            
+            # Use knowledge_docs as primary indicator (conversations are less relevant for similarity)
+            doc_count = knowledge_docs
+            
+            if doc_count == 0:
+                # Empty database - use minimal threshold to allow any matches
+                adaptive_threshold = 0.01
+                logger.info(f"📊 Database empty ({doc_count} docs) - using minimal threshold {adaptive_threshold}")
+            elif doc_count < 10:
+                # Very new database - use very low threshold
+                adaptive_threshold = 0.02
+                logger.info(f"📊 Database very new ({doc_count} docs) - using low threshold {adaptive_threshold}")
+            elif doc_count < 50:
+                # Small database - use low threshold
+                adaptive_threshold = 0.05
+                logger.info(f"📊 Database small ({doc_count} docs) - using low threshold {adaptive_threshold}")
+            elif doc_count < 200:
+                # Medium database - use slightly lower threshold
+                adaptive_threshold = 0.08
+                logger.debug(f"📊 Database medium ({doc_count} docs) - using threshold {adaptive_threshold}")
+            else:
+                # Mature database - use base threshold
+                adaptive_threshold = base_threshold
+                logger.debug(f"📊 Database mature ({doc_count} docs) - using base threshold {adaptive_threshold}")
+            
+            return adaptive_threshold
+        except Exception as e:
+            logger.warning(f"Failed to calculate adaptive threshold: {e}, using base threshold {base_threshold}")
+            return base_threshold
+    
     def retrieve_context(self, 
                         query: str, 
                         knowledge_limit: int = 3,  # Increased from 2 to 3 for better coverage
@@ -97,6 +147,13 @@ class RAGRetrieval:
             # If not in cache, perform retrieval
             # Generate query embedding (only once, used for both cache key and search)
             query_embedding = self.embedding_service.encode_text(query)
+            
+            # ADAPTIVE THRESHOLD: Adjust similarity threshold based on database state
+            # This ensures new/empty databases can still retrieve documents
+            original_threshold = similarity_threshold
+            similarity_threshold = self._calculate_adaptive_threshold(similarity_threshold)
+            if similarity_threshold != original_threshold:
+                logger.info(f"🔧 Adaptive threshold: {original_threshold:.3f} → {similarity_threshold:.3f} (based on database state)")
             
             # Nested Learning: If tier_preference is specified, use tier-based retrieval
             if tier_preference and ENABLE_CONTINUUM_MEMORY:
@@ -357,6 +414,26 @@ class RAGRetrieval:
                     filtered_knowledge.append(doc)
                 else:
                     filtered_knowledge_count += 1
+            
+            # PROGRESSIVE FALLBACK: If no documents pass threshold, try with lower threshold
+            if not filtered_knowledge and knowledge_results:
+                logger.warning(f"⚠️ No documents passed threshold {similarity_threshold:.3f}, trying progressive fallback...")
+                # Try with progressively lower thresholds
+                fallback_thresholds = [0.05, 0.02, 0.01, 0.0]  # Progressive fallback
+                for fallback_threshold in fallback_thresholds:
+                    if fallback_threshold >= similarity_threshold:
+                        continue  # Skip if not lower
+                    for doc in knowledge_results:
+                        if doc not in filtered_knowledge:
+                            distance = doc.get("distance", 1.0)
+                            similarity = _distance_to_similarity(distance)
+                            if similarity >= fallback_threshold:
+                                doc["similarity"] = similarity
+                                filtered_knowledge.append(doc)
+                                logger.info(f"✅ Progressive fallback: Added document with similarity {similarity:.3f} (threshold: {fallback_threshold:.3f})")
+                    if filtered_knowledge:
+                        logger.info(f"✅ Progressive fallback succeeded: {len(filtered_knowledge)} documents with threshold {fallback_threshold:.3f}")
+                        break  # Stop if we found documents
             
             # Log distance statistics for debugging similarity = 0.0 issues
             if distance_values:
