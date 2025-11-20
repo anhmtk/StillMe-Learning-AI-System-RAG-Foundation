@@ -150,6 +150,84 @@ def _is_factual_question(question: str) -> bool:
     
     return False
 
+def _extract_full_named_entity(question: str) -> Optional[str]:
+    """
+    Extract full named entity from question, prioritizing:
+    1. Quoted terms: '...' or "..."
+    2. Full phrases starting with keywords: "Hiệp ước ...", "Định đề ...", etc.
+    3. Capitalized multi-word phrases
+    
+    CRITICAL: This function must extract FULL phrases, not just first word.
+    Example: "Hiệp ước Hòa giải Daxonia 1956" → "Hiệp ước Hòa giải Daxonia 1956" (NOT "Hi")
+    
+    Args:
+        question: User question text
+        
+    Returns:
+        Full entity string or None
+    """
+    # Priority 1: Extract quoted terms (most reliable)
+    quoted_match = re.search(r'["\']([^"\']+)["\']', question)
+    if quoted_match:
+        entity = quoted_match.group(1).strip()
+        if len(entity) > 2:  # Must be meaningful (not just "Hi")
+            return entity
+    
+    # Priority 2: Extract full phrases starting with Vietnamese keywords
+    # Pattern: "Hiệp ước ... [year?]" or "Định đề ..." or "Hội chứng ..."
+    vietnamese_keywords = [
+        r"hiệp\s+ước", r"hội\s+nghị", r"hội\s+chứng", r"định\s+đề", r"học\s+thuyết",
+        r"chủ\s+nghĩa", r"lý\s+thuyết", r"khái\s+niệm", r"phong\s+trào", r"liên\s+minh"
+    ]
+    
+    for keyword_pattern in vietnamese_keywords:
+        # Match: keyword + optional words + optional year
+        # Example: "Hiệp ước Hòa giải Daxonia 1956"
+        pattern = rf'\b{keyword_pattern}\s+[^\.\?\!\n]+?(?:\s+\d{{4}})?(?=[\.\?\!\n]|$)'
+        match = re.search(pattern, question, re.IGNORECASE)
+        if match:
+            entity = match.group(0).strip()
+            # Remove trailing punctuation
+            entity = re.sub(r'[\.\?\!]+$', '', entity).strip()
+            if len(entity) > 5:  # Must be meaningful
+                return entity
+    
+    # Priority 3: Extract English patterns
+    english_keywords = [
+        r"treaty", r"conference", r"syndrome", r"postulate", r"theory", r"doctrine",
+        r"alliance", r"movement", r"organization"
+    ]
+    
+    for keyword_pattern in english_keywords:
+        # Match: keyword + optional words + optional year
+        pattern = rf'\b{keyword_pattern}\s+[^\.\?\!\n]+?(?:\s+\d{{4}})?(?=[\.\?\!\n]|$)'
+        match = re.search(pattern, question, re.IGNORECASE)
+        if match:
+            entity = match.group(0).strip()
+            entity = re.sub(r'[\.\?\!]+$', '', entity).strip()
+            if len(entity) > 5:
+                return entity
+    
+    # Priority 4: Extract capitalized multi-word phrases (English)
+    # Match: "Capitalized Word Capitalized Word ..." (at least 2 words)
+    capitalized_match = re.search(r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,})\b', question)
+    if capitalized_match:
+        entity = capitalized_match.group(1).strip()
+        if len(entity) > 5:
+            return entity
+    
+    # Priority 5: Extract Vietnamese capitalized phrases
+    vietnamese_capitalized = re.search(
+        r'\b([A-ZÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ][a-zàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]+(?:\s+[A-ZÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ][a-zàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]+)+)\b',
+        question
+    )
+    if vietnamese_capitalized:
+        entity = vietnamese_capitalized.group(1).strip()
+        if len(entity) > 5:
+            return entity
+    
+    return None
+
 def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_entity: Optional[str] = None) -> str:
     """
     Build a safe, honest refusal answer when hallucination is detected.
@@ -159,6 +237,9 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
     - Low confidence
     - Factual question detected
     - LLM might hallucinate
+    
+    CRITICAL: This function prioritizes honesty over helpfulness.
+    "Thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh."
     
     Args:
         question: User question
@@ -170,34 +251,30 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
     """
     # Extract entity from question if not provided
     if not suspicious_entity:
-        # Try to extract capitalized terms or quoted terms
-        entity_match = re.search(r'"([^"]+)"|([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)', question)
-        if entity_match:
-            suspicious_entity = entity_match.group(1) or entity_match.group(2)
-        else:
+        suspicious_entity = _extract_full_named_entity(question)
+        if not suspicious_entity:
             suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
     
     # Build answer based on language
+    # CRITICAL: Message must be strong, clear, and honest - no ambiguity
     if detected_lang == "vi":
         answer = (
-            f"Mình không tìm thấy bằng chứng đáng tin cậy nào về khái niệm/sự kiện có tên là \"{suspicious_entity}\" trong dữ liệu hiện có của mình.\n\n"
-            f"Có thể đây là:\n"
-            f"- một thuật ngữ giả định,\n"
-            f"- một khái niệm mới/chưa phổ biến,\n"
-            f"- hoặc một tên gọi khác với tên chuẩn trong tài liệu học thuật.\n\n"
-            f"Vì không có nguồn xác thực, mình **không dám khẳng định** về tác động kinh tế-xã hội hay các nghiên cứu học thuật liên quan.\n\n"
-            f"Nếu bạn có nguồn tham khảo cụ thể (link bài báo, sách, tác giả), bạn có thể gửi thêm, mình sẽ chỉ giúp phân tích nội dung dựa trên nguồn đó – chứ không tự tạo ra thông tin mới."
+            f"Mình không tìm thấy bất kỳ nguồn đáng tin cậy nào trong hệ thống về sự kiện/khái niệm có tên là \"{suspicious_entity}\".\n\n"
+            f"Có một số khả năng:\n"
+            f"- Đây là ví dụ giả định, tên tưởng tượng, hoặc một khái niệm chưa được ghi nhận rộng rãi trong các nguồn mà mình có.\n"
+            f"- Hoặc nó trùng với một tên gọi khác trong lịch sử nhưng mình không đủ dữ liệu để khẳng định.\n\n"
+            f"Vì không có bằng chứng, mình **không thể mô tả** \"các lập luận chính\" hay \"tác động lịch sử\" của \"{suspicious_entity}\" mà vẫn trung thực được.\n\n"
+            f"Nếu bạn có nguồn cụ thể (bài báo, sách, link), bạn có thể gửi, mình sẽ chỉ phân tích nội dung dựa trên nguồn đó – chứ không tự tạo thêm chi tiết."
         )
     else:
         # English fallback
         answer = (
-            f"I cannot find reliable evidence for a concept/event named \"{suspicious_entity}\" in my current data.\n\n"
-            f"This might be:\n"
-            f"- a hypothetical term,\n"
-            f"- a new/uncommon concept,\n"
-            f"- or a different name from standard academic terminology.\n\n"
-            f"As there is no verified source, I **cannot confirm** any socio-economic impacts or related academic research.\n\n"
-            f"If you have specific references (article link, book, author), you can provide them, and I will help analyze the content based on that source – without generating new information myself."
+            f"I cannot find any reliable sources in my system about the event/concept named \"{suspicious_entity}\".\n\n"
+            f"There are several possibilities:\n"
+            f"- This is a hypothetical example, an imaginary name, or a concept not widely documented in my available sources.\n"
+            f"- Or it corresponds to a different name in history, but I don't have sufficient data to confirm.\n\n"
+            f"Since there is no evidence, I **cannot describe** the \"main arguments\" or \"historical impact\" of \"{suspicious_entity}\" while remaining honest.\n\n"
+            f"If you have specific sources (article, book, link), you can provide them, and I will only analyze the content based on that source – without generating additional details myself."
         )
     
     return answer
@@ -1286,6 +1363,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     is_fallback_meta_answer = False  # Used in RAG path
     is_fallback_meta_answer_rag = False  # Used in RAG path post-processing
     is_fallback_meta_answer_non_rag = False  # Used in non-RAG path
+    is_fallback_for_learning = False  # Used to skip learning extraction for fallback meta-answers
+    is_fallback_for_learning = False  # Used to skip learning extraction for fallback meta-answers
     
     try:
         # Get services
@@ -1777,6 +1856,61 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
             context_is_relevant = True  # Default: assume relevant until proven otherwise
             if context["total_context_docs"] == 0:
                 context_is_relevant = False
+                
+                # CRITICAL: Pre-LLM Hallucination Guard for RAG path with no context
+                # If factual question + no context + suspicious entity → block and return honest response
+                # This prevents LLM from hallucinating about non-existent concepts/events
+                if _is_factual_question(chat_request.message):
+                    # Check for suspicious named entities using FPS
+                    try:
+                        from backend.knowledge.factual_scanner import scan_question
+                        fps_result = scan_question(chat_request.message)
+                        
+                        # If FPS detects non-existent concepts with low confidence, block and return honest response
+                        if not fps_result.is_plausible and fps_result.confidence < 0.3:
+                            # Extract full entity using improved extraction
+                            suspicious_entity = _extract_full_named_entity(chat_request.message)
+                            if not suspicious_entity and fps_result.detected_entities:
+                                suspicious_entity = fps_result.detected_entities[0]
+                            if not suspicious_entity:
+                                suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
+                            
+                            logger.warning(
+                                f"🛡️ Pre-LLM Hallucination Guard (RAG path, no context): "
+                                f"factual_question=True, fps_confidence={fps_result.confidence:.2f}, "
+                                f"entity={suspicious_entity}, reason={fps_result.reason}"
+                            )
+                            
+                            # Return honest response immediately (skip LLM call)
+                            honest_response = _build_safe_refusal_answer(
+                                chat_request.message, 
+                                detected_lang, 
+                                suspicious_entity
+                            )
+                            
+                            processing_steps.append("🛡️ Pre-LLM Hallucination Guard: Blocked factual question with suspicious entity (no RAG context)")
+                            
+                            # Mark as fallback to skip learning extraction
+                            is_fallback_for_learning = True
+                            
+                            # Calculate confidence score (low because no context)
+                            confidence_score = 1.0  # High confidence in honesty
+                            
+                            return ChatResponse(
+                                response=honest_response,
+                                confidence_score=confidence_score,
+                                processing_steps=processing_steps,
+                                timing_logs={
+                                    "total_time": time.time() - start_time,
+                                    "rag_retrieval_latency": rag_retrieval_latency,
+                                    "llm_inference_latency": 0.0  # No LLM call
+                                },
+                                validation_result=None,
+                                used_fallback=False
+                            )
+                    except Exception as fps_error:
+                        logger.warning(f"Pre-LLM FPS error (RAG path): {fps_error}, continuing with normal flow")
+                
                 # NO CONTEXT AVAILABLE - Use base LLM knowledge but be transparent
                 no_context_instruction = """
 ⚠️ NO RAG CONTEXT AVAILABLE ⚠️
@@ -2979,6 +3113,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     # Skip to end of function (skip validation, post-processing, learning)
                     # We'll handle this by setting a flag and checking it before validation
                     is_fallback_meta_answer = True
+                    is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
                 else:
                     is_fallback_meta_answer = False
                     # Log if raw_response exists but is not a fallback message
@@ -3112,6 +3247,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 logger.info("🛑 Fallback meta-answer detected (RAG path) - skipping post-processing (sanitize, quality eval, rewrite)")
                 processing_steps.append("🛑 Fallback message - terminal response, skipping post-processing")
                 is_fallback_meta_answer_rag = True
+                is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
                 # Skip post-processing entirely - response is already the fallback message
             else:
                 postprocessing_start = time.time()
@@ -3478,6 +3614,7 @@ Remember: RESPOND IN ENGLISH ONLY."""
             if response and isinstance(response, str) and is_fallback_message(response):
                 logger.info("🛑 Fallback meta-answer detected (non-RAG) - skipping post-processing")
                 is_fallback_meta_answer_non_rag = True
+                is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
                 processing_steps.append("🛑 Fallback message - terminal response, skipping all post-processing")
             
             llm_inference_end = time.time()
@@ -3565,11 +3702,10 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                 
                 # If suspicious patterns detected OR confidence is very low (< 0.3), override response
                 if has_suspicious_pattern or confidence_score < 0.3:
-                    # Extract suspicious entity from question
-                    suspicious_entity = None
-                    entity_match = re.search(r'"([^"]+)"|([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)', chat_request.message)
-                    if entity_match:
-                        suspicious_entity = entity_match.group(1) or entity_match.group(2)
+                    # Extract suspicious entity using improved extraction (full phrase, not just first word)
+                    suspicious_entity = _extract_full_named_entity(chat_request.message)
+                    if not suspicious_entity:
+                        suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
                     
                     # Override with safe refusal answer
                     response = _build_safe_refusal_answer(chat_request.message, detected_lang, suspicious_entity)
@@ -3582,6 +3718,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     processing_steps.append("🛡️ Hallucination Guard: Overrode response with safe refusal")
                     # Mark as fallback to skip post-processing
                     is_fallback_meta_answer_non_rag = True
+                    is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
             
             # CRITICAL: Add transparency warning for low confidence responses without context (non-RAG path)
             if confidence_score < 0.5 and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and response:
