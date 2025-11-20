@@ -58,8 +58,11 @@ class LearningScheduler:
             use_multi_source: If True, use SourceIntegration (RSS + arXiv + CrossRef + Wikipedia)
                              If False, use only RSS (backward compatibility)
         """
+        import time
+        start_time = time.time()
+        
         try:
-            logger.info(f"Starting learning cycle #{self.cycle_count + 1}")
+            logger.info(f"🚀 Starting learning cycle #{self.cycle_count + 1}")
             self.last_run_time = datetime.now()
             
             # Fetch from sources
@@ -67,31 +70,197 @@ class LearningScheduler:
                 # Try to use SourceIntegration if available (will be injected from main.py)
                 # For now, fallback to RSS only
                 entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=5)
-                logger.info(f"Fetched {len(entries)} entries from RSS feeds (multi-source integration in main.py)")
+                logger.info(f"✅ Fetched {len(entries)} entries from RSS feeds (multi-source integration in main.py)")
             else:
                 # RSS only
                 entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=5)
-                logger.info(f"Fetched {len(entries)} entries from RSS feeds")
+                logger.info(f"✅ Fetched {len(entries)} entries from RSS feeds")
             
-            # If auto_add_to_rag is enabled, we'll need to call RAG service
-            # For now, just log - will integrate with main.py's scheduler endpoint
+            # If auto_add_to_rag is enabled, actually process entries and add to RAG
+            entries_added = 0
+            entries_filtered = 0
             if self.auto_add_to_rag:
-                logger.info(f"Auto-add to RAG enabled - {len(entries)} entries ready for processing")
-                # Note: Actual RAG integration will be done in main.py's scheduler endpoint
+                logger.info(f"📦 Auto-add to RAG enabled - {len(entries)} entries ready for processing")
+                
+                # Import services from main module (avoid circular imports)
+                try:
+                    import backend.api.main as main_module
+                    rag_retrieval = main_module.rag_retrieval
+                    source_integration = main_module.source_integration
+                    content_curator = main_module.content_curator
+                    rss_fetch_history = main_module.rss_fetch_history
+                    
+                    if not rag_retrieval:
+                        logger.warning("⚠️ RAG retrieval not available, skipping RAG processing")
+                    else:
+                        # Create fetch cycle for tracking
+                        cycle_id = None
+                        if rss_fetch_history:
+                            cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=self.cycle_count + 1)
+                        
+                        # Fetch from all sources if available
+                        all_entries = []
+                        if source_integration:
+                            logger.info("📡 Fetching from all sources (RSS + arXiv + CrossRef + Wikipedia)...")
+                            all_entries = source_integration.fetch_all_sources(
+                                max_items_per_source=5,
+                                use_pre_filter=False  # We'll apply pre-filter manually to track rejected items
+                            )
+                            logger.info(f"✅ Fetched {len(all_entries)} entries from all sources")
+                        else:
+                            all_entries = entries
+                            logger.info(f"📡 Using {len(all_entries)} entries from RSS (SourceIntegration not available)")
+                        
+                        # STEP 1: Pre-Filter (BEFORE embedding) to reduce costs
+                        filtered_entries = all_entries
+                        if content_curator:
+                            logger.info("🔍 Applying pre-filter to reduce embedding costs...")
+                            filtered_entries, rejected_entries = content_curator.pre_filter_content(all_entries)
+                            entries_filtered = len(rejected_entries)
+                            logger.info(
+                                f"✅ Pre-Filter: {len(filtered_entries)}/{len(all_entries)} passed. "
+                                f"Rejected {entries_filtered} items (saving embedding costs)"
+                            )
+                        else:
+                            logger.warning("⚠️ Content curator not available, skipping pre-filter (may increase costs)")
+                        
+                        # STEP 2: Process entries and add to RAG with detailed progress tracking
+                        total_to_process = len(filtered_entries)
+                        logger.info(f"🔄 Starting RAG processing for {total_to_process} entries...")
+                        
+                        batch_size = 10  # Process in batches for better progress visibility
+                        for batch_idx in range(0, total_to_process, batch_size):
+                            batch = filtered_entries[batch_idx:batch_idx + batch_size]
+                            batch_num = (batch_idx // batch_size) + 1
+                            total_batches = (total_to_process + batch_size - 1) // batch_size
+                            
+                            logger.info(
+                                f"📊 Processing batch {batch_num}/{total_batches}: "
+                                f"{len(batch)} items ({batch_idx + 1}-{min(batch_idx + batch_size, total_to_process)}/{total_to_process})"
+                            )
+                            
+                            for entry_idx, entry in enumerate(batch):
+                                try:
+                                    content = f"{entry.get('title', '')}\n{entry.get('summary', '')}"
+                                    if not content.strip():
+                                        logger.warning(f"⚠️ Skipping empty entry: {entry.get('title', 'No title')}")
+                                        continue
+                                    
+                                    # Check for duplicates
+                                    is_duplicate = False
+                                    try:
+                                        existing = rag_retrieval.retrieve_context(
+                                            query=entry.get('title', ''),
+                                            knowledge_limit=1,
+                                            conversation_limit=0
+                                        )
+                                        if existing.get("knowledge_docs"):
+                                            existing_doc = existing["knowledge_docs"][0]
+                                            existing_metadata = existing_doc.get("metadata", {})
+                                            if existing_metadata.get("link", "") == entry.get("link", ""):
+                                                is_duplicate = True
+                                    except Exception:
+                                        pass
+                                    
+                                    if is_duplicate:
+                                        logger.debug(f"⏭️ Skipping duplicate: {entry.get('title', '')[:50]}")
+                                        continue
+                                    
+                                    # Calculate importance score
+                                    importance_score = 0.5
+                                    if content_curator:
+                                        importance_score = content_curator.calculate_importance_score(entry)
+                                    
+                                    # Add to RAG (this triggers embedding generation and ChromaDB insertion)
+                                    logger.debug(
+                                        f"🔧 Generating embedding and adding to ChromaDB: "
+                                        f"{entry.get('title', 'No title')[:50]}"
+                                    )
+                                    
+                                    success = rag_retrieval.add_learning_content(
+                                        content=content,
+                                        source=entry.get('source', 'rss'),
+                                        content_type="knowledge",
+                                        metadata={
+                                            "link": entry.get('link', ''),
+                                            "published": entry.get('published', ''),
+                                            "type": "rss_feed",
+                                            "scheduler_cycle": self.cycle_count + 1,
+                                            "priority_score": entry.get("priority_score", 0.5),
+                                            "importance_score": importance_score,
+                                            "title": entry.get('title', '')[:200]
+                                        }
+                                    )
+                                    
+                                    if success:
+                                        entries_added += 1
+                                        logger.info(
+                                            f"✅ ChromaDB: Inserted document {entries_added}/{total_to_process} "
+                                            f"({entries_added * 100 // total_to_process if total_to_process > 0 else 0}% complete) - "
+                                            f"{entry.get('title', 'No title')[:50]}"
+                                        )
+                                        
+                                        # Track in fetch history
+                                        if rss_fetch_history and cycle_id:
+                                            rss_fetch_history.add_fetch_item(
+                                                cycle_id=cycle_id,
+                                                title=entry.get("title", ""),
+                                                source_url=entry.get("source", ""),
+                                                link=entry.get("link", ""),
+                                                summary=entry.get("summary", ""),
+                                                status="Added to RAG",
+                                                vector_id=f"knowledge_{entry.get('link', '')[:8]}",
+                                                added_to_rag_at=datetime.now().isoformat()
+                                            )
+                                    else:
+                                        logger.warning(f"❌ Failed to add entry to RAG: {entry.get('title', 'No title')[:50]}")
+                                        
+                                except Exception as e:
+                                    logger.error(f"❌ Error processing entry: {e}")
+                                    continue
+                            
+                            # Log batch completion
+                            logger.info(
+                                f"✅ Batch {batch_num}/{total_batches} completed: "
+                                f"{entries_added} entries added so far (running total: {entries_added}/{total_to_process})"
+                            )
+                        
+                        # Complete fetch cycle
+                        if rss_fetch_history and cycle_id:
+                            rss_fetch_history.complete_fetch_cycle(cycle_id)
+                        
+                        processing_time = time.time() - start_time
+                        logger.info(
+                            f"✅ RAG processing completed: {entries_added}/{total_to_process} entries processed successfully "
+                            f"({entries_filtered} filtered, {total_to_process - entries_added - entries_filtered} failed/skipped) "
+                            f"in {processing_time:.2f}s"
+                        )
+                        
+                except Exception as e:
+                    logger.error(f"❌ Error in RAG processing: {e}", exc_info=True)
+                    # Continue with cycle completion even if RAG processing fails
             
             self.cycle_count += 1
             self.next_run_time = datetime.now() + timedelta(hours=self.interval_hours)
             
-            logger.info(f"Learning cycle #{self.cycle_count} completed. Next run: {self.next_run_time}")
+            total_time = time.time() - start_time
+            logger.info(
+                f"✅ Learning cycle #{self.cycle_count} completed in {total_time:.2f}s. "
+                f"Next run: {self.next_run_time}"
+            )
+            
             return {
                 "cycle_number": self.cycle_count,
                 "entries_fetched": len(entries),
+                "entries_added_to_rag": entries_added if self.auto_add_to_rag else 0,
+                "entries_filtered": entries_filtered if self.auto_add_to_rag else 0,
                 "timestamp": self.last_run_time.isoformat(),
-                "next_run": self.next_run_time.isoformat()
+                "next_run": self.next_run_time.isoformat(),
+                "processing_time_seconds": total_time
             }
             
         except Exception as e:
-            logger.error(f"Error in learning cycle: {e}")
+            logger.error(f"❌ Error in learning cycle: {e}", exc_info=True)
             return {
                 "cycle_number": self.cycle_count,
                 "error": str(e),

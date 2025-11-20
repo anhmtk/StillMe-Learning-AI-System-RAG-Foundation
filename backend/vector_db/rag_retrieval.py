@@ -698,10 +698,19 @@ class RAGRetrieval:
                            source: str, 
                            content_type: str = "knowledge",
                            metadata: Optional[Dict[str, Any]] = None) -> bool:
-        """Add new learning content to vector database"""
+        """Add new learning content to vector database
+        
+        This method:
+        1. Generates embeddings using the embedding service
+        2. Inserts documents into ChromaDB
+        3. Logs progress for monitoring
+        """
         try:
             import uuid
             from datetime import datetime
+            import time
+            
+            start_time = time.time()
             
             # Prepare metadata
             doc_metadata = {
@@ -713,7 +722,13 @@ class RAGRetrieval:
             
             doc_id = f"{content_type}_{uuid.uuid4().hex[:8]}"
             
-            # Add to appropriate collection
+            # Generate embedding (ChromaDB will do this automatically, but we log it for visibility)
+            # Note: ChromaDB's add() method automatically generates embeddings if not provided
+            # We log this step for transparency
+            logger.debug(f"🔧 Generating embedding for {content_type} content (ID: {doc_id[:8]}...)")
+            embedding_start = time.time()
+            
+            # Add to appropriate collection (ChromaDB handles embedding generation internally)
             if content_type == "knowledge":
                 success = self.chroma_client.add_knowledge(
                     documents=[content],
@@ -727,11 +742,19 @@ class RAGRetrieval:
                     ids=[doc_id]
                 )
             
+            embedding_time = time.time() - embedding_start
+            total_time = time.time() - start_time
+            
             if success:
-                logger.info(f"Added {content_type} content from {source}")
+                logger.debug(
+                    f"✅ Added {content_type} content from {source} "
+                    f"(embedding: {embedding_time:.3f}s, total: {total_time:.3f}s)"
+                )
+            else:
+                logger.warning(f"❌ Failed to add {content_type} content from {source}")
             
             return success
             
         except Exception as e:
-            logger.error(f"Failed to add learning content: {e}")
+            logger.error(f"❌ Failed to add learning content: {e}", exc_info=True)
             return False

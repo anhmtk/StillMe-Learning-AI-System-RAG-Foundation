@@ -391,6 +391,11 @@ class ChromaClient:
                      ids: List[str]) -> bool:
         """Add knowledge documents to vector database
         
+        This method:
+        1. Generates embeddings for documents (via ChromaDB's automatic embedding)
+        2. Inserts documents with embeddings into ChromaDB collection
+        3. Logs progress for monitoring
+        
         Args:
             documents: List of text documents
             metadatas: List of metadata for each document
@@ -400,15 +405,27 @@ class ChromaClient:
             bool: Success status
         """
         try:
+            import time
+            start_time = time.time()
+            
+            # ChromaDB automatically generates embeddings when documents are added
+            # We log this step for visibility
+            logger.debug(f"🔧 ChromaDB: Generating embeddings for {len(documents)} document(s)...")
+            
             self.knowledge_collection.add(
                 documents=documents,
                 metadatas=metadatas,
                 ids=ids
             )
-            logger.info(f"Added {len(documents)} knowledge documents")
+            
+            elapsed = time.time() - start_time
+            logger.debug(
+                f"✅ ChromaDB: Inserted {len(documents)} knowledge document(s) "
+                f"(embedding + insertion: {elapsed:.3f}s)"
+            )
             return True
         except Exception as e:
-            logger.error(f"Failed to add knowledge: {e}")
+            logger.error(f"❌ ChromaDB: Failed to add knowledge: {e}", exc_info=True)
             return False
     
     def add_conversation(self, 
