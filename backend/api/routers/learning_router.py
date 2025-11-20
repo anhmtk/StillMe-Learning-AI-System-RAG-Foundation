@@ -764,6 +764,11 @@ async def get_rss_fetch_history(limit: int = 100):
             raise HTTPException(status_code=503, detail="RSS fetch history not available")
         
         items = rss_fetch_history.get_latest_fetch_items(limit=limit)
+        
+        # Ensure items is always a list (never None)
+        if items is None:
+            items = []
+        
         return {
             "items": items,
             "total": len(items)

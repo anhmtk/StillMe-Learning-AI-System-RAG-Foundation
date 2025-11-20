@@ -144,7 +144,11 @@ def get_json(path: str, default: Dict[str, Any] | None = None, timeout: int = 10
     try:
         r = requests.get(url, timeout=timeout)
         r.raise_for_status()
-        return r.json()
+        result = r.json()
+        # Ensure result is never None - return empty dict if None
+        if result is None:
+            return default or {}
+        return result
     except requests.exceptions.ConnectionError as e:
         # Connection failed - backend may be down
         import logging
@@ -636,9 +640,22 @@ def page_overview():
                 try:
                     # Get RSS fetch history
                     fetch_history = get_json("/api/learning/rss/fetch-history", {"limit": 200}, timeout=30)
-                    items = fetch_history.get("items", [])
                     
-                    if items:
+                    # Handle None response
+                    if fetch_history is None:
+                        st.warning("⚠️ Backend returned no data. RSS fetch history may not be initialized yet.")
+                        st.caption("💡 Run a learning cycle first to generate statistics.")
+                        if st.button("❌ Close Statistics", use_container_width=True):
+                            st.session_state["show_learning_stats"] = False
+                            st.rerun()
+                        return
+                    
+                    # Ensure items is a list
+                    items = fetch_history.get("items", [])
+                    if items is None:
+                        items = []
+                    
+                    if items and len(items) > 0:
                         st.markdown("### 📋 Learning Activity Table")
                         st.caption(f"Showing {len(items)} most recent learning items")
                         
@@ -743,8 +760,14 @@ def page_overview():
                         st.info("📭 No learning history available yet. Run a learning cycle to see statistics.")
                         
                 except Exception as e:
-                    st.error(f"❌ Failed to load learning statistics: {e}")
+                    import traceback
+                    error_detail = str(e)
+                    error_traceback = traceback.format_exc()
+                    st.error(f"❌ Failed to load learning statistics: {error_detail}")
                     st.caption("💡 Make sure backend is running and RSS fetch history is enabled.")
+                    # Show detailed error for debugging
+                    with st.expander("🔍 Error Details (for debugging)", expanded=False):
+                        st.code(error_traceback, language="text")
                 
                 # Close button
                 if st.button("❌ Close Statistics", use_container_width=True):
