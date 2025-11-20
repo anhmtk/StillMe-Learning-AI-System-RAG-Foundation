@@ -19,16 +19,30 @@ class FactualHallucinationValidator(Validator):
     """
     Validator to detect factual hallucinations in history/science questions
     
+    🚨🚨🚨 HARD MODE ENABLED 🚨🚨🚨
+    - Marks ANY response containing unverified facts
+    - If suspicious entity not in KCI → fallback (no speculation)
+    - No "half-truth" responses: "I'm not sure... but here's analysis"
+    - Only return 100% deterministic template when guard is active
+    
     Detects:
     - Non-existent events/concepts described with certainty
     - Fabricated citations (e.g., "Smith, A. et al. (1975)")
     - Fake organizations, countries, alliances
     - Assertive descriptions of unverified concepts
+    - Detailed descriptions of non-existent concepts (even with disclaimers)
     """
     
-    def __init__(self):
+    def __init__(self, hard_mode: bool = True):
+        """
+        Initialize validator
+        
+        Args:
+            hard_mode: If True, enable HARD mode (strictest validation)
+        """
         super().__init__()
         self.fps = get_fps()
+        self.hard_mode = hard_mode  # 🚨🚨🚨 HARD MODE ENABLED BY DEFAULT 🚨🚨🚨
         
         # Patterns that indicate fabrication
         self.fake_citation_patterns = [
@@ -160,13 +174,14 @@ class FactualHallucinationValidator(Validator):
             if user_question:
                 fps_result = self.fps.scan(user_question)
                 
-                # CRITICAL: If question contains non-existent concepts, check if answer describes them
-                # This includes ANY description (not just assertive), because describing non-existent concepts
-                # is a form of hallucination, even with disclaimers
-                # Also check if answer describes entities that are NOT in KCI (unknown concepts)
+                # 🚨🚨🚨 HARD MODE: More aggressive entity checking 🚨🚨🚨
+                # In HARD mode, check entities if:
+                # 1. FPS says not plausible OR confidence < 0.5 OR
+                # 2. No context (len(ctx_docs) == 0) OR
+                # 3. HARD MODE: Even with context, if confidence is low (< 0.7), still check
                 should_check_entities = (
                     not fps_result.is_plausible or 
-                    fps_result.confidence < 0.5 or
+                    fps_result.confidence < (0.7 if self.hard_mode else 0.5) or
                     len(ctx_docs) == 0  # No context = higher risk of hallucination
                 )
                 
@@ -217,11 +232,27 @@ class FactualHallucinationValidator(Validator):
                                     re.search(pattern, window_text) for pattern in detail_patterns
                                 )
                                 
+                                # 🚨🚨🚨 HARD MODE: Even mentioning non-existent concept is suspicious 🚨🚨🚨
+                                # In HARD mode, ANY mention of non-existent concept is flagged
+                                # (not just detailed descriptions)
+                                entity_in_kci = self.fps.kci.check_term(entity)
+                                
+                                if self.hard_mode:
+                                    # HARD MODE: If entity not in KCI, flag it even without detail description
+                                    if not entity_in_kci:
+                                        reasons.append(
+                                            f"non_existent_concept_mentioned: {entity} (HARD MODE)"
+                                        )
+                                        logger.warning(
+                                            f"FactualHallucinationValidator (HARD MODE): Non-existent concept "
+                                            f"'{entity}' mentioned in answer. Blocking response."
+                                        )
+                                
                                 # CRITICAL: If answer describes details about non-existent concept,
                                 # this is hallucination, even with disclaimer
                                 if has_detail_description:
                                     # Check if entity is NOT in KCI (unknown concept)
-                                    if not self.fps.kci.check_term(entity):
+                                    if not entity_in_kci:
                                         reasons.append(
                                             f"detailed_description_of_non_existent_concept: {entity}"
                                         )

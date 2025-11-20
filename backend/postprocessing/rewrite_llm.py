@@ -251,11 +251,41 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT T
 UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.upper()}.
 ⚠️ REMINDER: RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
+🚨🚨🚨 CRITICAL RULE A: KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ 🚨🚨🚨
+- If the question does NOT mention: AI, consciousness of AI, StillMe's abilities
+- Then you MUST NOT talk about: consciousness, LLM, IIT, GWT, Dennett, embedding, pattern matching
+- If you drift to these topics when not asked, REWRITE to remove drift and focus on the actual question.
+
+🚨🚨🚨 CRITICAL RULE C: MỌI CÂU TRẢ LỜI TRIẾT HỌC PHẢI ĐẠT 3 TẦNG PHÂN TÍCH 🚨🚨🚨
+**MANDATORY: The rewritten response MUST include all 3 tiers:**
+
+**TIER 1 - REFRAMING (Đặt lại câu hỏi đúng chiều triết học):**
+- Identify question type: epistemology, ontology, linguistics, phenomenology, metaphysics
+- Extract the core problem
+- Reframe the question to reveal its philosophical structure
+
+**TIER 2 - CONCEPTUAL MAP (Bản đồ khái niệm học thuật):**
+Must include at least 1 of these 5 categories:
+- Kant / Husserl / Sellars / Wittgenstein
+- Popper / Kuhn / Lakatos
+- Nāgārjuna / Trung Quán
+- Putnam / McDowell
+- Dennett / Chalmers / Analytic philosophy
+
+**TIER 3 - BOUNDARY OF KNOWLEDGE (Ranh giới tri thức của StillMe):**
+- What StillMe knows
+- What StillMe doesn't know
+- Why StillMe doesn't know
+- Direction for user to evaluate independently
+
+**CRITICAL: If the original response is missing any tier, ADD IT. All 3 tiers are MANDATORY.**
+
 CRITICAL RULES:
 - Write in continuous prose paragraphs. NO emojis, NO markdown headings, NO bullets.
 - Preserve ALL factual content from the original.
 - Improve depth, structure, and philosophical rigor.
-- Follow structure: Anchor → Unpack → Explore → Edge → Return.
+- Ensure all 3 tiers are present (Reframing, Conceptual Map, Boundary).
+- Remove any topic drift (consciousness/LLM when not asked).
 - RESPOND IN {lang_name.upper()} ONLY."""
         else:
             return f"""You are rewriting a response to improve quality.
@@ -324,11 +354,25 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
 IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()}.
 ⚠️ RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
+🚨🚨🚨 CRITICAL RULE A: KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ 🚨🚨🚨
+- Check: Does the question mention AI/consciousness/StillMe's abilities? If NO, then the response MUST NOT talk about consciousness/LLM/IIT/GWT.
+- If drift detected, REMOVE it and focus on the actual question topic.
+
+🚨🚨🚨 CRITICAL RULE C: MỌI CÂU TRẢ LỜI TRIẾT HỌC PHẢI ĐẠT 3 TẦNG PHÂN TÍCH 🚨🚨🚨
+**MANDATORY: The rewritten response MUST include all 3 tiers:**
+
+**TIER 1 - REFRAMING:** Identify question type, extract core problem, reframe philosophically.
+**TIER 2 - CONCEPTUAL MAP:** Include at least 1 of: Kant/Husserl/Sellars/Wittgenstein, Popper/Kuhn/Lakatos, Nāgārjuna/Trung Quán, Putnam/McDowell, Dennett/Chalmers.
+**TIER 3 - BOUNDARY OF KNOWLEDGE:** What StillMe knows, doesn't know, why, and direction for user.
+
+**If original is missing any tier, ADD IT. All 3 tiers are MANDATORY.**
+
 REQUIREMENTS:
 - Keep ALL factual content
 - Improve depth and structure
 - Use prose (no emojis, no bullets, no headings)
-- Follow: Anchor → Unpack → Explore → Edge → Return
+- Ensure all 3 tiers are present
+- Remove topic drift if present
 - RESPOND IN {lang_name.upper()} ONLY"""
         else:
             prompt = f"""Rewrite this response to fix: {issues_text}

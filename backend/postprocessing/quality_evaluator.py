@@ -96,6 +96,31 @@ class QualityEvaluator:
             r'\bIn my experience\b',
         ]
         
+        # Topic drift indicators (CRITICAL: StillMe talking about consciousness/LLM when NOT asked)
+        # These patterns indicate StillMe is drifting to AI/consciousness topics when user didn't ask
+        self.drift_indicators = [
+            # Consciousness-related (when not asked)
+            r'\b(ý thức|consciousness|self-awareness|nhận thức bản thân)\b',
+            r'\b(IIT|Integrated Information Theory|Global Workspace Theory|GWT)\b',
+            r'\b(Dennett|Chalmers|phenomenal consciousness|functional response)\b',
+            r'\b(qualia|subjective experience|trải nghiệm chủ quan)\b',
+            # LLM/architecture-related (when not asked)
+            r'\b(LLM|Large Language Model|mô hình ngôn ngữ lớn)\b',
+            r'\b(embedding|semantic vectors|token attention)\b',
+            r'\b(pattern matching|không có ý thức|does not have consciousness)\b',
+            r'\b(statistical model|mô hình thống kê)\b',
+        ]
+        
+        # Keywords that indicate question IS about AI/consciousness (legitimate context)
+        self.legitimate_ai_keywords = [
+            r'\b(bạn có|do you have|are you|bạn là|you are)\s+(ý thức|consciousness|cảm xúc|emotion)\b',
+            r'\b(ý thức của bạn|your consciousness|your emotions|cảm xúc của bạn)\b',
+            r'\b(năng lực của bạn|your ability|khả năng của bạn)\b',
+            r'\b(how do you|bạn hoạt động|how does stillme|stillme hoạt động)\b',
+            r'\b(ai consciousness|ý thức ai|artificial consciousness)\b',
+            r'\b(llm consciousness|ý thức llm)\b',
+        ]
+        
         # Minimum length thresholds
         self.min_length_philosophical = 200  # Philosophical questions need depth
         self.min_length_general = 100        # General questions can be shorter
@@ -175,6 +200,13 @@ class QualityEvaluator:
         if anthropo_score > 0.1:  # Any anthropomorphism is bad
             reasons.append("Contains anthropomorphic language - claims experience or feelings")
         
+        # Check 6.5: Topic drift detection (CRITICAL - A. KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ)
+        if original_question:
+            drift_score = self._check_topic_drift(text_lower, original_question)
+            scores["drift"] = drift_score
+            if drift_score < 0.5:  # Drift detected
+                reasons.append("Topic drift detected - StillMe talks about consciousness/LLM when not asked")
+        
         # Check 7: Structure completeness (for philosophical)
         if is_philosophical:
             structure_score = self._check_structure_completeness(text)
@@ -185,14 +217,15 @@ class QualityEvaluator:
         # Determine overall quality
         # Weighted scoring
         weights = {
-            "template": 0.15,  # Template check gets 15% weight
-            "length": 0.12,
-            "depth": 0.20,
-            "unpacking": 0.18 if is_philosophical else 0.10,
-            "argument": 0.18,
-            "limitations": 0.10,
+            "template": 0.12,  # Template check gets 12% weight
+            "length": 0.10,
+            "depth": 0.18,
+            "unpacking": 0.16 if is_philosophical else 0.08,
+            "argument": 0.16,
+            "limitations": 0.08,
             "anthropomorphism": 0.10,  # Penalty if present
-            "structure": 0.10 if is_philosophical else 0.05,
+            "drift": 0.15,  # CRITICAL: Drift detection gets 15% weight (A. KHÔNG BAO GIỜ ĐƯỢC DRIFT)
+            "structure": 0.08 if is_philosophical else 0.03,
         }
         
         overall_score = sum(scores.get(k, 0) * weights.get(k, 0) for k in weights.keys())
@@ -200,6 +233,10 @@ class QualityEvaluator:
         # Penalty for anthropomorphism
         if scores.get("anthropomorphism", 0) > 0.1:
             overall_score *= 0.5  # Heavy penalty
+        
+        # CRITICAL: Heavy penalty for topic drift (A. KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ)
+        if scores.get("drift", 1.0) < 0.5:
+            overall_score *= 0.2  # Very heavy penalty - drift is unacceptable
         
         # CRITICAL: Heavy penalty for template-like responses
         if scores.get("template", 1.0) < 0.5:
@@ -242,6 +279,11 @@ class QualityEvaluator:
         is_template_like = any("template-like" in r.lower() for r in reasons)
         if is_template_like:
             has_critical_issues = True  # Force rewrite for template-like responses
+        
+        # CRITICAL: Topic drift should always trigger rewrite (A. KHÔNG BAO GIỜ ĐƯỢC DRIFT)
+        is_drift = any("topic drift" in r.lower() for r in reasons)
+        if is_drift:
+            has_critical_issues = True  # Force rewrite for drift
         
         is_too_short = text_length < (self.min_length_philosophical if is_philosophical else self.min_length_general)
         
@@ -393,6 +435,54 @@ class QualityEvaluator:
             return 0.2  # Weak template pattern but still concerning
         
         return 1.0  # No template pattern detected
+    
+    def _check_topic_drift(self, text_lower: str, original_question: str) -> float:
+        """
+        Check if StillMe is drifting to AI/consciousness topics when NOT asked.
+        
+        CRITICAL RULE (A. KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ):
+        - If question does NOT mention: AI, consciousness of AI, StillMe's abilities
+        - But response mentions: consciousness, LLM, IIT, GWT, Dennett, embedding, etc.
+        - Then this is DRIFT and must be rewritten 100%.
+        
+        Returns: 1.0 = good (no drift), 0.0 = bad (strong drift detected)
+        """
+        question_lower = original_question.lower()
+        
+        # Check if question is legitimately about AI/consciousness
+        is_legitimate_context = any(
+            re.search(pattern, question_lower, re.IGNORECASE) 
+            for pattern in self.legitimate_ai_keywords
+        )
+        
+        # If question IS about AI/consciousness, then talking about it is NOT drift
+        if is_legitimate_context:
+            return 1.0  # No drift - legitimate context
+        
+        # Check if response contains drift indicators
+        drift_matches = sum(
+            1 for pattern in self.drift_indicators 
+            if re.search(pattern, text_lower, re.IGNORECASE)
+        )
+        
+        # If response has drift indicators but question doesn't mention AI/consciousness, it's drift
+        if drift_matches >= 2:
+            logger.warning(
+                f"Topic drift detected: Question doesn't mention AI/consciousness, "
+                f"but response contains {drift_matches} drift indicators. "
+                f"Question: {original_question[:100]}..."
+            )
+            return 0.0  # Strong drift - must rewrite
+        
+        if drift_matches >= 1:
+            logger.warning(
+                f"Potential topic drift: Question doesn't mention AI/consciousness, "
+                f"but response contains {drift_matches} drift indicator(s). "
+                f"Question: {original_question[:100]}..."
+            )
+            return 0.3  # Weak drift - should rewrite
+        
+        return 1.0  # No drift detected
     
     def _check_structure_completeness(self, text: str) -> float:
         """

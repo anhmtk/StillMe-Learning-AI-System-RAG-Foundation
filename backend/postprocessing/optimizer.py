@@ -150,6 +150,11 @@ class PostProcessingOptimizer:
         """
         Determine if rewrite is really needed (pre-filter to avoid unnecessary rewrites)
         
+        🚨🚨🚨 CRITICAL RULE D: BẬT LẠI REWRITE MỨC CAO NHẤT 🚨🚨🚨
+        - For philosophical questions: ALWAYS rewrite if quality is not "good"
+        - Accept trade-off: latency/cost increase, but quality increases significantly
+        - If rewrite uses many tokens → let it run, do NOT disable
+        
         Args:
             quality_result: Quality evaluation result
             is_philosophical: Whether question is philosophical
@@ -166,13 +171,24 @@ class PostProcessingOptimizer:
         if quality == "good":
             return False, "quality_good"
         
-        # CRITICAL: Only rewrite when score is very low (<0.3) or has critical issues
-        # This prevents unnecessary rewrites for acceptable responses (score >= 0.3)
+        # CRITICAL: Critical issues always require rewrite
         critical_issues = [
             "Contains anthropomorphic language",
             "Output too short",
+            "Topic drift detected",  # CRITICAL: Drift always requires rewrite
         ]
         has_critical = any(issue in reasons for issue in critical_issues)
+        
+        # 🚨🚨🚨 CRITICAL RULE D: For philosophical questions, ALWAYS rewrite if quality is not "good" 🚨🚨🚨
+        # Accept trade-off: latency/cost increase, but quality increases significantly
+        if is_philosophical:
+            # ALWAYS rewrite philosophical questions if quality is not "good"
+            # This ensures 3-tier analysis (Reframing, Conceptual Map, Boundary) is enforced
+            logger.info(
+                f"🔄 Philosophical question requires rewrite: quality={quality}, "
+                f"score={overall_score:.2f}, reasons={reasons[:2]}"
+            )
+            return True, "philosophical_question_requires_rewrite"
         
         # For non-philosophical questions: only rewrite if score < 0.3 or has critical issues
         if not is_philosophical:
@@ -182,23 +198,6 @@ class PostProcessingOptimizer:
                     f"length={response_length}, critical_issues={has_critical}"
                 )
                 return False, f"score_acceptable_non_philosophical_{overall_score:.2f}"
-        
-        # For philosophical questions: only rewrite if score < 0.3 or has critical issues
-        if is_philosophical:
-            depth_issues = [
-                "Lacks philosophical depth",
-                "Missing conceptual unpacking",
-                "Weak argument structure",
-                "Missing philosophical structure",
-            ]
-            has_depth_issue = any(issue in reasons for issue in depth_issues)
-            
-            if overall_score >= 0.3 and not has_critical and not has_depth_issue:
-                logger.info(
-                    f"⏭️ Skipping rewrite: score={overall_score:.2f} >= 0.3 (threshold), "
-                    f"length={response_length}, critical_issues={has_critical}, depth_issues={has_depth_issue}"
-                )
-                return False, f"score_acceptable_philosophical_{overall_score:.2f}"
         
         # Rewrite needed
         return True, "quality_insufficient"
