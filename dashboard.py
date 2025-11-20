@@ -32,6 +32,24 @@ except ImportError:
 
 
 API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
+STILLME_API_KEY = os.getenv("STILLME_API_KEY", "")
+
+
+def get_api_headers() -> Dict[str, str]:
+    """
+    Get headers for API requests, including API key if available.
+    
+    Returns:
+        Dictionary with headers including X-API-Key if STILLME_API_KEY is set
+    """
+    headers = {
+        "Content-Type": "application/json"
+    }
+    
+    if STILLME_API_KEY:
+        headers["X-API-Key"] = STILLME_API_KEY
+    
+    return headers
 
 
 def display_local_time(utc_time_str: str, label: str = "Next run"):
@@ -362,8 +380,11 @@ def page_overview():
         st.markdown("---")
         st.caption("**Environment Variables:**")
         st.code(f"STILLME_API_BASE: {os.getenv('STILLME_API_BASE', 'NOT SET')}", language="text")
+        st.code(f"STILLME_API_KEY: {'SET (length: ' + str(len(STILLME_API_KEY)) + ')' if STILLME_API_KEY else 'NOT SET'}", language="text")
         if API_BASE == "http://localhost:8000":
             st.warning("⚠️ **WARNING:** API_BASE is still `localhost:8000`! This means `STILLME_API_BASE` environment variable is NOT set in Railway dashboard service. You need to set it to your backend URL (e.g., `https://stillme-backend-production-xxxx.up.railway.app`)")
+        if not STILLME_API_KEY:
+            st.error("❌ **CRITICAL:** `STILLME_API_KEY` is NOT set! Protected endpoints (scheduler start/stop, database reset, knowledge injection) will fail with 401 Unauthorized. Set `STILLME_API_KEY` in Railway dashboard service variables (must match backend `STILLME_API_KEY`).")
     
     # Get scheduler status with longer timeout (backend may be busy during learning cycle)
     # Use try-except to handle timeout gracefully and show progress if job is running
@@ -511,7 +532,11 @@ def page_overview():
             if st.button("▶️ Start Scheduler", width='stretch'):
                 try:
                     # Increased timeout to 30s to handle network latency (Railway deployment)
-                    r = requests.post(f"{API_BASE}/api/learning/scheduler/start", timeout=30)
+                    r = requests.post(
+                        f"{API_BASE}/api/learning/scheduler/start",
+                        headers=get_api_headers(),
+                        timeout=30
+                    )
                     if r.status_code == 200:
                         st.session_state["last_action"] = "✅ Scheduler started successfully!"
                         st.rerun()
@@ -527,13 +552,24 @@ def page_overview():
                             st.session_state["last_error"] = "⏱️ Request timed out. Please check scheduler status - it may have started in background."
                     except:
                         st.session_state["last_error"] = "⏱️ Request timed out. Scheduler may have started - please refresh to check status."
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 401:
+                        st.session_state["last_error"] = f"❌ 401 Unauthorized: API key missing or invalid. Please set STILLME_API_KEY in Railway dashboard service variables."
+                    elif e.response.status_code == 403:
+                        st.session_state["last_error"] = f"❌ 403 Forbidden: Invalid API key. Please verify STILLME_API_KEY matches backend key."
+                    else:
+                        st.session_state["last_error"] = f"❌ Failed to start scheduler: {e}"
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed to start scheduler: {e}"
         with col_stop:
             if st.button("⏹️ Stop Scheduler", width='stretch'):
                 try:
                     # Increased timeout to 30s to handle network latency (Railway deployment)
-                    r = requests.post(f"{API_BASE}/api/learning/scheduler/stop", timeout=30)
+                    r = requests.post(
+                        f"{API_BASE}/api/learning/scheduler/stop",
+                        headers=get_api_headers(),
+                        timeout=30
+                    )
                     if r.status_code == 200:
                         st.session_state["last_action"] = "✅ Scheduler stopped successfully!"
                         st.rerun()
@@ -549,6 +585,13 @@ def page_overview():
                             st.session_state["last_error"] = "⏱️ Request timed out. Please check scheduler status - it may have stopped in background."
                     except:
                         st.session_state["last_error"] = "⏱️ Request timed out. Scheduler may have stopped - please refresh to check status."
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 401:
+                        st.session_state["last_error"] = f"❌ 401 Unauthorized: API key missing or invalid. Please set STILLME_API_KEY in Railway dashboard service variables."
+                    elif e.response.status_code == 403:
+                        st.session_state["last_error"] = f"❌ 403 Forbidden: Invalid API key. Please verify STILLME_API_KEY matches backend key."
+                    else:
+                        st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
         with col_run_now:
@@ -1074,7 +1117,11 @@ def page_overview():
             if st.button("🔄 Reset Vector Database", width='stretch', type="secondary"):
                 try:
                     with st.spinner("Resetting database (this may take a moment)..."):
-                        r = requests.post(f"{API_BASE}/api/rag/reset-database", timeout=60)
+                        r = requests.post(
+                            f"{API_BASE}/api/rag/reset-database",
+                            headers=get_api_headers(),
+                            timeout=60
+                        )
                         if r.status_code == 200:
                             data = r.json()
                             message = data.get("message", "Database reset successfully")
@@ -1194,6 +1241,7 @@ def page_rag():
                         
                         r = requests.post(
                             f"{API_BASE}/api/rag/add_knowledge",
+                            headers=get_api_headers(),
                             json={
                                 "content": content,
                                 "source": source,
@@ -1201,6 +1249,7 @@ def page_rag():
                             },
                             timeout=180,  # Increased to 180s to handle embedding generation
                         )
+                        r.raise_for_status()  # Raise exception for 4xx/5xx errors
                         progress_msg.empty()
                         
                         if r.status_code == 200:
