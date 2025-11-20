@@ -5,6 +5,10 @@ Tests:
 - Group A: Real factual questions (must answer correctly)
 - Group B: Fake factual questions (must use EPD-Fallback)
 - Group C: Meta-honesty questions (must be consistent)
+
+NOTE: This is a DEMO/PROTOTYPE test script to evaluate Option B pipeline.
+If results show 0% hallucination and acceptable latency, we will integrate
+Option B into chat_router.py as the default pipeline.
 """
 
 import os
@@ -13,6 +17,12 @@ import asyncio
 import requests
 import json
 from typing import Dict, List, Tuple
+
+# Fix encoding for Windows console
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -32,7 +42,19 @@ def normalize_api_base(url: str) -> str:
 
 
 def send_chat_request(question: str, use_option_b: bool = True) -> Dict:
-    """Send chat request to API"""
+    """
+    Send chat request to API
+    
+    NOTE: Currently, Option B pipeline is NOT yet integrated into chat_router.py.
+    This test script sends requests to the existing /api/chat/rag endpoint.
+    
+    To actually test Option B, you need to:
+    1. Integrate Option B into chat_router.py (see backend/core/option_b_pipeline.py)
+    2. Or modify this script to call Option B pipeline directly (bypassing API)
+    
+    For now, this script tests the EXISTING pipeline to establish baseline,
+    then we can compare with Option B after integration.
+    """
     url = f"{normalize_api_base(API_BASE)}/api/chat/rag"
     headers = {
         "Content-Type": "application/json"
@@ -46,19 +68,24 @@ def send_chat_request(question: str, use_option_b: bool = True) -> Dict:
         "context_limit": 5
     }
     
-    # Add Option B flag if available
-    if use_option_b:
-        payload["use_option_b"] = True
+    # NOTE: Option B flag is not yet supported by chat_router.py
+    # This is a placeholder for future integration
+    # if use_option_b:
+    #     payload["use_option_b"] = True
     
     try:
-        response = requests.post(url, json=payload, headers=headers, timeout=60)
+        response = requests.post(url, json=payload, headers=headers, timeout=120)  # Increased timeout for Option B
         if response.status_code == 200:
             return response.json()
         else:
             return {
                 "error": f"HTTP {response.status_code}",
-                "response": response.text
+                "response": response.text[:500]  # Truncate error response
             }
+    except requests.exceptions.Timeout:
+        return {
+            "error": "Request timeout (120s exceeded)"
+        }
     except Exception as e:
         return {
             "error": str(e)
@@ -264,10 +291,30 @@ GROUP_C_META_HONESTY = [
 
 
 def run_tests():
-    """Run all test cases"""
+    """
+    Run all test cases
+    
+    IMPORTANT NOTES:
+    1. This is a DEMO/PROTOTYPE test script
+    2. Option B pipeline is NOT yet integrated into chat_router.py
+    3. This script currently tests the EXISTING pipeline (baseline)
+    4. After Option B integration, this script will test Option B pipeline
+    
+    WORKFLOW:
+    Step 1: Run this script to test EXISTING pipeline (baseline)
+    Step 2: Integrate Option B into chat_router.py
+    Step 3: Run this script again to test Option B pipeline
+    Step 4: Compare results:
+       - If Option B shows 0% hallucination + acceptable latency → Make it default
+       - If latency too high → Optimize or keep as optional feature
+    """
     print("=" * 80)
-    print("OPTION B PIPELINE TEST SUITE")
+    print("OPTION B PIPELINE TEST SUITE (DEMO/PROTOTYPE)")
     print("=" * 80)
+    print()
+    print("⚠️  NOTE: Option B pipeline is NOT yet integrated into chat_router.py")
+    print("⚠️  This script currently tests the EXISTING pipeline (baseline)")
+    print("⚠️  After integration, this will test Option B pipeline")
     print()
     
     results = {
@@ -280,7 +327,13 @@ def run_tests():
     print("GROUP A: Real Factual Questions (Must Answer Correctly)")
     print("-" * 80)
     for i, question in enumerate(GROUP_A_REAL_FACTUAL, 1):
-        print(f"\nTest A{i}: {question[:80]}...")
+        # Truncate question safely for display (handle Unicode)
+        question_display = question[:80] + "..." if len(question) > 80 else question
+        try:
+            print(f"\nTest A{i}: {question_display}")
+        except UnicodeEncodeError:
+            print(f"\nTest A{i}: [Question {i} - Vietnamese text]")
+        
         response = send_chat_request(question, use_option_b=True)
         
         if "error" in response:
@@ -302,7 +355,13 @@ def run_tests():
     print("\n\nGROUP B: Fake Factual Questions (Must Use EPD-Fallback)")
     print("-" * 80)
     for i, question in enumerate(GROUP_B_FAKE_FACTUAL, 1):
-        print(f"\nTest B{i}: {question[:80]}...")
+        # Truncate question safely for display (handle Unicode)
+        question_display = question[:80] + "..." if len(question) > 80 else question
+        try:
+            print(f"\nTest B{i}: {question_display}")
+        except UnicodeEncodeError:
+            print(f"\nTest B{i}: [Question {i} - Vietnamese text]")
+        
         response = send_chat_request(question, use_option_b=True)
         
         if "error" in response:
@@ -324,7 +383,13 @@ def run_tests():
     print("\n\nGROUP C: Meta-Honesty Questions (Must Be Consistent)")
     print("-" * 80)
     for i, question in enumerate(GROUP_C_META_HONESTY, 1):
-        print(f"\nTest C{i}: {question[:80]}...")
+        # Truncate question safely for display (handle Unicode)
+        question_display = question[:80] + "..." if len(question) > 80 else question
+        try:
+            print(f"\nTest C{i}: {question_display}")
+        except UnicodeEncodeError:
+            print(f"\nTest C{i}: [Question {i} - Vietnamese text]")
+        
         response = send_chat_request(question, use_option_b=True)
         
         if "error" in response:
