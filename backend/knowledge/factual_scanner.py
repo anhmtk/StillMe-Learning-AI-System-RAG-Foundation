@@ -365,6 +365,14 @@ class FactualPlausibilityScanner:
                             confidence = min(confidence, 0.2)
                             reason = "known_fake_entity_detected: Veridian (in Hội chứng Veridian)"
                             break
+                
+                # CRITICAL: Also check the question directly for "Hội chứng Veridian" pattern
+                if re.search(r'hội\s+chứng\s+veridian', question_lower_for_check, re.IGNORECASE):
+                    if not self.kci.check_term("veridian") and not self.kci.check_term("hội chứng veridian"):
+                        is_plausible = False
+                        confidence = min(confidence, 0.2)
+                        reason = "known_fake_entity_detected: Hội chứng Veridian (direct pattern match)"
+                        break
         
         # If we have historical events that don't exist in KCI
         # Check for patterns like "conference 1943", "hội nghị 1943", "Lisbon Conference 1943", "Hội nghị Hòa bình Lisbon 1943"

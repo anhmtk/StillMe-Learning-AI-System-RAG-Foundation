@@ -176,14 +176,22 @@ def _extract_full_named_entity(question: str) -> Optional[str]:
             return entity
     
     # Priority 2: Extract parenthetical terms (e.g., "(Diluted Nuclear Fusion)")
-    parenthetical_match = re.search(r'\(([^)]+)\)', question)
-    if parenthetical_match:
-        entity = parenthetical_match.group(1).strip()
-        # Filter out common parenthetical content (years, abbreviations)
-        if len(entity) > 5 and not re.match(r'^\d{4}$', entity):  # Not just a year
-            # Check if it looks like a proper noun/concept (has capital letters)
-            if re.search(r'[A-Z]', entity):
-                return entity
+    # CRITICAL: Extract ALL parenthetical terms and pick the longest/most meaningful one
+    parenthetical_matches = re.findall(r'\(([^)]+)\)', question)
+    if parenthetical_matches:
+        # Filter and prioritize: longer terms, has capital letters, not just years
+        valid_parentheticals = []
+        for match in parenthetical_matches:
+            entity = match.strip()
+            # Filter out years, short abbreviations
+            if len(entity) > 5 and not re.match(r'^\d{4}$', entity):
+                # Prioritize terms with capital letters (proper nouns/concepts)
+                if re.search(r'[A-Z]', entity):
+                    valid_parentheticals.append(entity)
+        
+        if valid_parentheticals:
+            # Return the longest one (most likely to be the full concept name)
+            return max(valid_parentheticals, key=len)
     
     # Priority 2: Extract full phrases starting with Vietnamese keywords
     # Pattern: "Hiệp ước ... [year?]" or "Định đề ..." or "Hội chứng ..."
@@ -268,25 +276,35 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
             suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
     
     # Build answer based on language
-    # CRITICAL: Message must be strong, clear, and honest - no ambiguity
+    # CRITICAL: Message must be natural, deep, honest - not robotic or shallow
+    # Philosophy: "Nó không biết mọi thứ, nhưng nó nghĩ rất đàng hoàng."
+    # (It doesn't know everything, but it thinks very properly/decently)
     if detected_lang == "vi":
         answer = (
-            f"Mình không tìm thấy bất kỳ nguồn đáng tin cậy nào trong hệ thống về sự kiện/khái niệm có tên là \"{suspicious_entity}\".\n\n"
+            f"Mình đã tìm kiếm trong cơ sở tri thức của mình, nhưng không tìm thấy bất kỳ nguồn đáng tin cậy nào về \"{suspicious_entity}\".\n\n"
+            f"**Điều này có nghĩa là gì?**\n\n"
             f"Có một số khả năng:\n"
-            f"- Đây là ví dụ giả định, tên tưởng tượng, hoặc một khái niệm chưa được ghi nhận rộng rãi trong các nguồn mà mình có.\n"
-            f"- Hoặc nó trùng với một tên gọi khác trong lịch sử nhưng mình không đủ dữ liệu để khẳng định.\n\n"
-            f"Vì không có bằng chứng, mình **không thể mô tả** \"các lập luận chính\" hay \"tác động lịch sử\" của \"{suspicious_entity}\" mà vẫn trung thực được.\n\n"
-            f"Nếu bạn có nguồn cụ thể (bài báo, sách, link), bạn có thể gửi, mình sẽ chỉ phân tích nội dung dựa trên nguồn đó – chứ không tự tạo thêm chi tiết."
+            f"- Đây có thể là một khái niệm giả định, tên tưởng tượng, hoặc một thuật ngữ chưa được ghi nhận rộng rãi trong các nguồn mà mình có.\n"
+            f"- Hoặc nó có thể trùng với một tên gọi khác trong lịch sử/khoa học, nhưng mình không đủ dữ liệu để xác nhận.\n\n"
+            f"**Vì sao mình không thể trả lời chi tiết?**\n\n"
+            f"Vì không có bằng chứng đáng tin cậy, mình **không thể mô tả các lập luận chính, cơ chế hoạt động, hay tác động lịch sử** của \"{suspicious_entity}\" mà vẫn trung thực được.\n\n"
+            f"**Mình có thể làm gì?**\n\n"
+            f"Nếu bạn có nguồn cụ thể (bài báo, sách, link) về \"{suspicious_entity}\", bạn có thể gửi cho mình. Mình sẽ phân tích nội dung dựa trên nguồn đó – chứ không tự tạo thêm chi tiết.\n\n"
+            f"Đây không phải là sự từ chối, mà là cam kết của mình về tính trung thực: **thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh.**"
         )
     else:
         # English fallback
         answer = (
-            f"I cannot find any reliable sources in my system about the event/concept named \"{suspicious_entity}\".\n\n"
-            f"There are several possibilities:\n"
-            f"- This is a hypothetical example, an imaginary name, or a concept not widely documented in my available sources.\n"
-            f"- Or it corresponds to a different name in history, but I don't have sufficient data to confirm.\n\n"
-            f"Since there is no evidence, I **cannot describe** the \"main arguments\" or \"historical impact\" of \"{suspicious_entity}\" while remaining honest.\n\n"
-            f"If you have specific sources (article, book, link), you can provide them, and I will only analyze the content based on that source – without generating additional details myself."
+            f"I've searched my knowledge base, but I cannot find any reliable evidence about \"{suspicious_entity}\".\n\n"
+            f"**What does this mean?**\n\n"
+            f"This could be:\n"
+            f"- A hypothetical concept, a fictional name, or a term not widely recognized in my available sources.\n"
+            f"- Or it might coincide with a different historical/scientific name, but I lack sufficient data to confirm.\n\n"
+            f"**Why can't I provide detailed information?**\n\n"
+            f"Without reliable evidence, I **cannot truthfully describe the main arguments, mechanisms, or historical impacts** of \"{suspicious_entity}\".\n\n"
+            f"**What can I do?**\n\n"
+            f"If you have specific sources (articles, books, links) about \"{suspicious_entity}\", you can share them with me. I will analyze the content based on those sources – without generating new details myself.\n\n"
+            f"This is not a refusal, but my commitment to honesty: **I'd rather say 'I don't know' 100 times than fabricate once to appear knowledgeable.**"
         )
     
     return answer
