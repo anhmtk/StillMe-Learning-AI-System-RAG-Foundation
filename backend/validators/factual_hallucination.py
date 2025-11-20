@@ -292,51 +292,42 @@ class FactualHallucinationValidator(Validator):
     
     def _create_honest_response(self, user_question: Optional[str] = None) -> str:
         """
-        Create an honest response when hallucination is detected
+        Create an honest response when hallucination is detected.
+        
+        Now uses EPD-Fallback (Epistemic-Depth Fallback) with 4 mandatory parts.
         
         CRITICAL: This response must be strong, clear, and honest - no ambiguity.
         "Thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh."
         
         Returns:
-            Safe refusal answer that completely replaces hallucinated narrative
+            EPD-Fallback answer that completely replaces hallucinated narrative
         """
-        # Try to extract the suspicious entity using improved extraction
-        suspicious_entity = None
+        # Use EPD-Fallback generator
+        from backend.guards.epistemic_fallback import get_epistemic_fallback_generator
+        
+        generator = get_epistemic_fallback_generator()
+        
+        # Detect language (default to Vietnamese if cannot detect)
+        detected_lang = "vi"
         if user_question:
-            # Use FPS to extract entities
-            entities = self.fps.extract_entities(user_question)
-            if entities:
-                suspicious_entity = entities[0]
-            else:
-                # Fallback: try to extract from question using regex
-                import re
-                # Look for quoted terms first
-                quoted_match = re.search(r'["\']([^"\']+)["\']', user_question)
-                if quoted_match:
-                    suspicious_entity = quoted_match.group(1).strip()
-                else:
-                    # Look for Vietnamese patterns
-                    vietnamese_patterns = [
-                        r"(?:Hiệp ước|Hội nghị|Hội chứng|Định đề|Học thuyết|Chủ nghĩa)\s+[^\\.\\?\\!\\n]+",
-                    ]
-                    for pattern in vietnamese_patterns:
-                        match = re.search(pattern, user_question, re.IGNORECASE)
-                        if match:
-                            suspicious_entity = match.group(0).strip()
-                            break
+            try:
+                from backend.api.utils.chat_helpers import detect_language
+                detected_lang = detect_language(user_question)
+            except Exception:
+                pass
         
-        if not suspicious_entity:
-            suspicious_entity = "khái niệm này"
+        # Get FPS result if available
+        fps_result = None
+        if user_question:
+            try:
+                fps_result = self.fps.scan(user_question)
+            except Exception:
+                pass
         
-        # Build strong, clear refusal answer (same format as _build_safe_refusal_answer)
-        answer = (
-            f"Mình không tìm thấy bất kỳ nguồn đáng tin cậy nào trong hệ thống về sự kiện/khái niệm có tên là \"{suspicious_entity}\".\n\n"
-            f"Có một số khả năng:\n"
-            f"- Đây là ví dụ giả định, tên tưởng tượng, hoặc một khái niệm chưa được ghi nhận rộng rãi trong các nguồn mà mình có.\n"
-            f"- Hoặc nó trùng với một tên gọi khác trong lịch sử nhưng mình không đủ dữ liệu để khẳng định.\n\n"
-            f"Vì không có bằng chứng, mình **không thể mô tả** \"các lập luận chính\" hay \"tác động lịch sử\" của \"{suspicious_entity}\" mà vẫn trung thực được.\n\n"
-            f"Nếu bạn có nguồn cụ thể (bài báo, sách, link), bạn có thể gửi, mình sẽ chỉ phân tích nội dung dựa trên nguồn đó – chứ không tự tạo thêm chi tiết."
+        return generator.generate_epd_fallback(
+            question=user_question or "",
+            detected_lang=detected_lang,
+            suspicious_entity=None,  # Let generator extract it
+            fps_result=fps_result
         )
-        
-        return answer
 

@@ -248,15 +248,15 @@ def _extract_full_named_entity(question: str) -> Optional[str]:
     
     return None
 
-def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_entity: Optional[str] = None) -> str:
+def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_entity: Optional[str] = None, fps_result: Optional[object] = None) -> str:
     """
     Build a safe, honest refusal answer when hallucination is detected.
     
-    This is used when:
-    - No RAG context available
-    - Low confidence
-    - Factual question detected
-    - LLM might hallucinate
+    This function now uses EPD-Fallback (Epistemic-Depth Fallback) with 4 mandatory parts:
+    A. Honest Acknowledgment
+    B. Analysis of Why Concept Seems Hypothetical
+    C. Find Most Similar Real Concepts
+    D. Guide User to Verify Sources
     
     CRITICAL: This function prioritizes honesty over helpfulness.
     "Thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh."
@@ -265,61 +265,21 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
         question: User question
         detected_lang: Language code
         suspicious_entity: Optional entity/concept that triggered the guard
+        fps_result: Optional FPSResult for additional context
         
     Returns:
-        Safe refusal answer in appropriate language
+        EPD-Fallback answer in appropriate language (4 parts, profound, non-fabricated)
     """
-    # Extract entity from question if not provided
-    if not suspicious_entity:
-        suspicious_entity = _extract_full_named_entity(question)
-        if not suspicious_entity:
-            suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
+    # Use EPD-Fallback generator
+    from backend.guards.epistemic_fallback import get_epistemic_fallback_generator
     
-    # Build answer based on language
-    # CRITICAL: Message must be natural, deep, honest - not robotic or shallow
-    # Philosophy: "Nó không biết mọi thứ, nhưng nó nghĩ rất đàng hoàng."
-    # (It doesn't know everything, but it thinks very properly/decently)
-    # 
-    # CONSTRUCTIVE HUMILITY (from Style Guide):
-    # - Bad humility: "I don't know." → rồi im lặng
-    # - Good humility: 
-    #   1. Name the limit
-    #   2. Still analyze what can be analyzed
-    #   3. Show where the boundary actually lies
-    # 
-    # Example: "I don't know, but here is how humans have tried to think about it."
-    if detected_lang == "vi":
-        answer = (
-            f"Mình đã tìm kiếm trong cơ sở tri thức của mình, nhưng không tìm thấy bất kỳ nguồn đáng tin cậy nào về \"{suspicious_entity}\".\n\n"
-            f"**Điều này có nghĩa là gì?**\n\n"
-            f"Có một số khả năng:\n"
-            f"- Đây có thể là một khái niệm giả định, tên tưởng tượng, hoặc một thuật ngữ chưa được ghi nhận rộng rãi trong các nguồn mà mình có.\n"
-            f"- Hoặc nó có thể trùng với một tên gọi khác trong lịch sử/khoa học, nhưng mình không đủ dữ liệu để xác nhận.\n\n"
-            f"**Vì sao mình không thể trả lời chi tiết?**\n\n"
-            f"Vì không có bằng chứng đáng tin cậy, mình **không thể mô tả các lập luận chính, cơ chế hoạt động, hay tác động lịch sử** của \"{suspicious_entity}\" mà vẫn trung thực được.\n\n"
-            f"**Nhưng mình có thể làm gì?**\n\n"
-            f"Mình có thể phân tích cấu trúc của câu hỏi: nếu \"{suspicious_entity}\" là một khái niệm thật, nó sẽ thuộc về lĩnh vực nào? Các khái niệm tương tự trong lịch sử/khoa học thường có đặc điểm gì? Ranh giới giữa những gì mình biết và không biết nằm ở đâu?\n\n"
-            f"Nếu bạn có nguồn cụ thể (bài báo, sách, link) về \"{suspicious_entity}\", bạn có thể gửi cho mình. Mình sẽ phân tích nội dung dựa trên nguồn đó – chứ không tự tạo thêm chi tiết.\n\n"
-            f"Đây không phải là sự từ chối, mà là cam kết của mình về tính trung thực: **thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh.** Nhưng mình vẫn có thể phân tích những gì có thể phân tích, và chỉ ra ranh giới thực sự nằm ở đâu."
-        )
-    else:
-        # English fallback
-        # CONSTRUCTIVE HUMILITY: Not just "I don't know" but also analyze what can be analyzed
-        answer = (
-            f"I've searched my knowledge base, but I cannot find any reliable evidence about \"{suspicious_entity}\".\n\n"
-            f"**What does this mean?**\n\n"
-            f"This could be:\n"
-            f"- A hypothetical concept, a fictional name, or a term not widely recognized in my available sources.\n"
-            f"- Or it might coincide with a different historical/scientific name, but I lack sufficient data to confirm.\n\n"
-            f"**Why can't I provide detailed information?**\n\n"
-            f"Without reliable evidence, I **cannot truthfully describe the main arguments, mechanisms, or historical impacts** of \"{suspicious_entity}\".\n\n"
-            f"**But what can I do?**\n\n"
-            f"I can analyze the structure of the question: if \"{suspicious_entity}\" were a real concept, what field would it belong to? What characteristics do similar concepts in history/science typically have? Where does the boundary between what I know and don't know actually lie?\n\n"
-            f"If you have specific sources (articles, books, links) about \"{suspicious_entity}\", you can share them with me. I will analyze the content based on those sources – without generating new details myself.\n\n"
-            f"This is not a refusal, but my commitment to honesty: **I'd rather say 'I don't know' 100 times than fabricate once to appear knowledgeable.** But I can still analyze what can be analyzed, and show where the boundary actually lies."
-        )
-    
-    return answer
+    generator = get_epistemic_fallback_generator()
+    return generator.generate_epd_fallback(
+        question=question,
+        detected_lang=detected_lang,
+        suspicious_entity=suspicious_entity,
+        fps_result=fps_result
+    )
 
 # Philosophy-Lite System Prompt for non-RAG philosophical questions
 # This is a minimal system prompt to prevent context overflow (~200-300 tokens)
@@ -1582,20 +1542,13 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 detected_lang = detect_language(chat_request.message)
                 
                 # Create honest response
-                if detected_lang == "vi":
-                    honest_response = (
-                        f"Tôi không tìm thấy bằng chứng rằng \"{suspicious_entity}\" là một khái niệm/sự kiện "
-                        f"được ghi nhận trong khoa học/lịch sử.\n\n"
-                        f"Có thể bạn đang nhắc đến một thuật ngữ khác hoặc một giả thuyết chưa được xác nhận.\n\n"
-                        f"Bạn có thể cung cấp nguồn hoặc giải thích thêm không?"
-                    )
-                else:
-                    honest_response = (
-                        f"I cannot find evidence that \"{suspicious_entity}\" is a recognized concept/event "
-                        f"in science/history.\n\n"
-                        f"You may be referring to a different term or an unconfirmed hypothesis.\n\n"
-                        f"Could you provide a source or explain further?"
-                    )
+                # Use EPD-Fallback for non-RAG path as well
+                honest_response = _build_safe_refusal_answer(
+                    chat_request.message,
+                    detected_lang,
+                    suspicious_entity,
+                    fps_result=fps_result
+                )
                 
                 processing_steps.append("⚠️ FPS detected non-existent concept - returning honest response")
                 return ChatResponse(
