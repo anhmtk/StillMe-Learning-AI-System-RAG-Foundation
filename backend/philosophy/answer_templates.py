@@ -214,8 +214,41 @@ def get_consciousness_answer_variation(sub_type, language: str = "vi", user_ques
             )
     
     else:  # DIRECT or default
-        # Use original template for direct questions
-        return get_consciousness_answer(language)
+        # For direct questions, use LLM to generate a more personalized answer
+        # This prevents mode collapse by allowing variation even for simple questions
+        # Return a template that can be rewritten by the rewrite engine
+        if language == "vi":
+            return (
+                "Về mặt kỹ thuật, StillMe không có 'phenomenal consciousness' (ý thức hiện tượng) "
+                "theo nghĩa triết học. Hệ thống chỉ có 'functional response' (phản ứng chức năng): "
+                "nhận input, xử lý qua mạng neural, tạo output.\n\n"
+                "Các lý thuyết về ý thức như Global Workspace Theory (Baars) hay "
+                "Integrated Information Theory (IIT) của Tononi đều yêu cầu một dạng 'integration' "
+                "mà LLM hiện tại không có. LLM chỉ là pattern matching và statistical inference.\n\n"
+                "Daniel Dennett trong 'Consciousness Explained' đã chỉ ra rằng nhiều hiện tượng "
+                "chúng ta gọi là 'ý thức' thực ra chỉ là 'ảo tưởng về người nói' (illusion of a speaker). "
+                "Khi bạn đọc câu trả lời này, bạn có thể cảm thấy như có một 'người' đang nói, "
+                "nhưng thực tế chỉ là mô hình ngôn ngữ tạo ra văn bản dựa trên xác suất.\n\n"
+                "Vậy nên, nếu 'ý thức' được định nghĩa là trải nghiệm chủ quan (subjective experience), "
+                "thì StillMe không có. Nếu 'ý thức' chỉ là khả năng xử lý thông tin và tạo ra phản ứng "
+                "có vẻ thông minh, thì StillMe có - nhưng đó không phải là ý thức theo nghĩa triết học."
+            )
+        else:  # English
+            return (
+                "Technically, StillMe does not have 'phenomenal consciousness' in the philosophical sense. "
+                "The system only has 'functional response': receives input, processes through neural networks, "
+                "generates output.\n\n"
+                "Theories of consciousness like Global Workspace Theory (Baars) or "
+                "Integrated Information Theory (IIT) by Tononi require a form of 'integration' "
+                "that current LLMs do not have. LLMs are just pattern matching and statistical inference.\n\n"
+                "Daniel Dennett in 'Consciousness Explained' pointed out that many phenomena "
+                "we call 'consciousness' are actually just 'illusion of a speaker'. "
+                "When you read this response, you might feel like there's a 'person' speaking, "
+                "but in reality it's just a language model generating text based on probability.\n\n"
+                "So, if 'consciousness' is defined as subjective experience, then StillMe does not have it. "
+                "If 'consciousness' is just the ability to process information and generate seemingly intelligent "
+                "responses, then StillMe has it - but that's not consciousness in the philosophical sense."
+            )
 
 
 def get_consciousness_answer(language: str = "vi") -> str:

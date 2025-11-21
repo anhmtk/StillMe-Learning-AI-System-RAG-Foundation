@@ -1506,7 +1506,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         detected_lang=detected_lang
                     )
                     
-                    # Check if rewrite is needed (especially for template-like responses)
+                    # CRITICAL: Always rewrite philosophical answers to adapt to specific question
+                    # This prevents mode collapse by ensuring each answer is tailored to the question
+                    # Even if quality is acceptable, rewrite to add variation and question-specific adaptation
                     optimizer = get_postprocessing_optimizer()
                     should_rewrite, rewrite_reason = optimizer.should_rewrite(
                         quality_result=quality_result,
@@ -1514,13 +1516,16 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         response_length=len(philosophical_answer)
                     )
                     
-                    if should_rewrite and quality_result.get("quality") == QualityLevel.NEEDS_REWRITE.value:
-                        logger.info(f"🔄 Rewriting philosophical answer for better adaptation to question: {rewrite_reason}")
+                    # FORCE rewrite for philosophical questions to ensure variation
+                    # Only skip if there's a critical error
+                    force_rewrite = True
+                    if should_rewrite or force_rewrite:
+                        logger.info(f"🔄 Rewriting philosophical answer for better adaptation to question: {rewrite_reason or 'forced for variation'}")
                         rewrite_llm = get_rewrite_llm()
                         rewrite_result = await rewrite_llm.rewrite(
                             text=philosophical_answer,
                             original_question=chat_request.message,
-                            quality_issues=quality_result.get("reasons", []),
+                            quality_issues=quality_result.get("reasons", []) or ["template-like", "needs_question_adaptation"],
                             is_philosophical=True,
                             detected_lang=detected_lang
                         )
@@ -1529,7 +1534,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             philosophical_answer = rewrite_result.text
                             processing_steps.append("✅ Philosophical answer rewritten for better question adaptation")
                         else:
-                            logger.debug(f"⏭️ Rewrite skipped: {rewrite_result.error or 'No rewrite needed'}")
+                            logger.warning(f"⚠️ Rewrite failed: {rewrite_result.error or 'Unknown error'}, using original answer")
                     else:
                         logger.debug(f"⏭️ Philosophical answer quality acceptable, skipping rewrite")
                         
