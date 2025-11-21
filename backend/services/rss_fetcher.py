@@ -57,28 +57,28 @@ class RSSFetcher:
             
             # NEW: Academic & Research Sources (as suggested by StillMe in user conversation)
             # Added based on StillMe's analysis of reliable, peer-reviewed, and up-to-date sources
-            "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science",  # Science Magazine - Peer-reviewed research breakthroughs
+            # Removed: "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science" - XML parsing error (not well-formed)
             "https://www.nature.com/nature.rss",  # Nature - Already exists, keeping for clarity
             # Removed: Reuters feeds (businessNews, technologyNews) - Permanent DNS errors ([Errno -2] Name or service not known)
             "https://feeds.bloomberg.com/markets/news.rss",  # Bloomberg Markets - Economic & financial analysis
             
             # Tech Policy & AI Governance Blogs
             "https://www.eff.org/rss/updates.xml",  # Electronic Frontier Foundation - Tech policy
-            "https://www.brookings.edu/feed/",  # Brookings main feed (fallback for tech-innovation)
-            "https://www.cato.org/feed/",  # Cato main feed (fallback for blog/technology - 403)
+            # Removed: "https://www.brookings.edu/feed/" - XML parsing error (syntax error: line 2, column 0)
+            # Removed: "https://www.cato.org/feed/" - Failed to fetch (403/404)
             # Removed: "https://www.aei.org/technology/feed/" - 403 Forbidden, no reliable alternative
             
-            # AI Ethics & Technology (NEW - Verified 2025-01-XX)
-            "https://www.technologyreview.com/topic/artificial-intelligence/feed/",  # MIT Technology Review - AI Ethics
-            "https://aiethicslab.com/feed/",  # AI Ethics Lab - AI ethics research and analysis
+            # AI Ethics & Technology
+            # Removed: "https://www.technologyreview.com/topic/artificial-intelligence/feed/" - Failed to fetch
+            # Removed: "https://aiethicslab.com/feed/" - Failed to fetch
             
             # Academic Blogs
-            "https://distill.pub/rss.xml",  # Distill - ML research blog
+            # Removed: "https://distill.pub/rss.xml" - Failed to fetch
             # Removed: "https://lilianweng.github.io/feed.xml" - 404 + XML error, no reliable alternative
-            "https://www.lesswrong.com/feed.xml",  # LessWrong - Rationality & AI safety
+            # Removed: "https://www.lesswrong.com/feed.xml" - Failed to fetch
             "https://www.alignmentforum.org/feed.xml",  # Alignment Forum - AI alignment
             "https://www.overcomingbias.com/feed",  # Overcoming Bias - Rationality
-            "https://www.scottaaronson.com/blog/?feed=rss2",  # Scott Aaronson's blog - Quantum computing & CS theory
+            # Removed: "https://www.scottaaronson.com/blog/?feed=rss2" - Failed to fetch
             
             # Note: Google Scholar, PubMed, IEEE Xplore don't have public RSS feeds
             # These would require API integration (future enhancement):
