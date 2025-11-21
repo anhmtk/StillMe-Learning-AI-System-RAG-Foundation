@@ -19,6 +19,11 @@
       "name": "stillme-chroma-cache",
       "mountPath": "/app/.cache/chroma",
       "sizeGB": 1
+    },
+    {
+      "name": "stillme-chromadb-data",
+      "mountPath": "/app/data",
+      "sizeGB": 5
     }
   ]
 }

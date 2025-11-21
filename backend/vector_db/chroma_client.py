@@ -13,11 +13,11 @@ logger = logging.getLogger(__name__)
 class ChromaClient:
     """ChromaDB client for StillMe vector operations"""
     
-    def __init__(self, persist_directory: str = "data/vector_db", reset_on_error: bool = False, embedding_service=None):
+    def __init__(self, persist_directory: str = None, reset_on_error: bool = False, embedding_service=None):
         """Initialize ChromaDB client
         
         Args:
-            persist_directory: Directory to persist vector database
+            persist_directory: Directory to persist vector database (defaults to /app/data/vector_db or env var)
             reset_on_error: If True, reset database on schema errors
             embedding_service: Optional EmbeddingService to generate embeddings (prevents ChromaDB from using default ONNX model)
         """
@@ -25,8 +25,62 @@ class ChromaClient:
         import os
         import shutil
         
+        # CRITICAL FIX: Use absolute path for Railway persistence
+        # Priority 1: Environment variable (for Railway persistent volume)
+        # Priority 2: Absolute path /app/data/vector_db (Railway standard)
+        # Priority 3: User-provided path (if absolute)
+        # Priority 4: Relative path (fallback for local dev)
+        if persist_directory is None:
+            # Check environment variable first
+            persist_directory = os.getenv("CHROMA_DB_PATH")
+            if persist_directory:
+                logger.info(f"✅ Using CHROMA_DB_PATH from environment: {persist_directory}")
+            else:
+                # Use absolute path for Railway (persists across deploys)
+                persist_directory = "/app/data/vector_db"
+                logger.info(f"✅ Using default absolute path for Railway persistence: {persist_directory}")
+        else:
+            # If user provided path, check if it's relative or absolute
+            if not os.path.isabs(persist_directory):
+                # Relative path - convert to absolute based on working directory
+                # For Railway, we want /app/data/vector_db
+                if persist_directory.startswith("data/"):
+                    persist_directory = f"/app/{persist_directory}"
+                    logger.info(f"✅ Converted relative path to absolute: {persist_directory}")
+                else:
+                    # Other relative paths - use as-is (local dev)
+                    logger.warning(f"⚠️ Using relative path (may not persist on Railway): {persist_directory}")
+        
         self.persist_directory = persist_directory
         self.reset_on_error = reset_on_error
+        
+        # CRITICAL: Ensure parent directory exists with proper permissions
+        # This is essential for Railway persistent volumes
+        parent_dir = os.path.dirname(persist_directory)
+        if parent_dir and not os.path.exists(parent_dir):
+            try:
+                os.makedirs(parent_dir, mode=0o755, exist_ok=True)
+                logger.info(f"✅ Created parent directory: {parent_dir}")
+            except Exception as parent_error:
+                logger.warning(f"⚠️ Could not create parent directory {parent_dir}: {parent_error}")
+        
+        # Ensure persist_directory exists (if not resetting)
+        if not reset_on_error and not os.path.exists(persist_directory):
+            try:
+                os.makedirs(persist_directory, mode=0o755, exist_ok=True)
+                logger.info(f"✅ Created ChromaDB directory: {persist_directory}")
+            except Exception as dir_error:
+                logger.warning(f"⚠️ Could not create ChromaDB directory {persist_directory}: {dir_error}")
+        
+        # CRITICAL: Verify directory is writable (essential for persistence)
+        if os.path.exists(persist_directory):
+            if os.access(persist_directory, os.W_OK):
+                logger.info(f"✅ ChromaDB directory is writable: {persist_directory}")
+            else:
+                logger.error(f"❌ ChromaDB directory is NOT writable: {persist_directory}")
+                logger.error("💡 This will cause data loss on Railway. Check volume mount permissions.")
+        else:
+            logger.warning(f"⚠️ ChromaDB directory does not exist yet: {persist_directory}")
         
         # Check if database exists and needs reset
         if reset_on_error:
