@@ -115,8 +115,9 @@ class ValidatorChain:
                 if validator_name == "ConfidenceValidator":
                     result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical)
                 elif validator_name == "CitationRequired":
-                    # Pass is_philosophical to CitationRequired to relax requirements
-                    result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical)
+                    # Pass is_philosophical and user_question to CitationRequired
+                    # user_question is needed to detect real factual questions (even with philosophical elements)
+                    result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical, user_question=user_question)
                 elif validator_name == "FactualHallucinationValidator":
                     # Pass user_question to FactualHallucinationValidator
                     result = validator.run(patched, ctx_docs, user_question=user_question)

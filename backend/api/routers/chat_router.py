@@ -1211,8 +1211,8 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     # This ensures we get a proper patched answer, not a fallback message
                     from backend.validators.citation import CitationRequired
                     citation_validator = CitationRequired(required=True)
-                    # Re-run citation validator to get patched answer
-                    citation_result = citation_validator.run(raw_response, ctx_docs, is_philosophical=is_philosophical)
+                    # Re-run citation validator to get patched answer (pass user_question to detect factual questions)
+                    citation_result = citation_validator.run(raw_response, ctx_docs, is_philosophical=is_philosophical, user_question=chat_request.message)
                     if citation_result.patched_answer:
                         response = citation_result.patched_answer
                         logger.info(f"✅ Added citation via CitationRequired. Reasons: {validation_result.reasons}")

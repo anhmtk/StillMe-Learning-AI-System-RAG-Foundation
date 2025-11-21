@@ -25,14 +25,15 @@ class CitationRequired:
         """
         self.required = required
     
-    def run(self, answer: str, ctx_docs: List[str], is_philosophical: bool = False) -> ValidationResult:
+    def run(self, answer: str, ctx_docs: List[str], is_philosophical: bool = False, user_question: str = "") -> ValidationResult:
         """
         Check if answer contains citations and auto-enforce if missing
         
         Args:
             answer: The answer to validate
             ctx_docs: List of context documents - if empty, citations are not required
-            is_philosophical: If True, relax citation requirements for philosophical questions (only require for factual claims)
+            is_philosophical: If True, relax citation requirements for pure philosophical questions (but still require for factual claims)
+            user_question: User's original question (to detect if it's a factual question with philosophical elements)
             
         Returns:
             ValidationResult with passed status and patched answer if citation was added
@@ -40,11 +41,34 @@ class CitationRequired:
         if not self.required:
             return ValidationResult(passed=True)
         
-        # For philosophical questions, skip citation requirement for pure philosophical analysis
-        # Only require citations for factual claims (e.g., historical facts, scientific data)
-        if is_philosophical:
-            logger.debug("Philosophical question detected - skipping citation requirement for philosophical analysis")
+        # CRITICAL FIX: Real factual questions (history, science, events) ALWAYS need citations
+        # Even if they have philosophical elements, they are still factual questions
+        # Examples: "Bretton Woods 1944", "Popper vs Kuhn", "Gödel's incompleteness theorem"
+        is_real_factual_question = False
+        if user_question:
+            question_lower = user_question.lower()
+            # Detect factual indicators: years, historical events, specific people, conferences, treaties
+            factual_indicators = [
+                r"\b\d{4}\b",  # Years (e.g., 1944, 1943)
+                r"\b(conference|hội nghị|treaty|hiệp ước|agreement|hiệp định)\b",
+                r"\b(bretton\s+woods|popper|kuhn|gödel|keynes|imf|world\s+bank)\b",
+                r"\b(historical|history|lịch sử|sự kiện|event)\b",
+                r"\b(scientist|philosopher|nhà khoa học|triết gia)\s+\w+",  # Named people
+            ]
+            for pattern in factual_indicators:
+                if re.search(pattern, question_lower):
+                    is_real_factual_question = True
+                    break
+        
+        # For pure philosophical questions (no factual elements), skip citation requirement
+        # BUT: If question has factual elements (years, events, named people), ALWAYS require citations
+        if is_philosophical and not is_real_factual_question:
+            logger.debug("Pure philosophical question detected (no factual elements) - skipping citation requirement")
             return ValidationResult(passed=True)
+        
+        # If it's a factual question (even with philosophical elements), require citations
+        if is_real_factual_question:
+            logger.debug(f"Real factual question detected - citations REQUIRED even if philosophical elements present")
         
         # Only require citations if we have context documents
         # If no context, AI is using general knowledge and citations are optional
