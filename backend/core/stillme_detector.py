@@ -84,6 +84,22 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
     query_lower = query.lower()
     matched_keywords = []
     
+    # CRITICAL: Check for technical architecture questions FIRST (RAG, DeepSeek, black box)
+    # These should trigger foundational knowledge retrieval even without explicit StillMe name
+    technical_keywords = [
+        "rag", "retrieval-augmented generation", "chromadb", "vector database",
+        "deepseek", "openai", "llm api", "black box", "blackbox",
+        "embedding", "multi-qa-minilm", "sentence-transformers",
+        "pipeline", "validation", "hallucination", "transparency",
+        "kiến trúc", "hệ thống", "cơ chế", "quy trình",
+        "cơ chế hoạt động", "cách hoạt động", "how does", "how it works"
+    ]
+    
+    for keyword in technical_keywords:
+        if keyword in query_lower:
+            matched_keywords.append("technical")
+            return (True, matched_keywords)
+    
     # Check for StillMe name
     if re.search(r'\bstillme\b|\bstill\s*me\b|\bstill-me\b', query_lower):
         matched_keywords.append("stillme_name")

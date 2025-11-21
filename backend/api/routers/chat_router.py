@@ -1773,7 +1773,23 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     }
                     logger.info(f"Retrieved {len(context['knowledge_docs'])} StillMe foundational knowledge documents")
             else:
+                # CRITICAL: Check if question is about technical architecture (RAG, DeepSeek, black box)
+                # These should prioritize foundational knowledge even if not detected as StillMe query
+                question_lower = chat_request.message.lower()
+                is_technical_question = any(
+                    keyword in question_lower 
+                    for keyword in [
+                        "rag", "retrieval-augmented", "chromadb", "vector database",
+                        "deepseek", "openai", "llm api", "black box", "blackbox",
+                        "embedding", "multi-qa-minilm", "sentence-transformers",
+                        "pipeline", "validation", "hallucination", "transparency",
+                        "kiến trúc", "hệ thống", "cơ chế", "quy trình",
+                        "cơ chế hoạt động", "cách hoạt động", "how does", "how it works"
+                    ]
+                )
+                
                 # Normal retrieval for non-StillMe queries
+                # But prioritize foundational knowledge for technical questions
                 # Optimized: conversation_limit reduced from 2 to 1 for latency
                 context = rag_retrieval.retrieve_context(
                     query=chat_request.message,
@@ -1781,6 +1797,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     conversation_limit=1,  # Optimized: reduced from 2 to 1
                     exclude_content_types=["technical"] if is_philosophical else None,
                     prioritize_style_guide=is_philosophical,
+                    prioritize_foundational=is_technical_question,  # Prioritize foundational for technical questions
                     is_philosophical=is_philosophical
                 )
         
