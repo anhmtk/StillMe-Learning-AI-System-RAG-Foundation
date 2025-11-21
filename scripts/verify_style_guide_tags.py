@@ -29,28 +29,67 @@ def verify_style_guide_tags():
         logger.info("Searching for style guide documents in ChromaDB...")
         
         # Method 1: Search with metadata filter for content_type="style_guide"
+        # Search in BOTH knowledge and conversation collections
+        filtered_results = []
         try:
             logger.info("Method 1: Searching with metadata filter content_type='style_guide'...")
             query_embedding = embedding_service.encode_text("style guide anthropomorphism")
-            filtered_results = chroma_client.search_knowledge(
-                query_embedding=query_embedding,
-                limit=50,  # Get more results
-                where={"content_type": "style_guide"}
-            )
-            logger.info(f"Found {len(filtered_results)} documents with content_type='style_guide'")
+            
+            # Search in knowledge collection
+            try:
+                knowledge_results = chroma_client.search_knowledge(
+                    query_embedding=query_embedding,
+                    limit=50,
+                    where={"content_type": "style_guide"}
+                )
+                filtered_results.extend(knowledge_results)
+                logger.info(f"Found {len(knowledge_results)} style guide documents in knowledge collection")
+            except Exception as knowledge_error:
+                logger.warning(f"Knowledge collection filter error: {knowledge_error}")
+            
+            # Search in conversation collection
+            try:
+                conversation_results = chroma_client.search_conversations(
+                    query_embedding=query_embedding,
+                    limit=50,
+                    where={"content_type": "style_guide"}
+                )
+                filtered_results.extend(conversation_results)
+                logger.info(f"Found {len(conversation_results)} style guide documents in conversation collection")
+            except Exception as conversation_error:
+                logger.warning(f"Conversation collection filter error: {conversation_error}")
+                
         except Exception as filter_error:
             logger.warning(f"Metadata filter not supported: {filter_error}")
-            filtered_results = []
         
         # Method 2: Search broadly and filter by metadata
         logger.info("Method 2: Searching broadly and filtering by metadata...")
         query = "anthropomorphism guard experience free templates style guide"
         query_embedding = embedding_service.encode_text(query)
         
-        all_results = chroma_client.search_knowledge(
-            query_embedding=query_embedding,
-            limit=100  # Get more results to find style guides
-        )
+        all_results = []
+        
+        # Search in knowledge collection
+        try:
+            knowledge_results = chroma_client.search_knowledge(
+                query_embedding=query_embedding,
+                limit=100
+            )
+            all_results.extend(knowledge_results)
+            logger.info(f"Found {len(knowledge_results)} documents from knowledge collection")
+        except Exception as knowledge_error:
+            logger.warning(f"Knowledge collection search error: {knowledge_error}")
+        
+        # Search in conversation collection
+        try:
+            conversation_results = chroma_client.search_conversations(
+                query_embedding=query_embedding,
+                limit=100
+            )
+            all_results.extend(conversation_results)
+            logger.info(f"Found {len(conversation_results)} documents from conversation collection")
+        except Exception as conversation_error:
+            logger.warning(f"Conversation collection search error: {conversation_error}")
         
         logger.info(f"Found {len(all_results)} total documents from semantic search")
         
