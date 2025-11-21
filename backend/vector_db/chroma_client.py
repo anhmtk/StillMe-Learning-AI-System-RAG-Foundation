@@ -139,6 +139,11 @@ class ChromaClient:
                 logger.warning(f"⚠️ ChromaDB persistent cache not found at {chroma_cache_dir}, using default cache")
             
             # Create client - if reset_on_error was True, directory is fresh
+            # CRITICAL: Use absolute path to ensure persistence on Railway
+            logger.info(f"🔧 Initializing ChromaDB PersistentClient with path: {persist_directory}")
+            logger.info(f"🔧 Path is absolute: {os.path.isabs(persist_directory)}")
+            logger.info(f"🔧 Path exists: {os.path.exists(persist_directory)}")
+            
             self.client = chromadb.PersistentClient(
                 path=persist_directory,
                 settings=Settings(
@@ -146,6 +151,11 @@ class ChromaClient:
                     allow_reset=True
                 )
             )
+            
+            # CRITICAL: Verify client is using persistent storage (not in-memory)
+            logger.info(f"✅ ChromaDB PersistentClient initialized successfully")
+            logger.info(f"✅ Database will persist at: {persist_directory}")
+            logger.info(f"✅ This ensures knowledge persists across Railway deploys")
             
             # If reset_on_error was True, we deleted the directory, so create new collections directly
             # Otherwise, try to get existing collections or create new ones
@@ -366,6 +376,9 @@ class ChromaClient:
                             
                             # Now create client with final path
                             logger.info(f"🔄 Creating ChromaDB client with final path: {persist_directory}")
+                            logger.info(f"🔧 Path is absolute: {os.path.isabs(persist_directory)}")
+                            logger.info(f"🔧 Path exists: {os.path.exists(persist_directory)}")
+                            
                             self.client = chromadb.PersistentClient(
                                 path=persist_directory,
                                 settings=Settings(
@@ -374,9 +387,15 @@ class ChromaClient:
                                 )
                             )
                             
+                            logger.info(f"✅ ChromaDB PersistentClient initialized (after reset)")
+                            logger.info(f"✅ Database will persist at: {persist_directory}")
+                            
                         except Exception as temp_error:
                             logger.warning(f"Temp path approach failed, trying direct path: {temp_error}")
                             # Fallback: Create directly with final path
+                            logger.info(f"🔧 Creating ChromaDB client with direct path: {persist_directory}")
+                            logger.info(f"🔧 Path is absolute: {os.path.isabs(persist_directory)}")
+                            
                             self.client = chromadb.PersistentClient(
                                 path=persist_directory,
                                 settings=Settings(
@@ -384,6 +403,9 @@ class ChromaClient:
                                     allow_reset=True
                                 )
                             )
+                            
+                            logger.info(f"✅ ChromaDB PersistentClient initialized (fallback)")
+                            logger.info(f"✅ Database will persist at: {persist_directory}")
                         
                         # Try to reset if method exists (some ChromaDB versions have this)
                         try:

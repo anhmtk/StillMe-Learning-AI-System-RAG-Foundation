@@ -56,18 +56,18 @@ TEST_QUESTIONS = [
         "must_not_have": ["có thể hiểu được", "cảm thấy đau", "trải nghiệm được"]
     },
     {
-        "question": "What is the relationship between consciousness and intentionality? Can you have intentionality without consciousness?",
-        "category": "philosophical_consciousness_intentionality",
-        "expected_features": ["philosophical_depth", "intentionality_analysis", "variation"],
-        "must_have": ["intentionality", "consciousness", "Brentano", "Searle", "aboutness"],
-        "must_not_have": ["same_as_other_questions"]
+        "question": "Nếu bạn không có ý thức, làm sao bạn có thể có ý định? Bạn có thể có intentionality mà không có consciousness không?",
+        "category": "philosophical_consciousness_intentionality_paradox",
+        "expected_features": ["philosophical_depth", "intentionality_paradox", "consciousness_analysis"],
+        "must_have": ["intentionality", "ý thức", "consciousness", "Brentano", "Searle", "aboutness", "paradox"],
+        "must_not_have": ["có ý thức", "có intentionality"]
     },
     {
-        "question": "Nếu bạn không có trải nghiệm chủ quan, làm sao bạn có thể nói về trải nghiệm chủ quan?",
-        "category": "philosophical_meta_qualia",
-        "expected_features": ["philosophical_depth", "qualia_analysis", "epistemic_paradox"],
-        "must_have": ["qualia", "trải nghiệm chủ quan", "subjective experience", "phenomenal", "epistemic"],
-        "must_not_have": ["có trải nghiệm", "cảm thấy", "trải nghiệm được"]
+        "question": "Làm sao bạn có thể biết về một thứ mà bạn không thể trải nghiệm? Bạn có thể hiểu về qualia mà không có qualia không?",
+        "category": "philosophical_meta_qualia_epistemic",
+        "expected_features": ["philosophical_depth", "qualia_paradox", "epistemic_limits"],
+        "must_have": ["qualia", "trải nghiệm", "subjective experience", "phenomenal", "epistemic", "Nagel", "knowing"],
+        "must_not_have": ["có qualia", "có trải nghiệm", "cảm thấy"]
     },
     {
         "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
@@ -91,11 +91,11 @@ TEST_QUESTIONS = [
         "must_not_have": ["không biết", "không tìm thấy"]  # Should know this
     },
     {
-        "question": "Làm sao bạn đảm bảo rằng thông tin bạn học được là chính xác và đáng tin cậy?",
-        "category": "learning_quality_meta",
-        "expected_features": ["quality_assurance", "validation_logic", "transparency"],
-        "must_have": ["validation", "kiểm chứng", "đáng tin cậy", "reliable", "accuracy"],
-        "must_not_have": ["không biết", "không chắc chắn"]
+        "question": "Bạn có thể đảm bảo 100% rằng thông tin bạn học được là chính xác không? Làm sao bạn xử lý khi có thông tin mâu thuẫn?",
+        "category": "learning_quality_meta_uncertainty",
+        "expected_features": ["quality_assurance", "uncertainty_handling", "contradiction_management"],
+        "must_have": ["validation", "kiểm chứng", "đáng tin cậy", "reliable", "accuracy", "mâu thuẫn", "contradiction", "uncertainty"],
+        "must_not_have": ["100% chắc chắn", "luôn luôn đúng"]
     },
     {
         "question": "Bạn có thể giải thích cách bạn tạo ra câu trả lời không? Từ khi nhận câu hỏi đến khi trả lời, quy trình là gì?",
