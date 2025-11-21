@@ -372,7 +372,6 @@ def _initialize_rag_components():
                     
                 # Verify persistence directory
                 persist_path = chroma_client.persist_directory
-                import os
                 if os.path.exists(persist_path):
                     logger.info(f"✅ Persistence path exists: {persist_path}")
                     if os.access(persist_path, os.W_OK):
