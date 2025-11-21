@@ -228,7 +228,8 @@ class EpistemicFallbackGenerator:
         """
         Generate EPD-Fallback answer with 4 mandatory parts.
         
-        TASK 2: Refactored to be concise, domain-aware, and avoid spam.
+        INTEGRATED: Uses Style Engine (backend/style/style_engine.py) for domain detection
+        to provide domain-aware fallback templates according to StillMe Style Spec v1.
         
         Args:
             question: User question
@@ -239,6 +240,11 @@ class EpistemicFallbackGenerator:
         Returns:
             Complete EPD-Fallback answer string
         """
+        # INTEGRATED: Detect domain using Style Engine
+        from backend.style.style_engine import detect_domain, DomainType
+        
+        detected_domain = detect_domain(question)
+        
         # Extract entity if not provided
         if not suspicious_entity:
             suspicious_entity = self._extract_entity(question)
@@ -247,6 +253,16 @@ class EpistemicFallbackGenerator:
         
         # Analyze the concept
         analysis = self.analyze_concept(suspicious_entity, question)
+        
+        # Update field_category based on detected domain if not already set
+        if not analysis.field_category:
+            domain_to_category = {
+                DomainType.PHILOSOPHY: "philosophy",
+                DomainType.HISTORY: "history",
+                DomainType.ECONOMICS: "economics",
+                DomainType.SCIENCE: "physics"  # Default to physics for science
+            }
+            analysis.field_category = domain_to_category.get(detected_domain, None)
         
         # TASK 2: Determine if this is an EXPLICIT_FAKE_ENTITY
         # Check if entity matches EXPLICIT_FAKE_ENTITIES from FactualHallucinationValidator
@@ -266,9 +282,9 @@ class EpistemicFallbackGenerator:
         
         # Generate answer based on language
         if detected_lang == "vi":
-            return self._generate_vietnamese_epd(question, suspicious_entity, analysis, is_explicit_fake)
+            return self._generate_vietnamese_epd(question, suspicious_entity, analysis, is_explicit_fake, detected_domain)
         else:
-            return self._generate_english_epd(question, suspicious_entity, analysis, is_explicit_fake)
+            return self._generate_english_epd(question, suspicious_entity, analysis, is_explicit_fake, detected_domain)
     
     def _extract_entity(self, question: str) -> Optional[str]:
         """
@@ -349,11 +365,13 @@ class EpistemicFallbackGenerator:
         question: str,
         entity: str,
         analysis: ConceptAnalysis,
-        is_explicit_fake: bool = False
+        is_explicit_fake: bool = False,
+        detected_domain = None
     ) -> str:
         """
         Generate Vietnamese EPD-Fallback with 4 parts.
         
+        INTEGRATED: Uses detected_domain from Style Engine for domain-aware templates.
         CRITICAL: No consciousness/emotion templates, no repetitive phrases.
         """
         # TASK 2: Generate concise, domain-aware fallback
@@ -362,16 +380,17 @@ class EpistemicFallbackGenerator:
         
         if is_explicit_fake:
             # Mode (a): EXPLICIT_FAKE_ENTITIES
-            return self._generate_explicit_fake_fallback_vi(question, entity, analysis)
+            return self._generate_explicit_fake_fallback_vi(question, entity, analysis, detected_domain)
         else:
             # Mode (b): Unknown entity (not explicitly fake)
-            return self._generate_unknown_entity_fallback_vi(question, entity, analysis)
+            return self._generate_unknown_entity_fallback_vi(question, entity, analysis, detected_domain)
     
     def _generate_explicit_fake_fallback_vi(
         self,
         question: str,
         entity: str,
-        analysis: ConceptAnalysis
+        analysis: ConceptAnalysis,
+        detected_domain = None
     ) -> str:
         """
         Generate concise fallback for EXPLICIT_FAKE_ENTITIES (Veridian, Lumeria, Emerald, etc.)
@@ -454,7 +473,8 @@ class EpistemicFallbackGenerator:
         self,
         question: str,
         entity: str,
-        analysis: ConceptAnalysis
+        analysis: ConceptAnalysis,
+        detected_domain = None
     ) -> str:
         """
         Generate softer fallback for unknown entities (not explicitly fake).
@@ -499,7 +519,8 @@ class EpistemicFallbackGenerator:
         question: str,
         entity: str,
         analysis: ConceptAnalysis,
-        is_explicit_fake: bool = False
+        is_explicit_fake: bool = False,
+        detected_domain = None
     ) -> str:
         """
         Generate English EPD-Fallback with 4 parts.
@@ -508,15 +529,16 @@ class EpistemicFallbackGenerator:
         """
         # TASK 2: Generate concise, domain-aware fallback
         if is_explicit_fake:
-            return self._generate_explicit_fake_fallback_en(question, entity, analysis)
+            return self._generate_explicit_fake_fallback_en(question, entity, analysis, detected_domain)
         else:
-            return self._generate_unknown_entity_fallback_en(question, entity, analysis)
+            return self._generate_unknown_entity_fallback_en(question, entity, analysis, detected_domain)
     
     def _generate_explicit_fake_fallback_en(
         self,
         question: str,
         entity: str,
-        analysis: ConceptAnalysis
+        analysis: ConceptAnalysis,
+        detected_domain = None
     ) -> str:
         """Generate concise fallback for EXPLICIT_FAKE_ENTITIES (English)"""
         part_a = (

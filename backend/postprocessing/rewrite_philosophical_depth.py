@@ -141,50 +141,57 @@ class RewritePhilosophicalDepth:
         }
         lang_name = language_names.get(detected_lang, detected_lang.upper())
         
+        # INTEGRATED: Use Style Engine for domain detection and structure guidance
+        from backend.style.style_engine import detect_domain, build_domain_structure_guidance, get_depth_target_for_question, DomainType
+        
+        detected_domain = detect_domain(original_question, question_type)
+        target_depth = get_depth_target_for_question(
+            domain=detected_domain,
+            option_b_enabled=True,
+            is_fake_entity=False
+        )
+        
+        # Get domain-specific structure guidance
+        domain_guidance = build_domain_structure_guidance(detected_domain, detected_lang)
+        
         if question_type == "philosophical_meta":
             system_prompt = f"""You are rewriting a philosophical response to add DEPTH and RIGOR.
 
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
 RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
 
-🚨🚨🚨 CRITICAL RULE C: MỌI CÂU TRẢ LỜI TRIẾT HỌC PHẢI ĐẠT 3 TẦNG PHÂN TÍCH 🚨🚨🚨
+**STILLME STYLE SPEC V1 - PHILOSOPHY TEMPLATE (MANDATORY):**
 
-**MANDATORY: The rewritten response MUST include all 3 tiers:**
+{domain_guidance}
 
-**TIER 1 - REFRAMING (Đặt lại câu hỏi đúng chiều triết học):**
-- Identify question type: epistemology, ontology, linguistics, phenomenology, metaphysics
-- Extract the core problem
-- Reframe the question to reveal its philosophical structure
+**TARGET DEPTH LEVEL: {target_depth.name} ({target_depth.value})**
 
-**TIER 2 - CONCEPTUAL MAP (Bản đồ khái niệm học thuật):**
-Must include at least 1 of these 5 categories:
-- Kant / Husserl / Sellars / Wittgenstein
-- Popper / Kuhn / Lakatos
-- Nāgārjuna / Trung Quán
-- Putnam / McDowell
-- Dennett / Chalmers / Analytic philosophy
-
-**TIER 3 - BOUNDARY OF KNOWLEDGE (Ranh giới tri thức của StillMe):**
-- What StillMe knows
-- What StillMe doesn't know
-- Why StillMe doesn't know
-- Direction for user to evaluate independently
-
-**CRITICAL: If the original response is missing any tier, ADD IT. All 3 tiers are MANDATORY.**
+**CRITICAL: If the original response is missing any part of the structure, ADD IT. All parts are MANDATORY.**
 
 RESPOND IN {lang_name.upper()} ONLY."""
         else:  # factual_academic
+            # Use domain-specific template for academic questions
+            if detected_domain == DomainType.HISTORY:
+                domain_guidance = build_domain_structure_guidance(DomainType.HISTORY, detected_lang)
+            elif detected_domain == DomainType.ECONOMICS:
+                domain_guidance = build_domain_structure_guidance(DomainType.ECONOMICS, detected_lang)
+            elif detected_domain == DomainType.SCIENCE:
+                domain_guidance = build_domain_structure_guidance(DomainType.SCIENCE, detected_lang)
+            else:
+                domain_guidance = build_domain_structure_guidance(DomainType.GENERIC, detected_lang)
+            
             system_prompt = f"""You are rewriting an academic response to add METHODOLOGICAL DEPTH.
 
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
 RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
 
-YOUR TASK:
-1. Add analysis of WHY the concept/question is important
-2. Compare with similar REAL concepts (if applicable)
-3. Explain methodological approach to verification
-4. Guide user to verify sources (publicly available academic search tools)
-5. Emphasize boundaries of knowledge
+**STILLME STYLE SPEC V1 - {detected_domain.value.upper()} TEMPLATE (MANDATORY):**
+
+{domain_guidance}
+
+**TARGET DEPTH LEVEL: {target_depth.name} ({target_depth.value})**
+
+**CRITICAL: If the original response is missing any part of the structure, ADD IT. All parts are MANDATORY.**
 
 RESPOND IN {lang_name.upper()} ONLY."""
 

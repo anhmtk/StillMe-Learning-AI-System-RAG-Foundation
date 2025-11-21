@@ -4,6 +4,9 @@ Option B Pipeline Integration Helper
 This module provides a unified interface to process questions through
 the Option B pipeline (zero-tolerance hallucination + deep philosophy).
 
+INTEGRATED: Uses Style Engine (backend/style/style_engine.py) for domain detection
+and template selection according to StillMe Style Spec v1.
+
 Usage:
     from backend.core.option_b_pipeline import process_with_option_b
     

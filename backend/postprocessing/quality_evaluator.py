@@ -134,6 +134,9 @@ class QualityEvaluator:
         """
         Evaluate output quality
         
+        INTEGRATED: Uses Style Engine (backend/style/style_engine.py) for depth evaluation
+        according to StillMe Style Spec v1 checklist (6 items).
+        
         Args:
             text: Sanitized output text
             is_philosophical: Whether this is a philosophical question
@@ -154,6 +157,20 @@ class QualityEvaluator:
                 "scores": {}
             }
         
+        # INTEGRATED: Use Style Engine for domain detection and depth evaluation
+        from backend.style.style_engine import detect_domain, evaluate_depth, DomainType
+        
+        detected_domain = DomainType.GENERIC
+        if original_question:
+            detected_domain = detect_domain(original_question)
+        
+        # Use Style Engine's evaluate_depth for comprehensive checklist
+        style_engine_meets_requirements, style_engine_missing = evaluate_depth(
+            response=text,
+            domain=detected_domain,
+            target_depth=None  # Will use default for domain
+        )
+        
         text_lower = text.lower()
         reasons = []
         scores = {}
@@ -170,9 +187,16 @@ class QualityEvaluator:
         if length_score < 0.5:
             reasons.append(f"Output too short ({len(text)} chars, need {self.min_length_philosophical if is_philosophical else self.min_length_general}+)")
         
-        # Check 2: Depth
+        # Check 2: Depth (INTEGRATED: Use Style Engine evaluation)
         depth_score = self._check_depth(text_lower)
         scores["depth"] = depth_score
+        
+        # Add Style Engine missing items to reasons
+        if style_engine_missing:
+            for missing_item in style_engine_missing:
+                if missing_item not in reasons:
+                    reasons.append(missing_item)
+        
         if depth_score < 0.4:
             reasons.append("Lacks philosophical depth - missing meta-cognitive reflection or conceptual analysis")
         
@@ -207,12 +231,16 @@ class QualityEvaluator:
             if drift_score < 0.5:  # Drift detected
                 reasons.append("Topic drift detected - StillMe talks about consciousness/LLM when not asked")
         
-        # Check 7: Structure completeness (for philosophical)
-        if is_philosophical:
+        # Check 7: Structure completeness (INTEGRATED: Use Style Engine domain template check)
+        if is_philosophical or detected_domain != DomainType.GENERIC:
             structure_score = self._check_structure_completeness(text)
             scores["structure"] = structure_score
             if structure_score < 0.4:
-                reasons.append("Missing philosophical structure - should have Anchor → Unpack → Explore → Edge → Return")
+                # Use domain-specific structure message
+                from backend.style.style_engine import get_domain_template
+                template = get_domain_template(detected_domain)
+                structure_parts = " → ".join(template.structure)
+                reasons.append(f"Missing {detected_domain.value} structure - should have {structure_parts}")
         
         # Determine overall quality
         # Weighted scoring
