@@ -122,7 +122,7 @@ TEST_QUESTIONS = [
 ]
 
 
-def send_chat_request(question: str) -> Dict:
+def send_chat_request(question: str, timeout: int = 60) -> Dict:
     """Send chat request to StillMe API"""
     headers = {
         "Content-Type": "application/json"
@@ -138,7 +138,7 @@ def send_chat_request(question: str) -> Dict:
             endpoint,
             json={"message": question, "use_rag": True},
             headers=headers,
-            timeout=60
+            timeout=timeout
         )
         response.raise_for_status()
         return response.json()
