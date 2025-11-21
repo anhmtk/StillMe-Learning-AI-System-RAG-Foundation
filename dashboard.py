@@ -1678,7 +1678,7 @@ def page_validation():
                         "Timestamp Added": item.get("timestamp_added", "N/A")[:19] if item.get("timestamp_added") else "N/A",
                         "Source URL (Link)": item.get("source_url", "N/A")[:60] + ("..." if len(item.get("source_url", "")) > 60 else ""),
                         "Content Snippet": item.get("retained_content_snippet", "N/A")[:100] + ("..." if len(item.get("retained_content_snippet", "")) > 100 else ""),
-                        "Vector ID": item.get("vector_id", "N/A"),
+                        "Tracking ID": item.get("vector_id", "N/A"),
                         "Retention Score": f"{item.get('retention_score', 0.0):.2f}"
                     })
                 
