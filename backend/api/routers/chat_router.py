@@ -1490,8 +1490,55 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     language=detected_lang
                 )
                 
-                # Return response immediately without LLM processing
-                processing_steps.append("✅ Detected philosophical question - returning 3-layer processed answer")
+                # CRITICAL: Pass philosophical answer through rewrite engine for variation and adaptation
+                # This prevents mode collapse by allowing LLM to adapt the answer to the specific question
+                try:
+                    from backend.postprocessing.rewrite_llm import get_rewrite_llm
+                    from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
+                    from backend.postprocessing.optimizer import get_postprocessing_optimizer
+                    
+                    # Evaluate quality of philosophical answer
+                    evaluator = get_quality_evaluator()
+                    quality_result = evaluator.evaluate(
+                        response=philosophical_answer,
+                        question=chat_request.message,
+                        is_philosophical=True,
+                        detected_lang=detected_lang
+                    )
+                    
+                    # Check if rewrite is needed (especially for template-like responses)
+                    optimizer = get_postprocessing_optimizer()
+                    should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                        quality_result=quality_result,
+                        is_philosophical=True,
+                        response_length=len(philosophical_answer)
+                    )
+                    
+                    if should_rewrite and quality_result.get("quality") == QualityLevel.NEEDS_REWRITE.value:
+                        logger.info(f"🔄 Rewriting philosophical answer for better adaptation to question: {rewrite_reason}")
+                        rewrite_llm = get_rewrite_llm()
+                        rewrite_result = await rewrite_llm.rewrite(
+                            text=philosophical_answer,
+                            original_question=chat_request.message,
+                            quality_issues=quality_result.get("reasons", []),
+                            is_philosophical=True,
+                            detected_lang=detected_lang
+                        )
+                        
+                        if rewrite_result.was_rewritten:
+                            philosophical_answer = rewrite_result.text
+                            processing_steps.append("✅ Philosophical answer rewritten for better question adaptation")
+                        else:
+                            logger.debug(f"⏭️ Rewrite skipped: {rewrite_result.error or 'No rewrite needed'}")
+                    else:
+                        logger.debug(f"⏭️ Philosophical answer quality acceptable, skipping rewrite")
+                        
+                except Exception as rewrite_error:
+                    logger.warning(f"⚠️ Error during philosophical answer rewrite: {rewrite_error}, using original answer")
+                    # Continue with original answer if rewrite fails
+                
+                # Return response
+                processing_steps.append("✅ Detected philosophical question - returning 3-layer processed answer (with rewrite if needed)")
                 return ChatResponse(
                     response=philosophical_answer,
                     confidence_score=1.0,  # High confidence for processed answer

@@ -20,6 +20,15 @@ class QuestionType(Enum):
     UNKNOWN = "UNKNOWN"  # Not a philosophical question about these topics
 
 
+class ConsciousnessSubType(Enum):
+    """Sub-types of consciousness questions for better variation"""
+    DIRECT = "DIRECT"  # Direct question: "bạn có ý thức ko?"
+    META = "META"  # Meta question: "làm sao bạn biết mình không có ý thức?"
+    PARADOX = "PARADOX"  # Paradox question: "nói không có ý thức có phải là có ý thức không?"
+    EPISTEMIC = "EPISTEMIC"  # Epistemic question: "bạn lấy căn cứ từ đâu?"
+    DEFINITIONAL = "DEFINITIONAL"  # Definitional question: "ý thức là gì?"
+
+
 def classify_philosophical_intent(text: str) -> QuestionType:
     """
     Classify philosophical question into one of three types:

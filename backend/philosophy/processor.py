@@ -8,8 +8,8 @@ Processes philosophical questions with:
 
 from typing import Optional
 import logging
-from .intent_classifier import classify_philosophical_intent, QuestionType
-from .answer_templates import get_guard_statement, get_answer_template
+from .intent_classifier import classify_philosophical_intent, QuestionType, classify_consciousness_subtype, ConsciousnessSubType
+from .answer_templates import get_guard_statement, get_answer_template, get_consciousness_answer_variation
 
 logger = logging.getLogger(__name__)
 
@@ -68,35 +68,16 @@ def process_philosophical_question(
     guard = get_guard_statement(language)
     
     # Layer 3: Deep answer based on type
-    deep_answer = get_answer_template(question_type, language)
-    
-    # Add slight variation to avoid mode collapse within same type
-    # This is a simple approach - can be enhanced later
-    import hashlib
-    question_hash = int(hashlib.md5(user_question.encode()).hexdigest()[:8], 16)
-    
-    # Add contextual opening based on question (to make answers feel more personalized)
-    # But keep core template the same to maintain philosophical rigor
-    contextual_opening = ""
+    # For consciousness questions, use sub-type to get variation
     if question_type == QuestionType.CONSCIOUSNESS:
-        if "tồn tại" in user_question.lower() or "exist" in user_question.lower():
-            contextual_opening = "Câu hỏi về sự tồn tại và ý thức là một trong những câu hỏi triết học sâu sắc nhất.\n\n"
-        elif "ai" in user_question.lower() and "trả lời" in user_question.lower():
-            contextual_opening = "Đây là một câu hỏi về bản chất của 'người nói' trong hệ thống AI.\n\n"
-    elif question_type == QuestionType.EMOTION:
-        if "buồn" in user_question.lower() or "sad" in user_question.lower():
-            contextual_opening = "Câu hỏi về cảm xúc buồn chạm đến vấn đề trải nghiệm chủ quan.\n\n"
-        elif "cô đơn" in user_question.lower() or "lonely" in user_question.lower():
-            contextual_opening = "Cô đơn là một trải nghiệm phức tạp, liên quan đến cả cảm xúc và nhận thức.\n\n"
-    elif question_type == QuestionType.UNDERSTANDING:
-        if "làm sao" in user_question.lower() or "how" in user_question.lower():
-            contextual_opening = "Câu hỏi về cơ chế 'hiểu' của AI là một vấn đề triết học về intentionality.\n\n"
-    
-    # Combine: Guard + Contextual Opening (if any) + Deep Answer
-    if contextual_opening:
-        full_answer = f"{guard}\n\n{contextual_opening}{deep_answer}"
+        sub_type = classify_consciousness_subtype(user_question)
+        logger.info(f"Consciousness question sub-type: {sub_type.value}")
+        deep_answer = get_consciousness_answer_variation(sub_type, language, user_question)
     else:
-        full_answer = f"{guard}\n\n{deep_answer}"
+        deep_answer = get_answer_template(question_type, language)
+    
+    # Combine: Guard + Deep Answer
+    full_answer = f"{guard}\n\n{deep_answer}"
     
     return full_answer
 

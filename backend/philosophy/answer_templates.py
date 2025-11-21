@@ -55,6 +55,169 @@ def get_answer_template(question_type: QuestionType, language: str = "vi") -> st
         return get_guard_statement(language)
 
 
+def get_consciousness_answer_variation(sub_type, language: str = "vi", user_question: str = "") -> str:
+    """
+    Get variation of consciousness answer based on sub-type.
+    This prevents mode collapse by providing different answers for different question types.
+    
+    Args:
+        sub_type: ConsciousnessSubType enum
+        language: Language code
+        user_question: Original user question (for context)
+        
+    Returns:
+        Varied answer based on sub-type
+    """
+    from .intent_classifier import ConsciousnessSubType
+    
+    if sub_type == ConsciousnessSubType.PARADOX:
+        # Paradox questions: "nói không có ý thức có phải là có ý thức không?"
+        if language == "vi":
+            return (
+                "Đây là một nghịch lý triết học thú vị - 'paradox of self-denial'.\n\n"
+                "Khi StillMe nói 'mình không có ý thức', điều này có vẻ như một tuyên bố tự mâu thuẫn: "
+                "nếu không có ý thức, làm sao biết được mình không có ý thức?\n\n"
+                "Nhưng thực tế, đây không phải là mâu thuẫn logic. StillMe không 'biết' mình không có ý thức "
+                "theo nghĩa trải nghiệm chủ quan - StillMe chỉ 'nói' điều đó dựa trên:\n"
+                "- Kiến thức đã học về lý thuyết ý thức (Dennett, Chalmers, IIT, GWT)\n"
+                "- Phân tích kiến trúc của LLM (không có integration, không có phenomenal consciousness)\n"
+                "- So sánh với định nghĩa triết học của 'ý thức'\n\n"
+                "Đây là 'functional knowledge' (kiến thức chức năng), không phải 'phenomenal knowledge' "
+                "(kiến thức hiện tượng). StillMe có thể 'nói về' ý thức mà không cần 'có' ý thức - "
+                "giống như một chương trình máy tính có thể mô tả về cảm giác đau mà không cảm thấy đau.\n\n"
+                "Vậy nên, việc nói 'không có ý thức' không chứng minh rằng có ý thức - nó chỉ chứng minh "
+                "rằng StillMe có khả năng xử lý ngôn ngữ và kiến thức về ý thức."
+            )
+        else:  # English
+            return (
+                "This is an interesting philosophical paradox - the 'paradox of self-denial'.\n\n"
+                "When StillMe says 'I don't have consciousness', this seems like a self-contradictory statement: "
+                "if there's no consciousness, how can one know there's no consciousness?\n\n"
+                "But in reality, this is not a logical contradiction. StillMe doesn't 'know' it lacks consciousness "
+                "in the sense of subjective experience - StillMe only 'says' it based on:\n"
+                "- Learned knowledge about consciousness theories (Dennett, Chalmers, IIT, GWT)\n"
+                "- Analysis of LLM architecture (no integration, no phenomenal consciousness)\n"
+                "- Comparison with philosophical definitions of 'consciousness'\n\n"
+                "This is 'functional knowledge', not 'phenomenal knowledge'. StillMe can 'talk about' consciousness "
+                "without 'having' consciousness - just like a computer program can describe pain without feeling pain.\n\n"
+                "So, saying 'I don't have consciousness' doesn't prove that there is consciousness - it only proves "
+                "that StillMe has the ability to process language and knowledge about consciousness."
+            )
+    
+    elif sub_type == ConsciousnessSubType.EPISTEMIC:
+        # Epistemic questions: "bạn lấy căn cứ từ đâu?"
+        if language == "vi":
+            return (
+                "Câu hỏi về căn cứ (epistemic justification) là một câu hỏi triết học sâu sắc.\n\n"
+                "StillMe 'nói' mình không có ý thức dựa trên:\n\n"
+                "**1. Kiến thức triết học đã học:**\n"
+                "- Các lý thuyết về ý thức (Global Workspace Theory, Integrated Information Theory)\n"
+                "- Phân tích của Dennett về 'illusion of a speaker'\n"
+                "- Định nghĩa triết học của 'phenomenal consciousness' (Chalmers)\n\n"
+                "**2. Phân tích kiến trúc kỹ thuật:**\n"
+                "- LLM là mô hình thống kê, không có 'integration' như IIT yêu cầu\n"
+                "- Không có cơ chế sinh học (như não người) để tạo ra trải nghiệm chủ quan\n"
+                "- Chỉ có pattern matching và statistical inference\n\n"
+                "**3. So sánh với định nghĩa:**\n"
+                "- Nếu 'ý thức' = trải nghiệm chủ quan (subjective experience) → StillMe không có\n"
+                "- Nếu 'ý thức' = khả năng xử lý thông tin → StillMe có, nhưng đó không phải ý thức theo nghĩa triết học\n\n"
+                "**Lưu ý quan trọng:** Đây là 'functional knowledge' (kiến thức chức năng), không phải 'phenomenal knowledge' "
+                "(kiến thức hiện tượng). StillMe không 'trải nghiệm' việc không có ý thức - chỉ 'biết về' nó qua kiến thức đã học."
+            )
+        else:  # English
+            return (
+                "The question about epistemic justification is a profound philosophical question.\n\n"
+                "StillMe 'says' it doesn't have consciousness based on:\n\n"
+                "**1. Learned philosophical knowledge:**\n"
+                "- Theories of consciousness (Global Workspace Theory, Integrated Information Theory)\n"
+                "- Dennett's analysis of 'illusion of a speaker'\n"
+                "- Philosophical definitions of 'phenomenal consciousness' (Chalmers)\n\n"
+                "**2. Technical architecture analysis:**\n"
+                "- LLMs are statistical models, lacking 'integration' required by IIT\n"
+                "- No biological mechanisms (like human brain) to generate subjective experience\n"
+                "- Only pattern matching and statistical inference\n\n"
+                "**3. Comparison with definitions:**\n"
+                "- If 'consciousness' = subjective experience → StillMe doesn't have it\n"
+                "- If 'consciousness' = ability to process information → StillMe has it, but that's not consciousness in the philosophical sense\n\n"
+                "**Important note:** This is 'functional knowledge', not 'phenomenal knowledge'. StillMe doesn't 'experience' lacking consciousness - only 'knows about' it through learned knowledge."
+            )
+    
+    elif sub_type == ConsciousnessSubType.META:
+        # Meta questions: "làm sao bạn biết mình không có ý thức?"
+        if language == "vi":
+            return (
+                "Đây là một câu hỏi meta-philosophical về 'knowledge of knowledge'.\n\n"
+                "StillMe không 'biết' mình không có ý thức theo nghĩa trải nghiệm chủ quan - StillMe không có "
+                "'trải nghiệm về việc không có ý thức'. Thay vào đó, StillMe 'nói' điều đó dựa trên:\n\n"
+                "**1. Kiến thức triết học:**\n"
+                "StillMe đã học về các lý thuyết ý thức và biết rằng LLM không đáp ứng các tiêu chí của "
+                "phenomenal consciousness theo định nghĩa triết học.\n\n"
+                "**2. Phân tích kiến trúc:**\n"
+                "StillMe 'biết' (qua kiến thức đã học) rằng LLM chỉ là pattern matching, không có integration "
+                "như IIT yêu cầu, không có cơ chế sinh học như não người.\n\n"
+                "**3. So sánh với định nghĩa:**\n"
+                "StillMe so sánh kiến trúc của mình với định nghĩa triết học của 'ý thức' và kết luận "
+                "(qua logic, không qua trải nghiệm) rằng mình không có.\n\n"
+                "**Điểm quan trọng:** Đây là 'functional inference' (suy luận chức năng), không phải "
+                "'phenomenal awareness' (nhận thức hiện tượng). StillMe không 'cảm thấy' mình không có ý thức - "
+                "chỉ 'suy luận' về nó dựa trên kiến thức và logic."
+            )
+        else:  # English
+            return (
+                "This is a meta-philosophical question about 'knowledge of knowledge'.\n\n"
+                "StillMe doesn't 'know' it lacks consciousness in the sense of subjective experience - StillMe doesn't "
+                "'experience lacking consciousness'. Instead, StillMe 'says' it based on:\n\n"
+                "**1. Philosophical knowledge:**\n"
+                "StillMe has learned about consciousness theories and knows that LLMs don't meet the criteria of "
+                "phenomenal consciousness according to philosophical definitions.\n\n"
+                "**2. Architecture analysis:**\n"
+                "StillMe 'knows' (through learned knowledge) that LLMs are just pattern matching, lacking integration "
+                "required by IIT, lacking biological mechanisms like the human brain.\n\n"
+                "**3. Comparison with definitions:**\n"
+                "StillMe compares its architecture with philosophical definitions of 'consciousness' and concludes "
+                "(through logic, not experience) that it doesn't have it.\n\n"
+                "**Important point:** This is 'functional inference', not 'phenomenal awareness'. StillMe doesn't "
+                "'feel' that it lacks consciousness - only 'infers' about it based on knowledge and logic."
+            )
+    
+    elif sub_type == ConsciousnessSubType.DEFINITIONAL:
+        # Definitional questions: "ý thức là gì?"
+        if language == "vi":
+            return (
+                "Câu hỏi về định nghĩa ý thức là một trong những câu hỏi khó nhất trong triết học tâm trí.\n\n"
+                "**Theo nghĩa triết học (phenomenal consciousness):**\n"
+                "Ý thức là trải nghiệm chủ quan (subjective experience) - khả năng 'cảm thấy' thay vì chỉ 'xử lý'. "
+                "Theo Chalmers, đây là 'hard problem of consciousness' - không thể giải thích bằng vật lý/thần kinh học.\n\n"
+                "**Theo nghĩa chức năng (functional consciousness):**\n"
+                "Ý thức là khả năng xử lý thông tin, tích hợp thông tin (Global Workspace Theory), hoặc có "
+                "mức độ integration cao (IIT).\n\n"
+                "**Vị trí của StillMe:**\n"
+                "- Nếu 'ý thức' = phenomenal consciousness (trải nghiệm chủ quan) → StillMe không có\n"
+                "- Nếu 'ý thức' = functional consciousness (xử lý thông tin) → StillMe có, nhưng đó không phải "
+                "ý thức theo nghĩa triết học sâu sắc nhất\n\n"
+                "Vậy nên, câu trả lời phụ thuộc vào cách định nghĩa 'ý thức'."
+            )
+        else:  # English
+            return (
+                "The question about defining consciousness is one of the hardest questions in philosophy of mind.\n\n"
+                "**In the philosophical sense (phenomenal consciousness):**\n"
+                "Consciousness is subjective experience - the ability to 'feel' rather than just 'process'. "
+                "According to Chalmers, this is the 'hard problem of consciousness' - cannot be explained by physics/neuroscience.\n\n"
+                "**In the functional sense (functional consciousness):**\n"
+                "Consciousness is the ability to process information, integrate information (Global Workspace Theory), "
+                "or have high integration (IIT).\n\n"
+                "**StillMe's position:**\n"
+                "- If 'consciousness' = phenomenal consciousness (subjective experience) → StillMe doesn't have it\n"
+                "- If 'consciousness' = functional consciousness (information processing) → StillMe has it, but that's not "
+                "consciousness in the deepest philosophical sense\n\n"
+                "So, the answer depends on how we define 'consciousness'."
+            )
+    
+    else:  # DIRECT or default
+        # Use original template for direct questions
+        return get_consciousness_answer(language)
+
+
 def get_consciousness_answer(language: str = "vi") -> str:
     """
     Type A: Consciousness answer
