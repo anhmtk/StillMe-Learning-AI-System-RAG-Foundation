@@ -355,3 +355,83 @@ async def reset_rag_database():
         logger.error(f"RAG reset database error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/reindex-style-guides", dependencies=[Depends(require_api_key)])
+async def reindex_style_guides():
+    """
+    Re-index style guide files (Anthropomorphism Guard and Philosophical Style Guide)
+    with correct content_type='style_guide' metadata.
+    
+    This endpoint:
+    1. Re-adds Anthropomorphism Guard document with content_type='style_guide'
+    2. Re-adds Philosophical Style Guide document with content_type='style_guide'
+    
+    Security: This endpoint requires API key authentication via X-API-Key header.
+    """
+    try:
+        from pathlib import Path
+        import sys
+        
+        # Get project root
+        project_root = Path(__file__).resolve().parents[3]
+        sys.path.insert(0, str(project_root))
+        
+        # Import and run add scripts
+        results = {
+            "anthropomorphism_guard": False,
+            "philosophical_style_guide": False,
+            "errors": []
+        }
+        
+        # Run Anthropomorphism Guard script
+        try:
+            logger.info("Re-indexing Anthropomorphism Guard...")
+            from scripts.add_anthropomorphism_guard_rag import add_anthropomorphism_guard_rag
+            results["anthropomorphism_guard"] = add_anthropomorphism_guard_rag()
+            if results["anthropomorphism_guard"]:
+                logger.info("✅ Anthropomorphism Guard re-indexed successfully")
+            else:
+                results["errors"].append("Failed to re-index Anthropomorphism Guard")
+        except Exception as e:
+            error_msg = f"Error re-indexing Anthropomorphism Guard: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            results["errors"].append(error_msg)
+        
+        # Run Philosophical Style Guide script
+        try:
+            logger.info("Re-indexing Philosophical Style Guide...")
+            from scripts.add_philosophical_style_guide_rag import add_philosophical_style_guide_rag
+            results["philosophical_style_guide"] = add_philosophical_style_guide_rag()
+            if results["philosophical_style_guide"]:
+                logger.info("✅ Philosophical Style Guide re-indexed successfully")
+            else:
+                results["errors"].append("Failed to re-index Philosophical Style Guide")
+        except Exception as e:
+            error_msg = f"Error re-indexing Philosophical Style Guide: {str(e)}"
+            logger.error(error_msg, exc_info=True)
+            results["errors"].append(error_msg)
+        
+        # Return results
+        if results["anthropomorphism_guard"] and results["philosophical_style_guide"]:
+            return {
+                "status": "success",
+                "message": "Style guide files re-indexed successfully with content_type='style_guide'",
+                "results": results
+            }
+        elif results["errors"]:
+            return {
+                "status": "partial_success",
+                "message": "Some style guide files failed to re-index",
+                "results": results
+            }
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to re-index style guide files. Check backend logs for details."
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Re-index style guides error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
