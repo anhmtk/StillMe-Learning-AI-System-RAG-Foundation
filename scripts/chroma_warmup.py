@@ -39,9 +39,11 @@ try:
     
     # Add dummy document WITHOUT embeddings (let ChromaDB generate embeddings using ONNX)
     # This will trigger ONNX model download if not already cached
+    # NOTE: ChromaDB automatically detects the embedding model from the embedding function
+    # The model name is determined by ChromaDB's default embedding function, not hardcoded here
     collection.add(
         ids=['warmup_doc'],
-        documents=['This is a warmup document to trigger ONNX model download for all-MiniLM-L6-v2']
+        documents=['This is a warmup document to trigger ONNX model download']
     )
     print('Added warmup document (will trigger ONNX model download)')
     
@@ -62,11 +64,18 @@ try:
     print('✅ ChromaDB ONNX warmup done')
     
     # Verify ONNX model was downloaded
-    onnx_model_path = os.path.join(chroma_cache_dir, 'onnx_models', 'all-MiniLM-L6-v2')
-    if os.path.exists(onnx_model_path):
-        print(f'✅ ONNX model verified at: {onnx_model_path}')
+    # NOTE: ChromaDB uses its default embedding function which may use different model names
+    # The actual model path depends on ChromaDB's internal configuration
+    onnx_models_dir = os.path.join(chroma_cache_dir, 'onnx_models')
+    if os.path.exists(onnx_models_dir):
+        onnx_models = os.listdir(onnx_models_dir)
+        if onnx_models:
+            print(f'✅ ONNX model(s) verified in: {onnx_models_dir}')
+            print(f'   Models found: {", ".join(onnx_models)}')
+        else:
+            print(f'⚠️ ONNX models directory exists but is empty (may download on first real use)')
     else:
-        print(f'⚠️ ONNX model not found at: {onnx_model_path} (may download on first real use)')
+        print(f'⚠️ ONNX models directory not found (may download on first real use)')
     
 except Exception as e:
     # Never fail the build - just log and continue

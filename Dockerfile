@@ -51,7 +51,7 @@ COPY scripts/model_warmup.py /app/scripts/model_warmup.py
 # Enable warmup by default to prevent runtime downloads
 ARG MODEL_WARMUP=true
 RUN if [ "$MODEL_WARMUP" = "true" ]; then \
-      echo "Pre-downloading embedding model all-MiniLM-L6-v2 (this may take 2-3 minutes)..."; \
+      echo "Pre-downloading embedding model multi-qa-MiniLM-L6-dot-v1 (this may take 2-3 minutes)..."; \
       python /app/scripts/model_warmup.py || true; \
       echo "Model warmup completed"; \
     else \

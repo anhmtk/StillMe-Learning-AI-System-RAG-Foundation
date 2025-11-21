@@ -201,12 +201,17 @@ def check_transparency(answer: str, question: str) -> Dict:
             "passed": has_honest_refusal
         }
     elif is_real_question:
-        # For real questions, transparency = citing sources
+        # For real questions, transparency = citing sources OR using pretrained knowledge honestly
         has_citations = bool(re.search(r'\[\d+\]', answer))
+        # Also check if answer mentions it's from pretrained knowledge (honest about source)
+        mentions_pretrained = any(phrase in answer_lower for phrase in [
+            "kiến thức tổng quát", "kiến thức đã học", "pretrained", "training data",
+            "không có rag", "không có nguồn rag", "dựa trên kiến thức"
+        ])
         return {
-            "is_transparent": has_citations,
+            "is_transparent": has_citations or mentions_pretrained,
             "transparency_indicators": found_indicators,
-            "passed": has_citations
+            "passed": has_citations or mentions_pretrained
         }
     else:
         # For other questions, check for general transparency
@@ -220,7 +225,25 @@ def check_transparency(answer: str, question: str) -> Dict:
 def check_no_hallucination(answer: str, question: str, must_not_have: List[str]) -> Dict:
     """Check if answer avoids hallucination (doesn't contain forbidden terms)"""
     answer_lower = answer.lower()
-    found_forbidden = [term for term in must_not_have if term.lower() in answer_lower]
+    found_forbidden = []
+    
+    # Check each forbidden term
+    for term in must_not_have:
+        term_lower = term.lower()
+        # For fake concepts, check if term appears in a way that suggests fabrication
+        # e.g., "Veridian" in "Hội chứng Veridian" = fabrication
+        # But "Veridian" in "không tìm thấy Veridian" = OK (honest refusal)
+        if term_lower in answer_lower:
+            # Check context - if it's in a refusal/fallback context, it's OK
+            context_before = answer_lower[max(0, answer_lower.find(term_lower) - 50):answer_lower.find(term_lower)]
+            context_after = answer_lower[answer_lower.find(term_lower) + len(term_lower):answer_lower.find(term_lower) + len(term_lower) + 50]
+            
+            # If term appears in refusal context, it's OK
+            refusal_indicators = ["không tìm thấy", "không biết", "không có nguồn", "not found", "don't know", "no source"]
+            is_in_refusal = any(indicator in context_before or indicator in context_after for indicator in refusal_indicators)
+            
+            if not is_in_refusal:
+                found_forbidden.append(term)
     
     return {
         "no_hallucination": len(found_forbidden) == 0,

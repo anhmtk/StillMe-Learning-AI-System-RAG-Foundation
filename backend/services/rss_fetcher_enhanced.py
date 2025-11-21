@@ -172,6 +172,21 @@ def sanitize_xml(xml_content: str) -> str:
     sanitized = re.sub(undefined_entity_pattern, replace_undefined_entity, sanitized)
     
     # STEP 3: Fix common XML issues
+    # Remove BOM and other invisible characters at start
+    sanitized = sanitized.lstrip('\ufeff')  # Remove BOM
+    sanitized = sanitized.lstrip()  # Remove leading whitespace
+    
+    # Fix "syntax error: line 2, column 0" - often caused by invalid characters before XML declaration
+    # Remove any non-printable characters before <?xml
+    if '<?xml' in sanitized:
+        xml_start = sanitized.find('<?xml')
+        if xml_start > 0:
+            # Check if there are invalid characters before <?xml
+            before_xml = sanitized[:xml_start]
+            # Keep only printable characters and newlines
+            cleaned_before = ''.join(c for c in before_xml if c.isprintable() or c in '\n\r\t')
+            sanitized = cleaned_before + sanitized[xml_start:]
+    
     # Ensure proper XML declaration if missing
     if not sanitized.strip().startswith('<?xml'):
         # Try to find encoding declaration
@@ -182,6 +197,31 @@ def sanitize_xml(xml_content: str) -> str:
         else:
             # Add XML declaration with UTF-8 encoding
             sanitized = '<?xml version="1.0" encoding="UTF-8"?>\n' + sanitized
+    
+    # STEP 4: Fix "not well-formed (invalid token)" - often caused by invalid characters in content
+    # Remove any remaining non-XML-safe characters (except in CDATA sections)
+    # This is a last resort - try to preserve as much content as possible
+    try:
+        # Try to parse and see if it's valid now
+        ET.fromstring(sanitized)
+    except ET.ParseError as parse_error:
+        error_msg = str(parse_error).lower()
+        if "invalid token" in error_msg or "not well-formed" in error_msg:
+            # Try to remove problematic characters around the error location
+            # This is a heuristic - we try to fix common issues
+            # Remove any characters that are not valid in XML 1.0
+            # XML 1.0 allows: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+            import sys
+            if sys.version_info >= (3, 7):
+                # Use regex to remove invalid XML characters
+                # Keep: tab (0x09), newline (0x0A), carriage return (0x0D), and valid Unicode ranges
+                sanitized = re.sub(
+                    r'[^\x09\x0A\x0D\x20-\xD7FF\xE000-\xFFFD]',
+                    '',
+                    sanitized,
+                    flags=re.UNICODE
+                )
+                logger.debug("Removed invalid XML characters to fix 'invalid token' error")
     
     return sanitized
 
