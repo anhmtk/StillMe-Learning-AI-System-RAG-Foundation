@@ -26,40 +26,75 @@ def verify_style_guide_tags():
         chroma_client = ChromaClient(persist_directory="data/vector_db")
         embedding_service = EmbeddingService(model_name="all-MiniLM-L6-v2")
         
-        # Search for style guide documents
+        logger.info("Searching for style guide documents in ChromaDB...")
+        
+        # Method 1: Search with metadata filter for content_type="style_guide"
+        try:
+            logger.info("Method 1: Searching with metadata filter content_type='style_guide'...")
+            query_embedding = embedding_service.encode_text("style guide anthropomorphism")
+            filtered_results = chroma_client.search_knowledge(
+                query_embedding=query_embedding,
+                limit=50,  # Get more results
+                where={"content_type": "style_guide"}
+            )
+            logger.info(f"Found {len(filtered_results)} documents with content_type='style_guide'")
+        except Exception as filter_error:
+            logger.warning(f"Metadata filter not supported: {filter_error}")
+            filtered_results = []
+        
+        # Method 2: Search broadly and filter by metadata
+        logger.info("Method 2: Searching broadly and filtering by metadata...")
         query = "anthropomorphism guard experience free templates style guide"
         query_embedding = embedding_service.encode_text(query)
         
-        logger.info("Searching for style guide documents in ChromaDB...")
-        
-        # Get documents (without filter to see all)
         all_results = chroma_client.search_knowledge(
             query_embedding=query_embedding,
-            limit=20
+            limit=100  # Get more results to find style guides
         )
+        
+        logger.info(f"Found {len(all_results)} total documents from semantic search")
+        
+        # Combine results (avoid duplicates)
+        all_docs = {}
+        for doc in filtered_results:
+            doc_id = doc.get("id", "unknown")
+            all_docs[doc_id] = doc
+        
+        for doc in all_results:
+            doc_id = doc.get("id", "unknown")
+            if doc_id not in all_docs:
+                all_docs[doc_id] = doc
         
         style_guide_docs = []
         other_docs = []
         
-        for doc in all_results:
+        for doc in all_docs.values():
             metadata = doc.get("metadata", {})
             title = metadata.get("title", "N/A")
             content_type = metadata.get("content_type", "")
             source = metadata.get("source", "")
             
             # Check if it's a style guide document
-            style_guide_indicators = [
-                "anthropomorphism_guard",
-                "experience_free_templates",
-                "StillMe_StyleGuide",
-                "style_guide",
-            ]
-            
-            is_style_guide = any(
-                indicator.lower() in str(title).lower() or 
-                indicator.lower() in str(source).lower()
-                for indicator in style_guide_indicators
-            )
+            # Priority 1: Check content_type metadata
+            if content_type == "style_guide":
+                is_style_guide = True
+            else:
+                # Priority 2: Check title/source for style guide indicators
+                style_guide_indicators = [
+                    "anthropomorphism_guard",
+                    "experience_free_templates",
+                    "StillMe_StyleGuide",
+                    "style_guide",
+                    "Anthropomorphism Guard",
+                    "Experience-Free",
+                    "Philosophical Style Guide",
+                ]
+                
+                is_style_guide = any(
+                    indicator.lower() in str(title).lower() or 
+                    indicator.lower() in str(source).lower()
+                    for indicator in style_guide_indicators
+                )
             
             if is_style_guide:
                 style_guide_docs.append({
@@ -103,9 +138,23 @@ def verify_style_guide_tags():
                 return False
         else:
             logger.warning("\n⚠️ No style guide documents found in ChromaDB!")
-            logger.warning("   Please run the add scripts:")
-            logger.warning("   python scripts/add_anthropomorphism_guard_rag.py")
-            logger.warning("   python scripts/add_philosophical_style_guide_rag.py")
+            logger.info(f"\n📊 Debug info:")
+            logger.info(f"   Total documents searched: {len(all_docs)}")
+            if other_docs:
+                logger.info(f"   Sample of other documents found:")
+                for doc in other_docs[:5]:
+                    logger.info(f"     - {doc['title']} (content_type: {doc.get('content_type', 'N/A')}, source: {doc.get('source', 'N/A')})")
+            
+            logger.warning("\n   Possible reasons:")
+            logger.warning("   1. Scripts chạy trên local nhưng ChromaDB path khác với production")
+            logger.warning("   2. Documents chưa được add vào ChromaDB (check logs của add scripts)")
+            logger.warning("   3. ChromaDB path không đúng (check persist_directory)")
+            logger.warning("\n   Please verify:")
+            logger.warning("   - Check logs của add scripts có báo '✅ added successfully' không?")
+            logger.warning("   - Check ChromaDB path: scripts dùng 'data/vector_db', production có thể khác")
+            logger.warning("   - Re-run add scripts nếu cần:")
+            logger.warning("     python scripts/add_anthropomorphism_guard_rag.py")
+            logger.warning("     python scripts/add_philosophical_style_guide_rag.py")
             return False
         
     except Exception as e:
