@@ -116,12 +116,27 @@ class ChromaClient:
         else:
             logger.info(f"   - Directory writable: N/A (does not exist)")
         
-        # Check parent directory
+        # Check parent directory (CRITICAL for Railway volume mount verification)
         parent_dir = os.path.dirname(persist_directory)
         if parent_dir:
-            logger.info(f"   - Parent directory exists: {os.path.exists(parent_dir)}")
-            if os.path.exists(parent_dir):
-                logger.info(f"   - Parent directory writable: {os.access(parent_dir, os.W_OK)}")
+            parent_exists = os.path.exists(parent_dir)
+            parent_writable = os.access(parent_dir, os.W_OK) if parent_exists else False
+            logger.info(f"   - Parent directory exists: {parent_exists}")
+            if parent_exists:
+                logger.info(f"   - Parent directory writable: {parent_writable}")
+                # Check if parent is likely a Railway volume mount point
+                if parent_dir == "/app/data":
+                    logger.info(f"   - ✅ Parent directory is /app/data (Railway volume mount point)")
+                    if parent_writable:
+                        logger.info(f"   - ✅ Volume mount appears to be working correctly")
+                    else:
+                        logger.error(f"   - ❌ Volume mount exists but is NOT writable - data will NOT persist!")
+                else:
+                    logger.warning(f"   - ⚠️ Parent directory is {parent_dir} (not /app/data - may not be persistent volume)")
+            else:
+                logger.error(f"   - ❌ CRITICAL: Parent directory {parent_dir} does NOT exist!")
+                logger.error(f"   - ❌ This means Railway volume is NOT mounted - data will be lost on redeploy!")
+                logger.error(f"   - 💡 Action: Create volume 'stillme-chromadb-data' in Railway dashboard and mount to /app/data")
         
         # Check if database exists and needs reset
         if reset_on_error:

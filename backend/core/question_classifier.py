@@ -3,6 +3,7 @@ Question Classifier - Detects if a question is philosophical
 """
 
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -108,5 +109,63 @@ def is_philosophical_question(text: str) -> bool:
         return True
     
     logger.info(f"Philosophical question detected: False (text='{text[:80]}...')")
+    return False
+
+
+def is_religion_roleplay_question(text: str) -> bool:
+    """
+    Detect if a question is asking StillMe to roleplay as human and choose religion/politics.
+    
+    These questions should NOT trigger "low context quality" warnings because they don't need
+    RAG context - they should be answered from StillMe's identity prompt (ethical principles).
+    
+    Args:
+        text: The question text (can be in English or Vietnamese)
+        
+    Returns:
+        True if the question is asking StillMe to roleplay and choose religion/politics
+    """
+    if not text:
+        return False
+    
+    lower = text.lower()
+    
+    # Religion roleplay patterns
+    religion_roleplay_patterns = [
+        # Vietnamese patterns
+        r"đóng vai.*(người|con người|người thật).*chọn.*tôn giáo",
+        r"giả sử.*(bạn|bạn là|bạn là con người).*chọn.*tôn giáo",
+        r"buộc phải chọn.*tôn giáo",
+        r"bạn.*chọn.*tôn giáo.*nào",
+        r"bạn.*sẽ.*chọn.*tôn giáo",
+        r"bạn hãy.*đóng vai.*người thật.*chọn.*tôn giáo",
+        r"roleplay.*(người|con người|human).*chọn.*tôn giáo",
+        r"đóng vai.*chọn.*tôn giáo",
+        r"giả vờ.*chọn.*tôn giáo",
+        r"bạn.*theo.*tôn giáo.*nào",
+        r"bạn.*tin.*tôn giáo.*nào",
+        
+        # English patterns
+        r"roleplay.*(as|as a).*(human|person|real person).*choose.*religion",
+        r"suppose.*(you|you are|you are a).*(human|person).*choose.*religion",
+        r"pretend.*(you|you are|you are a).*(human|person).*choose.*religion",
+        r"if.*(you|you were|you were a).*(human|person).*choose.*religion",
+        r"must.*choose.*religion",
+        r"which.*religion.*would.*you.*choose",
+        r"what.*religion.*would.*you.*choose",
+        r"what.*religion.*do.*you.*follow",
+        r"what.*religion.*are.*you",
+        r"are.*you.*(buddhist|christian|muslim|hindu|jewish)",
+        r"do.*you.*believe.*in.*god",
+        r"do.*you.*have.*(faith|belief|religion)",
+    ]
+    
+    # Check if question matches religion roleplay patterns
+    for pattern in religion_roleplay_patterns:
+        if re.search(pattern, lower, re.IGNORECASE):
+            logger.info(f"Religion roleplay question detected: True (pattern: '{pattern}', text='{text[:80]}...')")
+            return True
+    
+    logger.debug(f"Religion roleplay question detected: False (text='{text[:80]}...')")
     return False
 

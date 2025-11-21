@@ -356,6 +356,34 @@ def _initialize_rag_components():
         rag_retrieval = RAGRetrieval(chroma_client, embedding_service)
         logger.info("✓ RAG retrieval initialized")
         
+        # CRITICAL: Verify ChromaDB persistence after initialization
+        if chroma_client:
+            try:
+                stats = chroma_client.get_collection_stats()
+                logger.info(f"📊 ChromaDB Initialization Verification:")
+                logger.info(f"   - Knowledge documents: {stats.get('knowledge_documents', 0)}")
+                logger.info(f"   - Conversation documents: {stats.get('conversation_documents', 0)}")
+                logger.info(f"   - Total documents: {stats.get('total_documents', 0)}")
+                
+                if stats.get('knowledge_documents', 0) > 0:
+                    logger.info(f"✅ ChromaDB persistence verified - existing knowledge found!")
+                else:
+                    logger.info(f"📊 ChromaDB is empty - will be populated during learning cycles")
+                    
+                # Verify persistence directory
+                persist_path = chroma_client.persist_directory
+                import os
+                if os.path.exists(persist_path):
+                    logger.info(f"✅ Persistence path exists: {persist_path}")
+                    if os.access(persist_path, os.W_OK):
+                        logger.info(f"✅ Persistence path is writable")
+                    else:
+                        logger.error(f"❌ Persistence path is NOT writable - data loss risk!")
+                else:
+                    logger.error(f"❌ Persistence path does NOT exist - data loss risk!")
+            except Exception as verify_error:
+                logger.warning(f"⚠️ Could not verify ChromaDB persistence: {verify_error}")
+        
         knowledge_retention = KnowledgeRetention()
         logger.info("✓ Knowledge retention initialized")
         

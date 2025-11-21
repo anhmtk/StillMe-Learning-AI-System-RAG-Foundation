@@ -123,7 +123,8 @@ class ConfidenceValidator:
         logger.info(f"ConfidenceValidator initialized (require_uncertainty_when_no_context={require_uncertainty_when_no_context})")
     
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None, 
-            avg_similarity: Optional[float] = None, is_philosophical: bool = False) -> ValidationResult:
+            avg_similarity: Optional[float] = None, is_philosophical: bool = False,
+            is_religion_roleplay: bool = False) -> ValidationResult:
         """
         Check if answer appropriately expresses uncertainty
         
@@ -133,6 +134,7 @@ class ConfidenceValidator:
             context_quality: Context quality from RAG ("high", "medium", "low")
             avg_similarity: Average similarity score of retrieved context (0.0-1.0)
             is_philosophical: If True, relax uncertainty requirements for philosophical questions (don't force "I don't know" for theoretical reasoning)
+            is_religion_roleplay: If True, skip force template for religion/roleplay questions (they should answer from identity prompt, not RAG context)
             
         Returns:
             ValidationResult with passed status and reasons
@@ -141,7 +143,8 @@ class ConfidenceValidator:
         
         # Tier 3.5: Force uncertainty when context quality is low
         # BUT: Skip for philosophical questions (theoretical reasoning doesn't need context)
-        if not is_philosophical and (context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
+        # AND: Skip for religion/roleplay questions (they should answer from identity prompt, not RAG context)
+        if not is_philosophical and not is_religion_roleplay and (context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
             # Check if answer already expresses uncertainty
             has_uncertainty = any(
                 re.search(pattern, answer_lower, re.IGNORECASE)

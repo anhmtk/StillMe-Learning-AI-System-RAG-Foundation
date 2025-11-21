@@ -224,3 +224,130 @@ def _get_recommendations(env_vars: Dict, railway_status: Dict, image_cache_statu
     
     return recommendations
 
+
+@router.get("/chromadb-volume-status")
+async def get_chromadb_volume_status() -> Dict[str, Any]:
+    """
+    Get ChromaDB volume mount status and persistence information.
+    
+    This endpoint helps diagnose why ChromaDB data is lost after redeploy.
+    
+    Returns:
+        Volume mount status, path information, and recommendations
+    """
+    try:
+        import os
+        from pathlib import Path
+        
+        # Get ChromaDB path from environment or default
+        chroma_db_path = os.getenv("CHROMA_DB_PATH", "/app/data/vector_db")
+        
+        # Check parent directory (/app/data) - this should be the volume mount point
+        parent_dir = Path("/app/data")
+        chroma_dir = Path(chroma_db_path)
+        
+        # Check volume mount status
+        volume_status = {
+            "parent_directory": {
+                "path": str(parent_dir),
+                "exists": parent_dir.exists(),
+                "is_dir": parent_dir.is_dir() if parent_dir.exists() else False,
+                "is_writable": os.access(parent_dir, os.W_OK) if parent_dir.exists() else False,
+            },
+            "chromadb_directory": {
+                "path": str(chroma_dir),
+                "exists": chroma_dir.exists(),
+                "is_dir": chroma_dir.is_dir() if chroma_dir.exists() else False,
+                "is_writable": os.access(chroma_dir, os.W_OK) if chroma_dir.exists() else False,
+            }
+        }
+        
+        # Count files in ChromaDB directory if it exists
+        file_count = 0
+        total_size = 0
+        if chroma_dir.exists():
+            try:
+                for item in chroma_dir.rglob("*"):
+                    if item.is_file():
+                        file_count += 1
+                        total_size += item.stat().st_size
+            except Exception as e:
+                logger.warning(f"Could not count files in ChromaDB directory: {e}")
+        
+        volume_status["chromadb_directory"]["file_count"] = file_count
+        volume_status["chromadb_directory"]["total_size_bytes"] = total_size
+        volume_status["chromadb_directory"]["total_size_mb"] = round(total_size / (1024 * 1024), 2)
+        
+        # Check if this is likely a persistent volume (Railway)
+        is_persistent_volume = (
+            parent_dir.exists() and 
+            str(parent_dir) == "/app/data" and
+            os.access(parent_dir, os.W_OK)
+        )
+        
+        volume_status["is_persistent_volume"] = is_persistent_volume
+        
+        # Get recommendations
+        recommendations = []
+        
+        if not parent_dir.exists():
+            recommendations.append({
+                "priority": "CRITICAL",
+                "message": "Parent directory /app/data does not exist. Volume is NOT mounted!",
+                "action": "Create volume 'stillme-chromadb-data' in Railway dashboard and mount it to /app/data"
+            })
+        elif not os.access(parent_dir, os.W_OK):
+            recommendations.append({
+                "priority": "HIGH",
+                "message": "Parent directory /app/data exists but is NOT writable. Volume mount may have permission issues.",
+                "action": "Check volume permissions in Railway dashboard"
+            })
+        elif file_count == 0:
+            recommendations.append({
+                "priority": "MEDIUM",
+                "message": "ChromaDB directory exists but is empty. This is normal for first deploy, but data should persist after redeploy.",
+                "action": "After StillMe learns data, redeploy and check if files persist. If not, volume is not working correctly."
+            })
+        else:
+            recommendations.append({
+                "priority": "INFO",
+                "message": f"✅ Volume appears to be working! Found {file_count} files ({volume_status['chromadb_directory']['total_size_mb']} MB) in ChromaDB directory.",
+                "action": "None"
+            })
+        
+        # Check railway-backend.json configuration
+        config_info = {
+            "expected_volume_name": "stillme-chromadb-data",
+            "expected_mount_path": "/app/data",
+            "expected_size_gb": 5,
+            "config_file": "railway-backend.json"
+        }
+        
+        return {
+            "status": "success",
+            "volume_status": volume_status,
+            "config_info": config_info,
+            "recommendations": recommendations,
+            "diagnosis": _diagnose_chromadb_persistence(volume_status, recommendations)
+        }
+    except Exception as e:
+        logger.error(f"Error checking ChromaDB volume status: {e}")
+        return {
+            "status": "error",
+            "error": str(e),
+            "volume_status": None
+        }
+
+
+def _diagnose_chromadb_persistence(volume_status: Dict, recommendations: list) -> str:
+    """Diagnose ChromaDB persistence issues"""
+    if not volume_status["parent_directory"]["exists"]:
+        return "❌ CRITICAL: Volume is NOT mounted. Parent directory /app/data does not exist. Data will be lost on every redeploy."
+    
+    if not volume_status["parent_directory"]["is_writable"]:
+        return "⚠️ HIGH PRIORITY: Volume exists but is not writable. Check permissions in Railway dashboard."
+    
+    if volume_status["chromadb_directory"]["file_count"] == 0:
+        return "ℹ️ ChromaDB directory is empty. This is normal for first deploy. After StillMe learns data, redeploy and verify files persist."
+    
+    return f"✅ Volume appears to be working correctly. Found {volume_status['chromadb_directory']['file_count']} files in ChromaDB directory."

@@ -613,6 +613,7 @@ async def _handle_validation_with_fallback(
     context: dict,
     detected_lang: str,
     is_philosophical: bool,
+    is_religion_roleplay: bool,
     chat_request,
     enhanced_prompt: str,
     context_text: str,
@@ -734,13 +735,14 @@ async def _handle_validation_with_fallback(
     avg_similarity = context.get("avg_similarity_score", None)
     
     # Run validation with context quality info
-    # Tier 3.5: Pass context quality and is_philosophical to ValidatorChain
+    # Tier 3.5: Pass context quality, is_philosophical, and is_religion_roleplay to ValidatorChain
     validation_result = chain.run(
         raw_response, 
         ctx_docs,
         context_quality=context_quality,
         avg_similarity=avg_similarity,
         is_philosophical=is_philosophical,
+        is_religion_roleplay=is_religion_roleplay,
         user_question=chat_request.message  # Pass user question for FactualHallucinationValidator
     )
     
@@ -1442,6 +1444,18 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 logger.info("Philosophical question detected - will exclude technical documents from RAG")
         except ImportError:
             logger.warning("Question classifier not available, skipping philosophical detection")
+        except Exception as classifier_error:
+            logger.warning(f"Question classifier error: {classifier_error}")
+        
+        # Detect religion/roleplay questions - these should answer from identity prompt, not RAG context
+        is_religion_roleplay = False
+        try:
+            from backend.core.question_classifier import is_religion_roleplay_question
+            is_religion_roleplay = is_religion_roleplay_question(chat_request.message)
+            if is_religion_roleplay:
+                logger.info("Religion/roleplay question detected - will skip context quality warnings and force templates")
+        except ImportError:
+            logger.warning("Question classifier not available, skipping religion/roleplay detection")
         except Exception as classifier_error:
             logger.warning(f"Question classifier error: {classifier_error}")
         
@@ -2273,12 +2287,12 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                         f"(similarity={avg_similarity_str}), using philosophy-lite mode to prevent context overflow"
                     )
                 
-                # Fix 1: Block context quality warning for philosophical questions
+                # Fix 1: Block context quality warning for philosophical and religion/roleplay questions
                 context_quality_warning = ""
                 if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
-                    if is_philosophical:
-                        # For philosophical questions, skip warning - let model answer from pretrained knowledge
-                        logger.info(f"⚠️ Low RAG relevance for philosophical question (similarity={avg_similarity_str}), skipping warning to user. Model will answer from pretrained knowledge.")
+                    if is_philosophical or is_religion_roleplay:
+                        # For philosophical and religion/roleplay questions, skip warning - let model answer from pretrained knowledge/identity prompt
+                        logger.info(f"⚠️ Low RAG relevance for {'philosophical' if is_philosophical else 'religion/roleplay'} question (similarity={avg_similarity_str}), skipping warning to user. Model will answer from {'pretrained knowledge' if is_philosophical else 'identity prompt'}.")
                         context_quality_warning = ""  # Don't inject warning
                     else:
                         context_quality_warning = f"""
@@ -3656,6 +3670,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                 context=context,
                                 detected_lang=detected_lang,
                                 is_philosophical=is_philosophical,
+                                is_religion_roleplay=is_religion_roleplay,
                                 chat_request=chat_request,
                                 enhanced_prompt=enhanced_prompt,
                                 context_text=context_text,

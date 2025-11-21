@@ -72,7 +72,7 @@ class ValidatorChain:
     
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None,
             avg_similarity: Optional[float] = None, is_philosophical: bool = False,
-            user_question: Optional[str] = None) -> ValidationResult:
+            is_religion_roleplay: bool = False, user_question: Optional[str] = None) -> ValidationResult:
         """
         Run all validators with parallel execution for independent validators
         
@@ -87,6 +87,7 @@ class ValidatorChain:
             context_quality: Context quality from RAG ("high", "medium", "low") - Tier 3.5
             avg_similarity: Average similarity score of retrieved context (0.0-1.0) - Tier 3.5
             is_philosophical: If True, relax citation and confidence requirements for philosophical questions
+            is_religion_roleplay: If True, skip force template for religion/roleplay questions (they should answer from identity prompt)
             
         Returns:
             ValidationResult with overall status
@@ -113,7 +114,7 @@ class ValidatorChain:
             try:
                 # Tier 3.5: Pass context quality to ConfidenceValidator
                 if validator_name == "ConfidenceValidator":
-                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical)
+                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical, is_religion_roleplay=is_religion_roleplay)
                 elif validator_name == "CitationRequired":
                     # Pass is_philosophical and user_question to CitationRequired
                     # user_question is needed to detect real factual questions (even with philosophical elements)

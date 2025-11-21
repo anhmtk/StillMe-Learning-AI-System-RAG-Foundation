@@ -4,6 +4,7 @@ Fetches recent papers with code from paperswithcode.com
 """
 
 import httpx
+import feedparser  # type: ignore[import-untyped]
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
@@ -68,7 +69,6 @@ class PapersWithCodeFetcher:
                         return entries
                 
                 # Fallback: Try RSS feed if API fails
-                import feedparser
                 rss_url = f"{self.base_url}/latest"
                 try:
                     rss_response = await client.get(rss_url, follow_redirects=True)
