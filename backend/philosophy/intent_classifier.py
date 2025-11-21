@@ -43,6 +43,41 @@ def classify_philosophical_intent(text: str) -> QuestionType:
     
     # CRITICAL: Exclude questions about consciousness/emotions as SCIENTIFIC CONCEPTS or THEORIES
     # These are NOT questions about StillMe's own consciousness/emotions
+    # Also exclude TECHNICAL TERMS that should never trigger philosophy processor
+    technical_term_exclusions = [
+        # AI/ML Technical Terms
+        r"\brag\b",  # "RAG" (Retrieval-Augmented Generation)
+        r"\bllm\b",  # "LLM" (Large Language Model)
+        r"\bapi\b",  # "API"
+        r"\bvector\b",  # "vector"
+        r"\bembedding\b",  # "embedding"
+        r"\bchromadb\b",  # "ChromaDB"
+        r"\bretrieval\b",  # "retrieval"
+        r"\baugmented\b",  # "augmented"
+        r"\bgeneration\b",  # "generation"
+        r"\btransformer\b",  # "transformer"
+        r"\battention\b",  # "attention"
+        r"\btoken\b",  # "token"
+        r"\bprompt\b",  # "prompt"
+        r"\bcontext\b",  # "context"
+        r"\bdatabase\b",  # "database"
+        r"\bindex\b",  # "index"
+        r"\bquery\b",  # "query"
+        r"\bsearch\b",  # "search"
+        # Vietnamese technical terms
+        r"\bvectơ\b",  # "vectơ"
+        r"\bnhúng\b",  # "nhúng" (embedding)
+        r"\btruy\s+vấn\b",  # "truy vấn" (query)
+        r"\btìm\s+kiếm\b",  # "tìm kiếm" (search)
+        r"\bcơ\s+sở\s+dữ\s+liệu\b",  # "cơ sở dữ liệu" (database)
+    ]
+    
+    # If question contains technical terms, it's NOT about StillMe's consciousness - return UNKNOWN immediately
+    has_technical_term = any(re.search(pattern, text_lower) for pattern in technical_term_exclusions)
+    if has_technical_term:
+        logger.debug(f"Question contains technical terms, not about StillMe's consciousness: {text[:100]}")
+        return QuestionType.UNKNOWN
+    
     scientific_concept_indicators = [
         # Theory/research patterns
         r"\blý\s+thuyết\b",  # "lý thuyết"
@@ -199,31 +234,28 @@ def classify_philosophical_intent(text: str) -> QuestionType:
     ]
     
     # Type C - Understanding keywords (prioritize "hiểu" when it appears)
+    # CRITICAL: Exclude technical "understanding" questions (e.g., "how does RAG work?")
+    # Only match "hiểu" when it's about StillMe's own understanding, not technical concepts
     understanding_keywords = [
-        # Vietnamese - prioritize "hiểu" patterns
-        r"\bhiểu\b",
-        r"\bhiểu\s+theo\s+nghĩa\b",
+        # Vietnamese - prioritize "hiểu" patterns (but only when about StillMe)
+        r"\bhiểu\s+theo\s+nghĩa\b",  # "hiểu theo nghĩa" (understanding in what sense)
         r"\btheo\s+nghĩa\s+nào\s+.*\s+hiểu\b",  # "theo nghĩa nào ... hiểu"
-        r"\bhiểu\s+ra\s+sao\b",
-        r"\bhiểu\s+kiểu\s+gì\b",
-        r"\blàm\s+sao\s+.*\s+hiểu\b",  # "làm sao ... hiểu"
-        r"\bbiết\s+ý\s+nghĩa\b",
-        r"\bý\s+nghĩa\s+câu\s+nói\b",
-        r"\bý\s+nghĩa\b",
-        r"\bcomprehension\b",
-        r"\bmeaning\b",
-        # English
-        r"\bunderstand\b",
-        r"\bunderstanding\b",
-        r"\bhow\s+.*\s+understand\b",  # "how ... understand"
+        r"\bhiểu\s+ra\s+sao\b",  # "hiểu ra sao" (how do you understand)
+        r"\bhiểu\s+kiểu\s+gì\b",  # "hiểu kiểu gì" (what kind of understanding)
+        r"\blàm\s+sao\s+.*\s+hiểu\b",  # "làm sao ... hiểu" (how ... understand)
+        r"\bbiết\s+ý\s+nghĩa\b",  # "biết ý nghĩa" (know the meaning)
+        r"\bý\s+nghĩa\s+câu\s+nói\b",  # "ý nghĩa câu nói" (meaning of statement)
+        # CRITICAL: Only match "hiểu" when combined with personal pronouns about StillMe
+        # This prevents "giải thích RAG là gì" from matching
+        r"\bbạn\s+hiểu\b",  # "bạn hiểu" (you understand)
+        r"\byou\s+understand\b",  # "you understand"
+        r"\bdo\s+you\s+understand\b",  # "do you understand"
+        r"\bhow\s+do\s+you\s+understand\b",  # "how do you understand"
+        # English - only when about StillMe's understanding
+        r"\bhow\s+do\s+you\s+understand\b",  # "how do you understand"
         r"\bin\s+what\s+sense\s+.*\s+understand\b",  # "in what sense ... understand"
-        r"\bcomprehend\b",
-        r"\bcomprehension\b",
-        r"\bmeaning\b",
-        r"\bmean\b",
-        r"\bintentionality\b",
-        r"\bsemantic\b",
-        r"\bembedding\b",
+        r"\bintentionality\b",  # "intentionality" (philosophical concept)
+        # REMOVED: "hiểu" standalone, "meaning", "semantic", "embedding" - too broad, matches technical questions
     ]
     
     # Count matches for each type
