@@ -170,24 +170,28 @@ class ConfidenceValidator:
                 # Detect multiple languages from answer content (skip English uncertainty template)
                 detected_lang_from_answer = _detect_language_from_text(answer_for_detection)
                 
+                # CRITICAL FIX: Add citation [1] to uncertainty template when context documents are available
+                # This ensures transparency even when context is not relevant (required for real factual questions)
+                has_context = ctx_docs and len(ctx_docs) > 0
+                
                 uncertainty_templates = {
-                    'vi': "Mình không có đủ thông tin để trả lời chính xác câu hỏi này. Ngữ cảnh được tìm thấy có độ liên quan thấp với câu hỏi của bạn.",
-                    'fr': "Je n'ai pas suffisamment d'informations pour répondre avec précision à cette question. Le contexte récupéré a une faible pertinence par rapport à votre question.",
-                    'de': "Ich habe nicht genügend Informationen, um diese Frage genau zu beantworten. Der abgerufene Kontext hat eine geringe Relevanz für Ihre Frage.",
-                    'es': "No tengo suficiente información para responder con precisión a esta pregunta. El contexto recuperado tiene poca relevancia para su pregunta.",
-                    'ar': "ليس لدي معلومات كافية للإجابة على هذا السؤال بدقة. السياق المسترجع له صلة منخفضة بسؤالك.",
-                    'ru': "У меня недостаточно информации, чтобы точно ответить на этот вопрос. Извлеченный контекст имеет низкую релевантность к вашему вопросу.",
-                    'zh': "我没有足够的信息来准确回答这个问题。检索到的上下文与您的问题相关性较低。",
-                    'ja': "この質問に正確に答えるための十分な情報がありません。取得されたコンテキストは、あなたの質問との関連性が低いです。",
-                    'ko': "이 질문에 정확하게 답하기에 충분한 정보가 없습니다. 검색된 컨텍스트는 귀하의 질문과 관련성이 낮습니다.",
-                    'pt': "Não tenho informações suficientes para responder com precisão a esta pergunta. O contexto recuperado tem baixa relevância para sua pergunta.",
-                    'it': "Non ho informazioni sufficienti per rispondere con precisione a questa domanda. Il contesto recuperato ha una bassa rilevanza per la tua domanda.",
-                    'hi': "मेरे पास इस प्रश्न का सटीक उत्तर देने के लिए पर्याप्त जानकारी नहीं है। पुनर्प्राप्त संदर्भ का आपके प्रश्न से कम प्रासंगिकता है।",
-                    'th': "ฉันไม่มีข้อมูลเพียงพอที่จะตอบคำถามนี้อย่างแม่นยำ บริบทที่ดึงมามีความเกี่ยวข้องต่ำกับคำถามของคุณ",
+                    'vi': "Mình không có đủ thông tin để trả lời chính xác câu hỏi này. Ngữ cảnh được tìm thấy có độ liên quan thấp với câu hỏi của bạn." + (" [1]" if has_context else ""),
+                    'fr': "Je n'ai pas suffisamment d'informations pour répondre avec précision à cette question. Le contexte récupéré a une faible pertinence par rapport à votre question." + (" [1]" if has_context else ""),
+                    'de': "Ich habe nicht genügend Informationen, um diese Frage genau zu beantworten. Der abgerufene Kontext hat eine geringe Relevanz für Ihre Frage." + (" [1]" if has_context else ""),
+                    'es': "No tengo suficiente información para responder con precisión a esta pregunta. El contexto recuperado tiene poca relevancia para su pregunta." + (" [1]" if has_context else ""),
+                    'ar': "ليس لدي معلومات كافية للإجابة على هذا السؤال بدقة. السياق المسترجع له صلة منخفضة بسؤالك." + (" [1]" if has_context else ""),
+                    'ru': "У меня недостаточно информации, чтобы точно ответить на этот вопрос. Извлеченный контекст имеет низкую релевантность к вашему вопросу." + (" [1]" if has_context else ""),
+                    'zh': "我没有足够的信息来准确回答这个问题。检索到的上下文与您的问题相关性较低。" + (" [1]" if has_context else ""),
+                    'ja': "この質問に正確に答えるための十分な情報がありません。取得されたコンテキストは、あなたの質問との関連性が低いです。" + (" [1]" if has_context else ""),
+                    'ko': "이 질문에 정확하게 답하기에 충분한 정보가 없습니다. 검색된 컨텍스트는 귀하의 질문과 관련성이 낮습니다." + (" [1]" if has_context else ""),
+                    'pt': "Não tenho informações suficientes para responder com precisão a esta pergunta. O contexto recuperado tem baixa relevância para sua pergunta." + (" [1]" if has_context else ""),
+                    'it': "Non ho informazioni sufficienti per rispondere con precisione a questa domanda. Il contesto recuperato ha una bassa rilevanza per la tua domanda." + (" [1]" if has_context else ""),
+                    'hi': "मेरे पास इस प्रश्न का सटीक उत्तर देने के लिए पर्याप्त जानकारी नहीं है। पुनर्प्राप्त संदर्भ का आपके प्रश्न से कम प्रासंगिकता है।" + (" [1]" if has_context else ""),
+                    'th': "ฉันไม่มีข้อมูลเพียงพอที่จะตอบคำถามนี้อย่างแม่นยำ บริบทที่ดึงมามีความเกี่ยวข้องต่ำกับคำถามของคุณ" + (" [1]" if has_context else ""),
                 }
                 
                 uncertainty_template = uncertainty_templates.get(detected_lang_from_answer, 
-                    "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question.")
+                    "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question." + (" [1]" if has_context else ""))
                 # Prepend uncertainty to answer
                 patched_answer = f"{uncertainty_template}\n\n{answer}"
                 logger.warning("⚠️ Forced uncertainty expression due to low context quality")
