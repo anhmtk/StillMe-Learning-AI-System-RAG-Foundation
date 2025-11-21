@@ -406,3 +406,83 @@ def classify_philosophical_intent(text: str) -> QuestionType:
     
     return QuestionType.UNKNOWN
 
+
+def classify_consciousness_subtype(text: str) -> ConsciousnessSubType:
+    """
+    Classify consciousness questions into sub-types for better answer variation.
+    
+    Args:
+        text: User's question text (should already be classified as CONSCIOUSNESS)
+        
+    Returns:
+        ConsciousnessSubType enum value
+    """
+    if not text:
+        return ConsciousnessSubType.DIRECT
+    
+    text_lower = text.lower().strip()
+    
+    # PARADOX: Questions about the paradox of saying "no consciousness"
+    # Match both "không" and "ko" (Vietnamese abbreviation)
+    paradox_patterns = [
+        r"nói\s+(không|ko)\s+có\s+ý\s+thức.*có\s+phải.*ý\s+thức",
+        r"nói\s+(không|ko).*ý\s+thức.*thể\s+hiện.*ý\s+thức",
+        r"(không|ko)\s+có\s+ý\s+thức.*làm\s+sao.*biết.*(không|ko)\s+có",
+        r"nếu\s+(không|ko)\s+có.*làm\s+sao.*biết.*(không|ko)\s+có",
+        r"nếu\s+(không|ko)\s+có.*ý\s+thức.*làm\s+sao.*biết",
+        r"làm\s+sao.*biết.*(không|ko)\s+có.*ý\s+thức",
+        r"paradox.*consciousness",
+        r"contradiction.*consciousness",
+        r"nghịch\s+lý.*ý\s+thức",
+        r"mâu\s+thuẫn.*ý\s+thức",
+    ]
+    if any(re.search(pattern, text_lower) for pattern in paradox_patterns):
+        return ConsciousnessSubType.PARADOX
+    
+    # EPISTEMIC: Questions about how StillMe knows/justifies its claims
+    # BUT: If question also contains paradox pattern, prioritize PARADOX (already checked above)
+    epistemic_patterns = [
+        r"lấy\s+căn\s+cứ.*đâu",
+        r"căn\s+cứ.*(từ|vào)\s+đâu",
+        r"dựa\s+vào\s+đâu",
+        r"biết\s+từ\s+đâu",
+        r"how\s+do\s+you\s+know",
+        r"what\s+is\s+your\s+basis",
+        r"what\s+is\s+your\s+evidence",
+        r"justify",
+        r"epistemic",
+        r"căn\s+cứ",
+        r"bằng\s+chứng",
+    ]
+    # Only return EPISTEMIC if no paradox was detected (paradox takes priority)
+    if any(re.search(pattern, text_lower) for pattern in epistemic_patterns):
+        return ConsciousnessSubType.EPISTEMIC
+    
+    # META: Questions about StillMe's knowledge of its own state
+    meta_patterns = [
+        r"làm\s+sao.*biết.*(không|ko)\s+có",
+        r"how\s+do\s+you\s+know.*don't\s+have",
+        r"how\s+can\s+you\s+know",
+        r"biết\s+được.*không",
+        r"know.*don't\s+have",
+        r"aware.*don't\s+have",
+        r"meta.*consciousness",
+    ]
+    if any(re.search(pattern, text_lower) for pattern in meta_patterns):
+        return ConsciousnessSubType.META
+    
+    # DEFINITIONAL: Questions about what consciousness is
+    definitional_patterns = [
+        r"ý\s+thức\s+là\s+gì",
+        r"consciousness\s+is\s+what",
+        r"what\s+is\s+consciousness",
+        r"định\s+nghĩa.*ý\s+thức",
+        r"define.*consciousness",
+        r"meaning.*consciousness",
+    ]
+    if any(re.search(pattern, text_lower) for pattern in definitional_patterns):
+        return ConsciousnessSubType.DEFINITIONAL
+    
+    # DEFAULT: Direct question
+    return ConsciousnessSubType.DIRECT
+
