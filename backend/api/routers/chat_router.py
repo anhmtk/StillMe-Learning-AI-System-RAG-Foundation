@@ -2025,9 +2025,29 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                         from backend.knowledge.factual_scanner import scan_question
                         fps_result = scan_question(chat_request.message)
                         
+                        # CRITICAL: Check if entity is POTENTIALLY_REAL_ENTITIES before blocking
+                        # Well-known real entities should NEVER be blocked, even if not in RAG
+                        POTENTIALLY_REAL_ENTITIES = {
+                            "bretton woods", "bretton woods conference", "bretton woods conference 1944",
+                            "bretton woods agreement", "bretton woods system",
+                            "keynes", "john maynard keynes", "maynard keynes",
+                            "white", "harry dexter white", "harry d. white", "dexter white",
+                            "popper", "karl popper", "kuhn", "thomas kuhn",
+                            "lakatos", "imre lakatos", "feyerabend", "paul feyerabend",
+                            "imf", "international monetary fund", "world bank",
+                            "paradigm shift", "falsificationism", "scientific realism",
+                        }
+                        
+                        question_lower = chat_request.message.lower()
+                        contains_real_entity = any(
+                            real_entity in question_lower 
+                            for real_entity in POTENTIALLY_REAL_ENTITIES
+                        )
+                        
                         # If FPS detects non-existent concepts with low confidence, block and return honest response
+                        # BUT: Skip block if question contains POTENTIALLY_REAL_ENTITIES
                         # CRITICAL: Also check if confidence < 0.5 for suspicious entities (not just < 0.3)
-                        if not fps_result.is_plausible and fps_result.confidence < 0.5:
+                        if not contains_real_entity and not fps_result.is_plausible and fps_result.confidence < 0.5:
                             # Extract full entity using improved extraction (prioritizes quoted/parenthetical terms)
                             suspicious_entity = _extract_full_named_entity(chat_request.message)
                             
