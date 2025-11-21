@@ -27,7 +27,8 @@ if sys.platform == "win32":
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
+# Default to Railway production URL if not set
+API_BASE = os.getenv("STILLME_API_BASE", "stillme-backend-production.up.railway.app")
 API_KEY = os.getenv("STILLME_API_KEY", "")
 
 
@@ -70,19 +71,36 @@ def send_chat_request(question: str, use_option_b: bool = True) -> Dict:
     }
     
     try:
+        # DEBUG: Log request details
+        print(f"   📤 Sending request to: {url}")
+        print(f"   📤 Payload: message={question[:50]}..., use_option_b={use_option_b}")
+        
         response = requests.post(url, json=payload, headers=headers, timeout=120)  # Increased timeout for Option B
+        
+        # DEBUG: Log response status
+        print(f"   📥 Response status: {response.status_code}")
+        
         if response.status_code == 200:
             return response.json()
         else:
+            error_detail = response.text[:500] if response.text else "No error details"
+            print(f"   ❌ Error response: {error_detail}")
             return {
                 "error": f"HTTP {response.status_code}",
-                "response": response.text[:500]  # Truncate error response
+                "response": error_detail
             }
     except requests.exceptions.Timeout:
+        print(f"   ❌ Request timeout after 120s")
         return {
             "error": "Request timeout (120s exceeded)"
         }
+    except requests.exceptions.ConnectionError as e:
+        print(f"   ❌ Connection error: {e}")
+        return {
+            "error": f"Connection error: {e}"
+        }
     except Exception as e:
+        print(f"   ❌ Exception: {e}")
         return {
             "error": str(e)
         }
@@ -308,6 +326,17 @@ def run_tests():
     print("OPTION B PIPELINE TEST SUITE")
     print("=" * 80)
     print()
+    
+    # DEBUG: Print API configuration
+    normalized_url = normalize_api_base(API_BASE)
+    print(f"🔍 API Configuration:")
+    print(f"   API_BASE (env): {os.getenv('STILLME_API_BASE', 'NOT_SET')}")
+    print(f"   API_BASE (used): {API_BASE}")
+    print(f"   Normalized URL: {normalized_url}")
+    print(f"   Full endpoint: {normalized_url}/api/chat/rag")
+    print(f"   API_KEY: {'SET' if API_KEY else 'NOT_SET'}")
+    print()
+    
     print("✅ Option B pipeline is now integrated into chat_router.py")
     print("✅ This script tests Option B pipeline (zero-tolerance hallucination + deep philosophy)")
     print("⚠️  Expected latency: 10-20s (2-3x increase for absolute honesty and depth)")
