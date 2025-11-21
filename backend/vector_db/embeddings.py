@@ -15,7 +15,7 @@ try:
     from backend.utils.model_cache import ModelManager
     # Initialize ModelManager at module level to setup environment variables
     # This ensures cache is configured before SentenceTransformer is imported
-    _global_model_manager = ModelManager(model_name="all-MiniLM-L6-v2")
+    _global_model_manager = ModelManager(model_name="multi-qa-MiniLM-L6-dot-v1")
     # Import logging here to avoid circular import
     import logging as _logging_module
     _temp_logger = _logging_module.getLogger(__name__)
@@ -62,7 +62,7 @@ logger = logging.getLogger(__name__)
 class EmbeddingService:
     """Service for generating text embeddings"""
     
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = "multi-qa-MiniLM-L6-dot-v1"):
         """Initialize embedding service
         
         Args:
@@ -504,7 +504,7 @@ class EmbeddingService:
             return len(test_embedding)
         except Exception as e:
             logger.error(f"Failed to get embedding dimension: {e}")
-            return 384  # Default for all-MiniLM-L6-v2
+            return 384  # Default for multi-qa-MiniLM-L6-dot-v1 (384 dimensions)
     
     def batch_encode(self, texts: List[str], batch_size: int = 32) -> List[List[float]]:
         """Encode texts in batches for efficiency

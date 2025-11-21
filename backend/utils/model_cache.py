@@ -1,6 +1,6 @@
 """
 Model Cache Manager - CRITICAL for preventing model re-downloads on Railway
-Ensures all-MiniLM-L6-v2 model is cached in persistent volume and verified before loading
+Ensures multi-qa-MiniLM-L6-dot-v1 model is cached in persistent volume and verified before loading
 """
 
 import os
@@ -33,7 +33,7 @@ class ModelManager:
     to prevent re-downloading on every Railway deploy.
     """
     
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, model_name: str = "multi-qa-MiniLM-L6-dot-v1"):
         """Initialize ModelManager
         
         Args:

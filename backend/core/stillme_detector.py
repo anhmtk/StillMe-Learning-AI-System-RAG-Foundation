@@ -219,8 +219,8 @@ def get_foundational_query_variants(query: str) -> List[str]:
     # Add technical variants if query is about embedding/model/database
     if any(keyword in query_lower for keyword in ["embedding", "model", "mô hình", "chromadb", "vector"]):
         variants.extend([
-            "StillMe embedding model all-MiniLM-L6-v2 ChromaDB",
-            "StillMe sentence-transformers all-MiniLM-L6-v2 384 dimensions",
+            "StillMe embedding model multi-qa-MiniLM-L6-dot-v1 ChromaDB",
+            "StillMe sentence-transformers multi-qa-MiniLM-L6-dot-v1 384 dimensions",
             "StillMe vector database ChromaDB embedding model",
             "StillMe RAG embedding model technical architecture",
         ])
@@ -236,7 +236,7 @@ def get_foundational_query_variants(query: str) -> List[str]:
     # Add Vietnamese technical variants
     if any(keyword in query_lower for keyword in ["mô hình", "embedding", "cơ sở dữ liệu"]):
         variants.extend([
-            "StillMe mô hình embedding all-MiniLM-L6-v2 ChromaDB",
+            "StillMe mô hình embedding multi-qa-MiniLM-L6-dot-v1 ChromaDB",
             "StillMe cơ sở dữ liệu vector ChromaDB",
             "StillMe kiến trúc kỹ thuật embedding model",
         ])
