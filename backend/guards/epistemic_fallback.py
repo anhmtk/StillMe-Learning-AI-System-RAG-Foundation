@@ -349,7 +349,10 @@ class EpistemicFallbackGenerator:
             for i, reason in enumerate(analysis.suspicious_reasons, 1):
                 part_b += f"{i}. {reason}\n"
         else:
-            part_b += "1. Không xuất hiện trong các cơ sở dữ liệu học thuật chuẩn (PhilPapers, JSTOR, arXiv, historical archives).\n"
+            part_b += (
+                "1. Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.\n"
+                "2. Cấu trúc tên có vẻ không khớp với các quy ước đặt tên thông thường trong lĩnh vực này.\n"
+            )
         part_b += "\n"
         
         # PART C: Find Most Similar Real Concepts
@@ -366,37 +369,19 @@ class EpistemicFallbackGenerator:
         
         # PART D: Guide User to Verify Sources
         part_d = "**Hướng dẫn kiểm chứng nguồn:**\n\n"
-        if analysis.field_category == "philosophy":
-            part_d += (
-                "Để xác minh, bạn có thể:\n"
-                "- Kiểm tra PhilPapers (philpapers.org) - cơ sở dữ liệu triết học toàn diện nhất\n"
-                "- Tìm trong SEP (plato.stanford.edu) - Stanford Encyclopedia of Philosophy\n"
-                "- Search trên JSTOR hoặc Google Scholar với tên khái niệm chính xác\n"
-                "- Kiểm tra xem có phải là tên gọi khác (alternate naming) của một khái niệm đã biết không\n\n"
-            )
-        elif analysis.field_category == "history":
-            part_d += (
-                "Để xác minh, bạn có thể:\n"
-                "- Kiểm tra historical archives (JSTOR, historical databases)\n"
-                "- Tìm trong các tài liệu chính thức về sự kiện đó (nếu có)\n"
-                "- Search trên Google Scholar với tên sự kiện + năm\n"
-                "- Kiểm tra xem có phải là tên gọi khác hoặc mislabeling không\n\n"
-            )
-        elif analysis.field_category in ["physics", "chemistry"]:
-            part_d += (
-                "Để xác minh, bạn có thể:\n"
-                "- Kiểm tra arXiv (arxiv.org) - repository các bài báo khoa học\n"
-                "- Tìm trong PubMed (nếu liên quan đến y sinh)\n"
-                "- Search trên Google Scholar với tên khái niệm chính xác\n"
-                "- Kiểm tra xem có phải là thuật ngữ mới hoặc chưa được peer-review không\n\n"
-            )
-        else:
-            part_d += (
-                "Để xác minh, bạn có thể:\n"
-                "- Kiểm tra các cơ sở dữ liệu học thuật chuẩn (JSTOR, Google Scholar, arXiv)\n"
-                "- Tìm trong các nguồn chính thức về lĩnh vực này\n"
-                "- Kiểm tra xem có phải là tên gọi khác hoặc mislabeling không\n\n"
-            )
+        part_d += (
+            "Để xác minh, bạn có thể:\n"
+            "- Tìm kiếm trên các công cụ tìm kiếm học thuật công khai (Google Scholar, các thư viện số)\n"
+            "- Kiểm tra các nguồn chính thức về lĩnh vực này (nếu có)\n"
+            "- Kiểm tra xem có phải là tên gọi khác hoặc mislabeling không\n"
+            "- Nếu bạn có nguồn cụ thể (bài báo, sách, link), bạn có thể gửi cho mình\n\n"
+        )
+        part_d += (
+            "**Lưu ý quan trọng:**\n"
+            "Mình chỉ có thể truy cập các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
+            "Việc không tìm thấy trong các nguồn này KHÔNG có nghĩa là khái niệm chắc chắn không tồn tại "
+            "trên đời - chỉ có nghĩa là mình không có đủ căn cứ để mô tả chi tiết về nó mà vẫn trung thực.\n\n"
+        )
         
         part_d += (
             f"Nếu bạn có nguồn cụ thể (bài báo, sách, link) về \"{entity}\", "
@@ -442,7 +427,10 @@ class EpistemicFallbackGenerator:
             for i, reason in enumerate(analysis.suspicious_reasons, 1):
                 part_b += f"{i}. {reason}\n"
         else:
-            part_b += "1. Does not appear in standard academic databases (PhilPapers, JSTOR, arXiv, historical archives).\n"
+            part_b += (
+                "1. Not found in the internal knowledge bases and RAG that StillMe currently uses.\n"
+                "2. The naming structure seems inconsistent with common naming conventions in this field.\n"
+            )
         part_b += "\n"
         
         # PART C: Find Most Similar Real Concepts
@@ -459,42 +447,19 @@ class EpistemicFallbackGenerator:
         
         # PART D: Guide User to Verify Sources
         part_d = "**Source verification guidance:**\n\n"
-        if analysis.field_category == "philosophy":
-            part_d += (
-                "To verify, you can:\n"
-                "- Check PhilPapers (philpapers.org) - the most comprehensive philosophy database\n"
-                "- Search in SEP (plato.stanford.edu) - Stanford Encyclopedia of Philosophy\n"
-                "- Search on JSTOR or Google Scholar with the exact concept name\n"
-                "- Check if it's an alternate naming of a known concept\n\n"
-            )
-        elif analysis.field_category == "history":
-            part_d += (
-                "To verify, you can:\n"
-                "- Check historical archives (JSTOR, historical databases)\n"
-                "- Search in official documents about that event (if available)\n"
-                "- Search on Google Scholar with event name + year\n"
-                "- Check if it's an alternate name or mislabeling\n\n"
-            )
-        elif analysis.field_category in ["physics", "chemistry"]:
-            part_d += (
-                "To verify, you can:\n"
-                "- Check arXiv (arxiv.org) - repository of scientific papers\n"
-                "- Search in PubMed (if related to biomedical sciences)\n"
-                "- Search on Google Scholar with the exact concept name\n"
-                "- Check if it's a new term or not yet peer-reviewed\n\n"
-            )
-        else:
-            part_d += (
-                "To verify, you can:\n"
-                "- Check standard academic databases (JSTOR, Google Scholar, arXiv)\n"
-                "- Search in official sources for this field\n"
-                "- Check if it's an alternate name or mislabeling\n\n"
-            )
-        
         part_d += (
-            f"If you have specific sources (articles, books, links) about \"{entity}\", "
-            f"you can share them with me. I will analyze the content based on those sources – "
-            f"without generating new details myself.\n\n"
+            "To verify, you can:\n"
+            "- Search on publicly available academic search tools (Google Scholar, digital libraries)\n"
+            "- Check official sources for this field (if available)\n"
+            "- Check if it's an alternate name or mislabeling\n"
+            "- If you have specific sources (articles, books, links), you can share them with me\n\n"
+        )
+        part_d += (
+            "**Important note:**\n"
+            "I can only access the internal knowledge bases and RAG that StillMe currently uses. "
+            "Not finding it in these sources does NOT mean the concept definitely doesn't exist "
+            "in the world - it only means I don't have sufficient evidence to describe it in detail "
+            "while remaining honest.\n\n"
         )
         
         # Combine all parts
