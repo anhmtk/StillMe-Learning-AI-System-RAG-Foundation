@@ -76,11 +76,52 @@ class ChromaClient:
         if os.path.exists(persist_directory):
             if os.access(persist_directory, os.W_OK):
                 logger.info(f"✅ ChromaDB directory is writable: {persist_directory}")
+                # Check if directory has existing data
+                try:
+                    files_in_dir = os.listdir(persist_directory)
+                    if files_in_dir:
+                        logger.info(f"📊 ChromaDB directory contains {len(files_in_dir)} items (existing data detected)")
+                        # Log some file names for debugging (first 5)
+                        for item in files_in_dir[:5]:
+                            item_path = os.path.join(persist_directory, item)
+                            if os.path.isfile(item_path):
+                                size = os.path.getsize(item_path)
+                                logger.info(f"   - File: {item} ({size} bytes)")
+                            elif os.path.isdir(item_path):
+                                logger.info(f"   - Directory: {item}")
+                    else:
+                        logger.info(f"📊 ChromaDB directory is empty (new database)")
+                except Exception as list_error:
+                    logger.warning(f"⚠️ Could not list directory contents: {list_error}")
             else:
                 logger.error(f"❌ ChromaDB directory is NOT writable: {persist_directory}")
                 logger.error("💡 This will cause data loss on Railway. Check volume mount permissions.")
         else:
             logger.warning(f"⚠️ ChromaDB directory does not exist yet: {persist_directory}")
+        
+        # CRITICAL: Add comprehensive persistence debugging
+        logger.info(f"🔄 ChromaDB Persistence Debug:")
+        logger.info(f"   - Requested path: {persist_directory}")
+        logger.info(f"   - Absolute path: {os.path.abspath(persist_directory)}")
+        logger.info(f"   - Directory exists: {os.path.exists(persist_directory)}")
+        if os.path.exists(persist_directory):
+            logger.info(f"   - Directory writable: {os.access(persist_directory, os.W_OK)}")
+            try:
+                files = os.listdir(persist_directory)
+                logger.info(f"   - Files in directory: {len(files)} items")
+                if files:
+                    logger.info(f"   - Sample files: {files[:3]}")
+            except Exception as e:
+                logger.warning(f"   - Could not list files: {e}")
+        else:
+            logger.info(f"   - Directory writable: N/A (does not exist)")
+        
+        # Check parent directory
+        parent_dir = os.path.dirname(persist_directory)
+        if parent_dir:
+            logger.info(f"   - Parent directory exists: {os.path.exists(parent_dir)}")
+            if os.path.exists(parent_dir):
+                logger.info(f"   - Parent directory writable: {os.access(parent_dir, os.W_OK)}")
         
         # Check if database exists and needs reset
         if reset_on_error:
@@ -221,6 +262,34 @@ class ChromaClient:
                 )
             
             logger.info("ChromaDB client initialized successfully")
+            
+            # CRITICAL: Verify persistence after initialization
+            # Check if collections exist and have data
+            try:
+                knowledge_count = self.knowledge_collection.count()
+                conversation_count = self.conversation_collection.count()
+                logger.info(f"📊 ChromaDB Collections Status:")
+                logger.info(f"   - stillme_knowledge: {knowledge_count} documents")
+                logger.info(f"   - stillme_conversations: {conversation_count} documents")
+                logger.info(f"   - Total: {knowledge_count + conversation_count} documents")
+                
+                if knowledge_count > 0:
+                    logger.info(f"✅ ChromaDB has existing knowledge data - persistence is working!")
+                else:
+                    logger.info(f"📊 ChromaDB is empty (new database or after reset)")
+                
+                # Verify directory still exists and is writable
+                if os.path.exists(persist_directory):
+                    logger.info(f"✅ Persistence directory still exists: {persist_directory}")
+                    if os.access(persist_directory, os.W_OK):
+                        logger.info(f"✅ Persistence directory is writable")
+                    else:
+                        logger.error(f"❌ Persistence directory is NOT writable - data loss risk!")
+                else:
+                    logger.error(f"❌ Persistence directory does NOT exist - data loss risk!")
+                    
+            except Exception as verify_error:
+                logger.warning(f"⚠️ Could not verify ChromaDB persistence status: {verify_error}")
             
         except Exception as e:
             error_msg = str(e).lower()

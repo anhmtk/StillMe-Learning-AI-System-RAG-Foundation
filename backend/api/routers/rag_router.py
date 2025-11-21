@@ -271,7 +271,16 @@ async def reset_rag_database():
     """
     try:
         chroma_client = get_chroma_client()
-        persist_dir = "data/vector_db"
+        # CRITICAL FIX: Use absolute path for Railway persistence
+        # Match the path used in ChromaClient initialization
+        import os
+        persist_dir = os.getenv("CHROMA_DB_PATH", "/app/data/vector_db")
+        if not os.path.isabs(persist_dir):
+            # Convert relative path to absolute
+            if persist_dir.startswith("data/"):
+                persist_dir = f"/app/{persist_dir}"
+            else:
+                persist_dir = os.path.abspath(persist_dir)
         
         # If chroma_client is None, we need to delete the directory directly
         if not chroma_client:

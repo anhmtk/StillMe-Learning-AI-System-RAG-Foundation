@@ -244,8 +244,8 @@ def _initialize_rag_components():
         else:
             force_reset = os.getenv("FORCE_DB_RESET_ON_STARTUP", "false").lower() == "true"
         
-        # For Dashboard service, always use reset_on_error=True to handle schema mismatches automatically
-        # This is safe because Dashboard is typically a read-only service or can rebuild its database
+        # For Dashboard service, detect but DO NOT reset database in production
+        # CRITICAL: Dashboard should NOT reset database - it should share the same database as backend
         # Detect Dashboard service by multiple methods:
         # 1. Explicit DASHBOARD_MODE env var
         # 2. STREAMLIT_SERVER_PORT env var (Streamlit sets this)
@@ -258,16 +258,33 @@ def _initialize_rag_components():
             "dashboard" in os.getenv("SERVICE_NAME", "").lower()
         )
         
+        # CRITICAL FIX: Dashboard should NOT reset database, especially in production
+        # Dashboard should use the SAME database as backend, not reset it
+        # Only use reset_on_error=True for dashboard if explicitly requested AND not in production
+        dashboard_reset = False
+        if is_dashboard:
+            logger.info("📊 Dashboard service detected")
+            if is_production:
+                logger.info("📊 Production mode: Dashboard will NOT reset database (preserves data)")
+                dashboard_reset = False
+            else:
+                # In development, dashboard can use reset_on_error for schema mismatches
+                dashboard_reset = os.getenv("DASHBOARD_RESET_DB", "false").lower() == "true"
+                if dashboard_reset:
+                    logger.warning("⚠️ DASHBOARD_RESET_DB=true detected - dashboard will reset database (development only)")
+        
         # CRITICAL: Initialize EmbeddingService FIRST so we can pass it to ChromaClient
         # This prevents ChromaDB from using default ONNX model (all-MiniLM-L6-v2)
         embedding_service = EmbeddingService()
         logger.info("✓ Embedding service initialized")
         
-        if force_reset or is_dashboard:
+        # CRITICAL FIX: Only use reset_on_error=True if explicitly requested (force_reset or dashboard_reset)
+        # NEVER reset in production unless explicitly forced (which is disabled above)
+        if force_reset or dashboard_reset:
             if force_reset:
                 logger.warning("🔄 FORCE_DB_RESET_ON_STARTUP=True detected - will reset ChromaDB database")
-            if is_dashboard:
-                logger.info("📊 Dashboard service detected - will use auto-reset for ChromaDB schema mismatches")
+            if dashboard_reset:
+                logger.warning("🔄 Dashboard reset enabled - will reset ChromaDB database")
             chroma_client = ChromaClient(reset_on_error=True, embedding_service=embedding_service)
             logger.info("✓ ChromaDB client initialized (forced reset)")
         else:
