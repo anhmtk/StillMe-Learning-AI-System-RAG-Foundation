@@ -364,7 +364,7 @@ class ModelManager:
         }
 
 
-def verify_model_cache(model_name: str = "all-MiniLM-L6-v2") -> CacheStatus:
+def verify_model_cache(model_name: str = "multi-qa-MiniLM-L6-dot-v1") -> CacheStatus:
     """
     Standalone function to verify model cache.
     

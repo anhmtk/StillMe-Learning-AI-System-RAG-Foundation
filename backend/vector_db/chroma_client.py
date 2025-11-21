@@ -13,13 +13,15 @@ logger = logging.getLogger(__name__)
 class ChromaClient:
     """ChromaDB client for StillMe vector operations"""
     
-    def __init__(self, persist_directory: str = "data/vector_db", reset_on_error: bool = False):
+    def __init__(self, persist_directory: str = "data/vector_db", reset_on_error: bool = False, embedding_service=None):
         """Initialize ChromaDB client
         
         Args:
             persist_directory: Directory to persist vector database
             reset_on_error: If True, reset database on schema errors
+            embedding_service: Optional EmbeddingService to generate embeddings (prevents ChromaDB from using default ONNX model)
         """
+        self.embedding_service = embedding_service
         import os
         import shutil
         
@@ -392,9 +394,12 @@ class ChromaClient:
         """Add knowledge documents to vector database
         
         This method:
-        1. Generates embeddings for documents (via ChromaDB's automatic embedding)
+        1. Generates embeddings using EmbeddingService (if available) to use multi-qa-MiniLM-L6-dot-v1
         2. Inserts documents with embeddings into ChromaDB collection
         3. Logs progress for monitoring
+        
+        CRITICAL: If embedding_service is provided, we generate embeddings ourselves to avoid ChromaDB
+        using default ONNX model (all-MiniLM-L6-v2). This ensures we use multi-qa-MiniLM-L6-dot-v1.
         
         Args:
             documents: List of text documents
@@ -408,15 +413,28 @@ class ChromaClient:
             import time
             start_time = time.time()
             
-            # ChromaDB automatically generates embeddings when documents are added
-            # We log this step for visibility
-            logger.debug(f"🔧 ChromaDB: Generating embeddings for {len(documents)} document(s)...")
-            
-            self.knowledge_collection.add(
-                documents=documents,
-                metadatas=metadatas,
-                ids=ids
-            )
+            # CRITICAL: Generate embeddings using EmbeddingService if available
+            # This prevents ChromaDB from using default ONNX model (all-MiniLM-L6-v2)
+            if self.embedding_service:
+                logger.debug(f"🔧 Generating embeddings using EmbeddingService (multi-qa-MiniLM-L6-dot-v1) for {len(documents)} document(s)...")
+                embeddings = [self.embedding_service.encode_text(doc) for doc in documents]
+                
+                self.knowledge_collection.add(
+                    embeddings=embeddings,
+                    documents=documents,
+                    metadatas=metadatas,
+                    ids=ids
+                )
+            else:
+                # Fallback: Let ChromaDB generate embeddings (will use default ONNX model)
+                logger.warning("⚠️ EmbeddingService not provided - ChromaDB will use default ONNX model (all-MiniLM-L6-v2)")
+                logger.debug(f"🔧 ChromaDB: Generating embeddings for {len(documents)} document(s)...")
+                
+                self.knowledge_collection.add(
+                    documents=documents,
+                    metadatas=metadatas,
+                    ids=ids
+                )
             
             elapsed = time.time() - start_time
             logger.debug(
@@ -434,6 +452,9 @@ class ChromaClient:
                         ids: List[str]) -> bool:
         """Add conversation context to vector database
         
+        CRITICAL: If embedding_service is provided, we generate embeddings ourselves to avoid ChromaDB
+        using default ONNX model (all-MiniLM-L6-v2). This ensures we use multi-qa-MiniLM-L6-dot-v1.
+        
         Args:
             documents: List of conversation texts
             metadatas: List of metadata for each conversation
@@ -449,11 +470,27 @@ class ChromaClient:
                 cleaned_metadata = {k: v for k, v in metadata.items() if v is not None}
                 cleaned_metadatas.append(cleaned_metadata)
             
-            self.conversation_collection.add(
-                documents=documents,
-                metadatas=cleaned_metadatas,
-                ids=ids
-            )
+            # CRITICAL: Generate embeddings using EmbeddingService if available
+            # This prevents ChromaDB from using default ONNX model (all-MiniLM-L6-v2)
+            if self.embedding_service:
+                logger.debug(f"🔧 Generating embeddings using EmbeddingService (multi-qa-MiniLM-L6-dot-v1) for {len(documents)} conversation(s)...")
+                embeddings = [self.embedding_service.encode_text(doc) for doc in documents]
+                
+                self.conversation_collection.add(
+                    embeddings=embeddings,
+                    documents=documents,
+                    metadatas=cleaned_metadatas,
+                    ids=ids
+                )
+            else:
+                # Fallback: Let ChromaDB generate embeddings (will use default ONNX model)
+                logger.warning("⚠️ EmbeddingService not provided - ChromaDB will use default ONNX model (all-MiniLM-L6-v2)")
+                
+                self.conversation_collection.add(
+                    documents=documents,
+                    metadatas=cleaned_metadatas,
+                    ids=ids
+                )
             logger.info(f"Added {len(documents)} conversation documents")
             return True
         except Exception as e:

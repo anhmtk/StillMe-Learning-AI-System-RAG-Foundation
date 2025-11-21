@@ -258,19 +258,24 @@ def _initialize_rag_components():
             "dashboard" in os.getenv("SERVICE_NAME", "").lower()
         )
         
+        # CRITICAL: Initialize EmbeddingService FIRST so we can pass it to ChromaClient
+        # This prevents ChromaDB from using default ONNX model (all-MiniLM-L6-v2)
+        embedding_service = EmbeddingService()
+        logger.info("✓ Embedding service initialized")
+        
         if force_reset or is_dashboard:
             if force_reset:
                 logger.warning("🔄 FORCE_DB_RESET_ON_STARTUP=True detected - will reset ChromaDB database")
             if is_dashboard:
                 logger.info("📊 Dashboard service detected - will use auto-reset for ChromaDB schema mismatches")
-            chroma_client = ChromaClient(reset_on_error=True)
+            chroma_client = ChromaClient(reset_on_error=True, embedding_service=embedding_service)
             logger.info("✓ ChromaDB client initialized (forced reset)")
         else:
             # Try with reset_on_error=False first (preserve data)
             # If schema error, will try with reset_on_error=True (which deletes directory first)
             chroma_client_ref = None
             try:
-                chroma_client = ChromaClient(reset_on_error=False)
+                chroma_client = ChromaClient(reset_on_error=False, embedding_service=embedding_service)
                 logger.info("✓ ChromaDB client initialized")
             except (RuntimeError, Exception) as e:
                 error_str = str(e).lower()
@@ -302,7 +307,7 @@ def _initialize_rag_components():
                     for attempt in range(1, max_retries + 1):
                         try:
                             logger.info(f"🔄 Reset attempt {attempt}/{max_retries}...")
-                            chroma_client = ChromaClient(reset_on_error=True)
+                            chroma_client = ChromaClient(reset_on_error=True, embedding_service=embedding_service)
                             logger.info("✓ ChromaDB client initialized (after directory reset)")
                             break
                         except Exception as reset_error:
@@ -330,9 +335,7 @@ def _initialize_rag_components():
                 else:
                     raise
         
-        embedding_service = EmbeddingService()
-        logger.info("✓ Embedding service initialized")
-        
+        # EmbeddingService was already initialized above (before ChromaClient)
         rag_retrieval = RAGRetrieval(chroma_client, embedding_service)
         logger.info("✓ RAG retrieval initialized")
         
