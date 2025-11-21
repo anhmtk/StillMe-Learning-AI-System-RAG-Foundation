@@ -636,7 +636,7 @@ def page_overview():
         # Display Learning Statistics Dialog (Task Manager style)
         if st.session_state.get("show_learning_stats", False):
             st.markdown("---")
-            with st.expander("📊 Learning Statistics (Task Manager Style)", expanded=True):
+            with st.expander("📊 Learning Statistics", expanded=True):
                 try:
                     # Get RSS fetch history
                     fetch_history = get_json("/api/learning/rss/fetch-history", {"limit": 200}, timeout=30)
@@ -1535,7 +1535,10 @@ def page_learning():
                             if item.get('status_reason'):
                                 st.write(f"**Reason:** {item.get('status_reason')}")
                             if item.get('vector_id'):
-                                st.write(f"**Vector ID:** {item.get('vector_id')}")
+                                # Note: This is a tracking ID, not the actual ChromaDB vector ID
+                                # The actual ChromaDB ID format is: knowledge_<uuid> (generated during embedding)
+                                st.write(f"**Tracking ID:** `{item.get('vector_id')}`")
+                                st.caption("ℹ️ This is a tracking ID for fetch history. The actual ChromaDB vector ID is generated during embedding.")
                         st.write(f"**Summary:** {item.get('summary', 'N/A')[:200]}...")
     except Exception as e:
         st.error(f"Error fetching data: {e}")
@@ -1691,7 +1694,8 @@ def page_validation():
                         with col1:
                             st.write(f"**Timestamp Added:** {item.get('timestamp_added', 'N/A')}")
                             st.write(f"**Source URL:** [{item.get('source_url', 'N/A')}]({item.get('source_url', '#')})")
-                            st.write(f"**Vector ID:** `{item.get('vector_id', 'N/A')}`")
+                            st.write(f"**Tracking ID:** `{item.get('vector_id', 'N/A')}`")
+                            st.caption("ℹ️ Tracking ID for fetch history. Actual ChromaDB vector ID is generated during embedding.")
                         with col2:
                             st.write(f"**Retention Score:** {item.get('retention_score', 0.0):.2f}")
                             st.write(f"**Access Count:** {item.get('access_count', 0)}")

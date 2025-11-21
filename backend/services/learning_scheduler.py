@@ -201,7 +201,12 @@ class LearningScheduler:
                                         )
                                         
                                         # Track in fetch history
+                                        # Note: vector_id here is a temporary tracking ID, not the actual ChromaDB vector ID
+                                        # The actual ChromaDB ID is generated in add_learning_content() with format: knowledge_<uuid>
                                         if rss_fetch_history and cycle_id:
+                                            # Generate a proper tracking ID (not the actual ChromaDB vector ID)
+                                            import uuid
+                                            tracking_id = f"knowledge_{uuid.uuid4().hex[:8]}"
                                             rss_fetch_history.add_fetch_item(
                                                 cycle_id=cycle_id,
                                                 title=entry.get("title", ""),
@@ -209,7 +214,7 @@ class LearningScheduler:
                                                 link=entry.get("link", ""),
                                                 summary=entry.get("summary", ""),
                                                 status="Added to RAG",
-                                                vector_id=f"knowledge_{entry.get('link', '')[:8]}",
+                                                vector_id=tracking_id,  # Temporary tracking ID, actual ChromaDB ID is different
                                                 added_to_rag_at=datetime.now().isoformat()
                                             )
                                     else:
