@@ -1646,22 +1646,35 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         logger.info(f"Retrieved {len(provenance_results)} provenance documents")
                     else:
                         # Fallback to normal retrieval if provenance not found
+                        # Phase 2: Exclude style_guide from user chat (unless dev/admin mode)
+                        exclude_types = []
+                        if is_philosophical:
+                            exclude_types.append("technical")
+                        # Always exclude style_guide for user chat (prevents style drift from RAG)
+                        exclude_types.append("style_guide")
+                        
                         context = rag_retrieval.retrieve_context(
                             query=chat_request.message,
                             knowledge_limit=chat_request.context_limit,
                             conversation_limit=1,
-                            exclude_content_types=["technical"] if is_philosophical else None,
-                            prioritize_style_guide=is_philosophical,
+                            exclude_content_types=exclude_types if exclude_types else None,
+                            prioritize_style_guide=False,  # Never prioritize style guide for user chat
                             is_philosophical=is_philosophical
                         )
                 except Exception as provenance_error:
                     logger.warning(f"Provenance retrieval failed: {provenance_error}, falling back to normal retrieval")
+                    # Phase 2: Exclude style_guide from user chat
+                    exclude_types = []
+                    if is_philosophical:
+                        exclude_types.append("technical")
+                    exclude_types.append("style_guide")
+                    
                     context = rag_retrieval.retrieve_context(
                         query=chat_request.message,
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=1,
-                        exclude_content_types=["technical"] if is_philosophical else None,
-                        prioritize_style_guide=is_philosophical,
+                        exclude_content_types=exclude_types if exclude_types else None,
+                        prioritize_style_guide=False,  # Never prioritize style guide for user chat
                         is_philosophical=is_philosophical
                     )
             
@@ -1677,7 +1690,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=0,  # Don't need conversation for foundational queries
                         prioritize_foundational=True,
-                        exclude_content_types=["technical"] if is_philosophical else None,
+                        exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
                         prioritize_style_guide=is_philosophical,
                         is_philosophical=is_philosophical
                     )
@@ -1695,7 +1708,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=2,
                         prioritize_foundational=True,
-                        exclude_content_types=["technical"] if is_philosophical else None,
+                        exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
                         prioritize_style_guide=is_philosophical,
                         is_philosophical=is_philosophical
                     )
