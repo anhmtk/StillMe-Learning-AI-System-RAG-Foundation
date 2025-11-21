@@ -796,23 +796,23 @@ async def _handle_validation_with_fallback(
             step_detector = StepDetector()
             
             # Quick check first (performance optimization)
-            logger.info(f"🔍 Checking if response is multi-step (min_steps: {step_min_steps})...")
-            logger.info(f"🔍 Response preview (first 200 chars): {raw_response[:200]}...")
+            logger.debug(f"🔍 Checking if response is multi-step (min_steps: {step_min_steps})...")
+            logger.debug(f"🔍 Response preview (first 200 chars): {raw_response[:200]}...")
             is_multi = step_detector.is_multi_step(raw_response)
-            logger.info(f"🔍 is_multi_step result: {is_multi}")
+            logger.debug(f"🔍 is_multi_step result: {is_multi}")
             
             if is_multi:
                 steps = step_detector.detect_steps(raw_response)
-                logger.info(f"🔍 StepDetector found {len(steps)} steps")
+                logger.debug(f"🔍 StepDetector found {len(steps)} steps")
                 
                 if len(steps) >= step_min_steps:
-                    logger.info(f"🔍 Detected {len(steps)} steps - running step-level validation")
+                    logger.debug(f"🔍 Detected {len(steps)} steps - running step-level validation")
                     processing_steps.append(f"🔍 Step-level validation ({len(steps)} steps)")
                     
                     step_validator = StepValidator(confidence_threshold=step_confidence_threshold)
-                    logger.info(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold}")
+                    logger.debug(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold}")
                     step_results = step_validator.validate_all_steps(steps, ctx_docs, chain, parallel=True)
-                    logger.info(f"🔍 Step validation completed: {len(step_results)} results")
+                    logger.debug(f"🔍 Step validation completed: {len(step_results)} results")
                     
                     low_confidence_steps = [
                         r.step.step_number
@@ -858,7 +858,7 @@ async def _handle_validation_with_fallback(
     # NEW: Self-consistency checks (Phase 1 - SSR)
     consistency_info = None
     enable_consistency_checks = os.getenv("ENABLE_CONSISTENCY_CHECKS", "true").lower() == "true"
-    logger.info(f"🔍 Consistency checks config: enabled={enable_consistency_checks}")
+    logger.debug(f"🔍 Consistency checks config: enabled={enable_consistency_checks}")
     
     if enable_consistency_checks:
         try:
@@ -866,10 +866,10 @@ async def _handle_validation_with_fallback(
             
             checker = ConsistencyChecker()
             claims = checker.extract_claims(raw_response)
-            logger.info(f"🔍 Extracted {len(claims)} claims from response")
+            logger.debug(f"🔍 Extracted {len(claims)} claims from response")
             
             if len(claims) > 1:
-                logger.info(f"🔍 Checking consistency for {len(claims)} claims")
+                logger.debug(f"🔍 Checking consistency for {len(claims)} claims")
                 
                 # Check pairwise consistency
                 consistency_results = checker.check_pairwise_consistency(claims)
@@ -1006,7 +1006,7 @@ The RAG system found context documents, but they are NOT relevant to your questi
 """
     # Inject this instruction into the prompt (we'll need to rebuild prompt or inject into response)
     # For now, log it and let the response handle it
-    logger.info("Low relevance context detected - response should use base knowledge")
+    logger.debug("Low relevance context detected - response should use base knowledge")
     
     # Record metrics
     try:
@@ -1599,9 +1599,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 is_stillme_query, matched_keywords = detect_stillme_query(chat_request.message)
                 is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
                 if is_stillme_query:
-                    logger.info(f"StillMe query detected! Matched keywords: {matched_keywords}")
+                    logger.debug(f"StillMe query detected! Matched keywords: {matched_keywords}")
                 if is_origin_query:
-                    logger.info(f"Origin query detected! Matched keywords: {origin_keywords}")
+                    logger.debug(f"Origin query detected! Matched keywords: {origin_keywords}")
             except ImportError:
                 logger.warning("StillMe detector not available, skipping special retrieval rule")
             except Exception as detector_error:
@@ -1616,7 +1616,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             # CRITICAL: If origin query detected, retrieve provenance knowledge ONLY
             # This ensures provenance is ONLY retrieved when explicitly asked about origin/founder
             if is_origin_query:
-                logger.info("Origin query detected - retrieving provenance knowledge")
+                logger.debug("Origin query detected - retrieving provenance knowledge")
                 try:
                     query_embedding = rag_retrieval.embedding_service.encode_text(chat_request.message)
                     provenance_results = rag_retrieval.chroma_client.search_knowledge(
@@ -3032,7 +3032,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             
             # If not in cache, call LLM
             if not raw_response:
-                logger.info(f"🔍 DEBUG: About to call LLM - raw_response is None, cache_hit={cache_hit}, cache_enabled={cache_enabled}")
+                logger.debug(f"🔍 About to call LLM - raw_response is None, cache_hit={cache_hit}, cache_enabled={cache_enabled}")
                 processing_steps.append(f"🤖 Calling AI model ({provider_name})...")
                 llm_inference_start = time.time()
                 
@@ -3526,7 +3526,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                 if rewrite_result.was_rewritten:
                                     # Re-sanitize rewritten output (in case rewrite introduced issues)
                                     final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
-                                    logger.info(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
+                                    logger.debug(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
                                 else:
                                     # Fallback to sanitized original - rewrite failed
                                     final_response = sanitized_response
@@ -3539,8 +3539,8 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             else:
                                 final_response = sanitized_response
                                 if should_rewrite:
-                                    logger.info(f"⏭️ Skipping rewrite: {rewrite_reason}")
-                                logger.info(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                                    logger.debug(f"⏭️ Skipping rewrite: {rewrite_reason}")
+                                logger.debug(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
                             
                             response = final_response
                             
@@ -4069,7 +4069,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             if rewrite_result.was_rewritten:
                                 # Re-sanitize rewritten output (in case rewrite introduced issues)
                                 final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical_non_rag)
-                                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                                logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
                             else:
                                 # Fallback to sanitized original - rewrite failed
                                 final_response = sanitized_response
@@ -4082,11 +4082,11 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                         else:
                             final_response = sanitized_response
                             if should_rewrite and quality_result:
-                                logger.info(f"⏭️ Skipping rewrite (non-RAG): {rewrite_reason}")
+                                logger.debug(f"⏭️ Skipping rewrite (non-RAG): {rewrite_reason}")
                             if quality_result:
-                                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
+                                logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
                             else:
-                                logger.info(f"✅ Post-processing complete (non-RAG): sanitized → passed (no quality evaluation)")
+                                logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → passed (no quality evaluation)")
                 
                 response = final_response
                 

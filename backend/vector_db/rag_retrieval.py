@@ -58,15 +58,15 @@ class RAGRetrieval:
             if doc_count == 0:
                 # Empty database - use minimal threshold to allow any matches
                 adaptive_threshold = 0.01
-                logger.info(f"📊 Database empty ({doc_count} docs) - using minimal threshold {adaptive_threshold}")
+                logger.debug(f"📊 Database empty ({doc_count} docs) - using minimal threshold {adaptive_threshold}")
             elif doc_count < 10:
                 # Very new database - use very low threshold
                 adaptive_threshold = 0.02
-                logger.info(f"📊 Database very new ({doc_count} docs) - using low threshold {adaptive_threshold}")
+                logger.debug(f"📊 Database very new ({doc_count} docs) - using low threshold {adaptive_threshold}")
             elif doc_count < 50:
                 # Small database - use low threshold
                 adaptive_threshold = 0.05
-                logger.info(f"📊 Database small ({doc_count} docs) - using low threshold {adaptive_threshold}")
+                logger.debug(f"📊 Database small ({doc_count} docs) - using low threshold {adaptive_threshold}")
             elif doc_count < 200:
                 # Medium database - use slightly lower threshold
                 adaptive_threshold = 0.08
@@ -153,7 +153,7 @@ class RAGRetrieval:
             original_threshold = similarity_threshold
             similarity_threshold = self._calculate_adaptive_threshold(similarity_threshold)
             if similarity_threshold != original_threshold:
-                logger.info(f"🔧 Adaptive threshold: {original_threshold:.3f} → {similarity_threshold:.3f} (based on database state)")
+                logger.debug(f"🔧 Adaptive threshold: {original_threshold:.3f} → {similarity_threshold:.3f} (based on database state)")
             
             # Nested Learning: If tier_preference is specified, use tier-based retrieval
             if tier_preference and ENABLE_CONTINUUM_MEMORY:
@@ -430,9 +430,9 @@ class RAGRetrieval:
                             if similarity >= fallback_threshold:
                                 doc["similarity"] = similarity
                                 filtered_knowledge.append(doc)
-                                logger.info(f"✅ Progressive fallback: Added document with similarity {similarity:.3f} (threshold: {fallback_threshold:.3f})")
+                                logger.debug(f"✅ Progressive fallback: Added document with similarity {similarity:.3f} (threshold: {fallback_threshold:.3f})")
                     if filtered_knowledge:
-                        logger.info(f"✅ Progressive fallback succeeded: {len(filtered_knowledge)} documents with threshold {fallback_threshold:.3f}")
+                        logger.debug(f"✅ Progressive fallback succeeded: {len(filtered_knowledge)} documents with threshold {fallback_threshold:.3f}")
                         break  # Stop if we found documents
             
             # Log distance statistics for debugging similarity = 0.0 issues
@@ -457,9 +457,9 @@ class RAGRetrieval:
                     filtered_conversation_count += 1
             
             if filtered_knowledge_count > 0:
-                logger.info(f"📊 Filtered {filtered_knowledge_count} knowledge docs below similarity threshold {similarity_threshold}")
+                logger.debug(f"📊 Filtered {filtered_knowledge_count} knowledge docs below similarity threshold {similarity_threshold}")
             if filtered_conversation_count > 0:
-                logger.info(f"📊 Filtered {filtered_conversation_count} conversation docs below similarity threshold {similarity_threshold}")
+                logger.debug(f"📊 Filtered {filtered_conversation_count} conversation docs below similarity threshold {similarity_threshold}")
             
             # Apply MMR if enabled and we have enough documents
             if use_mmr and len(filtered_knowledge) > knowledge_limit:

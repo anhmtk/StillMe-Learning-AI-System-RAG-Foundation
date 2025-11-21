@@ -221,7 +221,8 @@ async def process_llm_response_with_option_b(
         else:
             processing_steps.append("✅ Hallucination Guard: No issues detected")
         
-        timing_logs["hallucination_guard"] = time.time() - guard_start
+        guard_time = time.time() - guard_start
+        timing_logs["hallucination_guard"] = f"{guard_time:.3f}s"
         
         # Step 6: Rewrite 1 - Honesty & Boundary
         rewrite1_start = time.time()
@@ -245,7 +246,8 @@ async def process_llm_response_with_option_b(
         else:
             processing_steps.append("✅ Rewrite 1: No changes needed")
         
-        timing_logs["rewrite1_honesty"] = time.time() - rewrite1_start
+        rewrite1_time = time.time() - rewrite1_start
+        timing_logs["rewrite1_honesty"] = f"{rewrite1_time:.3f}s"
         
         # Step 7: Rewrite 2 - Philosophical Depth (only if not fallback)
         rewrite2_start = time.time()
@@ -271,8 +273,10 @@ async def process_llm_response_with_option_b(
         else:
             processing_steps.append("⏭️ Rewrite 2: Skipped (already EPD-Fallback)")
         
-        timing_logs["rewrite2_depth"] = time.time() - rewrite2_start
-        timing_logs["total_time"] = time.time() - start_time
+        rewrite2_time = time.time() - rewrite2_start
+        total_time = time.time() - start_time
+        timing_logs["rewrite2_depth"] = f"{rewrite2_time:.3f}s"
+        timing_logs["total_time"] = f"{total_time:.3f}s"
         
         return {
             "response": final_response,
