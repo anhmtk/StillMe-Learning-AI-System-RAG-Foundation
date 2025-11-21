@@ -46,10 +46,11 @@ def add_philosophical_style_guide_rag():
         tags_list = ["foundational:style", "CRITICAL_FOUNDATION", "philosophical", "style_guide", "philosophy", "ethics", "transparency"]
         tags_string = ",".join(tags_list)
         
+        # Phase 2: Tag as style_guide (not knowledge) - will be filtered from user chat
         success = rag_retrieval.add_learning_content(
             content=content,
             source="CRITICAL_FOUNDATION",
-            content_type="knowledge",
+            content_type="style_guide",  # Phase 2: Changed from "knowledge" to "style_guide"
             metadata={
                 "title": "StillMe Philosophical Style Guide v1.0",
                 "foundational": "style",
@@ -57,9 +58,9 @@ def add_philosophical_style_guide_rag():
                 "source": "CRITICAL_FOUNDATION",
                 "tags": tags_string,
                 "importance_score": 1.0,
-                "content_type": "philosophical",
+                "content_type": "style_guide",  # Phase 2: Explicitly tag as style_guide
                 "domain": "style_guide",
-                "description": "CRITICAL: Philosophical style guide for StillMe - MUST be retrieved when answering philosophical questions to ensure deep, flowing, non-technical responses"
+                "description": "CRITICAL: Philosophical style guide for StillMe. NOTE: This is a style guide, not knowledge - filtered from user chat queries. Used internally for formatting/philosophical structure, not returned to users."
             }
         )
         

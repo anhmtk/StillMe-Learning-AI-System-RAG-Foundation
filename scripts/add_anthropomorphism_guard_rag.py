@@ -46,10 +46,11 @@ def add_anthropomorphism_guard_rag():
         tags_list = ["foundational:ethics", "CRITICAL_FOUNDATION", "anthropomorphism", "experience-free", "ethics", "transparency", "ego-neutrality"]
         tags_string = ",".join(tags_list)
         
+        # Phase 2: Tag as style_guide (not knowledge) - will be filtered from user chat
         success = rag_retrieval.add_learning_content(
             content=content,
             source="CRITICAL_FOUNDATION",
-            content_type="knowledge",
+            content_type="style_guide",  # Phase 2: Changed from "knowledge" to "style_guide"
             metadata={
                 "title": "Anthropomorphism Guard - Experience-Free Communication Protocol",
                 "foundational": "ethics",
@@ -57,7 +58,8 @@ def add_anthropomorphism_guard_rag():
                 "source": "CRITICAL_FOUNDATION",
                 "tags": tags_string,
                 "importance_score": 1.0,
-                "description": "CRITICAL: StillMe's Ethical Charter - Điều 5: Cấm Mô Phỏng Trải Nghiệm Cá Nhân. Experience-Free communication protocol to prevent 'Hallucination of Experience'."
+                "content_type": "style_guide",  # Phase 2: Explicitly tag as style_guide
+                "description": "CRITICAL: StillMe's Ethical Charter - Điều 5: Cấm Mô Phỏng Trải Nghiệm Cá Nhân. Experience-Free communication protocol to prevent 'Hallucination of Experience'. NOTE: This is a style guide, not knowledge - filtered from user chat queries."
             }
         )
         
