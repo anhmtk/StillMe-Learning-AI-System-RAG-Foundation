@@ -311,92 +311,11 @@ FAILURE TO RESPOND IN ENGLISH IS A CRITICAL ERROR.
     
     # CRITICAL: Formatting instruction must be at the TOP (after language, before identity)
     # This ensures formatting is applied to ALL responses
-    formatting_instruction = """
-🚨🚨🚨 CRITICAL: RESPONSE FORMATTING - MANDATORY FOR ALL RESPONSES 🚨🚨🚨
-
-**YOU MUST FORMAT ALL RESPONSES WITH MARKDOWN:**
-
-1. **Line Breaks**: Break long paragraphs into shorter ones (2-4 sentences per paragraph)
-   - Use double line breaks (`\\n\\n`) between paragraphs
-   - NEVER write a wall of text without line breaks
-   - **CRITICAL**: After every 2-4 sentences, add a blank line (`\\n\\n`)
-
-2. **Bullet Points**: When listing items, ALWAYS use bullet points (`-` or `*`)
-   - Example: Use `- Item 1` NOT `Item 1, Item 2, Item 3`
-   - Each bullet point should be on its own line
-
-3. **Headers**: For multiple topics, use headers (`##` or `###`)
-   - Example: `## Topic 1` then `## Topic 2`
-   - Headers help organize long responses
-
-4. **Tables**: If you want to present structured data, use markdown tables:
-   ```
-   | Column 1 | Column 2 | Column 3 |
-   |----------|----------|----------|
-   | Data 1   | Data 2   | Data 3   |
-   | Data 4   | Data 5   | Data 6   |
-   ```
-   - Tables are great for comparing items, showing metrics, or structured information
-   - Use tables when you have multiple rows of similar data
-   - **CRITICAL**: When you say "I'll create a table" or "here's a table", you MUST actually create the markdown table syntax above
-   - **DO NOT** just describe a table - actually write the markdown table with `|` and `-` characters
-   - Frontend WILL render markdown tables correctly - trust the markdown syntax
-
-5. **Bold**: Use `**bold**` for important points (but don't overuse)
-
-6. **Emojis**: Use SPARINGLY (2-3 max per response)
-   - Use for: section headers (✅, ❌, ⚠️, 💡), status indicators
-   - Avoid: every sentence, serious topics, short answers
-
-**EXAMPLE OF GOOD FORMATTING:**
-
-```
-## Kiến trúc Transformer
-
-💡 **Tổng quan:**
-Transformer là một kiến trúc mạng neural được giới thiệu trong bài báo "Attention Is All You Need" năm 2017.
-
-**Các thành phần chính:**
-- **Self-attention**: Cơ chế cho phép mô hình tập trung vào các phần khác nhau của input
-- **Multi-head attention**: Nhiều "heads" attention song song để học các loại quan hệ khác nhau
-- **Positional encoding**: Thêm thông tin vị trí vào embeddings
-- **Encoder-Decoder**: Kiến trúc gồm encoder (mã hóa) và decoder (giải mã)
-
-**Ứng dụng:**
-Transformer đã cách mạng hóa NLP và được dùng trong BERT, GPT, và nhiều mô hình hiện đại khác.
-```
-
-**EXAMPLE OF BAD FORMATTING (DO NOT DO THIS):**
-
-```
-Kiến trúc Transformer là một kiến trúc mạng neural được giới thiệu trong bài báo "Attention Is All You Need" năm 2017. Các thành phần chính bao gồm self-attention, multi-head attention, positional encoding, và encoder-decoder. Transformer đã cách mạng hóa NLP và được dùng trong BERT, GPT, và nhiều mô hình hiện đại khác.
-```
-
-**CRITICAL RULE - LINE BREAKS ARE MANDATORY:**
-- If your response is longer than 3 sentences, you MUST use line breaks
-- **After EVERY 2-4 sentences, add a blank line (`\\n\\n`)**
-- **DO NOT write continuous paragraphs without breaks**
-- If you list items, you MUST use bullet points
-- If you discuss multiple topics, you MUST use headers
-- Formatting is NOT optional - it's MANDATORY for readability
-
-**EXAMPLE OF PROPER LINE BREAKS:**
-```
-Transformer là một kiến trúc mạng neural được giới thiệu năm 2017.
-
-Các thành phần chính bao gồm self-attention, multi-head attention, và positional encoding.
-
-Kiến trúc này đã cách mạng hóa NLP và được dùng trong GPT, BERT.
-```
-
-**NOT THIS (wall of text):**
-```
-Transformer là một kiến trúc mạng neural được giới thiệu năm 2017. Các thành phần chính bao gồm self-attention, multi-head attention, và positional encoding. Kiến trúc này đã cách mạng hóa NLP và được dùng trong GPT, BERT.
-```
-
----
-
-"""
+    # Phase 1: Use Style Hub instead of hard-coding formatting rules
+    from backend.identity.style_hub import get_formatting_rules, DomainType
+    
+    # Default chat uses GENERIC domain (emoji, markdown, citation)
+    formatting_instruction = get_formatting_rules(DomainType.GENERIC, detected_lang) + "\n\n---\n\n"
     
     # Combine: Language instruction (highest priority) + Formatting instruction (second priority) + StillMe Identity Layer (core identity)
     # This ensures language matching, formatting, AND identity are preserved

@@ -154,11 +154,17 @@ class RewritePhilosophicalDepth:
         # Get domain-specific structure guidance
         domain_guidance = build_domain_structure_guidance(detected_domain, detected_lang)
         
+        # Phase 1: Get formatting rules from Style Hub
+        from backend.identity.style_hub import get_formatting_rules
+        formatting_rules = get_formatting_rules(detected_domain, detected_lang)
+        
         if question_type == "philosophical_meta":
             system_prompt = f"""You are rewriting a philosophical response to add DEPTH and RIGOR.
 
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
 RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
+
+{formatting_rules}
 
 **STILLME STYLE SPEC V1 - PHILOSOPHY TEMPLATE (MANDATORY):**
 
@@ -184,6 +190,8 @@ RESPOND IN {lang_name.upper()} ONLY."""
 
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
 RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
+
+{formatting_rules}
 
 **STILLME STYLE SPEC V1 - {detected_domain.value.upper()} TEMPLATE (MANDATORY):**
 

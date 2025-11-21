@@ -220,6 +220,13 @@ class RewriteLLM:
     
     def _build_system_prompt(self, is_philosophical: bool, detected_lang: str) -> str:
         """Build minimal system prompt for rewrite"""
+        # Phase 1: Use Style Hub instead of hard-coding rules
+        from backend.identity.style_hub import (
+            get_formatting_rules,
+            get_meta_llm_rules,
+            DomainType
+        )
+        
         # Get full language name for better clarity
         language_names = {
             'vi': 'Vietnamese (Tiếng Việt)',
@@ -239,6 +246,11 @@ class RewriteLLM:
         }
         lang_name = language_names.get(detected_lang, detected_lang.upper())
         
+        # Get formatting rules from Style Hub
+        domain = DomainType.PHILOSOPHY if is_philosophical else DomainType.GENERIC
+        formatting_rules = get_formatting_rules(domain, detected_lang)
+        meta_llm_rules = get_meta_llm_rules(detected_lang)
+        
         if is_philosophical:
             return f"""You are rewriting a philosophical response to improve quality.
 
@@ -251,11 +263,7 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT T
 UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.upper()}.
 ⚠️ REMINDER: RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
-🚨🚨🚨 CRITICAL RULE A: KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ 🚨🚨🚨
-- If the question does NOT mention: AI, consciousness of AI, StillMe's abilities, LLM, language model
-- Then you MUST NOT talk about: consciousness of LLM, "tôi chỉ hiểu qua văn bản", "tôi được train thế nào", IIT, GWT, embedding, pattern matching, "bản thân tôi là mô hình"
-- If you drift to these topics when not asked, REWRITE to remove drift and focus on the actual question.
-- Meta-cognitive reflection should be about HUMAN subjects in philosophy, NOT about the LLM itself.
+{meta_llm_rules}
 
 🚨🚨🚨 TASK 3: CẤU TRÚC TRẢ LỜI TRIẾT HỌC (MANDATORY - 5 PHẦN) 🚨🚨🚨
 **MANDATORY: The rewritten response MUST follow this 5-part structure:**
@@ -285,14 +293,12 @@ UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.u
 
 **CRITICAL: If the original response is missing any part, ADD IT. All 5 parts are MANDATORY.**
 
+{formatting_rules}
+
 CRITICAL RULES:
-- Write in continuous prose paragraphs. NO emojis, NO markdown headings, NO bullets.
 - Preserve ALL factual content from the original.
 - Improve depth, structure, and philosophical rigor.
 - Ensure all 5 parts are present (Anchor → Unpack → Explore → Edge → Return).
-- Remove any topic drift (AI/LLM/consciousness when not asked).
-- Remove meta-statements about "tôi chỉ hiểu qua văn bản" or "tôi được train thế nào" unless the question is about AI.
-- Meta-cognitive reflection should be about HUMAN subjects, NOT the LLM.
 - RESPOND IN {lang_name.upper()} ONLY."""
         else:
             return f"""You are rewriting a response to improve quality.
@@ -305,6 +311,8 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
 IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()} BEFORE RETURNING.
 UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.upper()}.
 ⚠️ REMINDER: RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
+
+{formatting_rules}
 
 CRITICAL RULES:
 - Preserve ALL factual content from the original.
@@ -345,6 +353,10 @@ CRITICAL RULES:
         truncated_text = text[:600] + "..." if len(text) > 600 else text
         truncated_question = original_question[:100] + "..." if len(original_question) > 100 else original_question
         
+        # Phase 1: Use Style Hub for meta-LLM rules
+        from backend.identity.style_hub import get_meta_llm_rules
+        meta_llm_rules = get_meta_llm_rules(detected_lang)
+        
         if is_philosophical:
             prompt = f"""Rewrite this philosophical response to fix: {issues_text}
 
@@ -361,9 +373,7 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
 IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()}.
 ⚠️ RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
-🚨🚨🚨 CRITICAL RULE A: KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ 🚨🚨🚨
-- Check: Does the question mention AI/consciousness/StillMe's abilities? If NO, then the response MUST NOT talk about consciousness/LLM/IIT/GWT.
-- If drift detected, REMOVE it and focus on the actual question topic.
+{meta_llm_rules}
 
 🚨🚨🚨 CRITICAL RULE C: MỌI CÂU TRẢ LỜI TRIẾT HỌC PHẢI ĐẠT 3 TẦNG PHÂN TÍCH 🚨🚨🚨
 **MANDATORY: The rewritten response MUST include all 3 tiers:**
