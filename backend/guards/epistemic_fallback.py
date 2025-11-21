@@ -608,9 +608,14 @@ class EpistemicFallbackGenerator:
         self,
         question: str,
         entity: str,
-        analysis: ConceptAnalysis
+        analysis: ConceptAnalysis,
+        detected_domain = None
     ) -> str:
-        """Generate softer fallback for unknown entities (English)"""
+        """
+        Generate softer fallback for unknown entities (English)
+        
+        INTEGRATED: Uses detected_domain from Style Engine for domain-aware templates.
+        """
         part_a = (
             f"I cannot find \"{entity}\" in the internal knowledge bases and RAG that StillMe currently uses. "
             f"This does NOT mean it definitely doesn't exist – it only means I don't have sufficient evidence "
