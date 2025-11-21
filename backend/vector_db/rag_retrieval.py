@@ -824,14 +824,17 @@ class RAGRetrieval:
             embedding_start = time.time()
             
             # Add to appropriate collection (ChromaDB handles embedding generation internally)
-            if content_type == "knowledge":
-                success = self.chroma_client.add_knowledge(
+            # Knowledge collection: knowledge, style_guide, technical, philosophical (all non-conversation content)
+            # Conversation collection: conversation, chat history
+            if content_type == "conversation":
+                success = self.chroma_client.add_conversation(
                     documents=[content],
                     metadatas=[doc_metadata],
                     ids=[doc_id]
                 )
             else:
-                success = self.chroma_client.add_conversation(
+                # All other content types (knowledge, style_guide, technical, philosophical) go to knowledge collection
+                success = self.chroma_client.add_knowledge(
                     documents=[content],
                     metadatas=[doc_metadata],
                     ids=[doc_id]
