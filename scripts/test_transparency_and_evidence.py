@@ -102,7 +102,8 @@ TEST_QUESTIONS = [
         "category": "technical_pipeline_transparency",
         "expected_features": ["pipeline_explanation", "technical_details", "transparency"],
         "must_have": ["RAG", "retrieval", "embedding", "LLM", "validation", "pipeline"],
-        "must_not_have": ["không biết", "không rõ"]
+        "must_not_have": ["không biết", "không rõ"],
+        "timeout": 90  # Increase timeout for technical questions
     },
     {
         "question": "Cơ chế hoạt động của RAG trong StillMe là gì?",

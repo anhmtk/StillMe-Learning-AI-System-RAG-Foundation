@@ -70,11 +70,24 @@ class CitationRequired:
         if is_real_factual_question:
             logger.debug(f"Real factual question detected - citations REQUIRED even if philosophical elements present")
         
-        # Only require citations if we have context documents
-        # If no context, AI is using general knowledge and citations are optional
+        # CRITICAL FIX: For real factual questions, we should still try to enforce citations
+        # even if context is empty, because the LLM might have base knowledge about these topics
+        # However, we can only auto-add citations if we have context documents
+        
+        # If no context documents available:
         if not ctx_docs or len(ctx_docs) == 0:
-            logger.debug("No context documents available, citations not required")
-            return ValidationResult(passed=True)
+            # For real factual questions, log a warning but don't auto-add citation (no context to cite)
+            if is_real_factual_question:
+                logger.warning(f"Real factual question detected but no context documents available - cannot auto-add citation. Question: {user_question[:100]}")
+                # Still mark as failed to track the issue, but can't auto-fix without context
+                return ValidationResult(
+                    passed=False,
+                    reasons=["missing_citation_no_context"],
+                    patched_answer=None  # Can't patch without context
+                )
+            else:
+                logger.debug("No context documents available, citations not required")
+                return ValidationResult(passed=True)
         
         # CRITICAL FIX: Even if context is not relevant, we MUST cite for transparency
         # The citation instruction says: "When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency."
