@@ -49,6 +49,26 @@ data/
 *.sqlite3
 chroma_db/
 
+# Vector DB và embeddings
+*.bin
+*.pkl
+*.parquet
+*.npy
+
+# Test results và logs
+tests/results/
+tests/logs/
+
+# Archive folders
+_graveyard/
+_attic/
+
+# Cache và temporary files
+.cache/
+*.cache
+.mypy_cache/
+.pytest_cache/
+
 # Internal documentation (not for public repo)
 docs/PROFESSIONAL_CODE_REVIEW.md
 docs/PROFESSIONAL_CODE_REVIEW_EVIDENCE.md
