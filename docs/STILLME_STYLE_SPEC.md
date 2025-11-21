@@ -307,7 +307,7 @@ Nếu thiếu ≥ 2 mục quan trọng → cho phép rewrite.
 ## VIII. References
 
 - Option B Pipeline: `backend/core/option_b_pipeline.py`
-- PHILO-LITE Prompt: `backend/api/routers/chat_router.py` (PHILOSOPHY_LITE_SYSTEM_PROMPT)
+- PHILO-LITE Prompt: `backend/identity/philosophy_lite.py` (PHILOSOPHY_LITE_SYSTEM_PROMPT) - SINGLE SOURCE OF TRUTH
 - EpistemicFallback: `backend/guards/epistemic_fallback.py`
 - Quality Evaluator: `backend/postprocessing/quality_evaluator.py`
 - Rewrite Engine: `backend/postprocessing/rewrite_llm.py`

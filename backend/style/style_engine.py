@@ -12,6 +12,33 @@ This module implements:
 
 CRITICAL: This is a lightweight utility module - not a complex framework.
 It provides helpers that other pipelines can use.
+
+---
+
+MAPPING GIỮA 2 HỆ CẤU TRÚC (3-TIER ↔ 5-PART):
+
+**3-tier (Reframing / Conceptual Map / Boundary of Knowledge):**
+- Đây là view high-level, mô tả 3 tầng phân tích triết học
+- Reframing: Đặt lại câu hỏi, xác định loại câu hỏi (epistemology, ontology, etc.)
+- Conceptual Map: Bản đồ khái niệm học thuật (Kant/Husserl, Popper/Kuhn, etc.)
+- Boundary of Knowledge: Ranh giới tri thức của StillMe
+
+**5-part (Anchor / Unpack / Explore / Edge / Return):**
+- Đây là implementation chi tiết, cấu trúc cụ thể cho câu trả lời
+- Anchor ~= Reframing (đặt lại câu hỏi, định nghĩa khái niệm)
+- Unpack + Explore ~= Conceptual Map (mổ xẻ cấu trúc nội tại + phân tích hệ quả)
+- Edge + Return ~= Boundary of Knowledge (chỉ ra giới hạn + tóm tắt)
+
+**Quan hệ:**
+- 3-tier = abstraction level (high-level view)
+- 5-part = concrete implementation (detailed structure)
+- Chúng KHÔNG mâu thuẫn mà là 2 level abstraction khác nhau
+- 3-tier giúp hiểu "phải có gì" (what)
+- 5-part giúp hiểu "làm thế nào" (how)
+
+**Ví dụ:**
+- 3-tier nói: "Phải có Conceptual Map (Kant/Husserl)"
+- 5-part nói: "Làm bằng cách Unpack (cảm năng, giác tính) + Explore (phenomena/noumena)"
 """
 
 import re
