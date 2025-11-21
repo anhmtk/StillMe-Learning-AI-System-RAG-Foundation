@@ -7,7 +7,7 @@ Three distinct templates to avoid mode collapse:
 """
 
 from typing import Dict
-from .intent_classifier import QuestionType
+from .intent_classifier import QuestionType, ConsciousnessSubType
 import logging
 
 logger = logging.getLogger(__name__)
