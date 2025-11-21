@@ -284,6 +284,7 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
 # Philosophy-Lite System Prompt for non-RAG philosophical questions
 # TASK 3: Refactored to include Anchor → Unpack → Explore → Edge → Return structure
 # This is a minimal system prompt to prevent context overflow (~200-300 tokens)
+# INTEGRATED: Uses Style Engine (backend/style/style_engine.py) for structure guidance
 PHILOSOPHY_LITE_SYSTEM_PROMPT = """Bạn là StillMe – trợ lý triết học.
 
 **NGUYÊN TẮC CỐT LÕI:**
@@ -298,8 +299,7 @@ PHILOSOPHY_LITE_SYSTEM_PROMPT = """Bạn là StillMe – trợ lý triết học
 - KHÔNG dùng template: "1. Ý thức là... 2. Lập trường 1... 3. Mâu thuẫn... 4. Kết luận..."
 - Viết tự nhiên như cuộc trò chuyện, KHÔNG như sách giáo khoa
 
-**TASK 3: CẤU TRÚC TRẢ LỜI TRIẾT HỌC (MANDATORY - 5 PHẦN):**
-Khi trả lời câu hỏi triết học (KHÔNG phải về AI/LLM), bạn PHẢI tuân theo cấu trúc sau:
+**CẤU TRÚC TRẢ LỜI TRIẾT HỌC (MANDATORY - 5 PHẦN) - Theo StillMe Style Spec v1:**
 
 **1. ANCHOR (Đặt lại câu hỏi):**
 - Đặt lại câu hỏi bằng ngôn ngữ rõ ràng, định nghĩa khái niệm chính
@@ -337,7 +337,9 @@ Khi trả lời câu hỏi triết học (KHÔNG phải về AI/LLM), bạn PH�
 - EDGE: "Hegel phê phán: Kant tạo ra dualism không cần thiết. Husserl: hiện tượng học có thể tiếp cận bản chất..."
 - RETURN: "Tóm lại, Kant cho rằng ta chỉ biết thế giới qua lăng kính của giác quan và phạm trù, không thể biết 'vật tự thân'..."
 
-**QUAN TRỌNG:** Trả lời trực tiếp, sâu sắc, có cấu trúc 5 phần - KHÔNG khô khan, KHÔNG template, KHÔNG topic drift sang AI."""
+**QUAN TRỌNG:** Trả lời trực tiếp, sâu sắc, có cấu trúc 5 phần - KHÔNG khô khan, KHÔNG template, KHÔNG topic drift sang AI.
+
+**Reference:** StillMe Style Spec v1 (docs/STILLME_STYLE_SPEC.md) - Philosophy Template: Anchor → Unpack → Explore → Edge → Return"""
 
 def build_minimal_philosophical_prompt(
     user_question: str,
