@@ -52,6 +52,10 @@ class CitationRequired:
             logger.debug("No context documents available, citations not required")
             return ValidationResult(passed=True)
         
+        # CRITICAL FIX: Even if context is not relevant, we MUST cite for transparency
+        # The citation instruction says: "When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency."
+        # So we should ALWAYS require citation when context is available, regardless of relevance
+        
         has_citation = bool(CITE_RE.search(answer))
         
         if has_citation:

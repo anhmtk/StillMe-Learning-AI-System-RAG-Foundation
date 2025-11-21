@@ -1780,11 +1780,13 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     keyword in question_lower 
                     for keyword in [
                         "rag", "retrieval-augmented", "chromadb", "vector database",
-                        "deepseek", "openai", "llm api", "black box", "blackbox",
+                        "deepseek", "deepseek api", "openai", "llm api", "black box", "blackbox",
+                        "black box system", "black box model", "black box ai",
                         "embedding", "multi-qa-minilm", "sentence-transformers",
                         "pipeline", "validation", "hallucination", "transparency",
                         "kiến trúc", "hệ thống", "cơ chế", "quy trình",
-                        "cơ chế hoạt động", "cách hoạt động", "how does", "how it works"
+                        "cơ chế hoạt động", "cách hoạt động", "how does", "how it works",
+                        "tại sao bạn sử dụng", "why do you use"  # Questions about system choices
                     ]
                 )
                 
@@ -1882,13 +1884,15 @@ You have {num_knowledge} context document(s) available. You MUST cite at least O
 - If user asks for "2-3 sources" but you only have 1 → Acknowledge: "I currently only have 1 source in my knowledge base, not the 2-3 sources you requested. However, based on this single source..."
 
 CRITICAL RULES:
-1. **Cite ONLY RELEVANT context** - This is CRITICAL for citation quality
+1. **MANDATORY CITATION WHEN CONTEXT IS AVAILABLE** - This is CRITICAL for transparency
+   - **ALWAYS cite at least ONE source [1], [2], or [3] when context documents are available**, even if context is not directly relevant
    - If context is relevant to your answer → Cite it: "According to [1], quantum entanglement is..."
-   - If context is NOT relevant to your answer → You can still cite to show transparency, but acknowledge: "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]. However, I want to be transparent about what context I reviewed."
-   - DO NOT cite irrelevant context as if it supports your answer - that's misleading
+   - If context is NOT relevant to your answer → **STILL cite it for transparency**, but acknowledge: "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]. However, I want to be transparent about what context I reviewed. Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
+   - **CRITICAL**: Even if you say "context is not relevant", you MUST still include [1] in your response for transparency
+   - DO NOT cite irrelevant context as if it supports your answer - acknowledge the mismatch
    - Example GOOD: "According to [1], quantum entanglement is..." (context is relevant)
-   - Example GOOD: "The context [1] discusses AI ethics, but your question is about religion, so I'll answer based on general knowledge." (transparent about relevance)
-   - Example BAD: Citing [1] about "technology access" when answering about "religion" without acknowledging the mismatch
+   - Example GOOD: "The context [1] discusses AI ethics, but your question is about religion, so I'll answer based on general knowledge." (transparent about relevance, STILL cites [1])
+   - Example BAD: Answering without [1] when context is available, even if you say "context is not relevant"
    
 2. **Quote vs Paraphrase - CRITICAL DISTINCTION:**
    - If you're CERTAIN it's a direct quote → Use quotation marks: "According to [1]: 'exact quote here'"

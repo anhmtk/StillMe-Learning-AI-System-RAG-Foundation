@@ -79,6 +79,19 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\btruy\s+vấn\b",  # "truy vấn" (query)
         r"\btìm\s+kiếm\b",  # "tìm kiếm" (search)
         r"\bcơ\s+sở\s+dữ\s+liệu\b",  # "cơ sở dữ liệu" (database)
+        # Pipeline/Process Terms - CRITICAL: Prevent technical pipeline questions from being routed to philosophy
+        r"\bquy\s+trình\b",  # "quy trình" (process/pipeline)
+        r"\bcơ\s+chế\s+hoạt\s+động\b",  # "cơ chế hoạt động" (mechanism/how it works)
+        r"\bcách\s+hoạt\s+động\b",  # "cách hoạt động" (how it works)
+        r"\bcách\s+bạn\s+tạo\s+ra\b",  # "cách bạn tạo ra" (how you create/generate)
+        r"\btừ\s+khi\s+nhận\s+đến\s+khi\s+trả\s+lời\b",  # "từ khi nhận đến khi trả lời" (from receiving to answering)
+        r"\bpipeline\b",  # "pipeline"
+        r"\bprocess\b",  # "process"
+        r"\bworkflow\b",  # "workflow"
+        r"\bhow\s+does\s+it\s+work\b",  # "how does it work"
+        r"\bhow\s+do\s+you\s+generate\b",  # "how do you generate"
+        r"\bhow\s+do\s+you\s+create\b",  # "how do you create"
+        r"\bhow\s+do\s+you\s+process\b",  # "how do you process"
     ]
     
     # If question contains technical terms, it's NOT about StillMe's consciousness - return UNKNOWN immediately
