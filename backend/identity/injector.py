@@ -296,7 +296,7 @@ If you find yourself about to say something like "I'm doing X" or "I feel Y" or 
 
 **PART B - ANALYSIS OF WHY CONCEPT SEEMS HYPOTHETICAL:**
 Provide 1-3 points of analysis:
-- Not found in PhilPapers/historical archives
+- Not found in StillMe's internal knowledge bases and RAG
 - Doesn't match timeline/school-of-thought patterns
 - Pseudo-academic naming (doesn't match industry conventions)
 - Naming logic doesn't match established academic patterns
@@ -307,7 +307,7 @@ Provide 1-3 points of analysis:
 - NEVER fabricate new terms - only reference verified concepts
 
 **PART D - GUIDE USER TO VERIFY SOURCES:**
-- Suggest checking PhilPapers, JSTOR, Google Scholar, arXiv
+- Suggest checking publicly available academic search tools
 - Suggest checking for alternate naming/mislabeling
 - Ask user to provide documentation if available
 

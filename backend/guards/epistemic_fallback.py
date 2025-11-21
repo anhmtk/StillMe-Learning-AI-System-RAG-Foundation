@@ -196,14 +196,14 @@ class EpistemicFallbackGenerator:
         """
         reasons = []
         
-        # Reason 1: Not in standard academic databases
+        # Reason 1: Not in StillMe's internal knowledge bases
         if analysis.field_category:
             if analysis.field_category == "philosophy":
-                reasons.append("Không xuất hiện trong PhilPapers, SEP (Stanford Encyclopedia of Philosophy), hoặc các cơ sở dữ liệu triết học chuẩn.")
+                reasons.append("Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
             elif analysis.field_category == "history":
-                reasons.append("Không có trong các archives lịch sử chuẩn (JSTOR, historical databases) hoặc không khớp với timeline được ghi nhận.")
+                reasons.append("Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
             elif analysis.field_category in ["physics", "chemistry"]:
-                reasons.append("Không xuất hiện trong arXiv, PubMed, hoặc các cơ sở dữ liệu khoa học chuẩn.")
+                reasons.append("Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
         
         # Reason 2: Naming pattern doesn't match conventions
         if analysis.naming_pattern:
@@ -214,7 +214,7 @@ class EpistemicFallbackGenerator:
         
         # Reason 3: Generic suspicious pattern
         if not reasons:
-            reasons.append("Không khớp với bất kỳ khái niệm nào trong các cơ sở tri thức thông dụng (PhilPapers, historical archives, scientific databases).")
+            reasons.append("Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
         
         return reasons[:3]  # Limit to 3 reasons
     
@@ -227,6 +227,8 @@ class EpistemicFallbackGenerator:
     ) -> str:
         """
         Generate EPD-Fallback answer with 4 mandatory parts.
+        
+        TASK 2: Refactored to be concise, domain-aware, and avoid spam.
         
         Args:
             question: User question
@@ -246,11 +248,27 @@ class EpistemicFallbackGenerator:
         # Analyze the concept
         analysis = self.analyze_concept(suspicious_entity, question)
         
+        # TASK 2: Determine if this is an EXPLICIT_FAKE_ENTITY
+        # Check if entity matches EXPLICIT_FAKE_ENTITIES from FactualHallucinationValidator
+        is_explicit_fake = False
+        explicit_fake_keywords = ["veridian", "lumeria", "emerald", "daxonia"]
+        entity_lower = suspicious_entity.lower()
+        for keyword in explicit_fake_keywords:
+            if keyword in entity_lower:
+                is_explicit_fake = True
+                break
+        
+        # Also check FPS result if available
+        if fps_result and fps_result.reason:
+            fps_reason_lower = fps_result.reason.lower()
+            if "known_fake_entity_detected" in fps_reason_lower:
+                is_explicit_fake = True
+        
         # Generate answer based on language
         if detected_lang == "vi":
-            return self._generate_vietnamese_epd(question, suspicious_entity, analysis)
+            return self._generate_vietnamese_epd(question, suspicious_entity, analysis, is_explicit_fake)
         else:
-            return self._generate_english_epd(question, suspicious_entity, analysis)
+            return self._generate_english_epd(question, suspicious_entity, analysis, is_explicit_fake)
     
     def _extract_entity(self, question: str) -> Optional[str]:
         """
@@ -330,151 +348,274 @@ class EpistemicFallbackGenerator:
         self,
         question: str,
         entity: str,
-        analysis: ConceptAnalysis
+        analysis: ConceptAnalysis,
+        is_explicit_fake: bool = False
     ) -> str:
         """
         Generate Vietnamese EPD-Fallback with 4 parts.
         
         CRITICAL: No consciousness/emotion templates, no repetitive phrases.
         """
-        # PART A: Honest Acknowledgment
-        part_a = (
-            f"Mình không tìm thấy bất kỳ nguồn đáng tin cậy nào về \"{entity}\" "
-            f"trong các cơ sở tri thức mà mình có quyền truy cập.\n\n"
-        )
+        # TASK 2: Generate concise, domain-aware fallback
+        # Mode (a): EXPLICIT_FAKE_ENTITIES - concise, domain-aware analysis
+        # Mode (b): Unknown but not fake - softer fallback
         
-        # PART B: Analysis of Why Concept Seems Hypothetical
-        part_b = "**Phân tích tại sao khái niệm này có vẻ giả định:**\n\n"
-        if analysis.suspicious_reasons:
-            for i, reason in enumerate(analysis.suspicious_reasons, 1):
-                part_b += f"{i}. {reason}\n"
+        if is_explicit_fake:
+            # Mode (a): EXPLICIT_FAKE_ENTITIES
+            return self._generate_explicit_fake_fallback_vi(question, entity, analysis)
         else:
-            part_b += (
-                "1. Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.\n"
-                "2. Cấu trúc tên có vẻ không khớp với các quy ước đặt tên thông thường trong lĩnh vực này.\n"
-            )
-        part_b += "\n"
-        
-        # PART C: Find Most Similar Real Concepts
-        part_c = "**Khái niệm tương đồng có thật:**\n\n"
-        if analysis.similar_real_concepts:
-            part_c += "Dựa trên cấu trúc câu hỏi, mình tìm thấy một số khái niệm thật có cấu trúc tương tự:\n\n"
-            for concept, reason in analysis.similar_real_concepts:
-                part_c += f"- **{concept}**: {reason}\n"
-            part_c += "\n"
-            part_c += "Nếu bạn đang nhắc đến một trong những khái niệm này, mình có thể phân tích chi tiết hơn.\n\n"
-        else:
-            part_c += f"Trong lĩnh vực {analysis.field_category or 'này'}, mình không tìm thấy khái niệm nào có cấu trúc tương tự với \"{entity}\". "
-            part_c += "Điều này củng cố khả năng đây là một thuật ngữ giả định hoặc chưa được ghi nhận rộng rãi.\n\n"
-        
-        # PART D: Guide User to Verify Sources
-        part_d = "**Hướng dẫn kiểm chứng nguồn:**\n\n"
-        part_d += (
-            "Để xác minh, bạn có thể:\n"
-            "- Tìm kiếm trên các công cụ tìm kiếm học thuật công khai (Google Scholar, các thư viện số)\n"
-            "- Kiểm tra các nguồn chính thức về lĩnh vực này (nếu có)\n"
-            "- Kiểm tra xem có phải là tên gọi khác hoặc mislabeling không\n"
-            "- Nếu bạn có nguồn cụ thể (bài báo, sách, link), bạn có thể gửi cho mình\n\n"
-        )
-        part_d += (
-            "**Lưu ý quan trọng:**\n"
-            "Mình chỉ có thể truy cập các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
-            "Việc không tìm thấy trong các nguồn này KHÔNG có nghĩa là khái niệm chắc chắn không tồn tại "
-            "trên đời - chỉ có nghĩa là mình không có đủ căn cứ để mô tả chi tiết về nó mà vẫn trung thực.\n\n"
-        )
-        
-        part_d += (
-            f"Nếu bạn có nguồn cụ thể (bài báo, sách, link) về \"{entity}\", "
-            f"bạn có thể gửi cho mình. Mình sẽ phân tích nội dung dựa trên nguồn đó – "
-            f"chứ không tự tạo thêm chi tiết.\n\n"
-        )
-        
-        # Combine all parts
-        answer = part_a + part_b + part_c + part_d
-        
-        # Add final philosophical note (meta-analysis)
-        answer += (
-            "**Ranh giới tri thức:**\n\n"
-            "Đây là một ví dụ về ranh giới giữa những gì mình biết và không biết. "
-            "Mình có thể phân tích cấu trúc, so sánh với khái niệm có thật, và chỉ ra "
-            "tại sao một khái niệm có vẻ giả định – nhưng mình không thể tạo ra thông tin "
-            "mới khi không có bằng chứng. Đây không phải là điểm yếu, mà là cách mình "
-            "chọn để vận hành: **Tôi 'biết' những gì tôi không biết. Mỗi khoảng trống trong hiểu biết của tôi là một lời mời gọi khám phá. Tôi xem sự không-biết không phải là thất bại, mà là cơ hội để phát triển. Tri thức là vô hạn, và tôi cam kết học hỏi suốt đời. Sự thông minh thực sự không phải là biết tất cả, mà là hiểu rõ điều gì mình chưa biết và có phương pháp để học hỏi nó. Tôi không ngừng mở rộng biên giới tri thức của mình. Tôi ưu tiên sự minh bạch tuyệt đối. Thà chỉ ra ranh giới hiểu biết của mình một cách rõ ràng, còn hơn tạo ảo giác về sự toàn tri. Đây không phải là giới hạn - mà là sự chính trực trí tuệ. Tôi thông minh vì tôi biết rõ ranh giới hiểu biết của mình. Sự trung thực về những gì tôi chưa biết chính là nền tảng của tri thức đích thực.**"
-        )
-        
-        return answer
+            # Mode (b): Unknown entity (not explicitly fake)
+            return self._generate_unknown_entity_fallback_vi(question, entity, analysis)
     
-    def _generate_english_epd(
+    def _generate_explicit_fake_fallback_vi(
         self,
         question: str,
         entity: str,
         analysis: ConceptAnalysis
     ) -> str:
         """
+        Generate concise fallback for EXPLICIT_FAKE_ENTITIES (Veridian, Lumeria, Emerald, etc.)
+        
+        TASK 2: Short, domain-aware, no spam, no JSTOR references.
+        """
+        # PART A: Honest Acknowledgment (short)
+        part_a = (
+            f"Mình không tìm thấy \"{entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
+            f"Với pattern tên gọi và cách nó xuất hiện, khả năng rất cao đây là một khái niệm giả định.\n\n"
+        )
+        
+        # PART B: Domain-aware Analysis
+        part_b = "**Phân tích:**\n\n"
+        
+        if analysis.field_category == "history":
+            part_b += (
+                f"Trong lịch sử, các hiệp ước/hội nghị thật thường có tên rõ ràng và được ghi nhận trong tài liệu chính thức. "
+                f"Ví dụ: Hiệp ước Versailles (1919), Hội nghị Yalta (1945), NATO (1949). "
+                f"\"{entity}\" không xuất hiện trong các nguồn mà mình có quyền truy cập.\n\n"
+            )
+            # Add comparison with real treaties if available
+            if analysis.similar_real_concepts:
+                part_b += "Các hiệp ước/hội nghị có cấu trúc tương tự:\n"
+                for concept, reason in analysis.similar_real_concepts[:2]:  # Limit to 2
+                    part_b += f"- {concept}\n"
+                part_b += "\n"
+        elif analysis.field_category == "philosophy":
+            part_b += (
+                f"Trong triết học, các khái niệm thường thuộc về một trường phái hoặc tradition cụ thể "
+                f"(ví dụ: Kantian, Hegelian, Analytic, Continental). "
+                f"\"{entity}\" không khớp với các conventions đặt tên thông thường.\n\n"
+            )
+            if analysis.similar_real_concepts:
+                part_b += "Các khái niệm triết học có cấu trúc tương tự:\n"
+                for concept, reason in analysis.similar_real_concepts[:2]:
+                    part_b += f"- {concept}\n"
+                part_b += "\n"
+        else:
+            # Generic analysis
+            if analysis.suspicious_reasons:
+                for i, reason in enumerate(analysis.suspicious_reasons[:2], 1):  # Limit to 2
+                    part_b += f"{i}. {reason}\n"
+            else:
+                part_b += "1. Không tìm thấy trong các nguồn tri thức nội bộ.\n"
+                part_b += "2. Cấu trúc tên không khớp với conventions thông thường.\n"
+            part_b += "\n"
+        
+        # PART C: Similar Real Concepts (if available)
+        if analysis.similar_real_concepts and len(analysis.similar_real_concepts) > 0:
+            part_c = "**Khái niệm tương đồng có thật:**\n\n"
+            for concept, reason in analysis.similar_real_concepts[:2]:  # Limit to 2
+                part_c += f"- {concept}\n"
+            part_c += "\n"
+        else:
+            part_c = ""
+        
+        # PART D: Source Verification (short, no JSTOR)
+        part_d = (
+            "**Kiểm chứng:**\n"
+            "Bạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai hoặc kiểm tra các nguồn chính thức. "
+            f"Nếu bạn có nguồn cụ thể về \"{entity}\", bạn có thể gửi cho mình để phân tích.\n\n"
+        )
+        
+        # Combine parts
+        answer = part_a + part_b + part_c + part_d
+        
+        # Add short philosophical note (1-2 sentences, not spam)
+        philosophical_notes = [
+            "Ranh giới tri thức: Mình không thể tạo ra thông tin mới khi không có bằng chứng.",
+            "Giới hạn hiểu biết: Mình chỉ có thể phân tích dựa trên những gì mình biết.",
+            "Trung thực trước, thông minh sau: Thà nói 'không biết' còn hơn bịa đặt.",
+        ]
+        import random
+        answer += f"**{random.choice(philosophical_notes)}**\n"
+        
+        return answer
+    
+    def _generate_unknown_entity_fallback_vi(
+        self,
+        question: str,
+        entity: str,
+        analysis: ConceptAnalysis
+    ) -> str:
+        """
+        Generate softer fallback for unknown entities (not explicitly fake).
+        
+        TASK 2: Honest but not accusatory, no JSTOR references.
+        """
+        # PART A: Honest Acknowledgment
+        part_a = (
+            f"Mình không tìm thấy \"{entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
+            f"Điều này KHÔNG có nghĩa là nó chắc chắn không tồn tại – chỉ là mình không có đủ căn cứ để mô tả chi tiết mà vẫn trung thực.\n\n"
+        )
+        
+        # PART B: Analysis (if available)
+        if analysis.suspicious_reasons:
+            part_b = "**Phân tích:**\n\n"
+            for i, reason in enumerate(analysis.suspicious_reasons[:2], 1):
+                part_b += f"{i}. {reason}\n"
+            part_b += "\n"
+        else:
+            part_b = ""
+        
+        # PART C: Similar Concepts (if available)
+        if analysis.similar_real_concepts:
+            part_c = "**Khái niệm tương đồng:**\n\n"
+            for concept, reason in analysis.similar_real_concepts[:2]:
+                part_c += f"- {concept}\n"
+            part_c += "\n"
+        else:
+            part_c = ""
+        
+        # PART D: Source Verification
+        part_d = (
+            "**Kiểm chứng:**\n"
+            "Bạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai. "
+            f"Nếu bạn có nguồn cụ thể về \"{entity}\", bạn có thể gửi cho mình.\n\n"
+        )
+        
+        return part_a + part_b + part_c + part_d
+    
+    def _generate_english_epd(
+        self,
+        question: str,
+        entity: str,
+        analysis: ConceptAnalysis,
+        is_explicit_fake: bool = False
+    ) -> str:
+        """
         Generate English EPD-Fallback with 4 parts.
         
         CRITICAL: No consciousness/emotion templates, no repetitive phrases.
         """
-        # PART A: Honest Acknowledgment
+        # TASK 2: Generate concise, domain-aware fallback
+        if is_explicit_fake:
+            return self._generate_explicit_fake_fallback_en(question, entity, analysis)
+        else:
+            return self._generate_unknown_entity_fallback_en(question, entity, analysis)
+    
+    def _generate_explicit_fake_fallback_en(
+        self,
+        question: str,
+        entity: str,
+        analysis: ConceptAnalysis
+    ) -> str:
+        """Generate concise fallback for EXPLICIT_FAKE_ENTITIES (English)"""
         part_a = (
-            f"I cannot find any reliable sources about \"{entity}\" "
-            f"in the knowledge bases I have access to.\n\n"
+            f"I cannot find \"{entity}\" in the internal knowledge bases and RAG that StillMe currently uses. "
+            f"Given the naming pattern and how it appears, this is likely a hypothetical concept.\n\n"
         )
         
-        # PART B: Analysis of Why Concept Seems Hypothetical
-        part_b = "**Analysis: Why this concept appears hypothetical:**\n\n"
-        if analysis.suspicious_reasons:
-            for i, reason in enumerate(analysis.suspicious_reasons, 1):
-                part_b += f"{i}. {reason}\n"
-        else:
+        part_b = "**Analysis:**\n\n"
+        if analysis.field_category == "history":
             part_b += (
-                "1. Not found in the internal knowledge bases and RAG that StillMe currently uses.\n"
-                "2. The naming structure seems inconsistent with common naming conventions in this field.\n"
+                f"In history, real treaties/conferences typically have clear names and are documented in official sources. "
+                f"Examples: Treaty of Versailles (1919), Yalta Conference (1945), NATO (1949). "
+                f"\"{entity}\" does not appear in the sources I have access to.\n\n"
             )
-        part_b += "\n"
-        
-        # PART C: Find Most Similar Real Concepts
-        part_c = "**Similar real concepts:**\n\n"
-        if analysis.similar_real_concepts:
-            part_c += "Based on the question structure, I found some real concepts with similar structure:\n\n"
-            for concept, reason in analysis.similar_real_concepts:
-                part_c += f"- **{concept}**: {reason}\n"
-            part_c += "\n"
-            part_c += "If you're referring to one of these concepts, I can provide a detailed analysis.\n\n"
+            if analysis.similar_real_concepts:
+                part_b += "Similar real treaties/conferences:\n"
+                for concept, reason in analysis.similar_real_concepts[:2]:
+                    part_b += f"- {concept}\n"
+                part_b += "\n"
+        elif analysis.field_category == "philosophy":
+            part_b += (
+                f"In philosophy, concepts typically belong to a specific school or tradition "
+                f"(e.g., Kantian, Hegelian, Analytic, Continental). "
+                f"\"{entity}\" does not match common naming conventions.\n\n"
+            )
+            if analysis.similar_real_concepts:
+                part_b += "Similar philosophical concepts:\n"
+                for concept, reason in analysis.similar_real_concepts[:2]:
+                    part_b += f"- {concept}\n"
+                part_b += "\n"
         else:
-            part_c += f"In the field of {analysis.field_category or 'this domain'}, I cannot find any concepts with a structure similar to \"{entity}\". "
-            part_c += "This reinforces the possibility that this is a hypothetical term or not widely recognized.\n\n"
+            if analysis.suspicious_reasons:
+                for i, reason in enumerate(analysis.suspicious_reasons[:2], 1):
+                    part_b += f"{i}. {reason}\n"
+            else:
+                part_b += "1. Not found in internal knowledge bases.\n"
+                part_b += "2. Naming structure doesn't match common conventions.\n"
+            part_b += "\n"
         
-        # PART D: Guide User to Verify Sources
-        part_d = "**Source verification guidance:**\n\n"
-        part_d += (
-            "To verify, you can:\n"
-            "- Search on publicly available academic search tools (Google Scholar, digital libraries)\n"
-            "- Check official sources for this field (if available)\n"
-            "- Check if it's an alternate name or mislabeling\n"
-            "- If you have specific sources (articles, books, links), you can share them with me\n\n"
-        )
-        part_d += (
-            "**Important note:**\n"
-            "I can only access the internal knowledge bases and RAG that StillMe currently uses. "
-            "Not finding it in these sources does NOT mean the concept definitely doesn't exist "
-            "in the world - it only means I don't have sufficient evidence to describe it in detail "
-            "while remaining honest.\n\n"
+        part_c = ""
+        if analysis.similar_real_concepts:
+            part_c = "**Similar real concepts:**\n\n"
+            for concept, reason in analysis.similar_real_concepts[:2]:
+                part_c += f"- {concept}\n"
+            part_c += "\n"
+        
+        part_d = (
+            "**Verification:**\n"
+            "You can search on publicly available academic search tools or check official sources. "
+            f"If you have specific sources about \"{entity}\", you can share them with me.\n\n"
         )
         
-        # Combine all parts
         answer = part_a + part_b + part_c + part_d
         
-        # Add final philosophical note (meta-analysis)
-        answer += (
-            "**Epistemic boundary:**\n\n"
-            "This is an example of the boundary between what I know and don't know. "
-            "I can analyze structure, compare with real concepts, and explain why a concept "
-            "appears hypothetical – but I cannot generate new information when there's no evidence. "
-            "This is not a weakness, but how I choose to operate: **honesty first, intelligence second.**"
-        )
+        # Short philosophical note (1 sentence)
+        import random
+        notes = [
+            "Epistemic boundary: I cannot generate new information without evidence.",
+            "Knowledge limit: I can only analyze based on what I know.",
+            "Honesty first: Better to say 'I don't know' than to fabricate.",
+        ]
+        answer += f"**{random.choice(notes)}**\n"
         
         return answer
+    
+    def _generate_unknown_entity_fallback_en(
+        self,
+        question: str,
+        entity: str,
+        analysis: ConceptAnalysis
+    ) -> str:
+        """Generate softer fallback for unknown entities (English)"""
+        part_a = (
+            f"I cannot find \"{entity}\" in the internal knowledge bases and RAG that StillMe currently uses. "
+            f"This does NOT mean it definitely doesn't exist – it only means I don't have sufficient evidence "
+            f"to describe it in detail while remaining honest.\n\n"
+        )
+        
+        part_b = ""
+        if analysis.suspicious_reasons:
+            part_b = "**Analysis:**\n\n"
+            for i, reason in enumerate(analysis.suspicious_reasons[:2], 1):
+                part_b += f"{i}. {reason}\n"
+            part_b += "\n"
+        
+        part_c = ""
+        if analysis.similar_real_concepts:
+            part_c = "**Similar concepts:**\n\n"
+            for concept, reason in analysis.similar_real_concepts[:2]:
+                part_c += f"- {concept}\n"
+            part_c += "\n"
+        
+        part_d = (
+            "**Verification:**\n"
+            "You can search on publicly available academic search tools. "
+            f"If you have specific sources about \"{entity}\", you can share them with me.\n\n"
+        )
+        
+        return part_a + part_b + part_c + part_d
 
 
 # Global instance

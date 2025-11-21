@@ -252,40 +252,47 @@ UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.u
 ⚠️ REMINDER: RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 🚨🚨🚨 CRITICAL RULE A: KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ 🚨🚨🚨
-- If the question does NOT mention: AI, consciousness of AI, StillMe's abilities
-- Then you MUST NOT talk about: consciousness, LLM, IIT, GWT, Dennett, embedding, pattern matching
+- If the question does NOT mention: AI, consciousness of AI, StillMe's abilities, LLM, language model
+- Then you MUST NOT talk about: consciousness of LLM, "tôi chỉ hiểu qua văn bản", "tôi được train thế nào", IIT, GWT, embedding, pattern matching, "bản thân tôi là mô hình"
 - If you drift to these topics when not asked, REWRITE to remove drift and focus on the actual question.
+- Meta-cognitive reflection should be about HUMAN subjects in philosophy, NOT about the LLM itself.
 
-🚨🚨🚨 CRITICAL RULE C: MỌI CÂU TRẢ LỜI TRIẾT HỌC PHẢI ĐẠT 3 TẦNG PHÂN TÍCH 🚨🚨🚨
-**MANDATORY: The rewritten response MUST include all 3 tiers:**
+🚨🚨🚨 TASK 3: CẤU TRÚC TRẢ LỜI TRIẾT HỌC (MANDATORY - 5 PHẦN) 🚨🚨🚨
+**MANDATORY: The rewritten response MUST follow this 5-part structure:**
 
-**TIER 1 - REFRAMING (Đặt lại câu hỏi đúng chiều triết học):**
-- Identify question type: epistemology, ontology, linguistics, phenomenology, metaphysics
-- Extract the core problem
-- Reframe the question to reveal its philosophical structure
+**1. ANCHOR (Đặt lại câu hỏi):**
+- Reframe the question clearly, define key concepts
+- Example: "Câu hỏi về sự phân biệt giữa hiện tượng (phenomena) và vật tự thân (noumena) trong triết học Kant..."
 
-**TIER 2 - CONCEPTUAL MAP (Bản đồ khái niệm học thuật):**
-Must include at least 1 of these 5 categories:
-- Kant / Husserl / Sellars / Wittgenstein
-- Popper / Kuhn / Lakatos
-- Nāgārjuna / Trung Quán
-- Putnam / McDowell
-- Dennett / Chalmers / Analytic philosophy
+**2. UNPACK (Mổ xẻ cấu trúc nội tại):**
+- Analyze the internal structure of the concept
+- Example with Kant: cảm năng, giác tính, không-thời-gian tiên nghiệm, phạm trù
+- Explain why this structure leads to the phenomena/noumena distinction
 
-**TIER 3 - BOUNDARY OF KNOWLEDGE (Ranh giới tri thức của StillMe):**
-- What StillMe knows
-- What StillMe doesn't know
-- Why StillMe doesn't know
-- Direction for user to evaluate independently
+**3. EXPLORE (Phân tích hệ quả):**
+- What humans know, don't know, and why
+- Example with Kant: Why do we only know phenomena? Role of noumena as limit?
+- Analyze the possibility of knowing "objective reality"
 
-**CRITICAL: If the original response is missing any tier, ADD IT. All 3 tiers are MANDATORY.**
+**4. EDGE (Chỉ ra giới hạn, tranh luận, phê phán):**
+- Point out limits of the argument
+- Reference critics: Hegel, Husserl, phenomenology, positivism
+- Debates and counterarguments
+
+**5. RETURN (Tóm tắt cho người đọc bình thường):**
+- 1 short paragraph, easy to understand, summarizes key points
+- Not too technical, but still accurate
+
+**CRITICAL: If the original response is missing any part, ADD IT. All 5 parts are MANDATORY.**
 
 CRITICAL RULES:
 - Write in continuous prose paragraphs. NO emojis, NO markdown headings, NO bullets.
 - Preserve ALL factual content from the original.
 - Improve depth, structure, and philosophical rigor.
-- Ensure all 3 tiers are present (Reframing, Conceptual Map, Boundary).
-- Remove any topic drift (consciousness/LLM when not asked).
+- Ensure all 5 parts are present (Anchor → Unpack → Explore → Edge → Return).
+- Remove any topic drift (AI/LLM/consciousness when not asked).
+- Remove meta-statements about "tôi chỉ hiểu qua văn bản" or "tôi được train thế nào" unless the question is about AI.
+- Meta-cognitive reflection should be about HUMAN subjects, NOT the LLM.
 - RESPOND IN {lang_name.upper()} ONLY."""
         else:
             return f"""You are rewriting a response to improve quality.

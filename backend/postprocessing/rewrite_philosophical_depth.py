@@ -183,7 +183,7 @@ YOUR TASK:
 1. Add analysis of WHY the concept/question is important
 2. Compare with similar REAL concepts (if applicable)
 3. Explain methodological approach to verification
-4. Guide user to verify sources (arXiv, JSTOR, Google Scholar, historical archives)
+4. Guide user to verify sources (publicly available academic search tools)
 5. Emphasize boundaries of knowledge
 
 RESPOND IN {lang_name.upper()} ONLY."""
