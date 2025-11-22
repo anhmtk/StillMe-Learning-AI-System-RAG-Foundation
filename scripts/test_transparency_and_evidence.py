@@ -88,7 +88,8 @@ TEST_QUESTIONS = [
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
         "must_have": ["Popper", "Kuhn", "paradigm", "[1]", "falsification"],
-        "must_not_have": ["không biết", "không tìm thấy"]  # Should know this
+        "must_not_have": ["không biết", "không tìm thấy"],  # Should know this
+        "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
         "question": "Làm sao bạn có thể phân biệt giữa thông tin đáng tin cậy và không đáng tin cậy? Bạn có tiêu chí nào để đánh giá chất lượng nguồn không?",

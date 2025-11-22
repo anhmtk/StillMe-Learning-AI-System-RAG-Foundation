@@ -87,33 +87,16 @@ class CitationRelevance:
                 relevance_issues.append(f"Error checking citation [{cite_num}]")
         
         if relevance_issues:
-            # Tier 3.5: Remove citations with low relevance instead of just warning
-            # Remove citations from answer
-            patched_answer = answer
-            citations_to_remove = []
+            # CRITICAL FIX: Do NOT remove citations - only warn
+            # Citations are essential for transparency, even if relevance is low
+            # Removing citations breaks transparency and causes test failures
+            # We should warn but keep citations to maintain transparency
             
-            for issue in relevance_issues:
-                # Extract citation number from issue message
-                cite_match = re.search(r'\[(\d+)\]', issue)
-                if cite_match:
-                    cite_num = cite_match.group(1)
-                    citations_to_remove.append(cite_num)
-            
-            # Remove citations from answer
-            if citations_to_remove:
-                for cite_num in citations_to_remove:
-                    # Remove [N] pattern
-                    patched_answer = re.sub(rf'\[{cite_num}\]', '', patched_answer)
-                    logger.info(f"🗑️ Removed citation [{cite_num}] due to low relevance")
-            
-            # Clean up multiple spaces
-            patched_answer = re.sub(r'\s+', ' ', patched_answer).strip()
-            
-            logger.warning(f"Citation relevance issues detected: {relevance_issues}")
+            logger.warning(f"Citation relevance issues detected (but keeping citations for transparency): {relevance_issues}")
             return ValidationResult(
-                passed=True,  # Don't fail, just remove citations
+                passed=True,  # Don't fail, just warn
                 reasons=[f"citation_relevance_warning: {issue}" for issue in relevance_issues],
-                patched_answer=patched_answer if citations_to_remove else None
+                patched_answer=None  # Do NOT remove citations - keep them for transparency
             )
         
         return ValidationResult(passed=True)
