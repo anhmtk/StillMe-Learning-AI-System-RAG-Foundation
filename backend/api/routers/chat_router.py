@@ -1549,20 +1549,20 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             logger.info(f"🔄 Rewriting philosophical answer (attempt {rewrite_attempts}/{max_rewrite_attempts}): {rewrite_reason or 'forced for variation and depth'}")
                             
                             try:
-                                rewrite_result = await rewrite_llm.rewrite(
-                                    text=philosophical_answer,
-                                    original_question=chat_request.message,
+                        rewrite_result = await rewrite_llm.rewrite(
+                            text=philosophical_answer,
+                            original_question=chat_request.message,
                                     quality_issues=quality_result.get("reasons", []) or ["template-like", "needs_question_adaptation", "needs_more_depth"],
-                                    is_philosophical=True,
-                                    detected_lang=detected_lang
-                                )
-                                
-                                if rewrite_result.was_rewritten:
-                                    philosophical_answer = rewrite_result.text
+                            is_philosophical=True,
+                            detected_lang=detected_lang
+                        )
+                        
+                        if rewrite_result.was_rewritten:
+                            philosophical_answer = rewrite_result.text
                                     rewrite_success = True
                                     processing_steps.append(f"✅ Philosophical answer rewritten for better adaptation and depth (attempt {rewrite_attempts})")
                                     logger.info(f"✅ Rewrite successful on attempt {rewrite_attempts}")
-                                else:
+                        else:
                                     error_msg = rewrite_result.error or 'Unknown error'
                                     logger.warning(f"⚠️ Rewrite attempt {rewrite_attempts} failed: {error_msg}")
                                     if rewrite_attempts < max_rewrite_attempts:
