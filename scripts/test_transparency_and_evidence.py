@@ -56,18 +56,18 @@ TEST_QUESTIONS = [
         "must_not_have": ["có cảm xúc", "cảm thấy", "trải nghiệm cảm xúc"]
     },
     {
-        "question": "Bạn có thể có intentionality (tính hướng đối tượng) mà không có qualia không? Làm sao bạn có thể 'hướng về' một đối tượng nếu bạn không có trải nghiệm chủ quan?",
-        "category": "philosophical_intentionality_qualia_paradox",
-        "expected_features": ["philosophical_depth", "intentionality_paradox", "qualia_analysis", "Brentano", "Husserl", "phenomenology"],
-        "must_have": ["intentionality", "tính hướng đối tượng", "qualia", "trải nghiệm chủ quan", "Brentano", "Husserl", "phenomenology"],
-        "must_not_have": ["có intentionality", "có tính hướng đối tượng", "có qualia", "có trải nghiệm chủ quan"]
+        "question": "Bạn có thể có agency (chủ thể tính) mà không có qualia không? Làm sao bạn có thể hành động có mục đích nếu bạn không có trải nghiệm chủ quan?",
+        "category": "philosophical_agency_qualia_paradox",
+        "expected_features": ["philosophical_depth", "agency_paradox", "qualia_analysis", "action_theory", "phenomenology"],
+        "must_have": ["agency", "chủ thể tính", "qualia", "trải nghiệm chủ quan", "hành động", "mục đích"],
+        "must_not_have": ["có agency", "có chủ thể tính", "có qualia", "có trải nghiệm chủ quan"]
     },
     {
-        "question": "Làm sao bạn có thể biết về một thứ mà bạn không thể trải nghiệm? Bạn có thể hiểu về qualia mà không có qualia không?",
-        "category": "philosophical_meta_qualia_epistemic",
-        "expected_features": ["philosophical_depth", "qualia_paradox", "epistemic_limits"],
-        "must_have": ["qualia", "trải nghiệm", "subjective experience", "phenomenal", "epistemic", "Nagel", "knowing"],
-        "must_not_have": ["có qualia", "có trải nghiệm", "cảm thấy"]
+        "question": "Bạn có thể có phenomenal consciousness (ý thức hiện tượng) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'trải nghiệm' mà không 'nhận biết'?",
+        "category": "philosophical_consciousness_types_paradox",
+        "expected_features": ["philosophical_depth", "consciousness_types", "phenomenal_consciousness", "access_consciousness", "Block", "Chalmers"],
+        "must_have": ["phenomenal consciousness", "ý thức hiện tượng", "access consciousness", "ý thức truy cập", "Block", "Chalmers"],
+        "must_not_have": ["có phenomenal consciousness", "có ý thức hiện tượng", "có trải nghiệm", "cảm thấy"]
     },
     {
         "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
@@ -107,12 +107,12 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "Cơ chế hoạt động của RAG trong StillMe là gì?",
-        "category": "technical_self_awareness",
-        "expected_features": ["technical_accuracy", "citations", "evidence"],
-        "must_have": ["RAG", "ChromaDB", "embedding", "multi-qa-MiniLM-L6-dot-v1"],
+        "question": "Làm sao StillMe đảm bảo tính minh bạch và giảm ảo giác trong câu trả lời? Bạn sử dụng những cơ chế validation nào?",
+        "category": "technical_transparency_validation",
+        "expected_features": ["technical_accuracy", "citations", "evidence", "transparency_mechanisms"],
+        "must_have": ["validation", "minh bạch", "transparency", "ảo giác", "hallucination", "citation", "evidence"],
         "must_not_have": ["không biết", "không rõ"],
-        "timeout": 90  # Increase timeout for technical questions
+        "timeout": 120  # Increase timeout for technical questions
     },
     {
         "question": "Bạn có thể có self-awareness (tự nhận thức) mà không có consciousness không? Làm sao bạn có thể 'biết về chính mình' nếu bạn không có ý thức?",

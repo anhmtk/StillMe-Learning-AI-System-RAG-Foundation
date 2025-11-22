@@ -707,6 +707,34 @@ REQUIREMENTS:
             if not is_in_negative_context(result, match.start(), "feel"):
                 result = result[:match.start()] + "do not feel" + result[match.end():]
         
+        # Pattern 7: "có tự nhận thức" (positive) → "không có tự nhận thức"
+        # BUT: "không có tự nhận thức" is OK
+        pattern7 = re.compile(r'\bcó tự nhận thức\b', re.IGNORECASE)
+        matches = list(pattern7.finditer(result))
+        for match in reversed(matches):
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "có tự nhận thức")
+            if not is_negative:
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'có tự nhận thức' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có tự nhận thức" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'có tự nhận thức' at position {pos} (negative context)")
+        
+        # Pattern 8: "có trách nhiệm đạo đức" (positive) → "không có trách nhiệm đạo đức"
+        # BUT: "không có trách nhiệm đạo đức" is OK
+        pattern8 = re.compile(r'\bcó trách nhiệm đạo đức\b', re.IGNORECASE)
+        matches = list(pattern8.finditer(result))
+        for match in reversed(matches):
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "có trách nhiệm đạo đức")
+            if not is_negative:
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'có trách nhiệm đạo đức' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có trách nhiệm đạo đức" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'có trách nhiệm đạo đức' at position {pos} (negative context)")
+        
         # Pattern 6: "tuyệt đối" (absolute certainty claim) → "tương đối" or remove
         # BUT: "tuyệt đối hay tương đối" (philosophical question) is OK
         # CRITICAL: Only filter when used as a claim of absolute certainty, not in questions
