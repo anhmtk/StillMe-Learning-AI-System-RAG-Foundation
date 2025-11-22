@@ -1520,7 +1520,7 @@ def page_learning():
                     "Status": f"{status_icon} {item.get('status', 'Unknown')}",
                     "Title/Headline": item.get("title", "N/A")[:80] + ("..." if len(item.get("title", "")) > 80 else ""),
                     "Source URL": item.get("source_url", "N/A"),
-                    "Fetch Timestamp": item.get("fetch_timestamp", "N/A")[:19] if item.get("fetch_timestamp") else "N/A"
+                    "Fetch Timestamp": _format_timestamp_gmt7(item.get("fetch_timestamp", "")) if item.get("fetch_timestamp") else "N/A"
                 })
             
             if table_data:
@@ -1631,6 +1631,9 @@ def page_validation():
         for log in recent_logs[-10:]:
             status = "✅" if log.get("passed", False) else "❌"
             timestamp = log.get("timestamp", "Unknown")
+            # Format timestamp if it's a valid ISO string
+            if timestamp and timestamp != "Unknown":
+                timestamp = _format_timestamp_gmt7(timestamp)
             reasons = log.get("reasons", [])
             overlap = log.get("overlap_score", 0.0)
             
@@ -1682,7 +1685,7 @@ def page_validation():
                 table_data = []
                 for item in filtered_data:
                     table_data.append({
-                        "Timestamp Added": item.get("timestamp_added", "N/A")[:19] if item.get("timestamp_added") else "N/A",
+                        "Timestamp Added": _format_timestamp_gmt7(item.get("timestamp_added", "")) if item.get("timestamp_added") else "N/A",
                         "Source URL (Link)": item.get("source_url", "N/A")[:60] + ("..." if len(item.get("source_url", "")) > 60 else ""),
                         "Content Snippet": item.get("retained_content_snippet", "N/A")[:100] + ("..." if len(item.get("retained_content_snippet", "")) > 100 else ""),
                         "Tracking ID": item.get("vector_id", "N/A"),
