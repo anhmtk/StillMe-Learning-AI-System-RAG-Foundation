@@ -3854,6 +3854,18 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         sanitizer = get_style_sanitizer()
                         sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
                         
+                        # CRITICAL: Build ctx_docs for citation preservation in rewrite
+                        # ctx_docs may not be in scope here, so rebuild from context
+                        ctx_docs_for_rewrite = []
+                        if 'context' in locals() and context:
+                            ctx_docs_for_rewrite = [
+                                doc["content"] for doc in context.get("knowledge_docs", [])
+                            ] + [
+                                doc["content"] for doc in context.get("conversation_docs", [])
+                            ]
+                        elif 'ctx_docs' in locals():
+                            ctx_docs_for_rewrite = ctx_docs
+                        
                         # CRITICAL: Check if sanitized response is a technical error or fallback message BEFORE quality evaluation
                         from backend.api.utils.error_detector import is_technical_error, is_fallback_message
                         is_error, error_type = is_technical_error(sanitized_response)
@@ -3918,17 +3930,39 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                 processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
                                 
                                 rewrite_llm = get_rewrite_llm()
+                                # CRITICAL: Pass ctx_docs to rewrite to preserve citations
                                 rewrite_result = await rewrite_llm.rewrite(
                                     text=sanitized_response,
                                     original_question=chat_request.message,
                                     quality_issues=quality_result["reasons"],
                                     is_philosophical=is_philosophical,
-                                    detected_lang=detected_lang
+                                    detected_lang=detected_lang,
+                                    ctx_docs=ctx_docs_for_rewrite
                                 )
                                 
                                 if rewrite_result.was_rewritten:
                                     # Re-sanitize rewritten output (in case rewrite introduced issues)
                                     final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
+                                    
+                                    # CRITICAL: Ensure citations are preserved after rewrite
+                                    # If rewrite removed citations but ctx_docs are available, re-add them
+                                    import re
+                                    cite_pattern = re.compile(r"\[(\d+)\]")
+                                    has_citations_after_rewrite = bool(cite_pattern.search(final_response))
+                                    if not has_citations_after_rewrite and ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0:
+                                        # Re-add citation using CitationRequired validator
+                                        from backend.validators.citation import CitationRequired
+                                        citation_validator = CitationRequired()
+                                        citation_result = citation_validator.run(
+                                            final_response, 
+                                            ctx_docs_for_rewrite, 
+                                            is_philosophical=is_philosophical,
+                                            user_question=chat_request.message
+                                        )
+                                        if citation_result.patched_answer:
+                                            final_response = citation_result.patched_answer
+                                            logger.info("✅ Re-added citations after rewrite")
+                                    
                                     logger.debug(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
                                 else:
                                     # Fallback to sanitized original - rewrite failed
@@ -4460,12 +4494,14 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
                             
                             rewrite_llm = get_rewrite_llm()
+                            # Non-RAG path: no ctx_docs available, pass empty list
                             rewrite_result = await rewrite_llm.rewrite(
                                 text=sanitized_response,
                                 original_question=chat_request.message,
                                 quality_issues=quality_result["reasons"],
                                 is_philosophical=is_philosophical_non_rag,
-                                detected_lang=detected_lang
+                                detected_lang=detected_lang,
+                                ctx_docs=[]  # Non-RAG path has no context documents
                             )
                             
                             if rewrite_result.was_rewritten:

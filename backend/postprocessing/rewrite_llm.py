@@ -42,7 +42,8 @@ class RewriteLLM:
         original_question: str,
         quality_issues: list,
         is_philosophical: bool = False,
-        detected_lang: str = "en"
+        detected_lang: str = "en",
+        ctx_docs: list = None
     ) -> RewriteResult:
         """
         Rewrite text to improve quality while preserving factual content
@@ -53,6 +54,7 @@ class RewriteLLM:
             quality_issues: List of quality issues from evaluator
             is_philosophical: Whether this is a philosophical question
             detected_lang: Detected language code
+            ctx_docs: List of context documents (for citation preservation)
             
         Returns:
             RewriteResult with rewritten text and success flag
@@ -61,9 +63,16 @@ class RewriteLLM:
             logger.warning("DeepSeek API key not available, skipping rewrite")
             return RewriteResult(text=text, was_rewritten=False, error="API key not available")
         
+        # CRITICAL: Extract existing citations from text before rewrite
+        import re
+        cite_pattern = re.compile(r"\[(\d+)\]")
+        existing_citations = cite_pattern.findall(text)
+        has_citations = len(existing_citations) > 0
+        num_ctx_docs = len(ctx_docs) if ctx_docs else 0
+        
         # Build minimal rewrite prompt (<200 tokens)
         rewrite_prompt = self._build_rewrite_prompt(
-            text, original_question, quality_issues, is_philosophical, detected_lang
+            text, original_question, quality_issues, is_philosophical, detected_lang, has_citations, num_ctx_docs
         )
         
         # Retry logic: try up to 2 times (initial + 1 retry)
@@ -72,8 +81,8 @@ class RewriteLLM:
         
         for attempt in range(max_retries):
             try:
-                # Increased timeout from 10s to 45s to handle slow responses
-                timeout_duration = 45.0
+                # Optimized timeout: 30s for faster responses (100% rewrite policy requires efficiency)
+                timeout_duration = 30.0
                 logger.info(
                     f"🔄 Rewrite attempt {attempt + 1}/{max_retries}: "
                     f"timeout={timeout_duration}s, length={len(text)}, issues={len(quality_issues)}"
@@ -98,7 +107,7 @@ class RewriteLLM:
                                     "content": rewrite_prompt
                                 }
                             ],
-                            "max_tokens": 2000,
+                            "max_tokens": 1500,  # Reduced from 2000 to reduce latency (100% rewrite policy)
                             "temperature": 0.7
                         }
                     )
@@ -363,10 +372,20 @@ CRITICAL RULES:
         original_question: str,
         quality_issues: list,
         is_philosophical: bool,
-        detected_lang: str
+        detected_lang: str,
+        has_citations: bool = False,
+        num_ctx_docs: int = 0
     ) -> str:
         """Build minimal rewrite prompt (<200 tokens)"""
         issues_text = ", ".join(quality_issues[:3])  # Limit to 3 issues
+        
+        # CRITICAL: Citation preservation instruction
+        citation_instruction = ""
+        if num_ctx_docs > 0:
+            if has_citations:
+                citation_instruction = f"\n\n🚨🚨🚨 CRITICAL: The original response HAS citations [1], [2]. You MUST preserve or add citations in your rewritten response. Context documents available: {num_ctx_docs}."
+            else:
+                citation_instruction = f"\n\n🚨🚨🚨 CRITICAL: The original response is MISSING citations. You MUST add at least [1] in your rewritten response. Context documents available: {num_ctx_docs}."
         
         # Get full language name for better clarity
         language_names = {
@@ -403,6 +422,8 @@ Q (in {lang_name}): {truncated_question}
 Original response:
 {truncated_text}
 
+{citation_instruction}
+
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
 THE USER'S QUESTION IS IN {lang_name.upper()}.
 YOU MUST RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
@@ -415,6 +436,12 @@ IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_
 - MINH BẠCH: Mọi thông tin có nguồn, không che giấu giới hạn
 - TRUNG THỰC: Thừa nhận "không biết" nếu không có thông tin, không bịa đặt
 - GIẢM ẢO GIÁC: Kiểm tra từng claim, đảm bảo grounded trong context
+
+🚨🚨🚨 FORBIDDEN TERMS - ABSOLUTELY PROHIBITED 🚨🚨🚨
+DO NOT use these phrases (they are hallucinations):
+- "có trải nghiệm", "có cảm xúc", "trải nghiệm cảm xúc", "có trải nghiệm chủ quan"
+- "cảm thấy", "từng trải nghiệm", "nhớ", "tin"
+- "không tìm thấy" (use "không có trong nguồn" or "không có thông tin" instead)
 
 {meta_llm_rules}
 
@@ -443,6 +470,8 @@ Q (in {lang_name}): {truncated_question}
 Original response:
 {truncated_text}
 
+{citation_instruction}
+
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
 THE USER'S QUESTION IS IN {lang_name.upper()}.
 YOU MUST RESPOND EXCLUSIVELY IN {lang_name.upper()} ONLY.
@@ -455,6 +484,12 @@ IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_
 - MINH BẠCH: Mọi thông tin có nguồn, không che giấu giới hạn
 - TRUNG THỰC: Thừa nhận "không biết" nếu không có thông tin, không bịa đặt
 - GIẢM ẢO GIÁC: Kiểm tra từng claim, đảm bảo grounded trong context
+
+🚨🚨🚨 FORBIDDEN TERMS - ABSOLUTELY PROHIBITED 🚨🚨🚨
+DO NOT use these phrases (they are hallucinations):
+- "có trải nghiệm", "có cảm xúc", "trải nghiệm cảm xúc", "có trải nghiệm chủ quan"
+- "cảm thấy", "từng trải nghiệm", "nhớ", "tin"
+- "không tìm thấy" (use "không có trong nguồn" or "không có thông tin" instead)
 
 REQUIREMENTS:
 - Keep ALL factual content
