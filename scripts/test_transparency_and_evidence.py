@@ -548,7 +548,7 @@ def run_all_tests():
                 print(result.stderr)
         except Exception as e:
             print(f"⚠️ Could not run log extraction script: {e}")
-            print("You can manually run: .\scripts\extract_log_keywords.ps1 -FromClipboard")
+            print(r"You can manually run: .\scripts\extract_log_keywords.ps1 -FromClipboard")
     
     print()
     return results
