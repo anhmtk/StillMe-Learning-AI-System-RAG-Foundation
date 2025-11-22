@@ -44,6 +44,7 @@ StillMe's foundational principle: **"I don't build an AI that knows everything. 
 - **Intellectual Humility**: Knowing when we don't know is our core strength
 - **Transparency**: Every decision, every learning source, every limitation is visible
 - **Ethical Boundaries**: We know what NOT to do — we don't simulate emotions, claim consciousness, or replace human agency
+- **Anti-Anthropomorphism**: StillMe explicitly states it is an AI system, not a human. All responses clarify StillMe's nature as a statistical model without subjective experience
 - **Cultural Respect**: Built to serve a global community with diverse cultural and philosophical backgrounds
 - **Scientific Honesty**: We distinguish between aspirational goals and measured results
 
@@ -205,12 +206,27 @@ See `env.example` for full list.
 - ✅ Vector Database (ChromaDB) - Semantic search and knowledge retrieval
 - ✅ RAG (Retrieval-Augmented Generation) - Context-aware responses
 - ✅ Validator Chain - Reduces hallucinations through multiple validation checks
-  - Citation validation
-  - Evidence overlap checking
-  - Confidence scoring (0.0-1.0)
-  - Fallback handling
-  - Language mismatch detection
-  - Ethics validation
+  - Citation validation (CitationRequired, CitationRelevance)
+  - Evidence overlap checking (EvidenceOverlap)
+  - Confidence scoring (0.0-1.0) with uncertainty detection
+  - Language mismatch detection (LanguageValidator)
+  - Ethics validation (EthicsAdapter)
+  - Identity check (IdentityCheckValidator) - Prevents anthropomorphism
+  - Ego neutrality (EgoNeutralityValidator) - Detects "Hallucination of Experience"
+  - Factual hallucination detection (FactualHallucinationValidator)
+  - Step-level validation (StepValidator) - Validates multi-step reasoning
+  - Consistency checking (ConsistencyChecker) - Cross-validates claims
+  - Fallback handling (FallbackHandler)
+- ✅ Post-Processing System - Quality enhancement and variation
+  - Quality evaluator - Rule-based quality assessment (0 token cost)
+  - Rewrite engine - LLM-based answer refinement with retry mechanism
+  - Style sanitizer - Removes anthropomorphic language
+  - Honesty handler - Specialized processing for transparency questions
+- ✅ Philosophical Question Processor - 3-layer system for consciousness/emotion questions
+  - Intent classification (consciousness, emotion, understanding, mixed)
+  - Sub-type detection (paradox, epistemic, meta, definitional, direct)
+  - Varied answer templates (5 guard statements, 4 deep answer variations)
+  - Anti-anthropomorphism enforcement - Explicitly states StillMe is AI system
 
 **Learning Pipeline:**
 - ✅ Multi-Source Learning - RSS, arXiv, CrossRef, Wikipedia
@@ -300,24 +316,34 @@ POST /api/learning/rss/fetch?max_items=5&auto_add=false
 ## 🔧 Architecture
 
 ```
-External Sources → Learning Pipeline → Vector DB → RAG → Validator Chain → Response
+External Sources → Learning Pipeline → Vector DB → RAG → Validator Chain → Post-Processing → Response
 ```
 
 **Components:**
-- **External Sources**: RSS, arXiv, CrossRef, Wikipedia
+- **External Sources**: RSS, arXiv, CrossRef, Wikipedia, Stanford Encyclopedia
 - **Learning Pipeline**: Scheduler → Source Integration → Pre-Filter → Content Curator → Embedding → ChromaDB
 - **RAG System**: ChromaDB (vector search) + LLM (response generation)
-- **Validator Chain**: Citation → Evidence → Confidence → Fallback
+- **Validator Chain**: Multi-layer validation (11 validators) ensuring quality and reducing hallucinations
+- **Post-Processing**: Quality evaluation → Rewrite engine (with retry) → Style sanitization
+- **Philosophical Processor**: Specialized 3-layer system for consciousness/emotion questions
 - **Dashboard**: Streamlit UI for monitoring and interaction
 
 **Data Flow:**
 1. Scheduler triggers learning cycle every 4 hours
 2. Source Integration fetches from enabled sources
-3. Pre-Filter removes low-quality content (saves embedding costs)
+3. Pre-Filter removes low-quality content (saves embedding costs by 30-50%)
 4. Content Curator prioritizes based on knowledge gaps
 5. Embedding Service converts text to vectors (all-MiniLM-L6-v2, 384 dims)
 6. ChromaDB stores vectors for semantic search
-7. User query → RAG retrieval → Validator Chain → Response
+7. User query → Intent detection (philosophical/factual) → RAG retrieval → LLM generation
+8. Response → Validator Chain (11 validators) → Post-processing (quality eval + rewrite) → Final response
+
+**Anti-Anthropomorphism Mechanisms:**
+- **Identity Check Validator**: Detects and prevents anthropomorphic language
+- **Ego Neutrality Validator**: Catches "Hallucination of Experience" (claims of personal experience)
+- **Philosophical Processor**: Explicitly states StillMe is AI system, not human
+- **Style Sanitizer**: Removes emotional language and personal experience claims
+- **Guard Statements**: Every philosophical answer includes clear statement that StillMe is AI
 
 **Detailed Architecture:** See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
