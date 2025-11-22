@@ -146,7 +146,14 @@ class RewriteLLM:
                             # CRITICAL: Post-rewrite filter for forbidden terms
                             # Even though we have FORBIDDEN TERMS in prompt, LLM might still use them
                             # We need to actively filter and replace them
-                            rewritten = self._filter_forbidden_terms(rewritten)
+                            try:
+                                original_length = len(rewritten)
+                                rewritten = self._filter_forbidden_terms(rewritten)
+                                if len(rewritten) != original_length:
+                                    logger.info(f"🔍 Filtered forbidden terms: {original_length} → {len(rewritten)} chars")
+                            except Exception as filter_error:
+                                logger.error(f"❌ Error in forbidden terms filter: {filter_error}", exc_info=True)
+                                # Continue with unfiltered text rather than failing completely
                             
                             logger.info(
                                 f"✅ Successfully rewrote output (attempt {attempt + 1}/{max_retries}): "
