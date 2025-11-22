@@ -1522,10 +1522,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     # Evaluate quality of philosophical answer
                     evaluator = get_quality_evaluator()
                     quality_result = evaluator.evaluate(
-                        response=philosophical_answer,
-                        question=chat_request.message,
+                        text=philosophical_answer,
                         is_philosophical=True,
-                        detected_lang=detected_lang
+                        original_question=chat_request.message
                     )
                     
                     # CRITICAL: Always rewrite philosophical answers to adapt to specific question

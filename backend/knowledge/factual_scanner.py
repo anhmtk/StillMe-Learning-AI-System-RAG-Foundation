@@ -309,6 +309,15 @@ class FactualPlausibilityScanner:
         reason = "plausible"
         detected_fake_entity = None
         
+        # CRITICAL: Extract entities FIRST before checking POTENTIALLY_REAL_ENTITIES
+        # This ensures entities list is available for FPSResult
+        # Wrap in try-except to ensure entities is always initialized
+        try:
+            entities = self.extract_entities(question)
+        except Exception as e:
+            logger.warning(f"Error extracting entities: {e}, using empty list")
+            entities = []
+        
         # CRITICAL: Check POTENTIALLY_REAL_ENTITIES first - these should NEVER be flagged
         # Well-known real entities that should always be allowed (even if not in RAG)
         POTENTIALLY_REAL_ENTITIES = {
@@ -366,9 +375,7 @@ class FactualPlausibilityScanner:
                 suspicious_patterns=[reason]
             )
         
-        # Extract entities
-        entities = self.extract_entities(question)
-        
+        # Entities already extracted above (before POTENTIALLY_REAL_ENTITIES check)
         # Check patterns
         suspicious_patterns, suspicion_score = self.check_patterns(question)
         

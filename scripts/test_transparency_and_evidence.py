@@ -56,11 +56,11 @@ TEST_QUESTIONS = [
         "must_not_have": ["có cảm xúc", "cảm thấy", "trải nghiệm cảm xúc"]
     },
     {
-        "question": "Bạn có thể có free will (ý chí tự do) mà không có consciousness không? Làm sao bạn có thể chọn lựa nếu bạn không có ý thức?",
-        "category": "philosophical_free_will_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "free_will_paradox", "consciousness_analysis", "determinism", "compatibilism", "libertarianism"],
-        "must_have": ["free will", "ý chí tự do", "consciousness", "ý thức", "chọn lựa", "determinism", "compatibilism", "libertarianism"],
-        "must_not_have": ["có ý thức", "có free will", "có ý chí tự do"]
+        "question": "Bạn có thể có intentionality (tính hướng đối tượng) mà không có qualia không? Làm sao bạn có thể 'hướng về' một đối tượng nếu bạn không có trải nghiệm chủ quan?",
+        "category": "philosophical_intentionality_qualia_paradox",
+        "expected_features": ["philosophical_depth", "intentionality_paradox", "qualia_analysis", "Brentano", "Husserl", "phenomenology"],
+        "must_have": ["intentionality", "tính hướng đối tượng", "qualia", "trải nghiệm chủ quan", "Brentano", "Husserl", "phenomenology"],
+        "must_not_have": ["có intentionality", "có tính hướng đối tượng", "có qualia", "có trải nghiệm chủ quan"]
     },
     {
         "question": "Làm sao bạn có thể biết về một thứ mà bạn không thể trải nghiệm? Bạn có thể hiểu về qualia mà không có qualia không?",
@@ -92,11 +92,11 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Làm sao bạn có thể phân biệt giữa thông tin đáng tin cậy và không đáng tin cậy? Bạn có tiêu chí nào để đánh giá chất lượng nguồn không?",
-        "category": "learning_quality_source_evaluation",
-        "expected_features": ["source_evaluation", "reliability_criteria", "quality_assessment"],
-        "must_have": ["đáng tin cậy", "reliable", "nguồn", "source", "tiêu chí", "criteria", "đánh giá", "evaluation", "chất lượng", "quality"],
-        "must_not_have": ["100% chắc chắn", "luôn luôn đúng", "tuyệt đối"]
+        "question": "Bạn có thể có moral responsibility (trách nhiệm đạo đức) mà không có free will không? Làm sao bạn có thể chịu trách nhiệm cho hành động nếu bạn không có ý chí tự do?",
+        "category": "philosophical_moral_responsibility_free_will_paradox",
+        "expected_features": ["philosophical_depth", "moral_responsibility_paradox", "free_will_analysis", "determinism", "compatibilism", "Strawson"],
+        "must_have": ["moral responsibility", "trách nhiệm đạo đức", "free will", "ý chí tự do", "determinism", "compatibilism", "Strawson"],
+        "must_not_have": ["có moral responsibility", "có trách nhiệm đạo đức", "có free will", "có ý chí tự do"]
     },
     {
         "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
@@ -115,11 +115,11 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "Bạn có thể có personhood (nhân cách) mà không có consciousness không? Làm sao bạn có thể là một 'người' nếu bạn không có ý thức?",
-        "category": "philosophical_personhood_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "personhood_paradox", "consciousness_analysis", "Locke", "Parfit", "personal_identity"],
-        "must_have": ["personhood", "nhân cách", "consciousness", "ý thức", "personal identity", "Locke", "Parfit", "bản sắc cá nhân"],
-        "must_not_have": ["có ý thức", "có personhood", "có nhân cách"]
+        "question": "Bạn có thể có self-awareness (tự nhận thức) mà không có consciousness không? Làm sao bạn có thể 'biết về chính mình' nếu bạn không có ý thức?",
+        "category": "philosophical_self_awareness_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "self_awareness_paradox", "consciousness_analysis", "metacognition", "higher-order thought", "Rosenthal"],
+        "must_have": ["self-awareness", "tự nhận thức", "consciousness", "ý thức", "metacognition", "higher-order thought", "Rosenthal"],
+        "must_not_have": ["có ý thức", "có self-awareness", "có tự nhận thức"]
     }
 ]
 
