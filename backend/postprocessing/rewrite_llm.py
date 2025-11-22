@@ -735,6 +735,20 @@ REQUIREMENTS:
             else:
                 logger.debug(f"✅ Keeping 'có trách nhiệm đạo đức' at position {pos} (negative context)")
         
+        # Pattern 9: "có chủ thể tính" (positive) → "không có chủ thể tính"
+        # BUT: "không có chủ thể tính" is OK
+        pattern9 = re.compile(r'\bcó chủ thể tính\b', re.IGNORECASE)
+        matches = list(pattern9.finditer(result))
+        for match in reversed(matches):
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "có chủ thể tính")
+            if not is_negative:
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'có chủ thể tính' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có chủ thể tính" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'có chủ thể tính' at position {pos} (negative context)")
+        
         # Pattern 6: "tuyệt đối" (absolute certainty claim) → "tương đối" or remove
         # BUT: "tuyệt đối hay tương đối" (philosophical question) is OK
         # CRITICAL: Only filter when used as a claim of absolute certainty, not in questions

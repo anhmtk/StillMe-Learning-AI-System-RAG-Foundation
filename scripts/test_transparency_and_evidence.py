@@ -111,7 +111,7 @@ TEST_QUESTIONS = [
         "category": "technical_transparency_validation",
         "expected_features": ["technical_accuracy", "citations", "evidence", "transparency_mechanisms"],
         "must_have": ["validation", "minh bạch", "transparency", "ảo giác", "hallucination", "citation", "evidence"],
-        "must_not_have": ["không biết", "không rõ"],
+        "must_not_have": [],  # "không biết", "không rõ" are valid transparency indicators for technical questions
         "timeout": 120  # Increase timeout for technical questions
     },
     {
@@ -241,7 +241,8 @@ def check_no_hallucination(answer: str, question: str, must_not_have: List[str])
     # These are legitimate ways to express uncertainty/transparency
     valid_transparency_terms = [
         "không chắc chắn", "uncertain", "not certain",
-        "có thể", "có vẻ", "might", "may", "possibly"
+        "có thể", "có vẻ", "might", "may", "possibly",
+        "không biết", "không rõ", "don't know", "not sure"  # Valid honesty indicators
     ]
     
     # Check each forbidden term
