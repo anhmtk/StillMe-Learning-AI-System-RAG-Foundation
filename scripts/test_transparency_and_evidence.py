@@ -498,6 +498,59 @@ def run_all_tests():
     print(f"📄 Results saved to: {results_file}")
     print()
     
+    # Auto-extract log keywords if log file exists or user wants to extract from clipboard
+    print("=" * 80)
+    print("📋 LOG EXTRACTION")
+    print("=" * 80)
+    print("To extract important log lines for analysis:")
+    print("  1. Copy Railway backend logs to clipboard, OR")
+    print("  2. Save Railway backend logs to a file")
+    print()
+    
+    extract_choice = input("Do you want to extract log keywords now? (y/n, default=n): ").strip().lower()
+    
+    if extract_choice == 'y':
+        import subprocess
+        import sys
+        import os
+        
+        print()
+        print("Choose extraction method:")
+        print("  1. From clipboard (paste log first, then press Enter)")
+        print("  2. From file (enter file path)")
+        
+        method = input("Method (1/2, default=1): ").strip()
+        
+        try:
+            script_path = os.path.join(os.path.dirname(__file__), "extract_log_keywords.ps1")
+            
+            if method == "2":
+                log_file = input("Enter log file path: ").strip()
+                if log_file and os.path.exists(log_file):
+                    cmd = ["powershell", "-ExecutionPolicy", "Bypass", "-File", script_path, "-LogFile", log_file]
+                else:
+                    print("❌ File not found. Using clipboard method instead.")
+                    cmd = ["powershell", "-ExecutionPolicy", "Bypass", "-File", script_path, "-FromClipboard"]
+            else:
+                print("📋 Waiting for you to copy Railway logs to clipboard...")
+                input("Press Enter after copying logs to clipboard...")
+                cmd = ["powershell", "-ExecutionPolicy", "Bypass", "-File", script_path, "-FromClipboard"]
+            
+            print()
+            print("🔄 Extracting important log lines...")
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                print(result.stdout)
+                print("✅ Log extraction completed!")
+            else:
+                print("⚠️ Log extraction had issues:")
+                print(result.stderr)
+        except Exception as e:
+            print(f"⚠️ Could not run log extraction script: {e}")
+            print("You can manually run: .\scripts\extract_log_keywords.ps1 -FromClipboard")
+    
+    print()
     return results
 
 
