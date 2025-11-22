@@ -254,6 +254,48 @@ class LearningScheduler:
                 f"Next run: {self.next_run_time}"
             )
             
+            # CRITICAL: Record learning metrics for dashboard/statistics
+            try:
+                from backend.services.learning_metrics_tracker import get_learning_metrics_tracker
+                
+                # Aggregate filter reasons (simplified - can be enhanced)
+                filter_reasons = {
+                    "Low quality/Short content": entries_filtered,
+                    "Duplicate": 0  # Can be enhanced to track actual duplicates
+                }
+                
+                # Aggregate sources (use source_integration if available)
+                sources = {}
+                try:
+                    import backend.api.main as main_module
+                    source_integration = main_module.source_integration
+                    if source_integration:
+                        # Try to get source breakdown from source_integration
+                        sources = {
+                            "rss": len(entries),
+                            "arxiv": 0,  # Can be enhanced to track actual source breakdown
+                            "crossref": 0,
+                            "wikipedia": 0
+                        }
+                    else:
+                        sources = {"rss": len(entries)}
+                except Exception:
+                    sources = {"rss": len(entries)}
+                
+                tracker = get_learning_metrics_tracker()
+                tracker.record_learning_cycle(
+                    cycle_number=self.cycle_count,
+                    entries_fetched=len(entries),
+                    entries_added=entries_added if self.auto_add_to_rag else 0,
+                    entries_filtered=entries_filtered if self.auto_add_to_rag else 0,
+                    filter_reasons=filter_reasons,
+                    sources=sources,
+                    duration_seconds=total_time
+                )
+                logger.info(f"📊 Learning metrics recorded for cycle #{self.cycle_count}")
+            except Exception as metrics_error:
+                logger.warning(f"⚠️ Failed to record learning metrics: {metrics_error}")
+            
             return {
                 "cycle_number": self.cycle_count,
                 "entries_fetched": len(entries),

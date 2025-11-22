@@ -923,6 +923,49 @@ async def startup_event():
     # Start auto-start task in background
     asyncio.create_task(auto_start_scheduler_after_init())
     
+    # CRITICAL: Start scheduler watchdog to auto-restart if it stops
+    async def scheduler_watchdog():
+        """Watchdog task to ensure scheduler stays running"""
+        # Wait for initial RAG initialization
+        await asyncio.sleep(10)  # Give initial startup time
+        
+        while True:
+            try:
+                await asyncio.sleep(300)  # Check every 5 minutes
+                
+                # Check if scheduler should be running
+                auto_start_enabled = os.getenv("AUTO_START_SCHEDULER", "true").lower() == "true"
+                if not auto_start_enabled:
+                    continue
+                
+                # Check if RAG is initialized
+                if not _rag_initialization_complete:
+                    continue
+                
+                # Check if scheduler exists
+                if not learning_scheduler:
+                    continue
+                
+                # Check if scheduler should be running but isn't
+                if not learning_scheduler.is_running:
+                    logger.warning("⚠️ Scheduler watchdog: Scheduler is not running but should be - restarting...")
+                    try:
+                        await learning_scheduler.start()
+                        logger.info("✅ Scheduler watchdog: Successfully restarted scheduler")
+                    except Exception as restart_error:
+                        logger.error(f"❌ Scheduler watchdog: Failed to restart scheduler: {restart_error}")
+                
+            except asyncio.CancelledError:
+                logger.info("Scheduler watchdog cancelled")
+                break
+            except Exception as e:
+                logger.error(f"Error in scheduler watchdog: {e}", exc_info=True)
+                await asyncio.sleep(60)  # Wait before retrying
+    
+    # Start watchdog task
+    asyncio.create_task(scheduler_watchdog())
+    logger.info("✅ Scheduler watchdog started - will auto-restart scheduler if it stops")
+    
     # Log component integration status
     logger.info("🔗 Component Integration Status:")
     logger.info(f"  - RAG System: {'✓ Ready' if rag_retrieval and knowledge_retention else '⏳ Initializing...'}")
