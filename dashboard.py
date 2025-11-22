@@ -53,6 +53,40 @@ def get_api_headers() -> Dict[str, str]:
     return headers
 
 
+def _format_timestamp_gmt7(timestamp_str: str) -> str:
+    """
+    Convert UTC timestamp to GMT+7 format for display
+    
+    Args:
+        timestamp_str: ISO format UTC timestamp string
+        
+    Returns:
+        Formatted timestamp string in GMT+7 (e.g., "Nov 22 2025 08:33:12")
+    """
+    if not timestamp_str:
+        return "N/A"
+    
+    try:
+        from datetime import datetime, timezone, timedelta
+        
+        # Parse UTC timestamp
+        if isinstance(timestamp_str, str):
+            if timestamp_str.endswith('Z'):
+                timestamp_str = timestamp_str[:-1] + '+00:00'
+            dt_utc = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            
+            # Convert UTC to GMT+7 (Vietnam timezone)
+            gmt7 = timezone(timedelta(hours=7))
+            dt_local = dt_utc.astimezone(gmt7)
+            
+            return dt_local.strftime("%b %d %Y %H:%M:%S")
+        else:
+            return str(timestamp_str)
+    except Exception:
+        # Fallback: return first 19 chars if conversion fails
+        return timestamp_str[:19] if isinstance(timestamp_str, str) and len(timestamp_str) > 19 else str(timestamp_str)
+
+
 def display_local_time(utc_time_str: str, label: str = "Next run"):
     """
     Display UTC time converted to user's local timezone.
