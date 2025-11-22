@@ -53,19 +53,22 @@ def process_philosophical_question(
         Complete answer with guard + deep answer
     """
     if not user_question:
-        return get_guard_statement(language)
+        return get_guard_statement(language, question_hash=0)
     
     # Layer 2: Classify intent
     question_type = classify_philosophical_intent(user_question)
     
+    # Calculate question hash for consistent variation selection
+    question_hash = hash(user_question) if user_question else 0
+    
     if question_type == QuestionType.UNKNOWN:
         # Not a philosophical question, return guard only
-        return get_guard_statement(language)
+        return get_guard_statement(language, question_hash=question_hash)
     
     logger.info(f"Philosophical question classified as: {question_type.value}")
     
-    # Layer 1: Guard statement
-    guard = get_guard_statement(language)
+    # Layer 1: Guard statement (with variation based on question hash)
+    guard = get_guard_statement(language, question_hash=question_hash)
     
     # Layer 3: Deep answer based on type
     # For consciousness questions, use sub-type to get variation

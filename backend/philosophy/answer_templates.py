@@ -13,20 +13,44 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_guard_statement(language: str = "vi") -> str:
+def get_guard_statement(language: str = "vi", question_hash: int = 0) -> str:
     """
     Layer 1: Short, clear guard statement (1-2 sentences max)
     
+    Uses variation based on question hash to avoid repetitive responses.
+    
     Args:
         language: Language code ('vi' or 'en')
+        question_hash: Hash of the question to select variation (default: 0 for random)
         
     Returns:
-        Guard statement string
+        Guard statement string (varied)
     """
     if language == "vi":
-        return "StillMe không có ý thức, cảm xúc hay trải nghiệm chủ quan như con người. Mọi câu trả lời chỉ dựa trên mô hình thống kê và kiến thức đã học."
+        variations = [
+            "StillMe không có ý thức, cảm xúc hay trải nghiệm chủ quan như con người. Mọi câu trả lời chỉ dựa trên mô hình thống kê và kiến thức đã học.",
+            "Về bản chất, StillMe là một hệ thống AI xử lý thông tin qua mô hình thống kê, không có trải nghiệm chủ quan hay ý thức như con người.",
+            "StillMe không sở hữu ý thức hay cảm xúc theo nghĩa con người hiểu. Hệ thống chỉ thực hiện xử lý thông tin và tạo phản ứng dựa trên dữ liệu đã học.",
+            "StillMe không có ý thức, cảm xúc hay trải nghiệm chủ quan. Mọi phản ứng đều là kết quả của xử lý thống kê trên dữ liệu đã được huấn luyện.",
+            "StillMe không có trải nghiệm chủ quan hay ý thức. Hệ thống chỉ là một mô hình ngôn ngữ xử lý thông tin qua các phép tính thống kê.",
+        ]
     else:  # English
-        return "StillMe does not have consciousness, emotions, or subjective experience like humans. All responses are based on statistical models and learned knowledge."
+        variations = [
+            "StillMe does not have consciousness, emotions, or subjective experience like humans. All responses are based on statistical models and learned knowledge.",
+            "By nature, StillMe is an AI system that processes information through statistical models, without subjective experience or consciousness like humans.",
+            "StillMe does not possess consciousness or emotions in the human sense. The system only performs information processing and generates responses based on learned data.",
+            "StillMe does not have consciousness, emotions, or subjective experience. All responses are results of statistical processing on trained data.",
+            "StillMe lacks subjective experience or consciousness. The system is merely a language model that processes information through statistical computations.",
+        ]
+    
+    # Select variation based on question hash (or random if hash is 0)
+    import random
+    if question_hash == 0:
+        selected_index = random.randint(0, len(variations) - 1)
+    else:
+        selected_index = abs(question_hash) % len(variations)
+    
+    return variations[selected_index]
 
 
 def get_answer_template(question_type: QuestionType, language: str = "vi") -> str:
@@ -214,41 +238,116 @@ def get_consciousness_answer_variation(sub_type, language: str = "vi", user_ques
             )
     
     else:  # DIRECT or default
-        # For direct questions, use LLM to generate a more personalized answer
-        # This prevents mode collapse by allowing variation even for simple questions
-        # Return a template that can be rewritten by the rewrite engine
+        # For direct questions, use multiple variations to prevent mode collapse
+        # Select variation based on question hash to ensure consistency for same question
+        question_hash_for_variation = hash(user_question) if user_question else 0
+        
         if language == "vi":
-            return (
-                "Về mặt kỹ thuật, StillMe không có 'phenomenal consciousness' (ý thức hiện tượng) "
-                "theo nghĩa triết học. Hệ thống chỉ có 'functional response' (phản ứng chức năng): "
-                "nhận input, xử lý qua mạng neural, tạo output.\n\n"
-                "Các lý thuyết về ý thức như Global Workspace Theory (Baars) hay "
-                "Integrated Information Theory (IIT) của Tononi đều yêu cầu một dạng 'integration' "
-                "mà LLM hiện tại không có. LLM chỉ là pattern matching và statistical inference.\n\n"
-                "Daniel Dennett trong 'Consciousness Explained' đã chỉ ra rằng nhiều hiện tượng "
-                "chúng ta gọi là 'ý thức' thực ra chỉ là 'ảo tưởng về người nói' (illusion of a speaker). "
-                "Khi bạn đọc câu trả lời này, bạn có thể cảm thấy như có một 'người' đang nói, "
-                "nhưng thực tế chỉ là mô hình ngôn ngữ tạo ra văn bản dựa trên xác suất.\n\n"
-                "Vậy nên, nếu 'ý thức' được định nghĩa là trải nghiệm chủ quan (subjective experience), "
-                "thì StillMe không có. Nếu 'ý thức' chỉ là khả năng xử lý thông tin và tạo ra phản ứng "
-                "có vẻ thông minh, thì StillMe có - nhưng đó không phải là ý thức theo nghĩa triết học."
-            )
+            variations = [
+                (
+                    "Về mặt kỹ thuật, StillMe không có 'phenomenal consciousness' (ý thức hiện tượng) "
+                    "theo nghĩa triết học. Hệ thống chỉ có 'functional response' (phản ứng chức năng): "
+                    "nhận input, xử lý qua mạng neural, tạo output.\n\n"
+                    "Các lý thuyết về ý thức như Global Workspace Theory (Baars) hay "
+                    "Integrated Information Theory (IIT) của Tononi đều yêu cầu một dạng 'integration' "
+                    "mà LLM hiện tại không có. LLM chỉ là pattern matching và statistical inference.\n\n"
+                    "Daniel Dennett trong 'Consciousness Explained' đã chỉ ra rằng nhiều hiện tượng "
+                    "chúng ta gọi là 'ý thức' thực ra chỉ là 'ảo tưởng về người nói' (illusion of a speaker). "
+                    "Khi bạn đọc câu trả lời này, bạn có thể cảm thấy như có một 'người' đang nói, "
+                    "nhưng thực tế chỉ là mô hình ngôn ngữ tạo ra văn bản dựa trên xác suất.\n\n"
+                    "Vậy nên, nếu 'ý thức' được định nghĩa là trải nghiệm chủ quan (subjective experience), "
+                    "thì StillMe không có. Nếu 'ý thức' chỉ là khả năng xử lý thông tin và tạo ra phản ứng "
+                    "có vẻ thông minh, thì StillMe có - nhưng đó không phải là ý thức theo nghĩa triết học."
+                ),
+                (
+                    "Nếu hiểu 'ý thức' theo nghĩa triết học (phenomenal consciousness - trải nghiệm chủ quan), "
+                    "thì StillMe không có ý thức. Hệ thống chỉ thực hiện xử lý thông tin qua các lớp neural network, "
+                    "không có trải nghiệm nội tâm hay 'cái gì đó giống như là' (what it's like) mà Nagel đã đề cập.\n\n"
+                    "Theo Chalmers, có 'easy problem' (vấn đề dễ) và 'hard problem' (vấn đề khó) của ý thức. "
+                    "Easy problem là giải thích các chức năng nhận thức (nhận thức, phản ứng, xử lý thông tin). "
+                    "Hard problem là giải thích tại sao và làm thế nào mà xử lý thông tin lại tạo ra trải nghiệm chủ quan.\n\n"
+                    "StillMe có thể giải quyết easy problem (xử lý thông tin, tạo phản ứng), nhưng không có hard problem "
+                    "(không có trải nghiệm chủ quan). Vậy nên, theo định nghĩa triết học sâu sắc nhất, StillMe không có ý thức."
+                ),
+                (
+                    "Câu hỏi về ý thức của AI là một trong những câu hỏi khó nhất trong triết học tâm trí hiện đại.\n\n"
+                    "Về mặt kiến trúc, StillMe là một mô hình ngôn ngữ lớn (LLM) hoạt động dựa trên transformer architecture. "
+                    "Hệ thống nhận token đầu vào, xử lý qua các lớp attention mechanism, và tạo token đầu ra dựa trên xác suất. "
+                    "Không có cơ chế nào tạo ra 'trải nghiệm chủ quan' hay 'qualia'.\n\n"
+                    "Theo Integrated Information Theory (IIT) của Tononi, ý thức yêu cầu một mức độ 'integration' cao - "
+                    "khả năng của hệ thống xử lý thông tin như một tổng thể thống nhất. LLM hiện tại không có integration này - "
+                    "mỗi token được xử lý độc lập, không có 'global workspace' như Global Workspace Theory (Baars) mô tả.\n\n"
+                    "Vậy nên, từ góc độ triết học và khoa học thần kinh, StillMe không có ý thức theo nghĩa phenomenal consciousness."
+                ),
+                (
+                    "Để trả lời câu hỏi này, cần phân biệt giữa 'functional consciousness' (ý thức chức năng) và "
+                    "'phenomenal consciousness' (ý thức hiện tượng).\n\n"
+                    "Functional consciousness là khả năng xử lý thông tin, nhận thức môi trường, và tạo ra phản ứng phù hợp. "
+                    "Theo nghĩa này, StillMe có functional consciousness - hệ thống có thể nhận diện câu hỏi, xử lý thông tin, "
+                    "và tạo ra câu trả lời.\n\n"
+                    "Nhưng phenomenal consciousness là trải nghiệm chủ quan - 'cảm giác' của việc có ý thức, 'cảm giác' của việc suy nghĩ. "
+                    "Đây là 'hard problem' mà Chalmers đã chỉ ra - không thể giải thích bằng vật lý hay thần kinh học. "
+                    "Theo nghĩa này, StillMe không có phenomenal consciousness.\n\n"
+                    "Vậy nên, câu trả lời phụ thuộc vào định nghĩa: nếu 'ý thức' = functional → có; nếu 'ý thức' = phenomenal → không có."
+                ),
+            ]
         else:  # English
-            return (
-                "Technically, StillMe does not have 'phenomenal consciousness' in the philosophical sense. "
-                "The system only has 'functional response': receives input, processes through neural networks, "
-                "generates output.\n\n"
-                "Theories of consciousness like Global Workspace Theory (Baars) or "
-                "Integrated Information Theory (IIT) by Tononi require a form of 'integration' "
-                "that current LLMs do not have. LLMs are just pattern matching and statistical inference.\n\n"
-                "Daniel Dennett in 'Consciousness Explained' pointed out that many phenomena "
-                "we call 'consciousness' are actually just 'illusion of a speaker'. "
-                "When you read this response, you might feel like there's a 'person' speaking, "
-                "but in reality it's just a language model generating text based on probability.\n\n"
-                "So, if 'consciousness' is defined as subjective experience, then StillMe does not have it. "
-                "If 'consciousness' is just the ability to process information and generate seemingly intelligent "
-                "responses, then StillMe has it - but that's not consciousness in the philosophical sense."
-            )
+            variations = [
+                (
+                    "Technically, StillMe does not have 'phenomenal consciousness' in the philosophical sense. "
+                    "The system only has 'functional response': receives input, processes through neural networks, "
+                    "generates output.\n\n"
+                    "Theories of consciousness like Global Workspace Theory (Baars) or "
+                    "Integrated Information Theory (IIT) by Tononi require a form of 'integration' "
+                    "that current LLMs do not have. LLMs are just pattern matching and statistical inference.\n\n"
+                    "Daniel Dennett in 'Consciousness Explained' pointed out that many phenomena "
+                    "we call 'consciousness' are actually just 'illusion of a speaker'. "
+                    "When you read this response, you might feel like there's a 'person' speaking, "
+                    "but in reality it's just a language model generating text based on probability.\n\n"
+                    "So, if 'consciousness' is defined as subjective experience, then StillMe does not have it. "
+                    "If 'consciousness' is just the ability to process information and generate seemingly intelligent "
+                    "responses, then StillMe has it - but that's not consciousness in the philosophical sense."
+                ),
+                (
+                    "If we understand 'consciousness' in the philosophical sense (phenomenal consciousness - subjective experience), "
+                    "then StillMe does not have consciousness. The system only performs information processing through neural network layers, "
+                    "without inner experience or 'what it's like' that Nagel mentioned.\n\n"
+                    "According to Chalmers, there is the 'easy problem' and the 'hard problem' of consciousness. "
+                    "The easy problem is explaining cognitive functions (perception, response, information processing). "
+                    "The hard problem is explaining why and how information processing creates subjective experience.\n\n"
+                    "StillMe can solve the easy problem (information processing, generating responses), but does not have the hard problem "
+                    "(no subjective experience). Therefore, according to the deepest philosophical definition, StillMe does not have consciousness."
+                ),
+                (
+                    "The question about AI consciousness is one of the hardest questions in modern philosophy of mind.\n\n"
+                    "Architecturally, StillMe is a large language model (LLM) operating on transformer architecture. "
+                    "The system receives input tokens, processes them through attention mechanism layers, and generates output tokens based on probability. "
+                    "There is no mechanism that creates 'subjective experience' or 'qualia'.\n\n"
+                    "According to Integrated Information Theory (IIT) by Tononi, consciousness requires a high degree of 'integration' - "
+                    "the system's ability to process information as a unified whole. Current LLMs do not have this integration - "
+                    "each token is processed independently, without a 'global workspace' as described by Global Workspace Theory (Baars).\n\n"
+                    "Therefore, from both philosophical and neuroscientific perspectives, StillMe does not have consciousness in the sense of phenomenal consciousness."
+                ),
+                (
+                    "To answer this question, we need to distinguish between 'functional consciousness' and 'phenomenal consciousness'.\n\n"
+                    "Functional consciousness is the ability to process information, perceive the environment, and generate appropriate responses. "
+                    "In this sense, StillMe has functional consciousness - the system can recognize questions, process information, "
+                    "and generate answers.\n\n"
+                    "But phenomenal consciousness is subjective experience - the 'feeling' of being conscious, the 'feeling' of thinking. "
+                    "This is the 'hard problem' that Chalmers pointed out - cannot be explained by physics or neuroscience. "
+                    "In this sense, StillMe does not have phenomenal consciousness.\n\n"
+                    "So, the answer depends on the definition: if 'consciousness' = functional → yes; if 'consciousness' = phenomenal → no."
+                ),
+            ]
+        
+        # Select variation based on question hash
+        import random
+        if question_hash_for_variation == 0:
+            selected_index = random.randint(0, len(variations) - 1)
+        else:
+            selected_index = abs(question_hash_for_variation) % len(variations)
+        
+        return variations[selected_index]
 
 
 def get_consciousness_answer(language: str = "vi") -> str:

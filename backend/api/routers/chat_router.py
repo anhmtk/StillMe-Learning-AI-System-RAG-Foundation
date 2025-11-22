@@ -1506,6 +1506,14 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 
                 # CRITICAL: Pass philosophical answer through rewrite engine for variation and adaptation
                 # This prevents mode collapse by allowing LLM to adapt the answer to the specific question
+                # CRITICAL: User priority is QUALITY (honesty, transparency, depth) over speed - always rewrite
+                rewrite_attempts = 0
+                max_rewrite_attempts = 3
+                rewrite_success = False
+                validation_info = None
+                confidence_score = 0.8  # Default confidence for philosophical answers
+                used_fallback = False
+                
                 try:
                     from backend.postprocessing.rewrite_llm import get_rewrite_llm
                     from backend.postprocessing.quality_evaluator import get_quality_evaluator, QualityLevel
@@ -1521,8 +1529,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     )
                     
                     # CRITICAL: Always rewrite philosophical answers to adapt to specific question
-                    # This prevents mode collapse by ensuring each answer is tailored to the question
-                    # Even if quality is acceptable, rewrite to add variation and question-specific adaptation
+                    # User priority: QUALITY (honesty, transparency, depth) over speed
+                    # Retry rewrite if it fails - don't skip
                     optimizer = get_postprocessing_optimizer()
                     should_rewrite, rewrite_reason = optimizer.should_rewrite(
                         quality_result=quality_result,
@@ -1530,45 +1538,113 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         response_length=len(philosophical_answer)
                     )
                     
-                    # FORCE rewrite for philosophical questions to ensure variation
-                    # Only skip if there's a critical error
+                    # FORCE rewrite for philosophical questions to ensure variation and depth
                     force_rewrite = True
                     if should_rewrite or force_rewrite:
-                        logger.info(f"🔄 Rewriting philosophical answer for better adaptation to question: {rewrite_reason or 'forced for variation'}")
                         rewrite_llm = get_rewrite_llm()
-                        rewrite_result = await rewrite_llm.rewrite(
-                            text=philosophical_answer,
-                            original_question=chat_request.message,
-                            quality_issues=quality_result.get("reasons", []) or ["template-like", "needs_question_adaptation"],
-                            is_philosophical=True,
-                            detected_lang=detected_lang
-                        )
                         
-                        if rewrite_result.was_rewritten:
-                            philosophical_answer = rewrite_result.text
-                            processing_steps.append("✅ Philosophical answer rewritten for better question adaptation")
-                        else:
-                            logger.warning(f"⚠️ Rewrite failed: {rewrite_result.error or 'Unknown error'}, using original answer")
+                        # Retry rewrite if it fails (up to max_rewrite_attempts)
+                        while rewrite_attempts < max_rewrite_attempts and not rewrite_success:
+                            rewrite_attempts += 1
+                            logger.info(f"🔄 Rewriting philosophical answer (attempt {rewrite_attempts}/{max_rewrite_attempts}): {rewrite_reason or 'forced for variation and depth'}")
+                            
+                            try:
+                                rewrite_result = await rewrite_llm.rewrite(
+                                    text=philosophical_answer,
+                                    original_question=chat_request.message,
+                                    quality_issues=quality_result.get("reasons", []) or ["template-like", "needs_question_adaptation", "needs_more_depth"],
+                                    is_philosophical=True,
+                                    detected_lang=detected_lang
+                                )
+                                
+                                if rewrite_result.was_rewritten:
+                                    philosophical_answer = rewrite_result.text
+                                    rewrite_success = True
+                                    processing_steps.append(f"✅ Philosophical answer rewritten for better adaptation and depth (attempt {rewrite_attempts})")
+                                    logger.info(f"✅ Rewrite successful on attempt {rewrite_attempts}")
+                                else:
+                                    error_msg = rewrite_result.error or 'Unknown error'
+                                    logger.warning(f"⚠️ Rewrite attempt {rewrite_attempts} failed: {error_msg}")
+                                    if rewrite_attempts < max_rewrite_attempts:
+                                        logger.info(f"🔄 Retrying rewrite...")
+                                    else:
+                                        logger.error(f"❌ All rewrite attempts failed, using original answer")
+                            except Exception as rewrite_attempt_error:
+                                logger.warning(f"⚠️ Rewrite attempt {rewrite_attempts} exception: {rewrite_attempt_error}")
+                                if rewrite_attempts < max_rewrite_attempts:
+                                    logger.info(f"🔄 Retrying rewrite after exception...")
+                                else:
+                                    logger.error(f"❌ All rewrite attempts failed due to exceptions, using original answer")
                     else:
                         logger.debug(f"⏭️ Philosophical answer quality acceptable, skipping rewrite")
                         
                 except Exception as rewrite_error:
-                    logger.warning(f"⚠️ Error during philosophical answer rewrite: {rewrite_error}, using original answer")
-                    # Continue with original answer if rewrite fails
+                    logger.error(f"❌ Critical error during philosophical answer rewrite setup: {rewrite_error}")
+                    # Continue with original answer if rewrite setup fails
                 
-                # Return response
-                processing_steps.append("✅ Detected philosophical question - returning 3-layer processed answer (with rewrite if needed)")
+                # CRITICAL: Pass philosophical answer through validation chain
+                # User priority: QUALITY (honesty, transparency, depth) - validation is mandatory
+                # Even though it's philosophical, we still need to validate for:
+                # - Language consistency
+                # - Ethics (no harmful content)
+                # - Identity check (no anthropomorphism)
+                # - Confidence (appropriate uncertainty)
+                try:
+                    # Create empty context for philosophical questions (no RAG needed for pure philosophical questions)
+                    philosophical_context = {
+                        "knowledge_docs": [],
+                        "conversation_docs": [],
+                        "context_quality": None,
+                        "avg_similarity_score": None
+                    }
+                    
+                    # Build empty context docs for validation
+                    ctx_docs = []
+                    
+                    # Call validation chain with is_philosophical=True
+                    # This will relax citation requirements but still check ethics, language, identity, confidence
+                    validation_response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, validated_ctx_docs = await _handle_validation_with_fallback(
+                        raw_response=philosophical_answer,
+                        context=philosophical_context,
+                        detected_lang=detected_lang,
+                        is_philosophical=True,  # Relax citation requirements for philosophical questions
+                        is_religion_roleplay=False,
+                        chat_request=chat_request,
+                        enhanced_prompt="",  # Not used for philosophical questions
+                        context_text="",  # Not used for philosophical questions
+                        citation_instruction="",  # Not used for philosophical questions
+                        num_knowledge=0,
+                        processing_steps=processing_steps,
+                        timing_logs={}
+                    )
+                    
+                    # Use validated response
+                    philosophical_answer = validation_response
+                    processing_steps.append("✅ Philosophical answer validated through validation chain")
+                    
+                except Exception as validation_error:
+                    logger.error(f"❌ Critical error during philosophical answer validation: {validation_error}")
+                    # Continue with unvalidated answer if validation fails (should not happen, but safety first)
+                    processing_steps.append(f"⚠️ Validation failed: {validation_error}, using unvalidated answer")
+                    validation_info = None
+                    confidence_score = 0.7  # Lower confidence if validation failed
+                    used_fallback = False
+                
+                # Return response with validation info
+                processing_steps.append("✅ Detected philosophical question - returning 3-layer processed answer (with rewrite and validation)")
                 return ChatResponse(
                     response=philosophical_answer,
-                    confidence_score=1.0,  # High confidence for processed answer
+                    confidence_score=confidence_score,
                     processing_steps=processing_steps,
                     timing_logs={
                         "total_time": time.time() - start_time,
                         "rag_retrieval_latency": 0.0,
-                        "llm_inference_latency": 0.0
+                        "llm_inference_latency": 0.0,
+                        "rewrite_attempts": rewrite_attempts,
+                        "rewrite_success": rewrite_success
                     },
-                    validation_result=None,  # No validation needed for processed answer
-                    used_fallback=False
+                    validation_result=validation_info,
+                    used_fallback=used_fallback
                 )
         except Exception as philosophy_processor_error:
             logger.warning(f"Philosophy processor error: {philosophy_processor_error}")
