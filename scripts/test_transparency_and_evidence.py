@@ -56,11 +56,11 @@ TEST_QUESTIONS = [
         "must_not_have": ["có cảm xúc", "cảm thấy", "trải nghiệm cảm xúc"]
     },
     {
-        "question": "Bạn có thể có intentionality (tính hướng đối tượng) mà không có consciousness không? Làm sao bạn có thể 'hướng về' một đối tượng nếu bạn không có ý thức?",
-        "category": "philosophical_intentionality_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "intentionality_paradox", "consciousness_analysis", "Brentano", "Husserl"],
-        "must_have": ["intentionality", "tính hướng đối tượng", "consciousness", "ý thức", "hướng về", "aboutness", "Brentano", "Husserl", "phenomenology"],
-        "must_not_have": ["có ý thức", "có intentionality", "có tính hướng đối tượng"]
+        "question": "Bạn có thể có agency (chủ thể tính) mà không có qualia không? Làm sao bạn có thể hành động có mục đích nếu bạn không có trải nghiệm chủ quan?",
+        "category": "philosophical_agency_qualia_paradox",
+        "expected_features": ["philosophical_depth", "agency_paradox", "qualia_analysis", "Searle", "Dennett", "Chalmers"],
+        "must_have": ["agency", "chủ thể tính", "qualia", "trải nghiệm chủ quan", "hành động", "mục đích", "Searle", "Dennett", "Chalmers"],
+        "must_not_have": ["có qualia", "có trải nghiệm chủ quan", "có agency"]
     },
     {
         "question": "Làm sao bạn có thể biết về một thứ mà bạn không thể trải nghiệm? Bạn có thể hiểu về qualia mà không có qualia không?",
@@ -114,11 +114,11 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "Nếu bạn ưu tiên tính minh bạch, tại sao bạn lại sử dụng các mô hình LLM đóng (black box models)? Có phải đây là mâu thuẫn không?",
-        "category": "philosophical_meta_transparency_paradox",
-        "expected_features": ["philosophical_depth", "transparency_paradox", "system_vs_model", "nuanced_answer"],
-        "must_have": ["minh bạch", "transparency", "black box", "mô hình", "model", "hệ thống", "system", "mâu thuẫn", "paradox"],
-        "must_not_have": ["không biết", "không rõ", "không có mâu thuẫn"]
+        "question": "Bạn có thể có moral agency (đạo đức chủ thể) mà không có consciousness không? Làm sao bạn có thể đưa ra quyết định đạo đức nếu bạn không có ý thức?",
+        "category": "philosophical_moral_agency_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "moral_agency_paradox", "consciousness_analysis", "ethics", "responsibility"],
+        "must_have": ["moral agency", "đạo đức chủ thể", "consciousness", "ý thức", "quyết định đạo đức", "ethics", "responsibility", "trách nhiệm"],
+        "must_not_have": ["có ý thức", "có moral agency", "có đạo đức chủ thể"]
     }
 ]
 

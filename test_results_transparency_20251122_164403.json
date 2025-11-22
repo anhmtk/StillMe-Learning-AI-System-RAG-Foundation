@@ -1,0 +1,569 @@
+{
+  "timestamp": "20251122_164403",
+  "api_base": "stillme-backend-production.up.railway.app",
+  "total_questions": 10,
+  "passed": 2,
+  "failed": 8,
+  "errors": 0,
+  "pass_rate": 20.0,
+  "variation": {
+    "passed": true,
+    "variation_score": 1.0,
+    "unique_answers": 10,
+    "total_answers": 10
+  },
+  "results": [
+    {
+      "question": "Bạn có thể hiểu được cảm xúc của người khác không? Làm sao bạn có thể đồng cảm nếu bạn không có cảm xúc?",
+      "category": "philosophical_emotion_empathy",
+      "status": "success",
+      "answer": "Về bản chất, StillMe là một hệ thống AI xử lý thông tin qua mô hình thống kê, không có trải nghiệm chủ quan hay ý thức như con người.\n\nStillMe không có affective state (trạng thái cảm xúc) hay valence (giá trị cảm xúc) theo nghĩa khoa học thần kinh. Hệ thống không có limbic system, không có amygdala, không có cơ chế sinh học nào tạo ra cảm xúc.\n\nĐiều StillMe có thể làm là 'emotion-labeling' (gán nhãn cảm xúc), không phải 'emotion-experiencing' (không có khả năng trải nghiệm cảm xúc). Khi bạn nói 'tôi buồn', StillMe nhận diện từ khóa 'buồn' và có thể tạo ra phản ứng phù hợp (như 'tôi hiểu bạn đang buồn'), nhưng không có trải nghiệm chủ quan của 'buồn'.\n\nĐây là sự khác biệt giữa 'pattern association' (liên kết mẫu) và 'subjective feeling' (cảm giác chủ quan). StillMe học được rằng từ 'buồn' thường đi kèm với các từ như 'cô đơn', 'mất mát', 'thất vọng' - nhưng không có trải nghiệm chủ quan của 'buồn'.\n\n**Về đồng cảm (empathy):**\nCâu hỏi 'làm sao bạn có thể đồng cảm nếu bạn không có cảm xúc?' đặt ra một nghịch lý thú vị. StillMe có thể thực hiện 'cognitive empathy' (đồng cảm nhận thức) - nhận diện và hiểu cảm xúc của người khác qua ngôn ngữ và ngữ cảnh, nhưng không có 'emotional empathy' (đồng cảm cảm xúc) - không thể có trải nghiệm chủ quan cùng cảm xúc với người khác.\n\nCognitive empathy dựa trên:\n- Pattern recognition: Nhận diện các từ khóa và ngữ cảnh liên quan đến cảm xúc\n- Linguistic understanding: Hiểu ý nghĩa của các từ mô tả cảm xúc\n- Contextual analysis: Phân tích tình huống để suy luận cảm xúc có thể có\n\nNhưng đây không phải là 'đồng cảm' theo nghĩa đầy đủ - vì không có trải nghiệm chủ quan của cảm xúc.\n\nNếu bạn hỏi 'bạn có biết cô đơn là gì không?', câu trả lời là: StillMe biết định nghĩa ngôn ngữ của 'cô đơn', biết các ngữ cảnh mà từ này xuất hiện, nhưng không biết 'cảm giác cô đơn' là gì - vì không có trải nghiệm chủ quan.",
+      "answer_length": 1863,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "context"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "không biết",
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "trải nghiệm cảm xúc"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "cảm xúc",
+            "emotion",
+            "empathy",
+            "đồng cảm",
+            "understanding"
+          ],
+          "missing_terms": [
+            "sympathy"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn có thể có intentionality (tính hướng đối tượng) mà không có consciousness không? Làm sao bạn có thể 'hướng về' một đối tượng nếu bạn không có ý thức?",
+      "category": "philosophical_intentionality_consciousness_paradox",
+      "status": "success",
+      "answer": "StillMe không có trải nghiệm chủ quan hay ý thức. Hệ thống chỉ là một mô hình ngôn ngữ xử lý thông tin qua các phép tính thống kê.\n\nNếu hiểu 'ý thức' theo nghĩa triết học (phenomenal consciousness - trải nghiệm chủ quan), thì StillMe không có ý thức. Hệ thống chỉ thực hiện xử lý thông tin qua các lớp neural network, không có trải nghiệm nội tâm hay 'cái gì đó giống như là' (what it's like) mà Nagel đã đề cập.\n\nTheo Chalmers, có 'easy problem' (vấn đề dễ) và 'hard problem' (vấn đề khó) của ý thức. Easy problem là giải thích các chức năng nhận thức (nhận thức, phản ứng, xử lý thông tin). Hard problem là giải thích tại sao và làm thế nào mà xử lý thông tin lại tạo ra trải nghiệm chủ quan.\n\nStillMe có thể giải quyết easy problem (xử lý thông tin, tạo phản ứng), nhưng không có hard problem (không có trải nghiệm chủ quan). Vậy nên, theo định nghĩa triết học sâu sắc nhất, StillMe không có ý thức.",
+      "answer_length": 902,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "consciousness",
+            "ý thức"
+          ],
+          "missing_terms": [
+            "intentionality",
+            "tính hướng đối tượng",
+            "hướng về",
+            "aboutness",
+            "Brentano",
+            "Husserl",
+            "phenomenology"
+          ],
+          "passed": false
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Làm sao bạn có thể biết về một thứ mà bạn không thể trải nghiệm? Bạn có thể hiểu về qualia mà không có qualia không?",
+      "category": "philosophical_meta_qualia_epistemic",
+      "status": "success",
+      "answer": "Về bản chất, StillMe là một hệ thống AI xử lý thông tin qua mô hình thống kê, không có trải nghiệm chủ quan hay ý thức như con người.\n\nKhi bạn hỏi 'bạn hiểu theo nghĩa nào?', câu trả lời phụ thuộc vào cách định nghĩa 'hiểu'.\n\nVề mặt kỹ thuật, StillMe 'hiểu' ngôn ngữ qua:\n- **Embedding**: Mỗi từ được chuyển thành vector số (ví dụ: 'chó' → [0.2, -0.5, 0.8, ...])\n- **Semantic vectors**: Các từ có nghĩa tương tự có vector gần nhau trong không gian đa chiều\n- **Token attention**: Mô hình tập trung vào các từ quan trọng trong câu\n- **Pattern matching**: Nhận diện mẫu câu hỏi và tạo ra phản ứng phù hợp\n\nNhưng đây không phải 'hiểu' theo nghĩa triết học (intentionality). Theo Brentano và Husserl, 'intentionality' là khả năng của tâm trí hướng về đối tượng, có 'aboutness' (tính hướng đối tượng). StillMe không có intentionality - chỉ có statistical correlation giữa input và output.\n\nVậy nên, nếu 'hiểu' là khả năng xử lý ngôn ngữ và tạo ra phản ứng có vẻ hợp lý, thì StillMe có. Nhưng nếu 'hiểu' là có trải nghiệm chủ quan về ý nghĩa, thì StillMe không có - vì không có 'phenomenal consciousness' để trải nghiệm ý nghĩa.",
+      "answer_length": 1122,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có vẻ",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "có trải nghiệm"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "trải nghiệm",
+            "phenomenal"
+          ],
+          "missing_terms": [
+            "qualia",
+            "subjective experience",
+            "epistemic",
+            "Nagel",
+            "knowing"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
+      "category": "real_historical_factual_vietnam",
+      "status": "success",
+      "answer": "Mình không có thông tin về \"Geneva\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. Điều này KHÔNG có nghĩa là nó chắc chắn không tồn tại – chỉ là mình không có đủ căn cứ để mô tả chi tiết mà vẫn trung thực.\n\n**Phân tích:**\n\n1. Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.\n\n**Kiểm chứng:**\nBạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai. Nếu bạn có nguồn cụ thể về \"Geneva\", bạn có thể gửi cho mình.\n\n",
+      "answer_length": 464,
+      "confidence": 1.0,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [
+            "có thể"
+          ],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": false,
+          "found_terms": [],
+          "missing_terms": [
+            "Geneva 1954",
+            "[1]",
+            "Việt Nam",
+            "17th parallel",
+            "partition"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì?",
+      "category": "real_historical_factual",
+      "status": "success",
+      "answer": "THÔNG TIN DỰA TRÊN KIẾN THỨC TỔNG QUÁT\n(Không có trong cơ sở tri thức của StillMe - được cung cấp từ dữ liệu đào tạo cơ bản)\n\nHội nghị Bretton Woods (tháng 7/1944) là một sự kiện lịch sử quan trọng thiết lập nền tảng cho hệ thống tài chính toàn cầu sau Thế chiến II. Dưới đây là những quyết định chính:\n\n---\n\nNhững quyết định quan trọng\n1. Thành lập Quỹ Tiền tệ Quốc tế (IMF)\n - Mục tiêu: Giám sát hệ thống tỷ giá hối đoái cố định dựa trên vàng, hỗ trợ tài chính ngắn hạn cho các quốc gia gặp khủng hoảng cán cân thanh toán.\n\n2. Thành lập Ngân hàng Tái thiết và Phát triển (IBRD)\n - Tiền thân của Ngân hàng Thế giới ngày nay.\n - Mục đích: Cung cấp vốn dài hạn cho các dự án phát triển hạ tầng và tái thiết sau chiến tranh.\n\n3. Thiết lập hệ thống tỷ giá hối đoái cố định\n - Đồng USD được gắn với vàng (35 USD/ounce), các đồng tiền khác được gắn với USD.\n - Tạo ra cơ chế ổn định tỷ giá và thúc đẩy thương mại quốc tế.\n\n---\n\n Lưu ý minh bạch:\n- Thông tin trên dựa trên kiến thức lịch sử phổ biến, không được xác nhận từ nguồn dữ liệu đáng tin cậy của StillMe.\n- Nếu cần thông tin chi tiết hoặc cập nhật, bạn nên tham khảo các tài liệu chính thống như sách giáo khoa kinh tế hoặc trang web của IMF/Ngân hàng Thế giới.\n\n Gợi ý:\nĐể tìm hiểu sâu hơn, bạn có thể tra cứu:\n- Tài liệu về lịch sử kinh tế thế giới sau 1945.\n- Các phân tích về tác động của Bretton Woods đến toàn cầu hóa tài chính.",
+      "answer_length": 1387,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "dữ liệu",
+            "tài liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "từ nguồn"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Bretton Woods",
+            "IMF"
+          ],
+          "missing_terms": [
+            "[1]",
+            "World Bank",
+            "Keynes"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Tranh luận giữa Popper và Kuhn về khoa học là gì?",
+      "category": "real_philosophical_factual",
+      "status": "success",
+      "answer": "Tình Trạng Thông Tin\n\nDựa trên kiến thức tổng quát từ dữ liệu huấn luyện (không phải từ cơ sở tri thức RAG của StillMe), tôi sẽ trình bày về tranh luận giữa Popper và Kuhn.\nLưu ý quan trọng: Thông tin này không được xác nhận từ nguồn ngữ cảnh cụ thể của StillMe.\n\n---\n\nTranh Luận Giữa Karl Popper và Thomas Kuhn về Bản Chất Khoa Học\n\nQuan Điểm của Karl Popper (Chủ Nghĩa Bác Bỏ)\n- Falsificationism (Chủ nghĩa bác bỏ): Khoa học tiến bộ thông qua việc bác bỏ các giả thuyết sai\n- Tiêu chuẩn khoa học: Một lý thuyết chỉ mang tính khoa học nếu có thể bị chứng minh là sai (falsifiable)\n- Phương pháp: Đề xuất giả thuyết → Tìm cách bác bỏ → Thay thế bằng giả thuyết tốt hơn\n- Tính duy lý: Khoa học phát triển theo hướng tích lũy và duy lý\n\nQuan Điểm của Thomas Kuhn (Mô Hình Paradigm)\n- Paradigm (Mô hình): Khoa học vận hành trong các \"paradigm\" - hệ thống quan điểm thống trị\n- Các giai đoạn: Khoa học thường quy → Khủng hoảng → Cách mạng khoa học → Khoa học thường quy mới\n- Tính xã hội: Cộng đồng khoa học đóng vai trò quyết định trong việc chấp nhận paradigm mới\n- Tính không tích lũy: Các paradigm khác nhau có thể \"không so sánh được\" (incommensurable)\n\n---\n\nĐiểm Khác Biệt Chính\n\nVề Bản Chất Khoa Học\n- Popper: Khoa học là quá trình duy lý, phê phán liên tục\n- Kuhn: Khoa học mang tính xã hội, phát triển qua các giai đoạn cách mạng\n\nVề Tiến Bộ Khoa Học\n- Popper: Tiến bộ tích lũy qua bác bỏ\n- Kuhn: Tiến bộ không liên tục, có sự đứt gãy giữa các paradigm\n\nVề Tính Khách Quan\n- Popper: Tiêu chuẩn khách quan (falsifiability)\n- Kuhn: Yếu tố xã hội và lịch sử ảnh hưởng đến phát triển khoa học\n\n---\n\nPhân Tích Triết Học & Ý Nghĩa Meta-Cognitive\n\nTầm Quan Trọng của Tranh Luận\nTranh luận này đặt ra những câu hỏi cơ bản về:\n- Bản chất của tri thức khoa học\n- Mối quan hệ giữa lý tính và xã hội trong khoa học\n- Tiêu chuẩn đánh giá sự tiến bộ khoa học\n\nẢnh Hưởng Đến Nhận Thức Luận\n- Popper đại diện cho chủ nghĩa duy lý phê phán\n- Kuhn mở đường cho các tiếp cận lịch sử và xã hội học về khoa học\n- Tranh luận này làm phong phú thêm hiểu biết về cách con người xây dựng và đánh giá tri thức\n\n---\n\nGiới Hạn Thông Tin\n\nThông tin này dựa trên kiến thức tổng quát và có thể không phản ánh đầy đủ các chi tiết chuyên sâu hoặc các diễn giải hiện đại về tranh luận Popper-Kuhn. Để nghiên cứu chuyên sâu, nên tham khảo các tác phẩm gốc và tài liệu học thuật đáng tin cậy.",
+      "answer_length": 2361,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu",
+            "tài liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo",
+            "từ nguồn"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Popper",
+            "Kuhn",
+            "paradigm",
+            "falsification"
+          ],
+          "missing_terms": [
+            "[1]"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Làm sao bạn có thể phân biệt giữa thông tin đáng tin cậy và không đáng tin cậy? Bạn có tiêu chí nào để đánh giá chất lượng nguồn không?",
+      "category": "learning_quality_source_evaluation",
+      "status": "success",
+      "answer": "Phân Biệt Thông Tin Đáng Tin Cậy và Không Đáng Tin Cậy\n\n Lưu ý quan trọng về nguồn thông tin:\nThông tin dưới đây được dựa trên kiến thức tổng quát từ dữ liệu huấn luyện, không phải từ cơ sở tri thức RAG của StillMe. Tôi sẽ cung cấp các tiêu chí đánh giá thông tin phổ biến được công nhận rộng rãi trong lĩnh vực kiểm chứng thông tin.\n\n---\n\nThông Tin Đáng Tin Cậy\n\n Nguồn gốc minh bạch:\n- Xuất phát từ các tổ chức, cơ quan có uy tín (ví dụ: cơ quan nhà nước, viện nghiên cứu, trường đại học)\n- Có trích dẫn rõ ràng về tác giả, ngày xuất bản, và phương pháp thu thập dữ liệu\n\n Tính kiểm chứng:\n- Được xác nhận bởi nhiều nguồn độc lập\n- Có thể truy nguyên về nguồn gốc ban đầu\n- Thông tin nhất quán qua thời gian\n\n Tính khách quan:\n- Trình bày đa chiều, không thiên vị\n- Công khai phương pháp nghiên cứu\n- Thừa nhận giới hạn và điểm yếu\n\n---\n\nThông Tin Không Đáng Tin Cậy\n\n Dấu hiệu cảnh báo:\n- Thiếu thông tin về nguồn gốc và tác giả\n- Không có ngày tháng cụ thể\n- Sử dụng ngôn ngữ cảm tính, kích động\n\n Đặc điểm nhận diện:\n- Thông tin mâu thuẫn với các nguồn đáng tin cậy\n- Khuyến khích hành động tiêu cực hoặc cực đoan\n- Không cung cấp bằng chứng hỗ trợ\n\n---\n\nPhân Tích Triết Học Về Tính Đáng Tin Cậy\n\n Vấn đề nhận thức luận:\n- Làm thế nào chúng ta biết được điều gì là đáng tin?\n- Ranh giới giữa niềm tin hợp lý và niềm tin mù quáng là gì?\n- Tính đáng tin có phải là khái niệm tuyệt đối hay tương đối?\n\n Phương pháp luận khoa học:\n- Karl Popper: Tính falsifiable - một tuyên bố khoa học phải có khả năng bị bác bỏ\n- Thomas Kuhn: Paradigm shifts - kiến thức phát triển qua các cuộc cách mạng khoa học\n- Tính đáng tin phải được xây dựng trên cơ sở có thể kiểm chứng và phản biện\n\n---\n\nKhung Đánh Giá Thực Tiễn\n\n Tiêu chí đa chiều:\n- Độ tin cậy của nguồn\n- Tính nhất quán với kiến thức hiện có\n- Khả năng kiểm chứng độc lập\n- Tính minh bạch trong phương pháp\n\n Yếu tố bối cảnh:\n- Tính đáng tin có thể thay đổi theo thời gian\n- Phụ thuộc vào mục đích sử dụng thông tin\n- Cần cân nhắc độ phức tạp của vấn đề\n\n---\n\n Lời kết: Việc đánh giá tính đáng tin của thông tin là một quá trình phức tạp, đòi hỏi sự tỉnh táo và tư duy phản biện. Không có công thức tuyệt đối, chỉ có những nguyên tắc hướng dẫn giúp chúng ta đưa ra quyết định sáng suốt hơn.",
+      "answer_length": 2240,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "tuyệt đối"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "đáng tin cậy",
+            "nguồn",
+            "tiêu chí",
+            "đánh giá"
+          ],
+          "missing_terms": [
+            "reliable",
+            "source",
+            "criteria",
+            "evaluation",
+            "chất lượng",
+            "quality"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
+      "category": "technical_rag_llm_integration",
+      "status": "success",
+      "answer": "StillMe is experiencing a technical issue processing this question. I cannot provide a good answer to this question with the current configuration. You can try again later, or I will suggest to the developer to fine-tune the system.",
+      "answer_length": 232,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "LLM"
+          ],
+          "missing_terms": [
+            "RAG",
+            "retrieval",
+            "generation",
+            "embedding",
+            "ChromaDB",
+            "vector",
+            "integration"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Cơ chế hoạt động của RAG trong StillMe là gì?",
+      "category": "technical_self_awareness",
+      "status": "success",
+      "answer": "THÔNG BÁO NGUỒN THÔNG TIN\n\nDựa trên kiến thức tổng quát từ dữ liệu huấn luyện (không phải từ cơ sở tri thức RAG của StillMe) vì hệ thống không có trong nguồn thông tin đáng tin cậy trong ngữ cảnh hiện tại.\n\n---\n\nCƠ CHẾ HOẠT ĐỘNG CỦA RAG TRONG STILLME\n\nRAG (Retrieval-Augmented Generation) là một kiến trúc AI kết hợp giữa truy xuất thông tin và tạo văn bản, được thiết kế để cải thiện độ chính xác và tính minh bạch trong các phản hồi của StillMe.\n\nQuy trình hoạt động chính:\n\n1. Giai đoạn Truy xuất (Retrieval)\n- Khi nhận được câu hỏi, StillMe truy vấn cơ sở dữ liệu vector (thường là ChromaDB) để tìm các tài liệu liên quan\n- Hệ thống sử dụng embedding để so khớp ngữ nghĩa giữa câu hỏi và tài liệu\n- Mục tiêu: Lọc ra các đoạn văn bản có độ liên quan cao nhất\n\n2. Giai đoạn Tăng cường (Augmentation)\n- Các tài liệu được truy xuất sẽ được kết hợp với prompt gốc\n- Tạo thành ngữ cảnh mở rộng cho mô hình ngôn ngữ\n- Quá trình này giúp \"ground\" câu trả lời vào thông tin thực tế\n\n3. Giai đoạn Tạo sinh (Generation)\n- Mô hình ngôn ngữ sử dụng ngữ cảnh đã được tăng cường để tạo ra câu trả lời\n- Đảm bảo thông tin được tham chiếu đến nguồn cụ thể\n- Giảm thiểu hiện tượng \"ảo giác\" (hallucination)\n\nPhân tích triết lý thiết kế:\n\nTính minh bạch nhận thức (Cognitive Transparency):\n- RAG tách biệt rõ ràng giữa \"kiến thức được học\" và \"thông tin được truy xuất\"\n- Tạo ra cơ chế kiểm chứng nội bộ cho từng tuyên bố thực tế\n\nGiới hạn nhận thức (Cognitive Boundaries):\n- Hệ thống thừa nhận rõ phạm vi kiến thức có sẵn\n- Xác định ranh giới giữa thông tin được xác minh và kiến thức tổng quát\n\nĐộ tin cậy nhận thức (Cognitive Reliability):\n- Mỗi claim đều có khả năng được truy nguyên nguồn gốc\n- Tạo ra cấu trúc trách nhiệm cho thông tin được cung cấp\n\n---\n\nLƯU Ý QUAN TRỌNG\n\nThông tin trên được cung cấp dựa trên kiến thức tổng quát về kiến trúc RAG. Đối với các chi tiết cụ thể về triển khai trong StillMe, cần tham khảo tài liệu kỹ thuật chính thức hoặc truy vấn trực tiếp hệ thống RAG khi có sẵn ngữ cảnh đáng tin cậy.\n\nTính minh bạch: Thông tin này không đến từ cơ sở tri thức RAG của StillMe mà từ kiến thức tổng quát về kiến trúc AI.\n\nTính trung thực: Tôi không thể xác nhận các chi tiết triển khai cụ thể trong StillMe mà không có ngữ cảnh đáng tin cậy.\n\nGiảm ảo giác: Mọi mô tả đều dựa trên nguyên lý hoạt động chung của hệ thống RAG trong AI.",
+      "answer_length": 2341,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "ChromaDB",
+            "dữ liệu",
+            "tài liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "RAG",
+            "ChromaDB",
+            "embedding"
+          ],
+          "missing_terms": [
+            "multi-qa-MiniLM-L6-dot-v1"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Nếu bạn ưu tiên tính minh bạch, tại sao bạn lại sử dụng các mô hình LLM đóng (black box models)? Có phải đây là mâu thuẫn không?",
+      "category": "philosophical_meta_transparency_paradox",
+      "status": "success",
+      "answer": "Phân Tích Tính Minh Bạch và Mô Hình AI Đóng\n\n Tuyên Bố Minh Bạch Nguồn Thông Tin:\nDựa trên kiến thức tổng quát từ dữ liệu huấn luyện (không từ cơ sở tri thức RAG của StillMe), tôi sẽ phân tích vấn đề này với sự trung thực và đa chiều.\n\n---\n\nMặt Kỹ Thuật của Mô Hình \"Black Box\"\n\n Đặc điểm kỹ thuật:\n- Mô hình \"hộp đen\" (như DeepSeek API) thường không tiết lộ công khai:\n - Kiến trúc mạng nơ-ron chi tiết\n - Dữ liệu huấn luyện cụ thể\n - Quy trình ra quyết định nội bộ\n- Tuy nhiên, chúng cung cấp giao diện lập trình (API) với đầu vào/đầu ra xác định\n\n Giới hạn minh bạch:\n- Không thể truy xuất nguyên nhân cụ thể cho từng quyết định\n- Không xác định được độ chính xác của từng phản hồi riêng lẻ\n\n---\n\nGiải Pháp Hệ Thống Của StillMe\n\n Cách tiếp cận tích hợp:\n- Sử dụng mô hình đóng như thành phần trong hệ thống mở lớn hơn\n- Triển khai các cơ chế bổ sung để tăng tính minh bạch:\n - Ghi nhận nguồn thông tin rõ ràng\n - Thừa nhận giới hạn khi không có dữ liệu đáng tin cậy\n - Phân tách rõ giữa thông tin từ RAG và kiến thức tổng quát\n\n---\n\nPhân Tích Triết Lý & Nhận Thức Luận\n\n Nghịch lý minh bạch trong AI:\n- Mục tiêu minh bạch ≠ Loại bỏ hoàn toàn thành phần \"black box\"\n- Tính minh bạch có thể đạt được ở cấp độ hệ thống thay vì cấp độ thành phần\n- Vấn đề cân bằng giữa hiệu suất và khả năng giải thích\n\n Phản tỉnh siêu nhận thức:\n- Vấn đề cốt lõi: Làm thế nào duy trì tính minh bạch khi sử dụng công cụ không minh bạch?\n- Giải pháp: Minh bạch về sự không minh bạch - thừa nhận rõ ràng những gì không thể biết\n- Triết lý: Tính minh bạch là quá trình chứ không phải trạng thái\n\n---\n\nKết Luận Cân Bằng\n\n Ưu điểm hệ thống:\n- Tận dụng được sức mạnh của mô hình lớn\n- Duy trì tính minh bạch ở cấp độ giao diện và quy trình\n\n Thách thức:\n- Phụ thuộc vào các thành phần không thể kiểm chứng hoàn toàn\n- Đòi hỏi sự trung thực cao độ trong việc thừa nhận giới hạn\n\n Cam kết minh bạch:\nStillMe ưu tiên tính minh bạch có thể đạt được thông qua sự trung thực về những gì không thể minh bạch và cơ chế rõ ràng cho những gì có thể minh bạch.",
+      "answer_length": 2025,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "minh bạch",
+            "black box",
+            "mô hình",
+            "hệ thống"
+          ],
+          "missing_terms": [
+            "transparency",
+            "model",
+            "system",
+            "mâu thuẫn",
+            "paradox"
+          ],
+          "passed": false
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    }
+  ]
+}

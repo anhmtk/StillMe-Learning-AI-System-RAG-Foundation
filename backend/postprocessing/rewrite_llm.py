@@ -574,10 +574,57 @@ REQUIREMENTS:
         
         # Helper function to check if term is in negative context
         def is_in_negative_context(text: str, pos: int, term: str) -> bool:
-            """Check if term at position is in negative context (OK to keep)"""
-            context_before = text[max(0, pos - 50):pos].lower()
-            # Check if any negative indicator appears before the term
-            return any(indicator in context_before for indicator in negative_indicators)
+            """
+            Check if term at position is in negative context (OK to keep)
+            
+            CRITICAL: Only consider negative indicators that are DIRECTLY related to the term,
+            not negative indicators that appear for other words in the sentence.
+            
+            Strategy:
+            1. Check immediate context (20 chars before) for direct negative indicators
+            2. Check if negative indicator is part of a phrase that includes the term
+            3. Avoid false positives from negative indicators for other words
+            """
+            # Check immediate context (20 chars) for direct negative indicators
+            immediate_context = text[max(0, pos - 20):pos].lower()
+            
+            # Direct negative patterns that apply to the term
+            direct_negative_patterns = [
+                r"không\s+có\s+" + re.escape(term.lower()),
+                r"không\s+" + re.escape(term.lower()),
+                r"no\s+" + re.escape(term.lower()),
+                r"not\s+" + re.escape(term.lower()),
+                r"without\s+" + re.escape(term.lower()),
+                r"does\s+not\s+have\s+" + re.escape(term.lower()),
+                r"don't\s+have\s+" + re.escape(term.lower()),
+            ]
+            
+            # Check if any direct negative pattern matches
+            for pattern in direct_negative_patterns:
+                if re.search(pattern, immediate_context, re.IGNORECASE):
+                    return True
+            
+            # Also check for "không có khả năng" + term (for "trải nghiệm cảm xúc")
+            if "không có khả năng" in immediate_context and term.lower() in text[pos:pos+30].lower():
+                return True
+            
+            # Check for negative indicators in immediate context (but be more strict)
+            # Only consider if they appear very close to the term (within 10 chars)
+            close_context = text[max(0, pos - 10):pos].lower()
+            close_negative_indicators = ["không có", "không", "no", "not", "without"]
+            if any(indicator in close_context for indicator in close_negative_indicators):
+                # Additional check: make sure the negative indicator is actually modifying this term
+                # by checking if there's no other word between the indicator and the term
+                for indicator in close_negative_indicators:
+                    indicator_pos = close_context.rfind(indicator)
+                    if indicator_pos >= 0:
+                        # Check if there's minimal text between indicator and term
+                        text_between = close_context[indicator_pos + len(indicator):].strip()
+                        # If text between is very short (just spaces/punctuation), it's likely modifying the term
+                        if len(text_between) < 5:  # Allow a few chars for spacing/punctuation
+                            return True
+            
+            return False
         
         # Pattern 1: "trải nghiệm cảm xúc" (positive) → "không có trải nghiệm cảm xúc"
         # BUT: "không có trải nghiệm cảm xúc", "không có khả năng trải nghiệm cảm xúc" is OK
@@ -638,6 +685,32 @@ REQUIREMENTS:
         for match in reversed(matches):
             if not is_in_negative_context(result, match.start(), "feel"):
                 result = result[:match.start()] + "do not feel" + result[match.end():]
+        
+        # Pattern 6: "tuyệt đối" (absolute certainty claim) → "tương đối" or remove
+        # BUT: "tuyệt đối hay tương đối" (philosophical question) is OK
+        # CRITICAL: Only filter when used as a claim of absolute certainty, not in questions
+        pattern6 = re.compile(r'\btuyệt đối\b', re.IGNORECASE)
+        matches = list(pattern6.finditer(result))
+        for match in reversed(matches):
+            context_before = result[max(0, match.start() - 30):match.start()].lower()
+            context_after = result[match.end():min(len(result), match.end() + 30)].lower()
+            
+            # Check if it's in a question context (OK to keep)
+            question_indicators = ["hay", "or", "?", "phải là", "là gì", "là gì", "khái niệm"]
+            is_question = any(indicator in context_before or indicator in context_after for indicator in question_indicators)
+            
+            # Check if it's used as a claim of absolute certainty (FORBIDDEN)
+            certainty_indicators = ["chắc chắn", "đúng", "sai", "luôn luôn", "không bao giờ", "100%"]
+            is_certainty_claim = any(indicator in context_before or indicator in context_after for indicator in certainty_indicators)
+            
+            # Only filter if it's a certainty claim, not a question
+            if not is_question and is_certainty_claim:
+                # Replace with "tương đối" or remove depending on context
+                result = result[:match.start()] + "tương đối" + result[match.end():]
+            elif not is_question:
+                # If not a question and not explicitly a certainty claim, still filter to be safe
+                # Replace with "tương đối" to maintain philosophical nuance
+                result = result[:match.start()] + "tương đối" + result[match.end():]
         
         return result
 
