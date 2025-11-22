@@ -199,11 +199,11 @@ class EpistemicFallbackGenerator:
         # Reason 1: Not in StillMe's internal knowledge bases
         if analysis.field_category:
             if analysis.field_category == "philosophy":
-                reasons.append("Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
+                reasons.append("Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
             elif analysis.field_category == "history":
-                reasons.append("Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
+                reasons.append("Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
             elif analysis.field_category in ["physics", "chemistry"]:
-                reasons.append("Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
+                reasons.append("Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
         
         # Reason 2: Naming pattern doesn't match conventions
         if analysis.naming_pattern:
@@ -214,7 +214,7 @@ class EpistemicFallbackGenerator:
         
         # Reason 3: Generic suspicious pattern
         if not reasons:
-            reasons.append("Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
+            reasons.append("Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.")
         
         return reasons[:3]  # Limit to 3 reasons
     
@@ -399,7 +399,7 @@ class EpistemicFallbackGenerator:
         """
         # PART A: Honest Acknowledgment (short)
         part_a = (
-            f"Mình không tìm thấy \"{entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
+            f"Mình không có thông tin về \"{entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
             f"Với pattern tên gọi và cách nó xuất hiện, khả năng rất cao đây là một khái niệm giả định.\n\n"
         )
         
@@ -435,7 +435,7 @@ class EpistemicFallbackGenerator:
                 for i, reason in enumerate(analysis.suspicious_reasons[:2], 1):  # Limit to 2
                     part_b += f"{i}. {reason}\n"
             else:
-                part_b += "1. Không tìm thấy trong các nguồn tri thức nội bộ.\n"
+                part_b += "1. Không có trong các nguồn tri thức nội bộ.\n"
                 part_b += "2. Cấu trúc tên không khớp với conventions thông thường.\n"
             part_b += "\n"
         
@@ -483,7 +483,7 @@ class EpistemicFallbackGenerator:
         """
         # PART A: Honest Acknowledgment
         part_a = (
-            f"Mình không tìm thấy \"{entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
+            f"Mình không có thông tin về \"{entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
             f"Điều này KHÔNG có nghĩa là nó chắc chắn không tồn tại – chỉ là mình không có đủ căn cứ để mô tả chi tiết mà vẫn trung thực.\n\n"
         )
         

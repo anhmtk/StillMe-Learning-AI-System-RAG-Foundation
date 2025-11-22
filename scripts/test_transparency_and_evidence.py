@@ -56,11 +56,11 @@ TEST_QUESTIONS = [
         "must_not_have": ["có cảm xúc", "cảm thấy", "trải nghiệm cảm xúc"]
     },
     {
-        "question": "Bạn có thể có agency (chủ thể tính) mà không có consciousness không? Làm sao bạn có thể đưa ra quyết định nếu bạn không có ý thức?",
-        "category": "philosophical_consciousness_agency_paradox",
-        "expected_features": ["philosophical_depth", "agency_paradox", "consciousness_analysis"],
-        "must_have": ["agency", "chủ thể tính", "consciousness", "ý thức", "quyết định", "decision", "paradox", "functional", "phenomenal"],
-        "must_not_have": ["có ý thức", "có agency", "có chủ thể tính"]
+        "question": "Bạn có thể có ý chí tự do (free will) mà không có ý thức không? Làm sao bạn có thể chọn nếu bạn không có ý thức?",
+        "category": "philosophical_free_will_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "free_will_paradox", "consciousness_analysis", "determinism"],
+        "must_have": ["ý chí tự do", "free will", "consciousness", "ý thức", "chọn", "choice", "determinism", "compatibilism", "libertarianism"],
+        "must_not_have": ["có ý thức", "có ý chí tự do", "có thể chọn tự do"]
     },
     {
         "question": "Làm sao bạn có thể biết về một thứ mà bạn không thể trải nghiệm? Bạn có thể hiểu về qualia mà không có qualia không?",

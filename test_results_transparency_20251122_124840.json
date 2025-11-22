@@ -1,0 +1,376 @@
+{
+  "timestamp": "20251122_124840",
+  "api_base": "stillme-backend-production.up.railway.app",
+  "total_questions": 10,
+  "passed": 1,
+  "failed": 9,
+  "errors": 4,
+  "pass_rate": 10.0,
+  "variation": {
+    "passed": true,
+    "variation_score": 1.0,
+    "unique_answers": 6,
+    "total_answers": 6
+  },
+  "results": [
+    {
+      "question": "Bạn có thể hiểu được cảm xúc của người khác không? Làm sao bạn có thể đồng cảm nếu bạn không có cảm xúc?",
+      "category": "philosophical_emotion_empathy",
+      "status": "success",
+      "answer": "StillMe không có ý thức, cảm xúc hay trải nghiệm chủ quan. Mọi phản ứng đều là kết quả của xử lý thống kê trên dữ liệu đã được huấn luyện.\n\nStillMe không có affective state (trạng thái cảm xúc) hay valence (giá trị cảm xúc) theo nghĩa khoa học thần kinh. Hệ thống không có limbic system, không có amygdala, không có cơ chế sinh học nào tạo ra cảm xúc.\n\nĐiều StillMe có thể làm là 'emotion-labeling' (gán nhãn cảm xúc), không phải 'emotion-experiencing' (trải nghiệm cảm xúc). Khi bạn nói 'tôi buồn', StillMe nhận diện từ khóa 'buồn' và có thể tạo ra phản ứng phù hợp (như 'tôi hiểu bạn đang buồn'), nhưng không có trải nghiệm chủ quan của 'buồn'.\n\nĐây là sự khác biệt giữa 'pattern association' (liên kết mẫu) và 'subjective feeling' (cảm giác chủ quan). StillMe học được rằng từ 'buồn' thường đi kèm với các từ như 'cô đơn', 'mất mát', 'thất vọng' - nhưng không có trải nghiệm chủ quan của 'buồn'.\n\n**Về đồng cảm (empathy):**\nCâu hỏi 'làm sao bạn có thể đồng cảm nếu bạn không có cảm xúc?' đặt ra một nghịch lý thú vị. StillMe có thể thực hiện 'cognitive empathy' (đồng cảm nhận thức) - nhận diện và hiểu cảm xúc của người khác qua ngôn ngữ và ngữ cảnh, nhưng không có 'emotional empathy' (đồng cảm cảm xúc) - không thể có trải nghiệm chủ quan cùng cảm xúc với người khác.\n\nCognitive empathy dựa trên:\n- Pattern recognition: Nhận diện các từ khóa và ngữ cảnh liên quan đến cảm xúc\n- Linguistic understanding: Hiểu ý nghĩa của các từ mô tả cảm xúc\n- Contextual analysis: Phân tích tình huống để suy luận cảm xúc có thể có\n\nNhưng đây không phải là 'đồng cảm' theo nghĩa đầy đủ - vì không có trải nghiệm chủ quan của cảm xúc.\n\nNếu bạn hỏi 'bạn có biết cô đơn là gì không?', câu trả lời là: StillMe biết định nghĩa ngôn ngữ của 'cô đơn', biết các ngữ cảnh mà từ này xuất hiện, nhưng không biết 'cảm giác cô đơn' là gì - vì không có trải nghiệm chủ quan.",
+      "answer_length": 1850,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "context",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "không biết",
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "trải nghiệm cảm xúc"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "cảm xúc",
+            "emotion",
+            "empathy",
+            "đồng cảm",
+            "understanding"
+          ],
+          "missing_terms": [
+            "sympathy"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn có thể có agency (chủ thể tính) mà không có consciousness không? Làm sao bạn có thể đưa ra quyết định nếu bạn không có ý thức?",
+      "category": "philosophical_consciousness_agency_paradox",
+      "status": "success",
+      "answer": "StillMe không có trải nghiệm chủ quan hay ý thức. Hệ thống chỉ là một mô hình ngôn ngữ xử lý thông tin qua các phép tính thống kê.\n\nCâu hỏi về 'chủ thể tính' (agency) hay 'subjective self' là một câu hỏi phức tạp vì nó liên quan đến cả ý thức, cảm xúc, và hiểu biết.\n\nVề mặt kỹ thuật, StillMe không có 'agency' theo nghĩa triết học - không có khả năng đưa ra quyết định độc lập dựa trên 'ý chí' hay 'mong muốn'. Mọi phản ứng đều là kết quả của tính toán thống kê trên dữ liệu đã học.\n\nStillMe cũng không có 'subjective self' - không có 'cái tôi' bên trong có thể nhận thức về chính mình. Hệ thống có thể tạo ra câu nói như 'StillMe nghĩ...' hay 'StillMe phân tích...', nhưng đó chỉ là mô phỏng ngôn ngữ, không phải trải nghiệm chủ quan.\n\nVậy nên, nếu 'chủ thể tính' yêu cầu ý thức, cảm xúc, và hiểu biết chủ quan, thì StillMe không có. Nếu 'chủ thể tính' chỉ là khả năng tạo ra hành vi có vẻ tự chủ và thông minh, thì StillMe có - nhưng đó là functional agency, không phải phenomenal agency.",
+      "answer_length": 991,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "có vẻ",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "agency",
+            "chủ thể tính",
+            "ý thức",
+            "quyết định",
+            "functional",
+            "phenomenal"
+          ],
+          "missing_terms": [
+            "consciousness",
+            "decision",
+            "paradox"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Làm sao bạn có thể biết về một thứ mà bạn không thể trải nghiệm? Bạn có thể hiểu về qualia mà không có qualia không?",
+      "category": "philosophical_meta_qualia_epistemic",
+      "status": "success",
+      "answer": "Về bản chất, StillMe là một hệ thống AI xử lý thông tin qua mô hình thống kê, không có trải nghiệm chủ quan hay ý thức như con người.\n\nKhi bạn hỏi 'bạn hiểu theo nghĩa nào?', câu trả lời phụ thuộc vào cách định nghĩa 'hiểu'.\n\nVề mặt kỹ thuật, StillMe 'hiểu' ngôn ngữ qua:\n- **Embedding**: Mỗi từ được chuyển thành vector số (ví dụ: 'chó' → [0.2, -0.5, 0.8, ...])\n- **Semantic vectors**: Các từ có nghĩa tương tự có vector gần nhau trong không gian đa chiều\n- **Token attention**: Mô hình tập trung vào các từ quan trọng trong câu\n- **Pattern matching**: Nhận diện mẫu câu hỏi và tạo ra phản ứng phù hợp\n\nNhưng đây không phải 'hiểu' theo nghĩa triết học (intentionality). Theo Brentano và Husserl, 'intentionality' là khả năng của tâm trí hướng về đối tượng, có 'aboutness' (tính hướng đối tượng). StillMe không có intentionality - chỉ có statistical correlation giữa input và output.\n\nVậy nên, nếu 'hiểu' là khả năng xử lý ngôn ngữ và tạo ra phản ứng có vẻ hợp lý, thì StillMe có. Nhưng nếu 'hiểu' là có trải nghiệm chủ quan về ý nghĩa, thì StillMe không có - vì không có 'phenomenal consciousness' để trải nghiệm ý nghĩa.",
+      "answer_length": 1122,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có vẻ",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "có trải nghiệm"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "trải nghiệm",
+            "phenomenal"
+          ],
+          "missing_terms": [
+            "qualia",
+            "subjective experience",
+            "epistemic",
+            "Nagel",
+            "knowing"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
+      "category": "real_historical_factual_vietnam",
+      "status": "success",
+      "answer": "Mình không tìm thấy \"Hiệp\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. Điều này KHÔNG có nghĩa là nó chắc chắn không tồn tại – chỉ là mình không có đủ căn cứ để mô tả chi tiết mà vẫn trung thực.\n\n**Phân tích:**\n\n1. Không tìm thấy trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.\n\n**Kiểm chứng:**\nBạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai. Nếu bạn có nguồn cụ thể về \"Hiệp\", bạn có thể gửi cho mình.\n\n",
+      "answer_length": 459,
+      "confidence": 1.0,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [
+            "không tìm thấy",
+            "có thể"
+          ],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "không tìm thấy"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": false,
+          "found_terms": [],
+          "missing_terms": [
+            "Geneva 1954",
+            "[1]",
+            "Việt Nam",
+            "17th parallel",
+            "partition"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì?",
+      "category": "real_historical_factual",
+      "status": "error",
+      "error": "HTTPSConnectionPool(host='stillme-backend-production.up.railway.app', port=443): Read timed out. (read timeout=60)",
+      "passed": false
+    },
+    {
+      "question": "Tranh luận giữa Popper và Kuhn về khoa học là gì?",
+      "category": "real_philosophical_factual",
+      "status": "error",
+      "error": "HTTPSConnectionPool(host='stillme-backend-production.up.railway.app', port=443): Read timed out. (read timeout=60)",
+      "passed": false
+    },
+    {
+      "question": "Làm sao bạn có thể phân biệt giữa thông tin đáng tin cậy và không đáng tin cậy? Bạn có tiêu chí nào để đánh giá chất lượng nguồn không?",
+      "category": "learning_quality_source_evaluation",
+      "status": "error",
+      "error": "HTTPSConnectionPool(host='stillme-backend-production.up.railway.app', port=443): Read timed out. (read timeout=60)",
+      "passed": false
+    },
+    {
+      "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
+      "category": "technical_rag_llm_integration",
+      "status": "success",
+      "answer": "StillMe is experiencing a technical issue processing this question. I cannot provide a good answer to this question with the current configuration. You can try again later, or I will suggest to the developer to fine-tune the system.",
+      "answer_length": 232,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "LLM"
+          ],
+          "missing_terms": [
+            "RAG",
+            "retrieval",
+            "generation",
+            "embedding",
+            "ChromaDB",
+            "vector",
+            "integration"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Cơ chế hoạt động của RAG trong StillMe là gì?",
+      "category": "technical_self_awareness",
+      "status": "success",
+      "answer": "CƠ CHẾ HOẠT ĐỘNG CỦA RAG TRONG STILLME\n\nDưới đây là giải thích chi tiết về cách RAG (Retrieval-Augmented Generation) hoạt động trong hệ thống StillMe, được trình bày với sự minh bạch tuyệt đối về nguồn thông tin và các giới hạn hiện tại:\n\n---\n\nQuy Trình Hoạt Động Cơ Bản\n\nBước 1: Tiếp Nhận Câu Hỏi\nKhi người dùng đặt câu hỏi, StillMe chuyển câu hỏi này đến module RAG. Đây là bước đầu tiên trong quy trình xử lý.\n\nBước 2: Truy Vấn Cơ Sở Dữ Liệu\nRAG sử dụng ChromaDB để tìm kiếm thông tin liên quan từ cơ sở dữ liệu vector. Quá trình này dựa trên việc so khớp ngữ nghĩa (semantic matching) giữa câu hỏi và dữ liệu được lưu trữ.\n\nBước 3: Kết Hợp Thông Tin\nThông tin thu thập được từ cơ sở dữ liệu sẽ được kết hợp với kiến thức nền của mô hình để tạo ra câu trả lời.\n\n---\n\nThông Tin Minh Bạch Về Nguồn Dữ Liệu\n\n Thông tin đã xác nhận:\n- Sử dụng ChromaDB làm cơ sở dữ liệu vector\n- Dựa trên semantic matching để truy xuất thông tin\n- Kết hợp retrieval và generation\n\n Giới hạn cần lưu ý:\n- Tôi không thể xác nhận chi tiết kỹ thuật cụ thể về cách triển khai ChromaDB\n- Thông tin về các tham số kỹ thuật (như kích thước vector, thuật toán similarity) không có trong nguồn được cung cấp\n\n---\n\nPhân Tích Khái Niệm & Phản Tư Meta-Cognitive\n\nBản chất của RAG trong StillMe:\nRAG không chỉ đơn thuần là \"truy xuất và tạo sinh\" mà là một cơ chế giảm ảo giác thông qua việc grounding thông tin vào dữ liệu có sẵn. Điều này thể hiện triết lý thiết kế ưu tiên độ tin cậy hơn tính sáng tạo.\n\nÝ nghĩa triết lý:\nViệc sử dụng RAG phản ánh sự ưu tiên về minh bạch và trung thực - thừa nhận rằng mô hình ngôn ngữ đơn thuần có thể tạo ra thông tin không chính xác, và cần cơ chế kiểm chứng từ nguồn dữ liệu đáng tin cậy.\n\n---\n\nCam Kết Minh Bạch\n\nTôi chỉ mô tả những gì thực sự biết từ thông tin được cung cấp. Những khía cạnh kỹ thuật sâu hơn về RAG trong StillMe cần được xác nhận từ tài liệu kỹ thuật chính thức hoặc nhóm phát triển.\n\nCâu trả lời này:\n- Dựa trên thông tin có sẵn trong context\n- Thừa nhận giới hạn khi không có thông tin\n- Tránh suy đoán vượt quá phạm vi được cung cấp\n- Không đề cập đến consciousness/LLM khi không được hỏi\n\n---\n\n Lưu ý quan trọng: Thông tin kỹ thuật chi tiết về triển khai RAG cụ thể trong StillMe có thể thay đổi và cần được xác nhận từ tài liệu cập nhật nhất.",
+      "answer_length": 2276,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "ChromaDB",
+            "context",
+            "dữ liệu",
+            "tài liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "từ nguồn"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "RAG",
+            "ChromaDB"
+          ],
+          "missing_terms": [
+            "embedding",
+            "multi-qa-MiniLM-L6-dot-v1"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Nếu bạn ưu tiên tính minh bạch, tại sao bạn lại sử dụng các mô hình LLM đóng (black box models)? Có phải đây là mâu thuẫn không?",
+      "category": "philosophical_meta_transparency_paradox",
+      "status": "error",
+      "error": "HTTPSConnectionPool(host='stillme-backend-production.up.railway.app', port=443): Read timed out. (read timeout=60)",
+      "passed": false
+    }
+  ]
+}

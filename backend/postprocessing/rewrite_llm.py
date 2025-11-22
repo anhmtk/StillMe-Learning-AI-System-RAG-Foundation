@@ -8,6 +8,7 @@ while preserving factual content.
 
 import logging
 import os
+import re
 from typing import Optional, Dict, Any, Tuple
 import httpx
 from dataclasses import dataclass
@@ -86,8 +87,9 @@ class RewriteLLM:
         
         for attempt in range(max_retries):
             try:
-                # Optimized timeout: 30s for faster responses (100% rewrite policy requires efficiency)
-                timeout_duration = 30.0
+                # Optimized timeout: 45s for complex rewrites (100% rewrite policy requires reliability)
+                # Increased from 30s to handle complex philosophical/technical questions without timeout
+                timeout_duration = 45.0
                 logger.info(
                     f"🔄 Rewrite attempt {attempt + 1}/{max_retries}: "
                     f"timeout={timeout_duration}s, length={len(text)}, issues={len(quality_issues)}"
@@ -140,6 +142,11 @@ class RewriteLLM:
                                     was_rewritten=False,
                                     error="Rewrite output too short"
                                 )
+                            
+                            # CRITICAL: Post-rewrite filter for forbidden terms
+                            # Even though we have FORBIDDEN TERMS in prompt, LLM might still use them
+                            # We need to actively filter and replace them
+                            rewritten = self._filter_forbidden_terms(rewritten)
                             
                             logger.info(
                                 f"✅ Successfully rewrote output (attempt {attempt + 1}/{max_retries}): "
