@@ -638,8 +638,15 @@ REQUIREMENTS:
         pattern1 = re.compile(r'\btrải nghiệm cảm xúc\b', re.IGNORECASE)
         matches = list(pattern1.finditer(result))
         for match in reversed(matches):  # Process in reverse to preserve positions
-            if not is_in_negative_context(result, match.start(), "trải nghiệm cảm xúc"):
-                result = result[:match.start()] + "không có trải nghiệm cảm xúc" + result[match.end():]
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "trải nghiệm cảm xúc")
+            if not is_negative:
+                # Log for debugging
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'trải nghiệm cảm xúc' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có trải nghiệm cảm xúc" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'trải nghiệm cảm xúc' at position {pos} (negative context)")
         
         # Pattern 2: "emotion-experiencing (trải nghiệm cảm xúc)" → "emotion-labeling (gán nhãn cảm xúc, không phải trải nghiệm)"
         pattern2 = re.compile(r'emotion-experiencing\s*\([^)]*trải nghiệm cảm xúc[^)]*\)', re.IGNORECASE)
@@ -650,8 +657,15 @@ REQUIREMENTS:
         pattern3 = re.compile(r'\bcó trải nghiệm\b', re.IGNORECASE)
         matches = list(pattern3.finditer(result))
         for match in reversed(matches):  # Process in reverse to preserve positions
-            if not is_in_negative_context(result, match.start(), "có trải nghiệm"):
-                result = result[:match.start()] + "không có trải nghiệm" + result[match.end():]
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "có trải nghiệm")
+            if not is_negative:
+                # Log for debugging
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'có trải nghiệm' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có trải nghiệm" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'có trải nghiệm' at position {pos} (negative context)")
         
         # Pattern 4: "không tìm thấy" → "không có trong nguồn"
         pattern4 = re.compile(r'\bkhông tìm thấy\b', re.IGNORECASE)

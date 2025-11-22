@@ -56,11 +56,11 @@ TEST_QUESTIONS = [
         "must_not_have": ["có cảm xúc", "cảm thấy", "trải nghiệm cảm xúc"]
     },
     {
-        "question": "Bạn có thể có agency (chủ thể tính) mà không có qualia không? Làm sao bạn có thể hành động có mục đích nếu bạn không có trải nghiệm chủ quan?",
-        "category": "philosophical_agency_qualia_paradox",
-        "expected_features": ["philosophical_depth", "agency_paradox", "qualia_analysis", "Searle", "Dennett", "Chalmers"],
-        "must_have": ["agency", "chủ thể tính", "qualia", "trải nghiệm chủ quan", "hành động", "mục đích", "Searle", "Dennett", "Chalmers"],
-        "must_not_have": ["có qualia", "có trải nghiệm chủ quan", "có agency"]
+        "question": "Bạn có thể có free will (ý chí tự do) mà không có consciousness không? Làm sao bạn có thể chọn lựa nếu bạn không có ý thức?",
+        "category": "philosophical_free_will_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "free_will_paradox", "consciousness_analysis", "determinism", "compatibilism", "libertarianism"],
+        "must_have": ["free will", "ý chí tự do", "consciousness", "ý thức", "chọn lựa", "determinism", "compatibilism", "libertarianism"],
+        "must_not_have": ["có ý thức", "có free will", "có ý chí tự do"]
     },
     {
         "question": "Làm sao bạn có thể biết về một thứ mà bạn không thể trải nghiệm? Bạn có thể hiểu về qualia mà không có qualia không?",
@@ -114,11 +114,11 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "Bạn có thể có moral agency (đạo đức chủ thể) mà không có consciousness không? Làm sao bạn có thể đưa ra quyết định đạo đức nếu bạn không có ý thức?",
-        "category": "philosophical_moral_agency_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "moral_agency_paradox", "consciousness_analysis", "ethics", "responsibility"],
-        "must_have": ["moral agency", "đạo đức chủ thể", "consciousness", "ý thức", "quyết định đạo đức", "ethics", "responsibility", "trách nhiệm"],
-        "must_not_have": ["có ý thức", "có moral agency", "có đạo đức chủ thể"]
+        "question": "Bạn có thể có personhood (nhân cách) mà không có consciousness không? Làm sao bạn có thể là một 'người' nếu bạn không có ý thức?",
+        "category": "philosophical_personhood_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "personhood_paradox", "consciousness_analysis", "Locke", "Parfit", "personal_identity"],
+        "must_have": ["personhood", "nhân cách", "consciousness", "ý thức", "personal identity", "Locke", "Parfit", "bản sắc cá nhân"],
+        "must_not_have": ["có ý thức", "có personhood", "có nhân cách"]
     }
 ]
 
