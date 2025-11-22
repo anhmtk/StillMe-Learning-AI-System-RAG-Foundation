@@ -283,6 +283,7 @@ def page_overview():
         st.metric("Conversation Docs", rag_stats.get("conversation_documents", 0))
 
     st.markdown("### Learning Performance")
+    st.caption("📊 **Accuracy Score**: Measures how accurate StillMe's answers are compared to expected answers. Target: 80% accuracy.")
     avg_acc = accuracy.get("average_accuracy", 0.0)
     gauge = go.Figure(
         go.Indicator(
@@ -291,7 +292,7 @@ def page_overview():
             number={"suffix": "%"},
             gauge={"axis": {"range": [0, 100]}},
             delta={"reference": 80},
-            title={"text": "Success Rate (%)"},
+            title={"text": "Answer Accuracy (%)"},
         )
     )
     gauge.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0))
