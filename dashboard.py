@@ -674,14 +674,21 @@ def page_overview():
                                 reason = ""
                             timestamp = item.get("fetch_timestamp", item.get("timestamp", ""))
                             
-                            # Format timestamp
+                            # Format timestamp - convert UTC to local timezone (GMT+7)
                             try:
                                 if timestamp:
                                     if isinstance(timestamp, str):
+                                        # Parse UTC timestamp
                                         if timestamp.endswith('Z'):
                                             timestamp = timestamp[:-1] + '+00:00'
-                                        dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-                                        formatted_time = dt.strftime("%Y-%m-%d %H:%M:%S")
+                                        dt_utc = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                                        
+                                        # Convert UTC to GMT+7 (Vietnam timezone)
+                                        from datetime import timezone, timedelta
+                                        gmt7 = timezone(timedelta(hours=7))
+                                        dt_local = dt_utc.astimezone(gmt7)
+                                        
+                                        formatted_time = dt_local.strftime("%b %d %Y %H:%M:%S")
                                     else:
                                         formatted_time = str(timestamp)
                                 else:
