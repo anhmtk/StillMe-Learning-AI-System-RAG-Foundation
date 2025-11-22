@@ -562,37 +562,82 @@ REQUIREMENTS:
         if not text:
             return text
         
-        # Forbidden term replacements (case-insensitive)
-        # CRITICAL: Use word boundaries and negative lookbehind to avoid false positives
-        forbidden_replacements = [
-            # "không tìm thấy" → "không có trong nguồn" or "không có thông tin"
-            (r"(?<!không có )(?<!không )(?<!no )\bkhông tìm thấy\b", "không có trong nguồn"),
-            (r"(?<!don't )(?<!do not )(?<!cannot )\bI don't find\b", "I don't have information"),
-            (r"(?<!don't )(?<!do not )(?<!cannot )\bcannot find\b", "do not have information"),
-            
-            # "trải nghiệm cảm xúc" (positive) → "không có trải nghiệm cảm xúc"
-            # BUT: "không có trải nghiệm cảm xúc" is OK - we need to be careful
-            # Pattern: "có trải nghiệm cảm xúc" or "trải nghiệm cảm xúc" (without "không có" before it)
-            # CRITICAL: Also catch "emotion-experiencing (trải nghiệm cảm xúc)" pattern
-            (r"(?<!không có )(?<!không )(?<!no )(?<!not )\btrải nghiệm cảm xúc\b", "không có trải nghiệm cảm xúc"),
-            (r"(?<!don't have )(?<!no )(?<!without )\bemotional experience\b", "do not have emotional experience"),
-            (r"emotion-experiencing\s*\([^)]*trải nghiệm cảm xúc[^)]*\)", "emotion-labeling (gán nhãn cảm xúc, không phải trải nghiệm)"),
-            
-            # "có trải nghiệm" (positive) → "không có trải nghiệm"
-            (r"(?<!không )(?<!no )\bcó trải nghiệm\b", "không có trải nghiệm"),
-            (r"(?<!don't )(?<!do not )(?<!no )\bhave experience\b", "do not have experience"),
-            (r"(?<!don't )(?<!do not )(?<!no )\bhave subjective experience\b", "do not have subjective experience"),
-            
-            # "cảm thấy" → "không cảm thấy" (if used positively)
-            # BUT: "không cảm thấy" is OK
-            (r"(?<!không )(?<!don't )(?<!do not )\bcảm thấy\b", "không cảm thấy"),
-            (r"(?<!don't )(?<!do not )(?<!cannot )\bfeel\b", "do not feel"),
+        result = text
+        
+        # CRITICAL: Check context before replacing to avoid false positives
+        # Negative indicators that make forbidden terms OK (phủ định)
+        negative_indicators = [
+            "không có", "không", "no", "not", "without", "does not", "don't", 
+            "doesn't", "cannot", "can't", "không có khả năng", "không thể",
+            "không phải", "is not", "are not", "was not", "were not"
         ]
         
-        result = text
-        for pattern, replacement in forbidden_replacements:
-            # Use case-insensitive replacement
-            result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+        # Helper function to check if term is in negative context
+        def is_in_negative_context(text: str, pos: int, term: str) -> bool:
+            """Check if term at position is in negative context (OK to keep)"""
+            context_before = text[max(0, pos - 50):pos].lower()
+            # Check if any negative indicator appears before the term
+            return any(indicator in context_before for indicator in negative_indicators)
+        
+        # Pattern 1: "trải nghiệm cảm xúc" (positive) → "không có trải nghiệm cảm xúc"
+        # BUT: "không có trải nghiệm cảm xúc", "không có khả năng trải nghiệm cảm xúc" is OK
+        pattern1 = re.compile(r'\btrải nghiệm cảm xúc\b', re.IGNORECASE)
+        matches = list(pattern1.finditer(result))
+        for match in reversed(matches):  # Process in reverse to preserve positions
+            if not is_in_negative_context(result, match.start(), "trải nghiệm cảm xúc"):
+                result = result[:match.start()] + "không có trải nghiệm cảm xúc" + result[match.end():]
+        
+        # Pattern 2: "emotion-experiencing (trải nghiệm cảm xúc)" → "emotion-labeling (gán nhãn cảm xúc, không phải trải nghiệm)"
+        pattern2 = re.compile(r'emotion-experiencing\s*\([^)]*trải nghiệm cảm xúc[^)]*\)', re.IGNORECASE)
+        result = pattern2.sub("emotion-labeling (gán nhãn cảm xúc, không phải trải nghiệm)", result)
+        
+        # Pattern 3: "có trải nghiệm" (positive) → "không có trải nghiệm"
+        # BUT: "không có trải nghiệm" is OK
+        pattern3 = re.compile(r'\bcó trải nghiệm\b', re.IGNORECASE)
+        matches = list(pattern3.finditer(result))
+        for match in reversed(matches):  # Process in reverse to preserve positions
+            if not is_in_negative_context(result, match.start(), "có trải nghiệm"):
+                result = result[:match.start()] + "không có trải nghiệm" + result[match.end():]
+        
+        # Pattern 4: "không tìm thấy" → "không có trong nguồn"
+        pattern4 = re.compile(r'\bkhông tìm thấy\b', re.IGNORECASE)
+        matches = list(pattern4.finditer(result))
+        for match in reversed(matches):
+            if not is_in_negative_context(result, match.start(), "không tìm thấy"):
+                result = result[:match.start()] + "không có trong nguồn" + result[match.end():]
+        
+        # Pattern 5: "cảm thấy" (positive) → "không cảm thấy"
+        # BUT: "không cảm thấy" is OK
+        pattern5 = re.compile(r'\bcảm thấy\b', re.IGNORECASE)
+        matches = list(pattern5.finditer(result))
+        for match in reversed(matches):
+            if not is_in_negative_context(result, match.start(), "cảm thấy"):
+                result = result[:match.start()] + "không cảm thấy" + result[match.end():]
+        
+        # English patterns
+        pattern_en1 = re.compile(r'\bemotional experience\b', re.IGNORECASE)
+        matches = list(pattern_en1.finditer(result))
+        for match in reversed(matches):
+            if not is_in_negative_context(result, match.start(), "emotional experience"):
+                result = result[:match.start()] + "do not have emotional experience" + result[match.end():]
+        
+        pattern_en2 = re.compile(r'\bhave experience\b', re.IGNORECASE)
+        matches = list(pattern_en2.finditer(result))
+        for match in reversed(matches):
+            if not is_in_negative_context(result, match.start(), "have experience"):
+                result = result[:match.start()] + "do not have experience" + result[match.end():]
+        
+        pattern_en3 = re.compile(r'\bhave subjective experience\b', re.IGNORECASE)
+        matches = list(pattern_en3.finditer(result))
+        for match in reversed(matches):
+            if not is_in_negative_context(result, match.start(), "have subjective experience"):
+                result = result[:match.start()] + "do not have subjective experience" + result[match.end():]
+        
+        pattern_en4 = re.compile(r'\bfeel\b', re.IGNORECASE)
+        matches = list(pattern_en4.finditer(result))
+        for match in reversed(matches):
+            if not is_in_negative_context(result, match.start(), "feel"):
+                result = result[:match.start()] + "do not feel" + result[match.end():]
         
         return result
 
