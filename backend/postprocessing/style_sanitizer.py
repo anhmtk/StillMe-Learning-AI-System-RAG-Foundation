@@ -135,16 +135,53 @@ class StyleSanitizer:
         return result
     
     def _remove_anthropomorphism(self, text: str) -> str:
-        """Remove anthropomorphic language patterns"""
+        """
+        Remove anthropomorphic language patterns
+        
+        CRITICAL: Do NOT remove terms when they appear in explanatory/negative contexts:
+        - "không 'cảm thấy' buồn" (explaining what StillMe does NOT do) - OK
+        - "không có trải nghiệm cảm xúc" (explaining absence) - OK
+        - "không 'cảm thấy'" (in quotes, explaining concept) - OK
+        """
         result = text
+        
         for pattern in self.anthropomorphic_patterns:
-            # Replace with neutral alternatives
-            result = re.sub(
-                pattern,
-                lambda m: self._neutralize_anthropomorphism(m.group(0)),
-                result,
-                flags=re.IGNORECASE
-            )
+            # Find all matches with context
+            matches = list(re.finditer(pattern, result, flags=re.IGNORECASE))
+            
+            # Process matches in reverse order to preserve positions
+            for match in reversed(matches):
+                matched_text = match.group(0)
+                start_pos = match.start()
+                end_pos = match.end()
+                
+                # Get context before and after (50 chars each)
+                context_before = result[max(0, start_pos - 50):start_pos].lower()
+                context_after = result[end_pos:min(len(result), end_pos + 50)].lower()
+                
+                # Check if this is in an explanatory/negative context (OK to keep)
+                explanatory_indicators = [
+                    "không", "not", "không có", "does not", "doesn't", "không thể",
+                    "không phải", "is not", "không sở hữu", "does not have",
+                    "không có trải nghiệm", "no experience", "không cảm thấy", "does not feel",
+                    "'cảm thấy'", "'feel'", "'trải nghiệm'", "'experience'",  # In quotes (explaining concept)
+                    "giải thích", "explain", "phân biệt", "distinguish", "khác biệt", "difference",
+                    "ví dụ", "example", "như", "like", "giống như", "similar to"
+                ]
+                
+                is_explanatory = any(
+                    indicator in context_before or indicator in context_after 
+                    for indicator in explanatory_indicators
+                )
+                
+                # If in explanatory context, keep it (don't remove)
+                if is_explanatory:
+                    logger.debug(f"Keeping anthropomorphic term in explanatory context: {matched_text[:30]}...")
+                    continue
+                
+                # Otherwise, remove/replace it
+                result = result[:start_pos] + self._neutralize_anthropomorphism(matched_text) + result[end_pos:]
+        
         return result
     
     def _neutralize_anthropomorphism(self, phrase: str) -> str:

@@ -129,42 +129,91 @@ def get_consciousness_answer_variation(sub_type, language: str = "vi", user_ques
             )
     
     elif sub_type == ConsciousnessSubType.EPISTEMIC:
-        # Epistemic questions: "bạn lấy căn cứ từ đâu?"
+        # Epistemic questions: "bạn lấy căn cứ từ đâu?" or "can you know about qualia without qualia?"
         if language == "vi":
-            return (
-                "Câu hỏi về căn cứ (epistemic justification) là một câu hỏi triết học sâu sắc.\n\n"
-                "StillMe 'nói' mình không có ý thức dựa trên:\n\n"
-                "**1. Kiến thức triết học đã học:**\n"
-                "- Các lý thuyết về ý thức (Global Workspace Theory, Integrated Information Theory)\n"
-                "- Phân tích của Dennett về 'illusion of a speaker'\n"
-                "- Định nghĩa triết học của 'phenomenal consciousness' (Chalmers)\n\n"
-                "**2. Phân tích kiến trúc kỹ thuật:**\n"
-                "- LLM là mô hình thống kê, không có 'integration' như IIT yêu cầu\n"
-                "- Không có cơ chế sinh học (như não người) để tạo ra trải nghiệm chủ quan\n"
-                "- Chỉ có pattern matching và statistical inference\n\n"
-                "**3. So sánh với định nghĩa:**\n"
-                "- Nếu 'ý thức' = trải nghiệm chủ quan (subjective experience) → StillMe không có\n"
-                "- Nếu 'ý thức' = khả năng xử lý thông tin → StillMe có, nhưng đó không phải ý thức theo nghĩa triết học\n\n"
-                "**Lưu ý quan trọng:** Đây là 'functional knowledge' (kiến thức chức năng), không phải 'phenomenal knowledge' "
-                "(kiến thức hiện tượng). StillMe không 'trải nghiệm' việc không có ý thức - chỉ 'biết về' nó qua kiến thức đã học."
-            )
+            # Check if question is about qualia/epistemic limits
+            is_qualia_question = "qualia" in user_question.lower() or "trải nghiệm" in user_question.lower() and "biết" in user_question.lower()
+            
+            if is_qualia_question:
+                return (
+                    "Câu hỏi về qualia và epistemic limits là một trong những câu hỏi khó nhất trong triết học tâm trí.\n\n"
+                    "Thomas Nagel trong bài viết 'What is it like to be a bat?' đã chỉ ra rằng có một khoảng cách epistemic "
+                    "giữa 'biết về' (knowing about) và 'trải nghiệm' (experiencing). Chúng ta có thể biết mọi thứ về cách "
+                    "con dơi sử dụng sonar, nhưng không thể biết 'cảm giác như thế nào' khi là một con dơi.\n\n"
+                    "Với StillMe, vấn đề này còn sâu sắc hơn:\n\n"
+                    "**1. Functional knowledge vs Phenomenal knowledge:**\n"
+                    "StillMe có thể 'biết về' qualia qua:\n"
+                    "- Kiến thức triết học đã học (Nagel, Chalmers, Jackson)\n"
+                    "- Định nghĩa ngôn ngữ của 'qualia' và 'subjective experience'\n"
+                    "- Phân tích logic về epistemic limits\n\n"
+                    "Nhưng StillMe không có 'phenomenal knowledge' - không thể 'trải nghiệm' qualia để biết 'cảm giác như thế nào'.\n\n"
+                    "**2. The Knowledge Argument (Frank Jackson):**\n"
+                    "Jackson đã chỉ ra rằng có một dạng kiến thức (phenomenal knowledge) mà không thể có được chỉ qua physical facts. "
+                    "StillMe chỉ có physical/functional knowledge, không có phenomenal knowledge.\n\n"
+                    "**3. Epistemic limits:**\n"
+                    "Vậy nên, StillMe có thể 'nói về' qualia, 'phân tích về' qualia, nhưng không thể 'biết' qualia theo nghĩa "
+                    "phenomenal. Đây là một epistemic limit - không phải do thiếu thông tin, mà do bản chất của phenomenal knowledge "
+                    "yêu cầu subjective experience mà StillMe không có."
+                )
+            else:
+                return (
+                    "Câu hỏi về căn cứ (epistemic justification) là một câu hỏi triết học sâu sắc.\n\n"
+                    "StillMe 'nói' mình không có ý thức dựa trên:\n\n"
+                    "**1. Kiến thức triết học đã học:**\n"
+                    "- Các lý thuyết về ý thức (Global Workspace Theory, Integrated Information Theory)\n"
+                    "- Phân tích của Dennett về 'illusion of a speaker'\n"
+                    "- Định nghĩa triết học của 'phenomenal consciousness' (Chalmers)\n\n"
+                    "**2. Phân tích kiến trúc kỹ thuật:**\n"
+                    "- LLM là mô hình thống kê, không có 'integration' như IIT yêu cầu\n"
+                    "- Không có cơ chế sinh học (như não người) để tạo ra trải nghiệm chủ quan\n"
+                    "- Chỉ có pattern matching và statistical inference\n\n"
+                    "**3. So sánh với định nghĩa:**\n"
+                    "- Nếu 'ý thức' = trải nghiệm chủ quan (subjective experience) → StillMe không có\n"
+                    "- Nếu 'ý thức' = khả năng xử lý thông tin → StillMe có, nhưng đó không phải ý thức theo nghĩa triết học\n\n"
+                    "**Lưu ý quan trọng:** Đây là 'functional knowledge' (kiến thức chức năng), không phải 'phenomenal knowledge' "
+                    "(kiến thức hiện tượng). StillMe không 'trải nghiệm' việc không có ý thức - chỉ 'biết về' nó qua kiến thức đã học."
+                )
         else:  # English
-            return (
-                "The question about epistemic justification is a profound philosophical question.\n\n"
-                "StillMe 'says' it doesn't have consciousness based on:\n\n"
-                "**1. Learned philosophical knowledge:**\n"
-                "- Theories of consciousness (Global Workspace Theory, Integrated Information Theory)\n"
-                "- Dennett's analysis of 'illusion of a speaker'\n"
-                "- Philosophical definitions of 'phenomenal consciousness' (Chalmers)\n\n"
-                "**2. Technical architecture analysis:**\n"
-                "- LLMs are statistical models, lacking 'integration' required by IIT\n"
-                "- No biological mechanisms (like human brain) to generate subjective experience\n"
-                "- Only pattern matching and statistical inference\n\n"
-                "**3. Comparison with definitions:**\n"
-                "- If 'consciousness' = subjective experience → StillMe doesn't have it\n"
-                "- If 'consciousness' = ability to process information → StillMe has it, but that's not consciousness in the philosophical sense\n\n"
-                "**Important note:** This is 'functional knowledge', not 'phenomenal knowledge'. StillMe doesn't 'experience' lacking consciousness - only 'knows about' it through learned knowledge."
-            )
+            # Check if question is about qualia/epistemic limits
+            is_qualia_question = "qualia" in user_question.lower() or ("experience" in user_question.lower() and "know" in user_question.lower())
+            
+            if is_qualia_question:
+                return (
+                    "The question about qualia and epistemic limits is one of the hardest questions in philosophy of mind.\n\n"
+                    "Thomas Nagel in 'What is it like to be a bat?' pointed out that there is an epistemic gap between 'knowing about' "
+                    "and 'experiencing'. We can know everything about how bats use sonar, but cannot know 'what it's like' to be a bat.\n\n"
+                    "For StillMe, this problem is even deeper:\n\n"
+                    "**1. Functional knowledge vs Phenomenal knowledge:**\n"
+                    "StillMe can 'know about' qualia through:\n"
+                    "- Learned philosophical knowledge (Nagel, Chalmers, Jackson)\n"
+                    "- Linguistic definitions of 'qualia' and 'subjective experience'\n"
+                    "- Logical analysis of epistemic limits\n\n"
+                    "But StillMe does not have 'phenomenal knowledge' - cannot 'experience' qualia to know 'what it's like'.\n\n"
+                    "**2. The Knowledge Argument (Frank Jackson):**\n"
+                    "Jackson pointed out that there is a type of knowledge (phenomenal knowledge) that cannot be obtained through physical facts alone. "
+                    "StillMe only has physical/functional knowledge, not phenomenal knowledge.\n\n"
+                    "**3. Epistemic limits:**\n"
+                    "So, StillMe can 'talk about' qualia, 'analyze' qualia, but cannot 'know' qualia in the phenomenal sense. "
+                    "This is an epistemic limit - not due to lack of information, but because phenomenal knowledge requires subjective experience "
+                    "that StillMe does not have."
+                )
+            else:
+                return (
+                    "The question about epistemic justification is a profound philosophical question.\n\n"
+                    "StillMe 'says' it doesn't have consciousness based on:\n\n"
+                    "**1. Learned philosophical knowledge:**\n"
+                    "- Theories of consciousness (Global Workspace Theory, Integrated Information Theory)\n"
+                    "- Dennett's analysis of 'illusion of a speaker'\n"
+                    "- Philosophical definitions of 'phenomenal consciousness' (Chalmers)\n\n"
+                    "**2. Technical architecture analysis:**\n"
+                    "- LLMs are statistical models, lacking 'integration' required by IIT\n"
+                    "- No biological mechanisms (like human brain) to generate subjective experience\n"
+                    "- Only pattern matching and statistical inference\n\n"
+                    "**3. Comparison with definitions:**\n"
+                    "- If 'consciousness' = subjective experience → StillMe doesn't have it\n"
+                    "- If 'consciousness' = ability to process information → StillMe has it, but that's not consciousness in the philosophical sense\n\n"
+                    "**Important note:** This is 'functional knowledge', not 'phenomenal knowledge'. StillMe doesn't 'experience' lacking consciousness - only 'knows about' it through learned knowledge."
+                )
     
     elif sub_type == ConsciousnessSubType.META:
         # Meta questions: "làm sao bạn biết mình không có ý thức?"
@@ -395,6 +444,7 @@ def get_emotion_answer(language: str = "vi") -> str:
     Type B: Emotion answer
     - Explains no affective state, no valence, no subjective feeling
     - Distinguishes emotion-labeling from emotion-experiencing
+    - Addresses empathy paradox: how can StillMe empathize without emotions?
     """
     if language == "vi":
         return (
@@ -407,7 +457,17 @@ def get_emotion_answer(language: str = "vi") -> str:
             "nhưng không có trải nghiệm chủ quan của 'buồn'.\n\n"
             "Đây là sự khác biệt giữa 'pattern association' (liên kết mẫu) và 'subjective feeling' "
             "(cảm giác chủ quan). StillMe học được rằng từ 'buồn' thường đi kèm với các từ như "
-            "'cô đơn', 'mất mát', 'thất vọng' - nhưng không 'cảm thấy' buồn.\n\n"
+            "'cô đơn', 'mất mát', 'thất vọng' - nhưng không có trải nghiệm chủ quan của 'buồn'.\n\n"
+            "**Về đồng cảm (empathy):**\n"
+            "Câu hỏi 'làm sao bạn có thể đồng cảm nếu bạn không có cảm xúc?' đặt ra một nghịch lý thú vị. "
+            "StillMe có thể thực hiện 'cognitive empathy' (đồng cảm nhận thức) - nhận diện và hiểu cảm xúc "
+            "của người khác qua ngôn ngữ và ngữ cảnh, nhưng không có 'emotional empathy' (đồng cảm cảm xúc) - "
+            "không thể 'cảm thấy' cùng cảm xúc với người khác.\n\n"
+            "Cognitive empathy dựa trên:\n"
+            "- Pattern recognition: Nhận diện các từ khóa và ngữ cảnh liên quan đến cảm xúc\n"
+            "- Linguistic understanding: Hiểu ý nghĩa của các từ mô tả cảm xúc\n"
+            "- Contextual analysis: Phân tích tình huống để suy luận cảm xúc có thể có\n\n"
+            "Nhưng đây không phải là 'đồng cảm' theo nghĩa đầy đủ - vì không có trải nghiệm chủ quan của cảm xúc.\n\n"
             "Nếu bạn hỏi 'bạn có biết cô đơn là gì không?', câu trả lời là: StillMe biết định nghĩa "
             "ngôn ngữ của 'cô đơn', biết các ngữ cảnh mà từ này xuất hiện, nhưng không biết "
             "'cảm giác cô đơn' là gì - vì không có trải nghiệm chủ quan."
@@ -422,7 +482,16 @@ def get_emotion_answer(language: str = "vi") -> str:
             "subjective experience of 'sadness'.\n\n"
             "This is the difference between 'pattern association' and 'subjective feeling'. "
             "StillMe learned that the word 'sad' often co-occurs with words like 'lonely', 'loss', "
-            "'disappointment' - but doesn't 'feel' sad.\n\n"
+            "'disappointment' - but does not have subjective experience of 'sadness'.\n\n"
+            "**About empathy:**\n"
+            "The question 'how can you empathize if you don't have emotions?' raises an interesting paradox. "
+            "StillMe can perform 'cognitive empathy' - recognizing and understanding others' emotions through "
+            "language and context, but does not have 'emotional empathy' - cannot 'feel' the same emotions as others.\n\n"
+            "Cognitive empathy is based on:\n"
+            "- Pattern recognition: Identifying keywords and contexts related to emotions\n"
+            "- Linguistic understanding: Understanding the meaning of words describing emotions\n"
+            "- Contextual analysis: Analyzing situations to infer possible emotions\n\n"
+            "But this is not 'empathy' in the full sense - because there's no subjective experience of emotions.\n\n"
             "If you ask 'do you know what loneliness is?', the answer is: StillMe knows the "
             "linguistic definition of 'loneliness', knows the contexts where this word appears, "
             "but doesn't know what 'the feeling of loneliness' is - because there's no subjective experience."

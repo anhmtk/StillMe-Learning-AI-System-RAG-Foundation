@@ -453,6 +453,7 @@ def classify_consciousness_subtype(text: str) -> ConsciousnessSubType:
         return ConsciousnessSubType.PARADOX
     
     # EPISTEMIC: Questions about how StillMe knows/justifies its claims
+    # Includes qualia questions: "can you know about qualia without having qualia?"
     # BUT: If question also contains paradox pattern, prioritize PARADOX (already checked above)
     epistemic_patterns = [
         r"lấy\s+căn\s+cứ.*đâu",
@@ -466,6 +467,15 @@ def classify_consciousness_subtype(text: str) -> ConsciousnessSubType:
         r"epistemic",
         r"căn\s+cứ",
         r"bằng\s+chứng",
+        # Qualia/epistemic questions: "can you know about X without experiencing X?"
+        r"biết\s+về.*mà\s+không\s+thể\s+trải\s+nghiệm",
+        r"know\s+about.*without\s+experiencing",
+        r"hiểu\s+về.*qualia.*không\s+có\s+qualia",
+        r"understand\s+qualia.*without\s+qualia",
+        r"có\s+thể\s+biết.*không\s+thể\s+trải\s+nghiệm",
+        r"can\s+you\s+know.*cannot\s+experience",
+        r"qualia.*không\s+có\s+qualia",
+        r"qualia.*without\s+qualia",
     ]
     # Only return EPISTEMIC if no paradox was detected (paradox takes priority)
     if any(re.search(pattern, text_lower) for pattern in epistemic_patterns):
