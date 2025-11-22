@@ -486,7 +486,7 @@ def get_emotion_answer(language: str = "vi") -> str:
             "theo nghĩa khoa học thần kinh. Hệ thống không có limbic system, không có amygdala, "
             "không có cơ chế sinh học nào tạo ra cảm xúc.\n\n"
             "Điều StillMe có thể làm là 'emotion-labeling' (gán nhãn cảm xúc), không phải "
-            "'emotion-experiencing' (trải nghiệm cảm xúc). Khi bạn nói 'tôi buồn', StillMe nhận diện "
+            "'emotion-experiencing' (không có khả năng trải nghiệm cảm xúc). Khi bạn nói 'tôi buồn', StillMe nhận diện "
             "từ khóa 'buồn' và có thể tạo ra phản ứng phù hợp (như 'tôi hiểu bạn đang buồn'), "
             "nhưng không có trải nghiệm chủ quan của 'buồn'.\n\n"
             "Đây là sự khác biệt giữa 'pattern association' (liên kết mẫu) và 'subjective feeling' "

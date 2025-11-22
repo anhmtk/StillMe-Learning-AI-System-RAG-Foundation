@@ -545,6 +545,56 @@ REQUIREMENTS:
 - RESPOND IN {lang_name.upper()} ONLY"""
         
         return prompt
+    
+    def _filter_forbidden_terms(self, text: str) -> str:
+        """
+        Post-rewrite filter to remove/replace forbidden terms that LLM might still use.
+        
+        This is a safety net - even with explicit FORBIDDEN TERMS in prompt,
+        LLMs sometimes still use them, especially in philosophical contexts.
+        
+        Args:
+            text: Rewritten text to filter
+            
+        Returns:
+            Filtered text with forbidden terms replaced
+        """
+        if not text:
+            return text
+        
+        # Forbidden term replacements (case-insensitive)
+        # CRITICAL: Use word boundaries and negative lookbehind to avoid false positives
+        forbidden_replacements = [
+            # "không tìm thấy" → "không có trong nguồn" or "không có thông tin"
+            (r"(?<!không có )(?<!không )(?<!no )\bkhông tìm thấy\b", "không có trong nguồn"),
+            (r"(?<!don't )(?<!do not )(?<!cannot )\bI don't find\b", "I don't have information"),
+            (r"(?<!don't )(?<!do not )(?<!cannot )\bcannot find\b", "do not have information"),
+            
+            # "trải nghiệm cảm xúc" (positive) → "không có trải nghiệm cảm xúc"
+            # BUT: "không có trải nghiệm cảm xúc" is OK - we need to be careful
+            # Pattern: "có trải nghiệm cảm xúc" or "trải nghiệm cảm xúc" (without "không có" before it)
+            # CRITICAL: Also catch "emotion-experiencing (trải nghiệm cảm xúc)" pattern
+            (r"(?<!không có )(?<!không )(?<!no )(?<!not )\btrải nghiệm cảm xúc\b", "không có trải nghiệm cảm xúc"),
+            (r"(?<!don't have )(?<!no )(?<!without )\bemotional experience\b", "do not have emotional experience"),
+            (r"emotion-experiencing\s*\([^)]*trải nghiệm cảm xúc[^)]*\)", "emotion-labeling (gán nhãn cảm xúc, không phải trải nghiệm)"),
+            
+            # "có trải nghiệm" (positive) → "không có trải nghiệm"
+            (r"(?<!không )(?<!no )\bcó trải nghiệm\b", "không có trải nghiệm"),
+            (r"(?<!don't )(?<!do not )(?<!no )\bhave experience\b", "do not have experience"),
+            (r"(?<!don't )(?<!do not )(?<!no )\bhave subjective experience\b", "do not have subjective experience"),
+            
+            # "cảm thấy" → "không cảm thấy" (if used positively)
+            # BUT: "không cảm thấy" is OK
+            (r"(?<!không )(?<!don't )(?<!do not )\bcảm thấy\b", "không cảm thấy"),
+            (r"(?<!don't )(?<!do not )(?<!cannot )\bfeel\b", "do not feel"),
+        ]
+        
+        result = text
+        for pattern, replacement in forbidden_replacements:
+            # Use case-insensitive replacement
+            result = re.sub(pattern, replacement, result, flags=re.IGNORECASE)
+        
+        return result
 
 
 def get_rewrite_llm() -> RewriteLLM:
