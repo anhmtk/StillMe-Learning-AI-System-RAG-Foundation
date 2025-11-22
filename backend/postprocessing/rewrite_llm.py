@@ -43,7 +43,9 @@ class RewriteLLM:
         quality_issues: list,
         is_philosophical: bool = False,
         detected_lang: str = "en",
-        ctx_docs: list = None
+        ctx_docs: list = None,
+        has_reliable_context: bool = False,
+        context_quality: str = None
     ) -> RewriteResult:
         """
         Rewrite text to improve quality while preserving factual content
@@ -55,6 +57,8 @@ class RewriteLLM:
             is_philosophical: Whether this is a philosophical question
             detected_lang: Detected language code
             ctx_docs: List of context documents (for citation preservation)
+            has_reliable_context: Whether RAG found reliable context
+            context_quality: Context quality level ("high", "medium", "low", None)
             
         Returns:
             RewriteResult with rewritten text and success flag
@@ -72,7 +76,8 @@ class RewriteLLM:
         
         # Build minimal rewrite prompt (<200 tokens)
         rewrite_prompt = self._build_rewrite_prompt(
-            text, original_question, quality_issues, is_philosophical, detected_lang, has_citations, num_ctx_docs
+            text, original_question, quality_issues, is_philosophical, detected_lang, 
+            has_citations, num_ctx_docs, has_reliable_context, context_quality
         )
         
         # Retry logic: try up to 2 times (initial + 1 retry)
@@ -374,7 +379,9 @@ CRITICAL RULES:
         is_philosophical: bool,
         detected_lang: str,
         has_citations: bool = False,
-        num_ctx_docs: int = 0
+        num_ctx_docs: int = 0,
+        has_reliable_context: bool = False,
+        context_quality: str = None
     ) -> str:
         """Build minimal rewrite prompt (<200 tokens)"""
         issues_text = ", ".join(quality_issues[:3])  # Limit to 3 issues
@@ -386,6 +393,37 @@ CRITICAL RULES:
                 citation_instruction = f"\n\n🚨🚨🚨 CRITICAL: The original response HAS citations [1], [2]. You MUST preserve or add citations in your rewritten response. Context documents available: {num_ctx_docs}."
             else:
                 citation_instruction = f"\n\n🚨🚨🚨 CRITICAL: The original response is MISSING citations. You MUST add at least [1] in your rewritten response. Context documents available: {num_ctx_docs}."
+        
+        # CRITICAL: Base knowledge usage instruction when RAG context is not available or not reliable
+        base_knowledge_instruction = ""
+        if not has_reliable_context or num_ctx_docs == 0:
+            base_knowledge_instruction = f"""
+            
+🚨🚨🚨 CRITICAL: RAG CONTEXT NOT AVAILABLE OR NOT RELIABLE 🚨🚨🚨
+
+StillMe's RAG system did NOT find reliable context for this question (context docs: {num_ctx_docs}, reliable: {has_reliable_context}).
+
+**YOU CAN and SHOULD use your BASE LLM KNOWLEDGE (training data) to answer, BUT you MUST:**
+
+1. **Be transparent**: Acknowledge that information comes from your base training data, not from StillMe's RAG knowledge base
+   - Say: "Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
+   - Or: "From my training data, [answer]. However, StillMe's knowledge base doesn't currently contain this information."
+
+2. **If original response says 'không tìm thấy' or 'I don't know'**: 
+   - **DO NOT just repeat "I don't know"**
+   - **USE your base knowledge to provide helpful information** (e.g., Geneva 1954, Bretton Woods 1944, Popper vs Kuhn)
+   - **BUT be transparent**: "Based on general knowledge (not from StillMe's RAG knowledge base), Geneva 1954 was..."
+
+3. **For well-known historical/factual topics** (Geneva 1954, Bretton Woods 1944, Popper vs Kuhn, etc.):
+   - **YOU HAVE this knowledge in your training data** - USE IT
+   - **Be transparent about source**: "Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
+   - **StillMe values being helpful WITH transparency**, not refusing to help
+
+4. **CRITICAL ANTI-HALLUCINATION RULE**:
+   - For SPECIFIC concepts you're NOT CERTAIN about → Say "I don't know"
+   - For GENERAL well-known topics (Geneva 1954, Bretton Woods, etc.) → Use base knowledge with transparency
+
+**REMEMBER**: StillMe's RAG knowledge base is small compared to your training data. When RAG doesn't have information, you SHOULD use your base knowledge to help users, but ALWAYS be transparent about the source."""
         
         # Get full language name for better clarity
         language_names = {
@@ -423,6 +461,7 @@ Original response:
 {truncated_text}
 
 {citation_instruction}
+{base_knowledge_instruction}
 
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
 THE USER'S QUESTION IS IN {lang_name.upper()}.
@@ -471,6 +510,7 @@ Original response:
 {truncated_text}
 
 {citation_instruction}
+{base_knowledge_instruction}
 
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
 THE USER'S QUESTION IS IN {lang_name.upper()}.

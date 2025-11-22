@@ -3857,14 +3857,23 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         # CRITICAL: Build ctx_docs for citation preservation in rewrite
                         # ctx_docs may not be in scope here, so rebuild from context
                         ctx_docs_for_rewrite = []
+                        has_reliable_context_for_rewrite = False
+                        context_quality_for_rewrite = None
+                        
                         if 'context' in locals() and context:
                             ctx_docs_for_rewrite = [
                                 doc["content"] for doc in context.get("knowledge_docs", [])
                             ] + [
                                 doc["content"] for doc in context.get("conversation_docs", [])
                             ]
+                            has_reliable_context_for_rewrite = context.get("has_reliable_context", False)
+                            context_quality_for_rewrite = context.get("context_quality", None)
                         elif 'ctx_docs' in locals():
                             ctx_docs_for_rewrite = ctx_docs
+                            # Try to get context info from validation if available
+                            if 'validation_info' in locals() and validation_info:
+                                # Context info might be in validation_info
+                                pass
                         
                         # CRITICAL: Check if sanitized response is a technical error or fallback message BEFORE quality evaluation
                         from backend.api.utils.error_detector import is_technical_error, is_fallback_message
@@ -3930,14 +3939,16 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                 processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
                                 
                                 rewrite_llm = get_rewrite_llm()
-                                # CRITICAL: Pass ctx_docs to rewrite to preserve citations
+                                # CRITICAL: Pass RAG context status to rewrite to enable base knowledge usage
                                 rewrite_result = await rewrite_llm.rewrite(
                                     text=sanitized_response,
                                     original_question=chat_request.message,
                                     quality_issues=quality_result["reasons"],
                                     is_philosophical=is_philosophical,
                                     detected_lang=detected_lang,
-                                    ctx_docs=ctx_docs_for_rewrite
+                                    ctx_docs=ctx_docs_for_rewrite,
+                                    has_reliable_context=has_reliable_context_for_rewrite,
+                                    context_quality=context_quality_for_rewrite
                                 )
                                 
                                 if rewrite_result.was_rewritten:
