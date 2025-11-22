@@ -1572,7 +1572,7 @@ def page_learning():
                             st.write(f"**Link:** [{item.get('link', 'N/A')[:50]}...]({item.get('link', '#')})" if item.get('link') else "**Link:** N/A")
                             st.write(f"**Status:** {item.get('status', 'Unknown')}")
                         with col2:
-                            st.write(f"**Fetch Timestamp:** {item.get('fetch_timestamp', 'N/A')}")
+                            st.write(f"**Fetch Timestamp:** {_format_timestamp_gmt7(item.get('fetch_timestamp', '')) if item.get('fetch_timestamp') else 'N/A'}")
                             if item.get('status_reason'):
                                 st.write(f"**Reason:** {item.get('status_reason')}")
                             if item.get('vector_id'):
@@ -1736,7 +1736,7 @@ def page_validation():
                     with st.expander(f"📄 {item.get('source_url', 'Unknown')[:50]}... (Score: {item.get('retention_score', 0.0):.2f})"):
                         col1, col2 = st.columns(2)
                         with col1:
-                            st.write(f"**Timestamp Added:** {item.get('timestamp_added', 'N/A')}")
+                            st.write(f"**Timestamp Added:** {_format_timestamp_gmt7(item.get('timestamp_added', '')) if item.get('timestamp_added') else 'N/A'}")
                             st.write(f"**Source URL:** [{item.get('source_url', 'N/A')}]({item.get('source_url', '#')})")
                             st.write(f"**Tracking ID:** `{item.get('vector_id', 'N/A')}`")
                             st.caption("ℹ️ Tracking ID for fetch history. Actual ChromaDB vector ID is generated during embedding.")
