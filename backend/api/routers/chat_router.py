@@ -1549,20 +1549,20 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             logger.info(f"🔄 Rewriting philosophical answer (attempt {rewrite_attempts}/{max_rewrite_attempts}): {rewrite_reason or 'forced for variation and depth'}")
                             
                             try:
-                        rewrite_result = await rewrite_llm.rewrite(
-                            text=philosophical_answer,
-                            original_question=chat_request.message,
+                                rewrite_result = await rewrite_llm.rewrite(
+                                    text=philosophical_answer,
+                                    original_question=chat_request.message,
                                     quality_issues=quality_result.get("reasons", []) or ["template-like", "needs_question_adaptation", "needs_more_depth"],
-                            is_philosophical=True,
-                            detected_lang=detected_lang
-                        )
-                        
-                        if rewrite_result.was_rewritten:
-                            philosophical_answer = rewrite_result.text
+                                    is_philosophical=True,
+                                    detected_lang=detected_lang
+                                )
+                                
+                                if rewrite_result.was_rewritten:
+                                    philosophical_answer = rewrite_result.text
                                     rewrite_success = True
                                     processing_steps.append(f"✅ Philosophical answer rewritten for better adaptation and depth (attempt {rewrite_attempts})")
                                     logger.info(f"✅ Rewrite successful on attempt {rewrite_attempts}")
-                        else:
+                                else:
                                     error_msg = rewrite_result.error or 'Unknown error'
                                     logger.warning(f"⚠️ Rewrite attempt {rewrite_attempts} failed: {error_msg}")
                                     if rewrite_attempts < max_rewrite_attempts:
@@ -3899,15 +3899,16 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                                     quality_result=quality_result
                                 )
                             
-                            # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
+                            # 🚨🚨🚨 CRITICAL: 100% REWRITE POLICY 🚨🚨🚨
+                            # Mọi câu trả lời đều phải được rewrite để đảm bảo minh bạch, trung thực, giảm ảo giác
                             should_rewrite, rewrite_reason = optimizer.should_rewrite(
                                 quality_result=quality_result,
                                 is_philosophical=is_philosophical,
                                 response_length=len(sanitized_response)
                             )
                             
-                            # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
-                            if should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                            # Stage 4: ALWAYS rewrite (100% policy) - Mục tiêu: minh bạch, trung thực, giảm ảo giác
+                            if should_rewrite:
                                 logger.info(
                                     f"⚠️ Quality evaluator flagged output for rewrite. "
                                     f"Issues: {quality_result['reasons']}, "
@@ -4440,17 +4441,16 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             quality_result=quality_result
                         )
                         
-                        # OPTIMIZATION: Pre-filter to avoid unnecessary rewrites
-                        # Only call should_rewrite if quality_result is available
+                        # 🚨🚨🚨 CRITICAL: 100% REWRITE POLICY 🚨🚨🚨
+                        # Mọi câu trả lời đều phải được rewrite để đảm bảo minh bạch, trung thực, giảm ảo giác
                         should_rewrite, rewrite_reason = optimizer.should_rewrite(
                             quality_result=quality_result,
                             is_philosophical=is_philosophical_non_rag,
                             response_length=len(sanitized_response)
                         )
                         
-                        # Stage 4: Conditional Pass-2 (DeepSeek rewrite) - Only if really needed
-                        # Only rewrite if quality_result is available and indicates rewrite needed
-                        if quality_result and should_rewrite and quality_result["quality"] == QualityLevel.NEEDS_REWRITE.value:
+                        # Stage 4: ALWAYS rewrite (100% policy) - Mục tiêu: minh bạch, trung thực, giảm ảo giác
+                        if should_rewrite:
                             logger.info(
                                 f"⚠️ Quality evaluator flagged output for rewrite (non-RAG). "
                                 f"Issues: {quality_result['reasons']}, "

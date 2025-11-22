@@ -150,10 +150,11 @@ class PostProcessingOptimizer:
         """
         Determine if rewrite is really needed (pre-filter to avoid unnecessary rewrites)
         
-        🚨🚨🚨 CRITICAL RULE D: BẬT LẠI REWRITE MỨC CAO NHẤT 🚨🚨🚨
-        - For philosophical questions: ALWAYS rewrite if quality is not "good"
-        - Accept trade-off: latency/cost increase, but quality increases significantly
-        - If rewrite uses many tokens → let it run, do NOT disable
+        🚨🚨🚨 CRITICAL: 100% REWRITE POLICY 🚨🚨🚨
+        - MỤC TIÊU: Minh bạch, trung thực, giảm ảo giác tối đa
+        - MỌI câu trả lời đều phải được rewrite kỹ càng (100%)
+        - Cost và latency quan trọng nhưng xếp thứ 2 sau mục tiêu trên
+        - Nếu không đạt mục tiêu 1 thì mục tiêu 2 không còn ý nghĩa
         
         Args:
             quality_result: Quality evaluation result
@@ -161,46 +162,28 @@ class PostProcessingOptimizer:
             response_length: Length of response
             
         Returns:
-            Tuple of (should_rewrite, reason)
+            Tuple of (should_rewrite, reason) - ALWAYS (True, reason)
         """
         quality = quality_result.get("quality", "good")
         overall_score = quality_result.get("overall_score", 1.0)
         reasons = quality_result.get("reasons", [])
         
-        # If quality is good, don't rewrite
-        if quality == "good":
-            return False, "quality_good"
+        # 🚨🚨🚨 CRITICAL: ALWAYS REWRITE - 100% POLICY 🚨🚨🚨
+        # Mọi câu trả lời đều phải được rewrite để đảm bảo:
+        # - Minh bạch: Mọi thông tin đều có nguồn, không che giấu
+        # - Trung thực: Thừa nhận giới hạn, không bịa đặt
+        # - Giảm ảo giác: Kiểm tra kỹ từng claim, đảm bảo grounded trong context
         
-        # CRITICAL: Critical issues always require rewrite
-        critical_issues = [
-            "Contains anthropomorphic language",
-            "Output too short",
-            "Topic drift detected",  # CRITICAL: Drift always requires rewrite
-        ]
-        has_critical = any(issue in reasons for issue in critical_issues)
+        logger.info(
+            f"🔄 ALWAYS rewriting (100% policy): quality={quality}, "
+            f"score={overall_score:.2f}, philosophical={is_philosophical}, "
+            f"length={response_length}, issues={len(reasons)}"
+        )
         
-        # 🚨🚨🚨 CRITICAL RULE D: For philosophical questions, ALWAYS rewrite if quality is not "good" 🚨🚨🚨
-        # Accept trade-off: latency/cost increase, but quality increases significantly
         if is_philosophical:
-            # ALWAYS rewrite philosophical questions if quality is not "good"
-            # This ensures 3-tier analysis (Reframing, Conceptual Map, Boundary) is enforced
-            logger.info(
-                f"🔄 Philosophical question requires rewrite: quality={quality}, "
-                f"score={overall_score:.2f}, reasons={reasons[:2]}"
-            )
-            return True, "philosophical_question_requires_rewrite"
-        
-        # For non-philosophical questions: only rewrite if score < 0.3 or has critical issues
-        if not is_philosophical:
-            if overall_score >= 0.3 and not has_critical:
-                logger.info(
-                    f"⏭️ Skipping rewrite: score={overall_score:.2f} >= 0.3 (threshold), "
-                    f"length={response_length}, critical_issues={has_critical}"
-                )
-                return False, f"score_acceptable_non_philosophical_{overall_score:.2f}"
-        
-        # Rewrite needed
-        return True, "quality_insufficient"
+            return True, "philosophical_question_100_percent_rewrite"
+        else:
+            return True, "non_philosophical_100_percent_rewrite"
 
 
 def get_postprocessing_optimizer() -> PostProcessingOptimizer:

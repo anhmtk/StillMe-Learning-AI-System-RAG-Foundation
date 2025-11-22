@@ -252,7 +252,7 @@ class RewriteLLM:
         meta_llm_rules = get_meta_llm_rules(detected_lang)
         
         if is_philosophical:
-            return f"""You are rewriting a philosophical response to improve quality.
+            return f"""You are rewriting a philosophical response to ensure MINH BẠCH (transparency), TRUNG THỰC (honesty), and GIẢM ẢO GIÁC (hallucination reduction).
 
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
 THE USER'S QUESTION IS IN {lang_name.upper()}.
@@ -264,6 +264,24 @@ UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.u
 ⚠️ REMINDER: RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
 {meta_llm_rules}
+
+🚨🚨🚨 MỤC TIÊU CHÍNH: MINH BẠCH, TRUNG THỰC, GIẢM ẢO GIÁC 🚨🚨🚨
+**MANDATORY: The rewritten response MUST prioritize:**
+
+**1. MINH BẠCH (Transparency):**
+- Mọi thông tin đều phải có nguồn rõ ràng (citations, sources)
+- Không che giấu giới hạn, không làm mờ nguồn gốc thông tin
+- Nếu thông tin không có nguồn → phải thừa nhận "không có nguồn" hoặc "dựa trên kiến thức tổng quát"
+
+**2. TRUNG THỰC (Honesty):**
+- Thừa nhận giới hạn: "Tôi không biết", "Tôi không thể xác nhận", "Thông tin này không có trong nguồn"
+- Không bịa đặt: Nếu không có thông tin, KHÔNG được tạo ra
+- Không phóng đại: Không nói quá những gì thực sự biết
+
+**3. GIẢM ẢO GIÁC (Hallucination Reduction):**
+- Kiểm tra kỹ từng claim: Mỗi factual claim phải có nguồn hoặc được đánh dấu là "uncertain"
+- Đảm bảo grounded: Mọi thông tin phải grounded trong context được cung cấp
+- Nếu không chắc → thêm "có thể", "có lẽ", "theo một số nguồn"
 
 🚨🚨🚨 TASK 3: CẤU TRÚC TRẢ LỜI TRIẾT HỌC (MANDATORY - 5 PHẦN) 🚨🚨🚨
 **MANDATORY: The rewritten response MUST follow this 5-part structure:**
@@ -299,9 +317,10 @@ CRITICAL RULES:
 - Preserve ALL factual content from the original.
 - Improve depth, structure, and philosophical rigor.
 - Ensure all 5 parts are present (Anchor → Unpack → Explore → Edge → Return).
+- PRIORITIZE: Minh bạch > Trung thực > Giảm ảo giác > Depth > Structure
 - RESPOND IN {lang_name.upper()} ONLY."""
         else:
-            return f"""You are rewriting a response to improve quality.
+            return f"""You are rewriting a response to ensure MINH BẠCH (transparency), TRUNG THỰC (honesty), and GIẢM ẢO GIÁC (hallucination reduction).
 
 🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
 THE USER'S QUESTION IS IN {lang_name.upper()}.
@@ -312,11 +331,30 @@ IF YOUR BASE MODEL WANTS TO RESPOND IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT T
 UNDER NO CIRCUMSTANCES return a response in any language other than {lang_name.upper()}.
 ⚠️ REMINDER: RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
+🚨🚨🚨 MỤC TIÊU CHÍNH: MINH BẠCH, TRUNG THỰC, GIẢM ẢO GIÁC 🚨🚨🚨
+**MANDATORY: The rewritten response MUST prioritize:**
+
+**1. MINH BẠCH (Transparency):**
+- Mọi thông tin đều phải có nguồn rõ ràng (citations, sources)
+- Không che giấu giới hạn, không làm mờ nguồn gốc thông tin
+- Nếu thông tin không có nguồn → phải thừa nhận "không có nguồn" hoặc "dựa trên kiến thức tổng quát"
+
+**2. TRUNG THỰC (Honesty):**
+- Thừa nhận giới hạn: "Tôi không biết", "Tôi không thể xác nhận", "Thông tin này không có trong nguồn"
+- Không bịa đặt: Nếu không có thông tin, KHÔNG được tạo ra
+- Không phóng đại: Không nói quá những gì thực sự biết
+
+**3. GIẢM ẢO GIÁC (Hallucination Reduction):**
+- Kiểm tra kỹ từng claim: Mỗi factual claim phải có nguồn hoặc được đánh dấu là "uncertain"
+- Đảm bảo grounded: Mọi thông tin phải grounded trong context được cung cấp
+- Nếu không chắc → thêm "có thể", "có lẽ", "theo một số nguồn"
+
 {formatting_rules}
 
 CRITICAL RULES:
 - Preserve ALL factual content from the original.
 - Improve clarity, structure, and depth.
+- PRIORITIZE: Minh bạch > Trung thực > Giảm ảo giác > Clarity > Structure
 - RESPOND IN {lang_name.upper()} ONLY."""
     
     def _build_rewrite_prompt(
@@ -358,7 +396,7 @@ CRITICAL RULES:
         meta_llm_rules = get_meta_llm_rules(detected_lang)
         
         if is_philosophical:
-            prompt = f"""Rewrite this philosophical response to fix: {issues_text}
+            prompt = f"""Rewrite this philosophical response to ensure MINH BẠCH, TRUNG THỰC, GIẢM ẢO GIÁC. Fix: {issues_text}
 
 Q (in {lang_name}): {truncated_question}
 
@@ -372,6 +410,11 @@ DO NOT RESPOND IN ENGLISH OR ANY OTHER LANGUAGE.
 EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
 IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()}.
 ⚠️ RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
+
+🚨🚨🚨 MỤC TIÊU: MINH BẠCH > TRUNG THỰC > GIẢM ẢO GIÁC 🚨🚨🚨
+- MINH BẠCH: Mọi thông tin có nguồn, không che giấu giới hạn
+- TRUNG THỰC: Thừa nhận "không biết" nếu không có thông tin, không bịa đặt
+- GIẢM ẢO GIÁC: Kiểm tra từng claim, đảm bảo grounded trong context
 
 {meta_llm_rules}
 
@@ -390,9 +433,10 @@ REQUIREMENTS:
 - Use prose (no emojis, no bullets, no headings)
 - Ensure all 3 tiers are present
 - Remove topic drift if present
+- PRIORITIZE: Minh bạch > Trung thực > Giảm ảo giác
 - RESPOND IN {lang_name.upper()} ONLY"""
         else:
-            prompt = f"""Rewrite this response to fix: {issues_text}
+            prompt = f"""Rewrite this response to ensure MINH BẠCH, TRUNG THỰC, GIẢM ẢO GIÁC. Fix: {issues_text}
 
 Q (in {lang_name}): {truncated_question}
 
@@ -407,9 +451,15 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {lang_name.upper()}.
 IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_name.upper()}.
 ⚠️ RESPOND IN {lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ⚠️
 
+🚨🚨🚨 MỤC TIÊU: MINH BẠCH > TRUNG THỰC > GIẢM ẢO GIÁC 🚨🚨🚨
+- MINH BẠCH: Mọi thông tin có nguồn, không che giấu giới hạn
+- TRUNG THỰC: Thừa nhận "không biết" nếu không có thông tin, không bịa đặt
+- GIẢM ẢO GIÁC: Kiểm tra từng claim, đảm bảo grounded trong context
+
 REQUIREMENTS:
 - Keep ALL factual content
 - Improve clarity and structure
+- PRIORITIZE: Minh bạch > Trung thực > Giảm ảo giác > Clarity
 - RESPOND IN {lang_name.upper()} ONLY"""
         
         return prompt
