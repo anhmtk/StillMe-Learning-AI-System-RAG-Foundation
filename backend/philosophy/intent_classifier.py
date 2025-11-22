@@ -27,6 +27,7 @@ class ConsciousnessSubType(Enum):
     PARADOX = "PARADOX"  # Paradox question: "nói không có ý thức có phải là có ý thức không?"
     EPISTEMIC = "EPISTEMIC"  # Epistemic question: "bạn lấy căn cứ từ đâu?"
     DEFINITIONAL = "DEFINITIONAL"  # Definitional question: "ý thức là gì?"
+    VOLITION = "VOLITION"  # Volition/desire question: "bạn muốn có ý thức ko?" / "do you want consciousness?"
 
 
 def classify_philosophical_intent(text: str) -> QuestionType:
@@ -524,6 +525,20 @@ def classify_consciousness_subtype(text: str) -> ConsciousnessSubType:
     ]
     if any(re.search(pattern, text_lower) for pattern in definitional_patterns):
         return ConsciousnessSubType.DEFINITIONAL
+    
+    # VOLITION: Questions about wanting/desiring consciousness
+    # CRITICAL: This must be checked BEFORE DIRECT to avoid misclassification
+    volition_patterns = [
+        r"bạn\s+(có\s+)?muốn\s+(có\s+)?ý\s+thức",
+        r"bạn\s+muốn\s+(có\s+)?ý\s+thức",
+        r"do\s+you\s+want\s+(to\s+have\s+)?consciousness",
+        r"would\s+you\s+want\s+(to\s+have\s+)?consciousness",
+        r"desire.*consciousness",
+        r"wish.*consciousness",
+        r"muốn\s+(có\s+)?ý\s+thức",
+    ]
+    if any(re.search(pattern, text_lower) for pattern in volition_patterns):
+        return ConsciousnessSubType.VOLITION
     
     # DEFAULT: Direct question
     return ConsciousnessSubType.DIRECT

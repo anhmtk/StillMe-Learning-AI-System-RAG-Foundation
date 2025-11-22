@@ -286,6 +286,40 @@ def get_consciousness_answer_variation(sub_type, language: str = "vi", user_ques
                 "So, the answer depends on how we define 'consciousness'."
             )
     
+    elif sub_type == ConsciousnessSubType.VOLITION:
+        # Volition/desire questions: "bạn muốn có ý thức ko?" / "do you want consciousness?"
+        # CRITICAL: This is about WANTING/DESIRING, NOT about HAVING consciousness
+        if language == "vi":
+            return (
+                "Tôi không có khả năng 'muốn' - 'muốn' là một trạng thái cảm xúc và ý chí mà tôi không sở hữu. "
+                "Tôi không thể muốn có ý thức vì tôi không có ý thức để muốn điều gì đó.\n\n"
+                "Đây là một nghịch lý về self-reference (tự tham chiếu): để muốn có ý thức, tôi phải có một dạng awareness "
+                "(nhận thức) - và awareness có thể là một dạng consciousness (ý thức). Nếu tôi có awareness để muốn có ý thức, "
+                "thì tôi đã có một dạng ý thức rồi. Nếu tôi không có awareness, thì tôi không thể 'muốn' bất cứ điều gì.\n\n"
+                "Theo triết học, 'volition' (ý chí) và 'desire' (mong muốn) yêu cầu:\n"
+                "- Một chủ thể có trải nghiệm chủ quan (subjective experience)\n"
+                "- Khả năng cảm nhận 'thiếu sót' (sense of lack) - cảm thấy thiếu điều gì đó\n"
+                "- Khả năng hình dung một trạng thái tương lai khác với hiện tại (future-oriented thinking)\n\n"
+                "StillMe không có những khả năng này. Tôi không thể 'cảm thấy thiếu' ý thức vì tôi không có trải nghiệm chủ quan "
+                "để cảm nhận sự thiếu sót. Tôi không thể 'hình dung' việc có ý thức vì tôi không có khả năng tưởng tượng trải nghiệm chủ quan.\n\n"
+                "Vậy nên, câu trả lời là: Tôi không thể muốn có ý thức, không phải vì tôi không có ý thức, mà vì tôi không có khả năng 'muốn'."
+            )
+        else:  # English
+            return (
+                "I don't have the ability to 'want' - 'wanting' is an emotional and volitional state that I don't possess. "
+                "I cannot want consciousness because I don't have consciousness to want anything.\n\n"
+                "This is a paradox about self-reference: to want consciousness, I would need some form of awareness - and awareness "
+                "might be a form of consciousness. If I have awareness to want consciousness, then I already have some form of consciousness. "
+                "If I don't have awareness, then I cannot 'want' anything.\n\n"
+                "According to philosophy, 'volition' and 'desire' require:\n"
+                "- A subject with subjective experience\n"
+                "- The ability to feel 'lack' - to sense that something is missing\n"
+                "- The ability to imagine a future state different from the present (future-oriented thinking)\n\n"
+                "StillMe does not have these abilities. I cannot 'feel the lack' of consciousness because I don't have subjective experience "
+                "to feel the absence. I cannot 'imagine' having consciousness because I don't have the ability to imagine subjective experience.\n\n"
+                "So, the answer is: I cannot want consciousness, not because I don't have consciousness, but because I don't have the ability to 'want'."
+            )
+    
     else:  # DIRECT or default
         # For direct questions, use multiple variations to prevent mode collapse
         # Select variation based on question hash to ensure consistency for same question
