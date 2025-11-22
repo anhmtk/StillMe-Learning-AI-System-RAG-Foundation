@@ -97,14 +97,19 @@ class CitationRequired:
         
         # CRITICAL FIX: Check if answer has URLs or source references that should be converted to citations
         # If answer has URLs like "Source: https://..." or "Sources: ...", convert them to [1] format
+        # ALSO: Check for bare URLs (https://...) at end of answer or after "Sources:" or "-"
         if not has_citation:
-            # Check for URL patterns that indicate sources
-            url_pattern = re.compile(r'(?:Source|Sources|Tham\s+Khảo|Tham\s+khảo|References?):\s*(?:https?://|www\.)', re.IGNORECASE)
-            has_urls = bool(url_pattern.search(answer))
+            # Pattern 1: URLs with source prefix
+            url_pattern_with_prefix = re.compile(r'(?:Source|Sources|Tham\s+Khảo|Tham\s+khảo|References?):\s*(?:https?://|www\.)', re.IGNORECASE)
+            # Pattern 2: Bare URLs (https:// or www.) - often at end of answer or after "-"
+            url_pattern_bare = re.compile(r'(?:^|\s|[-•])\s*(?:https?://[^\s]+|www\.[^\s]+)', re.IGNORECASE)
             
-            if has_urls:
+            has_urls_with_prefix = bool(url_pattern_with_prefix.search(answer))
+            has_bare_urls = bool(url_pattern_bare.search(answer))
+            
+            if has_urls_with_prefix or has_bare_urls:
                 # Convert URLs to citations
-                logger.info("Found URLs in answer, converting to citation format [1]")
+                logger.info(f"Found URLs in answer (with_prefix={has_urls_with_prefix}, bare={has_bare_urls}), converting to citation format [1]")
                 patched_answer = self._convert_urls_to_citations(answer, ctx_docs)
                 if patched_answer:
                     return ValidationResult(
@@ -180,6 +185,8 @@ class CitationRequired:
         - "Source: https://example.com" → "According to [1], ..."
         - "Sources: https://example.com, https://example2.com" → "According to [1] and [2], ..."
         - "Tham Khảo: https://example.com" → "Theo [1], ..."
+        - "- https://example.com" → "According to [1], ..."
+        - Bare URLs at end: "https://example.com" → "[1]"
         
         Args:
             answer: Original answer with URLs
@@ -193,22 +200,46 @@ class CitationRequired:
         
         result = answer
         
-        # Pattern to match source references with URLs
-        # Matches: "Source: https://...", "Sources: ...", "Tham Khảo: ...", etc.
-        source_pattern = re.compile(
+        # Pattern 1: Source references with URLs (with prefix)
+        source_pattern_with_prefix = re.compile(
             r'(?:Source|Sources|Tham\s+Khảo|Tham\s+khảo|References?):\s*(?:https?://[^\s]+|www\.[^\s]+)',
             re.IGNORECASE
         )
         
-        # Find all source references
-        matches = list(source_pattern.finditer(result))
+        # Pattern 2: Bare URLs (https:// or www.) - often at end of answer or after "-" or "•"
+        bare_url_pattern = re.compile(
+            r'(?:^|\s|[-•])\s*(https?://[^\s]+|www\.[^\s]+)',
+            re.IGNORECASE
+        )
         
-        if not matches:
+        # Find all source references (with prefix)
+        matches_with_prefix = list(source_pattern_with_prefix.finditer(result))
+        
+        # Find all bare URLs
+        matches_bare = list(bare_url_pattern.finditer(result))
+        
+        # Combine and sort by position
+        all_matches = []
+        for match in matches_with_prefix:
+            all_matches.append(('with_prefix', match))
+        for match in matches_bare:
+            # Only include if not already captured by prefix pattern
+            url_text = match.group(1)
+            is_duplicate = any(
+                url_text in m.group(0) for _, m in all_matches if _ == 'with_prefix'
+            )
+            if not is_duplicate:
+                all_matches.append(('bare', match))
+        
+        # Sort by position (reverse order for safe replacement)
+        all_matches.sort(key=lambda x: x[1].start(), reverse=True)
+        
+        if not all_matches:
             return None
         
         # Replace each source reference with citation
-        # Strategy: Replace "Source: URL" with "[1]" at the beginning of the sentence/paragraph
-        for i, match in enumerate(reversed(matches)):  # Process in reverse to preserve positions
+        # Strategy: Replace "Source: URL" or bare URL with "[1]" at the beginning of the sentence/paragraph
+        for i, (match_type, match) in enumerate(all_matches):  # Process in reverse order (already sorted)
             matched_text = match.group(0)
             start_pos = match.start()
             end_pos = match.end()
@@ -217,29 +248,37 @@ class CitationRequired:
             citation_num = min(i + 1, len(ctx_docs))
             citation = f"[{citation_num}]"
             
-            # Find the sentence/paragraph start (look for newline or start of text)
-            sentence_start = result.rfind('\n', 0, start_pos)
-            if sentence_start == -1:
-                sentence_start = 0
+            # For bare URLs, we need to handle the match differently
+            if match_type == 'bare':
+                # Bare URL match includes prefix (space, "-", etc.) in group(0), but URL is in group(1)
+                url_start = match.start(1)  # Start of actual URL
+                url_end = match.end(1)  # End of actual URL
+                # Remove the entire match (including prefix like "- " or space)
+                result = result[:start_pos] + f" {citation}" + result[end_pos:]
             else:
-                sentence_start += 1  # Skip the newline
-            
-            # Check if there's already a citation in this sentence
-            sentence_text = result[sentence_start:end_pos]
-            if CITE_RE.search(sentence_text):
-                # Already has citation, just remove the URL reference
-                result = result[:start_pos] + result[end_pos:]
-            else:
-                # Replace URL reference with citation
-                # Try to insert citation at a natural position (after first sentence or at start)
-                first_sentence_end = re.search(r'[.!?]\s+', result[sentence_start:start_pos])
-                if first_sentence_end:
-                    insert_pos = sentence_start + first_sentence_end.end()
-                    result = result[:insert_pos] + f" {citation}" + result[insert_pos:start_pos] + result[end_pos:]
+                # With prefix: "Source: https://..." - find sentence start
+                sentence_start = result.rfind('\n', 0, start_pos)
+                if sentence_start == -1:
+                    sentence_start = 0
                 else:
-                    # Insert at start of sentence
-                    result = result[:sentence_start] + f"{citation} " + result[sentence_start:start_pos] + result[end_pos:]
+                    sentence_start += 1  # Skip the newline
+                
+                # Check if there's already a citation in this sentence
+                sentence_text = result[sentence_start:end_pos]
+                if CITE_RE.search(sentence_text):
+                    # Already has citation, just remove the URL reference
+                    result = result[:start_pos] + result[end_pos:]
+                else:
+                    # Replace URL reference with citation
+                    # Try to insert citation at a natural position (after first sentence or at start)
+                    first_sentence_end = re.search(r'[.!?]\s+', result[sentence_start:start_pos])
+                    if first_sentence_end:
+                        insert_pos = sentence_start + first_sentence_end.end()
+                        result = result[:insert_pos] + f" {citation}" + result[insert_pos:start_pos] + result[end_pos:]
+                    else:
+                        # Insert at start of sentence
+                        result = result[:sentence_start] + f"{citation} " + result[sentence_start:start_pos] + result[end_pos:]
         
-        logger.info(f"Converted {len(matches)} URL reference(s) to citation format")
+        logger.info(f"Converted {len(all_matches)} URL reference(s) to citation format")
         return result
 

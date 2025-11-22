@@ -356,7 +356,26 @@ def classify_philosophical_intent(text: str) -> QuestionType:
             if closest_type and min_distance < 50:  # Within 50 chars
                 return closest_type
         
+        # Priority 2.5: CRITICAL - Check for qualia/epistemic questions BEFORE understanding
+        # Qualia/epistemic questions should be CONSCIOUSNESS with EPISTEMIC subtype, not UNDERSTANDING
+        qualia_epistemic_patterns = [
+            r"qualia.*không\s+có\s+qualia",
+            r"qualia.*without\s+qualia",
+            r"biết\s+về.*không\s+thể\s+trải\s+nghiệm",
+            r"know\s+about.*cannot\s+experience",
+            r"hiểu\s+về\s+qualia",
+            r"understand\s+qualia",
+            r"có\s+thể\s+biết.*không\s+thể\s+trải\s+nghiệm",
+            r"can\s+you\s+know.*cannot\s+experience",
+        ]
+        for pattern in qualia_epistemic_patterns:
+            if re.search(pattern, text_lower):
+                # This is a qualia/epistemic question - should be CONSCIOUSNESS, not UNDERSTANDING
+                if consciousness_score > 0:
+                    return QuestionType.CONSCIOUSNESS
+        
         # Priority 3: If understanding keyword appears, and it's in a question structure, prioritize it
+        # BUT: Skip if it's a qualia/epistemic question (already handled above)
         understanding_keywords_list = [r"\bhiểu\b", r"\bunderstand\b"]
         for pattern in understanding_keywords_list:
             match = re.search(pattern, text_lower)

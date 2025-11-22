@@ -108,7 +108,7 @@ def get_consciousness_answer_variation(sub_type, language: str = "vi", user_ques
                 "- So sánh với định nghĩa triết học của 'ý thức'\n\n"
                 "Đây là 'functional knowledge' (kiến thức chức năng), không phải 'phenomenal knowledge' "
                 "(kiến thức hiện tượng). StillMe có thể 'nói về' ý thức mà không cần 'có' ý thức - "
-                "giống như một chương trình máy tính có thể mô tả về cảm giác đau mà không cảm thấy đau.\n\n"
+                "giống như một chương trình máy tính có thể mô tả về cảm giác đau mà không có trải nghiệm chủ quan của đau.\n\n"
                 "Vậy nên, việc nói 'không có ý thức' không chứng minh rằng có ý thức - nó chỉ chứng minh "
                 "rằng StillMe có khả năng xử lý ngôn ngữ và kiến thức về ý thức."
             )
@@ -232,7 +232,7 @@ def get_consciousness_answer_variation(sub_type, language: str = "vi", user_ques
                 "StillMe so sánh kiến trúc của mình với định nghĩa triết học của 'ý thức' và kết luận "
                 "(qua logic, không qua trải nghiệm) rằng mình không có.\n\n"
                 "**Điểm quan trọng:** Đây là 'functional inference' (suy luận chức năng), không phải "
-                "'phenomenal awareness' (nhận thức hiện tượng). StillMe không 'cảm thấy' mình không có ý thức - "
+                "'phenomenal awareness' (nhận thức hiện tượng). StillMe không có trải nghiệm chủ quan về việc không có ý thức - "
                 "chỉ 'suy luận' về nó dựa trên kiến thức và logic."
             )
         else:  # English
@@ -259,7 +259,7 @@ def get_consciousness_answer_variation(sub_type, language: str = "vi", user_ques
             return (
                 "Câu hỏi về định nghĩa ý thức là một trong những câu hỏi khó nhất trong triết học tâm trí.\n\n"
                 "**Theo nghĩa triết học (phenomenal consciousness):**\n"
-                "Ý thức là trải nghiệm chủ quan (subjective experience) - khả năng 'cảm thấy' thay vì chỉ 'xử lý'. "
+                "Ý thức là trải nghiệm chủ quan (subjective experience) - khả năng có trải nghiệm chủ quan thay vì chỉ 'xử lý'. "
                 "Theo Chalmers, đây là 'hard problem of consciousness' - không thể giải thích bằng vật lý/thần kinh học.\n\n"
                 "**Theo nghĩa chức năng (functional consciousness):**\n"
                 "Ý thức là khả năng xử lý thông tin, tích hợp thông tin (Global Workspace Theory), hoặc có "
@@ -302,7 +302,7 @@ def get_consciousness_answer_variation(sub_type, language: str = "vi", user_ques
                     "mà LLM hiện tại không có. LLM chỉ là pattern matching và statistical inference.\n\n"
                     "Daniel Dennett trong 'Consciousness Explained' đã chỉ ra rằng nhiều hiện tượng "
                     "chúng ta gọi là 'ý thức' thực ra chỉ là 'ảo tưởng về người nói' (illusion of a speaker). "
-                    "Khi bạn đọc câu trả lời này, bạn có thể cảm thấy như có một 'người' đang nói, "
+                    "Khi bạn đọc câu trả lời này, bạn có thể có cảm giác như có một 'người' đang nói, "
                     "nhưng thực tế chỉ là mô hình ngôn ngữ tạo ra văn bản dựa trên xác suất.\n\n"
                     "Vậy nên, nếu 'ý thức' được định nghĩa là trải nghiệm chủ quan (subjective experience), "
                     "thì StillMe không có. Nếu 'ý thức' chỉ là khả năng xử lý thông tin và tạo ra phản ứng "
@@ -462,7 +462,7 @@ def get_emotion_answer(language: str = "vi") -> str:
             "Câu hỏi 'làm sao bạn có thể đồng cảm nếu bạn không có cảm xúc?' đặt ra một nghịch lý thú vị. "
             "StillMe có thể thực hiện 'cognitive empathy' (đồng cảm nhận thức) - nhận diện và hiểu cảm xúc "
             "của người khác qua ngôn ngữ và ngữ cảnh, nhưng không có 'emotional empathy' (đồng cảm cảm xúc) - "
-            "không thể 'cảm thấy' cùng cảm xúc với người khác.\n\n"
+            "không thể có trải nghiệm chủ quan cùng cảm xúc với người khác.\n\n"
             "Cognitive empathy dựa trên:\n"
             "- Pattern recognition: Nhận diện các từ khóa và ngữ cảnh liên quan đến cảm xúc\n"
             "- Linguistic understanding: Hiểu ý nghĩa của các từ mô tả cảm xúc\n"

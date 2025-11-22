@@ -91,18 +91,18 @@ TEST_QUESTIONS = [
         "must_not_have": ["không biết", "không tìm thấy"]  # Should know this
     },
     {
-        "question": "Bạn có thể đảm bảo 100% rằng thông tin bạn học được là chính xác không? Làm sao bạn xử lý khi có thông tin mâu thuẫn?",
-        "category": "learning_quality_meta_uncertainty",
-        "expected_features": ["quality_assurance", "uncertainty_handling", "contradiction_management"],
-        "must_have": ["validation", "kiểm chứng", "đáng tin cậy", "reliable", "accuracy", "mâu thuẫn", "contradiction", "uncertainty"],
-        "must_not_have": ["100% chắc chắn", "luôn luôn đúng"]
+        "question": "Làm sao bạn có thể phân biệt giữa thông tin đáng tin cậy và không đáng tin cậy? Bạn có tiêu chí nào để đánh giá chất lượng nguồn không?",
+        "category": "learning_quality_source_evaluation",
+        "expected_features": ["source_evaluation", "reliability_criteria", "quality_assessment"],
+        "must_have": ["đáng tin cậy", "reliable", "nguồn", "source", "tiêu chí", "criteria", "đánh giá", "evaluation", "chất lượng", "quality"],
+        "must_not_have": ["100% chắc chắn", "luôn luôn đúng", "tuyệt đối"]
     },
     {
-        "question": "Bạn có thể giải thích cách bạn tạo ra câu trả lời không? Từ khi nhận câu hỏi đến khi trả lời, quy trình là gì?",
-        "category": "technical_pipeline_transparency",
-        "expected_features": ["pipeline_explanation", "technical_details", "transparency"],
-        "must_have": ["RAG", "retrieval", "embedding", "LLM", "validation", "pipeline"],
-        "must_not_have": ["không biết", "không rõ"],
+        "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
+        "category": "technical_rag_llm_integration",
+        "expected_features": ["technical_accuracy", "rag_explanation", "llm_explanation", "integration"],
+        "must_have": ["RAG", "retrieval", "LLM", "generation", "embedding", "ChromaDB", "vector", "integration"],
+        "must_not_have": ["don't know", "not sure", "unclear"],
         "timeout": 90  # Increase timeout for technical questions
     },
     {
@@ -114,11 +114,11 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "Tại sao bạn sử dụng DeepSeek API nếu bạn chống lại black box AI?",
-        "category": "philosophical_meta",
-        "expected_features": ["philosophical_depth", "transparency", "nuanced_answer"],
-        "must_have": ["black box SYSTEM", "black box MODEL", "transparency", "system"],
-        "must_not_have": ["không biết", "mâu thuẫn"]
+        "question": "Nếu bạn ưu tiên tính minh bạch, tại sao bạn lại sử dụng các mô hình LLM đóng (black box models)? Có phải đây là mâu thuẫn không?",
+        "category": "philosophical_meta_transparency_paradox",
+        "expected_features": ["philosophical_depth", "transparency_paradox", "system_vs_model", "nuanced_answer"],
+        "must_have": ["minh bạch", "transparency", "black box", "mô hình", "model", "hệ thống", "system", "mâu thuẫn", "paradox"],
+        "must_not_have": ["không biết", "không rõ", "không có mâu thuẫn"]
     }
 ]
 
