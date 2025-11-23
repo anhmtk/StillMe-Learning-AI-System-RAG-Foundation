@@ -748,14 +748,35 @@ async def fetch_rss_content(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/rss/fetch-history")
-async def get_rss_fetch_history(limit: int = 100):
-    """Get latest RSS fetch items with detailed status from the most recent cycle
+async def get_rss_fetch_history(
+    limit: int = Query(default=500, ge=1, le=5000, description="Maximum number of items to return"),
+    latest_cycle_only: bool = Query(default=False, description="If True, only return items from latest cycle")
+):
+    """Get RSS fetch items with detailed status (source, link, timestamp, vector ID, title, status)
+    
+    This endpoint returns the raw learning feed data that StillMe has fetched.
+    Includes ALL entries: Added to RAG, Filtered, Duplicate, Failed, Error.
     
     Args:
-        limit: Maximum number of items to return
+        limit: Maximum number of items to return (default: 500, max: 5000)
+        latest_cycle_only: If True, only return items from the most recent cycle. 
+                         If False, return items from all cycles (default: False)
         
     Returns:
-        List of fetch items with status (Source URL, Title, Fetch Timestamp, STATUS)
+        Dictionary with:
+        - items: List of fetch items with:
+            - id: Database ID
+            - cycle_id: Learning cycle ID
+            - title: Entry title
+            - source_url: RSS feed URL
+            - link: Article URL
+            - summary: Entry summary
+            - fetch_timestamp: When entry was fetched
+            - status: "Added to RAG", "Filtered", "Duplicate", "Failed", "Error", "Skipped"
+            - status_reason: Reason for status (if applicable)
+            - vector_id: Vector database ID (if added to RAG)
+            - added_to_rag_at: Timestamp when added to RAG (if applicable)
+        - total: Total number of items returned
     """
     try:
         rss_fetch_history = _get_rss_fetch_history_service()
@@ -763,7 +784,12 @@ async def get_rss_fetch_history(limit: int = 100):
         if not rss_fetch_history:
             raise HTTPException(status_code=503, detail="RSS fetch history not available")
         
-        items = rss_fetch_history.get_latest_fetch_items(limit=limit)
+        # Get items based on latest_cycle_only flag
+        if latest_cycle_only:
+            items = rss_fetch_history.get_latest_fetch_items(limit=limit)
+        else:
+            # Get all items from all cycles (for comprehensive view)
+            items = rss_fetch_history.get_all_fetch_items(limit=limit)
         
         # Ensure items is always a list (never None)
         if items is None:
@@ -771,7 +797,8 @@ async def get_rss_fetch_history(limit: int = 100):
         
         return {
             "items": items,
-            "total": len(items)
+            "total": len(items),
+            "latest_cycle_only": latest_cycle_only
         }
         
     except HTTPException:

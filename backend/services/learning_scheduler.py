@@ -119,6 +119,24 @@ class LearningScheduler:
                                 f"✅ Pre-Filter: {len(filtered_entries)}/{len(all_entries)} passed. "
                                 f"Rejected {entries_filtered} items (saving embedding costs)"
                             )
+                            
+                            # CRITICAL: Track rejected entries in fetch history for transparency
+                            if rss_fetch_history and cycle_id:
+                                for rejected_entry in rejected_entries:
+                                    try:
+                                        rss_fetch_history.add_fetch_item(
+                                            cycle_id=cycle_id,
+                                            title=rejected_entry.get("title", ""),
+                                            source_url=rejected_entry.get("source", ""),
+                                            link=rejected_entry.get("link", ""),
+                                            summary=rejected_entry.get("summary", ""),
+                                            status="Filtered",
+                                            status_reason="Pre-filter: Low quality or short content",
+                                            vector_id=None,
+                                            added_to_rag_at=None
+                                        )
+                                    except Exception:
+                                        pass  # Don't fail on tracking errors
                         else:
                             logger.warning("⚠️ Content curator not available, skipping pre-filter (may increase costs)")
                         
@@ -138,10 +156,29 @@ class LearningScheduler:
                             )
                             
                             for entry_idx, entry in enumerate(batch):
+                                entry_status = "Unknown"
+                                entry_status_reason = ""
+                                tracking_id = None
+                                
                                 try:
                                     content = f"{entry.get('title', '')}\n{entry.get('summary', '')}"
                                     if not content.strip():
+                                        entry_status = "Skipped"
+                                        entry_status_reason = "Empty content"
                                         logger.warning(f"⚠️ Skipping empty entry: {entry.get('title', 'No title')}")
+                                        # Track skipped entries too
+                                        if rss_fetch_history and cycle_id:
+                                            rss_fetch_history.add_fetch_item(
+                                                cycle_id=cycle_id,
+                                                title=entry.get("title", ""),
+                                                source_url=entry.get("source", ""),
+                                                link=entry.get("link", ""),
+                                                summary=entry.get("summary", ""),
+                                                status=entry_status,
+                                                status_reason=entry_status_reason,
+                                                vector_id=None,
+                                                added_to_rag_at=None
+                                            )
                                         continue
                                     
                                     # Check for duplicates (optimized: query by metadata filter, no embedding needed)
@@ -157,7 +194,22 @@ class LearningScheduler:
                                             pass
                                     
                                     if is_duplicate:
+                                        entry_status = "Skipped"
+                                        entry_status_reason = "Duplicate entry"
                                         logger.debug(f"⏭️ Skipping duplicate: {entry.get('title', '')[:50]}")
+                                        # Track duplicate entries too
+                                        if rss_fetch_history and cycle_id:
+                                            rss_fetch_history.add_fetch_item(
+                                                cycle_id=cycle_id,
+                                                title=entry.get("title", ""),
+                                                source_url=entry.get("source", ""),
+                                                link=entry.get("link", ""),
+                                                summary=entry.get("summary", ""),
+                                                status=entry_status,
+                                                status_reason=entry_status_reason,
+                                                vector_id=None,
+                                                added_to_rag_at=None
+                                            )
                                         continue
                                     
                                     # Calculate importance score
@@ -188,6 +240,7 @@ class LearningScheduler:
                                     
                                     if success:
                                         entries_added += 1
+                                        entry_status = "Added to RAG"
                                         logger.info(
                                             f"✅ ChromaDB: Inserted document {entries_added}/{total_to_process} "
                                             f"({entries_added * 100 // total_to_process if total_to_process > 0 else 0}% complete) - "
@@ -207,15 +260,49 @@ class LearningScheduler:
                                                 source_url=entry.get("source", ""),
                                                 link=entry.get("link", ""),
                                                 summary=entry.get("summary", ""),
-                                                status="Added to RAG",
+                                                status=entry_status,
+                                                status_reason="",
                                                 vector_id=tracking_id,  # Temporary tracking ID, actual ChromaDB ID is different
                                                 added_to_rag_at=datetime.now().isoformat()
                                             )
                                     else:
+                                        entry_status = "Failed"
+                                        entry_status_reason = "Failed to add to RAG (filtered or error)"
                                         logger.warning(f"❌ Failed to add entry to RAG: {entry.get('title', 'No title')[:50]}")
+                                        # Track failed entries too
+                                        if rss_fetch_history and cycle_id:
+                                            rss_fetch_history.add_fetch_item(
+                                                cycle_id=cycle_id,
+                                                title=entry.get("title", ""),
+                                                source_url=entry.get("source", ""),
+                                                link=entry.get("link", ""),
+                                                summary=entry.get("summary", ""),
+                                                status=entry_status,
+                                                status_reason=entry_status_reason,
+                                                vector_id=None,
+                                                added_to_rag_at=None
+                                            )
                                         
                                 except Exception as e:
+                                    entry_status = "Error"
+                                    entry_status_reason = f"Processing error: {str(e)[:100]}"
                                     logger.error(f"❌ Error processing entry: {e}")
+                                    # Track error entries too
+                                    if rss_fetch_history and cycle_id:
+                                        try:
+                                            rss_fetch_history.add_fetch_item(
+                                                cycle_id=cycle_id,
+                                                title=entry.get("title", ""),
+                                                source_url=entry.get("source", ""),
+                                                link=entry.get("link", ""),
+                                                summary=entry.get("summary", ""),
+                                                status=entry_status,
+                                                status_reason=entry_status_reason,
+                                                vector_id=None,
+                                                added_to_rag_at=None
+                                            )
+                                        except Exception:
+                                            pass  # Don't fail on tracking errors
                                     continue
                             
                             # Log batch completion
