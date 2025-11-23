@@ -480,24 +480,60 @@ def _initialize_rag_components():
                 logger.warning(f"Could not get database stats: {stats_error}")
             
             query_embedding = embedding_service.encode_text("StillMe RAG continuous learning embedding model")
+            current_model_name = embedding_service.model_name
             
-            # Check if foundational knowledge exists
+            # EMERGENCY: Check for embedding model mismatch
+            # If we have documents but can't find foundational knowledge with good similarity,
+            # it likely means embeddings were created with a different model
+            embedding_mismatch_detected = False
             foundational_exists = False
             try:
                 # Try to find documents with CRITICAL_FOUNDATION source
                 foundational_results = chroma_client.search_knowledge(
                     query_embedding=query_embedding,
-                    limit=5,
-                    where={"source": "CRITICAL_FOUNDATION"}
+                    limit=10  # Get more results to check distances
                 )
+                
                 if foundational_results:
+                    # Check if any results have reasonable similarity (distance < 0.5)
+                    # If all results have very high distance (>= 0.95), it's likely a mismatch
+                    distances = [r.get("distance", 1.0) for r in foundational_results]
+                    avg_distance = sum(distances) / len(distances) if distances else 1.0
+                    min_distance = min(distances) if distances else 1.0
+                    
+                    # Filter for CRITICAL_FOUNDATION source
+                    foundational_docs = []
                     for result in foundational_results:
-                        content = result.get("content", "")
                         metadata = result.get("metadata", {})
-                        if "paraphrase-multilingual-MiniLM-L12-v2" in content and metadata.get("source") == "CRITICAL_FOUNDATION":
-                            foundational_exists = True
-                            logger.info(f"✅ Foundational knowledge found: {metadata.get('title', 'N/A')}")
-                            break
+                        if metadata.get("source") == "CRITICAL_FOUNDATION":
+                            foundational_docs.append(result)
+                    
+                    # If we have foundational docs but all have high distance, it's a mismatch
+                    if foundational_docs and avg_distance >= 0.95 and min_distance >= 0.9:
+                        embedding_mismatch_detected = True
+                        logger.error(f"🚨 CRITICAL: Embedding model mismatch detected for foundational knowledge!")
+                        logger.error(f"   - Current model: {current_model_name}")
+                        logger.error(f"   - Average distance: {avg_distance:.3f} (extremely high)")
+                        logger.error(f"   - Min distance: {min_distance:.3f}")
+                        logger.error(f"   - Found {len(foundational_docs)} foundational docs but none match")
+                        logger.error(f"   - ACTION: Will delete and re-embed foundational knowledge with current model")
+                    elif foundational_docs:
+                        # Check if content mentions current model
+                        for result in foundational_docs:
+                            content = result.get("content", "")
+                            metadata = result.get("metadata", {})
+                            distance = result.get("distance", 1.0)
+                            
+                            # If distance is reasonable (< 0.5) and content mentions current model
+                            if distance < 0.5 and current_model_name in content and metadata.get("source") == "CRITICAL_FOUNDATION":
+                                foundational_exists = True
+                                logger.info(f"✅ Foundational knowledge found: {metadata.get('title', 'N/A')} (distance: {distance:.3f})")
+                                break
+                else:
+                    # No results at all - check if database has documents
+                    if knowledge_docs > 0:
+                        logger.warning(f"⚠️ Database has {knowledge_docs} documents but foundational knowledge search returned no results")
+                        logger.warning(f"⚠️ This may indicate embedding model mismatch")
             except Exception as filter_error:
                 # If metadata filter fails, try without filter
                 logger.debug(f"Metadata filter not supported, trying content search: {filter_error}")
@@ -505,18 +541,63 @@ def _initialize_rag_components():
                     query_embedding=query_embedding,
                     limit=20
                 )
-                for result in all_results:
-                    content = result.get("content", "")
-                    metadata = result.get("metadata", {})
-                    if ("paraphrase-multilingual-MiniLM-L12-v2" in content and 
-                        ("CRITICAL_FOUNDATION" in str(metadata.get("source", "")) or 
-                         "foundational" in str(metadata.get("type", "")).lower())):
-                        foundational_exists = True
-                        logger.info("✅ Foundational knowledge found (via content search)")
-                        break
+                if all_results:
+                    distances = [r.get("distance", 1.0) for r in all_results]
+                    avg_distance = sum(distances) / len(distances) if distances else 1.0
+                    min_distance = min(distances) if distances else 1.0
+                    
+                    # If all results have very high distance, likely mismatch
+                    if avg_distance >= 0.95 and min_distance >= 0.9 and knowledge_docs > 0:
+                        embedding_mismatch_detected = True
+                        logger.error(f"🚨 CRITICAL: Embedding model mismatch detected!")
+                        logger.error(f"   - Current model: {current_model_name}")
+                        logger.error(f"   - Average distance: {avg_distance:.3f}")
+                        logger.error(f"   - Database has {knowledge_docs} documents but none match")
+                    else:
+                        for result in all_results:
+                            content = result.get("content", "")
+                            metadata = result.get("metadata", {})
+                            distance = result.get("distance", 1.0)
+                            if (distance < 0.5 and current_model_name in content and 
+                                ("CRITICAL_FOUNDATION" in str(metadata.get("source", "")) or 
+                                 "foundational" in str(metadata.get("type", "")).lower())):
+                                foundational_exists = True
+                                logger.info("✅ Foundational knowledge found (via content search)")
+                                break
+            
+            # EMERGENCY: If embedding mismatch detected, delete old foundational knowledge first
+            if embedding_mismatch_detected:
+                logger.warning(f"🔧 EMERGENCY MODE: Deleting old foundational knowledge to re-embed with current model...")
+                try:
+                    # Get all foundational knowledge IDs
+                    all_results = chroma_client.search_knowledge(
+                        query_embedding=query_embedding,
+                        limit=100  # Get many results to find all foundational docs
+                    )
+                    foundational_ids_to_delete = []
+                    for result in all_results:
+                        metadata = result.get("metadata", {})
+                        if metadata.get("source") == "CRITICAL_FOUNDATION":
+                            doc_id = result.get("id")
+                            if doc_id:
+                                foundational_ids_to_delete.append(doc_id)
+                    
+                    if foundational_ids_to_delete:
+                        logger.info(f"🗑️ Deleting {len(foundational_ids_to_delete)} old foundational knowledge documents...")
+                        chroma_client.knowledge_collection.delete(ids=foundational_ids_to_delete)
+                        logger.info(f"✅ Deleted {len(foundational_ids_to_delete)} old foundational knowledge documents")
+                        foundational_exists = False  # Force re-add
+                    else:
+                        logger.warning("⚠️ Could not find foundational knowledge IDs to delete")
+                except Exception as delete_error:
+                    logger.error(f"❌ Failed to delete old foundational knowledge: {delete_error}")
+                    logger.error(f"❌ Manual action may be required: Delete CRITICAL_FOUNDATION documents from ChromaDB")
             
             if not foundational_exists:
-                logger.info("⚠️ Foundational knowledge not found. Adding it now...")
+                if embedding_mismatch_detected:
+                    logger.info("🔄 Re-embedding foundational knowledge with current model...")
+                else:
+                    logger.info("⚠️ Foundational knowledge not found. Adding it now...")
                 # Load foundational knowledge from separate files
                 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                 technical_path = os.path.join(base_dir, "docs", "rag", "foundational_technical.md")

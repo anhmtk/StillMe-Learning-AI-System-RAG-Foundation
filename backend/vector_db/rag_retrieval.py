@@ -435,15 +435,54 @@ class RAGRetrieval:
                         logger.debug(f"✅ Progressive fallback succeeded: {len(filtered_knowledge)} documents with threshold {fallback_threshold:.3f}")
                         break  # Stop if we found documents
             
-            # Log distance statistics for debugging similarity = 0.0 issues
+            # EMERGENCY: Detect embedding model mismatch
+            # If average distance is extremely high (>= 0.95) AND we have documents in database,
+            # this strongly indicates embedding model mismatch
+            embedding_mismatch_detected = False
             if distance_values:
                 avg_distance = sum(distance_values) / len(distance_values)
                 min_distance = min(distance_values)
                 max_distance = max(distance_values)
-                if avg_distance >= 0.95:  # If average distance is very high (low similarity)
-                    logger.warning(f"⚠️ High average distance ({avg_distance:.3f}) detected - all documents may be irrelevant. "
-                                 f"Distance range: [{min_distance:.3f}, {max_distance:.3f}]. "
-                                 f"This may indicate: (1) Database is new/empty, (2) Embedding model mismatch, or (3) Query is unrelated to stored content.")
+                
+                # Check database stats to determine if mismatch is likely
+                try:
+                    stats = self.chroma_client.get_collection_stats()
+                    knowledge_docs = stats.get("knowledge_documents", 0)
+                    
+                    # If we have documents but all have very high distance, it's likely a mismatch
+                    if avg_distance >= 0.95 and knowledge_docs > 0 and not filtered_knowledge:
+                        embedding_mismatch_detected = True
+                        logger.error(f"🚨 CRITICAL: Embedding model mismatch detected!")
+                        logger.error(f"   - Average distance: {avg_distance:.3f} (extremely high)")
+                        logger.error(f"   - Distance range: [{min_distance:.3f}, {max_distance:.3f}]")
+                        logger.error(f"   - Database has {knowledge_docs} knowledge documents but none match")
+                        logger.error(f"   - This indicates embeddings were created with a different model")
+                        logger.error(f"   - Current model: {self.embedding_service.model_name}")
+                        logger.error(f"   - ACTION REQUIRED: Re-embed all documents with current model")
+                        
+                        # EMERGENCY MODE: Use minimal threshold to allow any matches
+                        logger.warning(f"🔧 EMERGENCY MODE: Lowering threshold to 0.01 to allow matches")
+                        emergency_threshold = 0.01
+                        for doc in knowledge_results:
+                            if doc not in filtered_knowledge:
+                                distance = doc.get("distance", 1.0)
+                                similarity = _distance_to_similarity(distance)
+                                if similarity >= emergency_threshold:
+                                    doc["similarity"] = similarity
+                                    filtered_knowledge.append(doc)
+                                    logger.debug(f"✅ Emergency mode: Added document with similarity {similarity:.3f}")
+                        
+                        if filtered_knowledge:
+                            logger.info(f"✅ Emergency mode succeeded: {len(filtered_knowledge)} documents with threshold {emergency_threshold}")
+                        else:
+                            logger.error(f"❌ Emergency mode failed: No documents match even with threshold {emergency_threshold}")
+                            logger.error(f"❌ Database requires complete re-embedding with model: {self.embedding_service.model_name}")
+                    elif avg_distance >= 0.95:
+                        logger.warning(f"⚠️ High average distance ({avg_distance:.3f}) detected - all documents may be irrelevant. "
+                                     f"Distance range: [{min_distance:.3f}, {max_distance:.3f}]. "
+                                     f"This may indicate: (1) Database is new/empty, (2) Embedding model mismatch, or (3) Query is unrelated to stored content.")
+                except Exception as stats_error:
+                    logger.warning(f"Could not check database stats for mismatch detection: {stats_error}")
             
             # Filter conversation results by similarity threshold
             filtered_conversation = []
