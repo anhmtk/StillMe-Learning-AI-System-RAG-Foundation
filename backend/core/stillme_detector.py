@@ -95,8 +95,22 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         "cơ chế hoạt động", "cách hoạt động", "how does", "how it works"
     ]
     
+    # CRITICAL: Check if question is about "your system" or "in your system"
+    # These are definitely about StillMe even without explicit StillMe name
+    has_your_system = any(
+        phrase in query_lower 
+        for phrase in [
+            "your system", "in your system", "your.*system", "system.*you",
+            "bạn.*hệ thống", "hệ thống.*bạn", "của bạn", "bạn.*sử dụng"
+        ]
+    )
+    
+    # If question has technical keywords AND "your system", it's definitely about StillMe
     for keyword in technical_keywords:
         if keyword in query_lower:
+            if has_your_system:
+                matched_keywords.append("technical_your_system")
+                return (True, matched_keywords)
             matched_keywords.append("technical")
             return (True, matched_keywords)
     
@@ -107,9 +121,13 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
     
     # Check for keyword combinations
     # Pattern 1: "StillMe" + learning/system keywords
+    # CRITICAL: "your system" or "in your system" should be treated as StillMe context
     has_stillme_context = any(
         keyword in query_lower 
         for keyword in ["stillme", "still me", "still-me", "bạn", "you", "it", "your", "của bạn"]
+    ) or any(
+        phrase in query_lower 
+        for phrase in ["your system", "in your system", "your.*system", "system.*you"]
     )
     
     has_learning_keyword = any(

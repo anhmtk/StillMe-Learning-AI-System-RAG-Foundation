@@ -1879,18 +1879,84 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     ]
                 )
                 
-                # Normal retrieval for non-StillMe queries
-                # But prioritize foundational knowledge for technical questions
-                # Optimized: conversation_limit reduced from 2 to 1 for latency
-                context = rag_retrieval.retrieve_context(
-                    query=chat_request.message,
-                    knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
-                    conversation_limit=1,  # Optimized: reduced from 2 to 1
-                    exclude_content_types=["technical"] if is_philosophical else None,
-                    prioritize_style_guide=is_philosophical,
-                    prioritize_foundational=is_technical_question,  # Prioritize foundational for technical questions
-                    is_philosophical=is_philosophical
+                # CRITICAL: Check if question is about "your system" - treat as StillMe query
+                has_your_system = any(
+                    phrase in question_lower 
+                    for phrase in [
+                        "your system", "in your system", "your.*system", "system.*you",
+                        "bạn.*hệ thống", "hệ thống.*bạn", "của bạn", "bạn.*sử dụng"
+                    ]
                 )
+                
+                # If technical question about "your system", treat as StillMe query
+                if is_technical_question and has_your_system:
+                    logger.info("Technical question about 'your system' detected - treating as StillMe query")
+                    # Use same logic as StillMe query: try query variants for foundational knowledge
+                    try:
+                        from backend.core.stillme_detector import get_foundational_query_variants
+                        query_variants = get_foundational_query_variants(chat_request.message)
+                        all_knowledge_docs = []
+                        
+                        for variant in query_variants[:3]:  # Try first 3 variants
+                            variant_context = rag_retrieval.retrieve_context(
+                                query=variant,
+                                knowledge_limit=chat_request.context_limit,
+                                conversation_limit=0,  # Don't need conversation for foundational queries
+                                prioritize_foundational=True,
+                                exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
+                                prioritize_style_guide=is_philosophical,
+                                is_philosophical=is_philosophical
+                            )
+                            # Merge results, avoiding duplicates
+                            existing_ids = {doc.get("id") for doc in all_knowledge_docs}
+                            for doc in variant_context.get("knowledge_docs", []):
+                                if doc.get("id") not in existing_ids:
+                                    all_knowledge_docs.append(doc)
+                        
+                        # If we still don't have results, do normal retrieval with foundational priority
+                        if not all_knowledge_docs:
+                            logger.warning("No foundational knowledge found for 'your system' question, falling back to normal retrieval")
+                            context = rag_retrieval.retrieve_context(
+                                query=chat_request.message,
+                                knowledge_limit=min(chat_request.context_limit, 5),
+                                conversation_limit=1,
+                                prioritize_foundational=True,
+                                exclude_content_types=["technical"] if is_philosophical else None,
+                                prioritize_style_guide=is_philosophical,
+                                is_philosophical=is_philosophical
+                            )
+                        else:
+                            # Use merged results
+                            context = {
+                                "knowledge_docs": all_knowledge_docs[:chat_request.context_limit],
+                                "conversation_docs": [],
+                                "total_context_docs": len(all_knowledge_docs[:chat_request.context_limit])
+                            }
+                            logger.info(f"Retrieved {len(context['knowledge_docs'])} foundational knowledge documents for 'your system' question")
+                    except Exception as variant_error:
+                        logger.warning(f"Error retrieving foundational knowledge for 'your system' question: {variant_error}, falling back to normal retrieval")
+                        context = rag_retrieval.retrieve_context(
+                            query=chat_request.message,
+                            knowledge_limit=min(chat_request.context_limit, 5),
+                            conversation_limit=1,
+                            prioritize_foundational=True,
+                            exclude_content_types=["technical"] if is_philosophical else None,
+                            prioritize_style_guide=is_philosophical,
+                            is_philosophical=is_philosophical
+                        )
+                else:
+                    # Normal retrieval for non-StillMe queries
+                    # But prioritize foundational knowledge for technical questions
+                    # Optimized: conversation_limit reduced from 2 to 1 for latency
+                    context = rag_retrieval.retrieve_context(
+                        query=chat_request.message,
+                        knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
+                        conversation_limit=1,  # Optimized: reduced from 2 to 1
+                        exclude_content_types=["technical"] if is_philosophical else None,
+                        prioritize_style_guide=is_philosophical,
+                        prioritize_foundational=is_technical_question,  # Prioritize foundational for technical questions
+                        is_philosophical=is_philosophical
+                    )
         
         rag_retrieval_end = time.time()
         rag_retrieval_latency = rag_retrieval_end - rag_retrieval_start
