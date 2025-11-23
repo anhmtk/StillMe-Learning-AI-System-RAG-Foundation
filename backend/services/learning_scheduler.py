@@ -68,6 +68,7 @@ class LearningScheduler:
             # If auto_add_to_rag is enabled, actually process entries and add to RAG
             entries_added = 0
             entries_filtered = 0
+            all_entries = []  # Initialize to track all fetched entries
             if self.auto_add_to_rag:
                 # Import services from main module (avoid circular imports)
                 try:
@@ -269,20 +270,20 @@ class LearningScheduler:
                     if source_integration:
                         # Try to get source breakdown from source_integration
                         sources = {
-                            "rss": len(entries),
+                            "rss": len(all_entries),
                             "arxiv": 0,  # Can be enhanced to track actual source breakdown
                             "crossref": 0,
                             "wikipedia": 0
                         }
                     else:
-                        sources = {"rss": len(entries)}
+                        sources = {"rss": len(all_entries)}
                 except Exception:
-                    sources = {"rss": len(entries)}
+                    sources = {"rss": len(all_entries)}
                 
                 tracker = get_learning_metrics_tracker()
                 tracker.record_learning_cycle(
                     cycle_number=self.cycle_count,
-                    entries_fetched=len(entries),
+                    entries_fetched=len(all_entries),
                     entries_added=entries_added if self.auto_add_to_rag else 0,
                     entries_filtered=entries_filtered if self.auto_add_to_rag else 0,
                     filter_reasons=filter_reasons,
@@ -295,7 +296,7 @@ class LearningScheduler:
             
             return {
                 "cycle_number": self.cycle_count,
-                "entries_fetched": len(entries),
+                "entries_fetched": len(all_entries),
                 "entries_added_to_rag": entries_added if self.auto_add_to_rag else 0,
                 "entries_filtered": entries_filtered if self.auto_add_to_rag else 0,
                 "timestamp": self.last_run_time.isoformat(),
