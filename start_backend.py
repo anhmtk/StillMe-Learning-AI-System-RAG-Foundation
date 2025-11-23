@@ -81,6 +81,12 @@ except Exception as e:
     logger.warning("⚠️ Continuing despite import error - /health endpoint may still work")
     sys.stdout.flush()
 
+# CRITICAL: Ensure app is defined before starting uvicorn
+if 'app' not in locals() and 'app' not in globals():
+    logger.error("❌ CRITICAL: FastAPI app not defined! Cannot start server.")
+    sys.stdout.flush()
+    sys.exit(1)
+
 # Start uvicorn
 logger.info("=" * 60)
 logger.info(f"Starting uvicorn server on 0.0.0.0:{port_int}...")
@@ -92,7 +98,19 @@ logger.info("✅ App started - Health endpoint /health is ready")
 logger.info("✅ Readiness endpoint /ready available (may return 503 until dependencies ready)")
 sys.stdout.flush()
 
+# CRITICAL: Add immediate health check endpoint test
 try:
+    # Test if app can be accessed
+    logger.info(f"🔍 Testing app object: {type(app)}")
+    logger.info(f"🔍 App routes count: {len(app.routes) if hasattr(app, 'routes') else 'unknown'}")
+    sys.stdout.flush()
+except Exception as e:
+    logger.warning(f"⚠️ Could not inspect app object: {e}")
+    sys.stdout.flush()
+
+try:
+    logger.info("🚀 Starting uvicorn server...")
+    sys.stdout.flush()
     uvicorn.run(
         app,
         host="0.0.0.0",
@@ -105,5 +123,7 @@ except KeyboardInterrupt:
     sys.stdout.flush()
 except Exception as e:
     logger.error(f"❌ Server crashed: {e}", exc_info=True)
+    import traceback
+    logger.error(f"❌ Full traceback: {traceback.format_exc()}")
     sys.stdout.flush()
     sys.exit(1)
