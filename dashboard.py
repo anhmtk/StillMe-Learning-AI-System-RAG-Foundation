@@ -2007,7 +2007,7 @@ def sidebar(page_for_chat: str | None = None):
         - DeepSeek: https://platform.deepseek.com
         - OpenAI: https://platform.openai.com
         
-        **Rate Limit:** 10 requests/minute per IP
+        **Rate Limit:** 15 requests/day per IP (to protect API costs)
         
         **Admin:** Unlimited chat (uses server API key)
         """)
