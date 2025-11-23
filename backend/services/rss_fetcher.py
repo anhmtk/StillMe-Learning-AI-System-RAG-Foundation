@@ -37,14 +37,15 @@ class RSSFetcher:
             # Biology & Science
             "https://www.nature.com/nature.rss",
             "https://www.nature.com/natmachintell.rss",  # Nature Machine Intelligence - AI research & ethics
-            "https://www.scientificamerican.com/rss/",  # Scientific American - Science news & analysis
-            "https://www.science.org/rss/news_current.xml",  # Science Magazine - Latest research news
-            "https://www.pnas.org/rss/current.xml",  # PNAS (Proceedings of the National Academy of Sciences) - Top research
+            "https://www.pnas.org/action/showFeed?type=etoc&feed=rss&jc=PNAS",  # PNAS - Working feed (alternative to /rss/current.xml)
+            # Removed: "https://www.scientificamerican.com/rss/" - 404 Not Found
+            # Removed: "https://www.science.org/rss/news_current.xml" - XML validation errors
+            # Removed: "https://www.pnas.org/rss/current.xml" - XML validation errors (using action/showFeed instead)
             # Removed: "https://www.sciencedaily.com/rss/matter_energy.xml" - XML parse errors (all variants failed)
             
             # Physics
-            "https://www.aps.org/publications/apsnews/rss.xml",  # American Physical Society News
-            "https://www.iop.org/rss",  # Institute of Physics RSS
+            # Removed: "https://www.aps.org/publications/apsnews/rss.xml" - 403 Forbidden (bot protection)
+            # Removed: "https://www.iop.org/rss" - 403 Forbidden (bot protection)
             # Removed: "https://physicsworld.com/feed/" - XML parse errors (all variants failed)
             "https://phys.org/rss-feed/",  # Phys.org main feed (reliable)
             
@@ -52,29 +53,33 @@ class RSSFetcher:
             # Note: Some chemistry feeds may be empty - will be monitored and replaced if needed
             
             # History & Historical Events
-            "https://www.history.com/.rss/topics/news",  # History.com - Historical events & analysis
-            "https://www.bbc.com/news/world/rss.xml",  # BBC World News - International history & current events
+            "https://feeds.bbci.co.uk/news/world/rss.xml",  # BBC World News - Fixed URL (redirects from bbc.com)
             "https://www.theguardian.com/world/rss",  # The Guardian World - Historical context & analysis
+            "https://www.historytoday.com/rss.xml",  # History Today - Academic history magazine
+            # Removed: "https://www.history.com/.rss/topics/news" - 404 Not Found
             # Note: Historical sources help StillMe answer questions about events like Geneva 1954, Bretton Woods 1944
             
             # Ethics & Applied Philosophy
-            "https://www.ethics.org.au/feed/",  # The Ethics Centre - Applied ethics & moral philosophy
-            "https://www.bioethics.net/feed/",  # Bioethics.net - Bioethics & medical ethics
+            "http://bioethicstoday.org/feed/",  # Bioethics Today - Working redirect from bioethics.net
+            # Removed: "https://www.ethics.org.au/feed/" - XML validation errors
+            # Removed: "https://www.bioethics.net/feed/" - Redirects to bioethicstoday.org (using direct URL)
             # Note: Ethics sources complement philosophy sources for practical ethical reasoning
             
             # Social Sciences
-            "https://www.psychologytoday.com/us/rss",  # Psychology Today - Psychology & social sciences
-            "https://www.scientificamerican.com/psychology/feed/",  # Scientific American Psychology
+            "https://www.apa.org/rss/topics/psychology",  # American Psychological Association - Psychology news
+            # Removed: "https://www.psychologytoday.com/us/rss" - 404 Not Found
+            # Removed: "https://www.scientificamerican.com/psychology/feed/" - 404 Not Found
             # Note: Social sciences provide context for understanding human behavior, religion, philosophy
             
             # Religious Studies & Philosophy
-            "https://philpapers.org/rss/recent.xml",  # PhilPapers - Recent philosophy papers
-            "https://www.philosophynow.org/rss",  # Philosophy Now - Philosophy magazine
+            "https://www.philosophynow.org/rss",  # Philosophy Now - Philosophy magazine (reliable)
             "https://www.theguardian.com/world/religion/rss",  # The Guardian - Religion
             "https://tricycle.org/feed/",  # Tricycle - Buddhist Magazine (reliable)
             "https://iep.utm.edu/feed/",  # Internet Encyclopedia of Philosophy - Academic philosophy reference
-            "https://www.patheos.com/feed/",  # Patheos - Multi-religious perspectives & interfaith dialogue
-            "https://www.religionnews.com/feed/",  # Religion News Service - Religion news & analysis
+            "https://www.firstthings.com/rss",  # First Things - Religion, culture, philosophy
+            # Removed: "https://philpapers.org/rss/recent.xml" - 403 Forbidden (bot protection)
+            # Removed: "https://www.patheos.com/feed/" - 403 Forbidden (bot protection)
+            # Removed: "https://www.religionnews.com/feed/" - 403 Forbidden (bot protection)
             # Removed: "https://aeon.co/feed.rss" - XML parse errors (all variants failed)
             # Removed: "https://www.lionsroar.com/feed/" - XML parse errors (all variants failed)
             
@@ -87,8 +92,9 @@ class RSSFetcher:
             
             # Tech Policy & AI Governance Blogs
             "https://www.eff.org/rss/updates.xml",  # Electronic Frontier Foundation - Tech policy
-            "https://www.acm.org/feed",  # ACM (Association for Computing Machinery) - Tech policy & research
-            "https://www.technologyreview.com/feed/",  # MIT Technology Review - AI & technology (main feed)
+            "https://www.wired.com/feed/rss",  # Wired - Technology & AI news
+            # Removed: "https://www.acm.org/feed" - 403 Forbidden (bot protection)
+            # Removed: "https://www.technologyreview.com/feed/" - XML validation errors
             # Removed: "https://www.brookings.edu/feed/" - XML parsing error (syntax error: line 2, column 0)
             # Removed: "https://www.cato.org/feed/" - Failed to fetch (403/404)
             # Removed: "https://www.aei.org/technology/feed/" - 403 Forbidden, no reliable alternative
@@ -99,7 +105,7 @@ class RSSFetcher:
             
             # Academic Blogs & AI Alignment
             "https://www.overcomingbias.com/feed",  # Overcoming Bias - Rationality (reliable)
-            "https://www.gwern.net/feed.xml",  # Gwern's Blog - AI, rationality, research
+            # Removed: "https://www.gwern.net/feed.xml" - XML validation errors
             # Removed: "https://www.alignmentforum.org/feed.xml" - XML parse errors (all variants failed)
             # Removed: "https://www.lesswrong.com/feed.xml" - XML parse errors
             # Removed: "https://distill.pub/rss.xml" - Failed to fetch
