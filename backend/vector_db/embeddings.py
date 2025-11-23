@@ -79,6 +79,10 @@ class EmbeddingService:
         if _global_model_manager is not None:
             self.model_manager = _global_model_manager
             
+            # Get cache_path FIRST before using it
+            cache_path = self.model_manager.cache_path
+            cache_status = self.model_manager.cache_status
+            
             # CRITICAL: Check if OLD model cache exists and delete it if found
             # This ensures we use the new multilingual model, not the old English-only model
             old_model_paths = [
@@ -97,12 +101,11 @@ class EmbeddingService:
                         logger.warning(f"⚠️ Could not delete old model cache: {delete_error}")
             
             # Try to copy model from image cache to persistent volume if needed
-            if not self.model_manager.cache_status.model_files_found:
+            if not cache_status.model_files_found:
                 logger.info("⚠️ Model not found in persistent cache, attempting to copy from image cache...")
                 self.model_manager.copy_model_from_image_cache()
-            
-            cache_path = self.model_manager.cache_path
-            cache_status = self.model_manager.cache_status
+                # Re-verify cache after copy attempt
+                cache_status = self.model_manager.cache_status
             
             # Log cache status
             if cache_status.model_files_found:
