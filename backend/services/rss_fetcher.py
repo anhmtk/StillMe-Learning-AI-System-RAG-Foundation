@@ -8,6 +8,10 @@ import asyncio
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from backend.services.content_curator import ContentCurator
 
 from backend.services.rss_fetcher_enhanced import (
     fetch_feed_with_fallback,
@@ -125,14 +129,18 @@ class RSSFetcher:
         self.successful_feeds = 0
         self.failed_feeds = 0
     
-    async def fetch_feeds_async(self, max_items_per_feed: int = 5) -> List[Dict[str, Any]]:
-        """Fetch entries from all RSS feeds (async version with retry and fallback)
+    async def fetch_feeds_async(self, max_items_per_feed: Optional[int] = None, 
+                                content_curator=None, 
+                                min_importance_score: float = 0.3) -> List[Dict[str, Any]]:
+        """Fetch entries from all RSS feeds with value-based prioritization
         
         Args:
-            max_items_per_feed: Maximum items to fetch per feed
+            max_items_per_feed: Maximum items to fetch per feed (None = fetch all, then filter by value)
+            content_curator: ContentCurator instance for importance scoring (optional)
+            min_importance_score: Minimum importance score to include (0.0-1.0)
             
         Returns:
-            List of feed entries
+            List of feed entries, prioritized by value/importance
         """
         all_entries = []
         self.successful_feeds = 0
@@ -170,8 +178,14 @@ class RSSFetcher:
                     logger.warning(error_msg)
                     continue
                 
-                # Extract entries
-                for entry in feed.entries[:max_items_per_feed]:
+                # Extract ALL entries (no limit if max_items_per_feed is None)
+                feed_entries = feed.entries
+                if max_items_per_feed is not None:
+                    feed_entries = feed.entries[:max_items_per_feed]
+                
+                # Process each entry and calculate importance score
+                scored_entries = []
+                for entry in feed_entries:
                     entry_data = {
                         "title": entry.get("title", ""),
                         "summary": entry.get("summary", entry.get("description", "")),
@@ -180,10 +194,29 @@ class RSSFetcher:
                         "source": feed_url,
                         "content_type": "knowledge"
                     }
-                    all_entries.append(entry_data)
+                    
+                    # Calculate importance score if curator available
+                    if content_curator:
+                        importance_score = content_curator.calculate_importance_score(entry_data)
+                        entry_data["importance_score"] = importance_score
+                        # Only include if meets minimum threshold
+                        if importance_score >= min_importance_score:
+                            scored_entries.append(entry_data)
+                    else:
+                        # No curator: include all entries (backward compatibility)
+                        scored_entries.append(entry_data)
                 
+                # Sort by importance score (highest first) if curator available
+                if content_curator and scored_entries:
+                    scored_entries.sort(key=lambda x: x.get("importance_score", 0.0), reverse=True)
+                
+                all_entries.extend(scored_entries)
                 self.successful_feeds += 1
-                logger.info(f"✅ Fetched {len(feed.entries[:max_items_per_feed])} items from {feed_url}")
+                
+                if content_curator:
+                    logger.info(f"✅ Fetched {len(scored_entries)}/{len(feed.entries)} items from {feed_url} (value-based: importance >= {min_importance_score})")
+                else:
+                    logger.info(f"✅ Fetched {len(scored_entries)} items from {feed_url}")
                 
             except Exception as e:
                 error_msg = f"Failed to process {feed_url}: {e}"
@@ -211,14 +244,18 @@ class RSSFetcher:
         
         return all_entries
     
-    def fetch_feeds(self, max_items_per_feed: int = 5) -> List[Dict[str, Any]]:
-        """Fetch entries from all RSS feeds (synchronous wrapper)
+    def fetch_feeds(self, max_items_per_feed: Optional[int] = None, 
+                    content_curator=None,
+                    min_importance_score: float = 0.3) -> List[Dict[str, Any]]:
+        """Fetch entries from all RSS feeds with value-based prioritization (synchronous wrapper)
         
         Args:
-            max_items_per_feed: Maximum items to fetch per feed
+            max_items_per_feed: Maximum items to fetch per feed (None = fetch all, filter by value)
+            content_curator: ContentCurator instance for importance scoring (optional)
+            min_importance_score: Minimum importance score to include (0.0-1.0)
             
         Returns:
-            List of feed entries
+            List of feed entries, prioritized by value/importance
         """
         # Run async version in event loop
         try:
@@ -227,13 +264,18 @@ class RSSFetcher:
                 # If loop is already running, create a new task
                 import concurrent.futures
                 with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(asyncio.run, self.fetch_feeds_async(max_items_per_feed))
+                    future = executor.submit(
+                        asyncio.run, 
+                        self.fetch_feeds_async(max_items_per_feed, content_curator, min_importance_score)
+                    )
                     return future.result()
             else:
-                return loop.run_until_complete(self.fetch_feeds_async(max_items_per_feed))
+                return loop.run_until_complete(
+                    self.fetch_feeds_async(max_items_per_feed, content_curator, min_importance_score)
+                )
         except RuntimeError:
             # No event loop, create one
-            return asyncio.run(self.fetch_feeds_async(max_items_per_feed))
+            return asyncio.run(self.fetch_feeds_async(max_items_per_feed, content_curator, min_importance_score))
     
     def fetch_single_feed(self, feed_url: str, max_items: int = 5) -> List[Dict[str, Any]]:
         """Fetch entries from a single RSS feed"""

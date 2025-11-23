@@ -52,25 +52,33 @@ class SourceIntegration:
                    f"PapersWithCode={ENABLE_PAPERS_WITH_CODE}, Conferences={ENABLE_CONFERENCES}, StanfordEncyclopedia={ENABLE_STANFORD_ENCYCLOPEDIA}")
     
     def fetch_all_sources(self,
-                         max_items_per_source: int = 5,
-                         use_pre_filter: bool = True) -> List[Dict[str, Any]]:
+                         max_items_per_source: Optional[int] = 5,
+                         use_pre_filter: bool = True,
+                         content_curator=None,
+                         min_importance_score: float = 0.3) -> List[Dict[str, Any]]:
         """
-        Fetch content from all enabled sources
+        Fetch content from all enabled sources with value-based prioritization
         
         Args:
-            max_items_per_source: Maximum items per source
+            max_items_per_source: Maximum items per source (None = fetch all, filter by value)
             use_pre_filter: Whether to apply pre-filter
+            content_curator: ContentCurator instance for importance scoring (optional)
+            min_importance_score: Minimum importance score to include (0.0-1.0)
             
         Returns:
             List of all fetched entries (filtered if use_pre_filter=True)
         """
         all_entries = []
         
-        # Fetch from RSS (always enabled)
+        # Fetch from RSS (always enabled) with value-based prioritization
         try:
-            rss_entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=max_items_per_source)
+            rss_entries = self.rss_fetcher.fetch_feeds(
+                max_items_per_feed=max_items_per_source,
+                content_curator=content_curator,
+                min_importance_score=min_importance_score
+            )
             all_entries.extend(rss_entries)
-            logger.info(f"Fetched {len(rss_entries)} entries from RSS")
+            logger.info(f"Fetched {len(rss_entries)} entries from RSS (value-based selection)")
             
             # Update system status tracker with RSS fetcher status
             from backend.services.system_status_tracker import get_system_status_tracker

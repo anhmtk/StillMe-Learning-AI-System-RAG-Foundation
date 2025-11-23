@@ -1067,26 +1067,24 @@ async def _run_learning_cycle_sync():
     except Exception as e:
         logger.error(f"Error processing community proposals: {e}")
     
-    # STEP 2: Process Automatic Sources (70% quota)
-    if learning_scheduler.auto_add_to_rag and rag_retrieval:
-        # Use entries from the learning cycle result (already fetched)
-        # Don't fetch again - use the entries that were already fetched in run_learning_cycle
-        entries_to_add = []
-        filtered_count = 0
-        
-        # Fetch from all sources using SourceIntegration
-        try:
-            # Use SourceIntegration to fetch from all enabled sources
-            if source_integration:
-                all_entries = source_integration.fetch_all_sources(
-                    max_items_per_source=5,
-                    use_pre_filter=False  # We'll apply pre-filter manually to track rejected items
-                )
-                logger.info(f"Fetched {len(all_entries)} entries from all sources (RSS + arXiv + CrossRef + Wikipedia)")
-            else:
-                # Fallback to RSS only
-                all_entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
-                logger.info(f"Fetched {len(all_entries)} entries from RSS (SourceIntegration not available)")
+        # STEP 2: Process Automatic Sources (70% quota)
+        # NOTE: Entries are already fetched in run_learning_cycle() - no duplicate fetch needed
+        # This section processes the entries that were already fetched
+        if learning_scheduler.auto_add_to_rag and rag_retrieval:
+            # Entries are already fetched in run_learning_cycle() - use result from there
+            # No need to fetch again - this would be duplicate
+            entries_to_add = []
+            filtered_count = 0
+            
+            # Get entries from learning cycle result (already fetched with value-based prioritization)
+            try:
+                # Entries were already fetched in run_learning_cycle() with value-based selection
+                # We just need to process them here (pre-filter, prioritize, add to RAG)
+                # If result doesn't have entries, that means run_learning_cycle() already processed them
+                all_entries = result.get("entries_fetched_list", [])
+                if not all_entries:
+                    logger.info("Entries already processed in run_learning_cycle() - skipping duplicate fetch")
+                    all_entries = []
             
             # STEP 1: Pre-Filter (BEFORE embedding) to reduce costs
             if content_curator:

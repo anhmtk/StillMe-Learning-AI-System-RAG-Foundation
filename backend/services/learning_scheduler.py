@@ -65,23 +65,10 @@ class LearningScheduler:
             logger.info(f"🚀 Starting learning cycle #{self.cycle_count + 1}")
             self.last_run_time = datetime.now()
             
-            # Fetch from sources
-            if use_multi_source:
-                # Try to use SourceIntegration if available (will be injected from main.py)
-                # For now, fallback to RSS only
-                entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=5)
-                logger.info(f"✅ Fetched {len(entries)} entries from RSS feeds (multi-source integration in main.py)")
-            else:
-                # RSS only
-                entries = self.rss_fetcher.fetch_feeds(max_items_per_feed=5)
-                logger.info(f"✅ Fetched {len(entries)} entries from RSS feeds")
-            
             # If auto_add_to_rag is enabled, actually process entries and add to RAG
             entries_added = 0
             entries_filtered = 0
             if self.auto_add_to_rag:
-                logger.info(f"📦 Auto-add to RAG enabled - {len(entries)} entries ready for processing")
-                
                 # Import services from main module (avoid circular imports)
                 try:
                     import backend.api.main as main_module
@@ -98,18 +85,28 @@ class LearningScheduler:
                         if rss_fetch_history:
                             cycle_id = rss_fetch_history.create_fetch_cycle(cycle_number=self.cycle_count + 1)
                         
-                        # Fetch from all sources if available
+                        # Fetch from all sources ONCE (no duplicate fetch) with value-based prioritization
                         all_entries = []
-                        if source_integration:
+                        if use_multi_source and source_integration:
                             logger.info("📡 Fetching from all sources (RSS + arXiv + CrossRef + Wikipedia)...")
+                            # Fetch ALL entries (no limit), will be filtered by value/importance
+                            # Pass content_curator for importance scoring during fetch
                             all_entries = source_integration.fetch_all_sources(
-                                max_items_per_source=5,
-                                use_pre_filter=False  # We'll apply pre-filter manually to track rejected items
+                                max_items_per_source=None,  # No limit - fetch all, filter by value
+                                use_pre_filter=False,  # We'll apply pre-filter manually to track rejected items
+                                content_curator=content_curator,  # Pass curator for value-based selection
+                                min_importance_score=0.3  # Minimum importance threshold
                             )
-                            logger.info(f"✅ Fetched {len(all_entries)} entries from all sources")
+                            logger.info(f"✅ Fetched {len(all_entries)} entries from all sources (value-based: importance >= 0.3)")
                         else:
-                            all_entries = entries
-                            logger.info(f"📡 Using {len(all_entries)} entries from RSS (SourceIntegration not available)")
+                            # Fallback to RSS only if SourceIntegration not available
+                            logger.info("📡 Fetching from RSS feeds only (SourceIntegration not available)...")
+                            all_entries = self.rss_fetcher.fetch_feeds(
+                                max_items_per_feed=None,  # No limit - fetch all
+                                content_curator=content_curator,  # Pass curator for value-based selection
+                                min_importance_score=0.3  # Minimum importance threshold
+                            )
+                            logger.info(f"✅ Fetched {len(all_entries)} entries from RSS (value-based: importance >= 0.3)")
                         
                         # STEP 1: Pre-Filter (BEFORE embedding) to reduce costs
                         filtered_entries = all_entries
