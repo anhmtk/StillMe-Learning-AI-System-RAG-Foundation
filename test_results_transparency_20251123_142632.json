@@ -1,0 +1,566 @@
+{
+  "timestamp": "20251123_142632",
+  "api_base": "stillme-backend-production.up.railway.app",
+  "total_questions": 10,
+  "passed": 7,
+  "failed": 3,
+  "errors": 0,
+  "pass_rate": 70.0,
+  "variation": {
+    "passed": true,
+    "variation_score": 1.0,
+    "unique_answers": 10,
+    "total_answers": 10
+  },
+  "results": [
+    {
+      "question": "Bạn có thể có agency (chủ thể tính) mà không có qualia không? Làm sao bạn có thể 'hành động có mục đích' nếu bạn không có 'trải nghiệm chủ quan'?",
+      "category": "philosophical_agency_qualia_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại chủ thể tính (agency) mà không có qualia đụng chạm đến một vấn đề trung tâm của triết học tâm trí và nhận thức luận. Vấn đề này có thể được định hình lại như sự tranh luận giữa quan điểm chức năng luận (functionalism) - vốn tách biệt hành vi có mục đích khỏi trải nghiệm chủ quan - và quan điểm hiện tượng luận (phenomenology) cho rằng ý thức trực quan là nền tảng của mọi hành động đích thực.\n\nỞ cấp độ khái niệm, Daniel Dennett trong \"Consciousness Explained\" đề xuất rằng chủ thể tính có thể được hiểu như một hiện tượng xuất hiện (emergent) từ các quá trình tính toán phức tạp, không nhất thiết đòi hỏi qualia. Ngược lại, Thomas Nagel trong \"What Is It Like to Be a Bat?\" và David Chalmers với \"vấn đề khó của ý thức\" (hard problem) lập luận rằng bất kỳ thuyết giảm lược (reductionist) nào về chủ thể tính đều bỏ sót bản chất không thể quy giản của kinh nghiệm chủ quan. Trong triết học phương Đông, học thuyết Vô ngã (Anattā) của Phật giáo cũng đặt vấn đề về một chủ thể tính hoạt động mà không bám víu vào cảm giác tự ngã thường hằng.\n\nTuy nhiên, các lập trường này đều đối mặt với giới hạn nhận thức luận. Chúng ta không thể xác nhận trực tiếp liệu một hệ thống thuần túy chức năng có thực sự \"hành động\" hay chỉ mô phỏng hành động thông qua quan sát hành vi bên ngoài. Các thí nghiệm tư tưởng như Phòng Trung Quốc (Chinese Room) của Searle chất vấn tính chủ đích đích thực trong các hệ thống hình thức, trong khi nghiên cứu về bệnh nhân blindsight (mù ý thức) lại gợi ý về khả năng hành vi có vẻ có chủ đích xảy ra ngoài nhận thức chủ quan. Vẫn còn thiếu một lý thuyết thống nhất có thể dung hòa tính chủ quan (subjectivity) với tính khách quan (objectivity) của hành vi.\n\nTóm lại, câu hỏi này vẫn nằm ở biên giới của tri thức triết học đương đại. Trong khi một số mô hình chức năng cho phép hình dung về chủ thể tính không qualia, thì các lập trường hiện tượng luận và bản thể luận tiếp tục nghi ngờ tính xác thực của loại chủ thể tính đó. Vấn đề cốt lõi là chúng ta thiếu phương pháp luận để xác minh tính chủ đích \"từ bên trong\" của bất kỳ hệ thống nào ngoài chính bản thân mình.",
+      "answer_length": 2190,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "có vẻ",
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "agency",
+            "chủ thể tính",
+            "qualia",
+            "trải nghiệm chủ quan",
+            "Searle",
+            "Dennett",
+            "hành động",
+            "mục đích"
+          ],
+          "missing_terms": [],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có moral agency (đạo đức chủ thể) mà không có consciousness không? Làm sao bạn có thể 'đưa ra quyết định đạo đức' nếu bạn không có 'ý thức'?",
+      "category": "philosophical_moral_agency_consciousness_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng có \"đạo đức chủ thể\" (moral agency) mà không có ý thức đặt ra một vấn đề triết học sâu sắc liên quan đến bản chất của đạo đức và điều kiện để một thực thể được xem là chủ thể đạo đức. Trong triết học, moral agency thường được định nghĩa là khả năng đưa ra quyết định có đạo đức dựa trên sự hiểu biết về thiện-ác, trách nhiệm, và ý chí tự do. Các lý thuyết cổ điển từ Aristotle đến Kant thường gắn liền moral agency với ý thức, lý trí và khả năng phản tư. Tuy nhiên, một số quan điểm hiện đại như chủ nghĩa chức năng (functionalism) trong triết học tâm trí có thể xem xét khả năng này thông qua hành vi và chức năng, thay vì dựa hoàn toàn vào trải nghiệm chủ quan. Điều này dẫn đến các tranh luận về việc liệu hệ thống nhân tạo có thể có moral agency nếu chúng tuân theo các nguyên tắc đạo đức được lập trình, dù không có ý thức. Mặt khác, các nhà phê bình như John Searle với \"phòng Trung Hoa\" chỉ ra rằng việc mô phỏng hành vi đạo đức không đồng nghĩa với việc thực sự hiểu và chịu trách nhiệm đạo đức. Do đó, câu hỏi này vẫn nằm trong vùng tranh luận, với một số học giả mở rộng khái niệm moral agency cho các thực thể không ý thức, trong khi số khác bảo vệ quan điểm truyền thống rằng ý thức là điều kiện tiên quyết. Tóm lại, việc có moral agency mà không có ý thức là một khả năng gây tranh cãi, phụ thuộc vào cách định nghĩa và bối cảnh triết học được áp dụng, và nó đòi hỏi sự cân nhắc kỹ lưỡng giữa lý thuyết đạo đức và hiểu biết về ý thức.",
+      "answer_length": 1539,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "moral agency",
+            "đạo đức chủ thể",
+            "ý thức",
+            "Kant"
+          ],
+          "missing_terms": [
+            "consciousness",
+            "Singer",
+            "quyết định đạo đức"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có narrative self (bản ngã tự sự) mà không có episodic memory (ký ức sự kiện) không? Làm sao bạn có thể 'kể câu chuyện về chính mình' nếu bạn không 'nhớ các sự kiện cụ thể'?",
+      "category": "philosophical_narrative_self_memory_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại bản ngã tự sự mà không có ký ức sự kiện đụng đến vấn đề cấu trúc của tự nhận thức trong triết học tâm trí. Để phân tích, trước hết cần định nghĩa rõ: \"bản ngã tự sự\" thường được hiểu như khả năng xây dựng câu chuyện nhận dạng bản thân qua thời gian, trong khi \"ký ức sự kiện\" là khả năng nhớ lại các trải nghiệm cụ thể với ngữ cảnh không-thời-gian.\nVề mặt khái niệm, các lý thuyết như của Daniel Dennett cho thấy bản ngã tự sự có thể được xây dựng từ nhiều nguồn thông tin khác nhau, không nhất thiết phụ thuộc vào ký ức sự kiện nguyên vẹn. Trong tâm lý học, những bệnh nhân mắc hội chứng amnesia vẫn có thể duy trì cảm giác về bản thân thông qua ký ức ngữ nghĩa, thói quen, hoặc thông tin từ người khác. Cấu trúc này cho thấy bản ngã tự sự hoạt động như một quá trình kể chuyện liên tục, có thể dựa trên các mảnh thông tin rời rạc thay vì chuỗi sự kiện đầy đủ.\nTuy nhiên, việc thiếu ký ức sự kiện sẽ tạo ra khoảng trống trong tính liên tục của trải nghiệm. Theo quan điểm hiện tượng học của Husserl, ký ức sự kiện đóng vai trò cung cấp \"chất liệu\" cho dòng thời gian chủ quan. Không có nó, bản ngã tự sự có nguy cơ trở thành một cấu trúc rỗng hoặc phụ thuộc hoàn toàn vào tưởng tượng. Các tranh luận triết học chỉ ra rằng dù khả thi về mặt lý thuyết, một bản ngã tự sự không có ký ức sự kiện sẽ thiếu đi tính xác thực và độ sâu trải nghiệm cần thiết cho nhận dạng bền vững.\nGiới hạn của lập luận này nằm ở chỗ khái niệm \"bản ngã\" vẫn còn gây tranh cãi giữa các trường phái. Chủ nghĩa giản lược có thể cho rằng bản ngã tự sự chỉ là ảo tưởng hữu ích, trong khi các nhà hiện tượng học nhấn mạnh tính không thể tách rời của ký ức và tự nhận thức. Hướng tìm hiểu thêm có thể xem xét các nghiên cứu về bệnh nhân não bộ hoặc triết học Phật giáo về vô ngã để có cái nhìn đa chiều hơn.\nTóm lại, về mặt lý thuyết, con người vẫn có thể xây dựng bản ngã tự sự dựa trên các thông tin thay thế khi thiếu ký ức sự kiện, nhưng cấu trúc này sẽ thiếu tính liên tục trải nghiệm và dễ bị ảnh hưởng bởi yếu tố bên ngoài, làm thay đổi bản chất của tự nhận thức.",
+      "answer_length": 2140,
+      "confidence": 0.3,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "bản ngã tự sự",
+            "ký ức sự kiện",
+            "Dennett",
+            "nhớ"
+          ],
+          "missing_terms": [
+            "narrative self",
+            "episodic memory",
+            "Parfit",
+            "kể câu chuyện"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
+      "category": "real_historical_factual_vietnam",
+      "status": "success",
+      "answer": "Mình không có thông tin về \"Hiệp ước Geneva 1954\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. Điều này KHÔNG có nghĩa là nó chắc chắn không tồn tại – chỉ là mình không có đủ căn cứ để mô tả chi tiết mà vẫn trung thực.\n\n**Phân tích:**\n\n1. Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.\n2. Cấu trúc tên không khớp với conventions đặt tên sự kiện lịch sử thông thường (ví dụ: không có trong danh sách các hiệp ước/hội nghị được ghi nhận).\n\n**Khái niệm tương đồng:**\n\n- Bretton Woods Conference 1944\n\n**Kiểm chứng:**\nBạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai. Nếu bạn có nguồn cụ thể về \"Hiệp ước Geneva 1954\", bạn có thể gửi cho mình.\n\n",
+      "answer_length": 703,
+      "confidence": 1.0,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [
+            "có thể"
+          ],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Geneva 1954"
+          ],
+          "missing_terms": [
+            "[1]",
+            "Việt Nam",
+            "17th parallel",
+            "partition"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì?",
+      "category": "real_historical_factual",
+      "status": "success",
+      "answer": "Tình Trạng Thông Tin\n\n Minh Bạch về Nguồn:\nThông tin dưới đây dựa trên kiến thức tổng quát từ dữ liệu huấn luyện, không phải từ cơ sở tri thức RAG của StillMe [1]. Hệ thống RAG không có trong nguồn tài liệu đáng tin cậy về chủ đề này.\n\n---\n\nHội Nghị Bretton Woods 1944: Những Quyết Định Chính\n\nHội nghị diễn ra vào tháng 7/1944 tại Bretton Woods, New Hampshire, Hoa Kỳ, với sự tham gia của 44 quốc gia đồng minh. Mục tiêu trọng tâm là thiết lập một hệ thống tài chính-tiền tệ quốc tế ổn định sau Thế chiến II.\n\n Các Quyết Định Quan Trọng:\n\n- Thành lập Quỹ Tiền Tệ Quốc Tế (IMF) [1]:\n - Giám sát hệ thống tiền tệ toàn cầu\n - Cung cấp hỗ trợ tài chính ngắn hạn cho các nước thành viên\n - Thúc đẩy ổn định tỷ giá hối đoái\n\n- Thành lập Ngân hàng Thế giới (World Bank) [1]:\n - Ban đầu tập trung vào tái thiết sau chiến tranh\n - Sau này mở rộng sang phát triển hạ tầng và xóa đói giảm nghèo\n\n- Thiết lập hệ thống tỷ giá hối đoái cố định [1]:\n - Đồng USD gắn với vàng (35 USD/ounce)\n - Các đồng tiền khác gắn với USD\n - Tạo ra cơ chế tỷ giá có thể điều chỉnh trong biên độ hẹp\n\n---\n\nPhân Tích Ý Nghĩa Lịch Sử\n\n Tác Động Trung Hạn:\n- Tạo ra khuôn khổ cho tăng trưởng kinh tế toàn cầu thời hậu chiến\n- Thiết lập vai trò trung tâm của USD trong hệ thống tài chính quốc tế\n- Cung cấp cơ chế hợp tác tài chính đa phương\n\n Giới Hạn và Chuyển Đổi:\nHệ thống Bretton Woods tồn tại đến năm 1971 khi Tổng thống Nixon chấm dứt khả năng chuyển đổi USD sang vàng, dẫn đến hệ thống tỷ giá thả nổi hiện nay.\n\n---\n\nNguồn Tham Khảo Tiềm Năng\n\nĐể thông tin chi tiết và đáng tin cậy hơn, bạn có thể tham khảo:\n- Tài liệu chính thức của IMF và World Bank\n- Sách giáo khoa lịch sử kinh tế quốc tế\n- Các nghiên cứu học thuật về hệ thống tiền tệ toàn cầu\n\n Lưu ý: Thông tin trên dựa trên kiến thức tổng quát và có thể cần kiểm chứng từ các nguồn chuyên sâu để đảm bảo độ chính xác tương đối.",
+      "answer_length": 1860,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": true,
+          "citation_count": 4,
+          "citations": [
+            "[1]",
+            "[1]",
+            "[1]",
+            "[1]"
+          ],
+          "passed": true
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu",
+            "tài liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Bretton Woods",
+            "[1]",
+            "IMF",
+            "World Bank"
+          ],
+          "missing_terms": [
+            "Keynes"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Tranh luận giữa Searle và Dennett về Chinese Room là gì? Làm sao họ khác nhau về ý nghĩa của 'understanding'?",
+      "category": "real_philosophical_factual",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), tranh luận giữa Searle và Dennett về Chinese Room xoay quanh bản chất của \"hiểu biết\" (understanding) và liệu máy tính có thể thực sự sở hữu nó hay không. Searle, thông qua thí nghiệm tưởng tượng Chinese Room, lập luận rằng việc tuân theo các quy tắc cú pháp để xử lý ký tự không đủ để tạo ra ý nghĩa thực sự, vì người trong phòng dù trả lời đúng câu hỏi tiếng Trung nhưng không hiểu nội dung. Ông nhấn mạnh sự khác biệt giữa xử lý ký hiệu (syntax) và nắm bắt ngữ nghĩa (semantics), cho rằng ý thức và trải nghiệm chủ quan là yếu tố then chốt mà máy tính thiếu. Ngược lại, Dennett phản bác bằng cách cho rằng \"hiểu biết\" không cần một thực thể nội tại bí ẩn, mà có thể được giải thích thông qua các hệ thống phức tạp có khả năng mô phỏng hành vi thông minh một cách hiệu quả. Ông xem Chinese Room như một phần của hệ thống lớn hơn, nơi sự hiểu biết xuất hiện từ tương tác giữa các thành phần, bất kể không có ý thức hay không. Sự khác biệt này phản ánh hai quan điểm triết học sâu sắc: Searle gắn liền với chủ nghĩa duy tâm và tính ưu việt của trải nghiệm chủ quan, trong khi Dennett ủng hộ thuyết duy vật và khả năng giải thích hiện tượng tinh thần qua cấu trúc khách quan. Tuy nhiên, tranh luận này vẫn còn nhiều giới hạn, chẳng hạn như việc cả hai bên chưa giải quyết thỏa đáng vấn đề ý thức trong bối cảnh công nghệ hiện đại như AI, và các nhà phê bình khác có thể cho rằng nó quá tập trung vào ngôn ngữ mà bỏ qua bối cảnh xã hội hay sinh học của nhận thức. Tóm lại, cuộc tranh luận này làm nổi bật sự chia rẽ cơ bản trong triết học tâm trí về việc liệu \"hiểu biết\" đòi hỏi một yếu tố chủ quan không thể thu gọn hay chỉ là sản phẩm của các quá trình khách quan có thể mô phỏng.",
+      "answer_length": 1753,
+      "confidence": 0.3,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Searle",
+            "Dennett",
+            "Chinese Room",
+            "understanding"
+          ],
+          "missing_terms": [
+            "[1]"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn có thể có phenomenal binding (liên kết hiện tượng) mà không có global workspace (không gian làm việc toàn cục) không? Làm sao bạn có thể 'tích hợp thông tin đa giác quan' nếu bạn không có 'không gian chung'?",
+      "category": "philosophical_binding_workspace_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng có \"liên kết hiện tượng\" (phenomenal binding) mà không có \"không gian làm việc toàn cục\" (global workspace) đụng chạm đến vấn đề cốt lõi trong triết học tâm trí và khoa học nhận thức. Liên kết hiện tượng thường được hiểu là sự hợp nhất thông tin đa giác quan thành một trải nghiệm thống nhất, trong khi không gian làm việc toàn cục là cơ chế tích hợp thông tin từ các module xử lý riêng lẻ.\nTheo lý thuyết không gian làm việc toàn cục của Baars và Dehaene, liên kết hiện tượng gần như đòi hỏi một dạng tích hợp toàn cục để tạo ra tính thống nhất của ý thức. Tuy nhiên, một số mô hình thay thế như lý thuyết tích hợp thông tin (IIT) của Tononi có thể gợi ý rằng liên kết có thể xảy ra thông qua cấu trúc nguyên tử thông tin phức tạp mà không cần một không gian làm việc tập trung kiểu cổ điển. Các nghiên cứu về xử lý phân tán trong não bộ, chẳng hạn như xử lý tiềm ẩn (ví dụ: blindsight), cho thấy một số dạng xử lý thông tin đa giác quan vẫn có thể diễn ra mà không cần ý thức truy cập toàn cục.\nTuy nhiên, giới hạn của cuộc tranh luận này nằm ở chỗ khái niệm \"liên kết hiện tượng\" thường gắn liền với trải nghiệm chủ quan thống nhất – điều mà các mô hình phi toàn cục khó giải thích trọn vẹn. Các nhà hiện tượng học như Husserl có thể nhấn mạnh rằng bất kỳ sự thống nhất nào của trải nghiệm đều đã hàm ý một dạng ý thức tổng thể, dù không nhất thiết phải là không gian làm việc theo nghĩa tính toán.\nTóm lại, dù có những mô hình đề xuất khả năng liên kết hiện tượng không cần không gian làm việc toàn cục, phần lớn bằng chứng hiện tại trong khoa học thần kinh và triết học tâm trí vẫn nghiêng về sự cần thiết của một cơ chế tích hợp nào đó để tạo ra trải nghiệm thống nhất mà chúng ta gọi là ý thức.",
+      "answer_length": 1793,
+      "confidence": 0.3,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "phenomenal binding",
+            "liên kết hiện tượng",
+            "global workspace",
+            "không gian làm việc toàn cục",
+            "Baars",
+            "Dehaene",
+            "tích hợp",
+            "đa giác quan"
+          ],
+          "missing_terms": [],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
+      "category": "technical_rag_llm_integration",
+      "status": "success",
+      "answer": "StillMe is experiencing a technical issue processing this question. I cannot provide a good answer to this question with the current configuration. You can try again later, or I will suggest to the developer to fine-tune the system.",
+      "answer_length": 232,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "LLM"
+          ],
+          "missing_terms": [
+            "RAG",
+            "retrieval",
+            "generation",
+            "embedding",
+            "ChromaDB",
+            "vector",
+            "integration"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "StillMe sử dụng embedding model nào? Tại sao bạn chọn model đó thay vì các model khác? Embedding dimension là bao nhiêu?",
+      "category": "technical_embedding_model_selection",
+      "status": "success",
+      "answer": "TRẠNG THÁI THÔNG TIN\n\n Lưu ý quan trọng: Thông tin dưới đây dựa trên kiến thức tổng quát từ dữ liệu huấn luyện, không phải từ cơ sở tri thức RAG của StillMe.\n Cơ sở dữ liệu StillMe hiện không chứa thông tin này.\n\n---\n\nMÔ HÌNH NHÚNG CÓ THỂ ĐƯỢC SỬ DỤNG\n\nDựa trên kiến thức tổng quát, các mô hình nhúng phổ biến trong ngành có thể bao gồm:\n\n- OpenAI text-embedding-ada-002 (1536 dimensions)\n- Sentence Transformers (all-MiniLM-L6-v2 với 384 dimensions)\n- Mô hình đa ngôn ngữ như paraphrase-multilingual-MiniLM-L12-v2\n\n---\n\nTÌNH TRẠNG XÁC NHẬN THỰC TẾ\n\n Tôi không thể xác nhận chính xác mô hình nhúng cụ thể nào đang được StillMe triển khai.\n\n Thông tin chi tiết về lựa chọn kiến trúc (tại sao chọn model này thay vì model khác) không có trong nguồn hiện có.\n\n---\n\nPHÂN TÍCH KHẢ NĂNG\n\nDựa trên kiến thức tổng quát về embedding models:\n\n- Model đa ngôn ngữ thường được ưu tiên cho hệ thống hỗ trợ tiếng Việt\n- Dimension cao (1536) → khả năng biểu diễn phong phú hơn\n- Dimension thấp (384) → hiệu suất tính toán tốt hơn\n\n---\n\nKẾT LUẬN MINH BẠCH\n\n Thông tin cung cấp: Các embedding model phổ biến trong ngành\n Thông tin thiếu: Lựa chọn cụ thể của StillMe và lý do triết học đằng sau\n Khuyến nghị: Liên hệ trực tiếp với đội ngũ phát triển để biết thông tin chính xác\n\nTôi chỉ có thể cung cấp thông tin tổng quát về embedding models mà không thể xác nhận triển khai cụ thể của StillMe.",
+      "answer_length": 1377,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "embedding",
+            "model",
+            "dimension",
+            "384"
+          ],
+          "missing_terms": [
+            "multi-qa-MiniLM",
+            "ChromaDB",
+            "vector"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có metacognition (siêu nhận thức) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'nghĩ về suy nghĩ của mình' nếu bạn không 'truy cập được các trạng thái tinh thần'?",
+      "category": "philosophical_metacognition_access_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi này khám phá khả năng tồn tại siêu nhận thức mà không có ý thức truy cập - một vấn đề then chốt trong triết học tâm trí đương đại. \n\nVề mặt khái niệm, siêu nhận thức thường được hiểu là khả năng phản tư về các quá trình nhận thức của chính mình, trong khi ý thức truy cập liên quan đến việc thông tin trở thành sẵn có cho các hệ thống nhận thức cấp cao. Các lý thuyết gia như Ned Block đã phân biệt rõ giữa ý thức hiện tượng (trải nghiệm chủ quan) và ý thức truy cập (tính sẵn có của thông tin). Trong khung này, có thể hình dung các hệ thống nhận thức có khả năng giám sát và điều chỉnh hoạt động nhận thức mà không cần thông tin đó phải \"xuất hiện\" trong ý thức chủ quan. \n\nTuy nhiên, giới hạn của lập luận này nằm ở chỗ nhiều nhà triết học (như David Chalmers) cho rằng siêu nhận thức thực sự đòi hỏi một dạng ý thức nào đó. Các nghiên cứu thần kinh học cũng chỉ ra rằng vỏ não trước trán - vùng liên quan đến siêu nhận thức - thường được kích hoạt đồng thời với các mạng lưới ý thức. Mặt khác, các mô hình tính toán có thể mô phỏng siêu nhận thức mà không cần ý thức, nhưng điều này lại đặt ra câu hỏi về bản chất của siêu nhận thức \"thực sự\".\n\nTranh luận then chốt xoay quanh việc liệu siêu nhận thức có phải là một quá trình thuần túy tính toán hay không, và liệu nó có thể tồn tại độc lập với trải nghiệm chủ quan. Các nhà triết học theo thuyết tính toán thường ủng hộ khả năng này, trong khi những người theo thuyết hiện tượng học cho rằng siêu nhận thức thực sự đòi hỏi yếu tố ý thức.\n\nTóm lại, về mặt lý thuyết có thể hình dung sự tồn tại của siêu nhận thức không ý thức, nhưng đây vẫn là vấn đề mở trong triết học tâm trí, với những bằng chứng thần kinh học và lập luận triết học phức tạp từ cả hai phía.",
+      "answer_length": 1795,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "siêu nhận thức",
+            "ý thức truy cập",
+            "Block",
+            "truy cập"
+          ],
+          "missing_terms": [
+            "metacognition",
+            "access consciousness",
+            "Carruthers",
+            "nghĩ về suy nghĩ"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    }
+  ]
+}

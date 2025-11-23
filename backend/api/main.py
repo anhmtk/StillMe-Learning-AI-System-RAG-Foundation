@@ -494,7 +494,7 @@ def _initialize_rag_components():
                     for result in foundational_results:
                         content = result.get("content", "")
                         metadata = result.get("metadata", {})
-                        if "multi-qa-MiniLM-L6-dot-v1" in content and metadata.get("source") == "CRITICAL_FOUNDATION":
+                        if "paraphrase-multilingual-MiniLM-L12-v2" in content and metadata.get("source") == "CRITICAL_FOUNDATION":
                             foundational_exists = True
                             logger.info(f"✅ Foundational knowledge found: {metadata.get('title', 'N/A')}")
                             break
@@ -508,7 +508,7 @@ def _initialize_rag_components():
                 for result in all_results:
                     content = result.get("content", "")
                     metadata = result.get("metadata", {})
-                    if ("multi-qa-MiniLM-L6-dot-v1" in content and 
+                    if ("paraphrase-multilingual-MiniLM-L12-v2" in content and 
                         ("CRITICAL_FOUNDATION" in str(metadata.get("source", "")) or 
                          "foundational" in str(metadata.get("type", "")).lower())):
                         foundational_exists = True

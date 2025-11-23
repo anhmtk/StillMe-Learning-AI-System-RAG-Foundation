@@ -4033,7 +4033,7 @@ User Question: {chat_request.message}
 4. Integration: Retrieval provides context, LLM uses context to generate accurate, cited answers
 
 **STILLME SPECIFIC:**
-- Uses multi-qa-MiniLM-L6-dot-v1 embedding model (384 dimensions)
+- Uses paraphrase-multilingual-MiniLM-L12-v2 embedding model (384 dimensions, 50+ languages)
 - ChromaDB as vector database
 - Retrieval happens first, then LLM generation with retrieved context
 

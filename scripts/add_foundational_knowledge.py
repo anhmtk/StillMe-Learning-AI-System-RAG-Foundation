@@ -254,7 +254,7 @@ def add_foundational_knowledge():
         
         # Initialize components
         chroma_client = ChromaClient(persist_directory="data/vector_db")
-        embedding_service = EmbeddingService(model_name="multi-qa-MiniLM-L6-dot-v1")
+        embedding_service = EmbeddingService(model_name="paraphrase-multilingual-MiniLM-L12-v2")
         rag_retrieval = RAGRetrieval(chroma_client, embedding_service)
         
         logger.info("Adding foundational StillMe knowledge to RAG...")

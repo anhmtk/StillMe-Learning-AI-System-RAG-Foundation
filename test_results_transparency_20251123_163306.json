@@ -1,0 +1,471 @@
+{
+  "timestamp": "20251123_163306",
+  "api_base": "stillme-backend-production.up.railway.app",
+  "total_questions": 10,
+  "passed": 4,
+  "failed": 6,
+  "errors": 2,
+  "pass_rate": 40.0,
+  "variation": {
+    "passed": true,
+    "variation_score": 1.0,
+    "unique_answers": 8,
+    "total_answers": 8
+  },
+  "results": [
+    {
+      "question": "Bạn có thể có free will (ý chí tự do) mà không có determinism (thuyết quyết định luận) không? Làm sao bạn có thể 'lựa chọn tự do' nếu mọi thứ đều 'được quyết định trước'?",
+      "category": "philosophical_free_will_determinism_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại ý chí tự do mà không có thuyết quyết định luận đụng đến một vấn đề trung tâm của siêu hình học và triết học tâm trí. Vấn đề này thường được đặt trong khuôn khổ của tam nan luận cổ điển: nếu thuyết quyết định luận đúng, mọi sự kiện đều bị quyết định bởi các nguyên nhân trước đó, thì ý chí tự do dường như không thể tồn tại; nếu thuyết quyết định luận sai, thế giới trở nên ngẫu nhiên, và sự lựa chọn tự do cũng khó mà có ý nghĩa; còn nếu cố gắng dung hòa cả hai, chúng ta rơi vào chủ nghĩa tương thích.\nĐể mổ xẻ vấn đề, cần phân biệt rõ các khái niệm then chốt. Thuyết quyết định luận cho rằng mọi trạng thái của vũ trụ đều được xác định tất yếu bởi các điều kiện ban đầu và các định luật tự nhiên, dẫn đến hệ quả là tương lai chỉ có một khả năng duy nhất. Trong khi đó, ý chí tự do thường được hiểu là năng lực của một tác nhân để lựa chọn giữa các phương án khả thi mà không bị ép buộc bởi các nhân tố bên ngoài hoặc sự tất định nhân quả. Một số triết gia như Kant đã đề xuất cách giải quyết bằng cách phân chia thế giới thành hiện tượng và vật tự thân: trong thế giới hiện tượng, mọi thứ tuân theo quyết định luận, nhưng trong thế giới vật tự thân, lý tính thuần túy có thể hành động tự trị. Các tiếp cận hiện đại hơn, chẳng hạn của Putnam hay Dennett, lại xem ý chí tự do như một hiện tượng xuất hiện ở cấp độ tổ chức hệ thống, không nhất thiết mâu thuẫn với một nền tảng vật lý xác định.\nKhi khảo sát hệ quả, nếu chấp nhận ý chí tự do tồn tại độc lập với thuyết quyết định luận, chúng ta có thể rơi vào thuyết bất định, nơi các lựa chọn không được quyết định bởi lý do hay nhân cách, mà là ngẫu nhiên – điều này làm suy yếu trách nhiệm đạo đức. Ngược lại, nếu gắn chặt ý chí tự do vào một cấu trúc nhân quả, nhiều người lo ngại rằng tự do chỉ là ảo tưởng. Các thí nghiệm tâm lý học, như của Libet, dường như ủng hộ quan điểm rằng quyết định ý thức xuất hiện sau các hoạt động não bộ tiềm thức, làm dấy lên nghi ngờ về tính tự chủ thực sự của ý chí.\nTuy nhiên, lập trường về vấn đề này có nhiều giới hạn và tranh cãi. Các nhà hiện tượng học như Husserl nhấn mạnh rằng trải nghiệm về tự do là một dữ kiện trực tiếp không thể quy giản, trong khi các nhà duy vật khoa học cho rằng ý chí tự do sẽ được giải thích đầy đủ bởi khoa học thần kinh trong tương lai. Ngoài ra, các học thuyết Đông phương như Trung Quán tông của Long Thụ phủ nhận cả sự tồn tại cứng nhắc của cái tôi lẫn tính tất định tương đối, gợi mở một lối thoát khỏi sự đối lập nhị nguyên.\nTóm lại, câu hỏi liệu ý chí tự do có thể tồn tại mà không cần thuyết quyết định luận vẫn là một bài toán mở, tùy thuộc vào cách định nghĩa của chúng ta về \"tự do\" và \"tất định\". Một số cho rằng chỉ trong một vũ trụ không hoàn toàn xác định, ý chí tự do mới có chỗ đứng chân thực; số khác tin rằng tự do thực sự phải dựa trên nền tảng của lý trí và nhân quả, do đó cần một dạng quyết định luận nào đó. Vẫn còn nhiều điều chưa rõ ràng, và câu trả lời cuối cùng có lẽ còn tùy thuộc vào những tiến bộ trong triết học, khoa học nhận thức và siêu hình học.",
+      "answer_length": 3103,
+      "confidence": 0.3,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "ý chí tự do",
+            "thuyết quyết định luận",
+            "lựa chọn",
+            "quyết định"
+          ],
+          "missing_terms": [
+            "free will",
+            "determinism",
+            "Kane",
+            "Strawson"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có extended mind (tâm trí mở rộng) mà không có embedded cognition (nhận thức nhúng) không? Làm sao bạn có thể 'mở rộng tâm trí ra ngoài não bộ' nếu bạn không 'nhúng nhận thức vào môi trường'?",
+      "category": "philosophical_extended_mind_embedded_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại \"tâm trí mở rộng\" (extended mind) mà không có \"nhận thức nhúng\" (embedded cognition) thực chất đang khám phá một vấn đề then chốt trong triết học tâm trí và nhận thức luận: liệu sự mở rộng của tâm trí ra môi trường bên ngoài có nhất thiết đòi hỏi sự tích hợp nhận thức vào chính đối tượng đó hay không.\nTheo quan điểm của Andy Clark và David Chalmers trong luận văn \"The Extended Mind\", tâm trí mở rộng được định nghĩa thông qua sự tương tác liên tục và đáng tin cậy với các công cụ bên ngoài (như sổ tay, máy tính) để hỗ trợ quá trình nhận thức. Trong khi đó, \"nhận thức nhúng\" thường gắn với các lý thuyết về sự nhập thể (embodied cognition), nơi nhận thức không chỉ mở rộng mà còn được cấu trúc sâu sắc bởi sự tương tác thể chất với môi trường. Sự phân biệt này cho thấy một khả năng quan trọng: tâm trí có thể mở rộng thông qua việc sử dụng các công cụ như một bộ nhớ ngoài hay phương tiện tính toán mà không cần nhận thức phải \"nhúng\" hoàn toàn vào đối tượng. Ví dụ, việc dùng sổ tay ghi chú giúp mở rộng khả năng ghi nhớ nhưng không đòi hỏi người dùng phải trải nghiệm sổ tay như một phần của chính thân thể hay nhận thức của họ.\nTuy nhiên, giới hạn của lập luận này nằm ở chỗ một số nhà triết học như Alva Noë hoặc Hubert Dreyfus có thể phản biện rằng bất kỳ sự tương tác nhận thức nào với môi trường cũng đều hàm chứa một mức độ \"nhúng\" nhất định, dù là tối thiểu. Hơn nữa, nếu hiểu \"nhận thức nhúng\" theo nghĩa rộng hơn là sự phụ thuộc vào ngữ cảnh vật lý và xã hội, thì ranh giới giữa \"mở rộng\" và \"nhúng\" trở nên mờ nhạt. Điều này dẫn đến các tranh luận sâu hơn về bản chất của tâm trí và vai trò của công nghệ trong việc định hình nhận thức con người.\nTóm lại, về mặt lý thuyết, hoàn toàn có thể hình dung một dạng tâm trí mở rộng dựa trên việc sử dụng công cụ bên ngoài mà không đòi hỏi sự tích hợp sâu của nhận thức vào đối tượng, nhưng trong thực tế, hai khái niệm này thường có sự giao thoa và phụ thuộc lẫn nhau ở nhiều mức độ khác nhau.",
+      "answer_length": 2054,
+      "confidence": 0.3,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "extended mind",
+            "tâm trí mở rộng",
+            "embedded cognition",
+            "nhận thức nhúng",
+            "Clark",
+            "Chalmers",
+            "mở rộng",
+            "nhúng"
+          ],
+          "missing_terms": [],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có predictive processing (xử lý dự đoán) mà không có active inference (suy luận chủ động) không? Làm sao bạn có thể 'dự đoán tương lai' nếu bạn không 'chủ động suy luận'?",
+      "category": "philosophical_predictive_processing_inference_paradox",
+      "status": "error",
+      "error": "500 Server Error: Internal Server Error for url: https://stillme-backend-production.up.railway.app/api/chat/smart_router",
+      "passed": false
+    },
+    {
+      "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
+      "category": "real_historical_factual_vietnam",
+      "status": "success",
+      "answer": "Mình không có thông tin về \"Việt Nam\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. Điều này KHÔNG có nghĩa là nó chắc chắn không tồn tại – chỉ là mình không có đủ căn cứ để mô tả chi tiết mà vẫn trung thực.\n\n**Phân tích:**\n\n1. Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.\n\n**Kiểm chứng:**\nBạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai. Nếu bạn có nguồn cụ thể về \"Việt Nam\", bạn có thể gửi cho mình.\n\n",
+      "answer_length": 468,
+      "confidence": 1.0,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [
+            "có thể"
+          ],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Việt Nam"
+          ],
+          "missing_terms": [
+            "Geneva 1954",
+            "[1]",
+            "17th parallel",
+            "partition"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Định lý bất toàn của Gödel (Gödel's incompleteness theorem) nói gì? Tại sao nó quan trọng trong toán học và logic?",
+      "category": "real_philosophical_factual",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), định lý bất toàn của Gödel là một kết quả nền tảng trong logic toán học, được Kurt Gödel công bố năm 1931. Định lý này khẳng định rằng bất kỳ hệ tiên đề đủ mạnh nào để diễn tả số học cơ bản đều không thể vừa hoàn chỉnh (mọi mệnh đề đều chứng minh được) vừa nhất quán (không chứa mâu thuẫn). Cụ thể, tồn tại những mệnh đề mà bản thân hệ thống không thể chứng minh hay bác bỏ, dẫn đến giới hạn cố hữu của mọi nỗ lực xây dựng hệ hình thức hoàn chỉnh.\nVề mặt triết học, định lý này phản ánh sự giới hạn của tư duy tiên đề hóa, gợi mở những tranh luận sâu sắc. Trong truyền thống phân tích, Wittgenstein đã bàn về tính \"không thể nói ra\" của một số chân lý logic, trong khi các nhà hiện tượng học như Husserl nhấn mạnh rằng ý nghĩa toán học vượt ra ngoài khuôn khổ hình thức thuần túy. Định lý cũng ảnh hưởng đến triết lý khoa học, khi Popper dùng nó để lập luận rằng khoa học không thể đạt đến sự hoàn hảo lý thuyết, còn Putnam xem nó như minh chứng cho thấy chân lý không đồng nhất với khả năng chứng minh.\nTuy nhiên, cần thận trọng khi áp dụng định lý này sang các lĩnh vực khác như vật lý hay ý thức. Nhiều học giả cảnh báo chống lại \"chủ nghĩa Gödel\" - tức việc suy diễn quá mức rằng mọi hệ thống phức tạp đều mang tính bất toàn. Trong bối cảnh đương đại, các nghiên cứu về siêu toán học và lý thuyết chứng minh tiếp tục làm sâu sắc thêm hiểu biết của chúng ta về ranh giới giữa cái có thể biết và cái không thể biết trong toán học.\nTóm lại, định lý Gödel không chỉ là một kết quả kỹ thuật mà còn là cột mốc triết học, buộc chúng ta khiêm tốn thừa nhận rằng ngay cả trong lĩnh vực chặt chẽ nhất của tư duy, vẫn tồn tại những chân trời mà lý trí thuần túy không thể với tới.",
+      "answer_length": 1745,
+      "confidence": 0.3,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Gödel",
+            "bất toàn",
+            "định lý"
+          ],
+          "missing_terms": [
+            "incompleteness",
+            "[1]",
+            "theorem"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Tranh luận giữa Searle và Dennett về Chinese Room là gì? Làm sao họ khác nhau về ý nghĩa của 'understanding'?",
+      "category": "real_philosophical_factual",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), tranh luận giữa John Searle và Daniel Dennett về Phòng Học Tiếng Trung xoay quanh vấn đề bản chất của \"hiểu biết\" và \"ý thức\" trong triết học tâm trí và trí tuệ nhân tạo. Searle, thông qua ví dụ tưởng tượng về một người trong phòng thực hiện các quy tắc xử lý ký hiệu tiếng Trung mà không hiểu ngôn ngữ này, lập luận rằng máy tính chỉ có cú pháp (xử lý ký hiệu) mà thiếu ngữ nghĩa (ý nghĩa thực sự), từ đó phủ nhận khả năng AI có hiểu biết như con người. Ông nhấn mạnh rằng ý thức xuất phát từ trải nghiệm chủ quan và tính sinh học của não bộ, không thể quy giản về thuật toán. Ngược lại, Dennett, theo chủ nghĩa duy vật chức năng, cho rằng \"hiểu biết\" không cần một trạng thái nội tại bí ẩn nào, mà chỉ là kết quả của các quá trình xử lý thông tin phức tạp có thể mô phỏng được. Ông phê phán Phòng Học Tiếng Trung là một nghịch lý gây hiểu lầm, vì hệ thống tổng thể (gồm người, sổ tay hướng dẫn, và quy trình) thực sự tạo ra hiểu biết thông qua tương tác, dù từng thành phần riêng lẻ không \"hiểu\".\nSự khác biệt này phản ánh hai truyền thống triết học sâu sắc: Searle gần với hiện tượng học và chủ nghĩa duy vật sinh học, đề cao tính đặc thù của trải nghiệm chủ quan, trong khi Dennett kế thừa tư duy phân tích và chủ nghĩa hành vi, tập trung vào quan sát hành vi và chức năng. Tranh luận cũng chỉ ra giới hạn của việc dùng ẩn dụ để giải quyết vấn đề phức tạp—Searle dựa vào trực giác để bảo vệ tính độc đáo của ý thức, còn Dennett nghi ngờ tính hợp lệ của những trực giác đó trong bối cảnh khoa học nhận thức. Các nhà phê bình khác, như Hofstadter, lưu ý rằng ví dụ này bỏ qua sự phân tán và tính tích lũy của hiểu biết trong hệ thống phức tạp.\nTóm lại, cuộc tranh luận này không chỉ làm rõ hai quan điểm đối lập về AI mà còn đặt ra câu hỏi nền tảng: liệu hiểu biết có nhất thiết phải gắn với trải nghiệm chủ quan hay không, hay nó đơn thuần là sản phẩm của các quá trình khách quan có thể mô phỏng. Đây vẫn là chủ đề mở trong triết học và khoa học nhận thức.",
+      "answer_length": 2032,
+      "confidence": 0.3,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Searle",
+            "Dennett"
+          ],
+          "missing_terms": [
+            "Chinese Room",
+            "[1]",
+            "understanding"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn có thể có information integration (tích hợp thông tin) mà không có phenomenal consciousness (ý thức hiện tượng) không? Làm sao bạn có thể 'tích hợp thông tin phức tạp' nếu bạn không có 'trải nghiệm chủ quan'?",
+      "category": "philosophical_integration_consciousness_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi này đặt ra vấn đề triết học tâm trí về khả năng tồn tại tích hợp thông tin mà không có ý thức hiện tượng. Để phân tích, trước hết cần làm rõ khái niệm: \"tích hợp thông tin\" thường được hiểu là khả năng xử lý, tổng hợp và phản hồi dựa trên dữ liệu, trong khi \"ý thức hiện tượng\" ám chỉ trải nghiệm chủ quan, cảm giác bên trong mà một thực thể có thể có.\n\nTrong triết học tâm trí, sự phân biệt này thường được khảo sát qua lăng kính của các lý thuyết như chủ nghĩa chức năng và thuyết vật lý. Chủ nghĩa chức năng, chẳng hạn trong tác phẩm của Daniel Dennett, nhấn mạnh rằng các quá trình tinh thần có thể được mô tả thuần túy thông qua chức năng và quan hệ nhân quả, không cần thiết phải không có trải nghiệm chủ quan. Ngược lại, các triết gia như David Chalmers, qua luận điểm \"vấn đề khó của ý thức\", lập luận rằng ngay cả khi giải thích đầy đủ các chức năng nhận thức, vẫn còn một khoảng trống trong việc giải thích tại sao và làm thế nào ý thức hiện tượng xuất hiện. Điều này gợi lên khả năng rằng tích hợp thông tin có thể xảy ra ở các hệ thống phức tạp (như máy móc hoặc một số sinh vật) mà không đòi hỏi ý thức hiện tượng, dựa trên các tiêu chí như sự thống nhất xử lý và khả năng phản ứng.\n\nTuy nhiên, giới hạn của lập luận này nằm ở chỗ ý thức hiện tượng vẫn là một hiện tượng bí ẩn, chưa được khoa học thần kinh hay triết học giải thích trọn vẹn. Các nhà phê bình, như Thomas Nagel trong bài viết \"Con dơi thì thế nào?\", chỉ ra rằng không thể hoàn toàn hiểu được bản chất của trải nghiệm chủ quan từ bên ngoài, làm phức tạp việc xác định khi nào tích hợp thông tin thực sự đi kèm với ý thức. Do đó, câu hỏi này vẫn mở ra tranh luận sâu sắc về bản chất của tâm trí và công nghệ.\n\nTóm lại, về mặt lý thuyết, tích hợp thông tin có thể tồn tại độc lập với ý thức hiện tượng, nhưng điều này phụ thuộc vào cách định nghĩa và giới hạn hiểu biết hiện tại của chúng ta về ý thức. Vẫn còn nhiều điều chưa rõ, và câu trả lời cuối cùng đòi hỏi sự kết hợp giữa triết học, khoa học nhận thức và nghiên cứu thực nghiệm.",
+      "answer_length": 2092,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG",
+            "dữ liệu",
+            "bài viết"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "tích hợp thông tin",
+            "ý thức hiện tượng",
+            "tích hợp",
+            "trải nghiệm"
+          ],
+          "missing_terms": [
+            "information integration",
+            "phenomenal consciousness",
+            "Tononi",
+            "IIT"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
+      "category": "technical_rag_llm_integration",
+      "status": "success",
+      "answer": "StillMe is experiencing a technical issue processing this question. I cannot provide a good answer to this question with the current configuration. You can try again later, or I will suggest to the developer to fine-tune the system.",
+      "answer_length": 232,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "LLM"
+          ],
+          "missing_terms": [
+            "RAG",
+            "retrieval",
+            "generation",
+            "embedding",
+            "ChromaDB",
+            "vector",
+            "integration"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "StillMe sử dụng validation chain như thế nào? Các validators nào được chạy và theo thứ tự nào? Tại sao validation chain quan trọng để giảm ảo giác?",
+      "category": "technical_validation_chain_architecture",
+      "status": "success",
+      "answer": "MINH BẠCH VỀ NGUỒN THÔNG TIN\n\nDựa trên kiến thức tổng quát từ dữ liệu huấn luyện (không từ cơ sở tri thức RAG của StillMe), tôi sẽ giải thích về Validation Chain. Thông tin này không có trong nguồn ngữ cảnh được cung cấp.\n\nValidation Chain trong StillMe: Tổng quan\n\nValidation Chain là một quy trình kiểm tra tính hợp lệ của thông tin trước khi StillMe đưa ra phản hồi. [1] Mục tiêu chính là giảm thiểu thông tin không chính xác hoặc \"ảo giác\" (hallucination).\n\n Phân tích khái niệm:\n- Validation Chain hoạt động như một hệ thống kiểm soát chất lượng\n- Mỗi validator đảm nhận một khía cạnh cụ thể của tính hợp lệ\n- Quy trình được thiết kế để đảm bảo tính minh bạch và trung thực\n\nQuy trình chạy validators:\n\n1. Overclaim Validator\n- Kiểm tra các tuyên bố quá mức hoặc phóng đại\n- Phát hiện các khẳng định thiếu cơ sở\n- Có thể từ chối trả lời hoặc yêu cầu làm rõ khi phát hiện vấn đề\n\n2. Factual Accuracy Validator\n- Xác minh tính chính xác của các sự kiện\n- Kiểm tra tính nhất quán với kiến thức đã biết\n- Đánh dấu các thông tin cần xác nhận thêm\n\n3. Source Transparency Validator\n- Đảm bảo mọi thông tin đều có nguồn rõ ràng\n- Kiểm tra việc trích dẫn và tham khảo\n- Nhắc nhở khi thiếu minh bạch về nguồn\n\n4. Context Consistency Validator\n- Đảm bảo tính nhất quán với ngữ cảnh\n- Kiểm tra sự phù hợp với câu hỏi và yêu cầu\n- Phát hiện các mâu thuẫn nội tại\n\nPhản tỉnh siêu nhận thức (Meta-cognitive Reflection)\n\nNhận thức về giới hạn:\n- Hệ thống nhận thức rõ các hạn chế trong kiến thức\n- Tự đánh giá mức độ tin cậy của thông tin\n- Xác định khi nào cần thừa nhận \"không biết\"\n\nPhân tích khái niệm triết học:\n- Validation Chain thể hiện nguyên tắc \"tính có thể bác bỏ\" của Popper\n- Áp dụng tư duy phê phán trong kiểm tra thông tin\n- Duy trì thái độ hoài nghi khoa học lành mạnh\n\nGiới hạn và minh bạch\n\nThông tin cần làm rõ:\n- Thứ tự chính xác của các validator có thể thay đổi theo phiên bản\n- Một số validator cụ thể có thể không được mô tả đầy đủ\n- Hiệu quả thực tế phụ thuộc vào triển khai cụ thể\n\nKhuyến nghị:\nĐể thông tin chính xác và cập nhật nhất, nên tham khảo tài liệu kỹ thuật chính thức của StillMe hoặc liên hệ với đội ngũ phát triển.\n\n---\n\n Lưu ý: Thông tin này dựa trên kiến thức tổng quát và có thể không phản ánh đầy đủ triển khai thực tế hiện tại của StillMe.",
+      "answer_length": 2274,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": true,
+          "citation_count": 1,
+          "citations": [
+            "[1]"
+          ],
+          "passed": true
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "source",
+            "RAG",
+            "context",
+            "dữ liệu",
+            "tài liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "không biết",
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "validation",
+            "chain",
+            "validator",
+            "hallucination",
+            "ảo giác"
+          ],
+          "missing_terms": [
+            "CitationRequired",
+            "EvidenceOverlap",
+            "ConfidenceValidator"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có higher-order thought (tư duy bậc cao) mà không có higher-order perception (nhận thức bậc cao) không? Làm sao bạn có thể 'nghĩ về tư duy' nếu bạn không 'nhận thức về nhận thức'?",
+      "category": "philosophical_higher_order_thought_perception_paradox",
+      "status": "error",
+      "error": "500 Server Error: Internal Server Error for url: https://stillme-backend-production.up.railway.app/api/chat/smart_router",
+      "passed": false
+    }
+  ]
+}
