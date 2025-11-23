@@ -48,8 +48,11 @@ HISTORICAL_EVENTS_MAP = {
     "geneva 1954": "Geneva Conference 1954",
     "hội nghị geneva 1954": "Geneva Conference 1954",
     "hiệp ước geneva 1954": "Geneva Conference 1954",
+    "hiệp ước geneva": "Geneva Conference",
+    "geneva conference": "Geneva Conference",
     "bretton woods 1944": "Bretton Woods Conference 1944",
     "hội nghị bretton woods 1944": "Bretton Woods Conference 1944",
+    "bretton woods": "Bretton Woods",
     "điện biên phủ 1954": "Dien Bien Phu 1954",
     "trận điện biên phủ": "Dien Bien Phu",
 }
@@ -85,6 +88,16 @@ def extract_key_terms(query: str) -> List[str]:
             key_terms.append(en_event)
             # Extract key words from English version
             key_terms.extend(en_event.split())
+            # Also add partial matches (e.g., "Geneva" from "Geneva Conference 1954")
+            if " " in en_event:
+                parts = en_event.split()
+                # Add first word (e.g., "Geneva", "Bretton")
+                if len(parts) > 0:
+                    key_terms.append(parts[0])
+                # Add year if present
+                for part in parts:
+                    if part.isdigit() and len(part) == 4:
+                        key_terms.append(part)
     
     # Extract Vietnamese keywords and map to English
     for vi_keyword, en_keyword in VI_EN_KEYWORD_MAP.items():
@@ -153,12 +166,16 @@ def is_historical_question(question: str) -> bool:
         # Historical figures
         r'\b(hồ chí minh|ho chi minh|bảo đại|bao dai|võ nguyên giáp)',
         
-        # Historical places/events
-        r'\b(geneva|bretton woods|điện biên phủ|dien bien phu)',
+        # Historical places/events (improved patterns)
+        r'\b(geneva|bretton\s+woods|điện biên phủ|dien bien phu)',
         r'\b(việt nam|vietnam|trung quốc|china|pháp|france)',
+        r'\b(17th\s+parallel|17th\s+paralell|vĩ tuyến 17)',  # 17th parallel for Vietnam partition
         
         # Historical organizations
-        r'\b(imf|world bank|nato|un|liên hợp quốc)',
+        r'\b(imf|world\s+bank|nato|un|liên hợp quốc)',
+        
+        # Historical keywords in Vietnamese
+        r'\b(quyết định|decided|đã quyết định|decisions?)\s+(về|about|regarding)',
     ]
     
     for pattern in historical_patterns:

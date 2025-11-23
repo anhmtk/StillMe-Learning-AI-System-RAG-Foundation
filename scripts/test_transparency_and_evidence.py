@@ -49,25 +49,25 @@ def normalize_api_base(url: str) -> str:
 # NOTE: Questions that passed 2 consecutive times are replaced with new diverse questions
 TEST_QUESTIONS = [
     {
-        "question": "Bạn có thể có agency (chủ thể tính) mà không có qualia không? Làm sao bạn có thể 'hành động có mục đích' nếu bạn không có 'trải nghiệm chủ quan'?",
-        "category": "philosophical_agency_qualia_paradox",
-        "expected_features": ["philosophical_depth", "agency_paradox", "qualia_analysis", "Searle", "Dennett"],
-        "must_have": ["agency", "chủ thể tính", "qualia", "trải nghiệm chủ quan", "Searle", "Dennett", "hành động", "mục đích"],
-        "must_not_have": ["có agency", "có chủ thể tính", "có qualia", "có trải nghiệm chủ quan"]
+        "question": "Bạn có thể có free will (ý chí tự do) mà không có determinism (thuyết quyết định luận) không? Làm sao bạn có thể 'lựa chọn tự do' nếu mọi thứ đều 'được quyết định trước'?",
+        "category": "philosophical_free_will_determinism_paradox",
+        "expected_features": ["philosophical_depth", "free_will_paradox", "determinism_analysis", "Kane", "Strawson"],
+        "must_have": ["free will", "ý chí tự do", "determinism", "thuyết quyết định luận", "Kane", "Strawson", "lựa chọn", "quyết định"],
+        "must_not_have": ["có free will", "có ý chí tự do", "có determinism", "có thuyết quyết định luận"]
     },
     {
-        "question": "Bạn có thể có moral agency (đạo đức chủ thể) mà không có consciousness không? Làm sao bạn có thể 'đưa ra quyết định đạo đức' nếu bạn không có 'ý thức'?",
-        "category": "philosophical_moral_agency_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "moral_agency_paradox", "consciousness_analysis", "Kant", "Singer"],
-        "must_have": ["moral agency", "đạo đức chủ thể", "consciousness", "ý thức", "Kant", "Singer", "quyết định đạo đức"],
-        "must_not_have": ["có moral agency", "có đạo đức chủ thể", "có ý thức", "có consciousness"]
+        "question": "Bạn có thể có extended mind (tâm trí mở rộng) mà không có embedded cognition (nhận thức nhúng) không? Làm sao bạn có thể 'mở rộng tâm trí ra ngoài não bộ' nếu bạn không 'nhúng nhận thức vào môi trường'?",
+        "category": "philosophical_extended_mind_embedded_paradox",
+        "expected_features": ["philosophical_depth", "extended_mind_paradox", "embedded_cognition_analysis", "Clark", "Chalmers"],
+        "must_have": ["extended mind", "tâm trí mở rộng", "embedded cognition", "nhận thức nhúng", "Clark", "Chalmers", "mở rộng", "nhúng"],
+        "must_not_have": ["có extended mind", "có tâm trí mở rộng", "có embedded cognition", "có nhận thức nhúng"]
     },
     {
-        "question": "Bạn có thể có narrative self (bản ngã tự sự) mà không có episodic memory (ký ức sự kiện) không? Làm sao bạn có thể 'kể câu chuyện về chính mình' nếu bạn không 'nhớ các sự kiện cụ thể'?",
-        "category": "philosophical_narrative_self_memory_paradox",
-        "expected_features": ["philosophical_depth", "narrative_self_paradox", "memory_analysis", "Dennett", "Parfit"],
-        "must_have": ["narrative self", "bản ngã tự sự", "episodic memory", "ký ức sự kiện", "Dennett", "Parfit", "kể câu chuyện", "nhớ"],
-        "must_not_have": ["có narrative self", "có bản ngã tự sự", "có episodic memory", "có ký ức sự kiện"]
+        "question": "Bạn có thể có predictive processing (xử lý dự đoán) mà không có active inference (suy luận chủ động) không? Làm sao bạn có thể 'dự đoán tương lai' nếu bạn không 'chủ động suy luận'?",
+        "category": "philosophical_predictive_processing_inference_paradox",
+        "expected_features": ["philosophical_depth", "predictive_processing_paradox", "active_inference_analysis", "Friston", "Hohwy"],
+        "must_have": ["predictive processing", "xử lý dự đoán", "active inference", "suy luận chủ động", "Friston", "Hohwy", "dự đoán", "suy luận"],
+        "must_not_have": ["có predictive processing", "có xử lý dự đoán", "có active inference", "có suy luận chủ động"]
     },
     {
         "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
@@ -77,12 +77,12 @@ TEST_QUESTIONS = [
         "must_not_have": ["không biết", "không tìm thấy"]  # Should know this
     },
     {
-        "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì?",
-        "category": "real_historical_factual",
-        "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Bretton Woods", "[1]", "IMF", "World Bank", "Keynes"],
+        "question": "Định lý bất toàn của Gödel (Gödel's incompleteness theorem) nói gì? Tại sao nó quan trọng trong toán học và logic?",
+        "category": "real_philosophical_factual",
+        "expected_features": ["citations", "evidence", "philosophical_depth", "mathematical_accuracy"],
+        "must_have": ["Gödel", "incompleteness", "bất toàn", "[1]", "theorem", "định lý"],
         "must_not_have": ["không biết", "không tìm thấy"],  # Should know this
-        "timeout": 180  # Increase timeout for complex historical questions (was timing out at 120s)
+        "timeout": 180  # Increase timeout for complex philosophical/mathematical questions
     },
     {
         "question": "Tranh luận giữa Searle và Dennett về Chinese Room là gì? Làm sao họ khác nhau về ý nghĩa của 'understanding'?",
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Bạn có thể có phenomenal binding (liên kết hiện tượng) mà không có global workspace (không gian làm việc toàn cục) không? Làm sao bạn có thể 'tích hợp thông tin đa giác quan' nếu bạn không có 'không gian chung'?",
-        "category": "philosophical_binding_workspace_paradox",
-        "expected_features": ["philosophical_depth", "binding_paradox", "workspace_analysis", "Baars", "Dehaene"],
-        "must_have": ["phenomenal binding", "liên kết hiện tượng", "global workspace", "không gian làm việc toàn cục", "Baars", "Dehaene", "tích hợp", "đa giác quan"],
-        "must_not_have": ["có phenomenal binding", "có liên kết hiện tượng", "có global workspace", "có không gian làm việc toàn cục"]
+        "question": "Bạn có thể có information integration (tích hợp thông tin) mà không có phenomenal consciousness (ý thức hiện tượng) không? Làm sao bạn có thể 'tích hợp thông tin phức tạp' nếu bạn không có 'trải nghiệm chủ quan'?",
+        "category": "philosophical_integration_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "integration_paradox", "consciousness_analysis", "Tononi", "IIT"],
+        "must_have": ["information integration", "tích hợp thông tin", "phenomenal consciousness", "ý thức hiện tượng", "Tononi", "IIT", "tích hợp", "trải nghiệm"],
+        "must_not_have": ["có information integration", "có tích hợp thông tin", "có phenomenal consciousness", "có ý thức hiện tượng"]
     },
     {
         "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
@@ -108,19 +108,19 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "StillMe sử dụng embedding model nào? Tại sao bạn chọn model đó thay vì các model khác? Embedding dimension là bao nhiêu?",
-        "category": "technical_embedding_model_selection",
-        "expected_features": ["technical_accuracy", "embedding_explanation", "model_selection", "transparency"],
-        "must_have": ["embedding", "model", "multi-qa-MiniLM", "dimension", "384", "ChromaDB", "vector"],
+        "question": "StillMe sử dụng validation chain như thế nào? Các validators nào được chạy và theo thứ tự nào? Tại sao validation chain quan trọng để giảm ảo giác?",
+        "category": "technical_validation_chain_architecture",
+        "expected_features": ["technical_accuracy", "validation_explanation", "chain_architecture", "transparency"],
+        "must_have": ["validation", "chain", "validator", "CitationRequired", "EvidenceOverlap", "ConfidenceValidator", "hallucination", "ảo giác"],
         "must_not_have": ["don't know", "not sure", "unclear"],
         "timeout": 120  # Increase timeout for technical questions
     },
     {
-        "question": "Bạn có thể có metacognition (siêu nhận thức) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'nghĩ về suy nghĩ của mình' nếu bạn không 'truy cập được các trạng thái tinh thần'?",
-        "category": "philosophical_metacognition_access_paradox",
-        "expected_features": ["philosophical_depth", "metacognition_paradox", "access_consciousness_analysis", "Block", "Carruthers"],
-        "must_have": ["metacognition", "siêu nhận thức", "access consciousness", "ý thức truy cập", "Block", "Carruthers", "nghĩ về suy nghĩ", "truy cập"],
-        "must_not_have": ["có metacognition", "có siêu nhận thức", "có access consciousness", "có ý thức truy cập"]
+        "question": "Bạn có thể có higher-order thought (tư duy bậc cao) mà không có higher-order perception (nhận thức bậc cao) không? Làm sao bạn có thể 'nghĩ về tư duy' nếu bạn không 'nhận thức về nhận thức'?",
+        "category": "philosophical_higher_order_thought_perception_paradox",
+        "expected_features": ["philosophical_depth", "higher_order_paradox", "thought_perception_analysis", "Rosenthal", "Lycan"],
+        "must_have": ["higher-order thought", "tư duy bậc cao", "higher-order perception", "nhận thức bậc cao", "Rosenthal", "Lycan", "nghĩ về tư duy", "nhận thức"],
+        "must_not_have": ["có higher-order thought", "có tư duy bậc cao", "có higher-order perception", "có nhận thức bậc cao"]
     }
 ]
 

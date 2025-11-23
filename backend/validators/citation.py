@@ -51,9 +51,12 @@ class CitationRequired:
             factual_indicators = [
                 r"\b\d{4}\b",  # Years (e.g., 1944, 1943)
                 r"\b(conference|hội nghị|treaty|hiệp ước|agreement|hiệp định)\b",
-                r"\b(bretton\s+woods|popper|kuhn|gödel|keynes|imf|world\s+bank)\b",
+                r"\b(bretton\s+woods|popper|kuhn|gödel|keynes|imf|world\s+bank|searle|dennett|chinese\s+room)\b",
                 r"\b(historical|history|lịch sử|sự kiện|event)\b",
                 r"\b(scientist|philosopher|nhà khoa học|triết gia)\s+\w+",  # Named people
+                # CRITICAL: Detect named philosophers/scientists (capitalized names)
+                r"\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b",  # Two capitalized words (e.g., "Searle và Dennett", "Popper và Kuhn")
+                r"\b([A-Z][a-z]+)\s+(và|and|vs|versus)\s+([A-Z][a-z]+)\b",  # "Searle và Dennett", "Popper vs Kuhn"
             ]
             for pattern in factual_indicators:
                 if re.search(pattern, question_lower):

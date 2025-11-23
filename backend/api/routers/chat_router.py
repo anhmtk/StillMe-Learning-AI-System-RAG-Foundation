@@ -1845,9 +1845,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     similarity_threshold = 0.1  # Default
                     
                     if is_historical:
-                        similarity_threshold = 0.05
+                        # Very low threshold to ensure we find historical facts even with multilingual mismatch
+                        similarity_threshold = 0.03
                         retrieval_query = enhance_query_for_retrieval(chat_request.message)
-                        logger.info(f"📜 Historical question (provenance fallback) - using threshold {similarity_threshold}, enhanced query")
+                        logger.info(f"📜 Historical question (provenance fallback) - using very low threshold {similarity_threshold}, enhanced query: '{retrieval_query[:100]}...'")
                     
                     context = rag_retrieval.retrieve_context(
                         query=retrieval_query,
@@ -1999,9 +2000,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     similarity_threshold = 0.1  # Default
                     
                     if is_historical:
-                        # SOLUTION 1: Lower threshold for historical questions (0.05 instead of 0.1)
-                        similarity_threshold = 0.05
-                        logger.info(f"📜 Historical question detected - using lower similarity threshold: {similarity_threshold}")
+                        # SOLUTION 1: Very low threshold for historical questions (0.03 instead of 0.1)
+                        # This ensures we find historical facts even with multilingual embedding mismatch
+                        similarity_threshold = 0.03
+                        logger.info(f"📜 Historical question detected - using very low similarity threshold: {similarity_threshold}")
                         
                         # SOLUTION 3: Enhance query with English keywords
                         retrieval_query = enhance_query_for_retrieval(chat_request.message)
@@ -3837,21 +3839,22 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         processing_steps.append("⚠️ LLM failed - using fallback message")
                         logger.warning(f"⚠️ Set raw_response to fallback message: {raw_response[:200]}")
                 
-                # CRITICAL: Check if raw_response is a technical error message before validation
+                # CRITICAL: Check if raw_response is a technical error message or fallback message before validation
                 # Never allow provider error messages to pass through validators
                 from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error, is_fallback_message
                 
                 if raw_response and isinstance(raw_response, str):
                     is_error, error_type = is_technical_error(raw_response)
-                    if is_error:
-                        # CRITICAL: For technical questions about "your system" in RAG path, retry with stronger prompt
-                        # (Similar to non-RAG path retry logic)
-                        if is_technical_about_system_rag and error_type == "generic":
-                            logger.warning(f"⚠️ Technical question about 'your system' (RAG path) returned fallback message - retrying with stronger prompt")
-                            # Build stronger prompt with technical system instruction
-                            stronger_prompt_rag = f"""{context_quality_warning}
+                    is_fallback = is_fallback_message(raw_response)
+                    
+                    # CRITICAL: For technical questions about "your system" in RAG path, retry if response is error OR fallback
+                    # This ensures we don't give up on valid technical questions
+                    if is_technical_about_system_rag and (is_error or is_fallback):
+                        logger.warning(f"⚠️ Technical question about 'your system' (RAG path) returned {'error' if is_error else 'fallback'} message - retrying with stronger prompt")
+                        # Build stronger prompt with technical system instruction
+                        stronger_prompt_rag = f"""{context_quality_warning}
 
-**CRITICAL: YOU MUST ANSWER THIS QUESTION. DO NOT RETURN A TECHNICAL ERROR MESSAGE.**
+**CRITICAL: YOU MUST ANSWER THIS QUESTION. DO NOT RETURN A TECHNICAL ERROR MESSAGE OR FALLBACK MESSAGE.**
 
 The user is asking: {chat_request.message}
 
@@ -3867,6 +3870,7 @@ Explain:
 - "I cannot provide a good answer"
 - "StillMe is experiencing a technical issue"
 - "I will suggest to the developer"
+- "I cannot provide a good answer to this question with the current configuration"
 
 **DO SAY:**
 - "Based on general knowledge about RAG systems..."
@@ -3879,31 +3883,66 @@ Explain:
 {stillme_instruction}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
-                            try:
-                                raw_response = await generate_ai_response(
-                                    stronger_prompt_rag,
-                                    detected_lang=detected_lang,
-                                    llm_provider=chat_request.llm_provider,
-                                    llm_api_key=chat_request.llm_api_key,
-                                    llm_api_url=chat_request.llm_api_url,
-                                    llm_model_name=chat_request.llm_model_name,
-                                    use_server_keys=use_server_keys
-                                )
-                                logger.info("✅ Retry with stronger prompt successful for technical 'your system' question (RAG path)")
-                                processing_steps.append("🔄 Retried with stronger prompt for technical 'your system' question (RAG path)")
-                                # Re-check if retry response is still an error
-                                is_error_retry, error_type_retry = is_technical_error(raw_response)
-                                if is_error_retry:
-                                    logger.warning(f"⚠️ Retry still returned error - using fallback message")
-                                    raw_response = get_fallback_message_for_error(error_type_retry, detected_lang)
-                            except Exception as retry_error:
-                                logger.error(f"⚠️ Retry failed (RAG path): {retry_error}")
-                                raw_response = get_fallback_message_for_error(error_type, detected_lang)
-                                processing_steps.append(f"⚠️ Technical error detected (RAG path) - using fallback message")
-                        else:
-                            logger.error(f"❌ Provider returned technical error as response (type: {error_type}): {raw_response[:200]}")
-                            # Replace with user-friendly fallback message
-                            raw_response = get_fallback_message_for_error(error_type, detected_lang)
+                        try:
+                            raw_response = await generate_ai_response(
+                                stronger_prompt_rag,
+                                detected_lang=detected_lang,
+                                llm_provider=chat_request.llm_provider,
+                                llm_api_key=chat_request.llm_api_key,
+                                llm_api_url=chat_request.llm_api_url,
+                                llm_model_name=chat_request.llm_model_name,
+                                use_server_keys=use_server_keys
+                            )
+                            logger.info("✅ Retry with stronger prompt successful for technical 'your system' question (RAG path)")
+                            processing_steps.append("🔄 Retried with stronger prompt for technical 'your system' question (RAG path)")
+                            # Re-check if retry response is still an error or fallback
+                            is_error_retry, error_type_retry = is_technical_error(raw_response)
+                            is_fallback_retry = is_fallback_message(raw_response)
+                            if is_error_retry or is_fallback_retry:
+                                logger.warning(f"⚠️ Retry still returned {'error' if is_error_retry else 'fallback'} - forcing one more retry with even stronger prompt")
+                                # Force one more retry with even stronger prompt
+                                force_prompt = f"""**ABSOLUTE MANDATORY: ANSWER THIS QUESTION ABOUT RAG SYSTEMS**
+
+User Question: {chat_request.message}
+
+**YOU MUST EXPLAIN:**
+1. RAG (Retrieval-Augmented Generation) combines retrieval from a knowledge base with LLM generation
+2. Retrieval: Query is embedded, searched in vector database (ChromaDB), returns relevant documents
+3. LLM Generation: Takes retrieved context + user question, generates answer
+4. Integration: Retrieval provides context, LLM uses context to generate accurate, cited answers
+
+**STILLME SPECIFIC:**
+- Uses multi-qa-MiniLM-L6-dot-v1 embedding model (384 dimensions)
+- ChromaDB as vector database
+- Retrieval happens first, then LLM generation with retrieved context
+
+**DO NOT RETURN ERROR MESSAGES. ANSWER THE QUESTION DIRECTLY.**
+
+Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
+                                try:
+                                    raw_response = await generate_ai_response(
+                                        force_prompt,
+                                        detected_lang=detected_lang,
+                                        llm_provider=chat_request.llm_provider,
+                                        llm_api_key=chat_request.llm_api_key,
+                                        llm_api_url=chat_request.llm_api_url,
+                                        llm_model_name=chat_request.llm_model_name,
+                                        use_server_keys=use_server_keys
+                                    )
+                                    logger.info("✅ Force retry successful for technical 'your system' question (RAG path)")
+                                    processing_steps.append("🔄 Force retry successful for technical 'your system' question")
+                                except Exception as force_error:
+                                    logger.error(f"⚠️ Force retry failed: {force_error}")
+                                    raw_response = get_fallback_message_for_error(error_type_retry or "generic", detected_lang)
+                        except Exception as retry_error:
+                            logger.error(f"⚠️ Retry failed (RAG path): {retry_error}")
+                            raw_response = get_fallback_message_for_error(error_type or "generic", detected_lang)
+                            processing_steps.append(f"⚠️ Technical error detected (RAG path) - using fallback message")
+                    elif is_error:
+                        # For non-technical questions, just replace with fallback
+                        logger.error(f"❌ Provider returned technical error as response (type: {error_type}): {raw_response[:200]}")
+                        # Replace with user-friendly fallback message
+                        raw_response = get_fallback_message_for_error(error_type, detected_lang)
                         processing_steps.append(f"⚠️ Technical error detected - replaced with fallback message")
                         logger.warning(f"⚠️ Replaced technical error with user-friendly message in {detected_lang}")
                 
