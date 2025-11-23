@@ -34,31 +34,34 @@ class RSSFetcher:
             # Note: psychologicalscience.org feed has parse errors - removed temporarily
             # "https://www.psychologicalscience.org/feed",
             
-            # Biology
+            # Biology & Science
             "https://www.nature.com/nature.rss",
             "https://www.nature.com/natmachintell.rss",  # Nature Machine Intelligence - AI research & ethics
-            "https://www.sciencedaily.com/rss/matter_energy.xml",  # ScienceDaily Biology
+            "https://www.scientificamerican.com/rss/",  # Scientific American - Science news & analysis
+            # Removed: "https://www.sciencedaily.com/rss/matter_energy.xml" - XML parse errors (all variants failed)
             
             # Physics
-            "https://physicsworld.com/feed/",
-            # Removed: "https://phys.org/rss-feed/physics-news/" - 400 Bad request
-            "https://phys.org/rss-feed/",  # Phys.org main feed (fallback)
+            "https://www.aps.org/publications/apsnews/rss.xml",  # American Physical Society News
+            "https://www.iop.org/rss",  # Institute of Physics RSS
+            # Removed: "https://physicsworld.com/feed/" - XML parse errors (all variants failed)
+            "https://phys.org/rss-feed/",  # Phys.org main feed (reliable)
             
             # Chemistry
             # Note: Some chemistry feeds may be empty - will be monitored and replaced if needed
             
             # Religious Studies & Philosophy
-            "https://aeon.co/feed.rss",  # Aeon Magazine - Philosophy, Religion, Culture
+            "https://philpapers.org/rss/recent.xml",  # PhilPapers - Recent philosophy papers
+            "https://www.philosophynow.org/rss",  # Philosophy Now - Philosophy magazine
             "https://www.theguardian.com/world/religion/rss",  # The Guardian - Religion
-            "https://www.lionsroar.com/feed/",  # Lion's Roar - Buddhist Wisdom for Our Time
-            "https://tricycle.org/feed/",  # Tricycle - Buddhist Magazine (previously 403, now available)
+            "https://tricycle.org/feed/",  # Tricycle - Buddhist Magazine (reliable)
             "https://iep.utm.edu/feed/",  # Internet Encyclopedia of Philosophy - Academic philosophy reference
-            # Note: Some religious studies feeds may be empty - will be monitored and replaced if needed
+            # Removed: "https://aeon.co/feed.rss" - XML parse errors (all variants failed)
+            # Removed: "https://www.lionsroar.com/feed/" - XML parse errors (all variants failed)
             
             # NEW: Academic & Research Sources (as suggested by StillMe in user conversation)
             # Added based on StillMe's analysis of reliable, peer-reviewed, and up-to-date sources
             # Removed: "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=science" - XML parsing error (not well-formed)
-            "https://www.nature.com/nature.rss",  # Nature - Already exists, keeping for clarity
+            # Note: "https://www.nature.com/nature.rss" already listed above in Biology & Science section
             # Removed: Reuters feeds (businessNews, technologyNews) - Permanent DNS errors ([Errno -2] Name or service not known)
             "https://feeds.bloomberg.com/markets/news.rss",  # Bloomberg Markets - Economic & financial analysis
             
@@ -72,12 +75,13 @@ class RSSFetcher:
             # Removed: "https://www.technologyreview.com/topic/artificial-intelligence/feed/" - Failed to fetch
             # Removed: "https://aiethicslab.com/feed/" - Failed to fetch
             
-            # Academic Blogs
+            # Academic Blogs & AI Alignment
+            "https://www.overcomingbias.com/feed",  # Overcoming Bias - Rationality (reliable)
+            "https://www.gwern.net/feed.xml",  # Gwern's Blog - AI, rationality, research
+            # Removed: "https://www.alignmentforum.org/feed.xml" - XML parse errors (all variants failed)
+            # Removed: "https://www.lesswrong.com/feed.xml" - XML parse errors
             # Removed: "https://distill.pub/rss.xml" - Failed to fetch
             # Removed: "https://lilianweng.github.io/feed.xml" - 404 + XML error, no reliable alternative
-            # Removed: "https://www.lesswrong.com/feed.xml" - Failed to fetch
-            "https://www.alignmentforum.org/feed.xml",  # Alignment Forum - AI alignment
-            "https://www.overcomingbias.com/feed",  # Overcoming Bias - Rationality
             # Removed: "https://www.scottaaronson.com/blog/?feed=rss2" - Failed to fetch
             
             # Note: Google Scholar, PubMed, IEEE Xplore don't have public RSS feeds

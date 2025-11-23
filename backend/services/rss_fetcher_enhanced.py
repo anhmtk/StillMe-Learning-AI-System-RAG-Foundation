@@ -48,27 +48,13 @@ FALLBACK_FEEDS = {
     "https://tricycle.org/feed/": [
         # No reliable fallback - feed removed from main list
     ],
-    # Add fallback feeds for feeds with XML validation errors
-    "https://www.sciencedaily.com/rss/matter_energy.xml": [
-        "https://www.sciencedaily.com/rss/all.xml",
-        "https://www.sciencedaily.com/rss/space_time.xml"
-    ],
-    "https://aeon.co/feed.rss": [
-        "https://aeon.co/feed",
-        "https://aeon.co/essays/feed"
-    ],
-    "https://www.alignmentforum.org/feed.xml": [
-        "https://www.alignmentforum.org/feed",
-        "https://www.lesswrong.com/feed.xml"
-    ],
-    "https://www.lionsroar.com/feed/": [
-        "https://www.lionsroar.com/feed",
-        "https://www.lionsroar.com/category/buddhism/feed/"
-    ],
-    "https://physicsworld.com/feed/": [
-        "https://physicsworld.com/feed",
-        "https://physicsworld.com/a/feed/"
-    ]
+    # Removed fallback feeds for permanently broken feeds (all variants failed XML validation):
+    # - https://www.sciencedaily.com/rss/matter_energy.xml (all variants failed)
+    # - https://aeon.co/feed.rss (all variants failed)
+    # - https://www.alignmentforum.org/feed.xml (all variants failed)
+    # - https://www.lionsroar.com/feed/ (all variants failed)
+    # - https://physicsworld.com/feed/ (all variants failed)
+    # These feeds have been removed from the main list and replaced with reliable alternatives
 }
 
 # Retry configuration
