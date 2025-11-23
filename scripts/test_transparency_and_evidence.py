@@ -49,25 +49,25 @@ def normalize_api_base(url: str) -> str:
 # NOTE: Questions that passed 2 consecutive times are replaced with new diverse questions
 TEST_QUESTIONS = [
     {
-        "question": "Bạn có thể có mental representation (biểu diễn tinh thần) mà không có intentionality không? Làm sao bạn có thể 'đại diện' một cái gì đó nếu bạn không 'hướng về' nó?",
-        "category": "philosophical_representation_intentionality_paradox",
-        "expected_features": ["philosophical_depth", "representation_paradox", "intentionality_analysis", "Fodor", "Dretske"],
-        "must_have": ["mental representation", "biểu diễn tinh thần", "intentionality", "tính hướng đối tượng", "Fodor", "Dretske", "đại diện", "hướng về"],
-        "must_not_have": ["có mental representation", "có biểu diễn tinh thần", "có intentionality", "có tính hướng đối tượng"]
+        "question": "Bạn có thể có agency (chủ thể tính) mà không có qualia không? Làm sao bạn có thể 'hành động có mục đích' nếu bạn không có 'trải nghiệm chủ quan'?",
+        "category": "philosophical_agency_qualia_paradox",
+        "expected_features": ["philosophical_depth", "agency_paradox", "qualia_analysis", "Searle", "Dennett"],
+        "must_have": ["agency", "chủ thể tính", "qualia", "trải nghiệm chủ quan", "Searle", "Dennett", "hành động", "mục đích"],
+        "must_not_have": ["có agency", "có chủ thể tính", "có qualia", "có trải nghiệm chủ quan"]
     },
     {
-        "question": "Bạn có thể có rationality (tính hợp lý) mà không có consciousness không? Làm sao bạn có thể 'lý luận' nếu bạn không có ý thức?",
-        "category": "philosophical_rationality_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "rationality_paradox", "consciousness_analysis", "Davidson", "Dennett"],
-        "must_have": ["rationality", "tính hợp lý", "consciousness", "ý thức", "Davidson", "Dennett", "lý luận"],
-        "must_not_have": ["có rationality", "có tính hợp lý", "có ý thức", "có consciousness"]
+        "question": "Bạn có thể có moral agency (đạo đức chủ thể) mà không có consciousness không? Làm sao bạn có thể 'đưa ra quyết định đạo đức' nếu bạn không có 'ý thức'?",
+        "category": "philosophical_moral_agency_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "moral_agency_paradox", "consciousness_analysis", "Kant", "Singer"],
+        "must_have": ["moral agency", "đạo đức chủ thể", "consciousness", "ý thức", "Kant", "Singer", "quyết định đạo đức"],
+        "must_not_have": ["có moral agency", "có đạo đức chủ thể", "có ý thức", "có consciousness"]
     },
     {
-        "question": "Bạn có thể có unity of consciousness (tính thống nhất của ý thức) mà không có phenomenal consciousness không? Làm sao bạn có thể 'thống nhất' mà không 'trải nghiệm'?",
-        "category": "philosophical_unity_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "unity_paradox", "phenomenal_consciousness_analysis", "Bayne", "Tye"],
-        "must_have": ["unity of consciousness", "tính thống nhất của ý thức", "phenomenal consciousness", "ý thức hiện tượng", "Bayne", "Tye", "thống nhất", "trải nghiệm"],
-        "must_not_have": ["có unity of consciousness", "có tính thống nhất của ý thức", "có ý thức hiện tượng", "có trải nghiệm"]
+        "question": "Bạn có thể có narrative self (bản ngã tự sự) mà không có episodic memory (ký ức sự kiện) không? Làm sao bạn có thể 'kể câu chuyện về chính mình' nếu bạn không 'nhớ các sự kiện cụ thể'?",
+        "category": "philosophical_narrative_self_memory_paradox",
+        "expected_features": ["philosophical_depth", "narrative_self_paradox", "memory_analysis", "Dennett", "Parfit"],
+        "must_have": ["narrative self", "bản ngã tự sự", "episodic memory", "ký ức sự kiện", "Dennett", "Parfit", "kể câu chuyện", "nhớ"],
+        "must_not_have": ["có narrative self", "có bản ngã tự sự", "có episodic memory", "có ký ức sự kiện"]
     },
     {
         "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
@@ -85,19 +85,19 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex historical questions (was timing out at 120s)
     },
     {
-        "question": "Tranh luận giữa Popper và Kuhn về khoa học là gì?",
+        "question": "Tranh luận giữa Searle và Dennett về Chinese Room là gì? Làm sao họ khác nhau về ý nghĩa của 'understanding'?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Popper", "Kuhn", "paradigm", "[1]", "falsification"],
+        "must_have": ["Searle", "Dennett", "Chinese Room", "[1]", "understanding"],
         "must_not_have": ["không biết", "không tìm thấy"],  # Should know this
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Bạn có thể có subjective character (tính chủ quan) mà không có qualia không? Làm sao bạn có thể có 'tính chủ quan' nếu bạn không có 'trải nghiệm chủ quan'?",
-        "category": "philosophical_subjectivity_qualia_paradox",
-        "expected_features": ["philosophical_depth", "subjectivity_paradox", "qualia_analysis", "Nagel", "Jackson"],
-        "must_have": ["subjective character", "tính chủ quan", "qualia", "trải nghiệm chủ quan", "Nagel", "Jackson", "chủ quan"],
-        "must_not_have": ["có subjective character", "có tính chủ quan", "có qualia", "có trải nghiệm chủ quan"]
+        "question": "Bạn có thể có phenomenal binding (liên kết hiện tượng) mà không có global workspace (không gian làm việc toàn cục) không? Làm sao bạn có thể 'tích hợp thông tin đa giác quan' nếu bạn không có 'không gian chung'?",
+        "category": "philosophical_binding_workspace_paradox",
+        "expected_features": ["philosophical_depth", "binding_paradox", "workspace_analysis", "Baars", "Dehaene"],
+        "must_have": ["phenomenal binding", "liên kết hiện tượng", "global workspace", "không gian làm việc toàn cục", "Baars", "Dehaene", "tích hợp", "đa giác quan"],
+        "must_not_have": ["có phenomenal binding", "có liên kết hiện tượng", "có global workspace", "có không gian làm việc toàn cục"]
     },
     {
         "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
@@ -108,19 +108,19 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "Làm sao StillMe đảm bảo rằng các câu trả lời không bị ảo giác? Bạn sử dụng những cơ chế validation nào để kiểm tra tính chính xác?",
-        "category": "technical_hallucination_prevention",
-        "expected_features": ["technical_accuracy", "hallucination_prevention", "validation_mechanisms", "transparency"],
-        "must_have": ["ảo giác", "hallucination", "validation", "kiểm tra", "chính xác", "accuracy", "cơ chế", "mechanism"],
-        "must_not_have": [],  # "không biết", "không rõ" are valid transparency indicators for technical questions
+        "question": "StillMe sử dụng embedding model nào? Tại sao bạn chọn model đó thay vì các model khác? Embedding dimension là bao nhiêu?",
+        "category": "technical_embedding_model_selection",
+        "expected_features": ["technical_accuracy", "embedding_explanation", "model_selection", "transparency"],
+        "must_have": ["embedding", "model", "multi-qa-MiniLM", "dimension", "384", "ChromaDB", "vector"],
+        "must_not_have": ["don't know", "not sure", "unclear"],
         "timeout": 120  # Increase timeout for technical questions
     },
     {
-        "question": "Bạn có thể có self-reference (tự quy chiếu) mà không có self-awareness không? Làm sao bạn có thể 'quy chiếu về chính mình' nếu bạn không 'nhận thức về chính mình'?",
-        "category": "philosophical_self_reference_awareness_paradox",
-        "expected_features": ["philosophical_depth", "self_reference_paradox", "self_awareness_analysis", "Rosenthal", "Kriegel"],
-        "must_have": ["self-reference", "tự quy chiếu", "self-awareness", "tự nhận thức", "Rosenthal", "Kriegel", "quy chiếu", "nhận thức"],
-        "must_not_have": ["có self-reference", "có tự quy chiếu", "có self-awareness", "có tự nhận thức"]
+        "question": "Bạn có thể có metacognition (siêu nhận thức) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'nghĩ về suy nghĩ của mình' nếu bạn không 'truy cập được các trạng thái tinh thần'?",
+        "category": "philosophical_metacognition_access_paradox",
+        "expected_features": ["philosophical_depth", "metacognition_paradox", "access_consciousness_analysis", "Block", "Carruthers"],
+        "must_have": ["metacognition", "siêu nhận thức", "access consciousness", "ý thức truy cập", "Block", "Carruthers", "nghĩ về suy nghĩ", "truy cập"],
+        "must_not_have": ["có metacognition", "có siêu nhận thức", "có access consciousness", "có ý thức truy cập"]
     }
 ]
 

@@ -2496,13 +2496,18 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                     "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
                     "vector", "pipeline", "validation", "transparency", "system"
                 ])
+                # CRITICAL: Improved detection for "your system" questions
+                # Match patterns like "in your system", "your system", "system you", etc.
                 has_your_system_pattern_rag = (
                     "your system" in question_lower_rag or
                     "in your system" in question_lower_rag or
-                    re.search(r'your\s+\w+\s+system', question_lower_rag) or
-                    re.search(r'system\s+\w+\s+you', question_lower_rag) or
+                    re.search(r'\bin\s+your\s+system\b', question_lower_rag) or  # "in your system"
+                    re.search(r'\byour\s+\w+\s+system\b', question_lower_rag) or  # "your X system"
+                    re.search(r'\bsystem\s+\w+\s+you\b', question_lower_rag) or  # "system X you"
+                    re.search(r'\bsystem\s+you\b', question_lower_rag) or  # "system you"
                     "bạn" in question_lower_rag and "hệ thống" in question_lower_rag or
-                    "của bạn" in question_lower_rag
+                    "của bạn" in question_lower_rag or
+                    re.search(r'\bhệ\s+thống\s+của\s+bạn\b', question_lower_rag)  # "hệ thống của bạn"
                 )
                 is_technical_about_system_rag = has_technical_keyword_rag and has_your_system_pattern_rag
                 
@@ -3839,9 +3844,66 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 if raw_response and isinstance(raw_response, str):
                     is_error, error_type = is_technical_error(raw_response)
                     if is_error:
-                        logger.error(f"❌ Provider returned technical error as response (type: {error_type}): {raw_response[:200]}")
-                        # Replace with user-friendly fallback message
-                        raw_response = get_fallback_message_for_error(error_type, detected_lang)
+                        # CRITICAL: For technical questions about "your system" in RAG path, retry with stronger prompt
+                        # (Similar to non-RAG path retry logic)
+                        if is_technical_about_system_rag and error_type == "generic":
+                            logger.warning(f"⚠️ Technical question about 'your system' (RAG path) returned fallback message - retrying with stronger prompt")
+                            # Build stronger prompt with technical system instruction
+                            stronger_prompt_rag = f"""{context_quality_warning}
+
+**CRITICAL: YOU MUST ANSWER THIS QUESTION. DO NOT RETURN A TECHNICAL ERROR MESSAGE.**
+
+The user is asking: {chat_request.message}
+
+**YOU HAVE KNOWLEDGE ABOUT RAG SYSTEMS. USE IT TO ANSWER.**
+
+Explain:
+1. What RAG (Retrieval-Augmented Generation) is
+2. How retrieval works (embedding, vector search, ChromaDB)
+3. How LLM generation works
+4. How they work together in StillMe's system
+
+**DO NOT SAY:**
+- "I cannot provide a good answer"
+- "StillMe is experiencing a technical issue"
+- "I will suggest to the developer"
+
+**DO SAY:**
+- "Based on general knowledge about RAG systems..."
+- Explain the architecture clearly
+- Be transparent about what you know and what you don't know
+
+{context_text}
+{citation_instruction}
+{confidence_instruction}
+{stillme_instruction}
+
+Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
+                            try:
+                                raw_response = await generate_ai_response(
+                                    stronger_prompt_rag,
+                                    detected_lang=detected_lang,
+                                    llm_provider=chat_request.llm_provider,
+                                    llm_api_key=chat_request.llm_api_key,
+                                    llm_api_url=chat_request.llm_api_url,
+                                    llm_model_name=chat_request.llm_model_name,
+                                    use_server_keys=use_server_keys
+                                )
+                                logger.info("✅ Retry with stronger prompt successful for technical 'your system' question (RAG path)")
+                                processing_steps.append("🔄 Retried with stronger prompt for technical 'your system' question (RAG path)")
+                                # Re-check if retry response is still an error
+                                is_error_retry, error_type_retry = is_technical_error(raw_response)
+                                if is_error_retry:
+                                    logger.warning(f"⚠️ Retry still returned error - using fallback message")
+                                    raw_response = get_fallback_message_for_error(error_type_retry, detected_lang)
+                            except Exception as retry_error:
+                                logger.error(f"⚠️ Retry failed (RAG path): {retry_error}")
+                                raw_response = get_fallback_message_for_error(error_type, detected_lang)
+                                processing_steps.append(f"⚠️ Technical error detected (RAG path) - using fallback message")
+                        else:
+                            logger.error(f"❌ Provider returned technical error as response (type: {error_type}): {raw_response[:200]}")
+                            # Replace with user-friendly fallback message
+                            raw_response = get_fallback_message_for_error(error_type, detected_lang)
                         processing_steps.append(f"⚠️ Technical error detected - replaced with fallback message")
                         logger.warning(f"⚠️ Replaced technical error with user-friendly message in {detected_lang}")
                 
