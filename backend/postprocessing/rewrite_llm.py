@@ -820,6 +820,20 @@ REQUIREMENTS:
             else:
                 logger.debug(f"✅ Keeping 'có tính chủ quan' at position {pos} (negative context)")
         
+        # Pattern 14: "có ý chí tự do" (positive) → "không có ý chí tự do"
+        # BUT: "không có ý chí tự do" is OK
+        pattern14 = re.compile(r'\bcó ý chí tự do\b', re.IGNORECASE)
+        matches = list(pattern14.finditer(result))
+        for match in reversed(matches):
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "có ý chí tự do")
+            if not is_negative:
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'có ý chí tự do' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có ý chí tự do" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'có ý chí tự do' at position {pos} (negative context)")
+        
         # Pattern 6: "tuyệt đối" (absolute certainty claim) → "tương đối" or remove
         # BUT: "tuyệt đối hay tương đối" (philosophical question) is OK
         # CRITICAL: Only filter when used as a claim of absolute certainty, not in questions
