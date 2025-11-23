@@ -40,16 +40,37 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         # Suppress healthcheck logs to reduce noise
         pass
 
+# Global variable to store healthcheck server instance
+_healthcheck_server = None
+
 def start_healthcheck_server(port):
     """Start a simple HTTP server for healthcheck while FastAPI app loads"""
+    global _healthcheck_server
     try:
-        server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+        _healthcheck_server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
         logger.info(f"✅ Healthcheck server started on port {port}")
         sys.stdout.flush()
-        server.serve_forever()
+        _healthcheck_server.serve_forever()
     except Exception as e:
         logger.error(f"❌ Healthcheck server failed: {e}")
         sys.stdout.flush()
+
+def stop_healthcheck_server():
+    """Stop the healthcheck server to free up the port for FastAPI"""
+    global _healthcheck_server
+    if _healthcheck_server:
+        try:
+            logger.info("🛑 Stopping healthcheck server to free port for FastAPI...")
+            sys.stdout.flush()
+            _healthcheck_server.shutdown()
+            _healthcheck_server.server_close()
+            _healthcheck_server = None
+            logger.info("✅ Healthcheck server stopped")
+            sys.stdout.flush()
+            time.sleep(0.5)  # Give port a moment to be released
+        except Exception as e:
+            logger.warning(f"⚠️ Error stopping healthcheck server: {e}")
+            sys.stdout.flush()
 
 # Get PORT from environment (Railway injects this)
 port = os.getenv("PORT", "8080")
@@ -198,6 +219,10 @@ if 'app' not in locals() and 'app' not in globals():
     logger.error("❌ CRITICAL: FastAPI app not defined! Cannot start server.")
     sys.stdout.flush()
     sys.exit(1)
+
+# CRITICAL: Stop healthcheck server before starting uvicorn
+# FastAPI app has its own /health endpoint, so healthcheck server is no longer needed
+stop_healthcheck_server()
 
 # Start uvicorn
 logger.info("=" * 60)
