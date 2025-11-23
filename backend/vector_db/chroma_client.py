@@ -751,6 +751,35 @@ class ChromaClient:
             logger.error(f"Failed to search conversations: {e}")
             return []
     
+    def check_duplicate_by_link(self, link: str) -> bool:
+        """Check if a document with the given link already exists in knowledge collection
+        
+        This is an optimized duplicate check that queries by metadata filter (no embedding needed)
+        Much faster than retrieve_context for duplicate detection during learning cycles.
+        
+        Args:
+            link: URL link to check for duplicates
+            
+        Returns:
+            True if duplicate exists, False otherwise
+        """
+        if not link:
+            return False
+        
+        try:
+            # Query ChromaDB directly by metadata filter (no embedding needed)
+            results = self.knowledge_collection.get(
+                where={"link": link},
+                limit=1
+            )
+            # If we get any results, it's a duplicate
+            return len(results.get("ids", [])) > 0
+        except Exception as e:
+            # If metadata filter fails (e.g., ChromaDB version compatibility), return False
+            # This allows the entry to be added (better than blocking all entries)
+            logger.debug(f"Duplicate check by link failed (non-critical): {e}")
+            return False
+    
     def get_collection_stats(self) -> Dict[str, int]:
         """Get statistics about collections
         

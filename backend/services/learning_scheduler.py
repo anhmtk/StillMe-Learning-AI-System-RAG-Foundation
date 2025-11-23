@@ -144,21 +144,17 @@ class LearningScheduler:
                                         logger.warning(f"⚠️ Skipping empty entry: {entry.get('title', 'No title')}")
                                         continue
                                     
-                                    # Check for duplicates
+                                    # Check for duplicates (optimized: query by metadata filter, no embedding needed)
                                     is_duplicate = False
-                                    try:
-                                        existing = rag_retrieval.retrieve_context(
-                                            query=entry.get('title', ''),
-                                            knowledge_limit=1,
-                                            conversation_limit=0
-                                        )
-                                        if existing.get("knowledge_docs"):
-                                            existing_doc = existing["knowledge_docs"][0]
-                                            existing_metadata = existing_doc.get("metadata", {})
-                                            if existing_metadata.get("link", "") == entry.get("link", ""):
-                                                is_duplicate = True
-                                    except Exception:
-                                        pass
+                                    entry_link = entry.get("link", "")
+                                    if entry_link:
+                                        try:
+                                            # Use optimized duplicate check (no embedding generation, no log spam)
+                                            chroma_client = rag_retrieval.chroma_client
+                                            is_duplicate = chroma_client.check_duplicate_by_link(entry_link)
+                                        except Exception:
+                                            # If duplicate check fails, allow entry to be added (better than blocking)
+                                            pass
                                     
                                     if is_duplicate:
                                         logger.debug(f"⏭️ Skipping duplicate: {entry.get('title', '')[:50]}")
