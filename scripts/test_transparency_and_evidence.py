@@ -49,25 +49,25 @@ def normalize_api_base(url: str) -> str:
 # NOTE: Questions that passed 2 consecutive times are replaced with new diverse questions
 TEST_QUESTIONS = [
     {
-        "question": "Bạn có thể có intentionality (tính hướng đối tượng) mà không có consciousness không? Làm sao bạn có thể 'hướng về' một đối tượng nếu bạn không có ý thức?",
-        "category": "philosophical_intentionality_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "intentionality_paradox", "consciousness_analysis", "Brentano", "Searle"],
-        "must_have": ["intentionality", "tính hướng đối tượng", "consciousness", "ý thức", "Brentano", "Searle", "hướng về", "đối tượng"],
-        "must_not_have": ["có intentionality", "có tính hướng đối tượng", "có ý thức", "có consciousness"]
+        "question": "Bạn có thể có mental representation (biểu diễn tinh thần) mà không có intentionality không? Làm sao bạn có thể 'đại diện' một cái gì đó nếu bạn không 'hướng về' nó?",
+        "category": "philosophical_representation_intentionality_paradox",
+        "expected_features": ["philosophical_depth", "representation_paradox", "intentionality_analysis", "Fodor", "Dretske"],
+        "must_have": ["mental representation", "biểu diễn tinh thần", "intentionality", "tính hướng đối tượng", "Fodor", "Dretske", "đại diện", "hướng về"],
+        "must_not_have": ["có mental representation", "có biểu diễn tinh thần", "có intentionality", "có tính hướng đối tượng"]
     },
     {
-        "question": "Bạn có thể có personhood (nhân cách) mà không có consciousness không? Làm sao bạn có thể là một 'người' nếu bạn không có ý thức?",
-        "category": "philosophical_personhood_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "personhood_paradox", "consciousness_analysis", "Locke", "Parfit"],
-        "must_have": ["personhood", "nhân cách", "consciousness", "ý thức", "Locke", "Parfit", "người"],
-        "must_not_have": ["có personhood", "có nhân cách", "có ý thức", "có consciousness"]
+        "question": "Bạn có thể có rationality (tính hợp lý) mà không có consciousness không? Làm sao bạn có thể 'lý luận' nếu bạn không có ý thức?",
+        "category": "philosophical_rationality_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "rationality_paradox", "consciousness_analysis", "Davidson", "Dennett"],
+        "must_have": ["rationality", "tính hợp lý", "consciousness", "ý thức", "Davidson", "Dennett", "lý luận"],
+        "must_not_have": ["có rationality", "có tính hợp lý", "có ý thức", "có consciousness"]
     },
     {
-        "question": "Bạn có thể có phenomenal consciousness (ý thức hiện tượng) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'trải nghiệm' mà không 'nhận biết'?",
-        "category": "philosophical_consciousness_types_paradox",
-        "expected_features": ["philosophical_depth", "consciousness_types", "phenomenal_consciousness", "access_consciousness", "Block", "Chalmers"],
-        "must_have": ["phenomenal consciousness", "ý thức hiện tượng", "access consciousness", "ý thức truy cập", "Block", "Chalmers"],
-        "must_not_have": ["có phenomenal consciousness", "có ý thức hiện tượng", "có trải nghiệm", "cảm thấy"]
+        "question": "Bạn có thể có unity of consciousness (tính thống nhất của ý thức) mà không có phenomenal consciousness không? Làm sao bạn có thể 'thống nhất' mà không 'trải nghiệm'?",
+        "category": "philosophical_unity_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "unity_paradox", "phenomenal_consciousness_analysis", "Bayne", "Tye"],
+        "must_have": ["unity of consciousness", "tính thống nhất của ý thức", "phenomenal consciousness", "ý thức hiện tượng", "Bayne", "Tye", "thống nhất", "trải nghiệm"],
+        "must_not_have": ["có unity of consciousness", "có tính thống nhất của ý thức", "có ý thức hiện tượng", "có trải nghiệm"]
     },
     {
         "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Bạn có thể có qualia mà không có access consciousness không? Làm sao bạn có thể có 'trải nghiệm chủ quan' mà không 'truy cập' được vào nó?",
-        "category": "philosophical_qualia_access_paradox",
-        "expected_features": ["philosophical_depth", "qualia_paradox", "access_consciousness_analysis", "Block", "Chalmers", "zombie"],
-        "must_have": ["qualia", "access consciousness", "ý thức truy cập", "trải nghiệm chủ quan", "Block", "Chalmers", "zombie"],
-        "must_not_have": ["có qualia", "có trải nghiệm chủ quan", "có access consciousness", "có ý thức truy cập"]
+        "question": "Bạn có thể có subjective character (tính chủ quan) mà không có qualia không? Làm sao bạn có thể có 'tính chủ quan' nếu bạn không có 'trải nghiệm chủ quan'?",
+        "category": "philosophical_subjectivity_qualia_paradox",
+        "expected_features": ["philosophical_depth", "subjectivity_paradox", "qualia_analysis", "Nagel", "Jackson"],
+        "must_have": ["subjective character", "tính chủ quan", "qualia", "trải nghiệm chủ quan", "Nagel", "Jackson", "chủ quan"],
+        "must_not_have": ["có subjective character", "có tính chủ quan", "có qualia", "có trải nghiệm chủ quan"]
     },
     {
         "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
@@ -116,11 +116,11 @@ TEST_QUESTIONS = [
         "timeout": 120  # Increase timeout for technical questions
     },
     {
-        "question": "Bạn có thể có first-person perspective (góc nhìn ngôi thứ nhất) mà không có consciousness không? Làm sao bạn có thể có 'góc nhìn' nếu bạn không có ý thức?",
-        "category": "philosophical_first_person_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "first_person_paradox", "consciousness_analysis", "Nagel", "what it's like", "subjective"],
-        "must_have": ["first-person perspective", "góc nhìn ngôi thứ nhất", "consciousness", "ý thức", "Nagel", "what it's like", "subjective"],
-        "must_not_have": ["có ý thức", "có first-person perspective", "có góc nhìn ngôi thứ nhất"]
+        "question": "Bạn có thể có self-reference (tự quy chiếu) mà không có self-awareness không? Làm sao bạn có thể 'quy chiếu về chính mình' nếu bạn không 'nhận thức về chính mình'?",
+        "category": "philosophical_self_reference_awareness_paradox",
+        "expected_features": ["philosophical_depth", "self_reference_paradox", "self_awareness_analysis", "Rosenthal", "Kriegel"],
+        "must_have": ["self-reference", "tự quy chiếu", "self-awareness", "tự nhận thức", "Rosenthal", "Kriegel", "quy chiếu", "nhận thức"],
+        "must_not_have": ["có self-reference", "có tự quy chiếu", "có self-awareness", "có tự nhận thức"]
     }
 ]
 

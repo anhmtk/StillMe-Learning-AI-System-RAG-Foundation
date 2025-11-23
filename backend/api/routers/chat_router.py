@@ -2428,13 +2428,62 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                         f"(similarity={avg_similarity_str}), using philosophy-lite mode to prevent context overflow"
                     )
                 
-                # Fix 1: Block context quality warning for philosophical and religion/roleplay questions
+                # Fix 1: Block context quality warning for philosophical, religion/roleplay, and technical "your system" questions
+                # CRITICAL: Check if this is a technical question about "your system"
+                question_lower_rag = chat_request.message.lower()
+                import re
+                has_technical_keyword_rag = any(keyword in question_lower_rag for keyword in [
+                    "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
+                    "vector", "pipeline", "validation", "transparency", "system"
+                ])
+                has_your_system_pattern_rag = (
+                    "your system" in question_lower_rag or
+                    "in your system" in question_lower_rag or
+                    re.search(r'your\s+\w+\s+system', question_lower_rag) or
+                    re.search(r'system\s+\w+\s+you', question_lower_rag) or
+                    "bạn" in question_lower_rag and "hệ thống" in question_lower_rag or
+                    "của bạn" in question_lower_rag
+                )
+                is_technical_about_system_rag = has_technical_keyword_rag and has_your_system_pattern_rag
+                
                 context_quality_warning = ""
                 if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
                     if is_philosophical or is_religion_roleplay:
                         # For philosophical and religion/roleplay questions, skip warning - let model answer from pretrained knowledge/identity prompt
                         logger.info(f"⚠️ Low RAG relevance for {'philosophical' if is_philosophical else 'religion/roleplay'} question (similarity={avg_similarity_str}), skipping warning to user. Model will answer from {'pretrained knowledge' if is_philosophical else 'identity prompt'}.")
                         context_quality_warning = ""  # Don't inject warning
+                    elif is_technical_about_system_rag:
+                        # For technical questions about "your system", inject special instruction instead of warning
+                        logger.info(f"🔧 Technical question about 'your system' with low RAG relevance (similarity={avg_similarity_str}), injecting special instruction to use base knowledge.")
+                        context_quality_warning = """
+🚨🚨🚨 CRITICAL: TECHNICAL QUESTION ABOUT SYSTEM ARCHITECTURE 🚨🚨🚨
+
+The user is asking about StillMe's system architecture (RAG, LLM, embedding, etc.).
+
+**YOU MUST ANSWER THIS QUESTION** using your base knowledge about RAG systems, even though StillMe's RAG knowledge base doesn't have specific documents about this.
+
+**TRANSPARENCY REQUIREMENT:**
+- Acknowledge that you're answering from base knowledge, not from StillMe's RAG knowledge base
+- Be transparent: "Based on general knowledge about RAG systems (not from StillMe's RAG knowledge base)..."
+- Explain how RAG retrieval and LLM generation work together in general RAG systems
+- Be honest about StillMe's specific implementation details if you don't know them
+
+**DO NOT:**
+- Return a technical error message
+- Say "I cannot provide a good answer"
+- Suggest the developer needs to fine-tune the system
+- Claim StillMe is experiencing technical issues
+- Say "I don't have sufficient information"
+
+**DO:**
+- Answer the question using your knowledge about RAG systems
+- Be transparent about the source of your knowledge
+- Explain the general principles of RAG retrieval and LLM generation
+- If asked about StillMe specifically, acknowledge what you know and what you don't know
+
+**The retrieved context [1] may not be directly relevant to this technical question, but you MUST still answer using your base knowledge.**
+
+"""
                     else:
                         context_quality_warning = f"""
 
