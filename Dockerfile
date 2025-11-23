@@ -95,10 +95,12 @@ ENV PYTHONUNBUFFERED=1
 # Expose ports
 EXPOSE 8000 8501
 
-# Health check - Increased start-period to allow RAG initialization (can take 30-60s)
+# Health check - Increased start-period to allow model download and RAG initialization
+# Model download can take 3-5 minutes, RAG initialization can take 30-60s
 # Health endpoint is available immediately, but we give extra time for full initialization
-HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=5 \
-    CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
+# CRITICAL: Use PORT env var (Railway sets this, default to 8080 if not set)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=600s --retries=10 \
+    CMD sh -c 'PORT=${PORT:-8080} && curl -f http://localhost:${PORT}/health || exit 1'
 
 # Default command (can be overridden)
 CMD ["python", "start_backend.py"]
