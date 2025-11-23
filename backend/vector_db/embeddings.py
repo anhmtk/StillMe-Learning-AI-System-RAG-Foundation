@@ -79,6 +79,23 @@ class EmbeddingService:
         if _global_model_manager is not None:
             self.model_manager = _global_model_manager
             
+            # CRITICAL: Check if OLD model cache exists and delete it if found
+            # This ensures we use the new multilingual model, not the old English-only model
+            old_model_paths = [
+                cache_path / "sentence_transformers" / "multi-qa-MiniLM-L6-dot-v1",
+                cache_path / "hub" / "models--sentence-transformers--multi-qa-MiniLM-L6-dot-v1",
+                cache_path / "models--sentence-transformers--multi-qa-MiniLM-L6-dot-v1",
+            ]
+            for old_path in old_model_paths:
+                if old_path.exists():
+                    logger.warning(f"⚠️ Found OLD model cache at {old_path} - deleting to force new model download...")
+                    try:
+                        import shutil
+                        shutil.rmtree(old_path)
+                        logger.info(f"✅ Deleted old model cache: {old_path}")
+                    except Exception as delete_error:
+                        logger.warning(f"⚠️ Could not delete old model cache: {delete_error}")
+            
             # Try to copy model from image cache to persistent volume if needed
             if not self.model_manager.cache_status.model_files_found:
                 logger.info("⚠️ Model not found in persistent cache, attempting to copy from image cache...")
