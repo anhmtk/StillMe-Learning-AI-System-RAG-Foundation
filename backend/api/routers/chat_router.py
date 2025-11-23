@@ -1975,13 +1975,33 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     # Normal retrieval for non-StillMe queries
                     # But prioritize foundational knowledge for technical questions
                     # Optimized: conversation_limit reduced from 2 to 1 for latency
+                    
+                    # SOLUTION 1 & 3: Improve retrieval for historical/factual questions
+                    # - Lower similarity threshold for historical questions
+                    # - Enhance query with English keywords for better cross-lingual matching
+                    from backend.core.query_preprocessor import is_historical_question, enhance_query_for_retrieval
+                    
+                    is_historical = is_historical_question(chat_request.message)
+                    retrieval_query = chat_request.message
+                    similarity_threshold = 0.1  # Default
+                    
+                    if is_historical:
+                        # SOLUTION 1: Lower threshold for historical questions (0.05 instead of 0.1)
+                        similarity_threshold = 0.05
+                        logger.info(f"📜 Historical question detected - using lower similarity threshold: {similarity_threshold}")
+                        
+                        # SOLUTION 3: Enhance query with English keywords
+                        retrieval_query = enhance_query_for_retrieval(chat_request.message)
+                        logger.info(f"🔍 Enhanced query for better cross-lingual matching: '{chat_request.message}' -> '{retrieval_query}'")
+                    
                     context = rag_retrieval.retrieve_context(
-                        query=chat_request.message,
+                        query=retrieval_query,  # Use enhanced query
                         knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
                         conversation_limit=1,  # Optimized: reduced from 2 to 1
                         exclude_content_types=["technical"] if is_philosophical else None,
                         prioritize_style_guide=is_philosophical,
                         prioritize_foundational=is_technical_question,  # Prioritize foundational for technical questions
+                        similarity_threshold=similarity_threshold,  # Use adaptive threshold
                         is_philosophical=is_philosophical
                     )
         
