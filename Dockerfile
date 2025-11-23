@@ -64,22 +64,15 @@ RUN if [ "$MODEL_WARMUP" = "true" ]; then \
 COPY scripts/chroma_warmup.py /app/scripts/chroma_warmup.py
 
 # Pre-download ChromaDB ONNX model during build stage
-# ChromaDB automatically downloads ONNX models to ~/.cache/chroma/onnx_models/
-# By setting HOME=/app, it will use /app/.cache/chroma/onnx_models/
-# This prevents re-downloading ONNX models (79.3MB) on every container start
-# CRITICAL: ONNX model download takes ~2-3 minutes, causing API timeouts
-# Pre-downloading in Docker image ensures it's available immediately at runtime
-# Note: Model will be cached in Railway persistent volume at /app/.cache/chroma (if mounted)
-# Using separate script to avoid heredoc syntax issues and make it more maintainable
-# This step never fails the build (|| true ensures it continues even on error)
-# Enable warmup by default to prevent runtime downloads
-ARG CHROMA_WARMUP=true
+# DISABLED by default to speed up build - ONNX model will download at runtime (cached in persistent volume)
+# Enable warmup only if CHROMA_WARMUP=true explicitly set
+ARG CHROMA_WARMUP=false
 RUN if [ "$CHROMA_WARMUP" = "true" ]; then \
       echo "Pre-downloading ChromaDB ONNX model (this may take 2-3 minutes)..."; \
       python /app/scripts/chroma_warmup.py || true; \
       echo "ChromaDB ONNX warmup completed"; \
     else \
-      echo "ChromaDB warmup disabled (CHROMA_WARMUP=false)"; \
+      echo "ChromaDB warmup disabled (CHROMA_WARMUP=false) - ONNX model will download at runtime"; \
     fi
 
 # Copy application code (including .streamlit config)
