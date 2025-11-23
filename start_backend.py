@@ -40,8 +40,10 @@ class HealthCheckHandler(BaseHTTPRequestHandler):
         # Suppress healthcheck logs to reduce noise
         pass
 
-# Global variable to store healthcheck server instance
+# Global variable to store healthcheck server instance and thread
 _healthcheck_server = None
+_healthcheck_thread = None
+_healthcheck_stop_flag = threading.Event()
 
 def start_healthcheck_server(port):
     """Start a simple HTTP server for healthcheck while FastAPI app loads"""
@@ -50,21 +52,41 @@ def start_healthcheck_server(port):
         _healthcheck_server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
         logger.info(f"✅ Healthcheck server started on port {port}")
         sys.stdout.flush()
-        _healthcheck_server.serve_forever()
-    except Exception as e:
-        logger.error(f"❌ Healthcheck server failed: {e}")
+        # Use serve_forever with timeout to allow checking stop flag
+        while not _healthcheck_stop_flag.is_set():
+            _healthcheck_server.handle_request()
+        logger.info("🛑 Healthcheck server stopping...")
         sys.stdout.flush()
+    except Exception as e:
+        if not _healthcheck_stop_flag.is_set():
+            logger.error(f"❌ Healthcheck server failed: {e}")
+            sys.stdout.flush()
 
 def stop_healthcheck_server():
     """Stop the healthcheck server to free up the port for FastAPI"""
-    global _healthcheck_server
+    global _healthcheck_server, _healthcheck_thread
     if _healthcheck_server:
         try:
             logger.info("🛑 Stopping healthcheck server to free port for FastAPI...")
             sys.stdout.flush()
-            _healthcheck_server.shutdown()
-            _healthcheck_server.server_close()
-            _healthcheck_server = None
+            # Signal server to stop
+            _healthcheck_stop_flag.set()
+            # Make a request to trigger handle_request() to check the flag
+            try:
+                import socket
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(0.1)
+                sock.connect(('localhost', port_int))
+                sock.close()
+            except:
+                pass  # Ignore connection errors
+            # Wait for thread to finish
+            if _healthcheck_thread and _healthcheck_thread.is_alive():
+                _healthcheck_thread.join(timeout=1.0)
+            # Close server
+            if _healthcheck_server:
+                _healthcheck_server.server_close()
+                _healthcheck_server = None
             logger.info("✅ Healthcheck server stopped")
             sys.stdout.flush()
             time.sleep(0.5)  # Give port a moment to be released
@@ -86,12 +108,12 @@ except ValueError:
 # The healthcheck server will be replaced by FastAPI app once it starts
 # Use a separate thread so it doesn't block
 logger.info("🚀 Starting immediate healthcheck server...")
-healthcheck_thread = threading.Thread(
+_healthcheck_thread = threading.Thread(
     target=start_healthcheck_server,
     args=(port_int,),
     daemon=True
 )
-healthcheck_thread.start()
+_healthcheck_thread.start()
 logger.info("✅ Healthcheck server started - Railway healthcheck will pass immediately")
 sys.stdout.flush()
 time.sleep(1)  # Give healthcheck server a moment to bind to port
