@@ -63,6 +63,7 @@ except ValueError:
 # CRITICAL: Start a simple healthcheck server immediately
 # This ensures Railway healthcheck passes while FastAPI app loads
 # The healthcheck server will be replaced by FastAPI app once it starts
+# Use a separate thread so it doesn't block
 logger.info("🚀 Starting immediate healthcheck server...")
 healthcheck_thread = threading.Thread(
     target=start_healthcheck_server,
@@ -72,7 +73,7 @@ healthcheck_thread = threading.Thread(
 healthcheck_thread.start()
 logger.info("✅ Healthcheck server started - Railway healthcheck will pass immediately")
 sys.stdout.flush()
-time.sleep(0.5)  # Give healthcheck server a moment to start
+time.sleep(1)  # Give healthcheck server a moment to bind to port
 
 logger.info("=" * 60)
 logger.info("StillMe Backend - Starting FastAPI Server")
@@ -158,7 +159,10 @@ except Exception as e:
 
 try:
     logger.info("🚀 Starting uvicorn server...")
+    logger.info("⚠️ Note: Healthcheck server will be replaced by FastAPI app")
     sys.stdout.flush()
+    # Uvicorn will bind to the same port, which will cause the healthcheck server to fail
+    # This is expected - FastAPI app takes over once it starts
     uvicorn.run(
         app,
         host="0.0.0.0",
