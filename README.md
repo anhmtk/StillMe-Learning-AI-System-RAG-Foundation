@@ -213,6 +213,7 @@ See `env.example` for full list.
   - Ethics validation (EthicsAdapter)
   - Identity check (IdentityCheckValidator) - Prevents anthropomorphism
   - Ego neutrality (EgoNeutralityValidator) - Detects "Hallucination of Experience"
+  - Source consensus (SourceConsensusValidator) - Detects contradictions between RAG sources
   - Factual hallucination detection (FactualHallucinationValidator)
   - Step-level validation (StepValidator) - Validates multi-step reasoning
   - Consistency checking (ConsistencyChecker) - Cross-validates claims

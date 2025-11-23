@@ -701,11 +701,15 @@ async def _handle_validation_with_fallback(
     enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
     identity_validator_strict = os.getenv("IDENTITY_VALIDATOR_STRICT", "true").lower() == "true"
     
+    # Import SourceConsensusValidator
+    from backend.validators.source_consensus import SourceConsensusValidator
+    
     validators = [
         LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
         CitationRequired(),
         CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
         EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
+        SourceConsensusValidator(enabled=True, timeout=3.0),  # NEW: Detect source contradictions (after EvidenceOverlap, before ConfidenceValidator)
         NumericUnitsBasic(),
         # Fix: Disable require_uncertainty_when_no_context for philosophical questions
         ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # Check for uncertainty

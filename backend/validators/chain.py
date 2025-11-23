@@ -52,14 +52,16 @@ class ValidatorChain:
             "NumericUnitsBasic",
             "SchemaFormat",
             "EthicsAdapter",
-            "EgoNeutralityValidator"  # Read-only detection, can run in parallel
+            "EgoNeutralityValidator",  # Read-only detection, can run in parallel
+            "SourceConsensusValidator"  # NEW: Can run in parallel (reads ctx_docs only)
         }
         
         # Validators that must run sequentially (have dependencies or modify state)
         sequential_only = {
             "LanguageValidator",  # Must run first
             "CitationRequired",   # Must run before CitationRelevance
-            "ConfidenceValidator" # May depend on other results
+            "SourceConsensusValidator",  # NEW: Must run after EvidenceOverlap, before ConfidenceValidator
+            "ConfidenceValidator" # May depend on other results (including SourceConsensusValidator)
         }
         
         if validator_name in sequential_only:
@@ -114,13 +116,17 @@ class ValidatorChain:
             try:
                 # Tier 3.5: Pass context quality to ConfidenceValidator
                 if validator_name == "ConfidenceValidator":
-                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical, is_religion_roleplay=is_religion_roleplay)
+                    # Pass previous reasons to ConfidenceValidator so it can detect source_contradiction
+                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical, is_religion_roleplay=is_religion_roleplay, previous_reasons=reasons)
                 elif validator_name == "CitationRequired":
                     # Pass is_philosophical and user_question to CitationRequired
                     # user_question is needed to detect real factual questions (even with philosophical elements)
                     result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical, user_question=user_question)
                 elif validator_name == "FactualHallucinationValidator":
                     # Pass user_question to FactualHallucinationValidator
+                    result = validator.run(patched, ctx_docs, user_question=user_question)
+                elif validator_name == "SourceConsensusValidator":
+                    # Pass user_question to SourceConsensusValidator for context
                     result = validator.run(patched, ctx_docs, user_question=user_question)
                 else:
                     result = validator.run(patched, ctx_docs)
@@ -138,6 +144,15 @@ class ValidatorChain:
                     # Check if this is only a low_overlap issue
                     if any("low_overlap" in r for r in result.reasons):
                         low_overlap_only = True
+                    
+                    # Check if this is a source_contradiction (should trigger uncertainty in ConfidenceValidator)
+                    if any("source_contradiction" in r for r in result.reasons):
+                        logger.info(
+                            f"Validator {i} ({type(validator).__name__}) detected source contradiction - "
+                            f"ConfidenceValidator will handle uncertainty expression"
+                        )
+                        # Don't fail fast - let ConfidenceValidator handle it
+                        # Mark that we have a source contradiction for ConfidenceValidator
                     
                     # Use patched answer if available
                     if result.patched_answer:

@@ -124,7 +124,7 @@ class ConfidenceValidator:
     
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None, 
             avg_similarity: Optional[float] = None, is_philosophical: bool = False,
-            is_religion_roleplay: bool = False) -> ValidationResult:
+            is_religion_roleplay: bool = False, previous_reasons: Optional[List[str]] = None) -> ValidationResult:
         """
         Check if answer appropriately expresses uncertainty
         
@@ -135,11 +135,63 @@ class ConfidenceValidator:
             avg_similarity: Average similarity score of retrieved context (0.0-1.0)
             is_philosophical: If True, relax uncertainty requirements for philosophical questions (don't force "I don't know" for theoretical reasoning)
             is_religion_roleplay: If True, skip force template for religion/roleplay questions (they should answer from identity prompt, not RAG context)
+            previous_reasons: List of reasons from previous validators (to detect source_contradiction)
             
         Returns:
             ValidationResult with passed status and reasons
         """
         answer_lower = answer.lower()
+        
+        # NEW: Check if SourceConsensusValidator detected a contradiction
+        has_source_contradiction = False
+        contradiction_details = ""
+        if previous_reasons:
+            for reason in previous_reasons:
+                if "source_contradiction" in reason:
+                    has_source_contradiction = True
+                    # Extract contradiction details (format: "source_contradiction:type:details")
+                    parts = reason.split(":", 2)
+                    if len(parts) >= 3:
+                        contradiction_details = parts[2]
+                    break
+        
+        # If source contradiction detected, force uncertainty expression
+        if has_source_contradiction:
+            logger.warning(f"🔍 Source contradiction detected - forcing uncertainty expression: {contradiction_details[:100]}")
+            
+            # Check if answer already acknowledges the contradiction
+            has_contradiction_acknowledgment = any(
+                phrase in answer_lower for phrase in [
+                    "mâu thuẫn", "contradiction", "conflicting", "khác nhau", "different",
+                    "không chắc chắn", "uncertain", "không rõ", "unclear", "không thể xác định"
+                ]
+            )
+            
+            if not has_contradiction_acknowledgment:
+                # Force uncertainty expression with contradiction acknowledgment
+                detected_lang_from_answer = _detect_language_from_text(answer)
+                
+                contradiction_templates = {
+                    'vi': f"Mình phát hiện các nguồn thông tin mâu thuẫn nhau về vấn đề này. {contradiction_details[:100] if contradiction_details else 'Các nguồn đưa ra thông tin khác nhau.'} Mình không thể xác định nguồn nào chính xác hơn.",
+                    'en': f"I detected conflicting information from sources. {contradiction_details[:100] if contradiction_details else 'Sources provide different information.'} I cannot determine which source is more accurate.",
+                    'fr': f"J'ai détecté des informations contradictoires entre les sources. {contradiction_details[:100] if contradiction_details else 'Les sources fournissent des informations différentes.'} Je ne peux pas déterminer quelle source est plus précise.",
+                    'de': f"Ich habe widersprüchliche Informationen aus den Quellen festgestellt. {contradiction_details[:100] if contradiction_details else 'Die Quellen liefern unterschiedliche Informationen.'} Ich kann nicht bestimmen, welche Quelle genauer ist.",
+                    'es': f"He detectado información contradictoria entre las fuentes. {contradiction_details[:100] if contradiction_details else 'Las fuentes proporcionan información diferente.'} No puedo determinar qué fuente es más precisa.",
+                }
+                
+                contradiction_template = contradiction_templates.get(
+                    detected_lang_from_answer,
+                    f"I detected conflicting information from sources. {contradiction_details[:100] if contradiction_details else 'Sources provide different information.'} I cannot determine which source is more accurate."
+                )
+                
+                patched_answer = f"{contradiction_template}\n\n{answer}"
+                
+                logger.warning("⚠️ Forced uncertainty expression due to source contradiction")
+                return ValidationResult(
+                    passed=True,
+                    reasons=["forced_uncertainty_source_contradiction"],
+                    patched_answer=patched_answer
+                )
         
         # Tier 3.5: Force uncertainty when context quality is low
         # BUT: Skip for philosophical questions (theoretical reasoning doesn't need context)
