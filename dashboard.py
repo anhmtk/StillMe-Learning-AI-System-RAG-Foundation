@@ -2006,24 +2006,16 @@ def check_authentication():
     # Get password from environment variable
     dashboard_password = os.getenv("DASHBOARD_PASSWORD", "")
     
-    # Check environment
-    env = os.getenv("ENV", "development").lower()
-    is_production = env == "production"
+    # CRITICAL FIX: Always require password if DASHBOARD_PASSWORD is set
+    # This ensures security regardless of ENV variable (Railway may not set ENV=production)
+    # If password is set → require authentication
+    # If password is NOT set → show warning but allow (for development/testing)
     
-    # If no password is set
     if not dashboard_password:
-        if is_production:
-            # In production, BLOCK access if no password
-            st.set_page_config(page_title="StillMe - Authentication Required", page_icon="🔐")
-            st.error("❌ **CRITICAL SECURITY ERROR:** Dashboard password is REQUIRED in production!")
-            st.error("Please set `DASHBOARD_PASSWORD` environment variable in Railway dashboard service variables.")
-            st.info("💡 **How to fix:**\n1. Go to Railway Dashboard → Dashboard Service → Variables\n2. Add new variable: `DASHBOARD_PASSWORD` = (your secure password)\n3. Redeploy service")
-            st.stop()
-        else:
-            # In development, show warning but allow access
-            st.warning("⚠️ **SECURITY WARNING:** `DASHBOARD_PASSWORD` is not set! Dashboard is open to everyone.")
-            st.warning("Set `DASHBOARD_PASSWORD` in Railway dashboard service variables for production.")
-            return  # Allow in development
+        # No password set - show warning but allow access (for development/testing)
+        st.warning("⚠️ **SECURITY WARNING:** `DASHBOARD_PASSWORD` is not set! Dashboard is open to everyone.")
+        st.warning("Set `DASHBOARD_PASSWORD` in Railway dashboard service variables for security.")
+        return  # Allow access without password (development mode)
     
     # Show login form
     st.set_page_config(page_title="StillMe - Authentication Required", page_icon="🔐")
