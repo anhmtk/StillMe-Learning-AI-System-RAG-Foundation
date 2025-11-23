@@ -1077,14 +1077,13 @@ async def _run_learning_cycle_sync():
             filtered_count = 0
             
             # Get entries from learning cycle result (already fetched with value-based prioritization)
-            try:
-                # Entries were already fetched in run_learning_cycle() with value-based selection
-                # We just need to process them here (pre-filter, prioritize, add to RAG)
-                # If result doesn't have entries, that means run_learning_cycle() already processed them
-                all_entries = result.get("entries_fetched_list", [])
-                if not all_entries:
-                    logger.info("Entries already processed in run_learning_cycle() - skipping duplicate fetch")
-                    all_entries = []
+            # Entries were already fetched in run_learning_cycle() with value-based selection
+            # We just need to process them here (pre-filter, prioritize, add to RAG)
+            # If result doesn't have entries, that means run_learning_cycle() already processed them
+            all_entries = result.get("entries_fetched_list", [])
+            if not all_entries:
+                logger.info("Entries already processed in run_learning_cycle() - skipping duplicate fetch")
+                all_entries = []
             
             # STEP 1: Pre-Filter (BEFORE embedding) to reduce costs
             if content_curator:
