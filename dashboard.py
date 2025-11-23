@@ -1995,6 +1995,23 @@ def sidebar(page_for_chat: str | None = None):
         # Note: Floating widget handles its own chat logic via JavaScript
         st.sidebar.success("✅ **Floating Chat Widget Active!**")
         st.sidebar.info("💡 Look for the **💬 chat button** in the **bottom-right corner** of your screen. Click it to open the resizable chat panel!")
+        
+        # CRITICAL: Cost warning for public chat
+        st.sidebar.markdown("---")
+        st.sidebar.warning("""
+        **💰 Cost Notice:**
+        
+        Public chat requires your own API key to prevent server cost exhaustion.
+        
+        **Get API keys:**
+        - DeepSeek: https://platform.deepseek.com
+        - OpenAI: https://platform.openai.com
+        
+        **Rate Limit:** 10 requests/minute per IP
+        
+        **Admin:** Unlimited chat (uses server API key)
+        """)
+        
         st.sidebar.markdown("---")
         st.sidebar.caption("**Features:** Resize, Drag, Fullscreen, Overlay")
     else:
