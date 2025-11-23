@@ -48,8 +48,9 @@ ENV HF_HOME=/app/.model_cache
 COPY scripts/model_warmup.py /app/scripts/model_warmup.py
 
 # Pre-download model (this step never fails the build - || true ensures it continues even on error)
-# Enable warmup by default to prevent runtime downloads
-ARG MODEL_WARMUP=true
+# DISABLED by default to speed up build - model will download at runtime (cached in persistent volume)
+# Enable warmup only if MODEL_WARMUP=true explicitly set
+ARG MODEL_WARMUP=false
 RUN if [ "$MODEL_WARMUP" = "true" ]; then \
       echo "Pre-downloading embedding model paraphrase-multilingual-MiniLM-L12-v2 (this may take 3-5 minutes)..."; \
       python /app/scripts/model_warmup.py || true; \
