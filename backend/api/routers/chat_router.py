@@ -3954,6 +3954,11 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 
                 # CRITICAL: Check if raw_response is a technical error message or fallback message before validation
                 # Never allow provider error messages to pass through validators
+                # CRITICAL: Initialize is_error and is_fallback BEFORE conditional blocks to avoid UnboundLocalError
+                is_error = False
+                error_type = "generic"
+                is_fallback = False
+                
                 from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error, is_fallback_message
                 
                 if raw_response and isinstance(raw_response, str):

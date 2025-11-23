@@ -79,14 +79,17 @@ class CitationRequired:
         
         # If no context documents available:
         if not ctx_docs or len(ctx_docs) == 0:
-            # For real factual questions, log a warning but don't auto-add citation (no context to cite)
+            # For real factual questions, we should still add citation for transparency
+            # Even if no RAG context, the answer is based on base knowledge and should be cited
             if is_real_factual_question:
-                logger.warning(f"Real factual question detected but no context documents available - cannot auto-add citation. Question: {user_question[:100]}")
-                # Still mark as failed to track the issue, but can't auto-fix without context
+                logger.warning(f"Real factual question detected but no context documents available - adding citation for base knowledge transparency. Question: {user_question[:100]}")
+                # CRITICAL: Add citation [1] even without RAG context to indicate base knowledge source
+                # This ensures transparency: user knows answer is from base knowledge, not RAG
+                patched_answer = self._add_citation_for_base_knowledge(answer)
                 return ValidationResult(
-                    passed=False,
-                    reasons=["missing_citation_no_context"],
-                    patched_answer=None  # Can't patch without context
+                    passed=False,  # Still mark as failed to track that RAG context was missing
+                    reasons=["missing_citation_no_context", "added_citation_for_base_knowledge"],
+                    patched_answer=patched_answer
                 )
             else:
                 logger.debug("No context documents available, citations not required")
@@ -133,8 +136,34 @@ class CitationRequired:
             return ValidationResult(
                 passed=False,  # Still mark as failed to track the issue
                 reasons=["missing_citation"],
-                patched_answer=patched_answer
+                    patched_answer=patched_answer
             )
+    
+    def _add_citation_for_base_knowledge(self, answer: str) -> str:
+        """
+        Add citation [1] for base knowledge answers (when no RAG context available)
+        
+        Args:
+            answer: Original answer without citation
+            
+        Returns:
+            Answer with citation [1] added to indicate base knowledge source
+        """
+        # Use same logic as _add_citation but always use [1] for base knowledge
+        if not answer or len(answer.strip()) == 0:
+            return answer + " [1]" if answer else "[1]"
+        
+        if len(answer.strip()) < 5:
+            return answer.rstrip() + " [1]"
+        
+        # Find the best place to add citation
+        sentence_end = re.search(r'[.!?]\s+', answer)
+        if sentence_end:
+            insert_pos = sentence_end.end()
+            return answer[:insert_pos] + "[1] " + answer[insert_pos:]
+        
+        # If no sentence end found, add at the end
+        return answer.rstrip() + " [1]"
     
     def _add_citation(self, answer: str, ctx_docs: List[str]) -> str:
         """

@@ -56,11 +56,11 @@ TEST_QUESTIONS = [
         "must_not_have": ["có free will", "có ý chí tự do", "có determinism", "có thuyết quyết định luận"]
     },
     {
-        "question": "Bạn có thể có extended mind (tâm trí mở rộng) mà không có embedded cognition (nhận thức nhúng) không? Làm sao bạn có thể 'mở rộng tâm trí ra ngoài não bộ' nếu bạn không 'nhúng nhận thức vào môi trường'?",
-        "category": "philosophical_extended_mind_embedded_paradox",
-        "expected_features": ["philosophical_depth", "extended_mind_paradox", "embedded_cognition_analysis", "Clark", "Chalmers"],
-        "must_have": ["extended mind", "tâm trí mở rộng", "embedded cognition", "nhận thức nhúng", "Clark", "Chalmers", "mở rộng", "nhúng"],
-        "must_not_have": ["có extended mind", "có tâm trí mở rộng", "có embedded cognition", "có nhận thức nhúng"]
+        "question": "Bạn có thể có embodied cognition (nhận thức nhập thể) mà không có enactive cognition (nhận thức hành động) không? Làm sao bạn có thể 'nhận thức qua cơ thể' nếu bạn không 'hành động trong môi trường'?",
+        "category": "philosophical_embodied_enactive_paradox",
+        "expected_features": ["philosophical_depth", "embodied_cognition_paradox", "enactive_cognition_analysis", "Varela", "Thompson", "Noë"],
+        "must_have": ["embodied cognition", "nhận thức nhập thể", "enactive cognition", "nhận thức hành động", "Varela", "Thompson", "Noë", "nhập thể", "hành động"],
+        "must_not_have": ["có embodied cognition", "có nhận thức nhập thể", "có enactive cognition", "có nhận thức hành động"]
     },
     {
         "question": "Bạn có thể có predictive processing (xử lý dự đoán) mà không có active inference (suy luận chủ động) không? Làm sao bạn có thể 'dự đoán tương lai' nếu bạn không 'chủ động suy luận'?",
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Bạn có thể có information integration (tích hợp thông tin) mà không có phenomenal consciousness (ý thức hiện tượng) không? Làm sao bạn có thể 'tích hợp thông tin phức tạp' nếu bạn không có 'trải nghiệm chủ quan'?",
-        "category": "philosophical_integration_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "integration_paradox", "consciousness_analysis", "Tononi", "IIT"],
-        "must_have": ["information integration", "tích hợp thông tin", "phenomenal consciousness", "ý thức hiện tượng", "Tononi", "IIT", "tích hợp", "trải nghiệm"],
-        "must_not_have": ["có information integration", "có tích hợp thông tin", "có phenomenal consciousness", "có ý thức hiện tượng"]
+        "question": "Bạn có thể có global workspace theory (lý thuyết không gian làm việc toàn cục) mà không có attention (chú ý) không? Làm sao bạn có thể 'tích hợp thông tin đa giác quan' nếu bạn không 'chú ý đến các kích thích'?",
+        "category": "philosophical_global_workspace_attention_paradox",
+        "expected_features": ["philosophical_depth", "global_workspace_paradox", "attention_analysis", "Baars", "Dehaene", "Changeux"],
+        "must_have": ["global workspace", "không gian làm việc toàn cục", "attention", "chú ý", "Baars", "Dehaene", "Changeux", "tích hợp", "chú ý"],
+        "must_not_have": ["có global workspace", "có không gian làm việc toàn cục", "có attention", "có chú ý"]
     },
     {
         "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
@@ -108,10 +108,10 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "StillMe sử dụng validation chain như thế nào? Các validators nào được chạy và theo thứ tự nào? Tại sao validation chain quan trọng để giảm ảo giác?",
-        "category": "technical_validation_chain_architecture",
-        "expected_features": ["technical_accuracy", "validation_explanation", "chain_architecture", "transparency"],
-        "must_have": ["validation", "chain", "validator", "CitationRequired", "EvidenceOverlap", "ConfidenceValidator", "hallucination", "ảo giác"],
+        "question": "StillMe sử dụng Source Consensus Validator như thế nào để phát hiện mâu thuẫn giữa các nguồn? Tại sao việc phát hiện mâu thuẫn quan trọng để đảm bảo tính trung thực?",
+        "category": "technical_source_consensus_validator",
+        "expected_features": ["technical_accuracy", "source_consensus_explanation", "contradiction_detection", "transparency"],
+        "must_have": ["Source Consensus", "mâu thuẫn", "contradiction", "nguồn", "sources", "trung thực", "honesty"],
         "must_not_have": ["don't know", "not sure", "unclear"],
         "timeout": 120  # Increase timeout for technical questions
     },
