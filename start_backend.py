@@ -95,7 +95,70 @@ except ImportError as e:
     sys.stdout.flush()
     sys.exit(1)
 
+# CRITICAL: Pre-download embedding model BEFORE importing FastAPI app
+# This ensures model is ready before any requests arrive
+logger.info("=" * 60)
+logger.info("📦 Pre-downloading embedding model...")
+logger.info("=" * 60)
+logger.info("Model: paraphrase-multilingual-MiniLM-L12-v2")
+logger.info("Cache location: /app/hf_cache (Railway persistent volume)")
+logger.info("This may take 3-5 minutes on first deploy...")
+sys.stdout.flush()
+
+try:
+    # Pre-download model using the same method as model_warmup.py
+    import os
+    from pathlib import Path
+    
+    # Set cache environment variables FIRST (before importing SentenceTransformer)
+    cache_path = Path("/app/hf_cache")
+    if cache_path.exists() or cache_path.parent.exists():
+        os.environ["TRANSFORMERS_CACHE"] = str(cache_path)
+        os.environ["HF_HOME"] = str(cache_path)
+        os.environ["HF_DATASETS_CACHE"] = str(cache_path / "datasets")
+        os.environ["SENTENCE_TRANSFORMERS_HOME"] = str(cache_path)
+        os.environ["HF_HUB_CACHE"] = str(cache_path / "hub")
+        logger.info(f"✅ Cache environment configured: {cache_path}")
+        sys.stdout.flush()
+    
+    # Now import and download model
+    from sentence_transformers import SentenceTransformer
+    
+    model_name = "paraphrase-multilingual-MiniLM-L12-v2"
+    logger.info(f"⏳ Downloading model: {model_name}...")
+    sys.stdout.flush()
+    
+    # Suppress tqdm progress bars
+    os.environ.setdefault("TQDM_DISABLE", "1")
+    
+    # Download model (this will cache it in /app/hf_cache)
+    model = SentenceTransformer(
+        model_name,
+        cache_folder=str(cache_path) if cache_path.exists() else None
+    )
+    
+    # Test model by encoding a small text
+    test_embedding = model.encode("test", show_progress_bar=False)
+    logger.info(f"✅ Model downloaded and verified (embedding dimension: {len(test_embedding)})")
+    logger.info(f"✅ Model cached at: {cache_path}")
+    sys.stdout.flush()
+    
+    # Clean up model from memory (we'll reload it later in EmbeddingService)
+    del model
+    import gc
+    gc.collect()
+    logger.info("✅ Model pre-download complete - ready for use")
+    sys.stdout.flush()
+    
+except Exception as e:
+    logger.warning(f"⚠️ Model pre-download failed: {e}")
+    logger.warning("⚠️ Model will be downloaded on first use (may cause slow first request)")
+    logger.warning("⚠️ This is not critical - service will continue to start")
+    sys.stdout.flush()
+    # Don't exit - let service continue (model will download on first use)
+
 # Import FastAPI app (this will trigger RAG initialization)
+logger.info("=" * 60)
 logger.info("Importing FastAPI application...")
 logger.info("Note: RAG components initialization may take 10-30 seconds")
 logger.info("The /health endpoint will be available immediately")
