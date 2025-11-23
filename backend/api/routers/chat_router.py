@@ -1837,12 +1837,25 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         exclude_types.append("technical")
                     exclude_types.append("style_guide")
                     
+                    # SOLUTION 1 & 3: Improve retrieval for historical/factual questions
+                    from backend.core.query_preprocessor import is_historical_question, enhance_query_for_retrieval
+                    
+                    is_historical = is_historical_question(chat_request.message)
+                    retrieval_query = chat_request.message
+                    similarity_threshold = 0.1  # Default
+                    
+                    if is_historical:
+                        similarity_threshold = 0.05
+                        retrieval_query = enhance_query_for_retrieval(chat_request.message)
+                        logger.info(f"📜 Historical question (provenance fallback) - using threshold {similarity_threshold}, enhanced query")
+                    
                     context = rag_retrieval.retrieve_context(
-                        query=chat_request.message,
+                        query=retrieval_query,
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=1,
                         exclude_content_types=exclude_types if exclude_types else None,
                         prioritize_style_guide=False,  # Never prioritize style guide for user chat
+                        similarity_threshold=similarity_threshold,
                         is_philosophical=is_philosophical
                     )
             
