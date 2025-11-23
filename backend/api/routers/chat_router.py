@@ -2500,6 +2500,10 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                         f"(similarity={avg_similarity_str}), using philosophy-lite mode to prevent context overflow"
                     )
                 
+                # CRITICAL: Initialize is_technical_about_system_rag BEFORE any conditional blocks to avoid UnboundLocalError
+                # This variable is used later in the code (line 3961) and must be defined in all code paths
+                is_technical_about_system_rag = False
+                
                 # Fix 1: Block context quality warning for philosophical, religion/roleplay, and technical "your system" questions
                 # CRITICAL: Check if this is a technical question about "your system"
                 question_lower_rag = chat_request.message.lower()
