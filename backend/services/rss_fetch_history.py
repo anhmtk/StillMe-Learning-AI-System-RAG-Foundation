@@ -21,17 +21,46 @@ RETRY_DELAY_BASE = 0.1  # Base delay in seconds (exponential backoff)
 class RSSFetchHistory:
     """Tracks RSS fetch history with detailed status for transparency"""
     
-    def __init__(self, db_path: str = "data/rss_fetch_history.db"):
+    def __init__(self, db_path: str = None):
         """
         Initialize RSS fetch history tracker
         
         Args:
-            db_path: Path to SQLite database for fetch history
+            db_path: Path to SQLite database for fetch history (defaults to Railway persistent volume or local data/)
         """
+        import os
+        
+        # CRITICAL: Use absolute path for Railway persistence (similar to ChromaDB)
+        # Priority 1: Environment variable (for Railway persistent volume)
+        # Priority 2: Absolute path /app/data/rss_fetch_history.db (Railway standard)
+        # Priority 3: User-provided path (if absolute)
+        # Priority 4: Relative path (fallback for local dev)
+        if db_path is None:
+            # Check environment variable first
+            db_path = os.getenv("RSS_FETCH_HISTORY_DB_PATH")
+            if db_path:
+                logger.info(f"✅ Using RSS_FETCH_HISTORY_DB_PATH from environment: {db_path}")
+            else:
+                # Use absolute path for Railway (persists across deploys)
+                # Same volume as ChromaDB: /app/data
+                db_path = "/app/data/rss_fetch_history.db"
+                logger.info(f"✅ Using default absolute path for Railway persistence: {db_path}")
+        else:
+            # If user provided path, check if it's relative or absolute
+            if not os.path.isabs(db_path):
+                # Relative path - convert to absolute based on working directory
+                # For Railway, we want /app/data/rss_fetch_history.db
+                if db_path.startswith("data/"):
+                    db_path = f"/app/{db_path}"
+                    logger.info(f"✅ Converted relative path to absolute: {db_path}")
+                else:
+                    # Other relative paths - use as-is (local dev)
+                    logger.warning(f"⚠️ Using relative path (may not persist on Railway): {db_path}")
+        
         self.db_path = db_path
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
         self._init_database()
-        logger.info("RSS Fetch History system initialized")
+        logger.info(f"RSS Fetch History system initialized (db_path: {db_path})")
     
     def _get_connection(self):
         """Get SQLite connection with timeout configuration"""
