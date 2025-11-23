@@ -2964,13 +2964,25 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                     if is_learning_proposal_query:
                         knowledge_gaps_text = ""
                         if actual_knowledge_gaps and len(actual_knowledge_gaps) > 0:
+                            # Build gap items list to avoid nested f-string with backslash
+                            gap_items = []
+                            for i, gap in enumerate(actual_knowledge_gaps[:10]):
+                                topic = gap.get('topics', ['Unknown topic'])[0] if gap.get('topics') else 'Unknown topic'
+                                question = gap.get('question', 'N/A')[:100]
+                                priority = gap.get('priority', 'medium')
+                                sources = ', '.join(gap.get('suggested_sources', []))
+                                newline = chr(10)
+                                gap_item = f"- **Gap {i+1}**: {topic} (from question: \"{question}...\"){newline}  - Priority: {priority}{newline}  - Suggested sources: {sources}"
+                                gap_items.append(gap_item)
+                            
+                            gaps_list = chr(10).join(gap_items)
                             knowledge_gaps_text = f"""
 
 🔍 **ACTUAL KNOWLEDGE GAPS DETECTED FROM VALIDATION METRICS (Last 7 days):**
 
 StillMe has analyzed its own validation failures and identified {len(actual_knowledge_gaps)} knowledge gaps where StillMe lacked RAG context:
 
-{chr(10).join(f"- **Gap {i+1}**: {gap.get('topics', ['Unknown topic'])[0] if gap.get('topics') else 'Unknown topic'} (from question: \"{gap.get('question', 'N/A')[:100]}...\"){chr(10)}  - Priority: {gap.get('priority', 'medium')}{chr(10)}  - Suggested sources: {', '.join(gap.get('suggested_sources', []))}" for i, gap in enumerate(actual_knowledge_gaps[:10]))}
+{gaps_list}
 
 **CRITICAL: You MUST base your learning source proposals on these ACTUAL knowledge gaps, not generic suggestions.**
 
@@ -2989,13 +3001,25 @@ StillMe has analyzed its own validation failures and identified {len(actual_know
 
 """
                         elif learning_suggestions_from_analysis and len(learning_suggestions_from_analysis) > 0:
+                            # Build suggestion items list to avoid nested f-string with backslash
+                            suggestion_items = []
+                            for i, s in enumerate(learning_suggestions_from_analysis[:10]):
+                                topic = s.get('topic', 'Unknown topic')
+                                priority = s.get('priority', 'medium')
+                                reason = s.get('reason', 'N/A')
+                                source = s.get('source', 'N/A')
+                                newline = chr(10)
+                                suggestion_item = f"- **Suggestion {i+1}**: {topic}{newline}  - Priority: {priority}{newline}  - Reason: {reason}{newline}  - Suggested source: {source}"
+                                suggestion_items.append(suggestion_item)
+                            
+                            suggestions_list = chr(10).join(suggestion_items)
                             knowledge_gaps_text = f"""
 
 🔍 **LEARNING SUGGESTIONS FROM VALIDATION PATTERN ANALYSIS (Last 7 days):**
 
 StillMe has analyzed its validation patterns and identified {len(learning_suggestions_from_analysis)} learning suggestions:
 
-{chr(10).join(f"- **Suggestion {i+1}**: {s.get('topic', 'Unknown topic')}{chr(10)}  - Priority: {s.get('priority', 'medium')}{chr(10)}  - Reason: {s.get('reason', 'N/A')}{chr(10)}  - Suggested source: {s.get('source', 'N/A')}" for i, s in enumerate(learning_suggestions_from_analysis[:10]))}
+{suggestions_list}
 
 **CRITICAL: You MUST base your learning source proposals on these ACTUAL suggestions from StillMe's self-analysis.**
 
