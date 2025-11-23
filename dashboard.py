@@ -1995,13 +1995,68 @@ def sidebar(page_for_chat: str | None = None):
     return page
 
 
+def check_authentication():
+    """
+    Check if user is authenticated. Blocks access if not authenticated.
+    """
+    # Check if user is already authenticated in session
+    if st.session_state.get("authenticated", False):
+        return
+    
+    # Get password from environment variable
+    dashboard_password = os.getenv("DASHBOARD_PASSWORD", "")
+    
+    # Check environment
+    env = os.getenv("ENV", "development").lower()
+    is_production = env == "production"
+    
+    # If no password is set
+    if not dashboard_password:
+        if is_production:
+            # In production, BLOCK access if no password
+            st.set_page_config(page_title="StillMe - Authentication Required", page_icon="🔐")
+            st.error("❌ **CRITICAL SECURITY ERROR:** Dashboard password is REQUIRED in production!")
+            st.error("Please set `DASHBOARD_PASSWORD` environment variable in Railway dashboard service variables.")
+            st.info("💡 **How to fix:**\n1. Go to Railway Dashboard → Dashboard Service → Variables\n2. Add new variable: `DASHBOARD_PASSWORD` = (your secure password)\n3. Redeploy service")
+            st.stop()
+        else:
+            # In development, show warning but allow access
+            st.warning("⚠️ **SECURITY WARNING:** `DASHBOARD_PASSWORD` is not set! Dashboard is open to everyone.")
+            st.warning("Set `DASHBOARD_PASSWORD` in Railway dashboard service variables for production.")
+            return  # Allow in development
+    
+    # Show login form
+    st.set_page_config(page_title="StillMe - Authentication Required", page_icon="🔐")
+    st.title("🔐 StillMe Dashboard - Authentication Required")
+    st.markdown("---")
+    
+    password_input = st.text_input("Enter Dashboard Password", type="password", key="password_input")
+    
+    if st.button("Login", type="primary"):
+        # Compare passwords directly (simple check)
+        if password_input == dashboard_password:
+            st.session_state["authenticated"] = True
+            st.success("✅ Authentication successful!")
+            time.sleep(0.5)  # Brief delay for user to see success message
+            st.rerun()
+        else:
+            st.error("❌ Invalid password. Please try again.")
+    
+    st.info("💡 **Note:** This dashboard contains sensitive operations:\n- RAG knowledge upload\n- Scheduler control (start/stop)\n- Database reset\n- Learning metrics\n\nAuthentication is required for security.")
+    st.stop()
+
+
 def main():
+    # CRITICAL: Set page config FIRST (must be before any Streamlit commands)
     st.set_page_config(
         page_title="StillMe",
         page_icon="🧠",
         layout="wide",
         initial_sidebar_state="expanded"
     )
+    
+    # CRITICAL: Check authentication AFTER page config but BEFORE any UI rendering
+    check_authentication()
     
     page = sidebar()
     
