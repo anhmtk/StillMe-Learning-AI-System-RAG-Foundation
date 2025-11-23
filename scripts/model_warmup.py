@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Model warmup script for Docker build.
-Pre-downloads all-MiniLM-L6-v2 model during build to avoid downloading on first query.
+Pre-downloads paraphrase-multilingual-MiniLM-L12-v2 model during build to avoid downloading on first query.
 
 This script is safe to fail - it will not break the Docker build.
 """
@@ -23,10 +23,10 @@ try:
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
     print(f'Created model cache directory: {cache_dir}')
     
-    print('🏗️ Pre-downloading model all-MiniLM-L6-v2...')
+    print('🏗️ Pre-downloading model paraphrase-multilingual-MiniLM-L12-v2...')
     from sentence_transformers import SentenceTransformer
     
-    model = SentenceTransformer('all-MiniLM-L6-v2', cache_folder=cache_dir)
+    model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', cache_folder=cache_dir)
     print('✅ Model pre-downloaded to /app/.model_cache')
     
     # Verify cache size

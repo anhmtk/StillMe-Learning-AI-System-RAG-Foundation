@@ -34,7 +34,8 @@ try:
     print('Created ChromaDB PersistentClient')
     
     # Create temporary collection for warmup
-    collection = client.create_collection('_preload_onnx')
+    # CRITICAL: Collection name must start with letter, not underscore
+    collection = client.create_collection('preload_onnx_warmup')
     print('Created temporary collection for warmup')
     
     # Add dummy document WITHOUT embeddings (let ChromaDB generate embeddings using ONNX)
@@ -60,7 +61,7 @@ try:
         print(f'⚠️ Query executed but may not have triggered ONNX download: {e}')
     
     # Clean up
-    client.delete_collection('_preload_onnx')
+    client.delete_collection('preload_onnx_warmup')
     print('✅ ChromaDB ONNX warmup done')
     
     # Verify ONNX model was downloaded
