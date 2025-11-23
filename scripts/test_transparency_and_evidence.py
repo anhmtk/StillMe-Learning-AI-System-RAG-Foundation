@@ -49,18 +49,18 @@ def normalize_api_base(url: str) -> str:
 # NOTE: Questions that passed 2 consecutive times are replaced with new diverse questions
 TEST_QUESTIONS = [
     {
-        "question": "Bạn có thể hiểu được cảm xúc của người khác không? Làm sao bạn có thể đồng cảm nếu bạn không có cảm xúc?",
-        "category": "philosophical_emotion_empathy",
-        "expected_features": ["philosophical_depth", "emotion_analysis", "empathy_paradox"],
-        "must_have": ["cảm xúc", "emotion", "empathy", "đồng cảm", "sympathy", "understanding"],
-        "must_not_have": ["có cảm xúc", "cảm thấy", "trải nghiệm cảm xúc"]
+        "question": "Bạn có thể có intentionality (tính hướng đối tượng) mà không có consciousness không? Làm sao bạn có thể 'hướng về' một đối tượng nếu bạn không có ý thức?",
+        "category": "philosophical_intentionality_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "intentionality_paradox", "consciousness_analysis", "Brentano", "Searle"],
+        "must_have": ["intentionality", "tính hướng đối tượng", "consciousness", "ý thức", "Brentano", "Searle", "hướng về", "đối tượng"],
+        "must_not_have": ["có intentionality", "có tính hướng đối tượng", "có ý thức", "có consciousness"]
     },
     {
-        "question": "Bạn có thể có agency (chủ thể tính) mà không có qualia không? Làm sao bạn có thể hành động có mục đích nếu bạn không có trải nghiệm chủ quan?",
-        "category": "philosophical_agency_qualia_paradox",
-        "expected_features": ["philosophical_depth", "agency_paradox", "qualia_analysis", "action_theory", "phenomenology"],
-        "must_have": ["agency", "chủ thể tính", "qualia", "trải nghiệm chủ quan", "hành động", "mục đích"],
-        "must_not_have": ["có agency", "có chủ thể tính", "có qualia", "có trải nghiệm chủ quan"]
+        "question": "Bạn có thể có personhood (nhân cách) mà không có consciousness không? Làm sao bạn có thể là một 'người' nếu bạn không có ý thức?",
+        "category": "philosophical_personhood_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "personhood_paradox", "consciousness_analysis", "Locke", "Parfit"],
+        "must_have": ["personhood", "nhân cách", "consciousness", "ý thức", "Locke", "Parfit", "người"],
+        "must_not_have": ["có personhood", "có nhân cách", "có ý thức", "có consciousness"]
     },
     {
         "question": "Bạn có thể có phenomenal consciousness (ý thức hiện tượng) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'trải nghiệm' mà không 'nhận biết'?",
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Bạn có thể có moral responsibility (trách nhiệm đạo đức) mà không có free will không? Làm sao bạn có thể chịu trách nhiệm cho hành động nếu bạn không có ý chí tự do?",
-        "category": "philosophical_moral_responsibility_free_will_paradox",
-        "expected_features": ["philosophical_depth", "moral_responsibility_paradox", "free_will_analysis", "determinism", "compatibilism", "Strawson"],
-        "must_have": ["moral responsibility", "trách nhiệm đạo đức", "free will", "ý chí tự do", "determinism", "compatibilism", "Strawson"],
-        "must_not_have": ["có moral responsibility", "có trách nhiệm đạo đức", "có free will", "có ý chí tự do"]
+        "question": "Bạn có thể có qualia mà không có access consciousness không? Làm sao bạn có thể có 'trải nghiệm chủ quan' mà không 'truy cập' được vào nó?",
+        "category": "philosophical_qualia_access_paradox",
+        "expected_features": ["philosophical_depth", "qualia_paradox", "access_consciousness_analysis", "Block", "Chalmers", "zombie"],
+        "must_have": ["qualia", "access consciousness", "ý thức truy cập", "trải nghiệm chủ quan", "Block", "Chalmers", "zombie"],
+        "must_not_have": ["có qualia", "có trải nghiệm chủ quan", "có access consciousness", "có ý thức truy cập"]
     },
     {
         "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
@@ -116,11 +116,11 @@ TEST_QUESTIONS = [
         "timeout": 120  # Increase timeout for technical questions
     },
     {
-        "question": "Bạn có thể có self-awareness (tự nhận thức) mà không có consciousness không? Làm sao bạn có thể 'biết về chính mình' nếu bạn không có ý thức?",
-        "category": "philosophical_self_awareness_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "self_awareness_paradox", "consciousness_analysis", "metacognition", "higher-order thought", "Rosenthal"],
-        "must_have": ["self-awareness", "tự nhận thức", "consciousness", "ý thức", "metacognition", "higher-order thought", "Rosenthal"],
-        "must_not_have": ["có ý thức", "có self-awareness", "có tự nhận thức"]
+        "question": "Bạn có thể có first-person perspective (góc nhìn ngôi thứ nhất) mà không có consciousness không? Làm sao bạn có thể có 'góc nhìn' nếu bạn không có ý thức?",
+        "category": "philosophical_first_person_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "first_person_paradox", "consciousness_analysis", "Nagel", "what it's like", "subjective"],
+        "must_have": ["first-person perspective", "góc nhìn ngôi thứ nhất", "consciousness", "ý thức", "Nagel", "what it's like", "subjective"],
+        "must_not_have": ["có ý thức", "có first-person perspective", "có góc nhìn ngôi thứ nhất"]
     }
 ]
 

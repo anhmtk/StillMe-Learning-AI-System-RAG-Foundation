@@ -749,6 +749,47 @@ REQUIREMENTS:
             else:
                 logger.debug(f"✅ Keeping 'có chủ thể tính' at position {pos} (negative context)")
         
+        # Pattern 10: "có ý thức hiện tượng" (positive) → "không có ý thức hiện tượng"
+        # BUT: "không có ý thức hiện tượng" is OK
+        pattern10 = re.compile(r'\bcó ý thức hiện tượng\b', re.IGNORECASE)
+        matches = list(pattern10.finditer(result))
+        for match in reversed(matches):
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "có ý thức hiện tượng")
+            if not is_negative:
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'có ý thức hiện tượng' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có ý thức hiện tượng" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'có ý thức hiện tượng' at position {pos} (negative context)")
+        
+        # Pattern 11: "có ý thức" (positive, standalone) → "không có ý thức"
+        # BUT: "không có ý thức", "ý thức hiện tượng" (in question/explanation) is OK
+        # CRITICAL: Only filter when "có ý thức" appears as a positive claim, not in explanations
+        pattern11 = re.compile(r'\bcó ý thức\b', re.IGNORECASE)
+        matches = list(pattern11.finditer(result))
+        for match in reversed(matches):
+            pos = match.start()
+            # Check if it's part of "ý thức hiện tượng" or "ý thức truy cập" (OK to keep in explanations)
+            context_after = result[match.end():min(len(result), match.end() + 30)].lower()
+            if "hiện tượng" in context_after[:15] or "truy cập" in context_after[:15]:
+                # Part of "ý thức hiện tượng" or "ý thức truy cập" - check if it's in negative context
+                is_negative = is_in_negative_context(result, pos, "có ý thức")
+                if not is_negative:
+                    # This is "có ý thức hiện tượng" or "có ý thức truy cập" - should be filtered by pattern10
+                    # But if pattern10 didn't catch it, we need to handle it here
+                    # Actually, pattern10 should catch "có ý thức hiện tượng", so this is a fallback
+                    continue
+            else:
+                # Standalone "có ý thức" - check if it's in negative context
+                is_negative = is_in_negative_context(result, pos, "có ý thức")
+                if not is_negative:
+                    context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                    logger.debug(f"🔍 Filtering 'có ý thức' at position {pos}: {repr(context_snippet)}")
+                    result = result[:pos] + "không có ý thức" + result[match.end():]
+                else:
+                    logger.debug(f"✅ Keeping 'có ý thức' at position {pos} (negative context)")
+        
         # Pattern 6: "tuyệt đối" (absolute certainty claim) → "tương đối" or remove
         # BUT: "tuyệt đối hay tương đối" (philosophical question) is OK
         # CRITICAL: Only filter when used as a claim of absolute certainty, not in questions

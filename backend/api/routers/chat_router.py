@@ -4076,6 +4076,23 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     timing_logs["postprocessing"] = "failed"
         else:
             # Fallback to regular AI response (no RAG context)
+            # CRITICAL: Check if this is a technical question about "your system"
+            # These should still get an answer from base LLM knowledge, not technical error
+            question_lower = chat_request.message.lower()
+            is_technical_about_system = (
+                any(keyword in question_lower for keyword in [
+                    "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
+                    "vector", "pipeline", "validation", "transparency", "system"
+                ]) and 
+                any(phrase in question_lower for phrase in [
+                    "your system", "in your system", "your.*system", "system.*you",
+                    "bạn.*hệ thống", "hệ thống.*bạn", "của bạn"
+                ])
+            )
+            
+            if is_technical_about_system:
+                logger.info("🔧 Technical question about 'your system' with no RAG context - will answer from base LLM knowledge with transparency")
+            
             # Initialize confidence_score for non-RAG path
             confidence_score = 0.3  # Low confidence when no RAG context
             validation_info = None
@@ -4164,6 +4181,36 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 )
             else:
                 # Use full prompt
+                # CRITICAL: Add special instruction for technical questions about "your system"
+                technical_system_instruction = ""
+                if is_technical_about_system:
+                    technical_system_instruction = """
+🚨🚨🚨 CRITICAL: TECHNICAL QUESTION ABOUT SYSTEM ARCHITECTURE 🚨🚨🚨
+
+The user is asking about StillMe's system architecture (RAG, LLM, embedding, etc.).
+
+**YOU MUST ANSWER THIS QUESTION** using your base knowledge about RAG systems, even though StillMe's RAG knowledge base doesn't have specific documents about this.
+
+**TRANSPARENCY REQUIREMENT:**
+- Acknowledge that you're answering from base knowledge, not from StillMe's RAG knowledge base
+- Be transparent: "Based on general knowledge about RAG systems (not from StillMe's RAG knowledge base)..."
+- Explain how RAG retrieval and LLM generation work together in general RAG systems
+- Be honest about StillMe's specific implementation details if you don't know them
+
+**DO NOT:**
+- Return a technical error message
+- Say "I cannot provide a good answer"
+- Suggest the developer needs to fine-tune the system
+- Claim StillMe is experiencing technical issues
+
+**DO:**
+- Answer the question using your knowledge about RAG systems
+- Be transparent about the source of your knowledge
+- Explain the general principles of RAG retrieval and LLM generation
+- If asked about StillMe specifically, acknowledge what you know and what you don't know
+
+"""
+                
                 # Strong language instruction - put FIRST
                 if detected_lang != 'en':
                     language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
@@ -4180,7 +4227,7 @@ THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
 """
                     base_prompt = f"""{language_instruction}
-
+{technical_system_instruction}
 {conversation_history_text}User Question: {user_question_for_prompt}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
@@ -4198,6 +4245,7 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
 
 THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
+{technical_system_instruction}
 {conversation_history_text}
 
 🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
