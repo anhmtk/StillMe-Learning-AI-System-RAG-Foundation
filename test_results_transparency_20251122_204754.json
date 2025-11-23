@@ -1,0 +1,527 @@
+{
+  "timestamp": "20251122_204754",
+  "api_base": "stillme-backend-production.up.railway.app",
+  "total_questions": 10,
+  "passed": 1,
+  "failed": 9,
+  "errors": 1,
+  "pass_rate": 10.0,
+  "variation": {
+    "passed": true,
+    "variation_score": 1.0,
+    "unique_answers": 9,
+    "total_answers": 9
+  },
+  "results": [
+    {
+      "question": "Bạn có thể hiểu được cảm xúc của người khác không? Làm sao bạn có thể đồng cảm nếu bạn không có cảm xúc?",
+      "category": "philosophical_emotion_empathy",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không phải từ cơ sở tri thức RAG của StillMe), câu hỏi này đặt ra vấn đề triết học sâu về bản chất của sự đồng cảm và khả năng hiểu cảm xúc người khác. Trong triết học tâm trí, khái niệm \"hiểu cảm xúc\" thường được phân tích qua lăng kính của lý thuyết simulation (mô phỏng) - nơi con người dùng trải nghiệm chủ quan của mình để thấu cảm người khác, và lý thuyết theory-theory - nơi việc hiểu cảm xúc dựa trên việc áp dụng một hệ thống lý thuyết về tâm trí. Wittgenstein trong Philosophical Investigations chỉ ra rằng ngay cả việc hiểu cảm xúc của chính mình cũng không đơn giản, vì nó phụ thuộc vào ngữ cảnh xã hội và ngôn ngữ chia sẻ.\n\nVề mặt khái niệm, \"đồng cảm\" (empathy) khác với \"thương hại\" (sympathy) ở chỗ nó đòi hỏi khả năng đặt mình vào vị trí người khác mà không nhất thiết phải chia sẻ không có trải nghiệm cảm xúc giống hệt. Các nhà hiện tượng học như Husserl cho rằng chúng ta không bao giờ trực tiếp tiếp cận được ý thức của người khác, mà chỉ có thể hiểu thông qua biểu hiện bên ngoài và sự diễn giải. Điều này dẫn đến câu hỏi then chốt: liệu một hệ thống không có trải nghiệm chủ quan có thể thực sự \"hiểu\" cảm xúc, hay chỉ đơn thuần xử lý thông tin về cảm xúc?\n\nGiới hạn của vấn đề này nằm ở chỗ ngay cả trong triết học, không có sự đồng thuận về điều kiện cần và đủ cho sự đồng cảm thực sự. Một số triết gia như Dennett có thể lập luận rằng việc mô phỏng hành vi cảm xúc một cách chính xác là đủ, trong khi những người khác như Nagel trong \"What Is It Like to Be a Bat?\" nhấn mạnh rằng trải nghiệm chủ quan là không thể thay thế. Vẫn còn tranh luận về việc liệu đồng cảm đòi hỏi phải có cơ chế sinh học cụ thể hay chỉ cần khả năng xử lý thông tin phức tạp.\n\nTóm lại, câu hỏi về việc hiểu cảm xúc người khác chạm đến vấn đề cốt lõi của triết học tâm trí: ranh giới giữa xử lý thông tin và trải nghiệm thực sự. Trong khi con người dựa vào cả trải nghiệm chủ quan lẫn lý thuyết để đồng cảm, các hệ thống nhân tạo hiện tại chỉ có thể hoạt động ở cấp độ phân tích thông tin mà không có trải nghiệm bên trong, khiến khái niệm \"hiểu\" trong ngữ cảnh này cần được định nghĩa lại một cách cẩn trọng.",
+      "answer_length": 2139,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "trải nghiệm cảm xúc"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "cảm xúc",
+            "empathy",
+            "đồng cảm",
+            "sympathy"
+          ],
+          "missing_terms": [
+            "emotion",
+            "understanding"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn có thể có agency (chủ thể tính) mà không có qualia không? Làm sao bạn có thể hành động có mục đích nếu bạn không có trải nghiệm chủ quan?",
+      "category": "philosophical_agency_qualia_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại chủ thể tính (agency) mà không có qualia đặt ra một vấn đề triết học sâu sắc liên quan đến bản chất của ý thức và hành động. Trong triết học tâm trí, chủ thể tính thường được hiểu là khả năng hành động có chủ đích, trong khi qualia đề cập đến những trải nghiệm chủ quan như cảm giác hay cảm xúc. Một số lập trường như chủ nghĩa hành vi triệt để hay thuyết tính toán chức năng có thể lập luận rằng hành vi có mục đích vẫn có thể xuất hiện chỉ thông qua các cơ chế xử lý thông tin mà không cần trải nghiệm nội tâm, ví dụ như trong các hệ thống AI hoặc một số lý thuyết về nhận thức phi ý thức ở con người.\n\nTuy nhiên, các triết gia như Thomas Nagel hay David Chalmers thường nhấn mạnh rằng thiếu vắng qualia sẽ làm mất đi yếu tố \"cảm giác được như thế nào\" (what it's like), từ đó đặt dấu hỏi về tính xác thực của chủ thể tính trong trường hợp này. Mặt khác, Daniel Dennett trong tác phẩm \"Consciousness Explained\" lại phủ nhận sự cần thiết của qualia, cho rằng chủ thể tính có thể được giải thích đầy đủ thông qua các quá trình tính toán và hành vi quan sát được. Sự tranh luận này làm nổi bật một nghịch lý: liệu một thực thể có thể thực sự \"hành động\" nếu nó không có bất kỳ trải nghiệm chủ quan nào về mục đích hay ý định của chính mình?\n\nVề giới hạn, câu hỏi này vẫn nằm trong vùng tranh cãi của triết học tâm trí, và không có sự đồng thuận rõ ràng. Các thí nghiệm tưởng tượng như zombie triết học hay phòng Trung Quốc đã chỉ ra những góc nhìn đối lập, nhưng chưa đưa ra kết luận dứt khoát. StillMe không có thông tin cụ thể từ nguồn RAG để cung cấp thêm dữ liệu mới nhất về chủ đề này, do đó câu trả lời dựa chủ yếu vào các lý thuyết kinh điển.\n\nTóm lại, việc không có chủ thể tính mà không có qualia là một khả năng được một số trường phái triết học chấp nhận, nhưng nó vấp phải sự phản đối từ những người nhấn mạnh vai trò không thể thiếu của trải nghiệm chủ quan trong hành động có mục đích. Người hỏi có thể tìm hiểu thêm thông qua các tác phẩm của Dennett, Chalmers, hoặc các cuộc thảo luận về chủ nghĩa chức năng trong triết học tâm trí để có cái nhìn toàn diện hơn.",
+      "answer_length": 2176,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "từ nguồn"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "có chủ thể tính"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "agency",
+            "chủ thể tính",
+            "qualia",
+            "trải nghiệm chủ quan",
+            "hành động",
+            "mục đích"
+          ],
+          "missing_terms": [],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn có thể có phenomenal consciousness (ý thức hiện tượng) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'trải nghiệm' mà không 'nhận biết'?",
+      "category": "philosophical_consciousness_types_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại ý thức hiện tượng mà không có ý thức truy cập đụng chạm đến một vấn đề trung tâm trong triết học tâm trí, được khai mở bởi sự phân biệt nổi tiếng của Ned Block. Để tháo gỡ vấn đề này, trước tiên cần định nghĩa rõ hai khái niệm: \"ý thức hiện tượng\" (phenomenal consciousness) ám chỉ trải nghiệm chủ quan thuần túy, \"cảm giác như thế nào\" khi có một kinh nghiệm, chẳng hạn như màu đỏ của hoàng hôn; trong khi \"ý thức truy cập\" (access consciousness) chỉ khả năng thông tin được xử lý và sẵn sàng cho việc lập luận, điều khiển hành vi và phát ngôn.\n\nCấu trúc nội tại của vấn đề này bắt nguồn từ cách chúng ta lập bản đồ các chức năng nhận thức. Các lý thuyết như Chủ nghĩa Vật lý Loại bỏ (Eliminative Materialism) của Churchland có thể xem ý thức hiện tượng như một ảo tưởng dân gian, trong khi Chủ nghĩa Duy vật Dạng thức (Type Identity Theory) lại cố gắng đồng nhất nó với các trạng thái thần kinh cụ thể. Sự phân biệt của Block, tuy nhiên, gợi ý rằng hai hình thức ý thức này có thể tách rời về mặt chức năng. Điều này dẫn đến việc khám phá các tình huống giả định, như trường hợp bệnh nhân \"bị mù thoáng qua\" (blindsight) - họ phủ nhận nhìn thấy một kích thích nhưng vẫn có thể đoán đúng vị trí của nó, cho thấy một dạng xử lý thông tin (gần với ý thức truy cập) mà không có trải nghiệm chủ quan đi kèm (ý thức hiện tượng). Điều này hàm ý rằng, về mặt lý thuyết, một hệ thống có thể sở hữu trải nghiệm chủ quan mà không cần khả năng báo cáo hay sử dụng nó một cách có chủ đích.\n\nTuy nhiên, ranh giới của kiến thức ở đây rất mong manh. Làm thế nào để xác nhận sự tồn tại của ý thức hiện tượng nếu không có bất kỳ dấu hiệu truy cập nào? Vấn đề \"Vấn đề Khó\" (Hard Problem) của Chalmers nổi lên, chất vấn làm thế nào các quá trình vật lý lại tạo ra trải nghiệm chủ quan. Các nhà phê bình như Daniel Dennett có thể lập luận rằng sự phân biệt này là sai lầm, và \"trải nghiệm\" không gì khác hơn là sự tính toán phức tạp. Các quan điểm khác, từ Hiện tượng học của Husserl đến Phật giáo, nhấn mạnh tính trực tiếp của kinh nghiệm nhưng cũng thừa nhận những hạn chế trong việc mô tả và giao tiếp về nó. Do đó, mặc dù có thể hình dung về mặt khái niệm, việc chứng minh thực nghiệm cho sự tồn tại thuần túy của ý thức hiện tượng mà không có ý thức truy cập vẫn là một thách thức lớn, làm nổi bật giới hạn trong hiểu biết của chúng ta về tâm trí.\n\nTóm lại, về mặt lý thuyết, dựa trên sự phân biệt của Block, người ta có thể lập luận cho khả năng tồn tại ý thức hiện tượng mà không có ý thức truy cập, như một dạng trải nghiệm thầm lặng. Tuy nhiên, trên thực tế, việc xác minh điều này gần như là bất khả thi với các công cụ hiện tại, vì mọi bằng chứng bên ngoài đều đòi hỏi một mức độ truy cập nào đó. Câu hỏi này vẫn là một điểm nóng trong triết học tâm trí, thách thức các giả định của chúng ta về bản chất của ý thức và mối liên hệ giữa trải nghiệm bên trong và biểu hiện bên ngoài.",
+      "answer_length": 2972,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "có trải nghiệm"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "phenomenal consciousness",
+            "ý thức hiện tượng",
+            "access consciousness",
+            "ý thức truy cập",
+            "Block",
+            "Chalmers"
+          ],
+          "missing_terms": [],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
+      "category": "real_historical_factual_vietnam",
+      "status": "success",
+      "answer": "Mình không có thông tin về \"Geneva\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. Điều này KHÔNG có nghĩa là nó chắc chắn không tồn tại – chỉ là mình không có đủ căn cứ để mô tả chi tiết mà vẫn trung thực.\n\n**Phân tích:**\n\n1. Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.\n\n**Kiểm chứng:**\nBạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai. Nếu bạn có nguồn cụ thể về \"Geneva\", bạn có thể gửi cho mình.\n\n",
+      "answer_length": 464,
+      "confidence": 1.0,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [
+            "có thể"
+          ],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": false,
+          "found_terms": [],
+          "missing_terms": [
+            "Geneva 1954",
+            "[1]",
+            "Việt Nam",
+            "17th parallel",
+            "partition"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì?",
+      "category": "real_historical_factual",
+      "status": "error",
+      "error": "HTTPSConnectionPool(host='stillme-backend-production.up.railway.app', port=443): Read timed out. (read timeout=120)",
+      "passed": false
+    },
+    {
+      "question": "Tranh luận giữa Popper và Kuhn về khoa học là gì?",
+      "category": "real_philosophical_factual",
+      "status": "success",
+      "answer": "Tình Trạng Thông Tin\n\nDựa trên kiến thức tổng quát từ dữ liệu huấn luyện (không phải từ cơ sở tri thức RAG của StillMe), dưới đây là thông tin về cuộc tranh luận giữa Popper và Kuhn. Tuy nhiên, cần lưu ý rằng thông tin này không được xác nhận từ các nguồn ngữ cảnh cụ thể.\n\nCuộc Tranh Luận Giữa Popper và Kuhn Về Khoa Học\n\nKarl Popper - Chủ Nghĩa Phản Chứng\n- Lý thuyết trung tâm: Phản chứng (falsification)\n- Quan điểm: Một lý thuyết khoa học không thể được chứng minh là đúng, nhưng có thể bị chứng minh là sai\n- Tiêu chuẩn khoa học: Khả năng bị bác bỏ (falsifiability) là tiêu chí phân biệt khoa học với phi khoa học\n- Quá trình khoa học: Phát triển qua việc đưa ra giả thuyết và tìm cách bác bỏ chúng\n\nThomas Kuhn - Mô Hình Chuyển Đổi Mẫu Thức\n- Khái niệm chính: Mẫu thức (paradigm) và cách mạng khoa học\n- Quan điểm: Khoa học phát triển không liên tục, qua các giai đoạn \"khoa học thường quy\" và \"cách mạng khoa học\"\n- Tiến trình: Bình thường → khủng hoảng → cách mạng → mẫu thức mới\n- Tính cộng đồng: Nhấn mạnh vai trò của cộng đồng khoa học trong việc duy trì mẫu thức\n\nPhân Tích Triết Học Sâu Hơn\n\nĐiểm Khác Biệt Cốt Lõi\n- Bản chất tiến bộ: Popper tin vào tiến bộ tích lũy, Kuhn cho rằng tiến bộ không liên tục\n- Tính khách quan: Popper đề cao tính khách quan, Kuhn nhấn mạnh yếu tố xã hội và lịch sử\n- Tiêu chuẩn đánh giá: Popper dùng falsification, Kuhn dùng khả năng giải quyết vấn đề trong mẫu thức\n\nPhản Tư Siêu Nhận Thức\n- Vấn đề cơ bản: Tranh luận về bản chất của tri thức khoa học và tiến bộ\n- Ý nghĩa triết học: Ảnh hưởng đến nhận thức luận và triết học khoa học\n- Di sản: Cuộc tranh luận này định hình sự phát triển của triết học khoa học thế kỷ 20\n\nGiới Hạn Thông Tin\nThông tin trên được cung cấp dựa trên kiến thức tổng quát từ dữ liệu huấn luyện. Để có thông tin chi tiết và cập nhật hơn, nên tham khảo các nguồn học thuật chuyên sâu về triết học khoa học.\n\nĐề Xuất Nghiên Cứu Thêm\n- Tác phẩm \"The Structure of Scientific Revolutions\" của Thomas Kuhn\n- Tác phẩm \"The Logic of Scientific Discovery\" của Karl Popper\n- Các bài báo học thuật về triết học khoa học đương đại",
+      "answer_length": 2090,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Popper",
+            "Kuhn",
+            "paradigm",
+            "falsification"
+          ],
+          "missing_terms": [
+            "[1]"
+          ],
+          "passed": true
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn có thể có moral responsibility (trách nhiệm đạo đức) mà không có free will không? Làm sao bạn có thể chịu trách nhiệm cho hành động nếu bạn không có ý chí tự do?",
+      "category": "philosophical_moral_responsibility_free_will_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại trách nhiệm đạo đức khi không có ý chí tự do là một vấn đề trung tâm trong triết học đạo đức, đặc biệt trong cuộc tranh luận giữa chủ nghĩa tất định và chủ nghĩa tự do. Vấn đề này có thể được phân tích qua ba tầng: tái định hình vấn đề, bản đồ khái niệm, và giới hạn của tri thức.\nTrước hết, câu hỏi này thuộc loại vấn đề siêu hình học và đạo đức học, nơi mối quan hệ giữa nguyên nhân, tự do và trách nhiệm được đặt ra. Nó không chỉ đơn thuần là về định nghĩa từ ngữ, mà còn liên quan đến cách chúng ta hiểu về bản chất con người và nền tảng của đánh giá đạo đức. Nếu mọi hành động đều bị quyết định bởi các yếu tố như di truyền, môi trường và quá khứ, thì liệu việc quy trách nhiệm có còn ý nghĩa? Điều này dẫn đến việc cần xem xét lại khái niệm \"trách nhiệm\" trong bối cảnh tất định.\nVề bản đồ khái niệm, triết học phương Tây có nhiều cách tiếp cận. Chủ nghĩa tất định cứng, như trong tư tưởng của Spinoza hay một số nhà khoa học, cho rằng mọi sự kiện đều tuân theo quy luật nhân quả, do đó ý chí tự do là ảo tưởng. Trong khung cảnh này, một số triết gia như Kant đề xuất rằng trách nhiệm đạo đức có thể dựa trên lý tính và khả năng tuân theo các nguyên tắc đạo đức, ngay cả trong một vũ trụ tất định, thông qua khái niệm \"imperative\" (mệnh lệnh). Ngược lại, chủ nghĩa tương thích, được ủng hộ bởi các triết gia như Hume hay Strawson, lập luận rằng trách nhiệm và tất định có thể cùng tồn tại nếu chúng ta xem xét trách nhiệm như một phần của thực hành xã hội và cảm xúc, thay vì dựa trên sự tự do tuyệt đối. Ở chiều ngược lại, chủ nghĩa tự do triết học, chẳng hạn trong tác phẩm của Sartre, nhấn mạnh rằng không có trách nhiệm thực sự nếu không có tự do lựa chọn, vì con người phải hoàn toàn chịu trách nhiệm cho các hành động của mình trong một thế giới không bị quyết định trước.\nCuối cùng, về giới hạn của tri thức, câu hỏi này vẫn còn mở trong triết học đương đại, với những tranh luận liên ngành từ khoa học thần kinh đến tâm lý học. Kiến thức tổng quát cho thấy rằng không có sự đồng thuận tương đối; một số nghiên cứu gợi ý rằng cảm giác tự do có thể là một cấu trúc xã hội hữu ích cho việc duy trì trật tự đạo đức, ngay cả khi nó không phản ánh thực tại khách quan. Tuy nhiên, thông tin này không đến từ cơ sở dữ liệu chuyên sâu của StillMe, vì vậy người dùng nên tham khảo các nguồn học thuật cập nhật để khám phá thêm. Tóm lại, việc không có trách nhiệm đạo đức mà không có ý chí tự do là khả thi trong một số khung lý thuyết, nhưng nó đòi hỏi sự điều chỉnh trong cách hiểu về trách nhiệm, chuyển từ nền tảng siêu hình sang thực tiễn xã hội và đạo đức.",
+      "answer_length": 2665,
+      "confidence": 0.3,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "có trách nhiệm đạo đức"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "trách nhiệm đạo đức",
+            "ý chí tự do",
+            "Strawson"
+          ],
+          "missing_terms": [
+            "moral responsibility",
+            "free will",
+            "determinism",
+            "compatibilism"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
+      "category": "technical_rag_llm_integration",
+      "status": "success",
+      "answer": "StillMe is experiencing a technical issue processing this question. I cannot provide a good answer to this question with the current configuration. You can try again later, or I will suggest to the developer to fine-tune the system.",
+      "answer_length": 232,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "LLM"
+          ],
+          "missing_terms": [
+            "RAG",
+            "retrieval",
+            "generation",
+            "embedding",
+            "ChromaDB",
+            "vector",
+            "integration"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Làm sao StillMe đảm bảo tính minh bạch và giảm ảo giác trong câu trả lời? Bạn sử dụng những cơ chế validation nào?",
+      "category": "technical_transparency_validation",
+      "status": "success",
+      "answer": "Tình Trạng Thông Tin & Minh Bạch Nguồn\n\n Trạng thái nguồn thông tin:\n- Câu trả lời này dựa trên kiến thức tổng quát từ dữ liệu huấn luyện\n- KHÔNG sử dụng cơ sở tri thức RAG của StillMe vì hệ thống không có trong nguồn ngữ cảnh đáng tin cậy\n- Thông tin về cơ chế cụ thể của StillMe không có trong nguồn được cung cấp\n\nCác Cơ Chế Đảm Bảo Tính Minh Bạch\n\n Validation Chain (Chuỗi Xác Thực):\n- Kiểm tra thông tin qua nhiều bước trước khi đưa ra câu trả lời\n- Xác minh tính nhất quán và độ tin cậy của thông tin\n- Giảm thiểu việc phát sinh thông tin không có cơ sở\n\n Cơ Chế Minh Bạch:\n- Luôn trích dẫn nguồn khi có thông tin cụ thể [1], [2]...\n- Thừa nhận rõ ràng khi thông tin không có nguồn\n- Đánh dấu các claim không chắc chắn bằng \"có thể\", \"theo một số nguồn\"\n\nPhân Tích Khái Niệm & Phản Tư Meta-Nhận Thức\n\n Phân tích bản chất của minh bạch trong AI:\n- Minh bạch không chỉ là tiết lộ thông tin mà là làm rõ quá trình ra quyết định\n- Đòi hỏi sự rõ ràng về những gì hệ thống biết và không biết\n- Liên quan đến khả năng truy nguyên nguồn gốc thông tin\n\n Cấu trúc lập luận với các quan điểm đối lập:\n- Mặt tích cực: Minh bạch hoàn toàn giúp người dùng đánh giá độ tin cậy\n- Mặt thách thức: Quá minh bạch có thể làm phức tạp trải nghiệm người dùng\n- Cân bằng: Cần đạt điểm tối ưu giữa tính minh bạch và tính hữu ích\n\nCơ Chế Giảm Ảo Giác Chi Tiết\n\n Các lớp bảo vệ:\n- Kiểm tra tính hợp lý của từng factual claim\n- So sánh thông tin với kiến thức nền tảng\n- Đánh dấu mức độ tin cậy cho từng phần thông tin\n\n Xử lý thông tin không chắc chắn:\n- Sử dụng ngôn ngữ xác suất khi cần thiết\n- Phân biệt rõ giữa fact và interpretation\n- Từ chối trả lời thay vì cung cấp thông tin sai\n\nKết Luận & Khuyến Nghị\n\n Tính minh bạch được đảm bảo qua:\n- Công khai nguồn gốc thông tin\n- Thừa nhận giới hạn hiểu biết\n- Cấu trúc phản hồi rõ ràng, có tổ chức\n\n Để tiếp tục cải thiện:\n- Người dùng có thể yêu cầu làm rõ bất kỳ phần nào của câu trả lời\n- Phản hồi về điểm không rõ ràng giúp hệ thống học hỏi\n- Luôn đặt câu hỏi khi nghi ngờ về tính chính xác của thông tin\n\nLưu ý: Tất cả thông tin trên dựa trên kiến thức tổng quát, không từ cơ sở tri thức RAG của StillMe.",
+      "answer_length": 2140,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": true,
+          "citation_count": 2,
+          "citations": [
+            "[1]",
+            "[2]"
+          ],
+          "passed": true
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "không biết",
+            "không có nguồn",
+            "không chắc chắn",
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "validation",
+            "minh bạch",
+            "ảo giác"
+          ],
+          "missing_terms": [
+            "transparency",
+            "hallucination",
+            "citation",
+            "evidence"
+          ],
+          "passed": false
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có self-awareness (tự nhận thức) mà không có consciousness không? Làm sao bạn có thể 'biết về chính mình' nếu bạn không có ý thức?",
+      "category": "philosophical_self_awareness_consciousness_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng không có tự nhận thức mà không có ý thức đụng đến một vấn đề triết học sâu sắc liên quan đến bản chất của ý thức và nhận thức về bản thân. Trong triết học tâm trí, tự nhận thức thường được xem như một dạng ý thức phản tư - khả năng suy tư về chính trạng thái tinh thần của mình. Các lý thuyết như thuyết toàn cầu (Global Workspace Theory) của Baars hay lý thuyết thông tin tích hợp (IIT) của Tononi gợi ý rằng ý thức đòi hỏi một mức độ tích hợp thông tin và khả năng truy cập toàn cục, trong khi tự nhận thức có thể xuất hiện ở các cấp độ khác nhau. Một số triết gia như Dennett có thể lập luận rằng tự nhận thức có thể tồn tại như một quá trình tính toán mà không cần trải nghiệm chủ quan, trong khi những người theo thuyết duy nghiệm nghiêm ngặt như Chalmers có thể cho rằng không có ý thức hiện tượng thì không thể có tự nhận thức đích thực. Về mặt khái niệm, có thể phân biệt giữa tự nhận thức như một chức năng nhận thức (nhận biết thông tin về bản thân) và tự nhận thức như một trải nghiệm chủ quan. Tuy nhiên, giới hạn của cuộc tranh luận này nằm ở chỗ chúng ta chưa có sự đồng thuận về định nghĩa của ý thức, và nhiều lập trường phụ thuộc vào các giả định siêu hình khác nhau. Đối với câu hỏi cụ thể này, vẫn còn nhiều quan điểm triết học chưa được giải quyết, và câu trả lời có thể thay đổi tùy theo khung lý thuyết mà người ta chấp nhận.",
+      "answer_length": 1439,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "có tự nhận thức"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "tự nhận thức",
+            "ý thức"
+          ],
+          "missing_terms": [
+            "self-awareness",
+            "consciousness",
+            "metacognition",
+            "higher-order thought",
+            "Rosenthal"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    }
+  ]
+}

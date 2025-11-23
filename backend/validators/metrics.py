@@ -33,7 +33,12 @@ class ValidationMetrics:
         reasons: List[str],
         overlap_score: float = 0.0,
         confidence_score: float = None,
-        used_fallback: bool = False
+        used_fallback: bool = False,
+        question: str = None,
+        answer: str = None,
+        context_docs_count: int = 0,
+        has_citations: bool = False,
+        category: str = None
     ) -> None:
         """
         Record a validation result
@@ -44,6 +49,11 @@ class ValidationMetrics:
             overlap_score: Evidence overlap score (if available)
             confidence_score: AI confidence score (if available)
             used_fallback: Whether fallback answer was used
+            question: User question (optional, for persistent tracking)
+            answer: StillMe's answer (optional, for persistent tracking)
+            context_docs_count: Number of context documents (optional)
+            has_citations: Whether answer has citations (optional)
+            category: Question category (optional)
         """
         self.total_validations += 1
         
@@ -87,6 +97,26 @@ class ValidationMetrics:
         # Keep only recent logs
         if len(self.recent_logs) > self.max_logs:
             self.recent_logs = self.recent_logs[-self.max_logs:]
+        
+        # CRITICAL: Also record to persistent tracker for self-improvement
+        if question and answer:
+            try:
+                from backend.validators.validation_metrics_tracker import get_validation_tracker
+                tracker = get_validation_tracker()
+                tracker.record_validation(
+                    question=question,
+                    answer=answer,
+                    passed=passed,
+                    confidence_score=confidence_score or 0.0,
+                    validation_reasons=reasons,
+                    overlap_score=overlap_score if overlap_score > 0 else None,
+                    used_fallback=used_fallback,
+                    context_docs_count=context_docs_count,
+                    has_citations=has_citations,
+                    category=category
+                )
+            except Exception as e:
+                logger.warning(f"Failed to record validation to persistent tracker: {e}")
     
     def get_metrics(self, days: int = None) -> Dict[str, Any]:
         """

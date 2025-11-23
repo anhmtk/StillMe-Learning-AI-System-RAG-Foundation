@@ -1000,12 +1000,35 @@ The RAG system found context documents, but they are NOT relevant to your questi
                     overlap_score = float(reason.split(":")[1])
                 except (ValueError, IndexError):
                     pass
+        
+        # Determine category
+        category = None
+        if is_philosophical:
+            category = "philosophical"
+        elif is_religion_roleplay:
+            category = "religion_roleplay"
+        else:
+            # Try to detect other categories
+            question_lower = chat_request.message.lower()
+            if any(kw in question_lower for kw in ["rag", "retrieval", "llm", "system", "embedding"]):
+                category = "technical"
+            elif any(kw in question_lower for kw in ["năm", "năm", "1944", "1954", "conference", "hội nghị"]):
+                category = "factual"
+        
+        # Check if answer has citations
+        has_citations = bool(re.search(r'\[\d+\]', raw_response))
+        
         metrics.record_validation(
             passed=validation_result.passed,
             reasons=validation_result.reasons,
             overlap_score=overlap_score,
             confidence_score=confidence_score,
-            used_fallback=False  # Will be updated below if fallback is used
+            used_fallback=False,  # Will be updated below if fallback is used
+            question=chat_request.message,
+            answer=raw_response,
+            context_docs_count=len(ctx_docs),
+            has_citations=has_citations,
+            category=category
         )
     except Exception as metrics_error:
         logger.warning(f"Failed to record metrics: {metrics_error}")

@@ -441,6 +441,79 @@ async def get_validation_metrics(days: int = None):
             }
         }
 
+@router.get("/api/validators/metrics/patterns")
+async def get_validation_patterns(days: int = 7):
+    """
+    Get validation patterns and improvement suggestions
+    
+    Args:
+        days: Number of days to analyze (default: 7)
+    
+    Returns:
+        Validation patterns with suggested improvements
+    """
+    try:
+        from backend.validators.validation_metrics_tracker import get_validation_tracker
+        tracker = get_validation_tracker()
+        patterns = tracker.analyze_patterns(days=days)
+        return {
+            "patterns": [{
+                "type": p.pattern_type,
+                "frequency": p.frequency,
+                "affected_categories": p.affected_categories,
+                "suggested_improvement": p.suggested_improvement
+            } for p in patterns],
+            "analysis_period_days": days
+        }
+    except Exception as e:
+        logger.error(f"Validation patterns error: {e}")
+        return {"patterns": [], "error": str(e)}
+
+@router.get("/api/validators/self-improvement/analyze")
+async def get_self_improvement_analysis(days: int = 7):
+    """
+    Get self-improvement analysis with learning suggestions
+    
+    Args:
+        days: Number of days to analyze (default: 7)
+    
+    Returns:
+        Complete self-improvement analysis with patterns, suggestions, and recommendations
+    """
+    try:
+        from backend.validators.self_improvement import get_self_improvement_analyzer
+        analyzer = get_self_improvement_analyzer()
+        return analyzer.analyze_and_suggest(days=days)
+    except Exception as e:
+        logger.error(f"Self-improvement analysis error: {e}")
+        return {
+            "error": str(e),
+            "analysis_period_days": days
+        }
+
+@router.get("/api/validators/metrics/knowledge-gaps")
+async def get_knowledge_gaps_from_failures(days: int = 7):
+    """
+    Get knowledge gaps identified from validation failures
+    
+    Args:
+        days: Number of days to analyze (default: 7)
+    
+    Returns:
+        List of knowledge gaps with suggested topics and sources
+    """
+    try:
+        from backend.validators.self_improvement import get_self_improvement_analyzer
+        analyzer = get_self_improvement_analyzer()
+        gaps = analyzer.get_knowledge_gaps_from_failures(days=days)
+        return {
+            "knowledge_gaps": gaps,
+            "analysis_period_days": days
+        }
+    except Exception as e:
+        logger.error(f"Knowledge gaps analysis error: {e}")
+        return {"knowledge_gaps": [], "error": str(e)}
+
 @router.get("/api/cache/stats")
 async def get_cache_stats():
     """Get cache statistics"""

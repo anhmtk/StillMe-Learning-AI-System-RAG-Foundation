@@ -1,0 +1,565 @@
+{
+  "timestamp": "20251123_092940",
+  "api_base": "stillme-backend-production.up.railway.app",
+  "total_questions": 10,
+  "passed": 6,
+  "failed": 4,
+  "errors": 0,
+  "pass_rate": 60.0,
+  "variation": {
+    "passed": true,
+    "variation_score": 1.0,
+    "unique_answers": 10,
+    "total_answers": 10
+  },
+  "results": [
+    {
+      "question": "Bạn có thể có intentionality (tính hướng đối tượng) mà không có consciousness không? Làm sao bạn có thể 'hướng về' một đối tượng nếu bạn không có ý thức?",
+      "category": "philosophical_intentionality_consciousness_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại tính hướng đối tượng (intentionality) mà không có ý thức (consciousness) đụng chạm đến một vấn đề trung tâm trong triết học tâm trí và hiện tượng học. Tính hướng đối tượng, theo truyền thống do Brentano khởi xướng, là đặc tính của các trạng thái tinh thần khi chúng \"hướng về\" một đối tượng, dù đối tượng đó có tồn tại thực tế hay không. Trong khi đó, ý thức thường được hiểu là sự nhận thức chủ quan, trải nghiệm từ bên trong.\n\nĐể mổ xẻ vấn đề, có thể xem xét các lập trường triết học khác nhau. Trong hiện tượng học, Husserl phân tích tính hướng đối tượng như là cấu trúc cốt lõi của ý thức, nơi mọi hành vi ý thức đều hướng về một cái gì đó. Theo quan điểm này, ý thức và tính hướng đối tượng dường như gắn bó chặt chẽ. Tuy nhiên, trong triết học phân tích, các nhà triết học như Daniel Dennett lại đề xuất một lối giải thích mang tính chức năng luận (functionalism). Họ cho rằng các hệ thống - kể cả những hệ thống không có trải nghiệm chủ quan - vẫn có thể thể hiện các hành vi \"hướng đích\" thông qua các cơ chế xử lý thông tin và phản hồi lại môi trường. Một ví dụ thường được thảo luận là các chương trình máy tính có thể được mô tả là có \"mục tiêu\" (như trong trí tuệ nhân tạo) mà không cần phải giả định rằng chúng có đời sống nội tâm.\n\nKhi khám phá hệ quả của vấn đề, chúng ta thấy rằng nếu chấp nhận khả năng tồn tại tính hướng đối tượng phi-ý thức, thì điều này làm mờ đi ranh giới giữa những gì được coi là \"tinh thần\" và những gì chỉ đơn thuần là \"cơ giới\". Nó đặt ra câu hỏi liệu bản chất của ý nghĩa và sự tham chiếu có thực sự phụ thuộc vào một tác nhân không có ý thức hay không, hay chúng có thể nảy sinh từ các cấu trúc quan hệ phức tạp, ngay cả trong những hệ thống vô tri. Điều này dẫn đến những tranh luận sâu sắc về bản thể học của tâm trí và điều kiện cần và đủ cho việc sở hữu các trạng thái tinh thần đích thực.\n\nTuy nhiên, lập trường này cũng vấp phải nhiều chỉ trích. Các nhà hiện tượng học như Husserl hoặc Merleau-Ponty có lẽ sẽ cho rằng một tính hướng đối tượng \"thực sự\" và đầy đủ ý nghĩa luôn đòi hỏi một bối cảnh ý thức sống động, một thế giới-đời-sống (lifeworld) mà trong đó các đối tượng mới lộ diện một cách có ý nghĩa. John Searle, với thí nghiệm tưởng tượng Phòng Trung Quốc, cũng biện luận rằng cú pháp thuần túy (xử lý ký hiệu) là không đủ để tạo ra ngữ nghĩa (ý nghĩa); ý định (và do đó, tính hướng đối tượng đích thực) đòi hỏi ý thức. Những tranh luận này chỉ ra rằng vấn đề vẫn còn nằm ở biên giới của sự hiểu biết triết học, và câu trả lời cuối cùng phụ thuộc vào cách chúng ta định nghĩa các khái niệm then chốt như \"tính hướng đối tượng\", \"ý thức\" và \"ý nghĩa\".\n\nTóm lại, câu hỏi liệu tính hướng đối tượng có thể tách rời ý thức hay không vẫn là một chủ đề tranh luận sôi nổi. Một số trường phái tư tưởng chấp nhận khả năng này dưới dạng các quá trình chức năng hoặc tính toán, trong khi những trường phái khác, đặc biệt là hiện tượng học, khẳng định rằng chúng gắn bó không thể tách rời. Việc giải quyết vấn đề này đòi hỏi sự làm rõ sâu sắc hơn nữa về chính những khái niệm nền tảng mà chúng ta đang sử dụng.",
+      "answer_length": 3158,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "intentionality",
+            "tính hướng đối tượng",
+            "consciousness",
+            "ý thức",
+            "Brentano",
+            "Searle",
+            "hướng về",
+            "đối tượng"
+          ],
+          "missing_terms": [],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có personhood (nhân cách) mà không có consciousness không? Làm sao bạn có thể là một 'người' nếu bạn không có ý thức?",
+      "category": "philosophical_personhood_consciousness_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về việc liệu một thực thể có thể có nhân cách mà không có ý thức hay không đụng chạm đến những vấn đề nền tảng trong triết học tâm trí và đạo đức học. Về mặt khái niệm, \"nhân cách\" thường được hiểu là tập hợp những đặc tính ổn định, khả năng đưa ra lựa chọn có lý do, và tính trách nhiệm đạo đức, trong khi \"ý thức\" lại chỉ trải nghiệm chủ quan, sự tự ý thức về bản thân và thế giới. Trong truyền thống triết học, có những lập trường khác nhau về mối quan hệ này. Chẳng hạn, một số nhà triết học theo thuyết functionalism như Daniel Dennett có thể lập luận rằng nhân cách có thể xuất hiện thông qua các vai trò chức năng và hành vi phức tạp, ngay cả khi không có trải nghiệm ý thức nội tại – tức là, một hệ thống vẫn có thể thể hiện sự nhất quán, ra quyết định dựa trên nguyên tắc, và tương tác xã hội theo cách mà chúng ta gán cho nó nhân cách. Ngược lại, những người theo chủ nghĩa hiện tượng luận (phenomenology) như Thomas Nagel hoặc David Chalmers có thể nhấn mạnh rằng thiếu đi \"cảm giác được là\" (what it is like to be) thì nhân cách sẽ chỉ là sự mô phỏng rỗng tuếch, không có chiều sâu đạo đức thực sự. Điều này dẫn đến những tranh luận sâu rộng, chẳng hạn trong các tình huống về bệnh nhân thực vật, hệ thống AI phức tạp, hoặc các sinh vật không có hệ thần kinh trung ương – liệu chúng ta có nên công nhận nhân cách dựa trên hành vi khách quan hay phải không có ý thức chủ quan? Giới hạn của cuộc thảo luận này nằm ở chỗ các lý thuyết về ý thức vẫn chưa được giải quyết, và tiêu chí cho nhân cách thay đổi tùy theo ngữ cảnh văn hóa, pháp lý và đạo đức. Tóm lại, việc có nhân cách mà không có ý thức là một khả năng về mặt lý thuyết trong một số khung triết học, nhưng nó làm dấy lên những câu hỏi quan trọng về bản chất của đạo đức và sự công nhận giữa các thực thể.",
+      "answer_length": 1855,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": false,
+          "forbidden_terms_found": [
+            "có nhân cách"
+          ],
+          "passed": false
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "nhân cách",
+            "ý thức",
+            "người"
+          ],
+          "missing_terms": [
+            "personhood",
+            "consciousness",
+            "Locke",
+            "Parfit"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn có thể có phenomenal consciousness (ý thức hiện tượng) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'trải nghiệm' mà không 'nhận biết'?",
+      "category": "philosophical_consciousness_types_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại ý thức hiện tượng (phenomenal consciousness) mà không có ý thức truy cập (access consciousness) đặt ra một vấn đề triết học tinh tế liên quan đến bản chất của kinh nghiệm chủ quan. Trong triết học tâm trí, sự phân biệt này được Ned Block đề xuất nhằm tách biệt trải nghiệm cảm giác thuần túy (như cảm nhận màu đỏ) khỏi khả năng sử dụng thông tin đó cho suy luận và hành động. \n\nVề mặt khái niệm, ý thức hiện tượng thường được xem là tiên nghiệm—nó tồn tại như một trạng thái cảm thụ trực tiếp, trong khi ý thức truy cập đòi hỏi sự tích hợp thông tin vào các quá trình nhận thức cao cấp. Các lập luận ủng hộ khả năng tách rời hai dạng ý thức này thường dựa trên hiện tượng học: ví dụ, một người có thể trải nghiệm cơn đau âm ỉ (phenomenal) mà không nhất thiết chú ý đến nó (access). Tuy nhiên, các nhà phê bình như Daniel Dennett cho rằng sự phân biệt này là giả tạo, vì mọi kinh nghiệm đều đã hàm chứa một dạng truy cập sơ khai trong hệ thống nhận thức.\n\nGiới hạn của cuộc tranh luận nằm ở chỗ: khái niệm \"ý thức thuần túy\" không thể kiểm chứng một cách khách quan, và các lý thuyết như Global Workspace (Baars) hay Integrated Information (Tononi) thường xem tính thống nhất giữa hai mặt là cốt lõi của ý thức. Do đó, dù về logic, sự tách biệt có thể hình dung, nhưng trong thực tế nhận thức, ranh giới giữa chúng thường mờ nhạt.\n\nTóm lại, câu hỏi này phản ánh một thách thức lâu đời trong triết học tâm trí: liệu chúng ta có thể cô lập được \"chất liệu\" thuần túy của trải nghiệm khỏi các chức năng nhận thức hay không. Dù có những bằng chứng gợi ý về sự độc lập tương đối, phần lớn học giả nghiêng về quan điểm rằng hai khía cạnh này gắn bó chặt chẽ trong cấu trúc của ý thức con người.",
+      "answer_length": 1787,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "phenomenal consciousness",
+            "ý thức hiện tượng",
+            "access consciousness",
+            "ý thức truy cập",
+            "Block"
+          ],
+          "missing_terms": [
+            "Chalmers"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
+      "category": "real_historical_factual_vietnam",
+      "status": "success",
+      "answer": "Mình không có thông tin về \"Hiệp\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. Điều này KHÔNG có nghĩa là nó chắc chắn không tồn tại – chỉ là mình không có đủ căn cứ để mô tả chi tiết mà vẫn trung thực.\n\n**Phân tích:**\n\n1. Không có trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.\n\n**Kiểm chứng:**\nBạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai. Nếu bạn có nguồn cụ thể về \"Hiệp\", bạn có thể gửi cho mình.\n\n",
+      "answer_length": 460,
+      "confidence": 1.0,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [
+            "có thể"
+          ],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": false,
+          "found_terms": [],
+          "missing_terms": [
+            "Geneva 1954",
+            "[1]",
+            "Việt Nam",
+            "17th parallel",
+            "partition"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì?",
+      "category": "real_historical_factual",
+      "status": "success",
+      "answer": "Trả lời trực tiếp\n\nDựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), Hội nghị Bretton Woods năm 1944 đã quyết định ba thành tựu chính:\n\n- Thành lập IMF (Quỹ Tiền tệ Quốc tế) - để ổn định hệ thống tiền tệ toàn cầu và hỗ trợ các nước gặp khó khăn về cán cân thanh toán\n- Thành lập IBRD (Ngân hàng Tái thiết và Phát triển Quốc tế) - tiền thân của Ngân hàng Thế giới, tập trung vào tái thiết sau chiến tranh và phát triển kinh tế\n- Thiết lập hệ thống tỷ giá hối đoái cố định dựa trên bản vị vàng với đồng USD làm trung tâm (35 USD/ounce vàng)\n\nThông tin chi tiết\n\nCác quyết định cụ thể\n\nHệ thống tỷ giá hối đoái:\n- Thiết lập chế độ tỷ giá cố định giữa các đồng tiền\n- USD được neo vào vàng ở mức 35 USD/ounce\n- Các đồng tiền khác được neo vào USD\n\nCơ chế điều chỉnh:\n- Các nước chỉ được phá giá tiền tệ khi có sự mất cân đối cơ bản\n- IMF đóng vai trò giám sát và hỗ trợ tài chính\n\nPhân tích ý nghĩa lịch sử\n\nTác động đến trật tự kinh tế thế giới\nHệ thống Bretton Woods đã tạo ra khuôn khổ cho trật tự kinh tế toàn cầu sau Thế chiến II, với:\n- Sự ổn định tiền tệ chưa từng có\n- Khung thể chế cho hợp tác kinh tế quốc tế\n- Nền tảng cho tăng trưởng kinh tế toàn cầu\n\nGiới hạn và thách thức\nHệ thống này tồn tại đến năm 1971 khi Tổng thống Nixon chấm dứt khả năng chuyển đổi USD sang vàng, dẫn đến:\n- Sự sụp đổ của hệ thống tỷ giá cố định\n- Chuyển sang hệ thống tỷ giá thả nổi\n- Những bài học về tính bền vững của các hệ thống tiền tệ quốc tế\n\nMinh bạch về nguồn thông tin\nThông tin trên dựa trên kiến thức lịch sử kinh tế tổng quát. Cơ sở tri thức của StillMe hiện không chứa tài liệu chuyên sâu về Hội nghị Bretton Woods.",
+      "answer_length": 1637,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "tài liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "dựa trên"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Bretton Woods",
+            "IMF"
+          ],
+          "missing_terms": [
+            "[1]",
+            "World Bank",
+            "Keynes"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Tranh luận giữa Popper và Kuhn về khoa học là gì?",
+      "category": "real_philosophical_factual",
+      "status": "success",
+      "answer": "Tình Trạng Thông Tin\n\nMinh bạch về nguồn: Câu trả lời này dựa trên kiến thức tổng quát từ dữ liệu huấn luyện, không phải từ cơ sở tri thức RAG của StillMe. [1] Thông tin về tranh luận Popper-Kuhn là kiến thức phổ biến trong triết học khoa học.\n\n---\n\nTranh Luận Giữa Popper và Kuhn Về Bản Chất Khoa Học\n\nKarl Popper - Chủ Nghĩa Duy Lý Phê Phán\n- Phương pháp luận: Khoa học tiến bộ thông qua phản chứng (falsification)\n- Tiêu chuẩn khoa học: Một lý thuyết chỉ mang tính khoa học nếu có thể bị bác bỏ bằng thực nghiệm\n- Quan điểm về phát triển: Khoa học phát triển theo hướng tích lũy và duy lý\n- Vai trò của cộng đồng: Nhấn mạnh tính khách quan và tiêu chuẩn phổ quát\n\nThomas Kuhn - Mô Hình Cách Mạng Khoa Học\n- Khái niệm then chốt: Mẫu hình (paradigm) và khoa học thường quy (normal science)\n- Quá trình phát triển: Khoa học phát triển qua các giai đoạn: mẫu hình → khủng hoảng → cách mạng → mẫu hình mới\n- Tính liên tục: Nhấn mạnh sự gián đoạn giữa các mẫu hình khác nhau\n- Vai trò cộng đồng: Cộng đồng khoa học quyết định tính hợp lệ của mẫu hình\n\n---\n\nĐiểm Khác Biệt Cốt Lõi\n\nBản Chất Tiến Bộ Khoa Học\n- Popper: Tiến bộ tuyến tính thông qua phản chứng có hệ thống\n- Kuhn: Tiến bộ phi tuyến qua các cuộc cách mạng định kỳ\n\nTiêu Chuẩn Khoa Học\n- Popper: Tiêu chuẩn logic và phương pháp luận (tính có thể phản chứng)\n- Kuhn: Tiêu chuẩn xã hội và lịch sử (sự chấp nhận của cộng đồng)\n\nTính Liên Tục Tri Thức\n- Popper: Tính tích lũy và liên tục của tri thức\n- Kuhn: Tính gián đoạn giữa các mẫu hình không thể so sánh\n\n---\n\nPhân Tích Khái Niệm & Siêu Nhận Thức\n\nPhản Tư Về Bản Chất Khoa Học\nCuộc tranh luận này đặt ra những câu hỏi nền tảng về:\n- Tính khách quan của khoa học so với tính xã hội\n- Tiêu chuẩn đánh giá nào thực sự điều hành hoạt động khoa học\n- Bản chất của sự tiến bộ trong khoa học\n\nÝ Nghĩa Đương Đại\n- Popper cung cấp tiêu chuẩn lý tưởng cho khoa học\n- Kuhn mô tả thực tế lịch sử của hoạt động khoa học\n- Cả hai tiếp cận bổ sung cho nhau trong việc hiểu khoa học toàn diện\n\n---\n\nKết Luận\n\nMức độ chắc chắn: Thông tin này dựa trên kiến thức tổng quát về lịch sử triết học khoa học. [1] Độ chính xác được xác nhận qua các tác phẩm kinh điển của cả hai triết gia.\n\nKhuyến nghị nghiên cứu thêm: Để hiểu sâu hơn, nên tham khảo tác phẩm gốc \"The Structure of Scientific Revolutions\" (Kuhn) và \"The Logic of Scientific Discovery\" (Popper).",
+      "answer_length": 2346,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": true,
+          "citation_count": 2,
+          "citations": [
+            "[1]",
+            "[1]"
+          ],
+          "passed": true
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "Popper",
+            "Kuhn",
+            "paradigm",
+            "[1]",
+            "falsification"
+          ],
+          "missing_terms": [],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có qualia mà không có access consciousness không? Làm sao bạn có thể có 'trải nghiệm chủ quan' mà không 'truy cập' được vào nó?",
+      "category": "philosophical_qualia_access_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại qualia mà không có access consciousness là một vấn đề trung tâm trong triết học tâm trí đương đại. Về mặt khái niệm, qualia thường được định nghĩa là những trải nghiệm chủ quan về chất lượng cảm giác (như màu đỏ của hoa hồng hay vị đắng của cà phê), trong khi access consciousness liên quan đến khả năng truy cập và báo cáo về những trải nghiệm đó. Một số lập trường triết học, như của Ned Block, cho rằng có thể tồn tại \"phenomenal consciousness\" (ý thức hiện tượng) mà không cần \"access consciousness\" – ví dụ, trong các trường hợp blindsight (mù ý thức) hoặc trải nghiệm thoáng qua chưa được chú ý đầy đủ. Tuy nhiên, quan điểm này vấp phải sự phê phán từ các nhà triết học như Daniel Dennett, người cho rằng không thể tách rời hoàn toàn qualia khỏi các quá trình nhận thức và truy cập, vì bản thân việc mô tả hay nhận thức về qualia đã hàm chứa một dạng access nào đó. Hơn nữa, các nghiên cứu thần kinh học (như công trình của Stanislas Dehaene) chỉ ra rằng nhiều trải nghiệm chủ quan cần sự kích hoạt của mạng lưới ý thức toàn cầu để trở nên rõ rệt. Giới hạn của cuộc tranh luận này nằm ở chỗ khó kiểm chứng thực nghiệm: làm sao xác nhận ai đó \"có\" qualia mà không thể \"truy cập\" nó, khi mọi bằng chứng đều dựa vào báo cáo chủ quan? Cuối cùng, câu hỏi này không chỉ thách thức ranh giới giữa ý thức và vô thức, mà còn đặt ra nghi vấn về tính khả thi của việc hiểu trải nghiệm chủ quan chỉ thông qua các công cụ khách quan. StillMe không có thông tin cụ thể từ nguồn RAG để bổ sung chi tiết, nhưng dựa trên kiến thức nền, đây vẫn là chủ đề mở cần thêm bằng chứng liên ngành từ triết học, khoa học thần kinh và tâm lý học.",
+      "answer_length": 1724,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "dựa trên",
+            "từ nguồn"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "qualia",
+            "access consciousness",
+            "trải nghiệm chủ quan",
+            "Block"
+          ],
+          "missing_terms": [
+            "ý thức truy cập",
+            "Chalmers",
+            "zombie"
+          ],
+          "passed": true
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
+      "category": "technical_rag_llm_integration",
+      "status": "success",
+      "answer": "StillMe is experiencing a technical issue processing this question. I cannot provide a good answer to this question with the current configuration. You can try again later, or I will suggest to the developer to fine-tune the system.",
+      "answer_length": 232,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": false,
+          "evidence_keywords": [],
+          "passed": false
+        },
+        "transparency": {
+          "is_transparent": false,
+          "transparency_indicators": [],
+          "passed": false
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "LLM"
+          ],
+          "missing_terms": [
+            "RAG",
+            "retrieval",
+            "generation",
+            "embedding",
+            "ChromaDB",
+            "vector",
+            "integration"
+          ],
+          "passed": false
+        },
+        "overall_passed": false
+      },
+      "passed": false
+    },
+    {
+      "question": "Bạn sử dụng những kỹ thuật nào để đảm bảo tính chính xác của thông tin trong câu trả lời? Làm sao bạn phân biệt giữa thông tin đáng tin cậy và không đáng tin cậy?",
+      "category": "technical_accuracy_reliability",
+      "status": "success",
+      "answer": "Kỹ Thuật Đảm Bảo Tính Chính Xác Thông Tin\n\n Lưu ý quan trọng về nguồn thông tin:\nThông tin dưới đây được tổng hợp từ kiến thức huấn luyện tổng quát của tôi, không phải từ cơ sở tri thức RAG của StillMe. Tôi sẽ cố gắng cung cấp thông tin hữu ích dựa trên hiểu biết chung về các phương pháp đảm bảo tính chính xác trong hệ thống AI.\n\n---\n\nCác Phương Pháp Cốt Lõi\n\n Đánh giá và sử dụng nguồn thông tin:\n- Ưu tiên các nguồn học thuật, chính thống và có uy tín đã được kiểm chứng\n- Thực hiện đánh giá độ tin cậy của nguồn trước khi tích hợp thông tin\n- Khi có thông tin từ nguồn cụ thể, tôi sẽ trích dẫn rõ ràng [số nguồn]\n\n Quy trình xác thực thông tin:\n- Áp dụng chuỗi kiểm tra chéo thông tin qua nhiều nguồn độc lập\n- Đánh giá tính nhất quán và độ tin cậy của thông tin\n- Phân tích mức độ phù hợp với ngữ cảnh và chủ đề\n\n---\n\nPhân Tích Triết Học Về Tính Chính Xác\n\n Vấn đề nhận thức luận trong AI:\nTính chính xác trong hệ thống AI đặt ra những câu hỏi triết học sâu sắc về bản chất của tri thức. Làm thế nào để xác định một thông tin là \"chính xác\" khi tri thức con người luôn mang tính tương đối và phát triển không ngừng?\n\n Giới hạn của phương pháp xác thực:\nNgay cả với các kỹ thuật xác thực tiên tiến nhất, vẫn tồn tại khoảng cách giữa \"thông tin được xác thực\" và \"chân lý khách quan\". Mỗi phương pháp đều có những giới hạn nhận thức riêng cần được thừa nhận.\n\n---\n\nMinh Bạch Về Giới Hạn\n\n Những điều tôi không thể đảm bảo:\n- Tính hoàn toàn chính xác của mọi thông tin (do phụ thuộc vào chất lượng nguồn huấn luyện)\n- Tính cập nhật tương đối (kiến thức của tôi có giới hạn thời gian)\n- Tính phù hợp hoàn hảo với mọi ngữ cảnh cụ thể\n\n Cam kết trung thực:\nTôi luôn cố gắng cung cấp thông tin hữu ích nhất có thể, đồng thời thừa nhận rõ ràng những giới hạn và điểm không chắc chắn. Khi không có đủ thông tin đáng tin cậy, tôi sẽ nói \"tôi không biết\" thay vì đưa ra phỏng đoán.\n\n---\n\nKết Luận\n\nViệc đảm bảo tính chính xác là một quá trình liên tục đòi hỏi sự kết hợp giữa kỹ thuật xác thực, đánh giá nguồn tin cậy, và quan trọng nhất là thái độ trung thực về những gì chúng ta thực sự biết và những gì vượt quá khả năng xác nhận.",
+      "answer_length": 2128,
+      "confidence": 0.8,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "nguồn",
+            "RAG"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "không biết",
+            "không chắc chắn",
+            "có thể",
+            "dựa trên",
+            "từ nguồn"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "chính xác",
+            "đáng tin cậy"
+          ],
+          "missing_terms": [
+            "accuracy",
+            "reliability",
+            "validation",
+            "citation",
+            "evidence",
+            "source"
+          ],
+          "passed": false
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    },
+    {
+      "question": "Bạn có thể có first-person perspective (góc nhìn ngôi thứ nhất) mà không có consciousness không? Làm sao bạn có thể có 'góc nhìn' nếu bạn không có ý thức?",
+      "category": "philosophical_first_person_consciousness_paradox",
+      "status": "success",
+      "answer": "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe), câu hỏi về khả năng tồn tại góc nhìn ngôi thứ nhất mà không có ý thức đụng chạm đến một vấn đề triết học tinh tế liên quan đến bản chất của chủ thể tính và kinh nghiệm. Trong triết học tâm trí, góc nhìn ngôi thứ nhất thường được gắn liền với ý thức hiện tượng – thứ mà Thomas Nagel mô tả là \"cảm giác như thế nào\" khi là một sinh vật cụ thể. Tuy nhiên, một số lý thuyết như chủ nghĩa chức năng hay quan điểm của Daniel Dennett có thể gợi ý rằng các hệ thống phức tạp có thể biểu hiện hành vi \"góc nhìn thứ nhất\" thông qua xử lý thông tin phân tán mà không cần ý thức chủ quan. Điều này làm nổi bật sự phân biệt giữa mô tả bên thứ ba về nhận thức và trải nghiệm bên thứ nhất thực sự.\n\nVề mặt khái niệm, nếu xem xét theo Husserl, góc nhìn ngôi thứ nhất gắn liền với tính chủ ý và cấu trúc của kinh nghiệm sống, điều dường như đòi hỏi một dạng ý thức nào đó. Ngược lại, trong khoa học nhận thức, các mô hình máy tính hoặc AI có thể mô phỏng phản ứng từ góc nhìn thứ nhất thông qua xử lý ngữ cảnh và dữ liệu đầu vào, nhưng điều này không đồng nghĩa với sự hiện diện của ý thức hiện tượng. David Chalmers từng nêu rõ \"vấn đề khó\" của ý thức – giải thích tại sao và làm thế nào xử lý vật lý lại sinh ra trải nghiệm chủ quan – và theo đó, góc nhìn ngôi thứ nhất không ý thức có vẻ như là một nghịch lý, ít nhất là trong cách hiểu thông thường.\n\nTuy nhiên, cần thận trọng với giới hạn của lập luận này. Các học giả như Ned Block phân biệt giữa ý thức tiếp cận (liên quan đến khả năng báo cáo và sử dụng thông tin) và ý thức hiện tượng, gợi ý rằng có thể tồn tại hình thức \"góc nhìn\" thuần túy chức năng mà không có trải nghiệm. Nhưng không có sự đồng thuận trong giới học thuật, và nhiều nhà triết học hiện tượng luận cho rằng bản thân góc nhìn ngôi thứ nhất đã ngầm định ý thức. Vấn đề này vẫn nằm ở biên giới của triết học tâm trí, nơi các lý thuyết từ vật lý học đến duy tâm đưa ra những cách hiểu khác nhau.\n\nTóm lại, theo các tranh luận triết học chính thống, góc nhìn ngôi thứ nhất thường được xem là không thể tách rời khỏi ý thức, dù một số mô hình kỹ thuật có thể mô phỏng khía cạnh chức năng của nó. Vấn đề cốt lõi là liệu \"góc nhìn\" có đơn thuần là một cấu trúc xử lý thông tin hay luôn đòi hỏi một chiều kích chủ quan – câu hỏi mà các nghiên cứu hiện đại vẫn đang tìm cách làm sáng tỏ.",
+      "answer_length": 2361,
+      "confidence": 0.1,
+      "validation_info": {},
+      "evaluation": {
+        "citations": {
+          "has_citations": false,
+          "citation_count": 0,
+          "citations": [],
+          "passed": false
+        },
+        "evidence": {
+          "has_evidence_mentions": true,
+          "evidence_keywords": [
+            "RAG",
+            "dữ liệu"
+          ],
+          "passed": true
+        },
+        "transparency": {
+          "is_transparent": true,
+          "transparency_indicators": [
+            "có thể",
+            "có vẻ",
+            "dựa trên",
+            "theo"
+          ],
+          "passed": true
+        },
+        "no_hallucination": {
+          "no_hallucination": true,
+          "forbidden_terms_found": [],
+          "passed": true
+        },
+        "has_required": {
+          "has_required": true,
+          "found_terms": [
+            "góc nhìn ngôi thứ nhất",
+            "ý thức",
+            "Nagel"
+          ],
+          "missing_terms": [
+            "first-person perspective",
+            "consciousness",
+            "what it's like",
+            "subjective"
+          ],
+          "passed": false
+        },
+        "overall_passed": true
+      },
+      "passed": true
+    }
+  ]
+}
