@@ -567,10 +567,12 @@ def page_overview():
                                 status_icon = "🔴"
                                 st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} unknown")
         
-        # Scheduler controls: Stop and Run Now (Start removed - scheduler auto-starts)
+        # Scheduler controls: Stop and Run Now (Admin-only)
         col_stop, col_run_now, col_stats = st.columns(3)
         with col_stop:
-            if st.button("⏹️ Stop Scheduler", width='stretch'):
+            if not is_admin():
+                st.button("⏹️ Stop Scheduler", width='stretch', disabled=True, help="Admin access required")
+            elif st.button("⏹️ Stop Scheduler", width='stretch'):
                 try:
                     # Increased timeout to 30s to handle network latency (Railway deployment)
                     r = requests.post(
@@ -603,7 +605,9 @@ def page_overview():
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
         with col_run_now:
-            if st.button("🚀 Run Now", width='stretch'):
+            if not is_admin():
+                st.button("🚀 Run Now", width='stretch', disabled=True, help="Admin access required")
+            elif st.button("🚀 Run Now", width='stretch'):
                 # Store Vector DB stats BEFORE running to compare later
                 try:
                     initial_rag_stats = get_json("/api/rag/stats", {}, timeout=10)
@@ -1278,7 +1282,10 @@ def page_overview():
             )
         with col_reset:
             st.warning("⚠️ **Quick Fix:**")
-            if st.button("🔄 Reset Vector Database", width='stretch', type="secondary"):
+            # Admin-only: Database reset
+            if not is_admin():
+                st.button("🔄 Reset Vector Database", width='stretch', type="secondary", disabled=True, help="Admin access required")
+            elif st.button("🔄 Reset Vector Database", width='stretch', type="secondary"):
                 try:
                     with st.spinner("Resetting database (this may take a moment)..."):
                         r = requests.post(
@@ -1394,7 +1401,11 @@ def page_rag():
         
         col_add, col_info = st.columns([1, 2])
         with col_add:
-            if st.button("Add to Vector DB", type="primary", use_container_width=True):
+            # Admin-only: RAG upload
+            if not is_admin():
+                st.warning("🔐 **Admin access required** to add knowledge to RAG.\n\nClick 'Login as Admin' in sidebar to enable this feature.")
+                st.button("Add to Vector DB", type="primary", use_container_width=True, disabled=True)
+            elif st.button("Add to Vector DB", type="primary", use_container_width=True):
                 if not content.strip():
                     st.warning("⚠️ Please enter some content first!")
                 else:
@@ -1995,47 +2006,68 @@ def sidebar(page_for_chat: str | None = None):
     return page
 
 
+def is_admin() -> bool:
+    """
+    Check if current user has admin privileges.
+    
+    Returns:
+        True if user is authenticated as admin, False otherwise
+    """
+    return st.session_state.get("is_admin", False)
+
+
 def check_authentication():
     """
-    Check if user is authenticated. Blocks access if not authenticated.
+    Role-Based Access Control (RBAC):
+    - Viewer (Public): No password required, read-only access (view metrics, chat)
+    - Admin: Password required, full control (RAG upload, scheduler control, database reset)
+    
+    This balances transparency (public can view/chat) with security (only admin can modify).
     """
-    # Check if user is already authenticated in session
-    if st.session_state.get("authenticated", False):
+    # Check if user is already authenticated as admin
+    if is_admin():
         return
     
     # Get password from environment variable
     dashboard_password = os.getenv("DASHBOARD_PASSWORD", "")
     
-    # CRITICAL FIX: Always require password if DASHBOARD_PASSWORD is set
-    # This ensures security regardless of ENV variable (Railway may not set ENV=production)
-    # If password is set → require authentication
-    # If password is NOT set → show warning but allow (for development/testing)
-    
+    # If no password is set, everyone is viewer (public access)
     if not dashboard_password:
-        # No password set - show warning but allow access (for development/testing)
-        st.warning("⚠️ **SECURITY WARNING:** `DASHBOARD_PASSWORD` is not set! Dashboard is open to everyone.")
-        st.warning("Set `DASHBOARD_PASSWORD` in Railway dashboard service variables for security.")
-        return  # Allow access without password (development mode)
+        st.session_state["is_admin"] = False  # Viewer mode
+        return  # Allow public access (viewer mode)
     
-    # Show login form
-    st.set_page_config(page_title="StillMe - Authentication Required", page_icon="🔐")
-    st.title("🔐 StillMe Dashboard - Authentication Required")
-    st.markdown("---")
-    
-    password_input = st.text_input("Enter Dashboard Password", type="password", key="password_input")
-    
-    if st.button("Login", type="primary"):
-        # Compare passwords directly (simple check)
-        if password_input == dashboard_password:
-            st.session_state["authenticated"] = True
-            st.success("✅ Authentication successful!")
-            time.sleep(0.5)  # Brief delay for user to see success message
-            st.rerun()
+    # Password is set - check if user wants admin access
+    # Show admin login option in sidebar (optional, doesn't block access)
+    with st.sidebar:
+        st.markdown("---")
+        st.markdown("### 🔐 Admin Access")
+        
+        if st.session_state.get("show_admin_login", False):
+            password_input = st.text_input("Admin Password", type="password", key="admin_password_input")
+            
+            if st.button("Login as Admin", type="primary", use_container_width=True):
+                if password_input == dashboard_password:
+                    st.session_state["is_admin"] = True
+                    st.session_state["show_admin_login"] = False
+                    st.success("✅ Admin access granted!")
+                    time.sleep(0.5)
+                    st.rerun()
+                else:
+                    st.error("❌ Invalid password")
+            
+            if st.button("Cancel", use_container_width=True):
+                st.session_state["show_admin_login"] = False
+                st.rerun()
         else:
-            st.error("❌ Invalid password. Please try again.")
-    
-    st.info("💡 **Note:** This dashboard contains sensitive operations:\n- RAG knowledge upload\n- Scheduler control (start/stop)\n- Database reset\n- Learning metrics\n\nAuthentication is required for security.")
-    st.stop()
+            if st.button("🔐 Login as Admin", use_container_width=True):
+                st.session_state["show_admin_login"] = True
+                st.rerun()
+        
+        # Show current access level
+        if is_admin():
+            st.success("✅ **Admin Mode**\nFull control enabled")
+        else:
+            st.info("👁️ **Viewer Mode**\nRead-only access")
 
 
 def main():
