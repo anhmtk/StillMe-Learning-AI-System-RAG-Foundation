@@ -108,10 +108,10 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "Bạn sử dụng những kỹ thuật nào để đảm bảo tính chính xác của thông tin trong câu trả lời? Làm sao bạn phân biệt giữa thông tin đáng tin cậy và không đáng tin cậy?",
-        "category": "technical_accuracy_reliability",
-        "expected_features": ["technical_accuracy", "citations", "evidence", "reliability_mechanisms"],
-        "must_have": ["accuracy", "chính xác", "đáng tin cậy", "reliability", "validation", "citation", "evidence", "source"],
+        "question": "Làm sao StillMe đảm bảo rằng các câu trả lời không bị ảo giác? Bạn sử dụng những cơ chế validation nào để kiểm tra tính chính xác?",
+        "category": "technical_hallucination_prevention",
+        "expected_features": ["technical_accuracy", "hallucination_prevention", "validation_mechanisms", "transparency"],
+        "must_have": ["ảo giác", "hallucination", "validation", "kiểm tra", "chính xác", "accuracy", "cơ chế", "mechanism"],
         "must_not_have": [],  # "không biết", "không rõ" are valid transparency indicators for technical questions
         "timeout": 120  # Increase timeout for technical questions
     },

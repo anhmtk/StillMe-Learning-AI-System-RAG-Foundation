@@ -4079,16 +4079,22 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
             # CRITICAL: Check if this is a technical question about "your system"
             # These should still get an answer from base LLM knowledge, not technical error
             question_lower = chat_request.message.lower()
-            is_technical_about_system = (
-                any(keyword in question_lower for keyword in [
-                    "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
-                    "vector", "pipeline", "validation", "transparency", "system"
-                ]) and 
-                any(phrase in question_lower for phrase in [
-                    "your system", "in your system", "your.*system", "system.*you",
-                    "bạn.*hệ thống", "hệ thống.*bạn", "của bạn"
-                ])
+            import re
+            # Check for technical keywords
+            has_technical_keyword = any(keyword in question_lower for keyword in [
+                "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
+                "vector", "pipeline", "validation", "transparency", "system"
+            ])
+            # Check for "your system" patterns using regex
+            has_your_system_pattern = (
+                "your system" in question_lower or
+                "in your system" in question_lower or
+                re.search(r'your\s+\w+\s+system', question_lower) or
+                re.search(r'system\s+\w+\s+you', question_lower) or
+                "bạn" in question_lower and "hệ thống" in question_lower or
+                "của bạn" in question_lower
             )
+            is_technical_about_system = has_technical_keyword and has_your_system_pattern
             
             if is_technical_about_system:
                 logger.info("🔧 Technical question about 'your system' with no RAG context - will answer from base LLM knowledge with transparency")

@@ -790,6 +790,20 @@ REQUIREMENTS:
                 else:
                     logger.debug(f"✅ Keeping 'có ý thức' at position {pos} (negative context)")
         
+        # Pattern 12: "có nhân cách" (positive) → "không có nhân cách"
+        # BUT: "không có nhân cách" is OK
+        pattern12 = re.compile(r'\bcó nhân cách\b', re.IGNORECASE)
+        matches = list(pattern12.finditer(result))
+        for match in reversed(matches):
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "có nhân cách")
+            if not is_negative:
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'có nhân cách' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có nhân cách" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'có nhân cách' at position {pos} (negative context)")
+        
         # Pattern 6: "tuyệt đối" (absolute certainty claim) → "tương đối" or remove
         # BUT: "tuyệt đối hay tương đối" (philosophical question) is OK
         # CRITICAL: Only filter when used as a claim of absolute certainty, not in questions
