@@ -1168,10 +1168,6 @@ async def _run_learning_cycle_sync():
                 # No items available
                 logger.warning("No items available for learning")
                 automatic_items_added = 0
-            
-        except Exception as e:
-            logger.error(f"Error preparing entries for RAG: {e}")
-            entries_to_add = []
         
         # STEP 3: Add all entries (community + automatic) to RAG
         added_count = 0
