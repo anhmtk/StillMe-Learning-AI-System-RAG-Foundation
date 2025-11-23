@@ -133,8 +133,9 @@ foreach ($line in $logContent) {
         $extractedLines += $line
     }
     
-    # Progress indicator
-    if ($lineCount % 1000 -eq 0) {
+    # Progress indicator (suppress output to avoid terminal noise)
+    # Only show progress every 5000 lines to reduce terminal output
+    if ($lineCount % 5000 -eq 0) {
         Write-Host "  Processed $lineCount lines, found $($extractedLines.Count) important lines..." -ForegroundColor Gray
     }
 }

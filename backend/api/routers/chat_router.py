@@ -1400,6 +1400,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     is_fallback_meta_answer_non_rag = False  # Used in non-RAG path
     is_fallback_for_learning = False  # Used to skip learning extraction for fallback meta-answers
     use_philosophy_lite_rag = False  # Initialize to prevent UnboundLocalError
+    # CRITICAL: Initialize is_technical_about_system_rag at function level to prevent UnboundLocalError
+    # This variable is used in RAG path (line 3970) and must be defined in ALL code paths
+    is_technical_about_system_rag = False
     
     # OPTION B PIPELINE: Check if enabled
     use_option_b = getattr(chat_request, 'use_option_b', False) or os.getenv("STILLME_USE_OPTION_B_PIPELINE", "false").lower() == "true"

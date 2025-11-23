@@ -570,10 +570,28 @@ def run_all_tests():
             
             print()
             print("🔄 Extracting important log lines...")
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            # Suppress PowerShell color output to avoid terminal noise
+            # Use shell=True on Windows to properly handle PowerShell output
+            import platform
+            if platform.system() == "Windows":
+                # On Windows, use shell=True to properly capture PowerShell output
+                result = subprocess.run(
+                    " ".join(cmd),  # Join command as string for shell=True
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    encoding='utf-8',
+                    errors='replace'
+                )
+            else:
+                result = subprocess.run(cmd, capture_output=True, text=True)
             
             if result.returncode == 0:
-                print(result.stdout)
+                # Filter out progress indicators and color codes from output
+                stdout_lines = result.stdout.split('\n')
+                filtered_lines = [line for line in stdout_lines if line.strip() and not line.strip().startswith('  Processed')]
+                if filtered_lines:
+                    print('\n'.join(filtered_lines))
                 print("✅ Log extraction completed!")
             else:
                 print("⚠️ Log extraction had issues:")
