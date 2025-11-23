@@ -68,6 +68,31 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
         r"peer.*closed",
     ]
     
+    # CRITICAL: Technical error messages from get_fallback_message_for_error (these should NOT be detected as errors)
+    # These are user-friendly fallback messages, not actual technical errors
+    fallback_message_patterns = [
+        r"stillme is experiencing a technical issue",
+        r"stillme đang gặp sự cố kỹ thuật",
+        r"i cannot provide a good answer",
+        r"mình không thể trả lời tốt",
+        r"i will suggest to the developer",
+        r"mình sẽ đề xuất cho developer",
+    ]
+    
+    # Check if text is a fallback message first (these are OK, not errors)
+    text_lower_for_fallback = text_lower
+    for pattern in fallback_message_patterns:
+        if re.search(pattern, text_lower_for_fallback):
+            # This is a fallback message, not a technical error
+            # But we still want to detect it as an error if it's the ONLY content (no actual answer)
+            # If it's part of a longer response with actual content, it's OK
+            if len(text.strip()) < 300:  # Short response = likely just fallback message
+                logger.debug(f"Detected fallback message (short): {text[:100]}...")
+                return True, "generic"  # Treat as error if it's just the fallback message
+            else:
+                # Long response with fallback message embedded = OK, not an error
+                return False, ""
+    
     # Check context overflow first (most specific)
     for pattern in context_overflow_patterns:
         if re.search(pattern, text_lower):

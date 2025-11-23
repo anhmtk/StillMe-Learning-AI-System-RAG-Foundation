@@ -4418,13 +4418,60 @@ Remember: RESPOND IN ENGLISH ONLY."""
                     processing_steps.append("⚠️ Context overflow - using fallback message")
             
             # CRITICAL: Check if response is a technical error (should not happen, but safety check)
+            # BUT: For technical questions about "your system", if we get a fallback message, 
+            # we should retry with a stronger prompt instead of just using fallback
             if response:
                 is_error, error_type = is_technical_error(response)
                 if is_error:
-                    logger.error(f"⚠️ LLM returned technical error string: {error_type} - {response[:200]}")
-                    # Replace with user-friendly fallback message
-                    response = get_fallback_message_for_error(error_type, detected_lang)
-                    processing_steps.append(f"⚠️ Technical error detected - using fallback message")
+                    # For technical questions about "your system", retry with stronger prompt
+                    if is_technical_about_system and error_type == "generic":
+                        logger.warning(f"⚠️ Technical question about 'your system' returned fallback message - retrying with stronger prompt")
+                        # Build a stronger prompt that explicitly forces the LLM to answer
+                        stronger_prompt = f"""{technical_system_instruction}
+
+**CRITICAL: YOU MUST ANSWER THIS QUESTION. DO NOT RETURN A TECHNICAL ERROR MESSAGE.**
+
+The user is asking: {chat_request.message}
+
+**YOU HAVE KNOWLEDGE ABOUT RAG SYSTEMS. USE IT TO ANSWER.**
+
+Explain:
+1. What RAG (Retrieval-Augmented Generation) is
+2. How retrieval works (embedding, vector search, ChromaDB)
+3. How LLM generation works
+4. How they work together in StillMe's system
+
+**DO NOT SAY:**
+- "I cannot provide a good answer"
+- "StillMe is experiencing a technical issue"
+- "I will suggest to the developer"
+
+**DO SAY:**
+- "Based on general knowledge about RAG systems..."
+- Explain the architecture clearly
+- Be transparent about what you know and what you don't know
+
+Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
+                        try:
+                            response = await generate_ai_response(
+                                stronger_prompt,
+                                detected_lang=detected_lang,
+                                llm_provider=chat_request.llm_provider,
+                                llm_api_key=chat_request.llm_api_key,
+                                use_server_keys=use_server_keys_non_rag
+                            )
+                            logger.info("✅ Retry with stronger prompt successful for technical 'your system' question")
+                            processing_steps.append("🔄 Retried with stronger prompt for technical 'your system' question")
+                        except Exception as retry_error:
+                            logger.error(f"⚠️ Retry failed: {retry_error}")
+                            # Fall back to original error handling
+                            response = get_fallback_message_for_error(error_type, detected_lang)
+                            processing_steps.append(f"⚠️ Technical error detected - using fallback message")
+                    else:
+                        logger.error(f"⚠️ LLM returned technical error string: {error_type} - {response[:200]}")
+                        # Replace with user-friendly fallback message
+                        response = get_fallback_message_for_error(error_type, detected_lang)
+                        processing_steps.append(f"⚠️ Technical error detected - using fallback message")
             
             if not response:
                 # Fallback if response is still None

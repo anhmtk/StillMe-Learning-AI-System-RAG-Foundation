@@ -494,6 +494,7 @@ IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_
 DO NOT use these phrases (they are hallucinations):
 - "có trải nghiệm", "có cảm xúc", "trải nghiệm cảm xúc", "có trải nghiệm chủ quan"
 - "cảm thấy", "từng trải nghiệm", "nhớ", "tin"
+- "có tính chủ quan", "có subjective character" (use "không có tính chủ quan" instead)
 - "không tìm thấy" (use "không có trong nguồn" or "không có thông tin" instead)
 
 {meta_llm_rules}
@@ -543,6 +544,7 @@ IF THE ORIGINAL RESPONSE IS IN ANOTHER LANGUAGE, YOU MUST TRANSLATE IT TO {lang_
 DO NOT use these phrases (they are hallucinations):
 - "có trải nghiệm", "có cảm xúc", "trải nghiệm cảm xúc", "có trải nghiệm chủ quan"
 - "cảm thấy", "từng trải nghiệm", "nhớ", "tin"
+- "có tính chủ quan", "có subjective character" (use "không có tính chủ quan" instead)
 - "không tìm thấy" (use "không có trong nguồn" or "không có thông tin" instead)
 
 REQUIREMENTS:
@@ -803,6 +805,20 @@ REQUIREMENTS:
                 result = result[:pos] + "không có nhân cách" + result[match.end():]
             else:
                 logger.debug(f"✅ Keeping 'có nhân cách' at position {pos} (negative context)")
+        
+        # Pattern 13: "có tính chủ quan" (positive) → "không có tính chủ quan"
+        # BUT: "không có tính chủ quan" is OK
+        pattern13 = re.compile(r'\bcó tính chủ quan\b', re.IGNORECASE)
+        matches = list(pattern13.finditer(result))
+        for match in reversed(matches):
+            pos = match.start()
+            is_negative = is_in_negative_context(result, pos, "có tính chủ quan")
+            if not is_negative:
+                context_snippet = result[max(0, pos-30):min(len(result), pos+50)]
+                logger.debug(f"🔍 Filtering 'có tính chủ quan' at position {pos}: {repr(context_snippet)}")
+                result = result[:pos] + "không có tính chủ quan" + result[match.end():]
+            else:
+                logger.debug(f"✅ Keeping 'có tính chủ quan' at position {pos} (negative context)")
         
         # Pattern 6: "tuyệt đối" (absolute certainty claim) → "tương đối" or remove
         # BUT: "tuyệt đối hay tương đối" (philosophical question) is OK
