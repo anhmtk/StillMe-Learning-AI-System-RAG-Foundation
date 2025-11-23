@@ -820,7 +820,18 @@ Pre-Filter rules: Minimum 150 characters, keyword scoring. Cost reduction: 30-50
             logger.warning(f"⚠️ Could not check/add foundational knowledge (non-critical): {foundational_error}")
             logger.debug("StillMe will still work, but may not answer questions about itself correctly")
         
-        logger.info("🎉 StillMe backend is ready!")
+        # CRITICAL: Log completion with clear formatting
+        import sys
+        sys.stdout.flush()
+        logger.info("=" * 60)
+        logger.info("🎉 StillMe Backend is READY!")
+        logger.info("=" * 60)
+        logger.info("✅ RAG System: Fully initialized")
+        logger.info("✅ Learning System: Ready")
+        logger.info("✅ All components: Operational")
+        logger.info("=" * 60)
+        sys.stdout.flush()
+        
         _rag_initialization_complete = True
         
         # Update metrics collector with component health
@@ -910,9 +921,16 @@ app.include_router(debug_router.router)  # Debug endpoints for cache/model monit
 @app.on_event("startup")
 async def startup_event():
     """Initialize RAG components and log when FastAPI/uvicorn server is ready"""
-    logger.info("🚀 FastAPI application startup event triggered")
+    import sys
+    sys.stdout.flush()  # Ensure logs are flushed immediately
+    
+    logger.info("=" * 60)
+    logger.info("🚀 StillMe Backend - FastAPI Startup Event")
+    logger.info("=" * 60)
     logger.info("🌐 Uvicorn server is ready to accept connections")
     logger.info("📋 /health endpoint is available immediately")
+    logger.info("=" * 60)
+    sys.stdout.flush()
     
     # Validate security configuration
     logger.info("🔐 Validating security configuration...")

@@ -248,13 +248,19 @@ stop_healthcheck_server()
 
 # Start uvicorn
 logger.info("=" * 60)
-logger.info(f"Starting uvicorn server on 0.0.0.0:{port_int}...")
+logger.info(f"🚀 Starting uvicorn server on 0.0.0.0:{port_int}...")
 logger.info("=" * 60)
 sys.stdout.flush()
 
 # Log that health endpoint is ready
-logger.info("✅ App started - Health endpoint /health is ready")
-logger.info("✅ Readiness endpoint /ready available (may return 503 until dependencies ready)")
+logger.info("=" * 60)
+logger.info("✅ StillMe Backend - Server Starting")
+logger.info("=" * 60)
+logger.info(f"📍 Port: {port_int}")
+logger.info("📍 Host: 0.0.0.0")
+logger.info("✅ Health endpoint: /health (available immediately)")
+logger.info("✅ Readiness endpoint: /ready (may return 503 until dependencies ready)")
+logger.info("=" * 60)
 sys.stdout.flush()
 
 # CRITICAL: Add immediate health check endpoint test
