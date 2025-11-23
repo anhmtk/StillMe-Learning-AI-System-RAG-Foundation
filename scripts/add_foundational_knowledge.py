@@ -25,7 +25,7 @@ FOUNDATIONAL_KNOWLEDGE = """
 
 **CRITICAL: StillMe's Learning Process:**
 1. **Automated Learning Cycles**: StillMe automatically fetches content from RSS feeds, arXiv, CrossRef, and Wikipedia every 4 hours (6 times per day)
-2. **RAG-Based Knowledge Storage**: All learned content is embedded using **sentence-transformers model `multi-qa-MiniLM-L6-dot-v1`** (384-dimensional embeddings, optimized for Q&A retrieval) and stored in **ChromaDB** vector database
+2. **RAG-Based Knowledge Storage**: All learned content is embedded using **sentence-transformers model `paraphrase-multilingual-MiniLM-L12-v2`** (384-dimensional embeddings, optimized for multilingual Q&A retrieval) and stored in **ChromaDB** vector database
 3. **Semantic Search**: When answering questions, StillMe retrieves relevant context from vector database using semantic similarity search
 4. **Continuous Updates**: StillMe's knowledge is constantly updated through automated learning cycles, NOT limited by training data cutoff dates
 5. **Transparency**: Every learning source is visible and auditable - users can see exactly what StillMe learns and from where
@@ -33,9 +33,9 @@ FOUNDATIONAL_KNOWLEDGE = """
 **Technical Architecture Details:**
 
 **Embedding Model:**
-- **Model Name**: `multi-qa-MiniLM-L6-dot-v1` (sentence-transformers, optimized for Q&A retrieval)
+- **Model Name**: `paraphrase-multilingual-MiniLM-L12-v2` (sentence-transformers, optimized for multilingual Q&A retrieval)
 - **Embedding Dimensions**: 384
-- **Purpose**: Converts text into vector embeddings for semantic search in ChromaDB
+- **Purpose**: Converts text into vector embeddings for semantic search in ChromaDB (supports 50+ languages)
 - **Library**: sentence-transformers (Hugging Face)
 
 **LLM Models (Language Generation):**
@@ -89,7 +89,7 @@ StillMe uses a **ValidatorChain** to ensure response quality and prevent halluci
 
 **Key Features:**
 - **Continuous Learning**: StillMe automatically fetches and learns from RSS feeds, arXiv, CrossRef, Wikipedia every 4 hours (6 cycles per day)
-- **RAG-Based Knowledge**: All knowledge is stored in ChromaDB vector database and retrieved using semantic search with `multi-qa-MiniLM-L6-dot-v1` embeddings
+- **RAG-Based Knowledge**: All knowledge is stored in ChromaDB vector database and retrieved using semantic search with `paraphrase-multilingual-MiniLM-L12-v2` embeddings
 - **Transparency**: Every learning source is visible and auditable - no black box learning
 - **Self-Diagnosis**: StillMe can identify knowledge gaps and prioritize what to learn next
 - **Content Curation**: Intelligent filtering and prioritization of learning content based on quality and relevance
@@ -100,9 +100,9 @@ StillMe uses a **ValidatorChain** to ensure response quality and prevent halluci
 **How StillMe Learns:**
 1. Automated scheduler fetches RSS feeds, arXiv, CrossRef, Wikipedia every 4 hours
 2. Content is pre-filtered for quality (minimum length, keyword relevance)
-3. High-quality content is embedded using `multi-qa-MiniLM-L6-dot-v1` model and stored in ChromaDB
+3. High-quality content is embedded using `paraphrase-multilingual-MiniLM-L12-v2` model and stored in ChromaDB
 4. When users ask questions, StillMe:
-   - Embeds the query using `multi-qa-MiniLM-L6-dot-v1`
+   - Embeds the query using `paraphrase-multilingual-MiniLM-L12-v2`
    - Retrieves relevant context from ChromaDB using semantic search
    - Generates response using LLM (DeepSeek or OpenAI) with retrieved context
    - Validates response using ValidatorChain

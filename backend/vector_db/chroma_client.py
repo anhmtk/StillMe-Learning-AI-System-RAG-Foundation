@@ -554,7 +554,7 @@ class ChromaClient:
         """Add knowledge documents to vector database
         
         This method:
-        1. Generates embeddings using EmbeddingService (if available) to use multi-qa-MiniLM-L6-dot-v1
+        1. Generates embeddings using EmbeddingService (if available) to use paraphrase-multilingual-MiniLM-L12-v2
         2. Inserts documents with embeddings into ChromaDB collection
         3. Logs progress for monitoring
         
@@ -576,7 +576,7 @@ class ChromaClient:
             # CRITICAL: Generate embeddings using EmbeddingService if available
             # This prevents ChromaDB from using default ONNX model (all-MiniLM-L6-v2)
             if self.embedding_service:
-                logger.debug(f"🔧 Generating embeddings using EmbeddingService (multi-qa-MiniLM-L6-dot-v1) for {len(documents)} document(s)...")
+                logger.debug(f"🔧 Generating embeddings using EmbeddingService (paraphrase-multilingual-MiniLM-L12-v2) for {len(documents)} document(s)...")
                 embeddings = [self.embedding_service.encode_text(doc) for doc in documents]
                 
                 self.knowledge_collection.add(

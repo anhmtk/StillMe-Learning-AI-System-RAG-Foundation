@@ -15,7 +15,7 @@ try:
     from backend.utils.model_cache import ModelManager
     # Initialize ModelManager at module level to setup environment variables
     # This ensures cache is configured before SentenceTransformer is imported
-    _global_model_manager = ModelManager(model_name="multi-qa-MiniLM-L6-dot-v1")
+    _global_model_manager = ModelManager(model_name="paraphrase-multilingual-MiniLM-L12-v2")
     # Import logging here to avoid circular import
     import logging as _logging_module
     _temp_logger = _logging_module.getLogger(__name__)
@@ -62,7 +62,7 @@ logger = logging.getLogger(__name__)
 class EmbeddingService:
     """Service for generating text embeddings"""
     
-    def __init__(self, model_name: str = "multi-qa-MiniLM-L6-dot-v1"):
+    def __init__(self, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"):
         """Initialize embedding service
         
         Args:

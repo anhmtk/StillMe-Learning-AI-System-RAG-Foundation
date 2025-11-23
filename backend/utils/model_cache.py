@@ -1,6 +1,6 @@
 """
 Model Cache Manager - CRITICAL for preventing model re-downloads on Railway
-Ensures multi-qa-MiniLM-L6-dot-v1 model is cached in persistent volume and verified before loading
+Ensures paraphrase-multilingual-MiniLM-L12-v2 model is cached in persistent volume and verified before loading
 """
 
 import os
@@ -33,7 +33,7 @@ class ModelManager:
     to prevent re-downloading on every Railway deploy.
     """
     
-    def __init__(self, model_name: str = "multi-qa-MiniLM-L6-dot-v1"):
+    def __init__(self, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2"):
         """Initialize ModelManager
         
         Args:
@@ -364,7 +364,7 @@ class ModelManager:
         }
 
 
-def verify_model_cache(model_name: str = "multi-qa-MiniLM-L6-dot-v1") -> CacheStatus:
+def verify_model_cache(model_name: str = "paraphrase-multilingual-MiniLM-L12-v2") -> CacheStatus:
     """
     Standalone function to verify model cache.
     
