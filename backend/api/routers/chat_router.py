@@ -1432,6 +1432,16 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             "bạn học từ đâu", "where do you learn", "what sources", "nguồn nào", "từ nguồn nào",
             "hiện bạn đang học", "bạn học tập cụ thể từ", "chủ đề cụ thể", "đề xuất nguồn"
         ]
+        # CRITICAL: Detect if user asks to propose learning sources based on knowledge gaps
+        is_learning_proposal_query = False
+        learning_proposal_keywords = [
+            "đề xuất nguồn học", "propose learning", "đề xuất thêm nguồn", "suggest sources",
+            "bổ sung nguồn", "thêm nguồn học", "kiến thức cần thiết", "knowledge gaps",
+            "lỗ hổng kiến thức", "thiếu kiến thức", "cần học thêm"
+        ]
+        if any(keyword in message_lower for keyword in learning_proposal_keywords):
+            is_learning_proposal_query = True
+            logger.info("Learning proposal query detected - will analyze actual knowledge gaps")
         if any(keyword in message_lower for keyword in learning_metrics_keywords):
             is_learning_metrics_query = True
             logger.info("Learning metrics query detected - fetching metrics data")
@@ -2865,6 +2875,30 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                 # Special instruction for learning sources queries
                 # CRITICAL: Skip for philosophical questions to reduce prompt size (unless explicitly asked)
                 learning_sources_instruction = ""
+                
+                # CRITICAL: If user asks to propose learning sources based on knowledge gaps,
+                # query actual knowledge gaps from validation metrics instead of generic template
+                actual_knowledge_gaps = None
+                learning_suggestions_from_analysis = None
+                if is_learning_proposal_query and not is_philosophical:
+                    logger.info("🔍 Learning proposal query detected - analyzing actual knowledge gaps from validation metrics")
+                    try:
+                        from backend.validators.self_improvement import get_self_improvement_analyzer
+                        analyzer = get_self_improvement_analyzer()
+                        
+                        # Get knowledge gaps from validation failures (last 7 days)
+                        actual_knowledge_gaps = analyzer.get_knowledge_gaps_from_failures(days=7)
+                        
+                        # Get learning suggestions from pattern analysis
+                        analysis_result = analyzer.analyze_and_suggest(days=7)
+                        learning_suggestions_from_analysis = analysis_result.get("learning_suggestions", [])
+                        
+                        logger.info(f"✅ Found {len(actual_knowledge_gaps)} knowledge gaps and {len(learning_suggestions_from_analysis)} learning suggestions from validation analysis")
+                    except Exception as gap_error:
+                        logger.warning(f"⚠️ Failed to analyze knowledge gaps: {gap_error}")
+                        actual_knowledge_gaps = []
+                        learning_suggestions_from_analysis = []
+                
                 if is_learning_sources_query and not is_philosophical:
                     if current_learning_sources:
                         sources_list = current_learning_sources.get("current_sources", {})
@@ -2918,6 +2952,81 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 **Format with line breaks, bullet points, headers, and 2-3 emojis**
 
 """
+                    # CRITICAL: If user asks to propose learning sources based on knowledge gaps,
+                    # inject actual knowledge gaps analysis instead of generic template
+                    if is_learning_proposal_query:
+                        knowledge_gaps_text = ""
+                        if actual_knowledge_gaps and len(actual_knowledge_gaps) > 0:
+                            knowledge_gaps_text = f"""
+
+🔍 **ACTUAL KNOWLEDGE GAPS DETECTED FROM VALIDATION METRICS (Last 7 days):**
+
+StillMe has analyzed its own validation failures and identified {len(actual_knowledge_gaps)} knowledge gaps where StillMe lacked RAG context:
+
+{chr(10).join(f"- **Gap {i+1}**: {gap.get('topics', ['Unknown topic'])[0] if gap.get('topics') else 'Unknown topic'} (from question: \"{gap.get('question', 'N/A')[:100]}...\")\n  - Priority: {gap.get('priority', 'medium')}\n  - Suggested sources: {', '.join(gap.get('suggested_sources', []))}" for i, gap in enumerate(actual_knowledge_gaps[:10]))}
+
+**CRITICAL: You MUST base your learning source proposals on these ACTUAL knowledge gaps, not generic suggestions.**
+
+**MANDATORY REQUIREMENTS:**
+1. **Acknowledge these gaps FIRST** - Say: "Dựa trên phân tích validation metrics của chính StillMe, mình đã phát hiện {len(actual_knowledge_gaps)} lỗ hổng kiến thức cụ thể..."
+2. **Propose sources to fill these SPECIFIC gaps** - Don't give generic suggestions
+3. **Be transparent** - Explain that these gaps were detected from StillMe's own validation failures
+4. **Prioritize high-priority gaps** - Focus on gaps marked as "high" priority first
+5. **Explain why these gaps matter** - Why StillMe needs to learn these topics
+
+**DO NOT:**
+- ❌ Give generic philosophical suggestions without addressing the actual gaps above
+- ❌ Say "Dựa trên kiến thức tổng quát" - you MUST say "Dựa trên phân tích validation metrics của chính StillMe"
+- ❌ Ignore the actual gaps and give template answers
+- ❌ Propose sources that don't address the gaps listed above
+
+"""
+                        elif learning_suggestions_from_analysis and len(learning_suggestions_from_analysis) > 0:
+                            knowledge_gaps_text = f"""
+
+🔍 **LEARNING SUGGESTIONS FROM VALIDATION PATTERN ANALYSIS (Last 7 days):**
+
+StillMe has analyzed its validation patterns and identified {len(learning_suggestions_from_analysis)} learning suggestions:
+
+{chr(10).join(f"- **Suggestion {i+1}**: {s.get('topic', 'Unknown topic')}\n  - Priority: {s.get('priority', 'medium')}\n  - Reason: {s.get('reason', 'N/A')}\n  - Suggested source: {s.get('source', 'N/A')}" for i, s in enumerate(learning_suggestions_from_analysis[:10]))}
+
+**CRITICAL: You MUST base your learning source proposals on these ACTUAL suggestions from StillMe's self-analysis.**
+
+**MANDATORY REQUIREMENTS:**
+1. **Acknowledge these suggestions FIRST** - Say: "Dựa trên phân tích validation patterns của chính StillMe, mình đã phát hiện {len(learning_suggestions_from_analysis)} đề xuất học tập cụ thể..."
+2. **Propose sources to address these SPECIFIC suggestions** - Don't give generic suggestions
+3. **Be transparent** - Explain that these suggestions came from StillMe's own validation analysis
+4. **Prioritize high-priority suggestions** - Focus on suggestions marked as "high" priority first
+
+**DO NOT:**
+- ❌ Give generic philosophical suggestions without addressing the actual suggestions above
+- ❌ Say "Dựa trên kiến thức tổng quát" - you MUST say "Dựa trên phân tích validation patterns của chính StillMe"
+- ❌ Ignore the actual suggestions and give template answers
+
+"""
+                        else:
+                            knowledge_gaps_text = """
+
+🔍 **NO SIGNIFICANT KNOWLEDGE GAPS DETECTED:**
+
+StillMe has analyzed its validation metrics and found no significant knowledge gaps in the last 7 days (all questions had sufficient RAG context).
+
+**CRITICAL: You MUST acknowledge this FIRST:**
+- Say: "Dựa trên phân tích validation metrics của chính StillMe, mình đã kiểm tra và không phát hiện lỗ hổng kiến thức đáng kể trong 7 ngày qua. Tất cả các câu hỏi đều có đủ ngữ cảnh RAG."
+
+**MANDATORY REQUIREMENTS:**
+1. **Acknowledge the analysis** - StillMe DID analyze its own knowledge, found no gaps
+2. **Propose sources for EXPANSION, not gaps** - Since there are no gaps, propose sources to expand knowledge in areas StillMe already covers
+3. **Be transparent** - Explain that StillMe analyzed itself and found no gaps, so proposals are for expansion
+4. **Focus on diversity** - Propose sources that add different perspectives or deeper coverage
+
+**DO NOT:**
+- ❌ Say "Dựa trên kiến thức tổng quát" - you MUST say "Dựa trên phân tích validation metrics của chính StillMe"
+- ❌ Pretend there are gaps when StillMe's analysis found none
+- ❌ Give generic template answers without acknowledging the analysis
+
+"""
+                        learning_sources_instruction += knowledge_gaps_text
                     else:
                         learning_sources_instruction = """
 
