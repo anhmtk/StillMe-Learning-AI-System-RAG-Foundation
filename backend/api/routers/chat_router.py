@@ -2970,7 +2970,7 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 
 StillMe has analyzed its own validation failures and identified {len(actual_knowledge_gaps)} knowledge gaps where StillMe lacked RAG context:
 
-{chr(10).join(f"- **Gap {i+1}**: {gap.get('topics', ['Unknown topic'])[0] if gap.get('topics') else 'Unknown topic'} (from question: \"{gap.get('question', 'N/A')[:100]}...\")\n  - Priority: {gap.get('priority', 'medium')}\n  - Suggested sources: {', '.join(gap.get('suggested_sources', []))}" for i, gap in enumerate(actual_knowledge_gaps[:10]))}
+{chr(10).join(f"- **Gap {i+1}**: {gap.get('topics', ['Unknown topic'])[0] if gap.get('topics') else 'Unknown topic'} (from question: \"{gap.get('question', 'N/A')[:100]}...\"){chr(10)}  - Priority: {gap.get('priority', 'medium')}{chr(10)}  - Suggested sources: {', '.join(gap.get('suggested_sources', []))}" for i, gap in enumerate(actual_knowledge_gaps[:10]))}
 
 **CRITICAL: You MUST base your learning source proposals on these ACTUAL knowledge gaps, not generic suggestions.**
 
@@ -2995,7 +2995,7 @@ StillMe has analyzed its own validation failures and identified {len(actual_know
 
 StillMe has analyzed its validation patterns and identified {len(learning_suggestions_from_analysis)} learning suggestions:
 
-{chr(10).join(f"- **Suggestion {i+1}**: {s.get('topic', 'Unknown topic')}\n  - Priority: {s.get('priority', 'medium')}\n  - Reason: {s.get('reason', 'N/A')}\n  - Suggested source: {s.get('source', 'N/A')}" for i, s in enumerate(learning_suggestions_from_analysis[:10]))}
+{chr(10).join(f"- **Suggestion {i+1}**: {s.get('topic', 'Unknown topic')}{chr(10)}  - Priority: {s.get('priority', 'medium')}{chr(10)}  - Reason: {s.get('reason', 'N/A')}{chr(10)}  - Suggested source: {s.get('source', 'N/A')}" for i, s in enumerate(learning_suggestions_from_analysis[:10]))}
 
 **CRITICAL: You MUST base your learning source proposals on these ACTUAL suggestions from StillMe's self-analysis.**
 
