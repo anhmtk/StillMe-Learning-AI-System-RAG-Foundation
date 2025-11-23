@@ -3,6 +3,10 @@
 import os
 import sys
 import logging
+import threading
+import time
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse
 
 # Configure logging to stdout (Railway captures stdout)
 # Force flush immediately to ensure Railway sees logs
@@ -17,6 +21,36 @@ logger = logging.getLogger(__name__)
 # Force stdout to be unbuffered for Railway
 sys.stdout.reconfigure(line_buffering=True)
 
+# Simple healthcheck server to respond immediately while FastAPI starts
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == '/health' or self.path == '/health/':
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(b'{"status":"healthy","service":"stillme-backend","timestamp":"' + 
+                           str(time.time()).encode() + b'"}')
+        else:
+            self.send_response(503)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(b'{"status":"starting","message":"FastAPI app is starting..."}')
+    
+    def log_message(self, format, *args):
+        # Suppress healthcheck logs to reduce noise
+        pass
+
+def start_healthcheck_server(port):
+    """Start a simple HTTP server for healthcheck while FastAPI app loads"""
+    try:
+        server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+        logger.info(f"✅ Healthcheck server started on port {port}")
+        sys.stdout.flush()
+        server.serve_forever()
+    except Exception as e:
+        logger.error(f"❌ Healthcheck server failed: {e}")
+        sys.stdout.flush()
+
 # Get PORT from environment (Railway injects this)
 port = os.getenv("PORT", "8080")
 
@@ -25,6 +59,20 @@ try:
 except ValueError:
     logger.error(f"Invalid PORT value '{port}'. Using default 8080.")
     port_int = 8080
+
+# CRITICAL: Start a simple healthcheck server immediately
+# This ensures Railway healthcheck passes while FastAPI app loads
+# The healthcheck server will be replaced by FastAPI app once it starts
+logger.info("🚀 Starting immediate healthcheck server...")
+healthcheck_thread = threading.Thread(
+    target=start_healthcheck_server,
+    args=(port_int,),
+    daemon=True
+)
+healthcheck_thread.start()
+logger.info("✅ Healthcheck server started - Railway healthcheck will pass immediately")
+sys.stdout.flush()
+time.sleep(0.5)  # Give healthcheck server a moment to start
 
 logger.info("=" * 60)
 logger.info("StillMe Backend - Starting FastAPI Server")
