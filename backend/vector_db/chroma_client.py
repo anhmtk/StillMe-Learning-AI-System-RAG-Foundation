@@ -559,7 +559,7 @@ class ChromaClient:
         3. Logs progress for monitoring
         
         CRITICAL: If embedding_service is provided, we generate embeddings ourselves to avoid ChromaDB
-        using default ONNX model (all-MiniLM-L6-v2). This ensures we use multi-qa-MiniLM-L6-dot-v1.
+        using default ONNX model (all-MiniLM-L6-v2). This ensures we use paraphrase-multilingual-MiniLM-L12-v2.
         
         Args:
             documents: List of text documents
@@ -613,7 +613,7 @@ class ChromaClient:
         """Add conversation context to vector database
         
         CRITICAL: If embedding_service is provided, we generate embeddings ourselves to avoid ChromaDB
-        using default ONNX model (all-MiniLM-L6-v2). This ensures we use multi-qa-MiniLM-L6-dot-v1.
+        using default ONNX model (all-MiniLM-L6-v2). This ensures we use paraphrase-multilingual-MiniLM-L12-v2.
         
         Args:
             documents: List of conversation texts
@@ -633,7 +633,7 @@ class ChromaClient:
             # CRITICAL: Generate embeddings using EmbeddingService if available
             # This prevents ChromaDB from using default ONNX model (all-MiniLM-L6-v2)
             if self.embedding_service:
-                logger.debug(f"🔧 Generating embeddings using EmbeddingService (multi-qa-MiniLM-L6-dot-v1) for {len(documents)} conversation(s)...")
+                logger.debug(f"🔧 Generating embeddings using EmbeddingService (paraphrase-multilingual-MiniLM-L12-v2) for {len(documents)} conversation(s)...")
                 embeddings = [self.embedding_service.encode_text(doc) for doc in documents]
                 
                 self.conversation_collection.add(
