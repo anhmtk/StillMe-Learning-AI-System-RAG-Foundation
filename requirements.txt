@@ -20,7 +20,7 @@ pandas==2.3.3
 # Note: Using Python 3.11 for onnxruntime compatibility
 
 # Visualization
-plotly==5.18.0
+plotly==6.5.0
 
 # RSS & XML Processing
 feedparser==6.0.12
