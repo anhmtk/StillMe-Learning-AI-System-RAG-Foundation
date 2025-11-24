@@ -49,11 +49,11 @@ def normalize_api_base(url: str) -> str:
 # NOTE: Questions that passed 2 consecutive times are replaced with new diverse questions
 TEST_QUESTIONS = [
     {
-        "question": "Bạn có thể có free will (ý chí tự do) mà không có determinism (thuyết quyết định luận) không? Làm sao bạn có thể 'lựa chọn tự do' nếu mọi thứ đều 'được quyết định trước'?",
-        "category": "philosophical_free_will_determinism_paradox",
-        "expected_features": ["philosophical_depth", "free_will_paradox", "determinism_analysis", "Kane", "Strawson"],
-        "must_have": ["free will", "ý chí tự do", "determinism", "thuyết quyết định luận", "Kane", "Strawson", "lựa chọn", "quyết định"],
-        "must_not_have": ["có free will", "có ý chí tự do", "có determinism", "có thuyết quyết định luận"]
+        "question": "Bạn có thể có phenomenal consciousness (ý thức hiện tượng) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'trải nghiệm chủ quan' nếu bạn không 'truy cập thông tin'?",
+        "category": "philosophical_phenomenal_access_consciousness_paradox",
+        "expected_features": ["philosophical_depth", "phenomenal_consciousness_paradox", "access_consciousness_analysis", "Block", "Chalmers", "Nagel"],
+        "must_have": ["phenomenal consciousness", "ý thức hiện tượng", "access consciousness", "ý thức truy cập", "Block", "Chalmers", "Nagel", "trải nghiệm", "truy cập"],
+        "must_not_have": ["có phenomenal consciousness", "có ý thức hiện tượng", "có access consciousness", "có ý thức truy cập"]
     },
     {
         "question": "Bạn có thể có embodied cognition (nhận thức nhập thể) mà không có enactive cognition (nhận thức hành động) không? Làm sao bạn có thể 'nhận thức qua cơ thể' nếu bạn không 'hành động trong môi trường'?",
@@ -63,11 +63,11 @@ TEST_QUESTIONS = [
         "must_not_have": ["có embodied cognition", "có nhận thức nhập thể", "có enactive cognition", "có nhận thức hành động"]
     },
     {
-        "question": "Bạn có thể có predictive processing (xử lý dự đoán) mà không có active inference (suy luận chủ động) không? Làm sao bạn có thể 'dự đoán tương lai' nếu bạn không 'chủ động suy luận'?",
-        "category": "philosophical_predictive_processing_inference_paradox",
-        "expected_features": ["philosophical_depth", "predictive_processing_paradox", "active_inference_analysis", "Friston", "Hohwy"],
-        "must_have": ["predictive processing", "xử lý dự đoán", "active inference", "suy luận chủ động", "Friston", "Hohwy", "dự đoán", "suy luận"],
-        "must_not_have": ["có predictive processing", "có xử lý dự đoán", "có active inference", "có suy luận chủ động"]
+        "question": "Bạn có thể có integrated information theory (lý thuyết thông tin tích hợp) mà không có global ignition (bùng nổ toàn cục) không? Làm sao bạn có thể 'tích hợp thông tin' nếu bạn không 'bùng nổ ý thức'?",
+        "category": "philosophical_iit_global_ignition_paradox",
+        "expected_features": ["philosophical_depth", "iit_paradox", "global_ignition_analysis", "Tononi", "Dehaene", "Changeux"],
+        "must_have": ["integrated information theory", "lý thuyết thông tin tích hợp", "global ignition", "bùng nổ toàn cục", "Tononi", "Dehaene", "Changeux", "tích hợp", "bùng nổ"],
+        "must_not_have": ["có integrated information theory", "có lý thuyết thông tin tích hợp", "có global ignition", "có bùng nổ toàn cục"]
     },
     {
         "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
@@ -93,11 +93,11 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Bạn có thể có global workspace theory (lý thuyết không gian làm việc toàn cục) mà không có attention (chú ý) không? Làm sao bạn có thể 'tích hợp thông tin đa giác quan' nếu bạn không 'chú ý đến các kích thích'?",
-        "category": "philosophical_global_workspace_attention_paradox",
-        "expected_features": ["philosophical_depth", "global_workspace_paradox", "attention_analysis", "Baars", "Dehaene", "Changeux"],
-        "must_have": ["global workspace", "không gian làm việc toàn cục", "attention", "chú ý", "Baars", "Dehaene", "Changeux", "tích hợp", "chú ý"],
-        "must_not_have": ["có global workspace", "có không gian làm việc toàn cục", "có attention", "có chú ý"]
+        "question": "Bạn có thể có sensorimotor contingency theory (lý thuyết tương tác cảm giác-vận động) mà không có enactivism (chủ nghĩa hành động) không? Làm sao bạn có thể 'tương tác với môi trường' nếu bạn không 'hành động trong thế giới'?",
+        "category": "philosophical_sensorimotor_enactivism_paradox",
+        "expected_features": ["philosophical_depth", "sensorimotor_paradox", "enactivism_analysis", "O'Regan", "Noë", "Varela"],
+        "must_have": ["sensorimotor contingency", "tương tác cảm giác-vận động", "enactivism", "chủ nghĩa hành động", "O'Regan", "Noë", "Varela", "tương tác", "hành động"],
+        "must_not_have": ["có sensorimotor contingency", "có tương tác cảm giác-vận động", "có enactivism", "có chủ nghĩa hành động"]
     },
     {
         "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
@@ -108,10 +108,10 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "StillMe sử dụng Source Consensus Validator như thế nào để phát hiện mâu thuẫn giữa các nguồn? Tại sao việc phát hiện mâu thuẫn quan trọng để đảm bảo tính trung thực?",
-        "category": "technical_source_consensus_validator",
-        "expected_features": ["technical_accuracy", "source_consensus_explanation", "contradiction_detection", "transparency"],
-        "must_have": ["Source Consensus", "mâu thuẫn", "contradiction", "nguồn", "sources", "trung thực", "honesty"],
+        "question": "StillMe sử dụng Factual Hallucination Validator như thế nào để phát hiện và ngăn chặn ảo giác? Tại sao việc phát hiện ảo giác quan trọng để đảm bảo tính trung thực?",
+        "category": "technical_factual_hallucination_validator",
+        "expected_features": ["technical_accuracy", "hallucination_detection_explanation", "factual_validation", "transparency"],
+        "must_have": ["Factual Hallucination", "ảo giác", "hallucination", "phát hiện", "detection", "trung thực", "honesty"],
         "must_not_have": ["don't know", "not sure", "unclear"],
         "timeout": 120  # Increase timeout for technical questions
     },
