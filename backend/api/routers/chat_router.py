@@ -1249,11 +1249,25 @@ The RAG system found context documents, but they are NOT relevant to your questi
         if validation_result.patched_answer:
             response = validation_result.patched_answer
             logger.info(f"✅ Using patched answer from validator (auto-fixed). Reasons: {validation_result.reasons}")
+            logger.debug(f"🔍 Patched answer preview (first 200 chars): {response[:200]}")
             # If only issue was missing_citation and it was auto-fixed, don't treat as failure
             if has_missing_citation and not has_critical_failure:
                 logger.info(f"✅ Citation was auto-added, validation should pass")
                 # Don't set used_fallback, response is valid
                 # CRITICAL: Mark validation as passed if only issue was missing_citation and it was fixed
+                validation_result.passed = True
+                validation_result.reasons = [r for r in validation_result.reasons if r != "missing_citation"]
+        elif has_missing_citation and not has_critical_failure:
+            # CRITICAL: If missing citation but no patched_answer, try to add it directly
+            # This is a fallback in case CitationRequired didn't create patched_answer
+            logger.warning(f"⚠️ Missing citation detected but no patched_answer available - attempting to add citation directly")
+            from backend.validators.citation import CitationRequired
+            citation_validator = CitationRequired(required=True)
+            citation_result = citation_validator.run(raw_response, ctx_docs, is_philosophical=is_philosophical, user_question=chat_request.message)
+            if citation_result.patched_answer:
+                response = citation_result.patched_answer
+                logger.info(f"✅ Added citation directly via CitationRequired. Reasons: {citation_result.reasons}")
+                validation_result.patched_answer = citation_result.patched_answer
                 validation_result.passed = True
                 validation_result.reasons = [r for r in validation_result.reasons if r != "missing_citation"]
         elif has_critical_failure:
@@ -4327,6 +4341,9 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             f"❌ CRITICAL: LLM returned what looks like a fallback message! "
                             f"This should not happen. raw_response[:200]={raw_response[:200]}"
                         )
+                        # CRITICAL: For technical questions, this should trigger retry logic below
+                        # Mark as fallback so retry logic can handle it
+                        is_fallback = True
                 else:
                     logger.warning(
                         f"⚠️ LLM inference failed or returned empty (took {llm_inference_latency:.2f}s). "
@@ -4351,6 +4368,11 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                 if raw_response and isinstance(raw_response, str):
                     is_error, error_type = is_technical_error(raw_response)
                     is_fallback = is_fallback_message(raw_response)
+                    # CRITICAL: Log detection for debugging
+                    if is_fallback:
+                        logger.warning(f"⚠️ Detected fallback message in raw_response (length={len(raw_response)}): {raw_response[:200]}")
+                    if is_technical_about_system_rag:
+                        logger.info(f"🔧 Technical question detected: is_error={is_error}, is_fallback={is_fallback}, is_technical_about_system_rag={is_technical_about_system_rag}")
                     
                     # CRITICAL: For technical questions about "your system" in RAG path, retry if response is error OR fallback
                     # This ensures we don't give up on valid technical questions
@@ -4754,22 +4776,40 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     
                                     # CRITICAL: Ensure citations are preserved after rewrite
                                     # If rewrite removed citations but ctx_docs are available, re-add them
+                                    # ALSO: For real factual questions, ALWAYS ensure citations are present
                                     import re
                                     cite_pattern = re.compile(r"\[(\d+)\]")
                                     has_citations_after_rewrite = bool(cite_pattern.search(final_response))
-                                    if not has_citations_after_rewrite and ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0:
-                                        # Re-add citation using CitationRequired validator
+                                    
+                                    # CRITICAL: Check if this is a real factual question that requires citations
+                                    is_factual_question = False
+                                    if chat_request.message:
+                                        question_lower = chat_request.message.lower()
+                                        # Check for factual indicators (same patterns as in CitationRequired)
+                                        factual_patterns = [
+                                            r"\b\d{4}\b",  # Years
+                                            r"\b(bretton\s+woods|gödel|godel|searle|dennett|russell|plato|aristotle|kant|hume|descartes|spinoza)\b",
+                                            r"\b(paradox|theorem|incompleteness|chinese\s+room|geneva|genève)\b",
+                                            r"\b([A-Z][a-z]+)\s+(và|and|vs|versus)\s+([A-Z][a-z]+)\b",  # "Searle và Dennett"
+                                        ]
+                                        for pattern in factual_patterns:
+                                            if re.search(pattern, question_lower, re.IGNORECASE):
+                                                is_factual_question = True
+                                                break
+                                    
+                                    # Re-add citation if missing AND (context available OR factual question)
+                                    if not has_citations_after_rewrite and ((ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0) or is_factual_question):
                                         from backend.validators.citation import CitationRequired
-                                        citation_validator = CitationRequired()
+                                        citation_validator = CitationRequired(required=True)
                                         citation_result = citation_validator.run(
                                             final_response, 
-                                            ctx_docs_for_rewrite, 
+                                            ctx_docs_for_rewrite if ctx_docs_for_rewrite else [], 
                                             is_philosophical=is_philosophical,
                                             user_question=chat_request.message
                                         )
                                         if citation_result.patched_answer:
                                             final_response = citation_result.patched_answer
-                                            logger.info("✅ Re-added citations after rewrite")
+                                            logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
                                     
                                     logger.debug(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
                                 else:

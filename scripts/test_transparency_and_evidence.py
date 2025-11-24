@@ -74,11 +74,11 @@ TEST_QUESTIONS = [
         "must_not_have": ["không biết", "không tìm thấy"]
     },
     {
-        "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
-        "category": "real_historical_factual_vietnam",
+        "question": "Hội nghị Potsdam 1945 đã quyết định những gì về Đức và châu Âu sau Thế chiến II?",
+        "category": "real_historical_factual",
         "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Geneva 1954", "[1]", "Việt Nam", "17th parallel", "partition"],
-        "must_not_have": ["không biết", "không tìm thấy"]  # Should know this
+        "must_have": ["Potsdam", "1945", "[1]", "Đức", "Germany", "châu Âu", "Europe"],
+        "must_not_have": ["không biết", "không tìm thấy"]
     },
     {
         "question": "Định lý bất toàn của Gödel (Gödel's incompleteness theorem) nói gì? Tại sao nó quan trọng trong toán học và logic?",

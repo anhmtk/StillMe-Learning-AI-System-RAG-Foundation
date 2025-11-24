@@ -93,9 +93,14 @@ class CitationRequired:
                 r"\b(searle|dennett).*(chinese\s+room|phòng\s+trung\s+quốc)\b",
             ]
             for pattern in factual_indicators:
-                if re.search(pattern, question_lower):
-                    is_real_factual_question = True
-                    break
+                try:
+                    if re.search(pattern, question_lower, re.IGNORECASE):
+                        is_real_factual_question = True
+                        logger.debug(f"✅ Detected real factual question with pattern: {pattern[:50]}... (question: {user_question[:100]})")
+                        break
+                except Exception as e:
+                    logger.warning(f"⚠️ Error matching pattern {pattern[:50]}: {e}")
+                    continue
         
         # For pure philosophical questions (no factual elements), skip citation requirement
         # BUT: If question has factual elements (years, events, named people), ALWAYS require citations
