@@ -2067,6 +2067,16 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # This ensures StillMe NEVER falls back to generic LLM knowledge about itself
         if is_origin_query:
             try:
+                # CRITICAL: Detect language BEFORE calling get_system_origin_answer
+                # If detected_lang is not yet defined, detect it now
+                try:
+                    from backend.api.utils.chat_helpers import detect_language
+                    detected_lang = detect_language(chat_request.message)
+                    logger.debug(f"🌐 Detected language for origin query: {detected_lang}")
+                except Exception as lang_error:
+                    logger.warning(f"Language detection failed: {lang_error}, defaulting to 'vi'")
+                    detected_lang = "vi"
+                
                 from backend.identity.system_origin import get_system_origin_answer
                 logger.info("🎯 Identity Truth Override: Returning SYSTEM_ORIGIN answer directly (no LLM fallback)")
                 system_truth_answer = get_system_origin_answer(detected_lang)

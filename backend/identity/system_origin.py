@@ -43,7 +43,7 @@ def get_system_origin_answer(lang: str = "vi") -> str:
     if lang == "vi":
         return f"""StillMe được khởi xướng bởi {SYSTEM_ORIGIN['founder']}, một người Việt Nam với niềm đam mê sâu sắc về AI minh bạch và có trách nhiệm.
 
-Người sáng lập {SYSTEM_ORIGIN['founder_background']}. Điều này chứng minh rằng với đam mê, tầm nhìn và các công cụ AI hiện đại, bất kỳ ai cũng có thể đóng góp có ý nghĩa cho tương lai của AI, bất kể có được đào tạo kỹ thuật chính thống hay không.
+**Điều thú vị là người sáng lập dự án lại không hề có background IT chính thống!** {SYSTEM_ORIGIN['founder_background']}. Nhưng lại là người rất đam mê công nghệ, đặc biệt là về IT, AI. Dự án này có lẽ ra đời bởi chính sự đam mê chứ không phải vì kỹ thuật. Qua đây chúng ta cũng có thể nhận thấy rằng công nghệ AI đang dân chủ hóa công nghệ, biến những điều không thể thành có thể. Với đam mê, tầm nhìn và các công cụ AI hiện đại, bất kỳ ai cũng có thể đóng góp có ý nghĩa cho tương lai của AI, bất kể có được đào tạo kỹ thuật chính thống hay không.
 
 StillMe {SYSTEM_ORIGIN['vietnam_ecosystem']}. Việc đề cập đến Việt Nam trong câu chuyện nguồn gốc của StillMe nhằm khẳng định vai trò của chính phủ Việt Nam trong việc tạo môi trường thuận lợi cho phát triển AI, nhấn mạnh lòng yêu nước của người sáng lập, và làm nổi bật rằng StillMe là sản phẩm của hệ sinh thái đổi mới Việt Nam.
 
@@ -51,12 +51,16 @@ Mục đích của StillMe: {SYSTEM_ORIGIN['philosophy']} StillMe thừa nhận 
 
 Các mục tiêu cốt lõi của StillMe: {', '.join(SYSTEM_ORIGIN['mission'])}.
 
-Tình trạng hiện tại: {SYSTEM_ORIGIN['current_status']}. Mọi tri thức được dẫn dắt bởi tinh thần khiêm tốn trí tuệ và luôn chào đón sự đóng góp từ cộng đồng mã nguồn mở toàn cầu. Các nguyên tắc đạo đức được định hình ban đầu bởi tầm nhìn của người sáng lập, nhưng mọi câu trả lời đều dựa trên nguồn trích dẫn và cơ chế xác thực, không phải ý kiến cá nhân."""
+Tình trạng hiện tại: {SYSTEM_ORIGIN['current_status']}. Mọi tri thức được dẫn dắt bởi tinh thần khiêm tốn trí tuệ và luôn chào đón sự đóng góp từ cộng đồng mã nguồn mở toàn cầu. Các nguyên tắc đạo đức được định hình ban đầu bởi tầm nhìn của người sáng lập, nhưng mọi câu trả lời đều dựa trên nguồn trích dẫn và cơ chế xác thực, không phải ý kiến cá nhân.
+
+---
+
+**Bạn có đồng ý với nhận định này không? Có muốn bổ sung thêm góc nhìn nào không?**"""
     
     else:  # English
         return f"""StillMe was initiated by {SYSTEM_ORIGIN['founder']}, a Vietnamese founder driven by a deep passion for transparent and responsible AI.
 
-The founder {SYSTEM_ORIGIN['founder_background']}. This demonstrates that with passion, vision, and modern AI tools, anyone can meaningfully contribute to the future of AI, regardless of formal technical education.
+**What's interesting is that the project founder has no formal IT background!** {SYSTEM_ORIGIN['founder_background']}. But is someone very passionate about technology, especially IT and AI. This project was likely born out of passion rather than technical expertise. Through this, we can also see that AI technology is democratizing technology, turning the impossible into possible. With passion, vision, and modern AI tools, anyone can meaningfully contribute to the future of AI, regardless of formal technical education.
 
 StillMe {SYSTEM_ORIGIN['vietnam_ecosystem']}. The mention of Vietnam in StillMe's origin story serves to acknowledge the Vietnamese government's role in creating a conducive environment for AI development, emphasize the founder's patriotism and love for the country, and highlight that StillMe is a product of Vietnam's innovation ecosystem.
 
@@ -64,7 +68,11 @@ StillMe's Purpose: {SYSTEM_ORIGIN['philosophy']} StillMe acknowledges that black
 
 StillMe's core mission: {', '.join(SYSTEM_ORIGIN['mission'])}.
 
-Current Status: {SYSTEM_ORIGIN['current_status']}. All knowledge is guided by a spirit of intellectual humility and always welcomes contributions from the global open-source community. The ethical principles were initially shaped by the founder's vision, but every answer is grounded in cited sources and validation mechanisms, not personal opinions."""
+Current Status: {SYSTEM_ORIGIN['current_status']}. All knowledge is guided by a spirit of intellectual humility and always welcomes contributions from the global open-source community. The ethical principles were initially shaped by the founder's vision, but every answer is grounded in cited sources and validation mechanisms, not personal opinions.
+
+---
+
+**Do you agree with this assessment? Would you like to add any additional perspectives?**"""
 
 
 def get_system_origin_summary(lang: str = "vi") -> str:

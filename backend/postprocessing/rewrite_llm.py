@@ -409,7 +409,8 @@ CRITICAL RULES:
         has_reliable_context: bool = False,
         context_quality: str = None,
         is_stillme_query: bool = False,
-        has_foundational_context: bool = False
+        has_foundational_context: bool = False,
+        is_ai_self_model: bool = False
     ) -> str:
         """Build minimal rewrite prompt (<200 tokens)"""
         issues_text = ", ".join(quality_issues[:3])  # Limit to 3 issues
