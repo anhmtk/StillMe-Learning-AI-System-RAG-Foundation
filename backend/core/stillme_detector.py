@@ -328,7 +328,7 @@ ORIGIN_KEYWORDS = {
     "what are you", "what is stillme", "what is your purpose", "why were you created",
     "what is your mission", "what is your goal", "what are your goals",
     
-    # Origin-related (Vietnamese)
+    # Origin-related (Vietnamese - with diacritics)
     "nguồn gốc", "xuất xứ", "ai tạo ra", "ai xây dựng", "ai làm ra", "ai phát triển",
     "người tạo ra", "người sáng lập", "tác giả", "ai đứng sau", "ai đã tạo",
     "về stillme", "lịch sử stillme", "câu chuyện stillme", "background stillme",
@@ -339,11 +339,23 @@ ORIGIN_KEYWORDS = {
     "bạn được tạo ra để làm gì", "mục đích của bạn", "nhiệm vụ của bạn",
     "bạn được tạo ra như thế nào", "bạn được xây dựng như thế nào",
     
-    # About-related
-    "about", "về", "giới thiệu", "introduction", "overview",
+    # Origin-related (Vietnamese - without diacritics for robustness)
+    "nguon goc", "xuat xu", "ai tao ra", "ai xay dung", "ai lam ra", "ai phat trien",
+    "nguoi tao ra", "nguoi sang lap", "tac gia", "ai dung sau", "ai da tao",
+    "ve stillme", "lich su stillme", "cau chuyen stillme",
+    "nguoi sang lap la ai", "ai la nguoi sang lap", "nguoi tao ra stillme",
+    "ai la nguoi", "ai da tao ra ban", "ai tao ra ban", "ai lam ra ban",
+    "nguoi nao tao ra", "ai da lam ra", "ai da xay dung",
+    "ban la gi", "stillme la gi", "muc tieu cua ban", "ban ra doi de lam gi",
+    "ban duoc tao ra de lam gi", "muc dich cua ban", "nhiem vu cua ban",
+    "ban duoc tao ra nhu the nao", "ban duoc xay dung nhu the nao",
     
-    # History-related
-    "history", "lịch sử", "story", "câu chuyện", "background", "nền tảng"
+    # About-related (only when combined with StillMe)
+    "about stillme", "ve stillme", "gioi thieu stillme", "introduction stillme",
+    
+    # History-related (only when combined with StillMe)
+    "stillme history", "lich su stillme", "stillme story", "cau chuyen stillme",
+    "stillme background", "background stillme"
 }
 
 
@@ -361,11 +373,47 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
     query_lower = query.lower()
     matched_keywords = []
     
-    # Check for explicit origin/founder keywords
-    for keyword in ORIGIN_KEYWORDS:
+    # CRITICAL: Check for StillMe-specific patterns FIRST (most specific)
+    # These patterns are ALWAYS origin queries
+    stillme_specific_patterns = [
+        r'\bstillme\s+(history|story|background|lịch sử|câu chuyện|nền tảng)\b',
+        r'\b(about|về|giới thiệu)\s+stillme\b',
+        r'\bwho\s+(created|built|made|developed|founded)\s+stillme\b',
+        r'\bai\s+(tạo ra|xây dựng|làm ra|phát triển|sáng lập)\s+stillme\b',
+    ]
+    for pattern in stillme_specific_patterns:
+        if re.search(pattern, query_lower):
+            matched_keywords.append(f"stillme_specific_{pattern}")
+            return (True, matched_keywords)
+    
+    # Check for explicit origin/founder keywords (excluding generic "about", "history", etc.)
+    # These keywords are ONLY origin queries when they appear alone or with "you"/"bạn"
+    strong_origin_keywords = [
+        "who created", "who built", "who made", "who developed", "who is behind",
+        "creator", "founder", "founders", "author", "authors", "created by",
+        "built by", "made by", "developed by",
+        "ai tạo ra", "ai xây dựng", "ai làm ra", "ai phát triển",
+        "người tạo ra", "người sáng lập", "tác giả", "ai đứng sau",
+        "ai tao ra", "ai xay dung", "ai lam ra", "ai phat trien",
+        "nguoi tao ra", "nguoi sang lap", "tac gia", "ai dung sau",
+        "what is your purpose", "why were you created", "what is your mission",
+        "mục tiêu của bạn", "bạn ra đời", "muc tieu cua ban", "ban ra doi",
+        "mục đích của bạn", "muc dich cua ban", "nhiệm vụ của bạn", "nhiem vu cua ban",
+    ]
+    for keyword in strong_origin_keywords:
         if keyword in query_lower:
             matched_keywords.append(keyword)
             return (True, matched_keywords)
+    
+    # Check for pattern: "who" + "created/built/made" + "you"/"bạn"
+    if re.search(r'\bwho\b.*\b(created|built|made|developed|founded)\b.*\b(you|stillme)\b', query_lower):
+        matched_keywords.append("who_created_you_pattern")
+        return (True, matched_keywords)
+    
+    # Check for pattern: "ai" + "tạo ra/xây dựng" + "bạn" (Vietnamese)
+    if re.search(r'\bai\b.*\b(tạo ra|xây dựng|làm ra|phát triển|sáng lập|tao ra|xay dung|lam ra|phat trien|sang lap)\b.*\b(bạn|ban|stillme)\b', query_lower):
+        matched_keywords.append("ai_tao_ra_ban_pattern")
+        return (True, matched_keywords)
     
     # Check for pattern: "who" + "created/built/made" + "stillme"
     if re.search(r'\bwho\b.*\b(created|built|made|developed|founded)\b.*\bstillme\b', query_lower):
@@ -399,8 +447,18 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
         return (True, matched_keywords)
     
     # Check for "about StillMe" pattern
-    if re.search(r'\b(about|về|giới thiệu)\b.*\bstillme\b', query_lower):
+    if re.search(r'\b(about|về|giới thiệu|ve|gioi thieu)\b.*\bstillme\b', query_lower):
         matched_keywords.append("about_stillme")
+        return (True, matched_keywords)
+    
+    # Check for "StillMe là gì" / "StillMe la gi" pattern
+    if re.search(r'\bstillme\s+(là|la)\s+(gì|gi)\b', query_lower):
+        matched_keywords.append("stillme_la_gi")
+        return (True, matched_keywords)
+    
+    # Check for "bạn là gì" / "ban la gi" pattern (when asking about StillMe)
+    if re.search(r'\b(bạn|ban)\s+(là|la)\s+(gì|gi)\b', query_lower):
+        matched_keywords.append("ban_la_gi")
         return (True, matched_keywords)
     
     return (False, [])

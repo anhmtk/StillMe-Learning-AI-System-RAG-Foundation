@@ -1998,12 +1998,31 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # Origin queries (e.g., "Ai tạo ra bạn?") should ALWAYS use SYSTEM_ORIGIN truth
         # CRITICAL: Detect StillMe queries for ALL questions (including philosophical)
         # Philosophical questions about StillMe (e.g., "Bạn có thể có embodied cognition...") should use foundational knowledge
+        
+        # CRITICAL FIX: ALWAYS detect origin queries, regardless of use_rag setting
+        # Identity Truth Override must work even when RAG is disabled
+        try:
+            from backend.core.stillme_detector import (
+                detect_stillme_query, 
+                get_foundational_query_variants,
+                detect_origin_query
+            )
+            # CRITICAL: Detect origin queries FIRST, before any RAG checks
+            # This ensures Identity Truth Override works even when RAG is disabled
+            is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
+            if is_origin_query:
+                logger.debug(f"Origin query detected! Matched keywords: {origin_keywords}")
+        except ImportError:
+            logger.warning("StillMe detector not available, skipping origin detection")
+        except Exception as detector_error:
+            logger.warning(f"StillMe detector error: {detector_error}")
+        
+        # Detect StillMe queries (for RAG retrieval optimization)
         if rag_retrieval and chat_request.use_rag:
             try:
                 from backend.core.stillme_detector import (
                     detect_stillme_query, 
-                    get_foundational_query_variants,
-                    detect_origin_query
+                    get_foundational_query_variants
                 )
                 is_stillme_query, matched_keywords = detect_stillme_query(chat_request.message)
                 
@@ -2034,13 +2053,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         matched_keywords = ["technical_your_system"]
                         logger.info("Technical question about 'your system' detected - treating as StillMe query")
                 
-                # CRITICAL: Always detect origin queries, even for philosophical questions
-                # Origin queries (e.g., "Ai tạo ra bạn?") should ALWAYS use SYSTEM_ORIGIN truth
-                is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
                 if is_stillme_query:
                     logger.debug(f"StillMe query detected! Matched keywords: {matched_keywords}")
-                if is_origin_query:
-                    logger.debug(f"Origin query detected! Matched keywords: {origin_keywords}")
             except ImportError:
                 logger.warning("StillMe detector not available, skipping special retrieval rule")
             except Exception as detector_error:
