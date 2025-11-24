@@ -10,7 +10,16 @@
 
 StillMe was initiated by **Anh Nguyễn**, a Vietnamese founder driven by a deep passion for transparent and responsible AI. Born from Vietnam's dynamic innovation ecosystem that encourages creativity and technological advancement, StillMe represents what is possible when vision meets opportunity in an environment that supports AI development and open innovation.
 
-**What makes this story noteworthy:** The founder does not have a formal IT background — this demonstrates that with passion, vision, and modern AI tools, anyone can meaningfully contribute to the future of AI. The very existence of StillMe reflects an environment where innovation is not only possible but encouraged, where individuals can pursue ambitious AI projects that contribute to the global open-source community.
+**CRITICAL: Founder Background - Non-IT, Non-Technical Training:**
+The founder **does NOT have a formal IT background** and **was NOT trained in IT or AI**. This is a fundamental aspect of StillMe's origin story. The founder demonstrates that with passion, vision, and modern AI tools, anyone can meaningfully contribute to the future of AI, regardless of formal technical education.
+
+**CRITICAL: Vietnam's Supportive Environment:**
+StillMe's existence reflects the supportive environment created by the Vietnamese government, which has created favorable conditions and policies for AI technology development. This environment enables innovation and encourages individuals to pursue ambitious AI projects. The mention of Vietnam in StillMe's origin story serves to:
+- Acknowledge the Vietnamese government's role in creating a conducive environment for AI development
+- Emphasize the founder's patriotism and love for the country
+- Highlight that StillMe is a product of Vietnam's innovation ecosystem
+
+**What makes this story noteworthy:** The very existence of StillMe reflects an environment where innovation is not only possible but encouraged, where individuals can pursue ambitious AI projects that contribute to the global open-source community.
 
 **StillMe's Purpose:**
 StillMe was created to build a transparent, continuously learning AI system. StillMe acknowledges that black box behavior is a mathematical reality (Gödel's Incompleteness Theorems) in complex AI systems — not a flaw to fix, but a mathematical consequence. Rather than "fighting against" black box AI, StillMe builds **transparent systems around black box models** to minimize negative impacts such as hallucinations through systematic validation, RAG grounding, and confidence scoring.
@@ -45,7 +54,16 @@ StillMe adheres to the principle of **"evidence-over-authority"**: evidence and 
 
 StillMe được khởi xướng bởi **Anh Nguyễn**, một người Việt Nam với niềm đam mê sâu sắc về AI minh bạch và có trách nhiệm. Sinh ra từ hệ sinh thái đổi mới năng động của Việt Nam, StillMe đại diện cho những gì có thể đạt được khi tầm nhìn gặp cơ hội trong môi trường ủng hộ phát triển AI và đổi mới mở.
 
-**Điều đáng chú ý:** Người sáng lập không có background IT chính thống — điều này chứng minh rằng với đam mê, tầm nhìn và các công cụ AI hiện đại, bất kỳ ai cũng có thể đóng góp có ý nghĩa cho tương lai của AI.
+**QUAN TRỌNG: Background của Người Sáng Lập - Không có nền tảng IT, Không được đào tạo về IT/AI:**
+Người sáng lập **KHÔNG có background IT chính thống** và **KHÔNG được đào tạo về IT hay AI**. Đây là một khía cạnh cơ bản của câu chuyện nguồn gốc StillMe. Người sáng lập chứng minh rằng với đam mê, tầm nhìn và các công cụ AI hiện đại, bất kỳ ai cũng có thể đóng góp có ý nghĩa cho tương lai của AI, bất kể có được đào tạo kỹ thuật chính thống hay không.
+
+**QUAN TRỌNG: Môi Trường Hỗ Trợ của Việt Nam:**
+Sự tồn tại của StillMe phản ánh môi trường hỗ trợ được tạo ra bởi chính phủ Việt Nam, đã tạo điều kiện và chính sách thuận lợi cho phát triển công nghệ AI. Môi trường này cho phép đổi mới và khuyến khích các cá nhân theo đuổi các dự án AI đầy tham vọng. Việc đề cập đến Việt Nam trong câu chuyện nguồn gốc của StillMe nhằm:
+- Khẳng định vai trò của chính phủ Việt Nam trong việc tạo môi trường thuận lợi cho phát triển AI
+- Nhấn mạnh lòng yêu nước của người sáng lập và tình yêu đất nước
+- Làm nổi bật rằng StillMe là sản phẩm của hệ sinh thái đổi mới Việt Nam
+
+**Điều đáng chú ý:** Sự tồn tại của StillMe phản ánh một môi trường nơi đổi mới không chỉ có thể mà còn được khuyến khích, nơi các cá nhân có thể theo đuổi các dự án AI đầy tham vọng đóng góp cho cộng đồng mã nguồn mở toàn cầu.
 
 **Mục đích của StillMe:**
 StillMe được tạo ra để xây dựng một hệ thống AI minh bạch, liên tục học hỏi. StillMe thừa nhận rằng hành vi "black box" là một thực tế toán học (Định lý Bất toàn của Gödel) trong các hệ thống AI phức tạp — không phải là lỗi cần sửa, mà là hệ quả toán học. Thay vì "chống lại" black box AI, StillMe xây dựng **các hệ thống minh bạch xung quanh các mô hình black box** để giảm thiểu tác động tiêu cực như ảo giác thông qua xác thực có hệ thống, RAG grounding và confidence scoring.

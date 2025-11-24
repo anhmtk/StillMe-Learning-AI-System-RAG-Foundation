@@ -779,7 +779,8 @@ async def _handle_validation_with_fallback(
     citation_instruction: str,
     num_knowledge: int,
     processing_steps: list,
-    timing_logs: dict
+    timing_logs: dict,
+    is_origin_query: bool = False
 ) -> tuple:
     """
     Handle validation logic with fallback mechanisms.
@@ -1496,9 +1497,10 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
     else:
         is_safe_refusal = False
     
-    # Only prepend disclaimer if NOT a fallback meta-answer and NOT a safe refusal
+    # Only prepend disclaimer if NOT a fallback meta-answer, NOT a safe refusal, and NOT an origin query
+    # CRITICAL: StillMe MUST know about its own origin - never add disclaimer for origin queries
     if (confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical and 
-        not is_fallback_meta and not is_safe_refusal):
+        not is_fallback_meta and not is_safe_refusal and not is_origin_query):
         # Check if response already has transparency disclaimer
         response_lower = response.lower()
         has_transparency = any(
@@ -1863,7 +1865,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         citation_instruction="",  # Not used for philosophical questions
                         num_knowledge=0,
                         processing_steps=processing_steps,
-                        timing_logs={}
+                        timing_logs={},
+                        is_origin_query=is_origin_query
                     )
                     
                     # Use validated response
@@ -4431,7 +4434,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 citation_instruction=citation_instruction,
                                 num_knowledge=num_knowledge,
                                 processing_steps=processing_steps,
-                                timing_logs=timing_logs
+                                timing_logs=timing_logs,
+                                is_origin_query=is_origin_query
                             )
                         except HTTPException:
                             raise
@@ -4473,7 +4477,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                 )
                 
                 # CRITICAL: Add transparency warning for low confidence responses without context (RAG path, validators disabled)
-                if confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical:
+                # CRITICAL: StillMe MUST know about its own origin - never add disclaimer for origin queries
+                if confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical and not is_origin_query:
                     response_lower = response.lower() if response else ""
                     has_transparency = any(
                         phrase in response_lower for phrase in [
