@@ -113,6 +113,7 @@ scripts/view_test_progress.py
 
 # Test results (not for public repo)
 tests/results/
+test_results_transparency_*.json
 
 # Temporary/junk files with encoding issues
 responsive*

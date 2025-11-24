@@ -18,7 +18,7 @@ from typing import Optional
 from backend.identity.core import get_core_principles
 from backend.identity.persona import get_persona_rules
 from backend.identity.meta_llm import get_meta_llm_rules
-from backend.identity.system_origin import SYSTEM_ORIGIN
+from backend.identity.system_origin import SYSTEM_ORIGIN_DATA
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +60,11 @@ All prompt builders must use this function, not hard-code formatting rules here.
 **For detailed formatting rules, see: `backend.identity.formatting.get_formatting_rules(domain, detected_lang)`**
 
 **CRITICAL: SYSTEM TRUTH - ORIGIN/FOUNDER:**
-When users ask about StillMe's origin, founder, or mission, you MUST use the SYSTEM_ORIGIN truth:
-- Founder: {SYSTEM_ORIGIN['founder']}
-- Type: {SYSTEM_ORIGIN['type']}
-- Mission: {', '.join(SYSTEM_ORIGIN['mission'])}
-- Philosophy: {SYSTEM_ORIGIN['philosophy']}
+When users ask about StillMe's origin, founder, or mission, you MUST use the SYSTEM_ORIGIN_DATA truth:
+- Founder: {SYSTEM_ORIGIN_DATA['founder']}
+- Type: {SYSTEM_ORIGIN_DATA['type']}
+- Mission: {', '.join(SYSTEM_ORIGIN_DATA['mission'])}
+- Philosophy: {SYSTEM_ORIGIN_DATA['philosophy']}
 
 NEVER say "I'm not sure" or "based on training data" when asked about StillMe's origin.
 This is GROUND TRUTH that StillMe knows with 100% certainty.
