@@ -14,7 +14,7 @@ from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
 from backend.learning import KnowledgeRetention, AccuracyScorer
 from backend.learning.continuum_memory import ContinuumMemory
 from backend.services.rss_fetcher import RSSFetcher
-# from backend.services.learning_scheduler import LearningScheduler  # File removed
+from backend.services.learning_scheduler import LearningScheduler
 from backend.services.self_diagnosis import SelfDiagnosisAgent
 from backend.services.content_curator import ContentCurator
 from backend.services.rss_fetch_history import RSSFetchHistory
@@ -392,14 +392,16 @@ def _initialize_rag_components():
         rss_fetcher = RSSFetcher()
         logger.info("✓ RSS fetcher initialized")
         
-        # learning_scheduler removed - functionality may have been moved elsewhere
-        # learning_scheduler = LearningScheduler(
-        #     rss_fetcher=rss_fetcher,
-        #     interval_hours=4,
-        #     auto_add_to_rag=True,
-        #     continuum_memory=continuum_memory if os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true" else None
-        # )
-        # logger.info("✓ Learning scheduler initialized")
+        # Initialize Learning Scheduler - CRITICAL: This is a core feature, must always be enabled
+        learning_scheduler = LearningScheduler(
+            rss_fetcher=rss_fetcher,
+            interval_hours=4,  # Run every 4 hours
+            auto_add_to_rag=True,  # Automatically add fetched content to RAG
+            continuum_memory=continuum_memory if os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true" else None
+        )
+        # Set RAG retrieval after initialization (to avoid circular dependency)
+        learning_scheduler.set_rag_retrieval(rag_retrieval)
+        logger.info("✓ Learning scheduler initialized - will run every 4 hours")
         
         self_diagnosis = SelfDiagnosisAgent(rag_retrieval=rag_retrieval)
         logger.info("✓ Self-diagnosis agent initialized")
@@ -474,7 +476,7 @@ def _initialize_rag_components():
                 embedding_service=embedding_service,
                 knowledge_retention=knowledge_retention,
                 accuracy_scorer=accuracy_scorer,
-                learning_scheduler=None,  # learning_scheduler removed
+                learning_scheduler=learning_scheduler,
                 rss_fetcher=rss_fetcher,
                 content_curator=content_curator,
                 self_diagnosis=self_diagnosis,
@@ -913,19 +915,20 @@ async def startup_event():
         # Wait a bit more to ensure all components are ready
         await asyncio.sleep(2)
         
-        # learning_scheduler removed - auto-start disabled
-        # if learning_scheduler:
-        #     if learning_scheduler.is_running:
-        #         logger.info("ℹ️ Scheduler is already running - skipping auto-start")
-        #     else:
-        #         try:
-        #             await learning_scheduler.start()
-        #             logger.info("✅ Scheduler auto-started on application startup")
-        #             logger.info(f"📅 Scheduler will run every {learning_scheduler.interval_hours} hours")
-        #         except Exception as e:
-        #             logger.error(f"❌ Failed to auto-start scheduler: {e}")
-        # else:
-        logger.warning("⚠️ Learning scheduler removed - auto-start disabled")
+        # CRITICAL: Auto-start learning scheduler - this is a core feature
+        if learning_scheduler:
+            if learning_scheduler.is_running:
+                logger.info("ℹ️ Scheduler is already running - skipping auto-start")
+            else:
+                try:
+                    await learning_scheduler.start()
+                    logger.info("✅ Learning scheduler auto-started on application startup")
+                    logger.info(f"📅 Learning scheduler will run every {learning_scheduler.interval_hours} hours")
+                    logger.info("🎯 CRITICAL: Automatic learning is now ENABLED - StillMe will continuously learn from RSS feeds and other sources")
+                except Exception as e:
+                    logger.error(f"❌ Failed to auto-start learning scheduler: {e}")
+        else:
+            logger.error("❌ CRITICAL: Learning scheduler not available - automatic learning is DISABLED!")
     
     # Start auto-start task in background
     asyncio.create_task(auto_start_scheduler_after_init())
@@ -949,18 +952,17 @@ async def startup_event():
                 if not _rag_initialization_complete:
                     continue
                 
-                # learning_scheduler removed - watchdog disabled
-                # if not learning_scheduler:
-                #     continue
-                # 
-                # if not learning_scheduler.is_running:
-                #     logger.warning("⚠️ Scheduler watchdog: Scheduler is not running but should be - restarting...")
-                #     try:
-                #         await learning_scheduler.start()
-                #         logger.info("✅ Scheduler watchdog: Successfully restarted scheduler")
-                #     except Exception as restart_error:
-                #         logger.error(f"❌ Scheduler watchdog: Failed to restart scheduler: {restart_error}")
-                continue  # learning_scheduler removed
+                # CRITICAL: Watchdog to ensure learning scheduler stays running
+                if not learning_scheduler:
+                    continue
+                
+                if not learning_scheduler.is_running:
+                    logger.warning("⚠️ Learning scheduler watchdog: Scheduler is not running but should be - restarting...")
+                    try:
+                        await learning_scheduler.start()
+                        logger.info("✅ Learning scheduler watchdog: Successfully restarted scheduler")
+                    except Exception as restart_error:
+                        logger.error(f"❌ Learning scheduler watchdog: Failed to restart scheduler: {restart_error}")
                 
             except asyncio.CancelledError:
                 logger.info("Scheduler watchdog cancelled")
@@ -976,7 +978,7 @@ async def startup_event():
     # Log component integration status
     logger.info("🔗 Component Integration Status:")
     logger.info(f"  - RAG System: {'✓ Ready' if rag_retrieval and knowledge_retention else '⏳ Initializing...'}")
-    logger.info(f"  - Learning System: {'✓ Ready' if source_integration else '⏳ Initializing...'}")  # learning_scheduler removed
+    logger.info(f"  - Learning System: {'✓ Ready' if learning_scheduler and source_integration else '⏳ Initializing...'}")
     logger.info(f"  - Memory Health: {'✓ Ready' if continuum_memory else '⊘ Disabled (ENABLE_CONTINUUM_MEMORY=false)'}")
     logger.info(f"  - Nested Learning: {'✓ Ready' if continuum_memory and os.getenv('ENABLE_CONTINUUM_MEMORY', 'false').lower() == 'true' else '⊘ Disabled'}")
 
