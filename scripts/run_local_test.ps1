@@ -10,5 +10,5 @@ Write-Host "🔧 Testing against local backend on port $port"
 Write-Host "   Make sure backend is running: python start_backend.py"
 Write-Host ""
 
-python scripts/test_transparency_and_evidence.py
+python scripts\test_transparency_and_evidence.py
 
