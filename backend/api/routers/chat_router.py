@@ -3134,10 +3134,10 @@ This is MANDATORY when provenance context is available and user asks about origi
 📊 LEARNING METRICS DATA FOR TODAY ({today_date}) - USE THIS DATA IN YOUR RESPONSE:
 
 **Today's Learning Statistics:**
-- **Entries Fetched**: {learning_metrics_data.entries_fetched}
-- **Entries Added**: {learning_metrics_data.entries_added}
-- **Entries Filtered**: {learning_metrics_data.entries_filtered}
-- **Filter Rate**: {(learning_metrics_data.entries_filtered / learning_metrics_data.entries_fetched * 100) if learning_metrics_data.entries_fetched > 0 else 0:.1f}%
+- **Entries Fetched**: {learning_metrics_data.total_entries_fetched}
+- **Entries Added**: {learning_metrics_data.total_entries_added}
+- **Entries Filtered**: {learning_metrics_data.total_entries_filtered}
+- **Filter Rate**: {(learning_metrics_data.total_entries_filtered / learning_metrics_data.total_entries_fetched * 100) if learning_metrics_data.total_entries_fetched > 0 else 0:.1f}%
 
 **Filter Reasons Breakdown:**
 {chr(10).join(f"- {reason}: {count}" for reason, count in learning_metrics_data.filter_reasons.items()) if learning_metrics_data.filter_reasons else "- No filter reasons available"}
@@ -3146,7 +3146,7 @@ This is MANDATORY when provenance context is available and user asks about origi
 {chr(10).join(f"- {source}: {count}" for source, count in learning_metrics_data.sources.items()) if learning_metrics_data.sources else "- No source data available"}
 
 **CRITICAL: You MUST use this actual data in your response:**
-- Provide specific numbers: {learning_metrics_data.entries_fetched} fetched, {learning_metrics_data.entries_added} added, {learning_metrics_data.entries_filtered} filtered
+- Provide specific numbers: {learning_metrics_data.total_entries_fetched} fetched, {learning_metrics_data.total_entries_added} added, {learning_metrics_data.total_entries_filtered} filtered
 - Explain filter reasons if available
 - List sources that contributed to learning
 - Format with line breaks, bullet points, headers, and 2-3 emojis
@@ -3156,8 +3156,8 @@ This is MANDATORY when provenance context is available and user asks about origi
 "## 📚 Học tập hôm nay ({today_date})
 
 Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
-- **Tìm nạp**: {learning_metrics_data.entries_fetched} nội dung
-- **Thêm vào**: {learning_metrics_data.entries_added} nội dung
+- **Tìm nạp**: {learning_metrics_data.total_entries_fetched} nội dung
+- **Thêm vào**: {learning_metrics_data.total_entries_added} nội dung
 - **Lọc bỏ**: {learning_metrics_data.entries_filtered} nội dung
 
 **Nguồn học tập**: [list sources]"
