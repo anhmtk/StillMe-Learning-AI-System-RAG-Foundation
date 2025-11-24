@@ -846,6 +846,48 @@ async def get_rss_circuit_breakers():
         logger.error(f"Circuit breaker stats error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/rss/health")
+async def get_rss_feed_health():
+    """Get RSS feed health monitoring data"""
+    try:
+        from backend.services.feed_health_monitor import get_feed_health_monitor
+        health_monitor = get_feed_health_monitor()
+        
+        stats = health_monitor.get_all_health_stats()
+        unhealthy_feeds = health_monitor.get_unhealthy_feeds()
+        
+        # Get detailed health for unhealthy feeds
+        unhealthy_details = {}
+        for feed_url in unhealthy_feeds:
+            unhealthy_details[feed_url] = health_monitor.get_feed_health(feed_url)
+        
+        return {
+            "overall_stats": stats,
+            "unhealthy_feeds_detail": unhealthy_details,
+            "replacement_history": health_monitor.get_replacement_history(limit=20)
+        }
+    except Exception as e:
+        logger.error(f"Feed health monitoring error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/rss/health/{feed_url:path}")
+async def get_single_feed_health(feed_url: str):
+    """Get health information for a specific feed"""
+    try:
+        from backend.services.feed_health_monitor import get_feed_health_monitor
+        health_monitor = get_feed_health_monitor()
+        
+        health_data = health_monitor.get_feed_health(feed_url)
+        if not health_data:
+            raise HTTPException(status_code=404, detail=f"Feed not found in health records: {feed_url}")
+        
+        return health_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Feed health error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/rss/stats")
 async def get_rss_stats():
     """Get RSS pipeline statistics"""

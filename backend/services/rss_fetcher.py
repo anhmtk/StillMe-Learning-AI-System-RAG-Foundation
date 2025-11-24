@@ -18,6 +18,7 @@ from backend.services.rss_fetcher_enhanced import (
     fetch_feed_with_retry
 )
 from backend.services.circuit_breaker import CircuitBreakerManager, CircuitBreakerConfig
+from backend.services.feed_health_monitor import get_feed_health_monitor
 
 logger = logging.getLogger(__name__)
 
@@ -191,6 +192,14 @@ class RSSFetcher:
                     self.failed_feeds += 1
                     self.error_count += 1
                     logger.error(error_msg)
+                    # Record failure in health monitor
+                    health_monitor = get_feed_health_monitor()
+                    health_monitor.record_failure(feed_url, str(feed_result))
+                    breaker = self.circuit_breaker_manager.get_breaker(
+                        f"rss_feed_{feed_url[:50]}",
+                        self.circuit_config
+                    )
+                    health_monitor.update_circuit_breaker_state(feed_url, breaker.state.value)
                     continue
                 
                 if feed_result is None:
@@ -198,6 +207,14 @@ class RSSFetcher:
                     errors.append(error_msg)
                     self.failed_feeds += 1
                     logger.warning(error_msg)
+                    # Record failure in health monitor
+                    health_monitor = get_feed_health_monitor()
+                    health_monitor.record_failure(feed_url, "All retries exhausted or circuit breaker OPEN")
+                    breaker = self.circuit_breaker_manager.get_breaker(
+                        f"rss_feed_{feed_url[:50]}",
+                        self.circuit_config
+                    )
+                    health_monitor.update_circuit_breaker_state(feed_url, breaker.state.value)
                     continue
                 
                 feed = feed_result
