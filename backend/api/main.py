@@ -464,6 +464,27 @@ def _initialize_rag_components():
         
         logger.info("✅ All RAG components initialized successfully")
         
+        # Set services in dependency injection module
+        try:
+            from backend.api.dependencies import set_services
+            set_services(
+                rag_retrieval=rag_retrieval,
+                chroma_client=chroma_client,
+                embedding_service=embedding_service,
+                knowledge_retention=knowledge_retention,
+                accuracy_scorer=accuracy_scorer,
+                learning_scheduler=learning_scheduler,
+                rss_fetcher=rss_fetcher,
+                content_curator=content_curator,
+                self_diagnosis=self_diagnosis,
+                continuum_memory=continuum_memory,
+                source_integration=source_integration,
+                rss_fetch_history=rss_fetch_history
+            )
+            logger.info("✅ Dependency injection services registered")
+        except Exception as di_error:
+            logger.warning(f"⚠️ Could not register dependency injection services: {di_error}")
+        
         # CRITICAL: Auto-add foundational knowledge if missing
         # This ensures StillMe can answer questions about itself on Railway deployment
         # MUST run BEFORE any RAG queries to ensure database has content

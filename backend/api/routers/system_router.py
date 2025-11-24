@@ -34,9 +34,14 @@ def get_chroma_client():
     return None
 
 @router.get("/")
-async def root():
+async def root(
+    rag_retrieval_service: object = RAGRetrievalDep if USE_DEPENDENCY_INJECTION else None
+):
     """Root endpoint"""
-    rag_retrieval = get_rag_retrieval()
+    if USE_DEPENDENCY_INJECTION and rag_retrieval_service:
+        rag_retrieval = rag_retrieval_service
+    else:
+        rag_retrieval = get_rag_retrieval()
     _initialization_error = get_initialization_error()
     
     # Debug: Log RAG status for troubleshooting
@@ -667,9 +672,15 @@ def get_knowledge_retention():
 
 # ChromaDB Backup Endpoints
 @router.post("/api/backup/chromadb/create")
-async def create_chromadb_backup(backup_name: Optional[str] = None):
+async def create_chromadb_backup(
+    backup_name: Optional[str] = None,
+    chroma_client_service: object = ChromaClientDep if USE_DEPENDENCY_INJECTION else None
+):
     """Create a backup of ChromaDB data"""
-    chroma_client = get_chroma_client()
+    if USE_DEPENDENCY_INJECTION and chroma_client_service:
+        chroma_client = chroma_client_service
+    else:
+        chroma_client = get_chroma_client()
     if not chroma_client:
         raise HTTPException(status_code=503, detail="ChromaDB client not available")
     
