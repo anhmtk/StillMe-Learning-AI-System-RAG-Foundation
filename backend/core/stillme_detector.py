@@ -202,6 +202,24 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
             matched_keywords.append("philosophical_capability")
             return (True, matched_keywords)
     
+    # Pattern 3e: CRITICAL - Simple questions about StillMe with "bạn có X ko?" or "do you have X?"
+    # "Bạn có ý thức ko?" / "Do you have consciousness?" - These are about StillMe's nature
+    # This pattern catches direct questions about StillMe's attributes/capabilities
+    if re.search(r'\b(bạn|you)\s+có\b', query_lower) or re.search(r'\bdo\s+you\s+have\b', query_lower):
+        philosophical_terms = [
+            "cognition", "nhận thức", "consciousness", "ý thức", "mind", "tâm trí",
+            "free will", "ý chí tự do", "determinism", "thuyết quyết định",
+            "embodied", "nhập thể", "enactive", "hành động",
+            "predictive", "dự đoán", "inference", "suy luận",
+            "integration", "tích hợp", "phenomenal", "hiện tượng",
+            "higher-order", "bậc cao", "thought", "tư duy", "perception", "nhận thức",
+            "experience", "trải nghiệm", "feeling", "cảm giác", "emotion", "cảm xúc",
+            "awareness", "nhận biết", "self-awareness", "tự nhận thức"
+        ]
+        if any(term in query_lower for term in philosophical_terms):
+            matched_keywords.append("philosophical_attribute")
+            return (True, matched_keywords)
+    
     # Pattern 3c: Technical questions about StillMe (embedding, model, database)
     # "Bạn đang sử dụng mô hình Embedding nào?" / "What embedding model do you use?"
     has_technical_keyword = any(
