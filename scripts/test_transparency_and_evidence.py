@@ -18,8 +18,10 @@ import sys
 import requests
 import json
 import re
+import glob
 from typing import Dict, List, Tuple
 from datetime import datetime
+from pathlib import Path
 
 # Fix encoding for Windows console
 if sys.platform == "win32":
@@ -447,6 +449,50 @@ def test_question(test_case: Dict, question_index: int) -> Dict:
     }
 
 
+def cleanup_old_test_results():
+    """
+    Clean up old test result files, keeping only the 2 most recent ones.
+    This prevents test result files from accumulating and cluttering the repository.
+    """
+    try:
+        # Find all test result files matching the pattern
+        script_dir = Path(__file__).parent
+        project_root = script_dir.parent
+        result_files = list(project_root.glob("test_results_transparency_*.json"))
+        
+        if len(result_files) <= 2:
+            print(f"   ✅ Found {len(result_files)} test result file(s) - no cleanup needed")
+            return
+        
+        # Sort by modification time (most recent first)
+        result_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        
+        # Keep the 2 most recent, delete the rest
+        files_to_keep = result_files[:2]
+        files_to_delete = result_files[2:]
+        
+        print(f"   📊 Found {len(result_files)} test result file(s)")
+        print(f"   ✅ Keeping 2 most recent:")
+        for f in files_to_keep:
+            print(f"      - {f.name}")
+        
+        if files_to_delete:
+            print(f"   🗑️  Deleting {len(files_to_delete)} old file(s):")
+            for f in files_to_delete:
+                try:
+                    f.unlink()
+                    print(f"      - Deleted: {f.name}")
+                except Exception as e:
+                    print(f"      - ⚠️  Failed to delete {f.name}: {e}")
+            print(f"   ✅ Cleanup completed - {len(files_to_keep)} file(s) remaining")
+        else:
+            print(f"   ✅ No files to delete")
+            
+    except Exception as e:
+        print(f"   ⚠️  Error during cleanup: {e}")
+        print(f"   (This is non-critical - test results are still saved)")
+
+
 def run_all_tests():
     """Run all test questions"""
     print("=" * 80)
@@ -536,6 +582,11 @@ def run_all_tests():
         }, f, indent=2, ensure_ascii=False)
     
     print(f"📄 Results saved to: {results_file}")
+    
+    # Phase 3: Auto-cleanup old test results - keep only 2 most recent
+    print()
+    print("🧹 Cleaning up old test results (keeping only 2 most recent)...")
+    cleanup_old_test_results()
     print()
     
     # Auto-extract log keywords if log file exists or user wants to extract from clipboard

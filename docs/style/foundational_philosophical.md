@@ -1,5 +1,5 @@
 ---
-content_type: philosophical
+content_type: style_guide
 domain: stillme_foundation
 ---
 

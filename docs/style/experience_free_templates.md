@@ -1,3 +1,8 @@
+---
+content_type: style_guide
+domain: stillme_foundation
+---
+
 # Experience-Free Answer Templates
 
 ## 🎯 Purpose

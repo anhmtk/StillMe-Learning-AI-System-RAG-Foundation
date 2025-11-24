@@ -263,12 +263,9 @@ class RewriteLLM:
     
     def _build_system_prompt(self, is_philosophical: bool, detected_lang: str) -> str:
         """Build minimal system prompt for rewrite"""
-        # Phase 1: Use Style Hub instead of hard-coding rules
-        from backend.identity.style_hub import (
-            get_formatting_rules,
-            get_meta_llm_rules,
-            DomainType
-        )
+        # Phase 2: Use Unified Identity Layer - formatting.py and meta_llm.py (single source of truth)
+        from backend.identity.formatting import get_formatting_rules, DomainType
+        from backend.identity.meta_llm import get_meta_llm_rules
         
         # Get full language name for better clarity
         language_names = {
@@ -511,8 +508,8 @@ StillMe's RAG system did NOT find reliable context for this question (context do
         truncated_text = text[:600] + "..." if len(text) > 600 else text
         truncated_question = original_question[:100] + "..." if len(original_question) > 100 else original_question
         
-        # Phase 1: Use Style Hub for meta-LLM rules
-        from backend.identity.style_hub import get_meta_llm_rules
+        # Phase 2: Use Unified Identity Layer - meta_llm.py (single source of truth)
+        from backend.identity.meta_llm import get_meta_llm_rules
         meta_llm_rules = get_meta_llm_rules(detected_lang)
         
         # CRITICAL: AI_SELF_MODEL domain - NO philosophy allowed

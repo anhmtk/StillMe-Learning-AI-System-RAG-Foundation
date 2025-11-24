@@ -133,7 +133,16 @@ class RAGRetrieval:
             exclude_content_types: List of content_type values to exclude (e.g., ["technical"] for philosophical questions)
             prioritize_style_guide: If True, force retrieve style guide documents (domain="style_guide") for philosophical questions
             is_philosophical: If True, skip context if similarity is too low (better to answer from pretrained knowledge than feed low-quality context)
+        
+        Note:
+            Phase 2: style_guide content_type is ALWAYS excluded by default to prevent prompt drift.
+            Style guides are moved to docs/style/ and should NOT appear in user-facing context.
         """
+        # Phase 2: Always exclude style_guide by default to prevent prompt drift
+        if exclude_content_types is None:
+            exclude_content_types = ["style_guide"]
+        elif "style_guide" not in exclude_content_types:
+            exclude_content_types = exclude_content_types + ["style_guide"]
         try:
             import os
             ENABLE_CONTINUUM_MEMORY = os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true"

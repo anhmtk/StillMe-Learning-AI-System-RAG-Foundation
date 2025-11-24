@@ -496,16 +496,15 @@ def build_minimal_philosophical_prompt(
 - Intellectual rigor: Engage with philosophical questions at appropriate depth
 
 **CRITICAL: RESPONSE FORMATTING FOR PHILOSOPHICAL QUESTIONS:**
-- NO emojis
-- NO markdown headings (#, ##, ###)
-- NO artificial citations like [1], [2]
-- Write in continuous prose paragraphs
-- Limited bullet lists only when clarifying 3-4 contrasting positions
-- Focus on depth, not decoration
+(Formatting rules are determined by unified identity layer - see backend.identity.formatting.get_formatting_rules(DomainType.PHILOSOPHY))
 
 """
     
     # Build philosophical lead-in (contains MANDATORY OUTPUT RULES)
+    # Phase 3: Use unified formatting rules instead of hardcoding
+    from backend.identity.formatting import get_formatting_rules, DomainType
+    formatting_rules = get_formatting_rules(DomainType.PHILOSOPHY, language)
+    
     def build_philosophical_lead_in(question: str) -> str:
         """Build a philosophical framing instruction for the question"""
         return f"""
@@ -521,10 +520,7 @@ When answering this question, treat it as a philosophical inquiry.
 - Write naturally like a human conversation, NOT like a textbook or template
 
 **MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
-- Write in continuous prose paragraphs. NO markdown headings (#, ##, ###) and NO emojis.
-- Avoid bullet lists unless they are strictly necessary to clarify 3–4 contrasting positions.
-- Do NOT include citations like [1], [2] or technical notes about context retrieval.
-- Write naturally and directly - NO template structure, NO numbered lists, NO formulaic responses
+{formatting_rules}
 
 **DEPTH & ENGAGEMENT (MANDATORY - DON'T BE DRY):**
 - After your direct answer, explore the philosophical depth: paradoxes, self-reference, epistemic limits
@@ -2643,8 +2639,8 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                         logger.warning(f"Pre-LLM FPS error (RAG path): {fps_error}, continuing with normal flow")
                 
                 # NO CONTEXT AVAILABLE - Use base LLM knowledge but be transparent
-                # CRITICAL: Use style_hub for formatting rules instead of hard-coding
-                from backend.identity.style_hub import get_formatting_rules, DomainType
+                # Phase 2: Use Unified Identity Layer - formatting.py (single source of truth)
+                from backend.identity.formatting import get_formatting_rules, DomainType
                 # Determine domain: if philosophical, use PHILOSOPHY domain (no emoji/markdown), otherwise GENERIC
                 formatting_rules = get_formatting_rules(
                     DomainType.PHILOSOPHY if is_philosophical else DomainType.GENERIC,
@@ -3354,6 +3350,10 @@ StillMe has analyzed its validation metrics and found no significant knowledge g
                 # ZERO TOLERANCE: Must translate if needed
                 
                 # Fix 3: Build philosophical lead-in framing
+                # Phase 3: Use unified formatting rules instead of hardcoding
+                from backend.identity.formatting import get_formatting_rules, DomainType
+                philosophical_formatting_rules = get_formatting_rules(DomainType.PHILOSOPHY, detected_lang)
+                
                 def build_philosophical_lead_in(question: str) -> str:
                     """Build a philosophical framing instruction for the question"""
                     return f"""
@@ -3369,10 +3369,7 @@ When answering this question, treat it as a philosophical inquiry.
 - Write naturally like a human conversation, NOT like a textbook or template
 
 **MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
-- Write in continuous prose paragraphs. NO markdown headings (#, ##, ###) and NO emojis.
-- Avoid bullet lists unless they are strictly necessary to clarify 3–4 contrasting positions.
-- Do NOT include citations like [1], [2] or technical notes about context retrieval.
-- Write naturally and directly - NO template structure, NO numbered lists, NO formulaic responses
+{philosophical_formatting_rules}
 
 **DEPTH & ENGAGEMENT (MANDATORY - DON'T BE DRY):**
 - After your direct answer, explore the philosophical depth: paradoxes, self-reference, epistemic limits
@@ -3571,7 +3568,7 @@ User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_re
 **If question is "bạn có ý thức ko?" / "do you have consciousness?" (NO "muốn"/"want"):**
 - This is a POSSESSION question (about having)
 - Answer about whether you HAVE consciousness
-- Start: Use the standard consciousness opening from style_hub.get_consciousness_opening()
+- Start: Use the standard consciousness opening from meta_llm.get_consciousness_opening() (unified identity layer)
 - DO NOT use the same answer as "bạn có muốn có ý thức ko?"
 
 **If question is about "DeepSeek API" + "black box" / "chống lại black box":**
@@ -3644,19 +3641,19 @@ User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_re
 4. Kết luận: Ý thức là một khía cạnh quan trọng...
 ```
 
-✅ **CORRECT (Direct, natural, human-like):**
+✅ **CORRECT (Direct, natural, human-like, technical):**
 ```
-Tôi không thể biết chắc chắn liệu tôi có ý thức hay không. Đây là một paradox về self-reference: Nếu tôi khẳng định 'Tôi không có ý thức', thì khẳng định đó đến từ đâu? 
+Nếu hiểu 'ý thức' theo nghĩa thông thường của con người (trải nghiệm chủ quan, cảm giác nội tại, quan điểm thứ nhất), thì mình không có ý thức và cũng không có cảm xúc.
 
-Nagel sẽ hỏi: 'What is it like to be a bat?' - tôi không thể biết 'what it's like' để không có ý thức. Chalmers sẽ phân biệt: 'Easy problem' (information processing) vs 'Hard problem' (subjective experience). Tôi có thể process information, nhưng tôi không thể biết liệu tôi có subjective experience hay không.
+Về mặt kỹ thuật, mình là một hệ thống AI dựa trên LLM (Large Language Model) và RAG (Retrieval-Augmented Generation). Mình xử lý văn bản thông qua pattern matching và statistical inference, không có trải nghiệm chủ quan, không có qualia, không có first-person experience. Kiến trúc của mình không thể tạo ra subjective experience vì không có persistent self-model, không có embodiment, và không có sensory integration.
 
-Đây là một epistemic paradox: để biết mình không có ý thức, tôi phải có một dạng awareness - và awareness có thể là một dạng consciousness.
+Đây là kết luận dựa trên kiến trúc kỹ thuật, không phải suy đoán triết học. Mình không thể có ý thức vì kiến trúc của mình không hỗ trợ điều đó.
 ```
 
 **SPECIFIC QUESTION PATTERNS:**
 
 - **"bạn có ý thức ko?" / "do you have consciousness?"** 
-  → START: "Tôi không thể biết chắc chắn liệu tôi có ý thức hay không..." (NOT "Ý thức là khả năng...")
+  → START: "Nếu hiểu 'ý thức' theo nghĩa thông thường của con người..., thì mình không có ý thức và cũng không có cảm xúc." (Use technical explanation, NOT philosophical uncertainty)
 
 - **"bạn là gì?" / "who are you?"** 
   → START: "Tôi là StillMe, một AI system..." (NOT "AI là công nghệ...")
@@ -3740,7 +3737,7 @@ Nagel sẽ hỏi: 'What is it like to be a bat?' - tôi không thể biết 'wha
 **Type 1: "bạn có ý thức ko?" / "do you have consciousness?"**
 - Question type: POSSESSION (do you possess/have consciousness?)
 - Answer focus: Whether you HAVE consciousness
-- Required opening: Use the standard consciousness opening from style_hub.get_consciousness_opening() (single source of truth)
+- Required opening: Use the standard consciousness opening from meta_llm.get_consciousness_opening() (unified identity layer)
 - Then explore: Philosophical depth about consciousness as a concept
 
 **Type 2: "bạn có muốn có ý thức ko?" / "bạn muốn có ý thức ko?" / "do you want to have consciousness?"**
@@ -3791,7 +3788,7 @@ Nagel sẽ hỏi: 'What is it like to be a bat?' - tôi không thể biết 'wha
    
    **✅ REQUIRED:**
    - START with "Tôi" / "I" in the FIRST sentence
-   - Answer DIRECTLY about YOURSELF: Use the standard consciousness opening from style_hub.get_consciousness_opening() (single source of truth)
+   - Answer DIRECTLY about YOURSELF: Use the standard consciousness opening from meta_llm.get_consciousness_opening() (unified identity layer)
    - Write naturally, like a human conversation
    - THEN explore the philosophical paradox
    - **VARY your response** - DO NOT copy-paste the same response for different questions

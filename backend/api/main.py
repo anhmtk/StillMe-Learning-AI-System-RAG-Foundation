@@ -620,9 +620,9 @@ def _initialize_rag_components():
                 else:
                     logger.info("⚠️ Foundational knowledge not found. Adding it now...")
                 # Load foundational knowledge from separate files
+                # Phase 2: Only load technical foundational knowledge (philosophical is now style_guide, moved to docs/style/)
                 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
                 technical_path = os.path.join(base_dir, "docs", "rag", "foundational_technical.md")
-                philosophical_path = os.path.join(base_dir, "docs", "rag", "foundational_philosophical.md")
                 
                 # Load technical foundational knowledge
                 if os.path.exists(technical_path):
@@ -660,46 +660,14 @@ def _initialize_rag_components():
                 else:
                     logger.warning(f"⚠️ Technical foundational knowledge file not found: {technical_path}")
                 
-                # Load philosophical foundational knowledge
-                if os.path.exists(philosophical_path):
-                    with open(philosophical_path, "r", encoding="utf-8") as f:
-                        philosophical_content = f.read()
-                    # Remove frontmatter if present
-                    if philosophical_content.startswith("---"):
-                        parts = philosophical_content.split("---", 2)
-                        if len(parts) >= 3:
-                            philosophical_content = parts[2].strip()
-                    
-                    tags_list_philosophical = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "philosophical", "ethics", "transparency"]
-                    tags_string_philosophical = ",".join(tags_list_philosophical)
-                    
-                    success_philosophical = rag_retrieval.add_learning_content(
-                        content=philosophical_content,
-                        source="CRITICAL_FOUNDATION",
-                        content_type="knowledge",
-                        metadata={
-                            "title": "StillMe Core Principles - Philosophical Foundation",
-                            "foundational": "stillme",
-                            "type": "foundational",
-                            "source": "CRITICAL_FOUNDATION",
-                            "tags": tags_string_philosophical,
-                            "importance_score": 1.0,
-                            "content_type": "philosophical",
-                            "domain": "stillme_foundation",
-                            "description": "CRITICAL: Philosophical principles and ethical foundation of StillMe - MUST be retrieved when answering about StillMe's values and approach"
-                        }
-                    )
-                    if success_philosophical:
-                        logger.info("✅ Philosophical foundational knowledge added successfully!")
-                    else:
-                        logger.warning("⚠️ Failed to add philosophical foundational knowledge")
-                else:
-                    logger.warning(f"⚠️ Philosophical foundational knowledge file not found: {philosophical_path}")
+                # Phase 2: Philosophical foundational knowledge is now a style_guide (moved to docs/style/)
+                # It should NOT be loaded into RAG to prevent prompt drift
+                # Style guides are excluded from RAG retrieval via exclude_content_types=["style_guide"]
                 
                 # Fallback: If files don't exist, use old string-based approach (for backward compatibility)
                 # Initialize FOUNDATIONAL_KNOWLEDGE outside if block to avoid UnboundLocalError
                 FOUNDATIONAL_KNOWLEDGE = None
-                if not os.path.exists(technical_path) or not os.path.exists(philosophical_path):
+                if not os.path.exists(technical_path):
                     logger.warning("⚠️ Foundational knowledge files not found, using fallback string-based approach")
                     # CRITICAL: FOUNDATIONAL_KNOWLEDGE string (600+ lines) has been COMMENTED OUT to prevent:
                     # 1. Context overflow (16,385 token limit)
@@ -722,8 +690,8 @@ def _initialize_rag_components():
                     #
                     # The proper solution is to ensure foundational knowledge files exist:
                     # - docs/rag/foundational_technical.md
-                    # - docs/rag/foundational_philosophical.md
-                    # These files are loaded via RAG-based approach above (lines 650-697)
+                    # Note: foundational_philosophical.md is now a style_guide (moved to docs/style/) and should NOT be in RAG
+                    # These files are loaded via RAG-based approach above
                     #
                     # If files don't exist, system will still work but may not answer questions about StillMe correctly.
                     # To fix: Run scripts/add_foundational_knowledge.py to ensure files exist and are loaded into RAG.

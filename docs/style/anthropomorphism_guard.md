@@ -1,3 +1,8 @@
+---
+content_type: style_guide
+domain: stillme_foundation
+---
+
 # Anthropomorphism Guard - StillMe's Experience-Free Communication Protocol
 
 ## 🎯 Core Principle: AI Does Not Have Experience

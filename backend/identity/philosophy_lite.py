@@ -12,13 +12,9 @@ Reference: StillMe Style Spec v1 (docs/STILLME_STYLE_SPEC.md)
 Phase 1: Now uses Style Hub for formatting rules and consciousness opening.
 """
 
-# Phase 1: Import from Style Hub instead of hard-coding
-from backend.identity.style_hub import (
-    get_formatting_rules,
-    get_consciousness_opening,
-    get_meta_llm_rules,
-    DomainType
-)
+# Phase 2: Import from Unified Identity Layer (single source of truth)
+from backend.identity.formatting import get_formatting_rules, DomainType
+from backend.identity.meta_llm import get_consciousness_opening, get_meta_llm_rules
 
 # Philosophy-Lite System Prompt for non-RAG philosophical questions
 # This is a minimal system prompt to prevent context overflow (~200-300 tokens)

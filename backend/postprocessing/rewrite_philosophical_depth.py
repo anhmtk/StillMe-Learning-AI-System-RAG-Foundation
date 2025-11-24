@@ -154,8 +154,8 @@ class RewritePhilosophicalDepth:
         # Get domain-specific structure guidance
         domain_guidance = build_domain_structure_guidance(detected_domain, detected_lang)
         
-        # Phase 1: Get formatting rules from Style Hub
-        from backend.identity.style_hub import get_formatting_rules
+        # Phase 2: Use Unified Identity Layer - formatting.py (single source of truth)
+        from backend.identity.formatting import get_formatting_rules
         formatting_rules = get_formatting_rules(detected_domain, detected_lang)
         
         if question_type == "philosophical_meta":
