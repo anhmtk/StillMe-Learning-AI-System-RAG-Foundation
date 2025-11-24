@@ -585,6 +585,8 @@ def run_all_tests():
         print(f"   ⚠️  Make sure backend is running locally on port {STILLME_PORT}!")
         print(f"   💡 Start with: python start_backend.py")
         print(f"   💡 Or set PORT env var: $env:PORT='{STILLME_PORT}'; python start_backend.py")
+        print(f"   ⚠️  CRITICAL: Backend local needs API keys in .env file!")
+        print(f"   💡 Add at least one: DEEPSEEK_API_KEY, OPENAI_API_KEY, or OPENROUTER_API_KEY")
     print(f"API Key: {'SET' if API_KEY else 'NOT SET'}")
     print(f"Test Questions: {len(TEST_QUESTIONS)}")
     print()
