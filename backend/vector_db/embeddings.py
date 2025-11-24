@@ -53,11 +53,19 @@ except Exception as e:
 
 # NOW import SentenceTransformer (after env vars are set)
 from sentence_transformers import SentenceTransformer
-from typing import List, Union, Dict
+from typing import List, Union, Dict, Optional
 import logging
 import hashlib
 
 logger = logging.getLogger(__name__)
+
+# Import Redis cache service (optional - will work without Redis)
+try:
+    from backend.services.redis_cache import get_cache_service
+    REDIS_CACHE_AVAILABLE = True
+except ImportError:
+    REDIS_CACHE_AVAILABLE = False
+    get_cache_service = None
 
 class EmbeddingService:
     """Service for generating text embeddings"""
@@ -370,7 +378,7 @@ class EmbeddingService:
     def encode_text(self, text: Union[str, List[str]]) -> Union[List[float], List[List[float]]]:
         """Generate embeddings for text
         
-        OPTIMIZATION: Uses cache for single text queries to avoid redundant encoding
+        OPTIMIZATION: Uses in-memory cache and Redis cache for single text queries to avoid redundant encoding
         
         Args:
             text: Single text string or list of text strings
@@ -379,24 +387,49 @@ class EmbeddingService:
             Single embedding vector or list of embedding vectors
         """
         try:
-            # OPTIMIZATION: Check cache for single text queries
+            # OPTIMIZATION: Check Redis cache first (for single text queries)
+            if isinstance(text, str) and REDIS_CACHE_AVAILABLE:
+                cache_service = get_cache_service()
+                if cache_service:
+                    cached_embedding = cache_service.get_embedding(text)
+                    if cached_embedding is not None:
+                        logger.debug(f"✅ Redis cache hit for embedding: {text[:50]}...")
+                        # Also update in-memory cache
+                        cache_key = self._get_cache_key(text)
+                        self._embedding_cache[cache_key] = cached_embedding
+                        return cached_embedding.copy() if isinstance(cached_embedding, list) else cached_embedding
+            
+            # OPTIMIZATION: Check in-memory cache for single text queries
             if isinstance(text, str):
                 cache_key = self._get_cache_key(text)
                 if cache_key in self._embedding_cache:
-                    logger.debug(f"Cache hit for query: {text[:50]}...")
+                    logger.debug(f"✅ In-memory cache hit for query: {text[:50]}...")
                     return self._embedding_cache[cache_key].copy()  # Return copy to prevent mutation
             
+            # Generate embeddings
             embeddings = self.model.encode(text, convert_to_tensor=False)
             
-            # OPTIMIZATION: Cache single text embeddings
+            # OPTIMIZATION: Cache single text embeddings (both in-memory and Redis)
             if isinstance(text, str):
+                embedding_list = embeddings.tolist() if hasattr(embeddings, 'tolist') else list(embeddings)
                 cache_key = self._get_cache_key(text)
+                
+                # Update in-memory cache
                 # Limit cache size (LRU eviction)
                 if len(self._embedding_cache) >= self._cache_max_size:
                     # Remove oldest entry (simple FIFO, could use LRU but this is simpler)
                     oldest_key = next(iter(self._embedding_cache))
                     del self._embedding_cache[oldest_key]
-                self._embedding_cache[cache_key] = embeddings.tolist() if hasattr(embeddings, 'tolist') else list(embeddings)
+                self._embedding_cache[cache_key] = embedding_list
+                
+                # Update Redis cache (if available)
+                if REDIS_CACHE_AVAILABLE:
+                    cache_service = get_cache_service()
+                    if cache_service:
+                        cache_service.cache_embedding(text, embedding_list)
+                        logger.debug(f"✅ Cached embedding in Redis: {text[:50]}...")
+                
+                return embedding_list
             
             # After first encode, model files should be cached
             # Verify cache location after first use (only log once)

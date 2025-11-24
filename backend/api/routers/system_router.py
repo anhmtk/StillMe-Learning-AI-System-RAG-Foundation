@@ -739,3 +739,48 @@ async def get_chromadb_backup_stats():
         logger.error(f"Backup stats error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to get backup stats: {str(e)}")
 
+# Redis Cache Endpoints
+@router.get("/api/cache/stats")
+async def get_cache_stats():
+    """Get Redis cache statistics"""
+    try:
+        from backend.services.redis_cache import get_cache_service
+        cache_service = get_cache_service()
+        if not cache_service:
+            return {
+                "enabled": False,
+                "message": "Redis cache not available"
+            }
+        
+        stats = cache_service.get_stats()
+        return stats
+    except Exception as e:
+        logger.error(f"Cache stats error: {e}", exc_info=True)
+        return {
+            "enabled": False,
+            "error": str(e)
+        }
+
+@router.post("/api/cache/clear")
+async def clear_cache():
+    """Clear all Redis cache (use with caution!)"""
+    try:
+        from backend.services.redis_cache import get_cache_service
+        cache_service = get_cache_service()
+        if not cache_service:
+            raise HTTPException(status_code=503, detail="Redis cache not available")
+        
+        success = cache_service.clear_all()
+        if success:
+            return {
+                "status": "success",
+                "message": "All cache cleared"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to clear cache")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Clear cache error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to clear cache: {str(e)}")
+

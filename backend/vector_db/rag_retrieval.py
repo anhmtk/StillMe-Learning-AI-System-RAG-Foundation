@@ -6,11 +6,37 @@ Combines vector search with knowledge retrieval
 from typing import List, Dict, Any, Optional
 from .chroma_client import ChromaClient
 from .embeddings import EmbeddingService
-from backend.services.cache_service import (
-    get_cache_service,
-    CACHE_PREFIX_RAG,
-    TTL_RAG_RETRIEVAL
-)
+# Try to import Redis cache service (new), fallback to old cache_service if not available
+try:
+    from backend.services.redis_cache import get_cache_service as get_redis_cache_service
+    REDIS_CACHE_AVAILABLE = True
+except ImportError:
+    REDIS_CACHE_AVAILABLE = False
+    get_redis_cache_service = None
+
+# Fallback to old cache_service if Redis not available
+try:
+    from backend.services.cache_service import (
+        get_cache_service as get_old_cache_service,
+        CACHE_PREFIX_RAG,
+        TTL_RAG_RETRIEVAL
+    )
+    OLD_CACHE_AVAILABLE = True
+except ImportError:
+    OLD_CACHE_AVAILABLE = False
+    get_old_cache_service = None
+    CACHE_PREFIX_RAG = "rag"
+    TTL_RAG_RETRIEVAL = 3600
+
+def get_cache_service():
+    """Get cache service (prefer Redis, fallback to old cache)"""
+    if REDIS_CACHE_AVAILABLE:
+        cache_service = get_redis_cache_service()
+        if cache_service:
+            return cache_service
+    if OLD_CACHE_AVAILABLE:
+        return get_old_cache_service()
+    return None
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -119,30 +145,44 @@ class RAGRetrieval:
             cache_hit = False
             cache_key = None
             
-            if cache_enabled:
+            if cache_enabled and cache_service:
                 # Generate cache key from query + parameters
-                # Use query text hash (embedding is expensive, we'll generate it once below)
-                cache_key = cache_service._generate_key(
-                    CACHE_PREFIX_RAG,
-                    query,
-                    knowledge_limit,
-                    conversation_limit,
-                    prioritize_foundational,
-                    tier_preference,
-                    similarity_threshold,
-                    use_mmr,
-                    mmr_lambda,
-                    exclude_content_types,
-                    prioritize_style_guide,
-                    is_philosophical
-                )
+                # Use Redis cache service's method if available, otherwise use old method
+                if REDIS_CACHE_AVAILABLE and hasattr(cache_service, '_generate_key'):
+                    cache_key = cache_service._generate_key(
+                        "rag_query",
+                        query,
+                        knowledge_limit
+                    )
+                    # Try to get from Redis cache
+                    cached_result = cache_service.get_query_result(query, knowledge_limit)
+                else:
+                    # Use old cache service method
+                    cache_key = cache_service._generate_key(
+                        CACHE_PREFIX_RAG,
+                        query,
+                        knowledge_limit,
+                        conversation_limit,
+                        prioritize_foundational,
+                        tier_preference,
+                        similarity_threshold,
+                        use_mmr,
+                        mmr_lambda,
+                        exclude_content_types,
+                        prioritize_style_guide,
+                        is_philosophical
+                    )
+                    cached_result = cache_service.get(cache_key)
                 
-                # Try to get from cache
-                cached_result = cache_service.get(cache_key)
                 if cached_result:
                     cache_hit = True
-                    logger.info(f"✅ RAG cache HIT (saved {cached_result.get('latency', 0):.2f}s)")
-                    return cached_result.get("context")
+                    # Handle both Redis cache format (dict) and old cache format
+                    if isinstance(cached_result, dict):
+                        logger.info(f"✅ RAG cache HIT (saved {cached_result.get('latency', 0):.2f}s)")
+                        return cached_result.get("context") or cached_result
+                    else:
+                        logger.info(f"✅ RAG cache HIT")
+                        return cached_result
             
             # If not in cache, perform retrieval
             # Generate query embedding (only once, used for both cache key and search)
