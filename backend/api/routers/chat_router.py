@@ -1709,14 +1709,14 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 
                 # Build technical answer about StillMe's architecture
                 # CRITICAL: Use foundational knowledge if available, but focus on technical facts
-                technical_answer = self._build_ai_self_model_answer(
+                technical_answer = _build_ai_self_model_answer(
                     chat_request.message,
                     detected_lang,
                     opening_statement
                 )
                 
                 # CRITICAL: Strip any philosophy from answer
-                technical_answer = self._strip_philosophy_from_answer(technical_answer)
+                technical_answer = _strip_philosophy_from_answer(technical_answer)
                 
                 # Return immediately - NO philosophy processor, NO rewrite with philosophy
                 processing_steps.append("✅ AI_SELF_MODEL query - answered with technical architecture only")
@@ -1795,12 +1795,18 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             logger.info(f"🔄 Rewriting philosophical answer (attempt {rewrite_attempts}/{max_rewrite_attempts}): {rewrite_reason or 'forced for variation and depth'}")
                             
                             try:
+                                # CRITICAL: Check if this is AI_SELF_MODEL domain
+                                from backend.style.style_engine import detect_domain, DomainType
+                                detected_domain = detect_domain(chat_request.message)
+                                is_ai_self_model_domain = (detected_domain == DomainType.AI_SELF_MODEL)
+                                
                                 rewrite_result = await rewrite_llm.rewrite(
                                     text=philosophical_answer,
                                     original_question=chat_request.message,
                                     quality_issues=quality_result.get("reasons", []) or ["template-like", "needs_question_adaptation", "needs_more_depth"],
                                     is_philosophical=True,
-                                    detected_lang=detected_lang
+                                    detected_lang=detected_lang,
+                                    is_ai_self_model=is_ai_self_model_domain
                                 )
                                 
                                 if rewrite_result.was_rewritten:
