@@ -752,10 +752,10 @@ async def get_rss_fetch_history(
     limit: int = Query(default=500, ge=1, le=5000, description="Maximum number of items to return"),
     latest_cycle_only: bool = Query(default=False, description="If True, only return items from latest cycle")
 ):
-    """Get RSS fetch items with detailed status (source, link, timestamp, vector ID, title, status)
+    """Get RSS fetch items that were successfully added to RAG (for learning feed display)
     
-    This endpoint returns the raw learning feed data that StillMe has fetched.
-    Includes ALL entries: Added to RAG, Filtered, Duplicate, Failed, Error.
+    This endpoint returns ONLY entries that were "Added to RAG" for display in the learning feed table.
+    Filtered/Skipped entries are not shown in the table to avoid spam, but their counts are included in summary stats.
     
     Args:
         limit: Maximum number of items to return (default: 500, max: 5000)
@@ -764,7 +764,7 @@ async def get_rss_fetch_history(
         
     Returns:
         Dictionary with:
-        - items: List of fetch items with:
+        - items: List of fetch items that were "Added to RAG" with:
             - id: Database ID
             - cycle_id: Learning cycle ID
             - title: Entry title
@@ -772,11 +772,17 @@ async def get_rss_fetch_history(
             - link: Article URL
             - summary: Entry summary
             - fetch_timestamp: When entry was fetched
-            - status: "Added to RAG", "Filtered", "Duplicate", "Failed", "Error", "Skipped"
-            - status_reason: Reason for status (if applicable)
-            - vector_id: Vector database ID (if added to RAG)
-            - added_to_rag_at: Timestamp when added to RAG (if applicable)
-        - total: Total number of items returned
+            - status: Always "Added to RAG"
+            - vector_id: Vector database ID
+            - added_to_rag_at: Timestamp when added to RAG
+        - total: Total number of items returned (only "Added to RAG")
+        - stats: Summary statistics (for display outside table):
+            - added_to_rag: Count of items added to RAG
+            - filtered: Count of items filtered (not shown in table)
+            - skipped: Count of items skipped/duplicate (not shown in table)
+            - failed: Count of items that failed (not shown in table)
+            - error: Count of items with errors (not shown in table)
+            - total: Total items processed
     """
     try:
         rss_fetch_history = _get_rss_fetch_history_service()
@@ -784,20 +790,31 @@ async def get_rss_fetch_history(
         if not rss_fetch_history:
             raise HTTPException(status_code=503, detail="RSS fetch history not available")
         
-        # Get items based on latest_cycle_only flag
-        if latest_cycle_only:
-            items = rss_fetch_history.get_latest_fetch_items(limit=limit)
-        else:
-            # Get all items from all cycles (for comprehensive view)
-            items = rss_fetch_history.get_all_fetch_items(limit=limit)
+        # CRITICAL: Only return items that were "Added to RAG" (filter out Skipped/Filtered/Failed)
+        # This prevents spam in the learning feed table
+        items = rss_fetch_history.get_added_to_rag_items(limit=limit)
+        
+        # If latest_cycle_only, filter items to only latest cycle
+        if latest_cycle_only and items:
+            # Get latest cycle ID from any item in latest cycle
+            latest_items_all = rss_fetch_history.get_latest_fetch_items(limit=1)
+            if latest_items_all:
+                latest_cycle_id = latest_items_all[0].get("cycle_id")
+                if latest_cycle_id:
+                    items = [item for item in items if item.get("cycle_id") == latest_cycle_id]
         
         # Ensure items is always a list (never None)
         if items is None:
             items = []
         
+        # Get summary stats from latest cycle (for display outside table - shows counts of filtered/skipped)
+        # Always get stats from latest cycle to show current cycle summary
+        stats = rss_fetch_history.get_fetch_stats(cycle_id=None)
+        
         return {
             "items": items,
             "total": len(items),
+            "stats": stats,  # Summary stats for filtered/skipped counts
             "latest_cycle_only": latest_cycle_only
         }
         

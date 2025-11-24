@@ -379,6 +379,7 @@ class RSSFetchHistory:
             for row in rows:
                 items.append({
                     "id": row[0],
+                    "cycle_id": cycle_id,  # Include cycle_id in response
                     "title": row[1],
                     "source_url": row[2],
                     "link": row[3],
@@ -441,4 +442,149 @@ class RSSFetchHistory:
         except Exception as e:
             logger.error(f"Failed to get all fetch items: {e}")
             return []
+    
+    def get_added_to_rag_items(self, limit: int = 1000) -> List[Dict[str, Any]]:
+        """Get only items that were successfully added to RAG
+        
+        Args:
+            limit: Maximum number of items to return
+            
+        Returns:
+            List of items with status "Added to RAG"
+        """
+        try:
+            conn = self._get_connection()
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT id, cycle_id, title, source_url, link, summary, fetch_timestamp,
+                       status, status_reason, vector_id, added_to_rag_at
+                FROM rss_fetch_items
+                WHERE status = 'Added to RAG'
+                ORDER BY added_to_rag_at DESC, fetch_timestamp DESC
+                LIMIT ?
+            """, (limit,))
+            
+            rows = cursor.fetchall()
+            conn.close()
+            
+            items = []
+            for row in rows:
+                items.append({
+                    "id": row[0],
+                    "cycle_id": row[1],
+                    "title": row[2],
+                    "source_url": row[3],
+                    "link": row[4],
+                    "summary": row[5],
+                    "fetch_timestamp": row[6],
+                    "status": row[7],
+                    "status_reason": row[8],
+                    "vector_id": row[9],
+                    "added_to_rag_at": row[10]
+                })
+            
+            return items
+            
+        except Exception as e:
+            logger.error(f"Failed to get added to RAG items: {e}")
+            return []
+    
+    def get_fetch_stats(self, cycle_id: Optional[int] = None) -> Dict[str, Any]:
+        """Get statistics about fetch items (for summary display)
+        
+        Args:
+            cycle_id: Optional cycle ID to filter by. If None, gets stats from all cycles.
+            
+        Returns:
+            Dictionary with counts by status
+        """
+        try:
+            conn = self._get_connection()
+            cursor = conn.cursor()
+            
+            if cycle_id:
+                # Get stats for specific cycle
+                cursor.execute("""
+                    SELECT status, COUNT(*) as count
+                    FROM rss_fetch_items
+                    WHERE cycle_id = ?
+                    GROUP BY status
+                """, (cycle_id,))
+            else:
+                # Get stats from latest cycle
+                cursor.execute("""
+                    SELECT id FROM rss_fetch_cycles
+                    WHERE completed_at IS NOT NULL
+                    ORDER BY completed_at DESC
+                    LIMIT 1
+                """)
+                cycle_row = cursor.fetchone()
+                if not cycle_row:
+                    cursor.execute("""
+                        SELECT id FROM rss_fetch_cycles
+                        ORDER BY started_at DESC
+                        LIMIT 1
+                    """)
+                    cycle_row = cursor.fetchone()
+                
+                if cycle_row:
+                    cycle_id = cycle_row[0]
+                    cursor.execute("""
+                        SELECT status, COUNT(*) as count
+                        FROM rss_fetch_items
+                        WHERE cycle_id = ?
+                        GROUP BY status
+                    """, (cycle_id,))
+                else:
+                    # No cycles yet
+                    return {
+                        "added_to_rag": 0,
+                        "filtered": 0,
+                        "skipped": 0,
+                        "failed": 0,
+                        "error": 0,
+                        "total": 0
+                    }
+            
+            rows = cursor.fetchall()
+            conn.close()
+            
+            stats = {
+                "added_to_rag": 0,
+                "filtered": 0,
+                "skipped": 0,
+                "failed": 0,
+                "error": 0,
+                "total": 0
+            }
+            
+            for row in rows:
+                status = row[0]
+                count = row[1]
+                stats["total"] += count
+                
+                if status == "Added to RAG":
+                    stats["added_to_rag"] = count
+                elif status == "Filtered":
+                    stats["filtered"] = count
+                elif status == "Skipped":
+                    stats["skipped"] = count
+                elif status == "Failed":
+                    stats["failed"] = count
+                elif status == "Error":
+                    stats["error"] = count
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Failed to get fetch stats: {e}")
+            return {
+                "added_to_rag": 0,
+                "filtered": 0,
+                "skipped": 0,
+                "failed": 0,
+                "error": 0,
+                "total": 0
+            }
 
