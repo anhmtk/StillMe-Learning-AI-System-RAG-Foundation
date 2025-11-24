@@ -1775,15 +1775,6 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         confidence_score=1.0,  # High confidence in honesty
                         processing_steps=processing_steps
                     )
-                    processing_steps=processing_steps,
-                    timing_logs={
-                        "total_time": time.time() - start_time,
-                        "rag_retrieval_latency": 0.0,
-                        "llm_inference_latency": 0.0
-                    },
-                    validation_result=None,
-                    used_fallback=False
-                )
             elif use_option_b and not fps_result.is_plausible and fps_result.confidence < 0.3:
                 # For Option B, mark for blocking but let Option B handle it with EPD-Fallback
                 fps_should_block = True
