@@ -230,11 +230,35 @@ class ValidatorChain:
             logger.debug(f"Running {len(parallel_validators)} validators in parallel...")
             parallel_results: Dict[int, ValidationResult] = {}
             
+            def _run_parallel_validator(validator, validator_name, patched_answer, ctx_docs_list, user_q=None):
+                """Helper function to run validator with correct parameters"""
+                try:
+                    # Pass user_question to validators that need it
+                    if validator_name == "FactualHallucinationValidator":
+                        return validator.run(patched_answer, ctx_docs_list, user_question=user_q)
+                    elif validator_name == "SourceConsensusValidator":
+                        return validator.run(patched_answer, ctx_docs_list, user_question=user_q)
+                    else:
+                        return validator.run(patched_answer, ctx_docs_list)
+                except Exception as e:
+                    logger.error(f"Parallel validator {validator_name} error: {e}")
+                    return ValidationResult(
+                        passed=False,
+                        reasons=[f"validator_error:{validator_name}:{str(e)}"]
+                    )
+            
             try:
-                with ThreadPoolExecutor(max_workers=len(parallel_validators)) as executor:
-                    # Submit all parallel validators
+                with ThreadPoolExecutor(max_workers=min(len(parallel_validators), 5)) as executor:
+                    # Submit all parallel validators with correct parameters
                     future_to_validator = {
-                        executor.submit(validator.run, patched, ctx_docs): (i, validator_name)
+                        executor.submit(
+                            _run_parallel_validator,
+                            validator,
+                            validator_name,
+                            patched,
+                            ctx_docs,
+                            user_question
+                        ): (i, validator_name)
                         for i, validator, validator_name in parallel_validators
                     }
                     
