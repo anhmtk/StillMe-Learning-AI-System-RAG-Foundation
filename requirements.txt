@@ -49,7 +49,7 @@ orjson==3.11.4
 # CRITICAL: ChromaDB 1.3.4 requires onnxruntime>=1.14.1
 # Using Python 3.11 for compatibility (Python 3.12 doesn't have onnxruntime wheels on Linux yet)
 onnxruntime>=1.14.1  # Required by chromadb, compatible with Python 3.11
-chromadb==1.3.4
+chromadb==1.3.5
 sentence-transformers>=2.7.0  # Updated to support newer huggingface_hub
 
 # Security & Rate Limiting
