@@ -1692,7 +1692,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             try:
                 # CRITICAL: Detect language BEFORE calling get_system_origin_answer
                 # detect_language is already imported at top level (line 11)
-                detected_lang = detect_language(chat_request.message)
+                try:
+                    detected_lang = detect_language(chat_request.message)
                     logger.debug(f"🌐 Detected language for origin query: {detected_lang}")
                 except Exception as lang_error:
                     logger.warning(f"Language detection failed: {lang_error}, defaulting to 'vi'")

@@ -225,6 +225,35 @@ class CacheService:
         }
         
         return stats
+    
+    def cache_query_result(self, query: str, context_limit: int, result: Dict[str, Any], ttl: Optional[int] = None) -> bool:
+        """Cache RAG query result
+        
+        Args:
+            query: User query
+            context_limit: Context limit used
+            result: RAG retrieval result
+            ttl: Time to live in seconds (default: 1 hour for queries)
+            
+        Returns:
+            True if cached successfully
+        """
+        key = self._generate_key("rag_query", query, context_limit)
+        ttl = ttl or self.default_ttl  # 1 hour default
+        return self.set(key, result, ttl)
+    
+    def get_query_result(self, query: str, context_limit: int) -> Optional[Dict[str, Any]]:
+        """Get cached RAG query result
+        
+        Args:
+            query: User query
+            context_limit: Context limit used
+            
+        Returns:
+            Cached result or None
+        """
+        key = self._generate_key("rag_query", query, context_limit)
+        return self.get(key)
 
 
 # Global cache service instance
