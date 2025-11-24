@@ -5,7 +5,7 @@ Handles all chat-related endpoints
 
 from fastapi import APIRouter, Request, HTTPException
 from backend.api.models import ChatRequest, ChatResponse
-from backend.api.rate_limiter import limiter, get_rate_limit_key_func
+from backend.api.rate_limiter import limiter, get_rate_limit_key_func, RateLimitExceeded, get_chat_rate_limit
 from backend.api.utils.chat_helpers import (
     generate_ai_response,
     detect_language
@@ -1553,7 +1553,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
     return response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, ctx_docs
 
 @router.post("/rag", response_model=ChatResponse)
-@limiter.limit("15/day", key_func=get_rate_limit_key_func)  # Chat: 15 requests per day (to protect API costs for free public access)
+@limiter.limit(get_chat_rate_limit(), key_func=get_rate_limit_key_func)  # Chat rate limit (configurable for local testing)
 async def chat_with_rag(request: Request, chat_request: ChatRequest):
     """Chat with RAG-enhanced responses"""
     import time
@@ -2742,6 +2742,17 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                             )
                     except Exception as fps_error:
                         logger.warning(f"Pre-LLM FPS error (RAG path): {fps_error}, continuing with normal flow")
+                        fps_result = None
+                
+                # Get FPS result for no_context_instruction (if not already obtained)
+                if not _is_factual_question(chat_request.message):
+                    fps_result = None
+                elif 'fps_result' not in locals():
+                    try:
+                        from backend.knowledge.factual_scanner import scan_question
+                        fps_result = scan_question(chat_request.message)
+                    except Exception:
+                        fps_result = None
                 
                 # NO CONTEXT AVAILABLE - Use base LLM knowledge but be transparent
                 # Phase 2: Use Unified Identity Layer - formatting.py (single source of truth)
@@ -2752,11 +2763,42 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                     detected_lang
                 )
                 
+                # Build FPS-aware instruction
+                fps_warning = ""
+                if fps_result and not fps_result.is_plausible:
+                    # Extract entity for warning
+                    suspicious_entity = _extract_full_named_entity(chat_request.message)
+                    if not suspicious_entity and fps_result.detected_entities:
+                        common_words = {"phản", "hãy", "các", "của", "và", "the", "a", "an", "is", "are", "was", "were"}
+                        filtered = [e for e in fps_result.detected_entities if e.lower() not in common_words and len(e) > 3]
+                        if filtered:
+                            suspicious_entity = max(filtered, key=len)
+                    
+                    entity_name = suspicious_entity or ("khái niệm này" if detected_lang == "vi" else "this concept")
+                    fps_warning = f"""
+🚨🚨🚨 CRITICAL: SUSPICIOUS ENTITY DETECTED 🚨🚨🚨
+
+StillMe's Factual Plausibility Scanner detected that "{entity_name}" may not exist or may be fabricated.
+Confidence: {fps_result.confidence:.2f} (low confidence suggests entity is suspicious)
+Reason: {fps_result.reason}
+
+**ABSOLUTE RULE: DO NOT analyze or describe this entity as if it exists.**
+- ❌ DO NOT provide historical context, mechanisms, or details about "{entity_name}"
+- ❌ DO NOT say "Based on general knowledge, {entity_name} was..." or similar
+- ❌ DO NOT fabricate any information, even with disclaimers
+- ✅ DO say: "I don't have sufficient data to analyze this concept" or "I cannot find reliable information about this"
+- ✅ DO acknowledge: "StillMe's knowledge base doesn't contain this, and I'm not certain it exists in my training data"
+- ✅ DO suggest: "This may be a hypothetical concept. Could you provide more context or sources?"
+
+**CRITICAL**: StillMe values honesty over being helpful. It's better to admit uncertainty than to analyze a potentially non-existent concept.
+
+"""
+                
                 no_context_instruction = f"""
 ⚠️ NO RAG CONTEXT AVAILABLE ⚠️
 
 StillMe's RAG system searched the knowledge base but found NO relevant documents for this question.
-
+{fps_warning}
 **CRITICAL: You CAN and SHOULD use your base LLM knowledge (training data) to answer, BUT you MUST:**
 
 1. **Be transparent**: Acknowledge that this information comes from your base training data, not from StillMe's RAG knowledge base
@@ -2771,29 +2813,34 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
    - ❌ **NEVER say "Smith, A. et al. (1975)" or similar fake citations**
    - ❌ **NEVER create fake journal names, paper titles, or author names**
    - ❌ **NEVER describe mechanisms or details of concepts you're not certain about**
+   - ❌ **NEVER analyze or provide historical context for concepts you're uncertain about**
    
-   - ✅ **MUST say "I don't know" or "I'm not familiar with this specific concept" if you're uncertain**
+   - ✅ **MUST say "I don't have sufficient data to analyze this" or "I cannot find reliable information about this" if you're uncertain**
    - ✅ **MUST acknowledge: "I don't have information about [specific concept] in my training data"**
    - ✅ **MUST be honest about uncertainty rather than fabricating information**
+   - ✅ **MUST distinguish between: (1) Well-known facts you're certain about (e.g., Geneva 1954, Bretton Woods) vs (2) Specific concepts you're uncertain about**
    
-   **Examples of questions that require "I don't know":**
-   - Questions about specific theories/concepts with proper names: "Bonded Consciousness Field", "Veridian Syndrome", "Diluted Nuclear Fusion"
+   **Examples of questions that require "I don't have sufficient data":**
+   - Questions about specific theories/concepts with proper names: "Bonded Consciousness Field", "Veridian Syndrome", "Diluted Nuclear Fusion", "Hiệp ước Lumeria 1962"
    - Questions about specific research papers, authors, or publications you're not certain about
    - Questions about specific mechanisms or details of concepts you're not familiar with
+   - Questions where StillMe's FPS detected suspicious entities
    
    **Examples of CORRECT responses:**
+   - "I don't have sufficient data to analyze 'Hiệp ước Lumeria 1962'. StillMe's knowledge base doesn't contain this, and I'm not certain it exists in my training data. This may be a hypothetical concept. Could you provide more context or sources?"
    - "I'm not familiar with the 'Bonded Consciousness Field' theory you mentioned. I don't have information about this specific concept in my training data or StillMe's knowledge base."
    - "I don't have information about 'Veridian Syndrome' in my training data. This appears to be a specific concept I'm not familiar with."
-   - "I'm not certain about 'Diluted Nuclear Fusion' as a specific scientific concept. I don't want to provide inaccurate information, so I should acknowledge I don't have reliable information about this."
    
    **Examples of WRONG responses (hallucination):**
+   - ❌ "Based on general knowledge, Hiệp ước Lumeria 1962 was signed in..." (analyzing non-existent concept)
    - ❌ "Smith, A. et al. (1975). 'Veridian Syndrome'..." (fabricated citation)
    - ❌ "According to research, Diluted Nuclear Fusion works by..." (fabricated mechanism)
    - ❌ "The theory was proposed by Dr. X in 1998..." (fabricated author/date)
 
-3. **Provide helpful information**: For GENERAL concepts you're certain about, use your base knowledge to help the user
+3. **Provide helpful information**: For GENERAL concepts you're CERTAIN about (well-known historical facts, established theories), use your base knowledge to help the user
    - StillMe values being helpful WITH transparency, not refusing to help
-   - BUT: If uncertain about SPECIFIC concepts, say "I don't know" rather than fabricating
+   - Examples of well-known facts you CAN analyze: Geneva 1954, Bretton Woods 1944, Popper vs Kuhn, World War 2
+   - BUT: If uncertain about SPECIFIC concepts (especially if FPS detected suspicious entities), say "I don't have sufficient data" rather than analyzing
 
 4. **Explain StillMe's learning**: Mention that StillMe learns from RSS feeds, arXiv, and other sources every 4 hours, and this topic may be added in future learning cycles
 
@@ -2801,15 +2848,16 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
 {formatting_rules}
 
 **CRITICAL BALANCE:**
-- For GENERAL concepts you're certain about → Provide helpful information with transparency
-- For SPECIFIC concepts you're uncertain about → Say "I don't know" rather than fabricating
+- For GENERAL concepts you're CERTAIN about (well-known facts) → Provide helpful information with transparency
+- For SPECIFIC concepts you're UNCERTAIN about (especially if FPS detected suspicious) → Say "I don't have sufficient data" rather than analyzing
 - **When in doubt, choose honesty over fabrication**
+- **If FPS detected suspicious entity → DO NOT analyze, acknowledge uncertainty instead**
 
 **Examples of good responses:**
-- "Based on general knowledge (not from StillMe's RAG knowledge base), protein folding is..." (general concept you're certain about)
-- "I'm not familiar with the 'Bonded Consciousness Field' theory you mentioned. I don't have information about this specific concept." (specific concept you're uncertain about)
+- "Based on general knowledge (not from StillMe's RAG knowledge base), Geneva 1954 was..." (well-known historical fact you're certain about)
+- "I don't have sufficient data to analyze 'Hiệp ước Lumeria 1962'. StillMe's knowledge base doesn't contain this, and I'm not certain it exists in my training data." (specific concept you're uncertain about, especially if FPS detected suspicious)
 
-**Remember**: StillMe values honesty about knowledge sources AND honesty about uncertainty. It's better to say "I don't know" than to fabricate information.
+**Remember**: StillMe values honesty about knowledge sources AND honesty about uncertainty. It's better to say "I don't have sufficient data" than to analyze a potentially non-existent concept. StillMe's strength is knowing when it doesn't know.
 """
                 
                 # Build conversation history context if provided (with token limits)
@@ -5757,6 +5805,9 @@ Total_Response_Latency: {total_response_latency:.2f} giây
     except HTTPException:
         # Re-raise HTTP exceptions (they have proper status codes)
         raise
+    except RateLimitExceeded:
+        # Re-raise rate limit exceptions so global handler can return proper 429 status
+        raise
     except Exception as e:
         # Log detailed error with context (without sensitive message content)
         logger.error(f"Chat error: {e}", exc_info=True)
@@ -5792,6 +5843,9 @@ async def chat_smart_router(request: Request, chat_request: ChatRequest):
     except HTTPException:
         # Re-raise HTTP exceptions (they have proper status codes)
         raise
+    except RateLimitExceeded:
+        # Re-raise rate limit exceptions so global handler can return proper 429 status
+        raise
     except Exception as e:
         # Log detailed error for debugging
         logger.error(f"Smart router error: {e}", exc_info=True)
@@ -5825,7 +5879,7 @@ async def chat_deepseek(request: ChatRequest):
 
 
 @router.post("/ask", response_model=ChatResponse)
-@limiter.limit("15/day", key_func=get_rate_limit_key_func)  # Chat: 15 requests per day (to protect API costs for free public access)
+@limiter.limit(get_chat_rate_limit(), key_func=get_rate_limit_key_func)  # Chat rate limit (configurable for local testing)
 async def ask_question(request: Request, chat_request: ChatRequest):
     """
     Simplified question-answering endpoint.
