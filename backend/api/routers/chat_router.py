@@ -1617,7 +1617,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 # Get today's metrics
                 learning_metrics_data = tracker.get_metrics_for_today()
                 if learning_metrics_data:
-                    logger.info(f"✅ Fetched learning metrics for today: {learning_metrics_data.entries_added} entries added")
+                    logger.info(f"✅ Fetched learning metrics for today: {learning_metrics_data.total_entries_added} entries added")
                 else:
                     logger.info("⚠️ No learning metrics available for today yet")
             except Exception as metrics_error:
@@ -3158,7 +3158,7 @@ This is MANDATORY when provenance context is available and user asks about origi
 Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 - **Tìm nạp**: {learning_metrics_data.total_entries_fetched} nội dung
 - **Thêm vào**: {learning_metrics_data.total_entries_added} nội dung
-- **Lọc bỏ**: {learning_metrics_data.entries_filtered} nội dung
+- **Lọc bỏ**: {learning_metrics_data.total_entries_filtered} nội dung
 
 **Nguồn học tập**: [list sources]"
 
