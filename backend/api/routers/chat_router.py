@@ -4895,16 +4895,23 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     
                     # Override with safe refusal answer
                     response = _build_safe_refusal_answer(chat_request.message, detected_lang, suspicious_entity)
-                    logger.warning(
-                        f"🛡️ Hallucination Guard triggered (non-RAG): "
-                        f"factual_question=True, confidence={confidence_score:.2f}, "
-                        f"suspicious_patterns={has_suspicious_pattern}, "
-                        f"entity={suspicious_entity or 'unknown'}"
-                    )
-                    processing_steps.append("🛡️ Hallucination Guard: Overrode response with safe refusal")
-                    # Mark as fallback to skip post-processing
-                    is_fallback_meta_answer_non_rag = True
-                    is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
+                    
+                    # CRITICAL: If None, it's a well-known historical fact - continue with normal flow (use base knowledge)
+                    if response is None:
+                        logger.info("✅ Well-known historical fact detected - continuing with normal flow to use base knowledge")
+                        processing_steps.append("✅ Well-known historical fact - using base knowledge with transparency")
+                        # Continue with normal flow (will use base knowledge instruction)
+                    else:
+                        logger.warning(
+                            f"🛡️ Hallucination Guard triggered (non-RAG): "
+                            f"factual_question=True, confidence={confidence_score:.2f}, "
+                            f"suspicious_patterns={has_suspicious_pattern}, "
+                            f"entity={suspicious_entity or 'unknown'}"
+                        )
+                        processing_steps.append("🛡️ Hallucination Guard: Overrode response with safe refusal")
+                        # Mark as fallback to skip post-processing
+                        is_fallback_meta_answer_non_rag = True
+                        is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
             
             # CRITICAL: Add transparency warning for low confidence responses without context (non-RAG path)
             if confidence_score < 0.5 and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and response:
