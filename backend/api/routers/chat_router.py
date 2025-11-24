@@ -5304,13 +5304,19 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             
                             rewrite_llm = get_rewrite_llm()
                             # Non-RAG path: no ctx_docs available, pass empty list
+                            # CRITICAL: Check if this is AI_SELF_MODEL domain
+                            from backend.style.style_engine import detect_domain, DomainType
+                            detected_domain = detect_domain(chat_request.message)
+                            is_ai_self_model_domain = (detected_domain == DomainType.AI_SELF_MODEL)
+                            
                             rewrite_result = await rewrite_llm.rewrite(
                                 text=sanitized_response,
                                 original_question=chat_request.message,
                                 quality_issues=quality_result["reasons"],
                                 is_philosophical=is_philosophical_non_rag,
                                 detected_lang=detected_lang,
-                                ctx_docs=[]  # Non-RAG path has no context documents
+                                ctx_docs=[],  # Non-RAG path has no context documents
+                                is_ai_self_model=is_ai_self_model_domain
                             )
                             
                             if rewrite_result.was_rewritten:
