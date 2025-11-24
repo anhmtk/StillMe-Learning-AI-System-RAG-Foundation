@@ -10,6 +10,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Import backup manager (avoid circular import)
+try:
+    from .chroma_backup import ChromaBackupManager
+except ImportError:
+    ChromaBackupManager = None
+    logger.warning("ChromaBackupManager not available")
+
+logger = logging.getLogger(__name__)
+
 class ChromaClient:
     """ChromaDB client for StillMe vector operations"""
     
@@ -53,6 +62,16 @@ class ChromaClient:
         
         self.persist_directory = persist_directory
         self.reset_on_error = reset_on_error
+        
+        # Initialize backup manager (if available)
+        if ChromaBackupManager is not None:
+            self.backup_manager = ChromaBackupManager(
+                persist_directory=persist_directory,
+                backup_directory=os.getenv("CHROMA_BACKUP_DIR")
+            )
+        else:
+            self.backup_manager = None
+            logger.warning("ChromaDB backup manager not available")
         
         # CRITICAL: Ensure parent directory exists with proper permissions
         # This is essential for Railway persistent volumes
@@ -798,3 +817,52 @@ class ChromaClient:
         except Exception as e:
             logger.error(f"Failed to get collection stats: {e}")
             return {"knowledge_documents": 0, "conversation_documents": 0, "total_documents": 0}
+    
+    def create_backup(self, backup_name: Optional[str] = None) -> Optional[str]:
+        """Create a backup of ChromaDB data
+        
+        Args:
+            backup_name: Optional backup name (defaults to timestamp)
+            
+        Returns:
+            Path to backup directory, or None if backup manager not available
+        """
+        if self.backup_manager is None:
+            logger.warning("Backup manager not available")
+            return None
+        return self.backup_manager.create_backup(backup_name)
+    
+    def restore_backup(self, backup_name: str, verify: bool = True) -> bool:
+        """Restore ChromaDB from backup
+        
+        Args:
+            backup_name: Name of backup to restore
+            verify: If True, verify backup before restoring
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        if self.backup_manager is None:
+            logger.warning("Backup manager not available")
+            return False
+        return self.backup_manager.restore_backup(backup_name, verify)
+    
+    def list_backups(self) -> List[dict]:
+        """List all available backups
+        
+        Returns:
+            List of backup metadata dictionaries
+        """
+        if self.backup_manager is None:
+            return []
+        return self.backup_manager.list_backups()
+    
+    def get_backup_stats(self) -> dict:
+        """Get statistics about backups
+        
+        Returns:
+            Dictionary with backup statistics
+        """
+        if self.backup_manager is None:
+            return {"error": "Backup manager not available"}
+        return self.backup_manager.get_backup_stats()

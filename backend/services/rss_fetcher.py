@@ -17,6 +17,7 @@ from backend.services.rss_fetcher_enhanced import (
     fetch_feed_with_fallback,
     fetch_feed_with_retry
 )
+from backend.services.circuit_breaker import CircuitBreakerManager, CircuitBreakerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,15 @@ class RSSFetcher:
     """Simple RSS feed fetcher"""
     
     def __init__(self):
+        # Initialize circuit breaker manager for RSS feeds
+        self.circuit_breaker_manager = CircuitBreakerManager()
+        # Circuit breaker config: Open after 5 failures, close after 2 successes, 60s timeout
+        self.circuit_config = CircuitBreakerConfig(
+            failure_threshold=5,
+            success_threshold=2,
+            timeout_seconds=60,
+            timeout_window=300  # 5 minute window
+        )
         # Default trusted RSS feeds
         self.feeds = [
             # Existing feeds
@@ -148,7 +158,29 @@ class RSSFetcher:
         errors = []
         
         # Fetch all feeds concurrently with retry and fallback
-        tasks = [fetch_feed_with_fallback(feed_url) for feed_url in self.feeds]
+        # Wrap each fetch with circuit breaker
+        async def fetch_with_circuit_breaker(feed_url: str):
+            """Fetch feed with circuit breaker protection"""
+            breaker = self.circuit_breaker_manager.get_breaker(
+                f"rss_feed_{feed_url[:50]}",  # Use first 50 chars as name
+                self.circuit_config
+            )
+            
+            # Check if circuit is open
+            if breaker.state.value == "open":
+                logger.warning(f"Circuit breaker OPEN for {feed_url} - skipping (too many failures)")
+                return None
+            
+            try:
+                # Execute fetch with circuit breaker
+                result = await fetch_feed_with_fallback(feed_url)
+                breaker._on_success()
+                return result
+            except Exception as e:
+                breaker._on_failure()
+                raise
+        
+        tasks = [fetch_with_circuit_breaker(feed_url) for feed_url in self.feeds]
         feeds = await asyncio.gather(*tasks, return_exceptions=True)
         
         for feed_url, feed_result in zip(self.feeds, feeds):
@@ -162,7 +194,7 @@ class RSSFetcher:
                     continue
                 
                 if feed_result is None:
-                    error_msg = f"Failed to fetch {feed_url}: All retries and fallbacks exhausted"
+                    error_msg = f"Failed to fetch {feed_url}: All retries and fallbacks exhausted or circuit breaker OPEN"
                     errors.append(error_msg)
                     self.failed_feeds += 1
                     logger.warning(error_msg)

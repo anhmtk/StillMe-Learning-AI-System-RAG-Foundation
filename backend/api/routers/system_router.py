@@ -9,7 +9,7 @@ import os
 import sqlite3
 import asyncio
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -25,6 +25,13 @@ def get_rag_retrieval():
 def get_initialization_error():
     import backend.api.main as main_module
     return main_module._initialization_error
+
+def get_chroma_client():
+    """Get ChromaDB client from main module"""
+    import backend.api.main as main_module
+    if hasattr(main_module, 'chroma_client') and main_module.chroma_client:
+        return main_module.chroma_client
+    return None
 
 @router.get("/")
 async def root():
@@ -657,4 +664,78 @@ def get_knowledge_retention():
     """Get knowledge retention service from main module"""
     import backend.api.main as main_module
     return main_module.knowledge_retention
+
+# ChromaDB Backup Endpoints
+@router.post("/api/backup/chromadb/create")
+async def create_chromadb_backup(backup_name: Optional[str] = None):
+    """Create a backup of ChromaDB data"""
+    chroma_client = get_chroma_client()
+    if not chroma_client:
+        raise HTTPException(status_code=503, detail="ChromaDB client not available")
+    
+    try:
+        backup_path = chroma_client.create_backup(backup_name)
+        if backup_path:
+            return {
+                "status": "success",
+                "backup_path": backup_path,
+                "message": "Backup created successfully"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Backup creation failed")
+    except Exception as e:
+        logger.error(f"Backup creation error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Backup creation failed: {str(e)}")
+
+@router.get("/api/backup/chromadb/list")
+async def list_chromadb_backups():
+    """List all available ChromaDB backups"""
+    chroma_client = get_chroma_client()
+    if not chroma_client:
+        raise HTTPException(status_code=503, detail="ChromaDB client not available")
+    
+    try:
+        backups = chroma_client.list_backups()
+        stats = chroma_client.get_backup_stats()
+        return {
+            "backups": backups,
+            "stats": stats
+        }
+    except Exception as e:
+        logger.error(f"Backup list error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to list backups: {str(e)}")
+
+@router.post("/api/backup/chromadb/restore")
+async def restore_chromadb_backup(backup_name: str, verify: bool = True):
+    """Restore ChromaDB from backup"""
+    chroma_client = get_chroma_client()
+    if not chroma_client:
+        raise HTTPException(status_code=503, detail="ChromaDB client not available")
+    
+    try:
+        success = chroma_client.restore_backup(backup_name, verify)
+        if success:
+            return {
+                "status": "success",
+                "message": f"Restored from backup: {backup_name}"
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Backup restore failed")
+    except Exception as e:
+        logger.error(f"Backup restore error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Backup restore failed: {str(e)}")
+
+@router.get("/api/backup/chromadb/stats")
+async def get_chromadb_backup_stats():
+    """Get ChromaDB backup statistics"""
+    chroma_client = get_chroma_client()
+    if not chroma_client:
+        raise HTTPException(status_code=503, detail="ChromaDB client not available")
+    
+    try:
+        stats = chroma_client.get_backup_stats()
+        return stats
+    except Exception as e:
+        logger.error(f"Backup stats error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to get backup stats: {str(e)}")
 

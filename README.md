@@ -403,14 +403,37 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 - [`docs/SPICE_ARCHITECTURE.md`](docs/SPICE_ARCHITECTURE.md) - SPICE framework
 - [`docs/CONFIDENCE_AND_FALLBACK.md`](docs/CONFIDENCE_AND_FALLBACK.md) - Validation system
 
-## ⚠️ Known Limitations
+## ⚠️ Known Limitations & Improvements
 
-**Current:**
-- SQLite database (PostgreSQL migration planned)
+**Current Limitations:**
+- SQLite database (PostgreSQL migration planned - Priority 1)
 - Single-threaded scheduler (needs distributed task queue)
-- ChromaDB memory-based (needs persistence for scaling)
+- ChromaDB persistence configured but backup/recovery system newly added
+- Response latency: 3-7s (optimization planned with Redis caching)
 
-**See:** [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md) for full list
+**Recent Improvements (v0.4.1):**
+- ✅ **ChromaDB Backup/Recovery System**: Automated backup mechanism with restore capabilities
+- ✅ **Circuit Breaker for RSS Feeds**: Prevents cascading failures, automatically skips failing feeds
+- ✅ **Enhanced Error Handling**: Better resilience for learning pipeline
+
+**Planned Improvements (Priority Order):**
+
+**Priority 1 - CRITICAL (Production Scale):**
+- 🔄 PostgreSQL Migration (in progress)
+- 🔄 ChromaDB Persistence Verification
+- ⏳ Error Handling & Circuit Breaker (partially complete)
+
+**Priority 2 - HIGH (Performance):**
+- ⏳ Redis Caching (50-70% latency reduction expected)
+- ⏳ Parallel Validation (30-40% validation time reduction)
+- ⏳ Structured Logging & Metrics (Prometheus integration)
+
+**Priority 3 - MEDIUM (Code Quality):**
+- ⏳ Dependency Injection Refactoring
+- ⏳ Security Hardening (OAuth2/JWT)
+- ⏳ Feed Health Monitoring
+
+**See:** [`docs/PLATFORM_ENGINEERING_ROADMAP.md`](docs/PLATFORM_ENGINEERING_ROADMAP.md) for detailed roadmap
 
 ## 📄 License
 
