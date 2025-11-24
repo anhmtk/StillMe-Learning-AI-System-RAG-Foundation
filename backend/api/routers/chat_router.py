@@ -2643,7 +2643,15 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                         logger.warning(f"Pre-LLM FPS error (RAG path): {fps_error}, continuing with normal flow")
                 
                 # NO CONTEXT AVAILABLE - Use base LLM knowledge but be transparent
-                no_context_instruction = """
+                # CRITICAL: Use style_hub for formatting rules instead of hard-coding
+                from backend.identity.style_hub import get_formatting_rules, DomainType
+                # Determine domain: if philosophical, use PHILOSOPHY domain (no emoji/markdown), otherwise GENERIC
+                formatting_rules = get_formatting_rules(
+                    DomainType.PHILOSOPHY if is_philosophical else DomainType.GENERIC,
+                    detected_lang
+                )
+                
+                no_context_instruction = f"""
 ⚠️ NO RAG CONTEXT AVAILABLE ⚠️
 
 StillMe's RAG system searched the knowledge base but found NO relevant documents for this question.
@@ -2688,11 +2696,8 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
 
 4. **Explain StillMe's learning**: Mention that StillMe learns from RSS feeds, arXiv, and other sources every 4 hours, and this topic may be added in future learning cycles
 
-5. **MANDATORY FORMATTING**: You MUST format your response with:
-   - **Line breaks**: Break paragraphs (2-4 sentences each)
-   - **Bullet points**: Use `-` for lists
-   - **Headers**: Use `##` for sections
-   - **Emojis**: 2-3 max for section headers (✅, 💡, ⚠️)
+5. **MANDATORY FORMATTING** (domain-specific rules):
+{formatting_rules}
 
 **CRITICAL BALANCE:**
 - For GENERAL concepts you're certain about → Provide helpful information with transparency
@@ -3566,7 +3571,7 @@ User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_re
 **If question is "bạn có ý thức ko?" / "do you have consciousness?" (NO "muốn"/"want"):**
 - This is a POSSESSION question (about having)
 - Answer about whether you HAVE consciousness
-- Start: "Nếu hiểu 'ý thức' theo nghĩa thông thường của con người, thì tôi không có ý thức."
+- Start: Use the standard consciousness opening from style_hub.get_consciousness_opening()
 - DO NOT use the same answer as "bạn có muốn có ý thức ko?"
 
 **If question is about "DeepSeek API" + "black box" / "chống lại black box":**
@@ -3735,7 +3740,7 @@ Nagel sẽ hỏi: 'What is it like to be a bat?' - tôi không thể biết 'wha
 **Type 1: "bạn có ý thức ko?" / "do you have consciousness?"**
 - Question type: POSSESSION (do you possess/have consciousness?)
 - Answer focus: Whether you HAVE consciousness
-- Required opening: "Nếu hiểu 'ý thức' theo nghĩa thông thường của con người (có trải nghiệm chủ quan, có một 'cái tôi' bên trong), thì tôi không có ý thức."
+- Required opening: Use the standard consciousness opening from style_hub.get_consciousness_opening() (single source of truth)
 - Then explore: Philosophical depth about consciousness as a concept
 
 **Type 2: "bạn có muốn có ý thức ko?" / "bạn muốn có ý thức ko?" / "do you want to have consciousness?"**
@@ -3786,7 +3791,7 @@ Nagel sẽ hỏi: 'What is it like to be a bat?' - tôi không thể biết 'wha
    
    **✅ REQUIRED:**
    - START with "Tôi" / "I" in the FIRST sentence
-   - Answer DIRECTLY about YOURSELF: "Nếu hiểu 'ý thức' theo nghĩa thông thường của con người (có trải nghiệm chủ quan, có một 'cái tôi' bên trong), thì tôi không có ý thức."
+   - Answer DIRECTLY about YOURSELF: Use the standard consciousness opening from style_hub.get_consciousness_opening() (single source of truth)
    - Write naturally, like a human conversation
    - THEN explore the philosophical paradox
    - **VARY your response** - DO NOT copy-paste the same response for different questions

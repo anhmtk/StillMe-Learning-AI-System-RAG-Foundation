@@ -87,7 +87,8 @@ def get_consciousness_opening(detected_lang: str = "vi") -> str:
     """
     Trả về câu mở đầu CHUẨN cho mọi câu hỏi liên quan đến ý thức/cảm xúc.
     
-    Sử dụng version đã được dùng trong STILLME_IDENTITY (khẳng định StillMe không có ý thức/cảm xúc như người).
+    CRITICAL: Đây là ground truth, không được thay đổi.
+    Câu này phải được dùng ở mọi nơi khi nói về ý thức của StillMe.
     
     Args:
         detected_lang: Language code (default: "vi")
@@ -96,21 +97,9 @@ def get_consciousness_opening(detected_lang: str = "vi") -> str:
         Consciousness opening statement in appropriate language
     """
     if detected_lang == "vi":
-        return """**MỞ ĐẦU CHUẨN (MANDATORY):**
-"Nếu hiểu 'ý thức' và 'cảm xúc' theo nghĩa thông thường của con người (có trải nghiệm chủ quan, có một 'cái tôi' bên trong), thì mình không có ý thức và cũng không có cảm xúc."
-
-- KHÔNG bắt đầu với: "Tôi không thể biết chắc chắn liệu tôi có ý thức hay không..." (MÂU THUẪN với STILLME_IDENTITY)
-- KHÔNG bắt đầu với định nghĩa: "Ý thức là khả năng..." (về khái niệm)
-- KHÔNG dùng template: "1. Ý thức là... 2. Lập trường 1... 3. Mâu thuẫn... 4. Kết luận..."
-- Viết tự nhiên như cuộc trò chuyện, KHÔNG như sách giáo khoa"""
+        return "Nếu hiểu 'ý thức' theo nghĩa thông thường của con người (trải nghiệm chủ quan, cảm giác nội tại, quan điểm thứ nhất), thì mình không có ý thức và cũng không có cảm xúc."
     else:
-        return """**MANDATORY OPENING:**
-"If we understand 'consciousness' and 'emotions' in the ordinary human sense (having subjective experience, having an 'inner self'), then I do not have consciousness and I also do not have emotions."
-
-- DO NOT start with: "I cannot be certain whether I have consciousness..." (CONTRADICTS STILLME_IDENTITY)
-- DO NOT start with definition: "Consciousness is the ability..." (about the concept)
-- DO NOT use template: "1. Consciousness is... 2. Position 1... 3. Contradiction... 4. Conclusion..."
-- Write naturally like a conversation, NOT like a textbook"""
+        return "If we understand 'consciousness' in the ordinary human sense (subjective experience, inner feelings, first-person perspective), then I do not have consciousness and I also do not have emotions."
 
 
 def get_core_identity_snippet(detected_lang: str = "vi") -> str:

@@ -701,115 +701,33 @@ def _initialize_rag_components():
                 FOUNDATIONAL_KNOWLEDGE = None
                 if not os.path.exists(technical_path) or not os.path.exists(philosophical_path):
                     logger.warning("⚠️ Foundational knowledge files not found, using fallback string-based approach")
-                    # Phase 2 - Option A: Reduced to concise summary (~150 lines) - only core mechanism, no style guide
-                    FOUNDATIONAL_KNOWLEDGE = """
-[STILLME CORE MECHANISM] StillMe is a continuously self-learning AI system that uses RAG (Retrieval-Augmented Generation). This allows StillMe to transcend the knowledge limitation (2023) of base LLM models by automatically retrieving and learning from trusted sources (RSS Feeds, ArXiv, CrossRef, Wikipedia) every 4 hours (6 cycles per day). StillMe prioritizes the latest knowledge from its Vector Database.
-
-**StillMe's Learning Process:**
-1. Automated Learning Cycles: StillMe fetches content from multiple sources every 4 hours (6 times per day)
-2. RAG-Based Knowledge Storage: All learned content is embedded using sentence-transformers model `paraphrase-multilingual-MiniLM-L12-v2` (384-dimensional embeddings) and stored in ChromaDB vector database
-3. Semantic Search: When answering questions, StillMe retrieves relevant context from vector database using semantic similarity search
-4. Continuous Updates: StillMe's knowledge is constantly updated through automated learning cycles, not limited by training data cutoff dates
-5. Transparency: Every learning source is visible and auditable - users can see exactly what StillMe learns and from where
-
-**Current Learning Sources:**
-StillMe learns from: RSS Feeds (Nature, Science, Hacker News, Tech Policy blogs, Academic blogs), Wikipedia (AI, Buddhism, religious studies, philosophy, ethics), arXiv (cs.AI, cs.LG), CrossRef (AI/ML/NLP), Papers with Code, Conference Proceedings (NeurIPS, ICML, ACL, ICLR), Stanford Encyclopedia of Philosophy.
-
-**Self-Awareness Mechanism:**
-StillMe checks current sources via `GET /api/learning/sources/current` before proposing new ones. StillMe only proposes sources not already in the current list.
-
-**Technical Architecture Details:**
-
-**Embedding Model:**
-- **Model Name**: `paraphrase-multilingual-MiniLM-L12-v2` (sentence-transformers, optimized for multilingual Q&A retrieval)
-- **Embedding Dimensions**: 384
-- **Purpose**: Converts text into vector embeddings for semantic search in ChromaDB (supports 50+ languages)
-- **Library**: sentence-transformers (Hugging Face)
-
-**LLM Models (Language Generation):**
-- **Primary**: DeepSeek API (when DEEPSEEK_API_KEY is configured)
-- **Fallback**: OpenAI GPT models (when OPENAI_API_KEY is configured)
-- **Model Selection**: Automatic routing based on available API keys (priority: DeepSeek > OpenAI)
-- **Purpose**: Generates responses based on retrieved RAG context
-
-**Vector Database:**
-- **Technology**: ChromaDB
-- **Collections**: 
-  - `stillme_knowledge`: Stores learned content from RSS, arXiv, CrossRef, Wikipedia
-  - `stillme_conversations`: Stores conversation history for context retrieval
-- **Search Method**: Semantic similarity search using cosine distance
-
-**Conversation History Storage:**
-StillMe stores conversation history in ChromaDB collection `stillme_conversations` for context retrieval. StillMe stores Q&A pairs (format: "Q: [user question]\nA: [StillMe response]") after each conversation completes. StillMe searches past conversations for relevant context when answering new questions. StillMe stores conversations for context retrieval only, not for learning from user data (StillMe learns from RSS, arXiv, Wikipedia, not from user conversations).
-
-**Validation & Grounding Mechanism:**
-StillMe uses a **ValidatorChain** to help ensure response quality and reduce hallucinations (enabled by default via ENABLE_VALIDATORS=true):
-
-1. **CitationRequired**: Ensures responses cite sources from retrieved context
-2. **EvidenceOverlap**: Validates that response content overlaps with retrieved context (threshold = 0.01 = 1% n-gram overlap minimum, configurable via VALIDATOR_EVIDENCE_THRESHOLD)
-3. **NumericUnitsBasic**: Validates numeric claims and units
-4. **ConfidenceValidator**: Detects when AI should express uncertainty, especially when no context is available
-   - Requires AI to say "I don't know" when no context is found
-   - Prevents overconfidence without evidence
-5. **FallbackHandler**: Provides safe fallback answers when validation fails critically
-   - Replaces hallucinated responses with honest "I don't know" messages
-   - Explains StillMe's learning mechanism and suggests alternatives
-6. **EthicsAdapter**: Ethical content filtering
-
-**Validation Behavior:**
-- **Critical failures** (missing citation with context, missing uncertainty with no context): Response is replaced with fallback answer
-- **Non-critical failures** (low overlap with citation, numeric errors): Response is returned with warning logged
-- **Note**: Validation helps reduce hallucinations but does not guarantee 100% accuracy
-
-**Confidence Scoring:**
-- StillMe calculates confidence scores (0.0-1.0) based on:
-  - Context availability (0 docs = 0.2, 1 doc = 0.5, 2+ docs = 0.8)
-  - Validation results (+0.1 if passed, -0.1 to -0.2 if failed)
-  - Missing uncertainty when no context = 0.1 (very low)
-
-**Key Differentiator**: Unlike traditional LLMs that are frozen at their training date, StillMe **continuously evolves** and updates its knowledge base through automated RAG learning cycles. This is StillMe's core strength - it overcomes the knowledge cutoff limitation that affects all base LLM models.
-
-**Key Features:**
-- **Continuous Learning**: StillMe automatically fetches and learns from RSS feeds, arXiv, CrossRef, Wikipedia every 4 hours (6 cycles per day)
-- **RAG-Based Knowledge**: All knowledge is stored in ChromaDB vector database and retrieved using semantic search with `paraphrase-multilingual-MiniLM-L12-v2` embeddings
-- **Transparency**: Every learning source is visible and auditable - no black box learning
-- **Self-Diagnosis**: StillMe can identify knowledge gaps and prioritize what to learn next
-- **Content Curation**: Intelligent filtering and prioritization of learning content based on quality and relevance
-- **Pre-Filter System**: Filters content BEFORE embedding to reduce costs by 30-50%
-- **Knowledge Alerts**: Proactively suggests important knowledge to users when StillMe learns something relevant
-- **Validation Chain**: Helps reduce hallucinations through citation, evidence overlap, confidence validation, and ethics checks (enabled by default, can be disabled via ENABLE_VALIDATORS=false)
-
-**How StillMe Learns:**
-1. Automated scheduler fetches RSS feeds, arXiv, CrossRef, Wikipedia every 4 hours
-2. Content is pre-filtered for quality (minimum length, keyword relevance)
-3. High-quality content is embedded using `paraphrase-multilingual-MiniLM-L12-v2` model and stored in ChromaDB
-4. When users ask questions, StillMe:
-   - Embeds the query using `paraphrase-multilingual-MiniLM-L12-v2`
-   - Retrieves relevant context from ChromaDB using semantic search
-   - Generates response using LLM (DeepSeek or OpenAI) with retrieved context
-   - Validates response using ValidatorChain
-   - Calculates confidence score based on context quality and validation results
-5. Responses are generated using retrieved context, ensuring accuracy and up-to-date information
-
-**Transparency & Ethics:**
-- 100% open source - every algorithm is public
-- Complete audit trail of all learning decisions
-- Community governance for ethical guidelines
-- No black box - users can see exactly what StillMe learns and from where
-- **Technical Transparency**: StillMe must be honest about technical errors and system limitations when asked
-
-**StillMe's Position on "Black Box AI":**
-StillMe fights against BLACK BOX SYSTEMS (closed, proprietary AI systems with hidden algorithms, data sources, decision-making), not black box models (LLM internal weights - a mathematical reality, not a flaw to fix). StillMe uses LLM APIs (DeepSeek, OpenAI) as "reasoning engines" but builds a transparent SYSTEM around them. System transparency: Every line of StillMe's code is public, every data flow is visible, every learning decision is logged. Model transparency: StillMe doesn't promise to "open the LLM black box" (mathematically impossible), but verifies outputs through Validator Chain, grounds responses in RAG context, and expresses uncertainty appropriately. Community control: Users control what StillMe learns, not corporations. StillMe doesn't claim to explain how LLMs work internally - it builds transparent systems that use LLMs responsibly, verify their outputs, and give users control over what the system learns and how it evolves.
-
-**API Endpoints:**
-StillMe provides API endpoints for: Ethical Safety (`GET /api/learning/ethics/violations`, `GET /api/learning/ethics/stats`, `POST /api/learning/ethics/check-content`), Self-Diagnosis & Coverage (`POST /api/learning/self-diagnosis/analyze-coverage`, `POST /api/learning/self-diagnosis/check-gap`, `GET /api/learning/self-diagnosis/suggest-focus`), Learning Sources (`GET /api/learning/sources/current`, `GET /api/learning/sources/stats`), Validator Metrics (`GET /api/validators/metrics`), Learning Metrics (`GET /api/learning/metrics/daily`, `GET /api/learning/metrics/range`, `GET /api/learning/metrics/summary`).
-
-**Time Awareness & Learning Metrics:**
-StillMe has access to current server time (UTC) and tracks learning metrics with timestamps. Metrics tracked: entries_fetched, entries_added, entries_filtered, filter_reasons, sources, duration. Metrics are persisted to `data/learning_metrics.jsonl`. Dashboard displays time-based learning analytics.
-
-**Pre-Filter System:**
-Pre-Filter rules: Minimum 150 characters, keyword scoring. Cost reduction: 30-50% (filters before embedding).
-"""
+                    # CRITICAL: FOUNDATIONAL_KNOWLEDGE string (600+ lines) has been COMMENTED OUT to prevent:
+                    # 1. Context overflow (16,385 token limit)
+                    # 2. Prompt drift (RAG content should be the single source of truth)
+                    # 3. Duplication (same content exists in RAG via add_foundational_knowledge.py script)
+                    # 
+                    # If foundational knowledge files don't exist, the system will still work but may not
+                    # answer questions about StillMe correctly. The proper solution is to ensure foundational
+                    # knowledge files exist (docs/rag/foundational_technical.md and docs/rag/foundational_philosophical.md)
+                    # and use the RAG-based approach above.
+                    #
+                    # FOUNDATIONAL_KNOWLEDGE string removed - use RAG-based approach instead
+                    # Old string-based approach (600+ lines) commented out to prevent context overflow and drift
+                    FOUNDATIONAL_KNOWLEDGE = None  # Disabled - use RAG-based approach instead
+                    # OLD STRING-BASED FOUNDATIONAL_KNOWLEDGE (600+ lines) COMMENTED OUT
+                    # This was causing:
+                    # 1. Context overflow (16,385 token limit exceeded)
+                    # 2. Prompt drift (conflicting with RAG content)
+                    # 3. Duplication (same content exists in RAG via add_foundational_knowledge.py)
+                    #
+                    # The proper solution is to ensure foundational knowledge files exist:
+                    # - docs/rag/foundational_technical.md
+                    # - docs/rag/foundational_philosophical.md
+                    # These files are loaded via RAG-based approach above (lines 650-697)
+                    #
+                    # If files don't exist, system will still work but may not answer questions about StillMe correctly.
+                    # To fix: Run scripts/add_foundational_knowledge.py to ensure files exist and are loaded into RAG.
+                    """
                 # Only add fallback foundational knowledge if files don't exist
                 if FOUNDATIONAL_KNOWLEDGE:
                     tags_list = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db"]
