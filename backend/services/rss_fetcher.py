@@ -176,9 +176,17 @@ class RSSFetcher:
                 # Execute fetch with circuit breaker
                 result = await fetch_feed_with_fallback(feed_url)
                 breaker._on_success()
+                # Record success in health monitor
+                health_monitor = get_feed_health_monitor()
+                health_monitor.record_success(feed_url)
+                health_monitor.update_circuit_breaker_state(feed_url, breaker.state.value)
                 return result
             except Exception as e:
                 breaker._on_failure()
+                # Record failure in health monitor
+                health_monitor = get_feed_health_monitor()
+                health_monitor.record_failure(feed_url, str(e))
+                health_monitor.update_circuit_breaker_state(feed_url, breaker.state.value)
                 raise
         
         tasks = [fetch_with_circuit_breaker(feed_url) for feed_url in self.feeds]
