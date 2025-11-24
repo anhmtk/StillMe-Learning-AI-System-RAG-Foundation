@@ -4312,10 +4312,32 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                         processing_steps.append("⚠️ Context overflow - using fallback message")
                 except ValueError as ve:
                     # ValueError from generate_ai_response (missing API keys, etc.)
-                    logger.error(f"❌ ValueError from generate_ai_response: {ve}")
-                    from backend.api.utils.error_detector import get_fallback_message_for_error
-                    raw_response = get_fallback_message_for_error("generic", detected_lang)
-                    processing_steps.append("⚠️ LLM configuration error - using fallback message")
+                    error_msg = str(ve)
+                    logger.error(f"❌ ValueError from generate_ai_response: {error_msg}")
+                    
+                    # Check if it's a missing API key error
+                    if "llm_provider" in error_msg.lower() or "api_key" in error_msg.lower() or "api key" in error_msg.lower():
+                        logger.error(
+                            f"❌ CRITICAL: Missing LLM API keys! "
+                            f"use_server_keys={use_server_keys}, "
+                            f"llm_provider={chat_request.llm_provider}, "
+                            f"has_server_keys={bool(os.getenv('DEEPSEEK_API_KEY') or os.getenv('OPENAI_API_KEY') or os.getenv('OPENROUTER_API_KEY'))}"
+                        )
+                        # For local testing, provide more helpful error message
+                        if IS_LOCAL_ENV:
+                            raw_response = (
+                                f"⚠️ Lỗi cấu hình: Backend local cần có API keys trong file .env để hoạt động. "
+                                f"Vui lòng thêm ít nhất một trong các keys sau: DEEPSEEK_API_KEY, OPENAI_API_KEY, hoặc OPENROUTER_API_KEY. "
+                                f"Chi tiết lỗi: {error_msg}"
+                            )
+                        else:
+                            from backend.api.utils.error_detector import get_fallback_message_for_error
+                            raw_response = get_fallback_message_for_error("api_error", detected_lang)
+                        processing_steps.append("⚠️ Missing API keys - cannot generate response")
+                    else:
+                        from backend.api.utils.error_detector import get_fallback_message_for_error
+                        raw_response = get_fallback_message_for_error("generic", detected_lang)
+                        processing_steps.append("⚠️ LLM configuration error - using fallback message")
                 except Exception as e:
                     # Catch any other unexpected exceptions (must be after ContextOverflowError)
                     logger.error(f"❌ Unexpected exception from generate_ai_response: {e}", exc_info=True)
