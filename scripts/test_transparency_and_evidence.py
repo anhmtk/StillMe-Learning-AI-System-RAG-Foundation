@@ -448,12 +448,29 @@ def test_question(test_case: Dict, question_index: int) -> Dict:
     response_data = send_chat_request(question, timeout=timeout)
     
     if "error" in response_data:
-        print(f"❌ ERROR: {response_data['error']}")
+        error_msg = response_data["error"]
+        print(f"❌ ERROR: {error_msg}")
+        # Check if it's a server error (502, 501, 500, etc.)
+        is_server_error = any(code in error_msg for code in ["502", "501", "500", "Bad Gateway", "Not Implemented", "Internal Server Error"])
+        if is_server_error:
+            print(f"   ⚠️  Server error detected - this may be temporary. Retrying in 5 seconds...")
+            import time
+            time.sleep(5)
+            # Retry once
+            try:
+                response_data = send_chat_request(question, timeout=timeout)
+                if "error" not in response_data:
+                    print(f"   ✅ Retry successful!")
+                else:
+                    print(f"   ❌ Retry also failed: {response_data['error']}")
+            except Exception as retry_error:
+                print(f"   ❌ Retry exception: {retry_error}")
+        
         return {
             "question": question,
             "category": category,
             "status": "error",
-            "error": response_data["error"],
+            "error": error_msg,
             "passed": False
         }
     
