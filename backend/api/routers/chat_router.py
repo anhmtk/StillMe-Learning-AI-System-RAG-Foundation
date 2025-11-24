@@ -23,7 +23,7 @@ import logging
 import os
 import re
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 import json
 
 logger = logging.getLogger(__name__)
