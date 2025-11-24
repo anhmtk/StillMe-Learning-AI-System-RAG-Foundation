@@ -4317,18 +4317,24 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     
                     # Check if it's a missing API key error
                     if "llm_provider" in error_msg.lower() or "api_key" in error_msg.lower() or "api key" in error_msg.lower():
+                        has_server_keys = bool(
+                            os.getenv('DEEPSEEK_API_KEY') or 
+                            os.getenv('OPENAI_API_KEY') or 
+                            os.getenv('OPENROUTER_API_KEY')
+                        )
                         logger.error(
                             f"❌ CRITICAL: Missing LLM API keys! "
                             f"use_server_keys={use_server_keys}, "
                             f"llm_provider={chat_request.llm_provider}, "
-                            f"has_server_keys={bool(os.getenv('DEEPSEEK_API_KEY') or os.getenv('OPENAI_API_KEY') or os.getenv('OPENROUTER_API_KEY'))}"
+                            f"has_server_keys={has_server_keys}"
                         )
-                        # For local testing, provide more helpful error message
-                        if IS_LOCAL_ENV:
+                        # Provide more helpful error message when no server keys found
+                        if not has_server_keys:
                             raw_response = (
-                                f"⚠️ Lỗi cấu hình: Backend local cần có API keys trong file .env để hoạt động. "
-                                f"Vui lòng thêm ít nhất một trong các keys sau: DEEPSEEK_API_KEY, OPENAI_API_KEY, hoặc OPENROUTER_API_KEY. "
-                                f"Chi tiết lỗi: {error_msg}"
+                                f"⚠️ Lỗi cấu hình: Backend cần có API keys trong file .env để hoạt động. "
+                                f"Vui lòng thêm ít nhất một trong các keys sau vào file .env: "
+                                f"DEEPSEEK_API_KEY, OPENAI_API_KEY, hoặc OPENROUTER_API_KEY. "
+                                f"Chi tiết: {error_msg}"
                             )
                         else:
                             from backend.api.utils.error_detector import get_fallback_message_for_error
