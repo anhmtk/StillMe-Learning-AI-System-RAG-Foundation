@@ -65,6 +65,8 @@ class CitationRequired:
                 # CRITICAL: Detect "Paradox của Russell" or "Russell's paradox" (case-insensitive)
                 r"\b(russell|russell's)\s+(paradox|nghịch\s+lý)\b",
                 r"\b(paradox|nghịch\s+lý)\s+(của|of)\s+(russell|russell's)\b",
+                r"\b(russell|russell's)\b.*\b(paradox|nghịch\s+lý)\b",  # "Russell...paradox" (words can be separated)
+                r"\b(paradox|nghịch\s+lý)\b.*\b(russell|russell's)\b",  # "paradox...Russell" (words can be separated)
                 # CRITICAL: Detect "Tranh luận giữa X và Y" pattern (case-insensitive)
                 r"\b(tranh\s+luận|debate|argument)\s+(giữa|between)\s+([A-Z][a-z]+)\s+(và|and)\s+([A-Z][a-z]+)\b",
                 # CRITICAL: Detect "forms" (hình thức) with Plato/Aristotle (case-insensitive)
