@@ -279,6 +279,25 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
             matched_keywords.append("philosophical_attribute")
             return (True, matched_keywords)
     
+    # Pattern 3f: CRITICAL - Questions about StillMe's wishes, desires, preferences
+    # "Nếu có thể ước thì bạn sẽ ước điều gì?" / "If you could wish, what would you wish for?"
+    # "Bạn muốn gì?" / "What do you want?"
+    # These are about StillMe's nature (it cannot have wishes/desires)
+    wish_desire_patterns = [
+        r'\b(bạn|you)\s+(sẽ|would|will)\s+(ước|wish)',
+        r'\b(bạn|you)\s+(muốn|want|desire)',
+        r'\b(bạn|you)\s+(thích|like|prefer)',
+        r'\b(bạn|you)\s+(hy\s+vọng|hope)',
+        r'\b(bạn|you)\s+(mong\s+muốn|aspire)',
+        r'\bif\s+(you|bạn)\s+could\s+(wish|ước)',
+        r'\bnếu\s+(bạn|you)\s+(có\s+thể\s+ước|could\s+wish)',
+        r'\bwhat\s+(do|would|will)\s+(you|bạn)\s+(wish|want|desire|like|prefer)',
+        r'\b(bạn|you)\s+(có\s+ước\s+muốn|have\s+wish|have\s+desire)',
+    ]
+    if any(re.search(pattern, query_lower, re.IGNORECASE) for pattern in wish_desire_patterns):
+        matched_keywords.append("wish_desire_preference")
+        return (True, matched_keywords)
+    
     # Pattern 3c: Technical questions about StillMe (embedding, model, database)
     # "Bạn đang sử dụng mô hình Embedding nào?" / "What embedding model do you use?"
     has_technical_keyword = any(
