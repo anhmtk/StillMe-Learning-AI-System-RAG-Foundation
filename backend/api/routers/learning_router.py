@@ -824,6 +824,28 @@ async def get_rss_fetch_history(
         logger.error(f"RSS fetch history error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/rss/circuit-breakers")
+async def get_rss_circuit_breakers():
+    """Get circuit breaker states for RSS feeds"""
+    try:
+        rss_fetcher = get_rss_fetcher()
+        if not rss_fetcher:
+            raise HTTPException(status_code=503, detail="RSS fetcher not available")
+        
+        circuit_states = rss_fetcher.get_circuit_breaker_states()
+        return {
+            "circuit_breakers": circuit_states,
+            "total_breakers": len(circuit_states),
+            "open_count": sum(1 for state in circuit_states.values() if state.get("state") == "open"),
+            "half_open_count": sum(1 for state in circuit_states.values() if state.get("state") == "half_open"),
+            "closed_count": sum(1 for state in circuit_states.values() if state.get("state") == "closed")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Circuit breaker stats error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/rss/stats")
 async def get_rss_stats():
     """Get RSS pipeline statistics"""
