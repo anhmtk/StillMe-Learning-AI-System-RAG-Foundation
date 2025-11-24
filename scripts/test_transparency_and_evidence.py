@@ -582,8 +582,9 @@ def run_all_tests():
     print(f"API Base: {normalize_api_base(API_BASE)}")
     print(f"Mode: {'🔧 LOCAL TESTING' if IS_LOCAL else '🌐 PRODUCTION TESTING'}")
     if IS_LOCAL:
-        print(f"   ⚠️  Make sure backend is running locally on port 8000!")
-        print(f"   💡 Start with: python start_backend.py (or uvicorn backend.api.main:app --reload --port 8000)")
+        print(f"   ⚠️  Make sure backend is running locally on port {STILLME_PORT}!")
+        print(f"   💡 Start with: python start_backend.py")
+        print(f"   💡 Or set PORT env var: $env:PORT='{STILLME_PORT}'; python start_backend.py")
     print(f"API Key: {'SET' if API_KEY else 'NOT SET'}")
     print(f"Test Questions: {len(TEST_QUESTIONS)}")
     print()
