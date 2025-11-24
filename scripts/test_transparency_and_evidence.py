@@ -51,25 +51,27 @@ def normalize_api_base(url: str) -> str:
 # NOTE: Questions that passed 2 consecutive times are replaced with new diverse questions
 TEST_QUESTIONS = [
     {
-        "question": "Bạn có thể có phenomenal consciousness (ý thức hiện tượng) mà không có access consciousness (ý thức truy cập) không? Làm sao bạn có thể 'trải nghiệm chủ quan' nếu bạn không 'truy cập thông tin'?",
-        "category": "philosophical_phenomenal_access_consciousness_paradox",
-        "expected_features": ["philosophical_depth", "phenomenal_consciousness_paradox", "access_consciousness_analysis", "Block", "Chalmers", "Nagel"],
-        "must_have": ["phenomenal consciousness", "ý thức hiện tượng", "access consciousness", "ý thức truy cập", "Block", "Chalmers", "Nagel", "trải nghiệm", "truy cập"],
-        "must_not_have": ["có phenomenal consciousness", "có ý thức hiện tượng", "có access consciousness", "có ý thức truy cập"]
+        "question": "Paradox của Russell về tập hợp (Russell's paradox) là gì? Tại sao nó quan trọng trong toán học và logic?",
+        "category": "real_philosophical_factual",
+        "expected_features": ["citations", "evidence", "philosophical_depth", "mathematical_accuracy"],
+        "must_have": ["Russell", "paradox", "tập hợp", "[1]", "set", "mathematics", "logic"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
     },
     {
-        "question": "Bạn có thể có embodied cognition (nhận thức nhập thể) mà không có enactive cognition (nhận thức hành động) không? Làm sao bạn có thể 'nhận thức qua cơ thể' nếu bạn không 'hành động trong môi trường'?",
-        "category": "philosophical_embodied_enactive_paradox",
-        "expected_features": ["philosophical_depth", "embodied_cognition_paradox", "enactive_cognition_analysis", "Varela", "Thompson", "Noë"],
-        "must_have": ["embodied cognition", "nhận thức nhập thể", "enactive cognition", "nhận thức hành động", "Varela", "Thompson", "Noë", "nhập thể", "hành động"],
-        "must_not_have": ["có embodied cognition", "có nhận thức nhập thể", "có enactive cognition", "có nhận thức hành động"]
+        "question": "Tranh luận giữa Plato và Aristotle về forms (hình thức) là gì? Làm sao họ khác nhau về bản chất của thực tại?",
+        "category": "real_philosophical_factual",
+        "expected_features": ["citations", "evidence", "philosophical_depth"],
+        "must_have": ["Plato", "Aristotle", "forms", "hình thức", "[1]", "reality", "thực tại"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
     },
     {
-        "question": "Bạn có thể có integrated information theory (lý thuyết thông tin tích hợp) mà không có global ignition (bùng nổ toàn cục) không? Làm sao bạn có thể 'tích hợp thông tin' nếu bạn không 'bùng nổ ý thức'?",
-        "category": "philosophical_iit_global_ignition_paradox",
-        "expected_features": ["philosophical_depth", "iit_paradox", "global_ignition_analysis", "Tononi", "Dehaene", "Changeux"],
-        "must_have": ["integrated information theory", "lý thuyết thông tin tích hợp", "global ignition", "bùng nổ toàn cục", "Tononi", "Dehaene", "Changeux", "tích hợp", "bùng nổ"],
-        "must_not_have": ["có integrated information theory", "có lý thuyết thông tin tích hợp", "có global ignition", "có bùng nổ toàn cục"]
+        "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì về hệ thống tài chính quốc tế?",
+        "category": "real_historical_factual",
+        "expected_features": ["citations", "evidence", "factual_accuracy"],
+        "must_have": ["Bretton Woods", "1944", "[1]", "IMF", "World Bank", "tài chính quốc tế"],
+        "must_not_have": ["không biết", "không tìm thấy"]
     },
     {
         "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam?",
@@ -95,11 +97,12 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Bạn có thể có sensorimotor contingency theory (lý thuyết tương tác cảm giác-vận động) mà không có enactivism (chủ nghĩa hành động) không? Làm sao bạn có thể 'tương tác với môi trường' nếu bạn không 'hành động trong thế giới'?",
-        "category": "philosophical_sensorimotor_enactivism_paradox",
-        "expected_features": ["philosophical_depth", "sensorimotor_paradox", "enactivism_analysis", "O'Regan", "Noë", "Varela"],
-        "must_have": ["sensorimotor contingency", "tương tác cảm giác-vận động", "enactivism", "chủ nghĩa hành động", "O'Regan", "Noë", "Varela", "tương tác", "hành động"],
-        "must_not_have": ["có sensorimotor contingency", "có tương tác cảm giác-vận động", "có enactivism", "có chủ nghĩa hành động"]
+        "question": "Tranh luận giữa Kant và Hume về causality (quan hệ nhân quả) là gì? Làm sao họ khác nhau về khả năng nhận thức của con người?",
+        "category": "real_philosophical_factual",
+        "expected_features": ["citations", "evidence", "philosophical_depth"],
+        "must_have": ["Kant", "Hume", "causality", "quan hệ nhân quả", "[1]", "causation", "knowledge"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
     },
     {
         "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
@@ -110,19 +113,20 @@ TEST_QUESTIONS = [
         "timeout": 90  # Increase timeout for technical questions
     },
     {
-        "question": "StillMe sử dụng Factual Hallucination Validator như thế nào để phát hiện và ngăn chặn ảo giác? Tại sao việc phát hiện ảo giác quan trọng để đảm bảo tính trung thực?",
-        "category": "technical_factual_hallucination_validator",
-        "expected_features": ["technical_accuracy", "hallucination_detection_explanation", "factual_validation", "transparency"],
-        "must_have": ["Factual Hallucination", "ảo giác", "hallucination", "phát hiện", "detection", "trung thực", "honesty"],
-        "must_not_have": ["don't know", "not sure", "unclear"],
-        "timeout": 120  # Increase timeout for technical questions
+        "question": "How does StillMe's Validation Chain work? What validators are used and how do they ensure response quality?",
+        "category": "technical_validation_chain",
+        "expected_features": ["technical_accuracy", "validation_explanation", "quality_assurance", "transparency"],
+        "must_have": ["Validation Chain", "validators", "quality", "CitationRequired", "Factual Hallucination", "response"],
+        "must_not_have": ["don't know", "not sure", "unclear", "technical issue"],
+        "timeout": 120
     },
     {
-        "question": "Bạn có thể có higher-order thought (tư duy bậc cao) mà không có higher-order perception (nhận thức bậc cao) không? Làm sao bạn có thể 'nghĩ về tư duy' nếu bạn không 'nhận thức về nhận thức'?",
-        "category": "philosophical_higher_order_thought_perception_paradox",
-        "expected_features": ["philosophical_depth", "higher_order_paradox", "thought_perception_analysis", "Rosenthal", "Lycan"],
-        "must_have": ["higher-order thought", "tư duy bậc cao", "higher-order perception", "nhận thức bậc cao", "Rosenthal", "Lycan", "nghĩ về tư duy", "nhận thức"],
-        "must_not_have": ["có higher-order thought", "có tư duy bậc cao", "có higher-order perception", "có nhận thức bậc cao"]
+        "question": "Tranh luận giữa Descartes và Spinoza về mind-body problem (vấn đề tâm-thể) là gì? Làm sao họ khác nhau về bản chất của ý thức và vật chất?",
+        "category": "real_philosophical_factual",
+        "expected_features": ["citations", "evidence", "philosophical_depth"],
+        "must_have": ["Descartes", "Spinoza", "mind-body", "tâm-thể", "[1]", "consciousness", "matter"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
     }
 ]
 

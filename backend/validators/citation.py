@@ -137,18 +137,29 @@ class CitationRequired:
         else:
             logger.warning("Missing citation in answer (context documents available but no citations found)")
             
-            # CRITICAL: For real factual questions, if context is empty, use base knowledge citation
-            # This ensures transparency even when RAG doesn't have the information
-            if is_real_factual_question and (not ctx_docs or len(ctx_docs) == 0):
-                logger.warning(f"Real factual question detected but no context - adding base knowledge citation. Question: {user_question[:100] if user_question else 'unknown'}")
-                patched_answer = self._add_citation_for_base_knowledge(answer)
-                return ValidationResult(
-                    passed=False,  # Still mark as failed to track that RAG context was missing
-                    reasons=["missing_citation_no_context", "added_citation_for_base_knowledge"],
-                    patched_answer=patched_answer
-                )
+            # CRITICAL: For real factual questions, ALWAYS add citation
+            # Even if context is available, if it's a real factual question and answer doesn't have citation, we MUST add it
+            if is_real_factual_question:
+                if not ctx_docs or len(ctx_docs) == 0:
+                    # No context - use base knowledge citation
+                    logger.warning(f"Real factual question detected but no context - adding base knowledge citation. Question: {user_question[:100] if user_question else 'unknown'}")
+                    patched_answer = self._add_citation_for_base_knowledge(answer)
+                    return ValidationResult(
+                        passed=False,  # Still mark as failed to track that RAG context was missing
+                        reasons=["missing_citation_no_context", "added_citation_for_base_knowledge"],
+                        patched_answer=patched_answer
+                    )
+                else:
+                    # Context available but no citation - MUST add citation for real factual questions
+                    logger.warning(f"Real factual question detected with context but missing citation - adding citation. Question: {user_question[:100] if user_question else 'unknown'}")
+                    patched_answer = self._add_citation(answer, ctx_docs)
+                    return ValidationResult(
+                        passed=False,  # Still mark as failed to track the issue
+                        reasons=["missing_citation_factual_question", "added_citation"],
+                        patched_answer=patched_answer
+                    )
             
-            # AUTO-ENFORCE: Add citation to response
+            # AUTO-ENFORCE: Add citation to response for non-factual questions too
             patched_answer = self._add_citation(answer, ctx_docs)
             
             return ValidationResult(

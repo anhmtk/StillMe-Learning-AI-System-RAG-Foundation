@@ -4140,10 +4140,14 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                     
                     # CRITICAL: Check if raw_response is an error message BEFORE validation
                     # This prevents error messages from passing through validators
+                    # BUT: For technical questions about "your system", don't replace with fallback immediately
+                    # Instead, let the retry logic handle it (it will retry with stronger prompt)
                     if raw_response and isinstance(raw_response, str):
                         from backend.api.utils.error_detector import is_technical_error
                         is_error, error_type = is_technical_error(raw_response)
-                        if is_error:
+                        # CRITICAL: For technical questions about system, don't replace with fallback immediately
+                        # The retry logic below will handle it with a stronger prompt
+                        if is_error and not is_technical_about_system_rag:
                             logger.error(
                                 f"❌ LLM returned technical error as response (type: {error_type}): {raw_response[:200]}. "
                                 f"Question: {chat_request.message[:100]}"
@@ -4151,6 +4155,12 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
                             from backend.api.utils.error_detector import get_fallback_message_for_error
                             raw_response = get_fallback_message_for_error(error_type, detected_lang)
                             processing_steps.append(f"⚠️ LLM returned technical error - replaced with fallback message")
+                        elif is_error and is_technical_about_system_rag:
+                            logger.warning(
+                                f"⚠️ Technical question about 'your system' returned error (type: {error_type}) - will retry with stronger prompt. "
+                                f"Question: {chat_request.message[:100]}"
+                            )
+                            # Don't replace yet - let retry logic handle it
                     
                     # CRITICAL: Validate raw_response immediately after LLM call
                     if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
