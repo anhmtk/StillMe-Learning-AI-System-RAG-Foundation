@@ -132,7 +132,18 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
     
     has_learning_keyword = any(
         keyword in query_lower 
-        for keyword in ["học", "learn", "learning", "học tập", "học hỏi", "tự học", "học như thế nào", "how do you learn", "how does.*learn", "cách học"]
+        for keyword in [
+            "học", "learn", "learning", "học tập", "học hỏi", "tự học", 
+            "học như thế nào", "how do you learn", "how does.*learn", "cách học",
+            "học được gì", "hoc duoc gi", "what did you learn", "what have you learned",
+            "hôm nay bạn học", "hom nay ban hoc", "today you learn", "what you learned today",
+            "lý do vì sao lại học", "ly do vi sao lai hoc", "why do you learn", "why learn",
+            "vì sao lại bỏ bài học", "vi sao lai bo bai hoc", "why skip", "why filter",
+            "bỏ bài học", "bo bai hoc", "skip", "filter", "bỏ qua", "bo qua",
+            "nguồn học", "nguon hoc", "learning source", "source of learning",
+            "nguồn học nào bị lỗi", "nguon hoc nao bi loi", "which source failed", "source error",
+            "lý do lỗi", "ly do loi", "reason for error", "why error", "why failed"
+        ]
     )
     
     has_system_keyword = any(
@@ -141,7 +152,10 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
             "hệ thống", "system", "hoạt động", "vận hành", "work", "cách", "how", 
             "như thế nào", "how does", "how do", "how work", "how function",
             "mechanisms", "wie funktioniert", "fonctionne", "comment fonctionne",
-            "cómo funciona", "如何工作", "どのように機能", "mechanism", "cơ chế"
+            "cómo funciona", "如何工作", "どのように機能", "mechanism", "cơ chế",
+            "triết lý hoạt động", "triet ly hoat dong", "operating philosophy", "philosophy of operation",
+            "mục tiêu phát triển", "muc tieu phat trien", "development goal", "development target",
+            "mục tiêu kế tiếp", "muc tieu ke tiep", "next goal", "next target", "future goal"
         ]
     )
     
@@ -173,11 +187,47 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
     
     # Pattern 3b: Direct learning questions (even without explicit StillMe name)
     # "How do you learn?" (Vietnamese: "Bạn học tập như thế nào?") - assume about StillMe
+    # CRITICAL: Also detect questions about learning activity, philosophy, goals, errors
+    # These are ALWAYS about StillMe even without "bạn"/"you"
     if has_learning_keyword and any(
         keyword in query_lower 
-        for keyword in ["bạn", "you", "your", "như thế nào", "how", "cách"]
+        for keyword in ["bạn", "you", "your", "như thế nào", "how", "cách", "hôm nay", "hom nay", "today", "ngày hôm nay", "ngay hom nay"]
     ):
         matched_keywords.append("learning_direct")
+        return (True, matched_keywords)
+    
+    # Pattern 3c: Questions about StillMe's philosophy, goals, errors (self-knowledge)
+    # These are ALWAYS about StillMe, even without explicit "bạn"/"you"
+    # Examples: "triết lý hoạt động của bạn", "mục tiêu phát triển", "nguồn học nào bị lỗi"
+    has_philosophy_goal_keyword = any(
+        keyword in query_lower 
+        for keyword in [
+            "triết lý", "triet ly", "philosophy", "philosophy of operation",
+            "mục tiêu", "muc tieu", "goal", "target", "development goal",
+            "phát triển", "phat trien", "development", "next goal",
+            "nguồn học", "nguon hoc", "learning source", "source",
+            "bị lỗi", "bi loi", "failed", "error", "lỗi", "loi", "why error", "why failed",
+            "lý do", "ly do", "reason", "why"
+        ]
+    )
+    
+    # If question has philosophy/goal/error keywords AND learning/system keywords, it's about StillMe
+    if has_philosophy_goal_keyword and (has_learning_keyword or has_system_keyword):
+        if has_philosophy_goal_keyword:
+            matched_keywords.append("philosophy_goal_error")
+        return (True, matched_keywords)
+    
+    # Pattern 3d: Questions about "hôm nay bạn học được gì" / "what did you learn today"
+    # These are ALWAYS about StillMe's learning activity
+    if any(
+        pattern in query_lower 
+        for pattern in [
+            "hôm nay bạn học", "hom nay ban hoc", "today you learn", "what did you learn today",
+            "học được gì", "hoc duoc gi", "learned what", "what learned",
+            "ngày hôm nay", "ngay hom nay", "today"
+        ]
+    ) and has_learning_keyword:
+        matched_keywords.append("learning_activity_today")
         return (True, matched_keywords)
     
     # Pattern 3d: CRITICAL - Questions about StillMe's capabilities/philosophy with "bạn có thể"

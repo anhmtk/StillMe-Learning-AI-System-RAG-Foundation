@@ -780,7 +780,8 @@ async def _handle_validation_with_fallback(
     num_knowledge: int,
     processing_steps: list,
     timing_logs: dict,
-    is_origin_query: bool = False
+    is_origin_query: bool = False,
+    is_stillme_query: bool = False
 ) -> tuple:
     """
     Handle validation logic with fallback mechanisms.
@@ -1497,10 +1498,11 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
     else:
         is_safe_refusal = False
     
-    # Only prepend disclaimer if NOT a fallback meta-answer, NOT a safe refusal, and NOT an origin query
-    # CRITICAL: StillMe MUST know about its own origin - never add disclaimer for origin queries
+    # Only prepend disclaimer if NOT a fallback meta-answer, NOT a safe refusal, NOT an origin query, and NOT a StillMe self-knowledge query
+    # CRITICAL: StillMe MUST know about itself - never add disclaimer for origin queries or StillMe self-knowledge queries
+    # StillMe self-knowledge queries include: learning activity, philosophy, goals, errors, system status
     if (confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical and 
-        not is_fallback_meta and not is_safe_refusal and not is_origin_query):
+        not is_fallback_meta and not is_safe_refusal and not is_origin_query and not is_stillme_query):
         # Check if response already has transparency disclaimer
         response_lower = response.lower()
         has_transparency = any(
@@ -1866,7 +1868,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         num_knowledge=0,
                         processing_steps=processing_steps,
                         timing_logs={},
-                        is_origin_query=is_origin_query
+                        is_origin_query=is_origin_query,
+                        is_stillme_query=is_stillme_query
                     )
                     
                     # Use validated response
@@ -4482,7 +4485,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 num_knowledge=num_knowledge,
                                 processing_steps=processing_steps,
                                 timing_logs=timing_logs,
-                                is_origin_query=is_origin_query
+                                is_origin_query=is_origin_query,
+                                is_stillme_query=is_stillme_query
                             )
                         except HTTPException:
                             raise
