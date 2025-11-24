@@ -695,7 +695,7 @@ def _initialize_rag_components():
                     #
                     # If files don't exist, system will still work but may not answer questions about StillMe correctly.
                     # To fix: Run scripts/add_foundational_knowledge.py to ensure files exist and are loaded into RAG.
-                    """
+                
                 # Only add fallback foundational knowledge if files don't exist
                 if FOUNDATIONAL_KNOWLEDGE:
                     tags_list = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db"]
