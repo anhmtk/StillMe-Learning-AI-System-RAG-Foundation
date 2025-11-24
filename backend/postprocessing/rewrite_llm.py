@@ -414,10 +414,11 @@ CRITICAL RULES:
                 citation_instruction = f"\n\n🚨🚨🚨 CRITICAL: The original response is MISSING citations. You MUST add at least [1] in your rewritten response. Context documents available: {num_ctx_docs}."
         
         # CRITICAL: Base knowledge usage instruction when RAG context is not available or not reliable
-        # BUT: If this is a StillMe query with foundational context, DON'T use mechanical disclaimer
-        # StillMe should answer about itself using foundational knowledge, not generic disclaimer
+        # BUT: If this is a StillMe query, DON'T use mechanical disclaimer (even without foundational context)
+        # StillMe should answer about itself naturally, not with generic "dựa trên kiến thức tổng quát..." disclaimer
+        # When StillMe answers about itself (free will, determinism, consciousness, etc.), it should use its own understanding
         base_knowledge_instruction = ""
-        if (not has_reliable_context or num_ctx_docs == 0) and not (is_stillme_query and has_foundational_context):
+        if (not has_reliable_context or num_ctx_docs == 0) and not is_stillme_query:
             base_knowledge_instruction = f"""
             
 🚨🚨🚨 CRITICAL: RAG CONTEXT NOT AVAILABLE OR NOT RELIABLE 🚨🚨🚨

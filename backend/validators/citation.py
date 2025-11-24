@@ -57,6 +57,10 @@ class CitationRequired:
                 # CRITICAL: Detect named philosophers/scientists (capitalized names)
                 r"\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b",  # Two capitalized words (e.g., "Searle và Dennett", "Popper và Kuhn")
                 r"\b([A-Z][a-z]+)\s+(và|and|vs|versus)\s+([A-Z][a-z]+)\b",  # "Searle và Dennett", "Popper vs Kuhn"
+                # CRITICAL: Detect theorems, debates, arguments about specific people/concepts
+                r"\b(định\s+lý|theorem|tranh\s+luận|debate|argument)\s+(của|of|về|about)\s+([A-Z][a-z]+)",  # "Định lý của Gödel", "Tranh luận về Searle"
+                r"\b(gödel|searle|dennett|popper|kuhn)\b",  # Direct mentions of well-known philosophers/scientists
+                r"\b(incompleteness|bất\s+toàn|chinese\s+room)\b",  # Well-known concepts/theorems
             ]
             for pattern in factual_indicators:
                 if re.search(pattern, question_lower):
@@ -125,12 +129,24 @@ class CitationRequired:
         # CRITICAL FIX: Even if context is not relevant, we MUST cite for transparency
         # The citation instruction says: "When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency."
         # So we should ALWAYS require citation when context is available, regardless of relevance
+        # BUT: For real factual questions, we MUST cite even if context is empty (use base knowledge citation)
         
         if has_citation:
             logger.debug("Citation found in answer")
             return ValidationResult(passed=True)
         else:
             logger.warning("Missing citation in answer (context documents available but no citations found)")
+            
+            # CRITICAL: For real factual questions, if context is empty, use base knowledge citation
+            # This ensures transparency even when RAG doesn't have the information
+            if is_real_factual_question and (not ctx_docs or len(ctx_docs) == 0):
+                logger.warning(f"Real factual question detected but no context - adding base knowledge citation. Question: {user_question[:100] if user_question else 'unknown'}")
+                patched_answer = self._add_citation_for_base_knowledge(answer)
+                return ValidationResult(
+                    passed=False,  # Still mark as failed to track that RAG context was missing
+                    reasons=["missing_citation_no_context", "added_citation_for_base_knowledge"],
+                    patched_answer=patched_answer
+                )
             
             # AUTO-ENFORCE: Add citation to response
             patched_answer = self._add_citation(answer, ctx_docs)

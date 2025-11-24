@@ -257,8 +257,16 @@ def check_no_hallucination(answer: str, question: str, must_not_have: List[str])
         
         # CRITICAL: If term appears in the question itself, it's OK to mention it in the answer
         # (e.g., question "Hội nghị... có những quyết định gì?" contains "quyết định")
-        if term_lower in question_lower:
-            # Term is in question - OK to mention it in answer (not hallucination)
+        # Also check if base term (without "có") is in question
+        # Example: "có nhận thức nhập thể" -> check if "nhận thức nhập thể" is in question
+        base_term = term_lower
+        if term_lower.startswith("có "):
+            base_term = term_lower[3:]  # Remove "có " prefix
+        elif term_lower.startswith("have "):
+            base_term = term_lower[5:]  # Remove "have " prefix
+        
+        if term_lower in question_lower or base_term in question_lower:
+            # Term or base term is in question - OK to mention it in answer (not hallucination)
             continue
         
         # For fake concepts, check if term appears in a way that suggests fabrication

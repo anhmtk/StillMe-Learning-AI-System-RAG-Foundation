@@ -1799,6 +1799,34 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     detect_origin_query
                 )
                 is_stillme_query, matched_keywords = detect_stillme_query(chat_request.message)
+                
+                # CRITICAL: Also detect technical questions about "your system" as StillMe queries
+                # This ensures questions like "What is RAG retrieval in your system?" are treated as StillMe queries
+                if not is_stillme_query:
+                    question_lower = chat_request.message.lower()
+                    is_technical_question = any(
+                        keyword in question_lower 
+                        for keyword in [
+                            "rag", "retrieval-augmented", "chromadb", "vector database",
+                            "deepseek", "openai", "llm api", "black box", "blackbox",
+                            "embedding", "sentence-transformers",
+                            "pipeline", "validation", "hallucination", "transparency",
+                            "kiến trúc", "hệ thống", "cơ chế", "quy trình",
+                            "cơ chế hoạt động", "cách hoạt động", "how does", "how it works"
+                        ]
+                    )
+                    has_your_system = any(
+                        phrase in question_lower 
+                        for phrase in [
+                            "your system", "in your system", "your.*system", "system.*you",
+                            "bạn.*hệ thống", "hệ thống.*bạn", "của bạn", "bạn.*sử dụng"
+                        ]
+                    )
+                    if is_technical_question and has_your_system:
+                        is_stillme_query = True
+                        matched_keywords = ["technical_your_system"]
+                        logger.info("Technical question about 'your system' detected - treating as StillMe query")
+                
                 # Only skip origin detection for philosophical questions (provenance is not relevant for philosophical StillMe questions)
                 if not is_philosophical:
                     is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
@@ -1895,6 +1923,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=0,  # Don't need conversation for foundational queries
                         prioritize_foundational=True,
+                        similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries to ensure foundational knowledge is retrieved
                         exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
                         prioritize_style_guide=is_philosophical,
                         is_philosophical=is_philosophical
@@ -1905,14 +1934,15 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         if doc.get("id") not in existing_ids:
                             all_knowledge_docs.append(doc)
                 
-                # If we still don't have results, do normal retrieval
+                # If we still don't have results, do normal retrieval with very low threshold
                 if not all_knowledge_docs:
-                    logger.warning("No foundational knowledge found, falling back to normal retrieval")
+                    logger.warning("No foundational knowledge found, falling back to normal retrieval with very low threshold")
                     context = rag_retrieval.retrieve_context(
                         query=chat_request.message,
                         knowledge_limit=chat_request.context_limit,
                         conversation_limit=2,
                         prioritize_foundational=True,
+                        similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries
                         exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
                         prioritize_style_guide=is_philosophical,
                         is_philosophical=is_philosophical
@@ -1967,6 +1997,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                                 knowledge_limit=chat_request.context_limit,
                                 conversation_limit=0,  # Don't need conversation for foundational queries
                                 prioritize_foundational=True,
+                                similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries to ensure foundational knowledge is retrieved
                                 exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
                                 prioritize_style_guide=is_philosophical,
                                 is_philosophical=is_philosophical
@@ -1977,14 +2008,15 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                                 if doc.get("id") not in existing_ids:
                                     all_knowledge_docs.append(doc)
                         
-                        # If we still don't have results, do normal retrieval with foundational priority
+                        # If we still don't have results, do normal retrieval with foundational priority and very low threshold
                         if not all_knowledge_docs:
-                            logger.warning("No foundational knowledge found for 'your system' question, falling back to normal retrieval")
+                            logger.warning("No foundational knowledge found for 'your system' question, falling back to normal retrieval with very low threshold")
                             context = rag_retrieval.retrieve_context(
                                 query=chat_request.message,
                                 knowledge_limit=min(chat_request.context_limit, 5),
                                 conversation_limit=1,
                                 prioritize_foundational=True,
+                                similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries
                                 exclude_content_types=["technical"] if is_philosophical else None,
                                 prioritize_style_guide=is_philosophical,
                                 is_philosophical=is_philosophical
@@ -2544,7 +2576,9 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                     "của bạn" in question_lower_rag or
                     re.search(r'\bhệ\s+thống\s+của\s+bạn\b', question_lower_rag)  # "hệ thống của bạn"
                 )
-                is_technical_about_system_rag = has_technical_keyword_rag and has_your_system_pattern_rag
+                # CRITICAL: Also check if this was already detected as StillMe query (from earlier detection)
+                # This ensures technical questions about "your system" are properly flagged for retry logic
+                is_technical_about_system_rag = (has_technical_keyword_rag and has_your_system_pattern_rag) or (is_stillme_query and has_technical_keyword_rag)
                 
                 context_quality_warning = ""
                 if not has_reliable_context or context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.3):
