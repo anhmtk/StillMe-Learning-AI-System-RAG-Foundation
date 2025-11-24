@@ -2083,12 +2083,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 
                 # Return immediately with system truth - no LLM processing needed
                 return ChatResponse(
-                    message=system_truth_answer,
-                    confidence=1.0,  # 100% confidence - this is ground truth
-                    sources=[],
+                    response=system_truth_answer,  # CRITICAL: Use 'response' field, not 'message'
+                    confidence_score=1.0,  # 100% confidence - this is ground truth
                     processing_steps=["🎯 Identity Truth Override: Used SYSTEM_ORIGIN ground truth"],
                     validation_info={},
-                    timing_logs={}
+                    timing={}
                 )
             except Exception as origin_error:
                 logger.error(f"❌ Failed to get SYSTEM_ORIGIN answer: {origin_error}, falling back to normal processing")
