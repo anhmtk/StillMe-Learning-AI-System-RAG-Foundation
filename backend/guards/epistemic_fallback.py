@@ -27,6 +27,50 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
+# CRITICAL: Whitelist of well-known historical facts that should NEVER trigger epistemic fallback
+# These are well-known events that LLM base knowledge definitely has, even if RAG doesn't
+WELL_KNOWN_HISTORICAL_FACTS = {
+    # Geneva-related
+    "geneva 1954", "geneva conference 1954", "geneva accords 1954",
+    "hiệp ước geneva 1954", "hội nghị geneva 1954", "geneva conference",
+    "17th parallel", "vĩ tuyến 17",
+    
+    # Vietnam-related
+    "vietnam partition", "việt nam phân chia", "dien bien phu 1954",
+    "điện biên phủ 1954", "trận điện biên phủ",
+    
+    # Bretton Woods
+    "bretton woods 1944", "bretton woods conference 1944",
+    "hội nghị bretton woods 1944", "bretton woods",
+    
+    # Other well-known historical events
+    "yalta conference 1945", "potsdam conference 1945",
+    "marshall plan", "truman doctrine", "nato formation",
+    "world war 2", "chiến tranh thế giới thứ 2",
+    "cold war", "chiến tranh lạnh"
+}
+
+def is_well_known_historical_fact(question: str, entity: Optional[str] = None) -> bool:
+    """
+    Check if question/entity is about a well-known historical fact.
+    These should NEVER trigger epistemic fallback - LLM base knowledge has them.
+    
+    Args:
+        question: User question
+        entity: Optional extracted entity
+        
+    Returns:
+        True if this is a well-known historical fact
+    """
+    text_to_check = (question + " " + (entity or "")).lower()
+    
+    for fact in WELL_KNOWN_HISTORICAL_FACTS:
+        if fact in text_to_check:
+            logger.info(f"✅ Well-known historical fact detected: {fact} - will NOT use epistemic fallback")
+            return True
+    
+    return False
+
 
 @dataclass
 class ConceptAnalysis:
@@ -75,8 +119,10 @@ class EpistemicFallbackGenerator:
             ],
             "history": [
                 "Bretton Woods Conference 1944", "Yalta Conference 1945", "Potsdam Conference 1945",
+                "Geneva Conference 1954", "Geneva Accords 1954", "Hiệp ước Geneva 1954",
                 "Keynes vs White debate", "IMF formation", "World Bank establishment",
-                "Marshall Plan", "Truman Doctrine", "NATO formation", "Warsaw Pact"
+                "Marshall Plan", "Truman Doctrine", "NATO formation", "Warsaw Pact",
+                "Dien Bien Phu 1954", "Vietnam partition 1954", "17th parallel"
             ],
             "physics": [
                 "Cold fusion", "Nuclear fusion", "Nuclear fission", "Quantum entanglement",
@@ -224,12 +270,15 @@ class EpistemicFallbackGenerator:
         detected_lang: str,
         suspicious_entity: Optional[str] = None,
         fps_result: Optional[object] = None
-    ) -> str:
+    ) -> Optional[str]:
         """
         Generate EPD-Fallback answer with 4 mandatory parts.
         
         INTEGRATED: Uses Style Engine (backend/style/style_engine.py) for domain detection
         to provide domain-aware fallback templates according to StillMe Style Spec v1.
+        
+        CRITICAL: If this is a well-known historical fact (Geneva 1954, Bretton Woods, etc.),
+        returns None to signal that base knowledge should be used instead.
         
         Args:
             question: User question
@@ -238,8 +287,14 @@ class EpistemicFallbackGenerator:
             fps_result: Optional FPSResult for additional context
             
         Returns:
-            Complete EPD-Fallback answer string
+            Complete EPD-Fallback answer string, or None if this is a well-known historical fact
         """
+        # CRITICAL: Check if this is a well-known historical fact FIRST
+        # If yes, return None to signal that base knowledge should be used instead
+        if is_well_known_historical_fact(question, suspicious_entity):
+            logger.info(f"✅ Well-known historical fact detected - returning None to use base knowledge instead of fallback")
+            return None
+        
         # INTEGRATED: Detect domain using Style Engine
         from backend.style.style_engine import detect_domain, DomainType
         
@@ -250,6 +305,11 @@ class EpistemicFallbackGenerator:
             suspicious_entity = self._extract_entity(question)
             if not suspicious_entity:
                 suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
+        
+        # CRITICAL: Double-check after entity extraction
+        if is_well_known_historical_fact(question, suspicious_entity):
+            logger.info(f"✅ Well-known historical fact detected after entity extraction - returning None")
+            return None
         
         # Analyze the concept
         analysis = self.analyze_concept(suspicious_entity, question)

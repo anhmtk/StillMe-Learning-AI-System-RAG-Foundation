@@ -95,10 +95,8 @@ class CitationRequired:
                 logger.debug("No context documents available, citations not required")
                 return ValidationResult(passed=True)
         
-        # CRITICAL FIX: Even if context is not relevant, we MUST cite for transparency
-        # The citation instruction says: "When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency."
-        # So we should ALWAYS require citation when context is available, regardless of relevance
-        
+        # CRITICAL: Even if context is available, check if answer already has citation
+        # If not, we MUST add it (this is the main path for missing citations)
         has_citation = bool(CITE_RE.search(answer))
         
         # CRITICAL FIX: Check if answer has URLs or source references that should be converted to citations
@@ -123,6 +121,10 @@ class CitationRequired:
                         reasons=["converted_urls_to_citations"],
                         patched_answer=patched_answer
                     )
+        
+        # CRITICAL FIX: Even if context is not relevant, we MUST cite for transparency
+        # The citation instruction says: "When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency."
+        # So we should ALWAYS require citation when context is available, regardless of relevance
         
         if has_citation:
             logger.debug("Citation found in answer")

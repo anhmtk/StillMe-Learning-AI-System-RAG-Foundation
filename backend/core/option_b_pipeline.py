@@ -106,18 +106,24 @@ async def process_with_option_b(
                 fps_result=fps_result
             )
             
-            processing_steps.append("🛡️ FPS blocked - returned EPD-Fallback")
-            timing_logs["fps_scan"] = time.time() - fps_start
-            timing_logs["total_time"] = time.time() - start_time
-            
-            return {
-                "response": fallback_text,
-                "question_type": question_type.value,
-                "hallucination_detected": True,
-                "used_fallback": True,
-                "processing_steps": processing_steps,
-                "timing_logs": timing_logs
-            }
+            # CRITICAL: If None, it's a well-known historical fact - continue with normal flow (use base knowledge)
+            if fallback_text is None:
+                logger.info("✅ Well-known historical fact detected - continuing with normal flow to use base knowledge")
+                processing_steps.append("✅ Well-known historical fact - using base knowledge with transparency")
+                # Continue with normal flow (will use base knowledge instruction)
+            else:
+                processing_steps.append("🛡️ FPS blocked - returned EPD-Fallback")
+                timing_logs["fps_scan"] = time.time() - fps_start
+                timing_logs["total_time"] = time.time() - start_time
+                
+                return {
+                    "response": fallback_text,
+                    "question_type": question_type.value,
+                    "hallucination_detected": True,
+                    "used_fallback": True,
+                    "processing_steps": processing_steps,
+                    "timing_logs": timing_logs
+                }
         
         timing_logs["fps_scan"] = time.time() - fps_start
         

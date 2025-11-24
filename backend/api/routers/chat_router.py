@@ -248,7 +248,7 @@ def _extract_full_named_entity(question: str) -> Optional[str]:
     
     return None
 
-def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_entity: Optional[str] = None, fps_result: Optional[object] = None) -> str:
+def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_entity: Optional[str] = None, fps_result: Optional[object] = None) -> Optional[str]:
     """
     Build a safe, honest refusal answer when hallucination is detected.
     
@@ -258,8 +258,8 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
     C. Find Most Similar Real Concepts
     D. Guide User to Verify Sources
     
-    CRITICAL: This function prioritizes honesty over helpfulness.
-    "Thà nói 'mình không biết' 100 lần còn hơn bịa 1 lần cho có vẻ thông minh."
+    CRITICAL: If this is a well-known historical fact (Geneva 1954, etc.), returns None
+    to signal that base knowledge should be used instead of fallback.
     
     Args:
         question: User question
@@ -268,18 +268,25 @@ def _build_safe_refusal_answer(question: str, detected_lang: str, suspicious_ent
         fps_result: Optional FPSResult for additional context
         
     Returns:
-        EPD-Fallback answer in appropriate language (4 parts, profound, non-fabricated)
+        EPD-Fallback answer in appropriate language (4 parts, profound, non-fabricated),
+        or None if this is a well-known historical fact (should use base knowledge)
     """
     # Use EPD-Fallback generator
     from backend.guards.epistemic_fallback import get_epistemic_fallback_generator
     
     generator = get_epistemic_fallback_generator()
-    return generator.generate_epd_fallback(
+    fallback = generator.generate_epd_fallback(
         question=question,
         detected_lang=detected_lang,
         suspicious_entity=suspicious_entity,
         fps_result=fps_result
     )
+    
+    # If None, it's a well-known historical fact - caller should use base knowledge
+    if fallback is None:
+        logger.info("✅ Well-known historical fact detected - caller should use base knowledge instead of fallback")
+    
+    return fallback
 
 # Philosophy-Lite System Prompt for non-RAG philosophical questions
 # TASK 3: Refactored to include Anchor → Unpack → Explore → Edge → Return structure
@@ -1756,10 +1763,18 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     fps_result=fps_result
                 )
                 
-                processing_steps.append("⚠️ FPS detected non-existent concept - returning honest response")
-                return ChatResponse(
-                    response=honest_response,
-                    confidence_score=1.0,  # High confidence in honesty
+                # CRITICAL: If None, it's a well-known historical fact - continue with normal flow (use base knowledge)
+                if honest_response is None:
+                    logger.info("✅ Well-known historical fact detected - continuing with normal flow to use base knowledge")
+                    processing_steps.append("✅ Well-known historical fact - using base knowledge with transparency")
+                    # Continue with normal flow (will use base knowledge instruction)
+                else:
+                    processing_steps.append("⚠️ FPS detected non-existent concept - returning honest response")
+                    return ChatResponse(
+                        response=honest_response,
+                        confidence_score=1.0,  # High confidence in honesty
+                        processing_steps=processing_steps
+                    )
                     processing_steps=processing_steps,
                     timing_logs={
                         "total_time": time.time() - start_time,
@@ -2369,10 +2384,16 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                                 suspicious_entity
                             )
                             
-                            processing_steps.append("🛡️ Pre-LLM Hallucination Guard: Blocked factual question with suspicious entity (no RAG context)")
-                            
-                            # Mark as fallback to skip learning extraction
-                            is_fallback_for_learning = True
+                            # CRITICAL: If None, it's a well-known historical fact - continue with normal flow (use base knowledge)
+                            if honest_response is None:
+                                logger.info("✅ Well-known historical fact detected - continuing with normal flow to use base knowledge")
+                                processing_steps.append("✅ Well-known historical fact - using base knowledge with transparency")
+                                # Continue with normal flow (will use base knowledge instruction)
+                            else:
+                                processing_steps.append("🛡️ Pre-LLM Hallucination Guard: Blocked factual question with suspicious entity (no RAG context)")
+                                
+                                # Mark as fallback to skip learning extraction
+                                is_fallback_for_learning = True
                             
                             # Calculate confidence score (low because no context)
                             confidence_score = 1.0  # High confidence in honesty
