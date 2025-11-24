@@ -44,7 +44,8 @@ WELL_KNOWN_HISTORICAL_FACTS = {
     "hội nghị bretton woods 1944", "bretton woods",
     
     # Other well-known historical events
-    "yalta conference 1945", "potsdam conference 1945",
+    "yalta conference 1945", "potsdam conference 1945", "potsdam 1945",
+    "hội nghị potsdam 1945", "potsdam agreement", "potsdam",
     "marshall plan", "truman doctrine", "nato formation",
     "world war 2", "chiến tranh thế giới thứ 2",
     "cold war", "chiến tranh lạnh"
