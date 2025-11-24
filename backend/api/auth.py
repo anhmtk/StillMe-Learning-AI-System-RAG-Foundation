@@ -108,12 +108,31 @@ def verify_api_key(api_key: Optional[str] = Security(api_key_header)) -> str:
     
     # Compare API keys (constant-time comparison to prevent timing attacks)
     if not constant_time_compare(api_key.encode(), expected_key.encode()):
+        # Try API key rotation service if available
+        try:
+            from backend.api.api_key_rotation import get_api_key_rotation_service
+            rotation_service = get_api_key_rotation_service()
+            if rotation_service and rotation_service.verify_key(api_key):
+                logger.debug("API key verified via rotation service")
+                return api_key
+        except Exception as rotation_error:
+            logger.debug(f"API key rotation service not available: {rotation_error}")
+        
         logger.warning("Invalid API key provided")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid API key.",
             headers={"WWW-Authenticate": "ApiKey"},
         )
+    
+    # Update rotation service if available
+    try:
+        from backend.api.api_key_rotation import get_api_key_rotation_service
+        rotation_service = get_api_key_rotation_service()
+        if rotation_service:
+            rotation_service.verify_key(api_key)  # Update usage stats
+    except Exception:
+        pass  # Rotation service not critical
     
     logger.debug("API key verified successfully")
     return api_key
