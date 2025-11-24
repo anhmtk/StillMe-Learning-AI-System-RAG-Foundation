@@ -17,6 +17,34 @@ router = APIRouter()
 # Feature flag for health/ready endpoints
 ENABLE_HEALTH_READY = os.getenv("ENABLE_HEALTH_READY", "true").lower() == "true"
 
+# Feature flag for dependency injection (currently disabled - using direct imports)
+USE_DEPENDENCY_INJECTION = os.getenv("USE_DEPENDENCY_INJECTION", "false").lower() == "true"
+
+# Import dependency injection types (if available)
+try:
+    from backend.api.dependencies import (
+        RAGRetrievalDep, ChromaClientDep, EmbeddingServiceDep, KnowledgeRetentionDep,
+        AccuracyScorerDep, RSSFetcherDep, LearningSchedulerDep, SelfDiagnosisAgentDep,
+        ContentCuratorDep, RSSFetchHistoryDep, ContinuumMemoryDep, SourceIntegrationDep,
+        FeedHealthMonitorDep, APIKeyRotationServiceDep
+    )
+except ImportError:
+    # Fallback if dependencies module not available
+    RAGRetrievalDep = None
+    ChromaClientDep = None
+    EmbeddingServiceDep = None
+    KnowledgeRetentionDep = None
+    AccuracyScorerDep = None
+    RSSFetcherDep = None
+    LearningSchedulerDep = None
+    SelfDiagnosisAgentDep = None
+    ContentCuratorDep = None
+    RSSFetchHistoryDep = None
+    ContinuumMemoryDep = None
+    SourceIntegrationDep = None
+    FeedHealthMonitorDep = None
+    APIKeyRotationServiceDep = None
+
 # Import global services from main (temporary - will refactor to dependency injection later)
 def get_rag_retrieval():
     import backend.api.main as main_module
