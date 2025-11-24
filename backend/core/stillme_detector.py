@@ -217,6 +217,15 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
             matched_keywords.append("philosophy_goal_error")
         return (True, matched_keywords)
     
+    # Pattern 3c-2: Questions about "why skip/filter" learning - ALWAYS about StillMe
+    # "vi sao lai bo bai hoc", "why skip learning", "why filter"
+    if has_learning_keyword and any(
+        pattern in query_lower 
+        for pattern in ["vi sao lai bo", "why skip", "why filter", "vi sao bo", "why do you skip", "why do you filter"]
+    ):
+        matched_keywords.append("why_skip_filter")
+        return (True, matched_keywords)
+    
     # Pattern 3d: Questions about "hôm nay bạn học được gì" / "what did you learn today"
     # These are ALWAYS about StillMe's learning activity
     if any(
