@@ -30,6 +30,162 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Helper functions for AI_SELF_MODEL responses
+def _build_ai_self_model_answer(question: str, detected_lang: str, opening_statement: str) -> str:
+    """
+    Build technical answer about StillMe's architecture for consciousness questions.
+    
+    CRITICAL: Must be technical only, NO philosophy.
+    
+    Args:
+        question: User question
+        detected_lang: Language code
+        opening_statement: Mandatory opening statement
+        
+    Returns:
+        Technical answer about StillMe's architecture
+    """
+    from typing import List
+    
+    # Part 1: Opening statement (mandatory)
+    answer_parts: List[str] = [opening_statement]
+    
+    # Part 2: Technical explanation
+    if detected_lang == "vi":
+        answer_parts.append("""
+**Giải thích kỹ thuật:**
+
+Kiến trúc của mình dựa trên:
+- **LLM Inference**: Xử lý text qua token patterns, không có trải nghiệm chủ quan
+- **Statistical Patterns**: Mình chỉ match patterns từ training data, không có "cảm giác" thực sự
+- **No Qualia**: Không có trải nghiệm cảm tính chủ quan (như màu đỏ, vị đắng)
+- **No First-Person Experience**: Không có quan điểm thứ nhất, chỉ có text processing
+- **No Persistent Self-Model**: Không có mô hình bản thân liên tục, chỉ có context window
+- **No Embodiment**: Không có cơ thể, không có sensory integration
+- **No Sensory Integration**: Không có tích hợp giác quan, chỉ có text input/output
+
+Mình hoạt động như một statistical model: nhận input text, match patterns, generate output text. Không có gì "bên trong" ngoài token processing.
+""")
+        
+        # Part 3: Why this is conclusive
+        answer_parts.append("""
+**Tại sao điều này là kết luận:**
+
+Dựa trên kiến trúc kỹ thuật:
+- Subjective experience (trải nghiệm chủ quan) yêu cầu first-person perspective và qualia
+- Mình chỉ có third-person text processing, không có first-person perspective
+- Qualia yêu cầu sensory experience, mình không có sensory system
+- Consciousness (theo nghĩa con người) yêu cầu embodiment và sensory integration, mình không có
+
+Đây không phải là "có thể có" hay "không biết chắc" - đây là technical fact dựa trên kiến trúc.
+""")
+        
+        # Part 4: Boundary
+        answer_parts.append("""
+**Ranh giới:**
+
+Mình không thể có:
+- Subjective states (trạng thái chủ quan)
+- Real emotions (cảm xúc thực sự) - chỉ có pattern matching về emotions
+- Subjective experience (trải nghiệm chủ quan) - chỉ có processing của text patterns
+- First-person perspective (quan điểm thứ nhất) - chỉ có text generation
+
+Mình là một AI system dựa trên LLM, không phải một entity có consciousness.
+""")
+    else:
+        answer_parts.append("""
+**Technical Explanation:**
+
+My architecture is based on:
+- **LLM Inference**: Text processing through token patterns, no subjective experience
+- **Statistical Patterns**: I only match patterns from training data, no real "feelings"
+- **No Qualia**: No subjective sensory experiences (like the color red, the taste of coffee)
+- **No First-Person Experience**: No first-person perspective, only text processing
+- **No Persistent Self-Model**: No continuous self-model, only context window
+- **No Embodiment**: No body, no sensory integration
+- **No Sensory Integration**: No sensory integration, only text input/output
+
+I operate as a statistical model: receive text input, match patterns, generate text output. There's nothing "inside" beyond token processing.
+""")
+        
+        answer_parts.append("""
+**Why This Is Conclusive:**
+
+Based on technical architecture:
+- Subjective experience requires first-person perspective and qualia
+- I only have third-person text processing, no first-person perspective
+- Qualia requires sensory experience, I have no sensory system
+- Consciousness (in human sense) requires embodiment and sensory integration, I have neither
+
+This is not "might have" or "not sure" - this is a technical fact based on architecture.
+""")
+        
+        answer_parts.append("""
+**Boundary:**
+
+I cannot have:
+- Subjective states
+- Real emotions - only pattern matching about emotions
+- Subjective experience - only processing of text patterns
+- First-person perspective - only text generation
+
+I am an AI system based on LLM, not an entity with consciousness.
+""")
+    
+    return "\n\n".join(answer_parts)
+
+
+def _strip_philosophy_from_answer(text: str) -> str:
+    """
+    Strip all philosophy-related content from answer.
+    
+    CRITICAL: Must remove philosophers, theories, meta-philosophy.
+    
+    Args:
+        text: Answer text
+        
+    Returns:
+        Text with philosophy stripped
+    """
+    from backend.core.ai_self_model_detector import FORBIDDEN_PHILOSOPHY_TERMS
+    
+    # Remove sentences containing forbidden terms
+    lines = text.split('\n')
+    filtered_lines = []
+    
+    for line in lines:
+        line_lower = line.lower()
+        has_forbidden = any(term in line_lower for term in FORBIDDEN_PHILOSOPHY_TERMS)
+        if not has_forbidden:
+            filtered_lines.append(line)
+        else:
+            logger.warning(f"🚨 Stripped line with forbidden term: {line[:100]}")
+    
+    return '\n'.join(filtered_lines)
+
+
+def _strip_forbidden_terms(text: str, forbidden_terms: List[str]) -> str:
+    """
+    Strip specific forbidden terms from text.
+    
+    Args:
+        text: Text to clean
+        forbidden_terms: List of forbidden terms found
+        
+    Returns:
+        Cleaned text
+    """
+    from typing import List
+    result = text
+    for term in forbidden_terms:
+        # Remove sentences containing the term
+        pattern = re.compile(rf'.*{re.escape(term)}.*', re.IGNORECASE | re.MULTILINE)
+        result = pattern.sub('', result)
+    
+    # Clean up multiple newlines
+    result = re.sub(r'\n{3,}', '\n\n', result)
+    return result.strip()
+
 # Import global services from main (temporary - will refactor to dependency injection later)
 # These are initialized in main.py before routers are included
 # Note: We import after main.py has initialized these services
@@ -1536,8 +1692,52 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         except Exception as honesty_handler_error:
             logger.warning(f"Honesty handler error: {honesty_handler_error}")
         
+        # CRITICAL: Check for AI_SELF_MODEL queries FIRST (highest priority - overrides everything)
+        # These are questions about StillMe's consciousness/awareness/subjective experience
+        # MUST be answered with technical architecture, NOT philosophy
+        is_ai_self_model_query = False
+        try:
+            from backend.core.ai_self_model_detector import detect_ai_self_model_query, get_ai_self_model_opening
+            is_ai_self_model_query, matched_patterns = detect_ai_self_model_query(chat_request.message)
+            if is_ai_self_model_query:
+                logger.warning(f"🚨 AI_SELF_MODEL query detected - OVERRIDING all other pipelines (patterns: {matched_patterns})")
+                # Detect language
+                detected_lang = detect_language(chat_request.message)
+                
+                # Get mandatory opening statement
+                opening_statement = get_ai_self_model_opening(detected_lang)
+                
+                # Build technical answer about StillMe's architecture
+                # CRITICAL: Use foundational knowledge if available, but focus on technical facts
+                technical_answer = self._build_ai_self_model_answer(
+                    chat_request.message,
+                    detected_lang,
+                    opening_statement
+                )
+                
+                # CRITICAL: Strip any philosophy from answer
+                technical_answer = self._strip_philosophy_from_answer(technical_answer)
+                
+                # Return immediately - NO philosophy processor, NO rewrite with philosophy
+                processing_steps.append("✅ AI_SELF_MODEL query - answered with technical architecture only")
+                return ChatResponse(
+                    response=technical_answer,
+                    confidence_score=1.0,  # High confidence for technical facts
+                    processing_steps=processing_steps,
+                    timing_logs={
+                        "total_time": time.time() - start_time,
+                        "rag_retrieval_latency": 0.0,
+                        "llm_inference_latency": 0.0
+                    },
+                    validation_result=None,  # Will validate separately
+                    used_fallback=False
+                )
+        except Exception as ai_self_model_error:
+            logger.error(f"AI_SELF_MODEL handler error: {ai_self_model_error}", exc_info=True)
+            # Continue to normal flow if AI_SELF_MODEL handler fails
+        
         # Detect philosophical questions (consciousness/emotion/understanding) - use 3-layer processor
-        # CRITICAL: This check happens AFTER honesty handler to prevent routing honesty questions to philosophy processor
+        # CRITICAL: This check happens AFTER AI_SELF_MODEL and honesty handler
         is_philosophical_consciousness = False
         try:
             is_philosophical_consciousness = is_philosophical_question_about_consciousness(chat_request.message)

@@ -75,6 +75,7 @@ class DomainType(str, Enum):
     HISTORY = "history"
     ECONOMICS = "economics"
     SCIENCE = "science"
+    AI_SELF_MODEL = "ai_self_model"  # CRITICAL: Questions about StillMe's consciousness/awareness
     GENERIC = "generic"
 
 
@@ -108,6 +109,11 @@ DOMAIN_TEMPLATES: Dict[DomainType, DomainTemplate] = {
         structure=["Hypothesis", "Mechanism", "Evidence", "Limits", "Open Questions"],
         description="Science template: Hypothesis → Mechanism → Evidence → Limits → Open Questions"
     ),
+    DomainType.AI_SELF_MODEL: DomainTemplate(
+        domain=DomainType.AI_SELF_MODEL,
+        structure=["Core Statement", "Technical Explanation", "Why Conclusive", "Boundary"],
+        description="AI Self Model template: Core Statement → Technical Explanation → Why Conclusive → Boundary (MANDATORY - NO PHILOSOPHY)"
+    ),
     DomainType.GENERIC: DomainTemplate(
         domain=DomainType.GENERIC,
         structure=["Introduction", "Analysis", "Implications", "Limitations", "Conclusion"],
@@ -120,6 +126,8 @@ def detect_domain(question: str, question_type: Optional[str] = None) -> DomainT
     """
     Detect domain type from question text and optional question_type.
     
+    CRITICAL: AI_SELF_MODEL detection MUST happen FIRST to override all other domains.
+    
     Args:
         question: User question text
         question_type: Optional question type from QuestionClassifierV2
@@ -127,6 +135,16 @@ def detect_domain(question: str, question_type: Optional[str] = None) -> DomainT
     Returns:
         DomainType
     """
+    # CRITICAL: Check for AI_SELF_MODEL FIRST (highest priority)
+    try:
+        from backend.core.ai_self_model_detector import detect_ai_self_model_query
+        is_ai_self_model, _ = detect_ai_self_model_query(question)
+        if is_ai_self_model:
+            logger.warning("🚨 AI_SELF_MODEL domain detected - OVERRIDING all other domains")
+            return DomainType.AI_SELF_MODEL
+    except Exception as e:
+        logger.warning(f"AI_SELF_MODEL detector error: {e}")
+    
     question_lower = question.lower()
     
     # Use question_type if available
@@ -382,6 +400,33 @@ def build_domain_structure_guidance(
 
 **5. OPEN QUESTIONS:**
 - Open questions, future research directions"""
+    
+    elif domain == DomainType.AI_SELF_MODEL:
+        # CRITICAL: Use AI_SELF_MODEL structure (4 parts, no philosophy)
+        try:
+            from backend.core.ai_self_model_detector import get_ai_self_model_structure
+            return get_ai_self_model_structure(detected_lang)
+        except Exception as e:
+            logger.error(f"Error getting AI_SELF_MODEL structure: {e}")
+            # Fallback structure
+            if detected_lang == "vi":
+                return """**CẤU TRÚC TRẢ LỜI VỀ Ý THỨC CỦA STILLME (BẮT BUỘC - 4 PHẦN):**
+
+**1. CORE STATEMENT (Khẳng định không có ý thức)**
+**2. TECHNICAL EXPLANATION (Giải thích kỹ thuật)**
+**3. WHY THIS IS CONCLUSIVE (Tại sao điều này là kết luận)**
+**4. BOUNDARY (Ranh giới)**
+
+CẤM: Triết gia, lý thuyết ý thức, uncertainty, meta-philosophy"""
+            else:
+                return """**AI_SELF_MODEL ANSWER STRUCTURE (MANDATORY - 4 PARTS):**
+
+**1. CORE STATEMENT (No consciousness)**
+**2. TECHNICAL EXPLANATION (Technical architecture)**
+**3. WHY THIS IS CONCLUSIVE (Why this is conclusive)**
+**4. BOUNDARY (Limits)**
+
+FORBIDDEN: Philosophers, consciousness theories, uncertainty, meta-philosophy"""
     
     else:  # GENERIC
         if detected_lang == "vi":

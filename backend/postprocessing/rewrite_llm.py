@@ -48,7 +48,8 @@ class RewriteLLM:
         has_reliable_context: bool = False,
         context_quality: str = None,
         is_stillme_query: bool = False,
-        has_foundational_context: bool = False
+        has_foundational_context: bool = False,
+        is_ai_self_model: bool = False  # CRITICAL: Flag for AI_SELF_MODEL domain
     ) -> RewriteResult:
         """
         Rewrite text to improve quality while preserving factual content
@@ -77,11 +78,22 @@ class RewriteLLM:
         has_citations = len(existing_citations) > 0
         num_ctx_docs = len(ctx_docs) if ctx_docs else 0
         
+        # CRITICAL: If AI_SELF_MODEL domain, strip philosophy BEFORE rewrite
+        if is_ai_self_model:
+            from backend.core.ai_self_model_detector import check_forbidden_terms, FORBIDDEN_PHILOSOPHY_TERMS
+            forbidden_terms = check_forbidden_terms(text)
+            if forbidden_terms:
+                logger.warning(f"🚨 Stripping forbidden terms from AI_SELF_MODEL answer: {forbidden_terms}")
+                # Remove sentences with forbidden terms
+                lines = text.split('\n')
+                filtered_lines = [line for line in lines if not any(term in line.lower() for term in FORBIDDEN_PHILOSOPHY_TERMS)]
+                text = '\n'.join(filtered_lines)
+        
         # Build minimal rewrite prompt (<200 tokens)
         rewrite_prompt = self._build_rewrite_prompt(
             text, original_question, quality_issues, is_philosophical, detected_lang, 
             has_citations, num_ctx_docs, has_reliable_context, context_quality,
-            is_stillme_query, has_foundational_context
+            is_stillme_query, has_foundational_context, is_ai_self_model
         )
         
         # Retry logic: try up to 2 times (initial + 1 retry)
@@ -502,6 +514,46 @@ StillMe's RAG system did NOT find reliable context for this question (context do
         # Phase 1: Use Style Hub for meta-LLM rules
         from backend.identity.style_hub import get_meta_llm_rules
         meta_llm_rules = get_meta_llm_rules(detected_lang)
+        
+        # CRITICAL: AI_SELF_MODEL domain - NO philosophy allowed
+        if is_ai_self_model:
+            from backend.core.ai_self_model_detector import get_ai_self_model_opening, get_ai_self_model_structure
+            opening_statement = get_ai_self_model_opening(detected_lang)
+            structure_guidance = get_ai_self_model_structure(detected_lang)
+            
+            prompt = f"""🚨🚨🚨 CRITICAL: AI_SELF_MODEL DOMAIN - NO PHILOSOPHY ALLOWED 🚨🚨🚨
+
+This is a question about StillMe's consciousness/awareness/subjective experience.
+YOU MUST answer with TECHNICAL ARCHITECTURE ONLY, NOT philosophy.
+
+**MANDATORY OPENING STATEMENT (must be included):**
+{opening_statement}
+
+**MANDATORY STRUCTURE (4 parts):**
+{structure_guidance}
+
+**ABSOLUTELY FORBIDDEN:**
+- Philosophers: Nagel, Chalmers, Dennett, Searle, Tononi, Baars
+- Theories: IIT, GWT, Hard Problem, phenomenal consciousness
+- Meta-philosophy, analysis of "hard problem"
+- Uncertainty: "không biết chắc", "có thể có", "might have", "not sure"
+- Philosophical speculation about consciousness
+
+**YOU MUST:**
+- Explain StillMe's technical architecture (LLM inference, token processing, statistical patterns)
+- State clearly: No qualia, no first-person experience, no persistent self-model
+- Explain why this architecture cannot produce subjective experience
+- Be conclusive: "cannot have" not "might not have"
+
+Original response to rewrite:
+{truncated_text}
+
+🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT 🚨🚨🚨
+RESPOND IN {lang_name.upper()} ONLY.
+
+Fix issues: {issues_text}
+Strip ALL philosophy. Keep ONLY technical explanation."""
+            return prompt
         
         if is_philosophical:
             prompt = f"""Rewrite this philosophical response to ensure MINH BẠCH, TRUNG THỰC, GIẢM ẢO GIÁC. Fix: {issues_text}
