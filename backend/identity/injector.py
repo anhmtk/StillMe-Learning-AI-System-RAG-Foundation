@@ -57,7 +57,7 @@ Formatting rules are determined by domain and are centralized in `backend.identi
 All prompt builders must use this function, not hard-code formatting rules here.
 
 **For detailed formatting rules, see: `backend.identity.formatting.get_formatting_rules(domain, detected_lang)`**
-
+"""
 
 # Default to Vietnamese for backward compatibility
 STILLME_IDENTITY = build_stillme_identity("vi")
