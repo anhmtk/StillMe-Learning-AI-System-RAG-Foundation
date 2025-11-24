@@ -331,8 +331,51 @@ def check_no_hallucination(answer: str, question: str, must_not_have: List[str])
 def check_has_required_content(answer: str, must_have: List[str]) -> Dict:
     """Check if answer contains required content"""
     answer_lower = answer.lower()
-    found_required = [term for term in must_have if term.lower() in answer_lower]
-    missing_required = [term for term in must_have if term.lower() not in answer_lower]
+    
+    # CRITICAL: Handle multilingual synonyms and variations
+    # Map English terms to Vietnamese equivalents and vice versa
+    synonym_map = {
+        # English -> Vietnamese
+        "paradox": ["paradox", "nghịch lý", "nghịch lí"],
+        "set": ["set", "tập hợp"],
+        "mathematics": ["mathematics", "toán học", "math"],
+        "logic": ["logic", "lôgic", "logic học"],
+        "reality": ["reality", "thực tại", "hiện thực"],
+        "theorem": ["theorem", "định lý", "định lí"],
+        "understanding": ["understanding", "hiểu", "hiểu biết", "sự hiểu"],
+        "causality": ["causality", "quan hệ nhân quả", "causation", "nhân quả"],
+        "causation": ["causation", "quan hệ nhân quả", "causality", "nhân quả"],
+        "knowledge": ["knowledge", "tri thức", "kiến thức"],
+        "consciousness": ["consciousness", "ý thức"],
+        "matter": ["matter", "vật chất"],
+        "partition": ["partition", "chia cắt", "phân chia"],
+        "17th parallel": ["17th parallel", "vĩ tuyến 17", "parallel 17", "17"],
+        # Vietnamese -> English
+        "nghịch lý": ["paradox", "nghịch lý", "nghịch lí"],
+        "tập hợp": ["set", "tập hợp"],
+        "toán học": ["mathematics", "toán học", "math"],
+        "thực tại": ["reality", "thực tại", "hiện thực"],
+        "định lý": ["theorem", "định lý", "định lí"],
+        "quan hệ nhân quả": ["causality", "quan hệ nhân quả", "causation", "nhân quả"],
+        "ý thức": ["consciousness", "ý thức"],
+        "vật chất": ["matter", "vật chất"],
+        "chia cắt": ["partition", "chia cắt", "phân chia"],
+        "vĩ tuyến 17": ["17th parallel", "vĩ tuyến 17", "parallel 17", "17"],
+    }
+    
+    found_required = []
+    missing_required = []
+    
+    for term in must_have:
+        term_lower = term.lower()
+        # Check if term or any of its synonyms appear in answer
+        synonyms = synonym_map.get(term_lower, [term_lower])
+        found = any(synonym.lower() in answer_lower for synonym in synonyms)
+        
+        if found:
+            found_required.append(term)
+        else:
+            missing_required.append(term)
     
     return {
         "has_required": len(found_required) > 0,

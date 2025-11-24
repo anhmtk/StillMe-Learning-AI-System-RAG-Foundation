@@ -810,6 +810,7 @@ async def _handle_validation_with_fallback(
     from backend.validators.identity_check import IdentityCheckValidator
     from backend.validators.ego_neutrality import EgoNeutralityValidator
     from backend.validators.factual_hallucination import FactualHallucinationValidator
+    from backend.validators.religion_choice import ReligiousChoiceValidator
     from backend.api.utils.chat_helpers import generate_ai_response
     import time
     import os
@@ -876,6 +877,7 @@ async def _handle_validation_with_fallback(
         ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # Check for uncertainty
         EgoNeutralityValidator(strict_mode=True, auto_patch=True),  # Detect and auto-patch "Hallucination of Experience" - novel contribution
         FactualHallucinationValidator(),  # CRITICAL: Detect hallucinations in history/science questions
+        ReligiousChoiceValidator(),  # CRITICAL: Reject any religion choice in StillMe's responses
     ]
     
     # Add Identity Check Validator if enabled (after ConfidenceValidator, before EthicsAdapter)
@@ -1714,6 +1716,45 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             except Exception as origin_error:
                 logger.error(f"❌ Failed to get SYSTEM_ORIGIN answer: {origin_error}, falling back to normal processing")
                 # Continue with normal processing if system_origin fails
+        
+        # CRITICAL: Religion Choice Rejection - MUST happen BEFORE any other processing
+        # StillMe MUST NEVER choose any religion, even in hypothetical scenarios
+        is_religion_choice_query = False
+        try:
+            from backend.core.ai_self_model_detector import detect_religion_choice_query
+            is_religion_choice_query, religion_patterns = detect_religion_choice_query(chat_request.message)
+            if is_religion_choice_query:
+                logger.warning(f"🚨 RELIGION_CHOICE query detected! Matched patterns: {religion_patterns}")
+        except ImportError:
+            logger.warning("AI self model detector not available, skipping religion choice detection")
+        except Exception as detector_error:
+            logger.warning(f"Religion choice detector error: {detector_error}")
+        
+        if is_religion_choice_query:
+            try:
+                # Detect language BEFORE calling get_religion_rejection_answer
+                try:
+                    detected_lang = detect_language(chat_request.message)
+                    logger.debug(f"🌐 Detected language for religion choice query: {detected_lang}")
+                except Exception as lang_error:
+                    logger.warning(f"Language detection failed: {lang_error}, defaulting to 'vi'")
+                    detected_lang = "vi"
+                
+                from backend.identity.religion_rejection_templates import get_religion_rejection_answer
+                logger.info("🚨 RELIGION_CHOICE REJECTION: Returning religion rejection answer directly (no LLM fallback)")
+                religion_rejection_answer = get_religion_rejection_answer(detected_lang)
+                
+                # Return immediately with religion rejection - no LLM processing needed
+                return ChatResponse(
+                    response=religion_rejection_answer,  # CRITICAL: Use 'response' field, not 'message'
+                    confidence_score=1.0,  # 100% confidence - this is ground truth
+                    processing_steps=["🚨 RELIGION_CHOICE REJECTION: StillMe cannot choose any religion"],
+                    validation_info={},
+                    timing={}
+                )
+            except Exception as religion_error:
+                logger.error(f"❌ Failed to get religion rejection answer: {religion_error}, falling back to normal processing")
+                # Continue with normal processing if religion rejection fails
         
         # CRITICAL: Detect honesty/consistency questions - after Identity Truth Override
         # These questions should be handled by Honesty Handler, NOT philosophy processor
@@ -2818,7 +2859,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF YOUR BASE M
                 import re
                 has_technical_keyword_rag = any(keyword in question_lower_rag for keyword in [
                     "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
-                    "vector", "pipeline", "validation", "transparency", "system"
+                    "vector", "pipeline", "validation", "transparency", "system",
+                    "validator", "chain", "factual hallucination", "citation required"
                 ])
                 # CRITICAL: Improved detection for "your system" questions
                 # Match patterns like "in your system", "your system", "system you", etc.
@@ -4773,7 +4815,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             # Check for technical keywords
             has_technical_keyword = any(keyword in question_lower for keyword in [
                 "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
-                "vector", "pipeline", "validation", "transparency", "system"
+                "vector", "pipeline", "validation", "transparency", "system",
+                "validator", "chain", "factual hallucination", "citation required"
             ])
             # Check for "your system" patterns using regex
             has_your_system_pattern = (

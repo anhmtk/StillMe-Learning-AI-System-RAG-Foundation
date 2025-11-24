@@ -195,17 +195,27 @@ class ValidatorChain:
                                 patched_answer=None
                             )
                         elif any("missing_citation" in r for r in reasons):
-                            # OPTIMIZATION: Early exit for missing citation without patch (critical failure)
-                            # Missing citation is critical but no patched_answer available
-                            # This should not happen if CitationRequired is working correctly
-                            logger.warning(
-                                f"Validator {i} ({type(validator).__name__}) failed: missing_citation (critical) without patch - early exit"
-                            )
-                            return ValidationResult(
-                                passed=False,
-                                reasons=reasons,
-                                patched_answer=None
-                            )
+                            # CRITICAL FIX: Don't early exit if patched_answer is available
+                            # CitationRequired should ALWAYS provide patched_answer when citation is missing
+                            # If patched_answer exists, continue with it (don't early exit)
+                            if result.patched_answer:
+                                logger.info(
+                                    f"Validator {i} ({type(validator).__name__}) fixed missing_citation with patched_answer, continuing..."
+                                )
+                                patched = result.patched_answer
+                                # Continue to next validator with patched answer
+                            else:
+                                # OPTIMIZATION: Early exit for missing citation without patch (critical failure)
+                                # Missing citation is critical but no patched_answer available
+                                # This should not happen if CitationRequired is working correctly
+                                logger.warning(
+                                    f"Validator {i} ({type(validator).__name__}) failed: missing_citation (critical) without patch - early exit"
+                                )
+                                return ValidationResult(
+                                    passed=False,
+                                    reasons=reasons,
+                                    patched_answer=None
+                                )
                         else:
                             # Track critical failure (no patch available)
                             has_critical_failure = True

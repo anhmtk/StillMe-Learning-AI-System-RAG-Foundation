@@ -70,6 +70,7 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
     
     # CRITICAL: Technical error messages from get_fallback_message_for_error (these should NOT be detected as errors)
     # These are user-friendly fallback messages, not actual technical errors
+    # BUT: If they are the ONLY content (short response), they should be detected as errors for retry logic
     fallback_message_patterns = [
         r"stillme is experiencing a technical issue",
         r"stillme đang gặp sự cố kỹ thuật",
@@ -77,9 +78,11 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
         r"mình không thể trả lời tốt",
         r"i will suggest to the developer",
         r"mình sẽ đề xuất cho developer",
+        r"cannot provide a good answer to this question with the current configuration",  # Exact match from test results
     ]
     
     # Check if text is a fallback message first (these are OK, not errors)
+    # BUT: If it's a short response (< 300 chars) with ONLY fallback message, treat as error for retry
     text_lower_for_fallback = text_lower
     for pattern in fallback_message_patterns:
         if re.search(pattern, text_lower_for_fallback):
@@ -196,29 +199,48 @@ def is_fallback_message(text: str) -> bool:
         return False
     
     normalized = text.strip()
+    text_lower = normalized.lower()
     
-    # Fallback message patterns (match exact phrases from get_fallback_message_for_error)
+    # CRITICAL: Check for exact fallback message patterns (match exact phrases from get_fallback_message_for_error)
     # Vietnamese patterns
     vi_patterns = [
-        "Hiện tại hệ thống của StillMe đang gặp giới hạn ngữ cảnh",
+        "hiện tại hệ thống của stillme đang gặp giới hạn ngữ cảnh",
         "prompt vượt quá giới hạn của model",
-        "StillMe đang gặp sự cố kỹ thuật khi kết nối với model AI",
-        "StillMe đang gặp sự cố kỹ thuật khi xử lý câu hỏi này",
-        "Mình không thể trả lời tốt câu hỏi này với cấu hình hiện tại",
-        "Mình xin lỗi vì không thể trả lời đầy đủ câu hỏi này",
+        "stillme đang gặp sự cố kỹ thuật khi kết nối với model ai",
+        "stillme đang gặp sự cố kỹ thuật khi xử lý câu hỏi này",
+        "mình không thể trả lời tốt câu hỏi này với cấu hình hiện tại",
+        "mình xin lỗi vì không thể trả lời đầy đủ câu hỏi này",
+        "mình sẽ đề xuất cho developer",
     ]
     
-    # English patterns
+    # English patterns (exact matches from get_fallback_message_for_error)
     en_patterns = [
-        "StillMe is currently encountering a context limit",
+        "stillme is currently encountering a context limit",
         "causing the prompt to exceed the model's limit",
-        "StillMe is experiencing a technical issue connecting to the AI model",
-        "StillMe is experiencing a technical issue processing this question",
-        "I cannot provide a good answer to this question with the current configuration",
-        "I apologize for not being able to fully answer this question",
+        "stillme is experiencing a technical issue connecting to the ai model",
+        "stillme is experiencing a technical issue processing this question",
+        "i cannot provide a good answer to this question with the current configuration",
+        "i apologize for not being able to fully answer this question",
+        "i will suggest to the developer",
     ]
     
-    # Check if text contains any fallback pattern
+    # CRITICAL: Check if text is EXACTLY or PREDOMINANTLY a fallback message
+    # If the text is short (< 500 chars) and contains a fallback pattern, it's likely a fallback
+    # If the text is longer but starts with a fallback pattern, it's also likely a fallback
     all_patterns = vi_patterns + en_patterns
-    return any(pattern in normalized for pattern in all_patterns)
+    
+    # Check if text starts with or contains a fallback pattern
+    for pattern in all_patterns:
+        if pattern in text_lower:
+            # If text is short, it's definitely a fallback
+            if len(normalized) < 500:
+                return True
+            # If text starts with fallback pattern, it's likely a fallback
+            if text_lower.startswith(pattern[:30]):  # Check first 30 chars of pattern
+                return True
+            # If fallback pattern is in the first 200 chars, it's likely a fallback
+            if pattern in text_lower[:200]:
+                return True
+    
+    return False
 

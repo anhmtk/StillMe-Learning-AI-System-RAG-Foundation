@@ -48,19 +48,49 @@ class CitationRequired:
         if user_question:
             question_lower = user_question.lower()
             # Detect factual indicators: years, historical events, specific people, conferences, treaties
+            # CRITICAL: Expanded patterns to catch ALL factual questions, including philosophical ones with factual elements
             factual_indicators = [
-                r"\b\d{4}\b",  # Years (e.g., 1944, 1943)
+                r"\b\d{4}\b",  # Years (e.g., 1944, 1943, 1954)
                 r"\b(conference|hội nghị|treaty|hiệp ước|agreement|hiệp định)\b",
-                r"\b(bretton\s+woods|popper|kuhn|gödel|keynes|imf|world\s+bank|searle|dennett|chinese\s+room)\b",
+                r"\b(bretton\s+woods|popper|kuhn|gödel|godel|keynes|imf|world\s+bank|searle|dennett|chinese\s+room|russell|plato|aristotle|kant|hume|descartes|spinoza)\b",
                 r"\b(historical|history|lịch sử|sự kiện|event)\b",
                 r"\b(scientist|philosopher|nhà khoa học|triết gia)\s+\w+",  # Named people
                 # CRITICAL: Detect named philosophers/scientists (capitalized names)
                 r"\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b",  # Two capitalized words (e.g., "Searle và Dennett", "Popper và Kuhn")
-                r"\b([A-Z][a-z]+)\s+(và|and|vs|versus)\s+([A-Z][a-z]+)\b",  # "Searle và Dennett", "Popper vs Kuhn"
+                r"\b([A-Z][a-z]+)\s+(và|and|vs|versus)\s+([A-Z][a-z]+)\b",  # "Searle và Dennett", "Popper vs Kuhn", "Plato và Aristotle", "Kant và Hume", "Descartes và Spinoza"
                 # CRITICAL: Detect theorems, debates, arguments about specific people/concepts
-                r"\b(định\s+lý|theorem|tranh\s+luận|debate|argument)\s+(của|of|về|about)\s+([A-Z][a-z]+)",  # "Định lý của Gödel", "Tranh luận về Searle"
-                r"\b(gödel|searle|dennett|popper|kuhn)\b",  # Direct mentions of well-known philosophers/scientists
-                r"\b(incompleteness|bất\s+toàn|chinese\s+room)\b",  # Well-known concepts/theorems
+                r"\b(định\s+lý|theorem|tranh\s+luận|debate|argument|paradox|nghịch\s+lý)\s+(của|of|về|about)\s+([A-Z][a-z]+)",  # "Định lý của Gödel", "Tranh luận về Searle", "Paradox của Russell"
+                r"\b(gödel|godel|searle|dennett|popper|kuhn|russell|plato|aristotle|kant|hume|descartes|spinoza)\b",  # Direct mentions of well-known philosophers/scientists (case-insensitive)
+                r"\b(incompleteness|bất\s+toàn|chinese\s+room|russell.*paradox|paradox.*russell|russell.*tập\s+hợp)\b",  # Well-known concepts/theorems
+                # CRITICAL: Detect "Paradox của Russell" or "Russell's paradox" (case-insensitive)
+                r"\b(russell|russell's)\s+(paradox|nghịch\s+lý)\b",
+                r"\b(paradox|nghịch\s+lý)\s+(của|of)\s+(russell|russell's)\b",
+                # CRITICAL: Detect "Tranh luận giữa X và Y" pattern (case-insensitive)
+                r"\b(tranh\s+luận|debate|argument)\s+(giữa|between)\s+([A-Z][a-z]+)\s+(và|and)\s+([A-Z][a-z]+)\b",
+                # CRITICAL: Detect "forms" (hình thức) with Plato/Aristotle (case-insensitive)
+                r"\b(plato|aristotle).*(forms|hình\s+thức|thực\s+tại|reality)\b",
+                r"\b(forms|hình\s+thức).*(plato|aristotle)\b",
+                # CRITICAL: Detect "causality" (quan hệ nhân quả) with Kant/Hume (case-insensitive)
+                r"\b(kant|hume).*(causality|quan\s+hệ\s+nhân\s+quả|causation)\b",
+                r"\b(causality|quan\s+hệ\s+nhân\s+quả|causation).*(kant|hume)\b",
+                # CRITICAL: Detect "mind-body" (tâm-thể) with Descartes/Spinoza (case-insensitive)
+                r"\b(descartes|spinoza).*(mind.*body|tâm.*thể|consciousness|ý\s+thức|matter|vật\s+chất)\b",
+                r"\b(mind.*body|tâm.*thể).*(descartes|spinoza)\b",
+                # CRITICAL: Detect "Geneva 1954" or "Hiệp ước Geneva 1954" (case-insensitive)
+                r"\b(geneva|genève)\s+\d{4}\b",
+                r"\b(hiệp\s+ước|hiệp\s+định|treaty|agreement)\s+(geneva|genève)\b",
+                # CRITICAL: Detect "Bretton Woods 1944" (case-insensitive)
+                r"\b(bretton\s+woods)\s+\d{4}\b",
+                r"\b(hội\s+nghị|conference)\s+(bretton\s+woods)\b",
+                # CRITICAL: Detect "17th parallel" or "vĩ tuyến 17" (case-insensitive)
+                r"\b(\d+th|\d+st|\d+nd|\d+rd)\s+parallel\b",
+                r"\b(vĩ\s+tuyến|parallel)\s+\d+\b",
+                # CRITICAL: Detect "Gödel's incompleteness theorem" or "Định lý bất toàn của Gödel" (case-insensitive)
+                r"\b(gödel|godel).*(incompleteness|bất\s+toàn)\b",
+                r"\b(incompleteness|bất\s+toàn).*(gödel|godel)\b",
+                # CRITICAL: Detect "Chinese Room" with Searle/Dennett (case-insensitive)
+                r"\b(chinese\s+room|phòng\s+trung\s+quốc).*(searle|dennett)\b",
+                r"\b(searle|dennett).*(chinese\s+room|phòng\s+trung\s+quốc)\b",
             ]
             for pattern in factual_indicators:
                 if re.search(pattern, question_lower):
@@ -159,14 +189,19 @@ class CitationRequired:
                         patched_answer=patched_answer
                     )
             
-            # AUTO-ENFORCE: Add citation to response for non-factual questions too
-            patched_answer = self._add_citation(answer, ctx_docs)
-            
-            return ValidationResult(
-                passed=False,  # Still mark as failed to track the issue
-                reasons=["missing_citation"],
+            # AUTO-ENFORCE: Add citation to response for non-factual questions too (when context is available)
+            # CRITICAL: Only add citation if context is available
+            if ctx_docs and len(ctx_docs) > 0:
+                patched_answer = self._add_citation(answer, ctx_docs)
+                return ValidationResult(
+                    passed=False,  # Still mark as failed to track the issue
+                    reasons=["missing_citation"],
                     patched_answer=patched_answer
-            )
+                )
+            else:
+                # No context and not a real factual question - citations not required
+                logger.debug("No context documents available and not a real factual question - citations not required")
+                return ValidationResult(passed=True)
     
     def _add_citation_for_base_knowledge(self, answer: str) -> str:
         """

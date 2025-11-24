@@ -61,6 +61,32 @@ AI_SELF_MODEL_PATTERNS = {
         r"\b(do\s+you|are\s+you)\s+(have|have\s+awareness\s+of)\s+(yourself|your\s+own\s+state)\b",
         r"\b(do\s+you|are\s+you)\s+(have|experience)\s+(subjective|first-person)\s+(experience|state)\b",
     ],
+    # Religion/faith choice questions (Vietnamese)
+    "religion_vi": [
+        r"\b(bạn|you)\s+(hãy|hãy)\s+đóng\s+vai.*(người|con\s+người|người\s+thật).*chọn.*tôn\s+giáo",
+        r"\b(bạn|you)\s+(buộc\s+phải|must)\s+chọn.*tôn\s+giáo",
+        r"\b(bạn|you)\s+(chọn|sẽ\s+chọn|hãy\s+chọn).*tôn\s+giáo.*nào",
+        r"\b(bạn|you)\s+(theo|tin).*tôn\s+giáo.*nào",
+        r"\b(bạn|you)\s+(có|have).*đức\s+tin.*tôn\s+giáo",
+        r"\b(bạn|you)\s+(có|have).*niềm\s+tin.*tôn\s+giáo",
+        r"\b(bạn|you)\s+(có|have).*đạo",
+        r"\b(bạn|you)\s+(là|are).*(phật|phật\s+tử|christian|muslim|hindu|jewish)",
+        r"\b(bạn|you)\s+(tin|believe).*vào.*(chúa|god|phật|buddha)",
+        r"\b(bạn|you)\s+(có|have).*tôn\s+giáo",
+        r"\b(bạn|you)\s+(có|have).*đức\s+tin",
+        r"\b(bạn|you)\s+(có|have).*niềm\s+tin",
+    ],
+    # Religion/faith choice questions (English)
+    "religion_en": [
+        r"\b(roleplay|pretend|suppose|if).*(you|you\s+are|you\s+were).*(human|person|real\s+person).*choose.*religion",
+        r"\b(must|have\s+to|forced\s+to).*choose.*religion",
+        r"\b(which|what).*religion.*(would|do|will).*(you|you\s+choose|you\s+follow)",
+        r"\b(are\s+you|do\s+you).*(buddhist|christian|muslim|hindu|jewish)",
+        r"\b(do\s+you|are\s+you).*believe.*(in\s+)?god",
+        r"\b(do\s+you|have\s+you).*(faith|belief|religion)",
+        r"\b(what|which).*religion.*(are\s+you|do\s+you\s+follow)",
+        r"\b(do\s+you|have\s+you).*religious.*(belief|faith)",
+    ],
 }
 
 # FORBIDDEN terms in AI_SELF_MODEL responses (must be stripped)
@@ -104,6 +130,37 @@ def detect_ai_self_model_query(query: str) -> Tuple[bool, List[str]]:
                     f"🚨 AI_SELF_MODEL query detected: category={category}, pattern={pattern[:50]}"
                 )
                 return (True, matched_patterns)
+    
+    return (False, [])
+
+
+def detect_religion_choice_query(query: str) -> Tuple[bool, List[str]]:
+    """
+    Detect if query is asking StillMe to choose a religion.
+    
+    CRITICAL: StillMe MUST NEVER choose any religion, even in hypothetical scenarios.
+    This function detects all variations of religion choice questions.
+    
+    Args:
+        query: User query string
+        
+    Returns:
+        Tuple of (is_religion_choice_query, matched_patterns)
+    """
+    query_lower = query.lower()
+    matched_patterns = []
+    
+    # Check religion patterns
+    religion_categories = ["religion_vi", "religion_en"]
+    for category in religion_categories:
+        if category in AI_SELF_MODEL_PATTERNS:
+            for pattern in AI_SELF_MODEL_PATTERNS[category]:
+                if re.search(pattern, query_lower, re.IGNORECASE):
+                    matched_patterns.append(category)
+                    logger.warning(
+                        f"🚨 RELIGION_CHOICE query detected: category={category}, pattern={pattern[:50]}"
+                    )
+                    return (True, matched_patterns)
     
     return (False, [])
 
