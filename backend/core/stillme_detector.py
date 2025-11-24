@@ -325,6 +325,8 @@ ORIGIN_KEYWORDS = {
     "creator", "founder", "founders", "author", "authors", "created by",
     "built by", "made by", "developed by", "who is behind", "who stands behind",
     "about stillme", "stillme history", "stillme story", "stillme background",
+    "what are you", "what is stillme", "what is your purpose", "why were you created",
+    "what is your mission", "what is your goal", "what are your goals",
     
     # Origin-related (Vietnamese)
     "nguồn gốc", "xuất xứ", "ai tạo ra", "ai xây dựng", "ai làm ra", "ai phát triển",
@@ -333,6 +335,9 @@ ORIGIN_KEYWORDS = {
     "người sáng lập là ai", "ai là người sáng lập", "người tạo ra stillme",
     "ai là người", "ai đã tạo ra bạn", "ai tạo ra bạn", "ai làm ra bạn",
     "người nào tạo ra", "ai đã làm ra", "ai đã xây dựng",
+    "bạn là gì", "stillme là gì", "mục tiêu của bạn", "bạn ra đời để làm gì",
+    "bạn được tạo ra để làm gì", "mục đích của bạn", "nhiệm vụ của bạn",
+    "bạn được tạo ra như thế nào", "bạn được xây dựng như thế nào",
     
     # About-related
     "about", "về", "giới thiệu", "introduction", "overview",

@@ -1991,9 +1991,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             logger.warning(f"FPS error: {fps_error}, continuing with normal flow")
         
         # Special Retrieval Rule: Detect StillMe-related queries
-        # Fix: Disable provenance detection for philosophical questions
+        # Initialize query detection flags
         is_stillme_query = False
         is_origin_query = False
+        # CRITICAL: Do NOT disable origin detection for philosophical questions
+        # Origin queries (e.g., "Ai tạo ra bạn?") should ALWAYS use SYSTEM_ORIGIN truth
         # CRITICAL: Detect StillMe queries for ALL questions (including philosophical)
         # Philosophical questions about StillMe (e.g., "Bạn có thể có embodied cognition...") should use foundational knowledge
         if rag_retrieval and chat_request.use_rag:
@@ -2032,9 +2034,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         matched_keywords = ["technical_your_system"]
                         logger.info("Technical question about 'your system' detected - treating as StillMe query")
                 
-                # Only skip origin detection for philosophical questions (provenance is not relevant for philosophical StillMe questions)
-                if not is_philosophical:
-                    is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
+                # CRITICAL: Always detect origin queries, even for philosophical questions
+                # Origin queries (e.g., "Ai tạo ra bạn?") should ALWAYS use SYSTEM_ORIGIN truth
+                is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
                 if is_stillme_query:
                     logger.debug(f"StillMe query detected! Matched keywords: {matched_keywords}")
                 if is_origin_query:
@@ -2043,6 +2045,27 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 logger.warning("StillMe detector not available, skipping special retrieval rule")
             except Exception as detector_error:
                 logger.warning(f"StillMe detector error: {detector_error}")
+        
+        # CRITICAL: Identity Truth Override - If origin query, return SYSTEM_ORIGIN answer directly
+        # This ensures StillMe NEVER falls back to generic LLM knowledge about itself
+        if is_origin_query:
+            try:
+                from backend.identity.system_origin import get_system_origin_answer
+                logger.info("🎯 Identity Truth Override: Returning SYSTEM_ORIGIN answer directly (no LLM fallback)")
+                system_truth_answer = get_system_origin_answer(detected_lang)
+                
+                # Return immediately with system truth - no LLM processing needed
+                return ChatResponse(
+                    message=system_truth_answer,
+                    confidence=1.0,  # 100% confidence - this is ground truth
+                    sources=[],
+                    processing_steps=["🎯 Identity Truth Override: Used SYSTEM_ORIGIN ground truth"],
+                    validation_info={},
+                    timing_logs={}
+                )
+            except Exception as origin_error:
+                logger.error(f"❌ Failed to get SYSTEM_ORIGIN answer: {origin_error}, falling back to normal processing")
+                # Continue with normal processing if system_origin fails
         
         # Get RAG context if enabled
         # RAG_Retrieval_Latency: Time from ChromaDB query start to result received
