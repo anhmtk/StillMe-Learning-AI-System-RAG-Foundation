@@ -32,7 +32,8 @@ def detect_language(text: str) -> str:
     detected_lang = None
     
     try:
-        from langdetect import detect, LangDetectException
+        from langdetect import detect
+        from langdetect import LangDetectException
         detected = detect(text)
         
         # Map langdetect codes to our internal codes
@@ -60,7 +61,12 @@ def detect_language(text: str) -> str:
             detected_lang = lang_map[detected]
             logger.info(f"🌐 langdetect detected: {detected} -> {detected_lang}")
             
-    except (LangDetectException, ImportError) as e:
+    except ImportError:
+        # langdetect not available - will use rule-based detection
+        logger.debug("langdetect not available, will use rule-based detection")
+    except Exception as e:
+        # LangDetectException or other langdetect errors
+        logger.debug(f"langdetect failed: {e}, will use rule-based detection")
         logger.debug(f"langdetect failed or not available: {e}, will use rule-based detection")
     
     # CRITICAL: Check for explicit language requests (only clear requests, not mentions)
