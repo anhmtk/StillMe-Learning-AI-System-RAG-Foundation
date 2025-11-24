@@ -1783,7 +1783,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # Fix: Disable provenance detection for philosophical questions
         is_stillme_query = False
         is_origin_query = False
-        if rag_retrieval and chat_request.use_rag and not is_philosophical:  # Skip provenance detection for philosophical questions
+        # CRITICAL: Detect StillMe queries for ALL questions (including philosophical)
+        # Philosophical questions about StillMe (e.g., "Bạn có thể có embodied cognition...") should use foundational knowledge
+        if rag_retrieval and chat_request.use_rag:
             try:
                 from backend.core.stillme_detector import (
                     detect_stillme_query, 
@@ -1791,7 +1793,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     detect_origin_query
                 )
                 is_stillme_query, matched_keywords = detect_stillme_query(chat_request.message)
-                is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
+                # Only skip origin detection for philosophical questions (provenance is not relevant for philosophical StillMe questions)
+                if not is_philosophical:
+                    is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
                 if is_stillme_query:
                     logger.debug(f"StillMe query detected! Matched keywords: {matched_keywords}")
                 if is_origin_query:
@@ -4279,6 +4283,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                         ctx_docs_for_rewrite = []
                         has_reliable_context_for_rewrite = False
                         context_quality_for_rewrite = None
+                        has_foundational_context = False
                         
                         if 'context' in locals() and context:
                             ctx_docs_for_rewrite = [
@@ -4288,6 +4293,16 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             ]
                             has_reliable_context_for_rewrite = context.get("has_reliable_context", False)
                             context_quality_for_rewrite = context.get("context_quality", None)
+                            
+                            # CRITICAL: Check if we have foundational knowledge (CRITICAL_FOUNDATION source)
+                            # If StillMe query has foundational context, don't use mechanical disclaimer
+                            if is_stillme_query:
+                                for doc in context.get("knowledge_docs", []):
+                                    metadata = doc.get("metadata", {})
+                                    if metadata.get("source") == "CRITICAL_FOUNDATION":
+                                        has_foundational_context = True
+                                        logger.info("✅ Found foundational knowledge in context - will not use mechanical disclaimer")
+                                        break
                         elif 'ctx_docs' in locals():
                             ctx_docs_for_rewrite = ctx_docs
                             # Try to get context info from validation if available
@@ -4360,6 +4375,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 
                                 rewrite_llm = get_rewrite_llm()
                                 # CRITICAL: Pass RAG context status to rewrite to enable base knowledge usage
+                                # CRITICAL: Pass is_stillme_query and has_foundational_context to avoid mechanical disclaimer
                                 rewrite_result = await rewrite_llm.rewrite(
                                     text=sanitized_response,
                                     original_question=chat_request.message,
@@ -4368,7 +4384,9 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     detected_lang=detected_lang,
                                     ctx_docs=ctx_docs_for_rewrite,
                                     has_reliable_context=has_reliable_context_for_rewrite,
-                                    context_quality=context_quality_for_rewrite
+                                    context_quality=context_quality_for_rewrite,
+                                    is_stillme_query=is_stillme_query if 'is_stillme_query' in locals() else False,
+                                    has_foundational_context=has_foundational_context if 'has_foundational_context' in locals() else False
                                 )
                                 
                                 if rewrite_result.was_rewritten:

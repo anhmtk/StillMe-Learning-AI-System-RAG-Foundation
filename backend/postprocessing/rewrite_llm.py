@@ -46,7 +46,9 @@ class RewriteLLM:
         detected_lang: str = "en",
         ctx_docs: list = None,
         has_reliable_context: bool = False,
-        context_quality: str = None
+        context_quality: str = None,
+        is_stillme_query: bool = False,
+        has_foundational_context: bool = False
     ) -> RewriteResult:
         """
         Rewrite text to improve quality while preserving factual content
@@ -78,7 +80,8 @@ class RewriteLLM:
         # Build minimal rewrite prompt (<200 tokens)
         rewrite_prompt = self._build_rewrite_prompt(
             text, original_question, quality_issues, is_philosophical, detected_lang, 
-            has_citations, num_ctx_docs, has_reliable_context, context_quality
+            has_citations, num_ctx_docs, has_reliable_context, context_quality,
+            is_stillme_query, has_foundational_context
         )
         
         # Retry logic: try up to 2 times (initial + 1 retry)
@@ -395,7 +398,9 @@ CRITICAL RULES:
         has_citations: bool = False,
         num_ctx_docs: int = 0,
         has_reliable_context: bool = False,
-        context_quality: str = None
+        context_quality: str = None,
+        is_stillme_query: bool = False,
+        has_foundational_context: bool = False
     ) -> str:
         """Build minimal rewrite prompt (<200 tokens)"""
         issues_text = ", ".join(quality_issues[:3])  # Limit to 3 issues
@@ -409,8 +414,10 @@ CRITICAL RULES:
                 citation_instruction = f"\n\n🚨🚨🚨 CRITICAL: The original response is MISSING citations. You MUST add at least [1] in your rewritten response. Context documents available: {num_ctx_docs}."
         
         # CRITICAL: Base knowledge usage instruction when RAG context is not available or not reliable
+        # BUT: If this is a StillMe query with foundational context, DON'T use mechanical disclaimer
+        # StillMe should answer about itself using foundational knowledge, not generic disclaimer
         base_knowledge_instruction = ""
-        if not has_reliable_context or num_ctx_docs == 0:
+        if (not has_reliable_context or num_ctx_docs == 0) and not (is_stillme_query and has_foundational_context):
             base_knowledge_instruction = f"""
             
 🚨🚨🚨 CRITICAL: RAG CONTEXT NOT AVAILABLE OR NOT RELIABLE 🚨🚨🚨

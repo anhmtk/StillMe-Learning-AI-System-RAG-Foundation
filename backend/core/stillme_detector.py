@@ -180,6 +180,28 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         matched_keywords.append("learning_direct")
         return (True, matched_keywords)
     
+    # Pattern 3d: CRITICAL - Questions about StillMe's capabilities/philosophy with "bạn có thể"
+    # "Bạn có thể có X mà không có Y không?" - These are about StillMe's nature/capabilities
+    # Examples: "Bạn có thể có embodied cognition mà không có enactive cognition không?"
+    if re.search(r'\b(bạn|you)\s+có\s+thể\b', query_lower):
+        # If question asks "can you have X without Y", it's about StillMe's capabilities
+        if re.search(r'\b(có|have)\s+\w+\s+mà\s+không\s+(có|have)\b', query_lower) or \
+           re.search(r'\b(có|have)\s+\w+.*\bwithout\b', query_lower):
+            matched_keywords.append("capability_paradox")
+            return (True, matched_keywords)
+        # Also catch "bạn có thể" + philosophical/cognitive terms
+        philosophical_terms = [
+            "cognition", "nhận thức", "consciousness", "ý thức", "mind", "tâm trí",
+            "free will", "ý chí tự do", "determinism", "thuyết quyết định",
+            "embodied", "nhập thể", "enactive", "hành động",
+            "predictive", "dự đoán", "inference", "suy luận",
+            "integration", "tích hợp", "phenomenal", "hiện tượng",
+            "higher-order", "bậc cao", "thought", "tư duy", "perception", "nhận thức"
+        ]
+        if any(term in query_lower for term in philosophical_terms):
+            matched_keywords.append("philosophical_capability")
+            return (True, matched_keywords)
+    
     # Pattern 3c: Technical questions about StillMe (embedding, model, database)
     # "Bạn đang sử dụng mô hình Embedding nào?" / "What embedding model do you use?"
     has_technical_keyword = any(
