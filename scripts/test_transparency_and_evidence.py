@@ -33,8 +33,24 @@ if sys.platform == "win32":
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # API Configuration
+# To test locally: Set STILLME_API_BASE=localhost:8000 or http://localhost:8000
+# To test production: Set STILLME_API_BASE=stillme-backend-production.up.railway.app (default)
+# You can also set STILLME_PORT to override the port (default: 8000 for local)
 API_BASE = os.getenv("STILLME_API_BASE", "stillme-backend-production.up.railway.app")
 API_KEY = os.getenv("STILLME_API_KEY", "")
+STILLME_PORT = os.getenv("STILLME_PORT", "8000")
+
+# Auto-detect if running locally (if API_BASE contains localhost)
+IS_LOCAL = "localhost" in API_BASE.lower() or "127.0.0.1" in API_BASE.lower()
+
+# If local and API_BASE doesn't include port, add it
+if IS_LOCAL and ":" not in API_BASE.split("//")[-1]:
+    if API_BASE.startswith("http://") or API_BASE.startswith("https://"):
+        # Replace port in URL
+        base_without_port = API_BASE.rsplit(":", 1)[0] if ":" in API_BASE.split("//")[-1] else API_BASE
+        API_BASE = f"{base_without_port}:{STILLME_PORT}"
+    else:
+        API_BASE = f"http://localhost:{STILLME_PORT}"
 
 
 def normalize_api_base(url: str) -> str:
@@ -564,6 +580,10 @@ def run_all_tests():
     print("=" * 80)
     print()
     print(f"API Base: {normalize_api_base(API_BASE)}")
+    print(f"Mode: {'🔧 LOCAL TESTING' if IS_LOCAL else '🌐 PRODUCTION TESTING'}")
+    if IS_LOCAL:
+        print(f"   ⚠️  Make sure backend is running locally on port 8000!")
+        print(f"   💡 Start with: python start_backend.py (or uvicorn backend.api.main:app --reload --port 8000)")
     print(f"API Key: {'SET' if API_KEY else 'NOT SET'}")
     print(f"Test Questions: {len(TEST_QUESTIONS)}")
     print()

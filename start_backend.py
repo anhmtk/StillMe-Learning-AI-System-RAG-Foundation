@@ -95,7 +95,8 @@ def stop_healthcheck_server():
             sys.stdout.flush()
 
 # Get PORT from environment (Railway injects this)
-port = os.getenv("PORT", "8080")
+# For local development, default to 8000; for Railway, use 8080
+port = os.getenv("PORT", "8000" if os.getenv("ENVIRONMENT") != "production" else "8080")
 
 try:
     port_int = int(port)
