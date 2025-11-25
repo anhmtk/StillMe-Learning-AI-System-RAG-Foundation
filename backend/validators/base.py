@@ -4,6 +4,18 @@ Base classes for StillMe validators
 
 from typing import Protocol, List, Optional
 from pydantic import BaseModel
+from enum import Enum
+
+
+class ValidatorType(Enum):
+    """
+    Validator classification for Phase 2 optimization
+    
+    CRITICAL: Always run - essential for response quality
+    OPTIONAL: Run conditionally - only when specific conditions are met
+    """
+    CRITICAL = "critical"
+    OPTIONAL = "optional"
 
 
 class ValidationResult(BaseModel):
