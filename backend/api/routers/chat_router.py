@@ -5200,6 +5200,8 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                 if should_skip:
                     logger.info(f"⏭️ Skipping post-processing (non-RAG): {skip_reason}")
                     timing_logs["postprocessing"] = "skipped"
+                    # CRITICAL: When skipping post-processing, preserve original response
+                    final_response = response
                 else:
                     # Stage 2: Hard Filter (0 token) - Style Sanitization
                     sanitizer = get_style_sanitizer()

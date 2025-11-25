@@ -40,8 +40,9 @@ class CitationFormatter:
             r'how many planets',
             r'chemical symbol for',
             r'gravity on earth',
-            # Basic math
-            r'what is \d+ [+-\*/] \d+',
+            # Basic math (fix regex: escape - in character class or use separate pattern)
+            r'what is \d+ [+\-*/] \d+',  # Fixed: escape - in character class
+            r'what is \d+\s*[+\-*/]\s*\d+',  # Alternative: with optional spaces
             r'prime number',
         ]
     
