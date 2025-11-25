@@ -135,6 +135,13 @@ class ValidatorChain:
                 if "CitationRequired" in type(validator).__name__:
                     has_citation = result.passed
                 
+                # CRITICAL: Check for patched_answer even when passed=True
+                # This allows validators to improve responses (e.g., convert numeric citations to human-readable)
+                # even when validation passed
+                if result.patched_answer and result.patched_answer != patched:
+                    patched = result.patched_answer
+                    logger.debug(f"Using patched answer from validator {i} (passed=True, improvement made)")
+                
                 if not result.passed:
                     reasons.extend(result.reasons)
                     logger.debug(
