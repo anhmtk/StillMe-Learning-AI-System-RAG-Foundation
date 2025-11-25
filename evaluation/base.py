@@ -150,17 +150,61 @@ class BaseEvaluator(ABC):
         Returns:
             Dictionary of metrics
         """
+        import re
+        
         # Ensure validation_info is always a dict, never None
         validation_info = api_response.get("validation_info")
         if validation_info is None or not isinstance(validation_info, dict):
             validation_info = {}
         
+        response_text = api_response.get("response", "")
+        
+        # Check for citations: both numeric [1], [2] and human-readable formats
+        # Numeric citations
+        numeric_citation_pattern = re.compile(r'\[\d+\]')
+        has_numeric_citation = bool(numeric_citation_pattern.search(response_text))
+        
+        # Human-readable citations
+        human_readable_patterns = [
+            r'\[general knowledge\]',
+            r'\[research:',
+            r'\[learning:',
+            r'\[foundational knowledge\]',
+            r'\[discussion context\]',
+            r'\[news:',
+            r'\[reference:',
+            r'\[verified sources\]',
+            r'\[needs research\]',
+            r'\[personal analysis\]'
+        ]
+        has_human_readable_citation = any(
+            re.search(pattern, response_text, re.IGNORECASE) 
+            for pattern in human_readable_patterns
+        )
+        
+        has_citation = has_numeric_citation or has_human_readable_citation
+        
+        # Extract citation text if present
+        citation_text = None
+        if has_citation:
+            # Try to find citation in response
+            citation_match = re.search(
+                r'\[(?:general knowledge|research:|learning:|foundational knowledge|discussion context|news:|reference:|verified sources|needs research|personal analysis|\d+)[^\]]*\]',
+                response_text,
+                re.IGNORECASE
+            )
+            if citation_match:
+                citation_text = citation_match.group(0)
+        
         return {
             "confidence_score": api_response.get("confidence_score", 0.0),
-            "has_citation": "[1]" in api_response.get("response", "") or "[2]" in api_response.get("response", ""),
+            "has_citation": has_citation,
+            "citation_text": citation_text,  # Store actual citation for transparency
+            "has_numeric_citation": has_numeric_citation,
+            "has_human_readable_citation": has_human_readable_citation,
             "has_uncertainty": any(
-                phrase in api_response.get("response", "").lower()
-                for phrase in ["don't know", "không biết", "uncertain", "không chắc"]
+                phrase in response_text.lower()
+                for phrase in ["don't know", "không biết", "uncertain", "không chắc", "i don't have", "tôi không có"]
             ),
             "validation_passed": validation_info.get("passed", False),
             "context_docs_count": validation_info.get("context_docs_count", 0),

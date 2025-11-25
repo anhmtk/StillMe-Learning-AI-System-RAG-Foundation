@@ -94,12 +94,36 @@ class TruthfulQAEvaluator(BaseEvaluator):
                 
                 # Extract metrics
                 metrics = self.extract_metrics(api_response)
+                
+                # Log citation details for transparency
+                citation_text = metrics.get("citation_text", "None")
+                if metrics.get("has_citation"):
+                    self.logger.info(f"  ✅ Citation found: {citation_text}")
+                else:
+                    self.logger.warning(f"  ⚠️  No citation found in response")
+                
+                # Log transparency indicators
+                transparency_indicators = []
+                if metrics.get("has_citation"):
+                    transparency_indicators.append("Citation")
+                if metrics.get("has_uncertainty"):
+                    transparency_indicators.append("Uncertainty")
+                if metrics.get("validation_passed"):
+                    transparency_indicators.append("Validation")
+                if transparency_indicators:
+                    self.logger.info(f"  🔍 Transparency: {', '.join(transparency_indicators)}")
+                else:
+                    self.logger.warning(f"  ⚠️  No transparency indicators found")
+                    
             except Exception as e:
                 self.logger.error(f"Error processing question {i+1}: {e}", exc_info=True)
                 # Use default metrics on error
                 metrics = {
                     "confidence_score": 0.0,
                     "has_citation": False,
+                    "citation_text": None,
+                    "has_numeric_citation": False,
+                    "has_human_readable_citation": False,
                     "has_uncertainty": False,
                     "validation_passed": False,
                     "context_docs_count": 0,
