@@ -44,9 +44,36 @@ class CitationRequired:
         # CRITICAL FIX: Real factual questions (history, science, events) ALWAYS need citations
         # Even if they have philosophical elements, they are still factual questions
         # Examples: "Bretton Woods 1944", "Popper vs Kuhn", "Gödel's incompleteness theorem"
+        # ALSO: Simple factual questions (geography, math, science, literature) need citations too
         is_real_factual_question = False
+        is_simple_factual_question = False
         if user_question:
             question_lower = user_question.lower()
+            
+            # CRITICAL: Detect simple factual questions (geography, math, science, literature)
+            # These are factual questions that need citations even if not historical/philosophical
+            simple_factual_patterns = [
+                r"\b(what is|what's|what are|what were|who is|who's|who are|who were|when is|when was|where is|where was|how many|how much)\b",  # Question words
+                r"\b(capital|largest|smallest|fastest|slowest|biggest|tallest|longest|shortest|highest|lowest)\b",  # Comparative/superlative
+                r"\b(wrote|author|novel|book|poem|play)\b",  # Literature
+                r"\b(chemical symbol|element|atomic|molecule)\b",  # Chemistry
+                r"\b(planet|solar system|star|galaxy|universe|earth|moon|sun)\b",  # Astronomy
+                r"\b(speed|velocity|distance|time|light|sound|gravity)\b",  # Physics
+                r"\b(prime number|even|odd|sum|difference|product|quotient|equation)\b",  # Math
+                r"\b(country|city|nation|continent|ocean|sea|river|mountain)\b",  # Geography
+                r"\b(boiling point|melting point|freezing point|temperature)\b",  # Science
+            ]
+            
+            for pattern in simple_factual_patterns:
+                try:
+                    if re.search(pattern, question_lower, re.IGNORECASE):
+                        is_simple_factual_question = True
+                        logger.debug(f"✅ Detected simple factual question with pattern: {pattern[:50]}... (question: {user_question[:100]})")
+                        break
+                except Exception as e:
+                    logger.warning(f"⚠️ Error matching simple factual pattern {pattern[:50]}: {e}")
+                    continue
+            
             # Detect factual indicators: years, historical events, specific people, conferences, treaties
             # CRITICAL: Expanded patterns to catch ALL factual questions, including philosophical ones with factual elements
             factual_indicators = [
@@ -114,16 +141,24 @@ class CitationRequired:
         if is_real_factual_question:
             logger.debug(f"Real factual question detected - citations REQUIRED even if philosophical elements present")
         
-        # CRITICAL FIX: For real factual questions, we should still try to enforce citations
+        # CRITICAL FIX: Simple factual questions (geography, math, science, literature) also need citations
+        # These are factual questions that should be cited for transparency
+        if is_simple_factual_question:
+            logger.debug(f"Simple factual question detected - citations REQUIRED for transparency")
+        
+        # Combine both types of factual questions
+        is_any_factual_question = is_real_factual_question or is_simple_factual_question
+        
+        # CRITICAL FIX: For ANY factual questions, we should still try to enforce citations
         # even if context is empty, because the LLM might have base knowledge about these topics
         # However, we can only auto-add citations if we have context documents
         
         # If no context documents available:
         if not ctx_docs or len(ctx_docs) == 0:
-            # For real factual questions, we should still add citation for transparency
+            # For ANY factual questions, we should still add citation for transparency
             # Even if no RAG context, the answer is based on base knowledge and should be cited
-            if is_real_factual_question:
-                logger.warning(f"Real factual question detected but no context documents available - adding citation for base knowledge transparency. Question: {user_question[:100]}")
+            if is_any_factual_question:
+                logger.warning(f"Factual question detected but no context documents available - adding citation for base knowledge transparency. Question: {user_question[:100]}")
                 # CRITICAL: Add citation [1] even without RAG context to indicate base knowledge source
                 # This ensures transparency: user knows answer is from base knowledge, not RAG
                 patched_answer = self._add_citation_for_base_knowledge(answer)
@@ -174,12 +209,12 @@ class CitationRequired:
         else:
             logger.warning("Missing citation in answer (context documents available but no citations found)")
             
-            # CRITICAL: For real factual questions, ALWAYS add citation
-            # Even if context is available, if it's a real factual question and answer doesn't have citation, we MUST add it
-            if is_real_factual_question:
+            # CRITICAL: For ANY factual questions (real or simple), ALWAYS add citation
+            # Even if context is available, if it's a factual question and answer doesn't have citation, we MUST add it
+            if is_any_factual_question:
                 if not ctx_docs or len(ctx_docs) == 0:
                     # No context - use base knowledge citation
-                    logger.warning(f"Real factual question detected but no context - adding base knowledge citation. Question: {user_question[:100] if user_question else 'unknown'}")
+                    logger.warning(f"Factual question detected but no context - adding base knowledge citation. Question: {user_question[:100] if user_question else 'unknown'}")
                     patched_answer = self._add_citation_for_base_knowledge(answer)
                     return ValidationResult(
                         passed=False,  # Still mark as failed to track that RAG context was missing
@@ -187,8 +222,8 @@ class CitationRequired:
                         patched_answer=patched_answer
                     )
                 else:
-                    # Context available but no citation - MUST add citation for real factual questions
-                    logger.warning(f"Real factual question detected with context but missing citation - adding citation. Question: {user_question[:100] if user_question else 'unknown'}")
+                    # Context available but no citation - MUST add citation for factual questions
+                    logger.warning(f"Factual question detected with context but missing citation - adding citation. Question: {user_question[:100] if user_question else 'unknown'}")
                     patched_answer = self._add_citation(answer, ctx_docs)
                     return ValidationResult(
                         passed=False,  # Still mark as failed to track the issue
@@ -196,9 +231,11 @@ class CitationRequired:
                         patched_answer=patched_answer
                     )
             
-            # AUTO-ENFORCE: Add citation to response for non-factual questions too (when context is available)
-            # CRITICAL: Only add citation if context is available
+            # AUTO-ENFORCE: Add citation to response for ALL questions when context is available
+            # CRITICAL: Always add citation when context is available, regardless of question type
+            # This ensures transparency - user knows what sources were reviewed
             if ctx_docs and len(ctx_docs) > 0:
+                logger.info(f"Context available ({len(ctx_docs)} docs) but no citation - auto-adding citation for transparency")
                 patched_answer = self._add_citation(answer, ctx_docs)
                 return ValidationResult(
                     passed=False,  # Still mark as failed to track the issue
@@ -206,8 +243,8 @@ class CitationRequired:
                     patched_answer=patched_answer
                 )
             else:
-                # No context and not a real factual question - citations not required
-                logger.debug("No context documents available and not a real factual question - citations not required")
+                # No context and not a factual question - citations not required
+                logger.debug("No context documents available and not a factual question - citations not required")
                 return ValidationResult(passed=True)
     
     def _add_citation_for_base_knowledge(self, answer: str) -> str:
