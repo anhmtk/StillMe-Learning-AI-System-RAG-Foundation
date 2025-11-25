@@ -43,27 +43,45 @@ class CacheService:
         # Try to connect to Redis
         if REDIS_AVAILABLE:
             try:
-                redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-                redis_password = os.getenv("REDIS_PASSWORD", None)
+                # CRITICAL FIX: Use REDIS_URL if available, otherwise fallback to REDIS_HOST/REDIS_PORT
+                redis_url = os.getenv("REDIS_URL")
                 
-                # Parse Redis URL
-                if redis_url.startswith("redis://"):
-                    redis_url = redis_url.replace("redis://", "")
+                if redis_url:
+                    # Use redis.from_url() to parse REDIS_URL properly
+                    # This handles redis://user:password@host:port/db format
+                    self.redis_client = redis.from_url(
+                        redis_url,
+                        decode_responses=True,
+                        socket_connect_timeout=5,
+                        socket_timeout=5,
+                        retry_on_timeout=True,
+                        health_check_interval=30
+                    )
+                    logger.info(f"✅ Connecting to Redis using REDIS_URL")
+                else:
+                    # Fallback to individual variables if REDIS_URL not set
+                    redis_host = os.getenv("REDIS_HOST", "localhost")
+                    redis_port = int(os.getenv("REDIS_PORT", "6379"))
+                    redis_password = os.getenv("REDIS_PASSWORD", None)
+                    
+                    self.redis_client = redis.Redis(
+                        host=redis_host,
+                        port=redis_port,
+                        password=redis_password,
+                        decode_responses=True,
+                        socket_connect_timeout=2,
+                        socket_timeout=2
+                    )
+                    logger.info(f"✅ Connecting to Redis using REDIS_HOST/REDIS_PORT: {redis_host}:{redis_port}")
                 
-                # Try to connect
-                self.redis_client = redis.Redis(
-                    host=os.getenv("REDIS_HOST", "localhost"),
-                    port=int(os.getenv("REDIS_PORT", "6379")),
-                    password=redis_password,
-                    decode_responses=True,
-                    socket_connect_timeout=2,
-                    socket_timeout=2
-                )
                 # Test connection
                 self.redis_client.ping()
-                logger.info("✅ Redis cache connected")
+                logger.info("✅ Redis cache connected successfully")
             except Exception as e:
                 logger.warning(f"⚠️ Redis not available, using in-memory cache: {e}")
+                logger.warning(f"   REDIS_URL: {os.getenv('REDIS_URL', 'NOT SET')}")
+                logger.warning(f"   REDIS_HOST: {os.getenv('REDIS_HOST', 'NOT SET')}")
+                logger.warning(f"   REDIS_PORT: {os.getenv('REDIS_PORT', 'NOT SET')}")
                 self.redis_client = None
         
         if not self.redis_client:
