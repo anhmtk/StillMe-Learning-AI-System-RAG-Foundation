@@ -3,14 +3,17 @@ CitationRequired validator - Ensures answers include citations
 """
 
 import re
-from typing import List
+from typing import List, Any
 from .base import ValidationResult
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Pattern to match citations like [1], [2], [123]
+# Pattern to match citations like [1], [2], [123] (for backward compatibility)
 CITE_RE = re.compile(r"\[(\d+)\]")
+
+# Pattern to match human-readable citations like [general knowledge], [research: Wikipedia]
+HUMAN_READABLE_CITE_RE = re.compile(r'\[(?:general knowledge|research:|learning:|news:|reference:|foundational knowledge|discussion context|verified sources|needs research|personal analysis)[^\]]*\]', re.IGNORECASE)
 
 
 class CitationRequired:
@@ -24,14 +27,21 @@ class CitationRequired:
             required: Whether citations are required (default: True)
         """
         self.required = required
+        # Import citation formatter
+        try:
+            from backend.utils.citation_formatter import get_citation_formatter
+            self.citation_formatter = get_citation_formatter()
+        except ImportError:
+            logger.warning("CitationFormatter not available - using legacy numeric citations")
+            self.citation_formatter = None
     
-    def run(self, answer: str, ctx_docs: List[str], is_philosophical: bool = False, user_question: str = "") -> ValidationResult:
+    def run(self, answer: str, ctx_docs: List[Any], is_philosophical: bool = False, user_question: str = "") -> ValidationResult:
         """
         Check if answer contains citations and auto-enforce if missing
         
         Args:
             answer: The answer to validate
-            ctx_docs: List of context documents - if empty, citations are not required
+            ctx_docs: List of context documents (can be dicts or objects with metadata) - if empty, citations are not required
             is_philosophical: If True, relax citation requirements for pure philosophical questions (but still require for factual claims)
             user_question: User's original question (to detect if it's a factual question with philosophical elements)
             
@@ -173,7 +183,8 @@ class CitationRequired:
         
         # CRITICAL: Even if context is available, check if answer already has citation
         # If not, we MUST add it (this is the main path for missing citations)
-        has_citation = bool(CITE_RE.search(answer))
+        # Check for both numeric citations [1] and human-readable citations
+        has_citation = bool(CITE_RE.search(answer) or HUMAN_READABLE_CITE_RE.search(answer))
         
         # CRITICAL FIX: Check if answer has URLs or source references that should be converted to citations
         # If answer has URLs like "Source: https://..." or "Sources: ...", convert them to [1] format
@@ -224,7 +235,7 @@ class CitationRequired:
                 else:
                     # Context available but no citation - MUST add citation for factual questions
                     logger.warning(f"Factual question detected with context but missing citation - adding citation. Question: {user_question[:100] if user_question else 'unknown'}")
-                    patched_answer = self._add_citation(answer, ctx_docs)
+                    patched_answer = self._add_citation(answer, ctx_docs, user_question)
                     return ValidationResult(
                         passed=False,  # Still mark as failed to track the issue
                         reasons=["missing_citation_factual_question", "added_citation"],
@@ -236,7 +247,7 @@ class CitationRequired:
             # This ensures transparency - user knows what sources were reviewed
             if ctx_docs and len(ctx_docs) > 0:
                 logger.info(f"Context available ({len(ctx_docs)} docs) but no citation - auto-adding citation for transparency")
-                patched_answer = self._add_citation(answer, ctx_docs)
+                patched_answer = self._add_citation(answer, ctx_docs, user_question)
                 return ValidationResult(
                     passed=False,  # Still mark as failed to track the issue
                     reasons=["missing_citation"],
@@ -249,15 +260,20 @@ class CitationRequired:
     
     def _add_citation_for_base_knowledge(self, answer: str) -> str:
         """
-        Add citation [1] for base knowledge answers (when no RAG context available)
+        Add human-readable citation for base knowledge answers (when no RAG context available)
         
         Args:
             answer: Original answer without citation
             
         Returns:
-            Answer with citation [1] added to indicate base knowledge source
+            Answer with human-readable citation added to indicate base knowledge source
         """
-        # Use same logic as _add_citation but always use [1] for base knowledge
+        # Use citation formatter if available
+        if self.citation_formatter:
+            citation = self.citation_formatter.get_citation_strategy("", [])
+            return self.citation_formatter.add_citation_to_response(answer, citation)
+        
+        # Fallback to legacy [1] format
         if not answer or len(answer.strip()) == 0:
             return answer + " [1]" if answer else "[1]"
         
@@ -273,17 +289,26 @@ class CitationRequired:
         # If no sentence end found, add at the end
         return answer.rstrip() + " [1]"
     
-    def _add_citation(self, answer: str, ctx_docs: List[str]) -> str:
+    def _add_citation(self, answer: str, ctx_docs: List[Any], user_question: str = "") -> str:
         """
-        Automatically add citation to answer when missing
+        Automatically add human-readable citation to answer when missing
         
         Args:
             answer: Original answer without citation
-            ctx_docs: List of context documents
+            ctx_docs: List of context documents (can be dicts or objects with metadata)
+            user_question: User's original question (for citation strategy)
             
         Returns:
-            Answer with citation added
+            Answer with human-readable citation added
         """
+        # Use citation formatter if available
+        if self.citation_formatter:
+            citation = self.citation_formatter.get_citation_strategy(user_question, ctx_docs)
+            patched = self.citation_formatter.add_citation_to_response(answer, citation)
+            logger.info(f"Auto-added human-readable citation '{citation}' to response (context docs: {len(ctx_docs)})")
+            return patched
+        
+        # Fallback to legacy [1] format
         # Edge case: Empty or whitespace-only answer
         if not answer or len(answer.strip()) == 0:
             logger.warning("Cannot add citation to empty answer")

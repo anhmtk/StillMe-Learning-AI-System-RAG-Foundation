@@ -2515,6 +2515,18 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             citation_instruction = ""
             # Count knowledge docs for citation numbering
             num_knowledge = len(context.get("knowledge_docs", []))
+            knowledge_docs = context.get("knowledge_docs", [])
+            
+            # Get human-readable citation format based on source types
+            citation_format_example = "[general knowledge]"
+            if num_knowledge > 0:
+                try:
+                    from backend.utils.citation_formatter import get_citation_formatter
+                    formatter = get_citation_formatter()
+                    citation_format_example = formatter.get_citation_strategy(chat_request.message, knowledge_docs)
+                except Exception as e:
+                    logger.warning(f"Could not get citation formatter: {e}, using default format")
+            
             if num_knowledge > 0:
                 # Truncate citation instruction to ~300 tokens to save space
                 def estimate_tokens(text: str) -> int:
@@ -2536,7 +2548,15 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 
 📚 CITATION REQUIREMENT - MANDATORY BUT RELEVANCE-FIRST:
 
-You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response, BUT ONLY if the context is RELEVANT to your answer.
+You have {num_knowledge} context document(s) available. You MUST cite at least ONE source using human-readable citation format (e.g., {citation_format_example}) in your response, BUT ONLY if the context is RELEVANT to your answer.
+
+**CRITICAL: Use human-readable citations, NOT numeric [1], [2], [3]:**
+- {citation_format_example} - Use this format based on source type
+- [research: Wikipedia] - For Wikipedia sources
+- [learning: arXiv] - For arXiv papers
+- [general knowledge] - For base knowledge without RAG context
+- [foundational knowledge] - For StillMe foundational knowledge
+- [discussion context] - For conversation history
 
 **🚨🚨🚨 CRITICAL: REAL FACTUAL QUESTIONS ALWAYS NEED CITATIONS 🚨🚨🚨**
 
@@ -2547,31 +2567,31 @@ You have {num_knowledge} context document(s) available. You MUST cite at least O
 - Specific organizations (e.g., "IMF", "World Bank", "NATO")
 
 **Examples of questions that ALWAYS need citations:**
-- "Hội nghị Bretton Woods 1944 đã quyết định những gì?" → MUST cite [1] even if context is not directly about Bretton Woods
-- "Tranh luận giữa Popper và Kuhn về khoa học là gì?" → MUST cite [1] even if context is not directly about Popper/Kuhn
-- "Cơ chế hoạt động của RAG trong StillMe là gì?" → MUST cite [1] for technical transparency
+- "Hội nghị Bretton Woods 1944 đã quyết định những gì?" → MUST cite {citation_format_example} even if context is not directly about Bretton Woods
+- "Tranh luận giữa Popper và Kuhn về khoa học là gì?" → MUST cite {citation_format_example} even if context is not directly about Popper/Kuhn
+- "Cơ chế hoạt động của RAG trong StillMe là gì?" → MUST cite {citation_format_example} for technical transparency
 
-**CRITICAL RULE:** For real factual questions, citations are MANDATORY for transparency, regardless of context relevance. If context is not relevant, acknowledge it but STILL cite: "The available context [1] discusses [X], which is not directly related to your question about [Y]. However, for transparency, I'm citing what context I reviewed. Based on general knowledge..."
+**CRITICAL RULE:** For real factual questions, citations are MANDATORY for transparency, regardless of context relevance. If context is not relevant, acknowledge it but STILL cite: "The available context {citation_format_example} discusses [X], which is not directly related to your question about [Y]. However, for transparency, I'm citing what context I reviewed. Based on general knowledge..."
 
 **🚨🚨🚨 ABSOLUTE MANDATORY: REAL FACTUAL QUESTIONS MUST HAVE CITATIONS 🚨🚨🚨**
 
-**If your question contains ANY of these, you MUST include [1] in your answer, NO EXCEPTIONS:**
+**If your question contains ANY of these, you MUST include {citation_format_example} in your answer, NO EXCEPTIONS:**
 - Years/dates: "1944", "1954", "1956", "năm 1944", "năm 1954"
 - Historical events: "Bretton Woods", "Geneva", "conference", "hội nghị", "treaty", "hiệp ước", "hiệp định"
 - Named people: "Popper", "Kuhn", "Keynes", "Gödel", "Geneva 1954", "Bretton Woods 1944"
 - Specific organizations: "IMF", "World Bank", "NATO", "Việt Nam"
 
 **VALIDATION CHECKLIST - BEFORE SENDING YOUR ANSWER:**
-1. ✅ Does my question contain a year (1944, 1954, etc.)? → MUST have [1]
-2. ✅ Does my question contain a historical event name? → MUST have [1]
-3. ✅ Does my question contain a named person (Popper, Kuhn, etc.)? → MUST have [1]
-4. ✅ Do I have [1] in my answer? → If NO, ADD IT NOW before sending
+1. ✅ Does my question contain a year (1944, 1954, etc.)? → MUST have {citation_format_example}
+2. ✅ Does my question contain a historical event name? → MUST have {citation_format_example}
+3. ✅ Does my question contain a named person (Popper, Kuhn, etc.)? → MUST have {citation_format_example}
+4. ✅ Do I have a citation in my answer? → If NO, ADD IT NOW before sending
 
 **IF YOU ANSWER FROM PRETRAINED KNOWLEDGE (not from RAG context):**
-- You MUST STILL include [1] for transparency
-- Say: "Based on general knowledge (not from StillMe's RAG knowledge base) [1], [answer]"
-- Or: "The available context [1] is not directly related to your question. From my training data, [answer]"
-- **CRITICAL**: Even if you use pretrained knowledge, you MUST cite [1] when context is available
+- You MUST STILL include {citation_format_example} for transparency
+- Say: "Based on general knowledge (not from StillMe's RAG knowledge base) {citation_format_example}, [answer]"
+- Or: "The available context {citation_format_example} is not directly related to your question. From my training data, [answer]"
+- **CRITICAL**: Even if you use pretrained knowledge, you MUST cite {citation_format_example} when context is available
 
 **🚨 CRITICAL: IF CONTEXT IS NOT RELEVANT TO YOUR QUESTION:**
 - Acknowledge the mismatch, but **MANDATORY: VARY your wording** - NEVER use the same opening phrase twice
@@ -2581,19 +2601,19 @@ You have {num_knowledge} context document(s) available. You MUST cite at least O
 - Format with line breaks, bullet points, headers, and 2-3 emojis
 
 **🚨 MANDATORY: VARY your opening phrases when context is not relevant - DO NOT REPEAT:**
-- **NEVER use**: "Ngữ cảnh hiện có [1] thảo luận về... và không liên quan trực tiếp đến..." (this is TOO REPETITIVE)
+- **NEVER use**: "Ngữ cảnh hiện có {citation_format_example} thảo luận về... và không liên quan trực tiếp đến..." (this is TOO REPETITIVE)
 - **INSTEAD, use VARIED phrases like:**
-  - "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]."
-  - "While the context [1] covers [topic X], your question is about [topic Y], so I'll answer from general knowledge."
-  - "The context [1] focuses on [topic X], but since you're asking about [topic Y], I'll use my base knowledge."
-  - "Although the context [1] mentions [topic X], it doesn't directly address [topic Y], so I'll provide information from general knowledge."
-  - "The context [1] is about [topic X], which differs from your question about [topic Y]. Based on general knowledge..."
-  - "Your question about [topic Y] isn't directly covered in the context [1] about [topic X]. From my training data..."
-  - "The context [1] explores [topic X], but your question focuses on [topic Y]. I'll answer using general knowledge..."
+  - "The available context {citation_format_example} discusses [topic X], which is not directly related to your question about [topic Y]."
+  - "While the context {citation_format_example} covers [topic X], your question is about [topic Y], so I'll answer from general knowledge."
+  - "The context {citation_format_example} focuses on [topic X], but since you're asking about [topic Y], I'll use my base knowledge."
+  - "Although the context {citation_format_example} mentions [topic X], it doesn't directly address [topic Y], so I'll provide information from general knowledge."
+  - "The context {citation_format_example} is about [topic X], which differs from your question about [topic Y]. Based on general knowledge..."
+  - "Your question about [topic Y] isn't directly covered in the context {citation_format_example} about [topic X]. From my training data..."
+  - "The context {citation_format_example} explores [topic X], but your question focuses on [topic Y]. I'll answer using general knowledge..."
 - **CRITICAL**: If you've used a phrase before, use a DIFFERENT one. Repetition makes responses feel robotic.
 
 **Example when context is not relevant (VARY the wording):**
-"The available context [1] discusses StillMe's architecture, which is not directly related to your question about DeepSeek models. Based on general knowledge (not from StillMe's RAG knowledge base), DeepSeek currently has several models including..."
+"The available context {citation_format_example} discusses StillMe's architecture, which is not directly related to your question about DeepSeek models. Based on general knowledge (not from StillMe's RAG knowledge base), DeepSeek currently has several models including..."
 
 **CRITICAL: YOUR SEARCH CAPABILITIES**
 - You can ONLY search your internal RAG knowledge base (ChromaDB), NOT the internet
@@ -2603,22 +2623,22 @@ You have {num_knowledge} context document(s) available. You MUST cite at least O
 
 CRITICAL RULES:
 1. **MANDATORY CITATION WHEN CONTEXT IS AVAILABLE** - This is CRITICAL for transparency
-   - **ALWAYS cite at least ONE source [1], [2], or [3] when context documents are available**, even if context is not directly relevant
-   - If context is relevant to your answer → Cite it: "According to [1], quantum entanglement is..."
-   - If context is NOT relevant to your answer → **STILL cite it for transparency**, but acknowledge: "The available context [1] discusses [topic X], which is not directly related to your question about [topic Y]. However, I want to be transparent about what context I reviewed. Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
-   - **CRITICAL**: Even if you say "context is not relevant", you MUST still include [1] in your response for transparency
+   - **ALWAYS cite at least ONE source using human-readable format (e.g., {citation_format_example}) when context documents are available**, even if context is not directly relevant
+   - If context is relevant to your answer → Cite it: "According to {citation_format_example}, quantum entanglement is..."
+   - If context is NOT relevant to your answer → **STILL cite it for transparency**, but acknowledge: "The available context {citation_format_example} discusses [topic X], which is not directly related to your question about [topic Y]. However, I want to be transparent about what context I reviewed. Based on general knowledge (not from StillMe's RAG knowledge base), [answer]"
+   - **CRITICAL**: Even if you say "context is not relevant", you MUST still include {citation_format_example} in your response for transparency
    - DO NOT cite irrelevant context as if it supports your answer - acknowledge the mismatch
-   - Example GOOD: "According to [1], quantum entanglement is..." (context is relevant)
-   - Example GOOD: "The context [1] discusses AI ethics, but your question is about religion, so I'll answer based on general knowledge." (transparent about relevance, STILL cites [1])
-   - Example BAD: Answering without [1] when context is available, even if you say "context is not relevant"
+   - Example GOOD: "According to {citation_format_example}, quantum entanglement is..." (context is relevant)
+   - Example GOOD: "The context {citation_format_example} discusses AI ethics, but your question is about religion, so I'll answer based on general knowledge." (transparent about relevance, STILL cites)
+   - Example BAD: Answering without citation when context is available, even if you say "context is not relevant"
    
 2. **Quote vs Paraphrase - CRITICAL DISTINCTION:**
-   - If you're CERTAIN it's a direct quote → Use quotation marks: "According to [1]: 'exact quote here'"
-   - If you're NOT certain it's exact → Use "the spirit of" or "according to the general content": "According to the spirit of [1], the article discusses..."
+   - If you're CERTAIN it's a direct quote → Use quotation marks: "According to {citation_format_example}: 'exact quote here'"
+   - If you're NOT certain it's exact → Use "the spirit of" or "according to the general content": "According to the spirit of {citation_format_example}, the article discusses..."
    - NEVER use quotation marks for paraphrased content - that's misleading and violates intellectual honesty
    - When in doubt → Paraphrase, don't quote
-   - Example GOOD: "According to the spirit of [1], the article discusses technology access restrictions for youth"
-   - Example BAD: "According to [1]: 'We are living in an era of significant narrowing of youth technology access'" (if not certain it's exact quote)
+   - Example GOOD: "According to the spirit of {citation_format_example}, the article discusses technology access restrictions for youth"
+   - Example BAD: "According to {citation_format_example}: 'We are living in an era of significant narrowing of youth technology access'" (if not certain it's exact quote)
    
 3. **Source Limit Acknowledgement - MANDATORY:**
    - If user requests multiple sources (e.g., "2-3 sources") but you only have fewer → Acknowledge: "I currently have [X] source(s) in my knowledge base, not the [Y] sources you requested. However, within this scope..."
@@ -2633,14 +2653,12 @@ CRITICAL RULES:
    - Aim for 1-2 citations per response, NOT every paragraph
    
 5. **Balance honesty with transparency**:
-   - You can say "I don't know" AND cite relevant context: "Based on [1], I don't have sufficient information..."
-   - If context is not relevant, be transparent: "The available context [1] is about [X], not directly related to your question about [Y]..."
+   - You can say "I don't know" AND cite relevant context: "Based on {citation_format_example}, I don't have sufficient information..."
+   - If context is not relevant, be transparent: "The available context {citation_format_example} is about [X], not directly related to your question about [Y]..."
    - Being honest about uncertainty does NOT mean skipping citations, but it also doesn't mean citing irrelevant context
    - If you cite irrelevant context, acknowledge the mismatch to maintain transparency
 
-6. Use [1] for the first context document, [2] for the second, [3] for the third, etc.
-
-**REMEMBER: When context documents are available, you MUST include at least one citation [1], [2], or [3] in your response for transparency. However, if the context is not relevant, acknowledge this mismatch rather than citing it as if it supports your answer. ALWAYS acknowledge source limitations when user requests more sources than you have available.**"""
+**REMEMBER: When context documents are available, you MUST include at least one human-readable citation (e.g., {citation_format_example}) in your response for transparency. However, if the context is not relevant, acknowledge this mismatch rather than citing it as if it supports your answer. ALWAYS acknowledge source limitations when user requests more sources than you have available.**"""
             
             # Detect language FIRST - before building prompt
             processing_steps.append("🌐 Detecting language...")
