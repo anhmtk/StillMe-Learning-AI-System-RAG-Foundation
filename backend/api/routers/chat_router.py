@@ -3708,25 +3708,44 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     prompt_builder = UnifiedPromptBuilder()
                     base_prompt_unified = prompt_builder.build_prompt(prompt_context)
                     
-                    # Append special instructions that UnifiedPromptBuilder doesn't handle yet
-                    # (These will be integrated into UnifiedPromptBuilder in future phases)
-                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{context_quality_warning}Context: {context_text}
-{citation_instruction}
-{confidence_instruction}
-{stillme_instruction}
-{provenance_instruction}
+                    # Phase 4: Append special instructions that UnifiedPromptBuilder doesn't handle yet
+                    # Note: UnifiedPromptBuilder already includes:
+                    # - Language instruction (P1)
+                    # - Core identity (P1)
+                    # - Context instruction (P2) - includes citation, context quality warning, StillMe instruction
+                    # - Formatting (P3)
+                    # - User question (at the end)
+                    # 
+                    # Special instructions that UnifiedPromptBuilder doesn't handle:
+                    # - philosophical_style_instruction (for philosophical questions with style guide)
+                    # - learning_metrics_instruction (for StillMe queries)
+                    # - learning_sources_instruction (for StillMe queries)
+                    # - confidence_instruction (for low confidence scenarios)
+                    # - provenance_instruction (for provenance queries)
+                    # - Context text (RAG context documents)
+                    #
+                    # CRITICAL: Do NOT duplicate user question - UnifiedPromptBuilder already has it at the end
+                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}
 
 🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
 
-User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_request.message, max_tokens=3000)}
+Context: {context_text}
 """
                     
                     # Combine unified prompt with special instructions
-                    # Note: UnifiedPromptBuilder already includes language, core identity, context instruction, formatting, user question
-                    # We append special instructions that are specific to chat_router logic
-                    # But UnifiedPromptBuilder already has user question, so we need to extract it and append special instructions before it
-                    # For now, append special instructions after unified prompt (will be refined in future)
-                    base_prompt = base_prompt_unified + "\n\n" + special_instructions
+                    # UnifiedPromptBuilder already has user question at the end, so we append special instructions before it
+                    # Extract user question from unified prompt and insert special instructions before it
+                    if "User Question:" in base_prompt_unified:
+                        # Split at "User Question:" to insert special instructions before it
+                        parts = base_prompt_unified.split("User Question:", 1)
+                        if len(parts) == 2:
+                            base_prompt = parts[0] + special_instructions + "\n\nUser Question:" + parts[1]
+                        else:
+                            # Fallback: append at the end (shouldn't happen)
+                            base_prompt = base_prompt_unified + "\n\n" + special_instructions
+                    else:
+                        # Fallback: append at the end if "User Question:" not found
+                        base_prompt = base_prompt_unified + "\n\n" + special_instructions
                     
                     logger.info("✅ Using UnifiedPromptBuilder for context-available prompt (reduced prompt length, no conflicts)")
             
@@ -3776,10 +3795,11 @@ User Question (in {detected_lang_name.upper()}): {_truncate_user_message(chat_re
                 # Provider will detect and use PHILOSOPHY_LITE_SYSTEM_PROMPT
                 enhanced_prompt = base_prompt
             elif enable_validators:
-                from backend.identity.injector import inject_identity
-                # Add style instruction before injecting identity
-                prompt_with_style = f"{style_instruction}\n\n{base_prompt}" if style_instruction else base_prompt
-                enhanced_prompt = inject_identity(prompt_with_style)
+                # Phase 4: Remove inject_identity() - system prompt already has STILLME_IDENTITY
+                # generate_ai_response() uses build_system_prompt_with_language() which includes STILLME_IDENTITY
+                # Adding identity to user prompt would cause duplication
+                # Add style instruction if available
+                enhanced_prompt = f"{style_instruction}\n\n{base_prompt}" if style_instruction else base_prompt
             else:
                 # No validators: use prompt as-is, but still add style instruction if available
                 enhanced_prompt = f"{style_instruction}\n\n{base_prompt}" if style_instruction else base_prompt
@@ -4800,11 +4820,10 @@ User Question: {user_question_for_prompt}
 
 Remember: RESPOND IN ENGLISH ONLY."""
                 
-                if enable_validators:
-                    from backend.identity.injector import inject_identity
-                    enhanced_prompt = inject_identity(base_prompt)
-                else:
-                    enhanced_prompt = base_prompt
+                # Phase 4: Remove inject_identity() - system prompt already has STILLME_IDENTITY
+                # generate_ai_response() uses build_system_prompt_with_language() which includes STILLME_IDENTITY
+                # Adding identity to user prompt would cause duplication
+                enhanced_prompt = base_prompt
             
             # LLM_Inference_Latency: Time from API call start to response received
             llm_inference_start = time.time()
