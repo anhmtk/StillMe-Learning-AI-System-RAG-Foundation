@@ -215,6 +215,22 @@ class CitationRequired:
         # BUT: For real factual questions, we MUST cite even if context is empty (use base knowledge citation)
         
         if has_citation:
+            # CRITICAL: If we have numeric citations [1], [2], convert them to human-readable format
+            # This ensures all citations are human-readable for better transparency
+            has_numeric_only = bool(CITE_RE.search(answer)) and not bool(HUMAN_READABLE_CITE_RE.search(answer))
+            
+            if has_numeric_only and self.citation_formatter:
+                # Replace numeric citations with human-readable format
+                citation = self.citation_formatter.get_citation_strategy(user_question, ctx_docs)
+                # Replace all numeric citations [1], [2], [3] with human-readable citation
+                patched_answer = self.citation_formatter.replace_numeric_citations(answer, citation)
+                logger.info(f"Converted numeric citations to human-readable format: '{citation}'")
+                return ValidationResult(
+                    passed=True,  # Still passed, but we improved the citation format
+                    reasons=["converted_numeric_to_human_readable"],
+                    patched_answer=patched_answer
+                )
+            
             logger.debug("Citation found in answer")
             return ValidationResult(passed=True)
         else:
