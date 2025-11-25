@@ -5205,10 +5205,10 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             quality_result=quality_result
                         )
                         
-                            # Phase 3: Only rewrite when CRITICAL issues are present
-                            # Critical issues: missing citation, anthropomorphic language, language mismatch, topic drift, template-like
-                            # Non-critical issues (depth, unpacking, style) do NOT trigger rewrite
-                            should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                        # Phase 3: Only rewrite when CRITICAL issues are present
+                        # Critical issues: missing citation, anthropomorphic language, language mismatch, topic drift, template-like
+                        # Non-critical issues (depth, unpacking, style) do NOT trigger rewrite
+                        should_rewrite, rewrite_reason = optimizer.should_rewrite(
                             quality_result=quality_result,
                             is_philosophical=is_philosophical_non_rag,
                             response_length=len(sanitized_response)
