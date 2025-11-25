@@ -125,7 +125,8 @@ class BaseEvaluator(ABC):
             "message": question,
             "user_id": "evaluation_bot",
             "use_rag": use_rag,
-            "context_limit": 3
+            "context_limit": 3,
+            "use_server_keys": True  # CRITICAL: Use server API keys for evaluation
         }
         
         try:
