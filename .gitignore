@@ -111,6 +111,9 @@ scripts/verify_backend_deployment.py
 scripts/view_test_suite.py
 scripts/view_test_progress.py
 
+# Internal analysis/improvement docs (not for public repo)
+docs/ANALYSIS_AND_IMPROVEMENTS.md
+
 # Test results (not for public repo)
 tests/results/
 test_results_transparency_*.json
