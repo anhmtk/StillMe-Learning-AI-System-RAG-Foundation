@@ -463,6 +463,8 @@ class OpenRouterProvider(LLMProvider):
                         if not content or not content.strip():
                             logger.warning("OpenRouter API returned empty or None content")
                             return "OpenRouter API returned empty response"
+                        # CRITICAL: Log successful response to trace
+                        logger.info(f"🔍 [TRACE] OpenRouter returned content: length={len(content)}, preview={content[:200]}")
                         return content
                     else:
                         return "OpenRouter API returned unexpected response format"
@@ -508,7 +510,7 @@ class OpenRouterProvider(LLMProvider):
                         # Raise exception instead of returning error string
                         raise Exception(f"OpenRouter API error: {response.status_code} - {error_text}")
                     
-        except (InsufficientQuotaError, ContextOverflowError):
+        except (InsufficientQuotaError, ContextOverflowError, AuthenticationError, AuthorizationError):
             # Re-raise to be handled by caller for fallback
             raise
         except Exception as e:
@@ -698,8 +700,8 @@ class OpenAIProvider(LLMProvider):
                         # Raise exception instead of returning error string
                         raise Exception(f"OpenAI API error: {response.status_code} - {error_text}")
                     
-        except (InsufficientQuotaError, ContextOverflowError):
-            # Re-raise to be handled by caller
+        except (InsufficientQuotaError, ContextOverflowError, AuthenticationError, AuthorizationError):
+            # Re-raise to be handled by caller (for fallback to other providers)
             raise
         except Exception as e:
             logger.error(f"OpenAI API error: {e}")

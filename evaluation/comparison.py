@@ -547,7 +547,7 @@ class SystemComparator:
         """
         import requests
         
-        url = f"{self.stillme_api_url}/api/chat/smart_router"
+        url = f"{self.stillme_api_url}/api/chat/rag"
         payload = {
             "message": question,
             "user_id": "evaluation_bot",

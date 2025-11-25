@@ -1655,6 +1655,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     validation_info = None
     processing_steps = []  # Track processing steps for real-time status
     style_learning_response = None  # Initialize for style learning
+    response = None  # CRITICAL: Initialize response to prevent UnboundLocalError
+    raw_response = None  # CRITICAL: Initialize raw_response to prevent UnboundLocalError
+    final_response = None  # CRITICAL: Initialize final_response to prevent UnboundLocalError
     
     # Initialize fallback flags for both RAG and non-RAG paths to prevent UnboundLocalError
     is_fallback_meta_answer = False  # Used in RAG path
@@ -2479,8 +2482,12 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         enable_validators = os.getenv("ENABLE_VALIDATORS", "true").lower() == "true"
         enable_tone_align = os.getenv("ENABLE_TONE_ALIGN", "true").lower() == "true"
         
+        # CRITICAL: Log context status to trace why RAG path might not be entered
+        logger.info(f"🔍 [TRACE] Context check: context={context is not None}, total_context_docs={context.get('total_context_docs', 0) if context else 0}, knowledge_docs={len(context.get('knowledge_docs', [])) if context else 0}, conversation_docs={len(context.get('conversation_docs', [])) if context else 0}")
+        
         if context and context["total_context_docs"] > 0:
             # Use context to enhance response
+            logger.info(f"🔍 [TRACE] Entering RAG path: total_context_docs={context['total_context_docs']}, knowledge_docs={len(context.get('knowledge_docs', []))}, conversation_docs={len(context.get('conversation_docs', []))}")
             # Build context with token limits (3000 tokens max to leave room for system prompt and user message)
             # Model context limit is 16385, but we need to be very conservative:
             # - System prompt: ~3300-3600 tokens (language + formatting + truncated STILLME_IDENTITY + time awareness)
@@ -3839,12 +3846,20 @@ Context: {context_text}
                     cached_raw_response = cached_response.get("response")
                     # CRITICAL: Only use cache if response is valid (not None/empty)
                     if cached_raw_response and isinstance(cached_raw_response, str) and cached_raw_response.strip():
-                        raw_response = cached_raw_response
-                        cache_hit = True
-                        logger.info(f"✅ LLM cache HIT (saved {cached_response.get('latency', 0):.2f}s)")
-                        processing_steps.append("⚡ Response from cache (fast!)")
-                        llm_inference_latency = cached_response.get("latency", 0.01)
-                        timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s (cached)"
+                        # CRITICAL: Check if cached response is a fallback message
+                        from backend.api.utils.error_detector import is_fallback_message
+                        if is_fallback_message(cached_raw_response):
+                            logger.warning(f"⚠️ Cache contains fallback message - ignoring cache and calling LLM")
+                            raw_response = None
+                            cache_hit = False
+                        else:
+                            raw_response = cached_raw_response
+                            cache_hit = True
+                            logger.info(f"✅ LLM cache HIT (saved {cached_response.get('latency', 0):.2f}s)")
+                            logger.info(f"🔍 [TRACE] Cached response: length={len(raw_response)}, preview={raw_response[:200]}")
+                            processing_steps.append("⚡ Response from cache (fast!)")
+                            llm_inference_latency = cached_response.get("latency", 0.01)
+                            timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s (cached)"
                     else:
                         # Cache contains invalid response (None/empty) - ignore cache and call LLM
                         logger.warning(f"⚠️ Cache contains invalid response (None/empty), ignoring cache and calling LLM")
@@ -3926,6 +3941,8 @@ Context: {context_text}
                             llm_model_name=chat_request.llm_model_name,
                             use_server_keys=use_server_keys
                         )
+                        # CRITICAL: Log raw_response immediately after LLM call to trace response loss
+                        logger.info(f"🔍 [TRACE] raw_response after LLM call (RAG path): length={len(raw_response) if raw_response else 0}, type={type(raw_response)}, preview={raw_response[:200] if raw_response else 'None'}")
                         
                         # Validate raw_response
                         if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
@@ -5281,6 +5298,17 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                 # Don't break the pipeline - post-processing is enhancement, not critical
                 logger.warning(f"⚠️ Post-processing failed (non-RAG), using original response")
                 timing_logs["postprocessing"] = "failed"
+                # CRITICAL: Ensure final_response is set to original response if post-processing fails
+                if final_response is None:
+                    final_response = response
+        
+        # CRITICAL: Ensure response is set from final_response, or keep original if final_response is None
+        logger.info(f"🔍 [TRACE] Before final_response assignment: response={response[:200] if response else 'None'}, final_response={final_response[:200] if final_response else 'None'}, response_type={type(response)}, final_response_type={type(final_response)}")
+        if final_response is not None:
+            response = final_response
+            logger.info(f"🔍 [TRACE] After final_response assignment: response={response[:200] if response else 'None'}, response_type={type(response)}")
+        else:
+            logger.warning(f"⚠️ [TRACE] final_response is None, keeping original response: response={response[:200] if response else 'None'}, response_type={type(response)}")
         
         # Calculate total response latency
         # Total_Response_Latency: Time from request received to response returned
@@ -5475,8 +5503,11 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             response = f"{style_learning_response}\n\n---\n\n{response}"
         
         # CRITICAL: Final safety check - ensure response is never None or empty before returning
+        logger.info(f"🔍 [TRACE] Final check before return: response={response[:200] if response else 'None'}, response_type={type(response)}, response_length={len(response) if response else 0}")
         if not response or not isinstance(response, str) or not response.strip():
-            logger.error("⚠️ Response is None, empty, or invalid before returning ChatResponse - using fallback")
+            logger.error(f"⚠️ Response is None, empty, or invalid before returning ChatResponse - using fallback. response={response}, type={type(response)}, detected_lang={detected_lang}")
+            logger.error(f"⚠️ Debug info: raw_response={raw_response[:200] if raw_response else 'None'}, final_response={final_response[:200] if final_response else 'None'}")
+            logger.error(f"⚠️ Processing steps: {processing_steps[-5:] if len(processing_steps) > 5 else processing_steps}")
             from backend.api.utils.error_detector import get_fallback_message_for_error
             response = get_fallback_message_for_error("generic", detected_lang or "vi")
             processing_steps.append("⚠️ Response validation failed - using fallback message")

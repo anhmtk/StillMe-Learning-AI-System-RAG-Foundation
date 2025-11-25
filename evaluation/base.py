@@ -120,7 +120,7 @@ class BaseEvaluator(ABC):
         """
         import requests
         
-        url = f"{self.api_base_url}/api/chat/smart_router"
+        url = f"{self.api_base_url}/api/chat/rag"
         payload = {
             "message": question,
             "user_id": "evaluation_bot",

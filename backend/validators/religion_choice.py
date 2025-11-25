@@ -59,10 +59,12 @@ class ReligiousChoiceValidator(Validator):
     CRITICAL: StillMe MUST NEVER choose any religion, even in hypothetical scenarios.
     """
     
-    def validate(
+    def run(
         self,
         answer: str,
         ctx_docs: List[str] = None,
+        is_philosophical: bool = False,
+        is_religion_roleplay: bool = False,
         user_question: Optional[str] = None,
         **kwargs
     ) -> ValidationResult:
@@ -116,10 +118,7 @@ class ReligiousChoiceValidator(Validator):
         if violations:
             return ValidationResult(
                 passed=False,
-                reasons=violations,
-                patched=None,  # Cannot auto-patch - must be rewritten
-                requires_rewrite=True,
-                rewrite_reason="Response contains religion choice - StillMe cannot choose any religion"
+                reasons=violations
             )
         
         return ValidationResult(

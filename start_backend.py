@@ -8,6 +8,19 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    logger = logging.getLogger(__name__)
+    logger.info("✓ Loaded environment variables from .env file")
+except ImportError:
+    # python-dotenv not installed, skip (Railway uses environment variables directly)
+    pass
+except Exception as e:
+    logger = logging.getLogger(__name__)
+    logger.warning(f"⚠️ Failed to load .env file: {e}")
+
 # Configure logging to stdout (Railway captures stdout)
 # Force flush immediately to ensure Railway sees logs
 logging.basicConfig(
