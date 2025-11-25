@@ -145,45 +145,91 @@ class PostProcessingOptimizer:
         self,
         quality_result: Dict,
         is_philosophical: bool,
-        response_length: int
+        response_length: int,
+        validation_result: Optional[Dict] = None
     ) -> Tuple[bool, str]:
         """
-        Determine if rewrite is really needed (pre-filter to avoid unnecessary rewrites)
+        Determine if rewrite is really needed (Phase 3: Only rewrite critical issues)
         
-        🚨🚨🚨 CRITICAL: 100% REWRITE POLICY 🚨🚨🚨
-        - MỤC TIÊU: Minh bạch, trung thực, giảm ảo giác tối đa
-        - MỌI câu trả lời đều phải được rewrite kỹ càng (100%)
-        - Cost và latency quan trọng nhưng xếp thứ 2 sau mục tiêu trên
-        - Nếu không đạt mục tiêu 1 thì mục tiêu 2 không còn ý nghĩa
+        Phase 3 Optimization: "Less is More"
+        - Chỉ rewrite khi có CRITICAL issues:
+          1. Missing citation (critical) - khi có context nhưng không có citation
+          2. Anthropomorphic language (critical) - "in my experience", "tôi cảm thấy"
+          3. Language mismatch (critical) - trả lời sai ngôn ngữ
+        - KHÔNG rewrite cho:
+          - Minor formatting issues (thiếu emoji, markdown format)
+          - Style preferences (paragraph structure khác nhau)
+          - Natural variation (cùng câu hỏi nhưng cách diễn đạt khác)
+          - Depth, unpacking (optional - không phải critical)
         
         Args:
             quality_result: Quality evaluation result
             is_philosophical: Whether question is philosophical
             response_length: Length of response
+            validation_result: Optional validation result from validator chain
             
         Returns:
-            Tuple of (should_rewrite, reason) - ALWAYS (True, reason)
+            Tuple of (should_rewrite, reason)
         """
         quality = quality_result.get("quality", "good")
         overall_score = quality_result.get("overall_score", 1.0)
         reasons = quality_result.get("reasons", [])
         
-        # 🚨🚨🚨 CRITICAL: ALWAYS REWRITE - 100% POLICY 🚨🚨🚨
-        # Mọi câu trả lời đều phải được rewrite để đảm bảo:
-        # - Minh bạch: Mọi thông tin đều có nguồn, không che giấu
-        # - Trung thực: Thừa nhận giới hạn, không bịa đặt
-        # - Giảm ảo giác: Kiểm tra kỹ từng claim, đảm bảo grounded trong context
+        # Phase 3: Check for CRITICAL issues only
+        critical_issues = []
         
-        logger.info(
-            f"🔄 ALWAYS rewriting (100% policy): quality={quality}, "
-            f"score={overall_score:.2f}, philosophical={is_philosophical}, "
-            f"length={response_length}, issues={len(reasons)}"
+        # 1. Check for anthropomorphic language (CRITICAL)
+        has_anthropomorphic = any(
+            "anthropomorphic" in r.lower() or 
+            "contains anthropomorphic" in r.lower() or
+            "claims experience" in r.lower() or
+            "claims feelings" in r.lower()
+            for r in reasons
         )
+        if has_anthropomorphic:
+            critical_issues.append("anthropomorphic_language")
         
-        if is_philosophical:
-            return True, "philosophical_question_100_percent_rewrite"
-        else:
-            return True, "non_philosophical_100_percent_rewrite"
+        # 2. Check for missing citation (CRITICAL) - from validation_result if available
+        if validation_result:
+            validation_reasons = validation_result.get("reasons", [])
+            has_missing_citation = any("missing_citation" in r for r in validation_reasons)
+            if has_missing_citation:
+                critical_issues.append("missing_citation")
+        
+        # 3. Check for language mismatch (CRITICAL) - from validation_result if available
+        if validation_result:
+            validation_reasons = validation_result.get("reasons", [])
+            has_language_mismatch = any("language_mismatch" in r for r in validation_reasons)
+            if has_language_mismatch:
+                critical_issues.append("language_mismatch")
+        
+        # 4. Check for topic drift (CRITICAL - StillMe talking about consciousness/LLM when not asked)
+        has_topic_drift = any("topic drift" in r.lower() for r in reasons)
+        if has_topic_drift:
+            critical_issues.append("topic_drift")
+        
+        # 5. Check for template-like response (CRITICAL - too mechanical)
+        has_template_like = any("template-like" in r.lower() for r in reasons)
+        if has_template_like:
+            critical_issues.append("template_like")
+        
+        # Phase 3: Only rewrite if there are CRITICAL issues
+        if critical_issues:
+            logger.info(
+                f"🔄 Phase 3: Rewriting due to CRITICAL issues: {critical_issues}, "
+                f"quality={quality}, score={overall_score:.2f}, "
+                f"philosophical={is_philosophical}, length={response_length}"
+            )
+            return True, f"critical_issues: {', '.join(critical_issues)}"
+        
+        # No critical issues - skip rewrite (allow natural variation)
+        logger.info(
+            f"⏭️ Phase 3: Skipping rewrite - no critical issues, "
+            f"quality={quality}, score={overall_score:.2f}, "
+            f"philosophical={is_philosophical}, length={response_length}, "
+            f"non_critical_reasons={reasons[:2] if reasons else 'none'}"
+        )
+        return False, "no_critical_issues"
 
 
 def get_postprocessing_optimizer() -> PostProcessingOptimizer:

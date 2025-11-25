@@ -1969,10 +1969,12 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     # User priority: QUALITY (honesty, transparency, depth) over speed
                     # Retry rewrite if it fails - don't skip
                     optimizer = get_postprocessing_optimizer()
+                    # Phase 3: Pass validation_result if available (for philosophical path, validation happens after rewrite)
                     should_rewrite, rewrite_reason = optimizer.should_rewrite(
                         quality_result=quality_result,
                         is_philosophical=True,
-                        response_length=len(philosophical_answer)
+                        response_length=len(philosophical_answer),
+                        validation_result=None  # Validation happens after rewrite for philosophical questions
                     )
                     
                     # FORCE rewrite for philosophical questions to ensure variation and depth
@@ -4477,15 +4479,24 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     quality_result=quality_result
                                 )
                             
-                            # 🚨🚨🚨 CRITICAL: 100% REWRITE POLICY 🚨🚨🚨
-                            # Mọi câu trả lời đều phải được rewrite để đảm bảo minh bạch, trung thực, giảm ảo giác
+                            # Phase 3: Only rewrite when CRITICAL issues are present
+                            # Pass validation_result to check for missing_citation and language_mismatch
+                            validation_result_dict = None
+                            if 'validation_info' in locals() and validation_info:
+                                # Convert ValidationResult to dict for should_rewrite()
+                                validation_result_dict = {
+                                    "passed": validation_info.get("passed", True),
+                                    "reasons": validation_info.get("reasons", [])
+                                }
+                            
                             should_rewrite, rewrite_reason = optimizer.should_rewrite(
                                 quality_result=quality_result,
                                 is_philosophical=is_philosophical,
-                                response_length=len(sanitized_response)
+                                response_length=len(sanitized_response),
+                                validation_result=validation_result_dict
                             )
                             
-                            # Stage 4: ALWAYS rewrite (100% policy) - Mục tiêu: minh bạch, trung thực, giảm ảo giác
+                            # Stage 4: Conditional rewrite (Phase 3) - Only for critical issues
                             if should_rewrite:
                                 logger.info(
                                     f"⚠️ Quality evaluator flagged output for rewrite. "
@@ -5175,9 +5186,10 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             quality_result=quality_result
                         )
                         
-                        # 🚨🚨🚨 CRITICAL: 100% REWRITE POLICY 🚨🚨🚨
-                        # Mọi câu trả lời đều phải được rewrite để đảm bảo minh bạch, trung thực, giảm ảo giác
-                        should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                            # Phase 3: Only rewrite when CRITICAL issues are present
+                            # Critical issues: missing citation, anthropomorphic language, language mismatch, topic drift, template-like
+                            # Non-critical issues (depth, unpacking, style) do NOT trigger rewrite
+                            should_rewrite, rewrite_reason = optimizer.should_rewrite(
                             quality_result=quality_result,
                             is_philosophical=is_philosophical_non_rag,
                             response_length=len(sanitized_response)
