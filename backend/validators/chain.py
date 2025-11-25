@@ -329,13 +329,28 @@ class ValidatorChain:
             for r in reasons
         ) and not has_critical_failure
         
+        # CRITICAL FIX: Ensure patched_answer is always set if patched differs from answer
+        # OR if we have missing_citation with patch (even if patched == answer due to edge case)
+        # This prevents response = None bug
+        if patched != answer:
+            final_patched_answer = patched
+        elif has_missing_citation_with_patch:
+            # Even if patched == answer (shouldn't happen, but defensive), use patched
+            final_patched_answer = patched
+            logger.warning(f"⚠️ [FIX] patched == answer but has_missing_citation_with_patch=True, using patched anyway")
+        else:
+            final_patched_answer = None
+        
+        # CRITICAL FIX: Log patched_answer status to help debug
+        logger.info(f"🔍 [TRACE] ValidatorChain final: patched={patched[:100] if patched else 'None'}..., answer={answer[:100] if answer else 'None'}..., patched_answer={final_patched_answer[:100] if final_patched_answer else 'None'}..., patched != answer={patched != answer}")
+        
         # If we have critical failures without patches, validation failed
         if has_critical_failure and not has_missing_citation_with_patch:
             logger.warning(f"Validation failed: {len(reasons)} failure reasons, no patches available")
             return ValidationResult(
                 passed=False,
                 reasons=reasons,
-                patched_answer=patched if patched != answer else None
+                patched_answer=final_patched_answer
             )
         
         # If only warnings (not violations), validation passed
@@ -344,7 +359,7 @@ class ValidatorChain:
             return ValidationResult(
                 passed=True,
                 reasons=reasons,
-                patched_answer=patched if patched != answer else None
+                patched_answer=final_patched_answer
             )
         
         # If missing_citation was fixed with patch, validation passed
@@ -353,13 +368,13 @@ class ValidatorChain:
             return ValidationResult(
                 passed=True,
                 reasons=[r for r in reasons if r != "missing_citation"],  # Remove missing_citation from reasons since it's fixed
-                patched_answer=patched if patched != answer else None
+                patched_answer=final_patched_answer
             )
         
         # All validators passed or were patched, or low_overlap was allowed due to citation
         return ValidationResult(
             passed=True,
             reasons=reasons,
-            patched_answer=patched if patched != answer else None
+            patched_answer=final_patched_answer
         )
 

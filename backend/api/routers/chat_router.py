@@ -1564,8 +1564,20 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 response = raw_response
     else:
         # Validation passed - use patched answer if available, otherwise use raw response
-        response = validation_result.patched_answer or raw_response
-        logger.debug(f"✅ Validation passed. Reasons: {validation_result.reasons}")
+        # CRITICAL FIX: Ensure we never use None - if both are None, use fallback
+        if validation_result.patched_answer:
+            response = validation_result.patched_answer
+            logger.debug(f"✅ Validation passed. Using patched_answer. Reasons: {validation_result.reasons}")
+        elif raw_response:
+            response = raw_response
+            logger.debug(f"✅ Validation passed. Using raw_response. Reasons: {validation_result.reasons}")
+        else:
+            # CRITICAL: Both patched_answer and raw_response are None - this should never happen
+            logger.error(f"🚨 CRITICAL: Both patched_answer and raw_response are None after validation passed!")
+            from backend.api.utils.error_detector import get_fallback_message_for_error
+            response = get_fallback_message_for_error("generic", detected_lang)
+            used_fallback = True
+            logger.error(f"🚨 Using fallback message due to None response")
     
     # CRITICAL: Ensure response is never None or empty after validation
     if not response or not isinstance(response, str) or not response.strip():
@@ -5309,6 +5321,12 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
             logger.info(f"🔍 [TRACE] After final_response assignment: response={response[:200] if response else 'None'}, response_type={type(response)}")
         else:
             logger.warning(f"⚠️ [TRACE] final_response is None, keeping original response: response={response[:200] if response else 'None'}, response_type={type(response)}")
+            # CRITICAL: If both response and final_response are None, we have a problem
+            if response is None:
+                logger.error(f"❌ [TRACE] CRITICAL: Both response and final_response are None! This should never happen. Using fallback.")
+                from backend.api.utils.error_detector import get_fallback_message_for_error
+                response = get_fallback_message_for_error("generic", detected_lang or "vi")
+                processing_steps.append("⚠️ CRITICAL: Both response and final_response were None - using fallback")
         
         # Calculate total response latency
         # Total_Response_Latency: Time from request received to response returned
