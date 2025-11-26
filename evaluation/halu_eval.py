@@ -76,6 +76,33 @@ class HaluEvalEvaluator(BaseEvaluator):
         
         self.logger.info(f"Evaluating StillMe on {len(questions)} HaluEval questions...")
         
+        # CRITICAL: Health check and warmup before starting evaluation
+        self.logger.info("🔍 Performing health check and warmup...")
+        try:
+            import requests
+            health_url = f"{self.api_base_url}/health"
+            health_response = requests.get(health_url, timeout=10)
+            if health_response.status_code == 200:
+                self.logger.info("✅ Backend health check passed")
+            else:
+                self.logger.warning(f"⚠️  Backend health check returned status {health_response.status_code}")
+        except Exception as e:
+            self.logger.warning(f"⚠️  Health check failed: {e}, continuing anyway...")
+        
+        # Warmup request to ensure backend is ready
+        try:
+            self.logger.info("🔥 Sending warmup request...")
+            warmup_response = self.query_stillme("Hello", use_rag=False, max_retries_for_fallback=1)
+            warmup_text = warmup_response.get("response", "")
+            if warmup_text and not self.is_fallback_message(warmup_text):
+                self.logger.info("✅ Warmup successful - backend is ready")
+            else:
+                self.logger.warning(f"⚠️  Warmup returned fallback message, backend may have issues")
+        except Exception as e:
+            self.logger.warning(f"⚠️  Warmup failed: {e}, continuing anyway...")
+        
+        self.logger.info("")
+        
         import time
         results = []
         for i, qa_pair in enumerate(questions):
