@@ -1702,7 +1702,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
     return response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, ctx_docs
 
 @router.post("/rag", response_model=ChatResponse)
-@limiter.limit(get_chat_rate_limit(), key_func=get_rate_limit_key_func)  # Chat rate limit (configurable for local testing)
+@limiter.limit(get_chat_rate_limit, key_func=get_rate_limit_key_func)  # Chat rate limit (dynamic based on API key)
 async def chat_with_rag(request: Request, chat_request: ChatRequest):
     """Chat with RAG-enhanced responses"""
     import time
@@ -5857,7 +5857,7 @@ async def chat_deepseek(request: ChatRequest):
 
 
 @router.post("/ask", response_model=ChatResponse)
-@limiter.limit(get_chat_rate_limit(), key_func=get_rate_limit_key_func)  # Chat rate limit (configurable for local testing)
+@limiter.limit(get_chat_rate_limit, key_func=get_rate_limit_key_func)  # Chat rate limit (dynamic based on API key)
 async def ask_question(request: Request, chat_request: ChatRequest):
     """
     Simplified question-answering endpoint.

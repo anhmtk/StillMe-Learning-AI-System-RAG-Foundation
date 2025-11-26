@@ -135,23 +135,27 @@ def get_rate_limit_key_func(request: Request) -> str:
         return get_remote_address(request)
 
 
-def get_chat_rate_limit() -> str:
+def get_chat_rate_limit(request: Optional[Request] = None) -> str:
     """
-    Get chat endpoint rate limit based on environment.
+    Get chat endpoint rate limit based on environment and user type.
     For local development/testing, can be disabled or increased via env vars.
     
-    Note: Evaluation requests (user_id="evaluation_bot") are handled via
-    get_rate_limit_key_func which returns a special key "evaluation:evaluation_bot".
-    The limiter needs to be configured to allow unlimited requests for this key.
+    CRITICAL: API key users get higher rate limits than IP-based users.
+    - IP-based users (no API key): 15/day (strict limit to prevent abuse)
+    - API key users: 1000/day (higher limit for authenticated users)
+    - Evaluation requests: 10000/day (unlimited for evaluation)
     
+    Args:
+        request: Optional FastAPI request object to check for API key
+        
     Returns:
-        Rate limit string (e.g., "15/day", "1000/minute", or "1000/day" if disabled)
+        Rate limit string (e.g., "15/day", "1000/day", or "10000/day")
     """
     if DISABLE_RATE_LIMIT:
         # Disable rate limiting by setting a very high limit
         return "10000/day"
     
-    # Check if custom rate limit is set via env var
+    # Check if custom rate limit is set via env var (applies to all users)
     if os.getenv("RATE_LIMIT_CHAT"):
         return os.getenv("RATE_LIMIT_CHAT")
     
@@ -165,8 +169,37 @@ def get_chat_rate_limit() -> str:
         # Default: 1000 requests per day (should be enough for testing)
         return os.getenv("RATE_LIMIT_CHAT_LOCAL", "1000/day")
     
-    # Railway/Production: use higher rate limit to support evaluation
-    # Previous: 15/day was too strict for evaluation runs
-    # New: 1000/day should be enough for evaluation while still preventing abuse
-    return os.getenv("RATE_LIMIT_CHAT_RAILWAY", "1000/day")
+    # Railway/Production: Different limits for API key users vs IP-based users
+    if request:
+        # Check for evaluation requests first (highest priority)
+        try:
+            import json
+            body = request._body if hasattr(request, '_body') else None
+            if body:
+                try:
+                    if isinstance(body, bytes):
+                        body_str = body.decode('utf-8')
+                    else:
+                        body_str = str(body)
+                    body_data = json.loads(body_str)
+                    user_id = body_data.get("user_id", "")
+                    use_server_keys = body_data.get("use_server_keys", False)
+                    # Evaluation requests: unlimited
+                    if user_id == "evaluation_bot" and use_server_keys:
+                        return "10000/day"
+                except (json.JSONDecodeError, AttributeError, UnicodeDecodeError):
+                    pass
+        except Exception:
+            pass
+        
+        # Check if user has API key (authenticated user)
+        api_key = get_api_key_for_limiting(request)
+        if api_key:
+            # API key users: higher limit (1000/day)
+            # This allows authenticated users to use the service freely
+            return os.getenv("RATE_LIMIT_CHAT_API_KEY", "1000/day")
+    
+    # IP-based users (no API key): strict limit (15/day)
+    # This prevents abuse from anonymous users
+    return os.getenv("RATE_LIMIT_CHAT_IP", "15/day")
 
