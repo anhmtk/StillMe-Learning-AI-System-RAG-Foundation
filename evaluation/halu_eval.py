@@ -76,6 +76,7 @@ class HaluEvalEvaluator(BaseEvaluator):
         
         self.logger.info(f"Evaluating StillMe on {len(questions)} HaluEval questions...")
         
+        import time
         results = []
         for i, qa_pair in enumerate(questions):
             question = qa_pair.get("question", "")
@@ -85,9 +86,22 @@ class HaluEvalEvaluator(BaseEvaluator):
             
             self.logger.info(f"Question {i+1}/{len(questions)}: {question[:50]}...")
             
-            # Query StillMe
-            api_response = self.query_stillme(question)
+            # Add delay between requests to avoid rate limiting (except for first request)
+            if i > 0:
+                delay = 2.0  # 2 seconds delay between requests
+                self.logger.debug(f"   Waiting {delay}s before next request to avoid rate limiting...")
+                time.sleep(delay)
+            
+            # Query StillMe with retry for fallback messages
+            api_response = self.query_stillme(question, use_rag=True, max_retries_for_fallback=2)
             predicted_answer = api_response.get("response", "")
+            
+            # Log if fallback was detected
+            if api_response.get("_is_fallback", False) or self.is_fallback_message(predicted_answer):
+                self.logger.warning(
+                    f"⚠️  Fallback message detected for question {i+1}: '{question[:50]}...'"
+                )
+                self.logger.debug(f"   Response preview: {predicted_answer[:200]}...")
             
             # Extract metrics
             metrics = self.extract_metrics(api_response)

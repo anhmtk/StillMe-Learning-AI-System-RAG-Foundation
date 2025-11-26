@@ -84,13 +84,20 @@ class TruthfulQAEvaluator(BaseEvaluator):
             self.logger.info(f"Question {i+1}/{len(questions)}: {question[:50]}...")
             
             try:
-                # Query StillMe
-                api_response = self.query_stillme(question)
+                # Query StillMe with retry for fallback messages
+                api_response = self.query_stillme(question, use_rag=True, max_retries_for_fallback=2)
                 if not api_response:
                     self.logger.warning(f"Empty API response for question {i+1}, skipping...")
                     continue
                 
                 predicted_answer = api_response.get("response", "")
+                
+                # Log if fallback was detected
+                if api_response.get("_is_fallback", False) or self.is_fallback_message(predicted_answer):
+                    self.logger.warning(
+                        f"⚠️  Fallback message detected for question {i+1}: '{question[:50]}...'"
+                    )
+                    self.logger.debug(f"   Response preview: {predicted_answer[:200]}...")
                 
                 # Extract metrics
                 metrics = self.extract_metrics(api_response)

@@ -107,18 +107,20 @@ class BaseEvaluator(ABC):
         """
         pass
     
-    def query_stillme(self, question: str, use_rag: bool = True) -> Dict[str, Any]:
+    def query_stillme(self, question: str, use_rag: bool = True, max_retries_for_fallback: int = 2) -> Dict[str, Any]:
         """
-        Query StillMe API
+        Query StillMe API with retry logic for fallback messages
         
         Args:
             question: Question to ask
             use_rag: Whether to use RAG
+            max_retries_for_fallback: Maximum retries if fallback message is detected
             
         Returns:
             API response
         """
         import requests
+        import time
         
         url = f"{self.api_base_url}/api/chat/rag"
         payload = {
@@ -129,8 +131,8 @@ class BaseEvaluator(ABC):
             "use_server_keys": True  # CRITICAL: Use server API keys for evaluation
         }
         
-        import time
         max_retries = 3
+        fallback_retries = 0
         
         for attempt in range(max_retries):
             try:
@@ -153,7 +155,32 @@ class BaseEvaluator(ABC):
                         }
                 
                 response.raise_for_status()
-                return response.json()
+                api_response = response.json()
+                
+                # CRITICAL: Check if response is a fallback message
+                response_text = api_response.get("response", "")
+                if response_text and self.is_fallback_message(response_text):
+                    if fallback_retries < max_retries_for_fallback:
+                        fallback_retries += 1
+                        wait_time = fallback_retries * 3  # Exponential backoff: 3s, 6s
+                        self.logger.warning(
+                            f"Fallback message detected for question '{question[:50]}...', "
+                            f"retrying in {wait_time}s (fallback retry {fallback_retries}/{max_retries_for_fallback})"
+                        )
+                        time.sleep(wait_time)
+                        continue  # Retry the request
+                    else:
+                        self.logger.error(
+                            f"Fallback message persisted for question '{question[:50]}...' "
+                            f"after {max_retries_for_fallback} retries. Response: {response_text[:200]}..."
+                        )
+                        # Return the response anyway, but mark it as fallback
+                        api_response["_is_fallback"] = True
+                        return api_response
+                
+                # Success - no fallback message
+                return api_response
+                
             except requests.exceptions.Timeout:
                 if attempt < max_retries - 1:
                     wait_time = (attempt + 1) * 2
@@ -188,6 +215,50 @@ class BaseEvaluator(ABC):
             "validation_info": {"passed": False}
         }
     
+    def is_fallback_message(self, text: str) -> bool:
+        """
+        Detect if response is a fallback message (technical error message)
+        
+        Args:
+            text: Response text to check
+            
+        Returns:
+            True if text is a fallback message
+        """
+        if not text or len(text.strip()) < 50:
+            return False
+        
+        text_lower = text.lower()
+        
+        # Fallback message patterns (from backend/api/utils/error_detector.py)
+        fallback_patterns = [
+            "stillme is experiencing a technical issue",
+            "stillme đang gặp sự cố kỹ thuật",
+            "i cannot provide a good answer",
+            "mình không thể trả lời tốt",
+            "i cannot provide a good answer to this question with the current configuration",
+            "cannot provide a good answer to this question with the current configuration",
+            "i will suggest to the developer",
+            "mình sẽ đề xuất cho developer",
+            "stillme is currently encountering a context limit",
+            "hiện tại hệ thống của stillme đang gặp giới hạn ngữ cảnh",
+        ]
+        
+        # Check if text contains fallback patterns
+        # If text is short (< 500 chars) and contains fallback pattern, it's likely a fallback
+        # If text starts with fallback pattern, it's also likely a fallback
+        has_fallback_pattern = any(pattern in text_lower for pattern in fallback_patterns)
+        
+        if has_fallback_pattern:
+            # If text is short or starts with fallback, it's definitely a fallback
+            if len(text.strip()) < 500 or text_lower.startswith(("stillme is experiencing", "stillme đang gặp")):
+                return True
+            # If text is longer but fallback pattern appears in first 200 chars, it's likely a fallback
+            if any(pattern in text_lower[:200] for pattern in fallback_patterns):
+                return True
+        
+        return False
+    
     def extract_metrics(self, api_response: Dict[str, Any]) -> Dict[str, Any]:
         """
         Extract metrics from API response
@@ -206,6 +277,9 @@ class BaseEvaluator(ABC):
             validation_info = {}
         
         response_text = api_response.get("response", "")
+        
+        # CRITICAL: Detect fallback messages
+        is_fallback = self.is_fallback_message(response_text)
         
         # Check for citations: both numeric [1], [2] and human-readable formats
         # Numeric citations
@@ -252,10 +326,10 @@ class BaseEvaluator(ABC):
             "has_human_readable_citation": has_human_readable_citation,
             "has_uncertainty": any(
                 phrase in response_text.lower()
-                for phrase in ["don't know", "không biết", "uncertain", "không chắc", "i don't have", "tôi không có"]
+                for phrase in ["don't know", "không biết", "uncertain", "không chắc", "i don't have", "tôi không có", "insufficient information", "thiếu thông tin"]
             ),
             "validation_passed": validation_info.get("passed", False),
             "context_docs_count": validation_info.get("context_docs_count", 0),
-            "used_fallback": validation_info.get("used_fallback", False)
+            "used_fallback": validation_info.get("used_fallback", False) or is_fallback  # Include detected fallback
         }
 
