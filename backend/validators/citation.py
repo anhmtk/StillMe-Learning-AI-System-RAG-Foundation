@@ -334,6 +334,43 @@ class CitationRequired:
         # Check for both numeric citations [1] and human-readable citations
         has_citation = bool(CITE_RE.search(answer) or HUMAN_READABLE_CITE_RE.search(answer))
         
+        # CRITICAL FIX: Check if answer mentions "Based on general knowledge" or similar phrases
+        # If yes, convert to proper citation format [general knowledge]
+        if not has_citation:
+            general_knowledge_patterns = [
+                r'based\s+on\s+general\s+knowledge\s*(?:\([^)]*\))?(?!\s*\[)',
+                r'from\s+my\s+training\s+data(?!\s*\[)',
+                r'not\s+from\s+stillme\'?s\s+rag\s+knowledge\s+base(?!\s*\[)',
+                r'kiến\s+thức\s+tổng\s+quát(?!\s*\[)',
+                r'dựa\s+trên\s+kiến\s+thức(?!\s*\[)',
+            ]
+            answer_lower = answer.lower()
+            for pattern in general_knowledge_patterns:
+                if re.search(pattern, answer_lower, re.IGNORECASE):
+                    # Convert to [general knowledge] citation format
+                    logger.info(f"Found 'Based on general knowledge' text without citation format - converting to [general knowledge]")
+                    # Replace the pattern with citation format
+                    # Strategy: Find the pattern and add [general knowledge] after it
+                    match = re.search(pattern, answer_lower, re.IGNORECASE)
+                    if match:
+                        # Find the actual text in original case
+                        original_match = re.search(pattern, answer, re.IGNORECASE)
+                        if original_match:
+                            insert_pos = original_match.end()
+                            # Check if [general knowledge] already exists nearby (within 50 chars)
+                            nearby_text = answer[max(0, insert_pos-50):min(len(answer), insert_pos+50)]
+                            if not HUMAN_READABLE_CITE_RE.search(nearby_text):
+                                # Add [general knowledge] citation
+                                citation_text = " [general knowledge]"
+                                patched_answer = answer[:insert_pos] + citation_text + answer[insert_pos:]
+                                logger.warning(f"✅ Converted 'Based on general knowledge' text to citation format")
+                                return ValidationResult(
+                                    passed=False,  # Still mark as failed to track the conversion
+                                    reasons=["converted_general_knowledge_text_to_citation"],
+                                    patched_answer=patched_answer
+                                )
+                    break
+        
         # CRITICAL FIX: Check if answer has URLs or source references that should be converted to citations
         # If answer has URLs like "Source: https://..." or "Sources: ...", convert them to [1] format
         # ALSO: Check for bare URLs (https://...) at end of answer or after "Sources:" or "-"

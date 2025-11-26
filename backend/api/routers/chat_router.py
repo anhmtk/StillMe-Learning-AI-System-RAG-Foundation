@@ -1449,6 +1449,20 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                             input_language=detected_lang
                         )
                         used_fallback = True
+                        # CRITICAL: Pass fallback message through CitationRequired to add citations for factual questions
+                        from backend.api.utils.error_detector import is_fallback_message
+                        if is_fallback_message(response):
+                            from backend.validators.citation import CitationRequired
+                            citation_validator = CitationRequired(required=True)
+                            citation_result = citation_validator.run(
+                                response, 
+                                ctx_docs=ctx_docs,
+                                is_philosophical=is_philosophical,
+                                user_question=chat_request.message
+                            )
+                            if citation_result.patched_answer:
+                                response = citation_result.patched_answer
+                                logger.info(f"✅ Added citation to fallback message for factual question (language mismatch). Reasons: {citation_result.reasons}")
                 except Exception as retry_error:
                     logger.error(f"Retry failed: {retry_error}, using fallback")
                     fallback_handler = FallbackHandler()
@@ -1461,6 +1475,20 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         input_language=detected_lang
                     )
                     used_fallback = True
+                    # CRITICAL: Pass fallback message through CitationRequired to add citations for factual questions
+                    from backend.api.utils.error_detector import is_fallback_message
+                    if is_fallback_message(response):
+                        from backend.validators.citation import CitationRequired
+                        citation_validator = CitationRequired(required=True)
+                        citation_result = citation_validator.run(
+                            response, 
+                            ctx_docs=ctx_docs,
+                            is_philosophical=is_philosophical,
+                            user_question=chat_request.message
+                        )
+                        if citation_result.patched_answer:
+                            response = citation_result.patched_answer
+                            logger.info(f"✅ Added citation to fallback message for factual question (retry error). Reasons: {citation_result.reasons}")
             else:
                 # Other critical failures (has_missing_uncertainty) - use fallback
                 fallback_handler = FallbackHandler()
@@ -1474,6 +1502,20 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 )
                 used_fallback = True
                 logger.warning(f"⚠️ Validation failed with critical failure, using fallback answer. Reasons: {validation_result.reasons}")
+                # CRITICAL: Pass fallback message through CitationRequired to add citations for factual questions
+                from backend.api.utils.error_detector import is_fallback_message
+                if is_fallback_message(response):
+                    from backend.validators.citation import CitationRequired
+                    citation_validator = CitationRequired(required=True)
+                    citation_result = citation_validator.run(
+                        response, 
+                        ctx_docs=ctx_docs,
+                        is_philosophical=is_philosophical,
+                        user_question=chat_request.message
+                    )
+                    if citation_result.patched_answer:
+                        response = citation_result.patched_answer
+                        logger.info(f"✅ Added citation to fallback message for factual question (critical failure). Reasons: {citation_result.reasons}")
         elif has_missing_citation:
             # Missing citation - check if patched_answer was already created by CitationRequired
             if validation_result.patched_answer:
@@ -1521,6 +1563,18 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         if is_fallback_message(response):
                             used_fallback = True
                             logger.warning(f"⚠️ FallbackHandler returned fallback message instead of patched answer")
+                            # CRITICAL: Pass fallback message through CitationRequired to add citations for factual questions
+                            from backend.validators.citation import CitationRequired
+                            citation_validator = CitationRequired(required=True)
+                            citation_result = citation_validator.run(
+                                response, 
+                                ctx_docs=ctx_docs,
+                                is_philosophical=is_philosophical,
+                                user_question=chat_request.message
+                            )
+                            if citation_result.patched_answer:
+                                response = citation_result.patched_answer
+                                logger.info(f"✅ Added citation to fallback message for factual question. Reasons: {citation_result.reasons}")
                         else:
                             logger.info(f"✅ Added citation via FallbackHandler. Reasons: {validation_result.reasons}")
                     # CRITICAL: Ensure response is not None/empty after adding citation

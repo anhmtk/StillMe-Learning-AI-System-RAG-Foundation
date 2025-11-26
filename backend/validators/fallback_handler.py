@@ -145,22 +145,46 @@ class FallbackHandler:
         logger.info(f"FallbackHandler: Added citation '{citation_text.strip()}' to answer (context docs: {len(ctx_docs)})")
         return patched
     
-    def _get_no_context_fallback(self, user_question: str, detected_lang: str = 'en') -> str:
+    def _get_no_context_fallback(self, user_question: str, detected_lang: str = 'en', add_citation_if_factual: bool = True) -> str:
         """
         Generate fallback answer when no context is available
         
         Args:
             user_question: User's question
             detected_lang: Detected language code
+            add_citation_if_factual: If True, add [general knowledge] citation for factual questions
             
         Returns:
-            Safe fallback answer in appropriate language
+            Safe fallback answer in appropriate language (with citation if factual question)
         """
         # Sanitize user question to prevent XSS
         safe_question = _sanitize_for_display(user_question, max_length=50)
         
+        # CRITICAL: Check if this is a factual question and add citation if needed
+        is_factual = False
+        if add_citation_if_factual and user_question:
+            try:
+                # Simple heuristic: check for factual question patterns
+                question_lower = user_question.lower()
+                factual_indicators = [
+                    r'\b(what|who|when|where|how|why)\s+(is|was|are|were|did|does|do|will|can)',
+                    r'\b(capital|population|president|won|wrote|discovered|invented|created)',
+                    r'\b\d{4}\b',  # Years
+                    r'\b(explain|describe|define|tell me about)',
+                ]
+                import re
+                for pattern in factual_indicators:
+                    if re.search(pattern, question_lower):
+                        is_factual = True
+                        break
+            except Exception as e:
+                logger.warning(f"Error detecting factual question: {e}")
+                is_factual = False
+        
+        citation_suffix = " [general knowledge]" if is_factual else ""
+        
         if detected_lang == 'vi':
-            return f"""Tôi xin lỗi. Dựa trên thông tin tôi tìm kiếm, hiện tại StillMe không có dữ liệu đủ tin cậy để trả lời câu hỏi của bạn về "{safe_question}".
+            fallback_text = f"""Tôi xin lỗi. Dựa trên thông tin tôi tìm kiếm, hiện tại StillMe không có dữ liệu đủ tin cậy để trả lời câu hỏi của bạn về "{safe_question}".
 
 StillMe là hệ thống học tập liên tục, tự động cập nhật kiến thức từ RSS feeds, arXiv, và các nguồn tin cậy khác mỗi 4 giờ (6 lần mỗi ngày). 
 
@@ -169,10 +193,11 @@ Bạn có thể:
 - Đặt câu hỏi theo cách khác hoặc chia nhỏ câu hỏi
 - Yêu cầu tôi giúp tìm kiếm các chủ đề liên quan
 
-Tôi muốn trả lời chính xác dựa trên kiến thức đã được xác minh, thay vì đoán mò. Cảm ơn bạn đã hiểu."""
+Tôi muốn trả lời chính xác dựa trên kiến thức đã được xác minh, thay vì đoán mò. Cảm ơn bạn đã hiểu.{citation_suffix}"""
+            return fallback_text
         
         elif detected_lang == 'zh':
-            return f"""抱歉。根据我搜索的信息，目前 StillMe 没有足够可靠的数据来回答您关于"{safe_question}"的问题。
+            fallback_text = f"""抱歉。根据我搜索的信息，目前 StillMe 没有足够可靠的数据来回答您关于"{safe_question}"的问题。
 
 StillMe 是一个持续学习系统，每 4 小时（每天 6 次）自动从 RSS 源、arXiv 和其他可信来源更新知识。
 
@@ -181,10 +206,11 @@ StillMe 是一个持续学习系统，每 4 小时（每天 6 次）自动从 RS
 - 以不同方式提问或将问题分解
 - 要求我帮助查找相关主题
 
-我希望基于已验证的知识准确回答，而不是猜测。感谢您的理解。"""
+我希望基于已验证的知识准确回答，而不是猜测。感谢您的理解。{citation_suffix}"""
+            return fallback_text
         
         else:  # Default to English
-            return f"""I apologize. Based on my search, StillMe currently doesn't have sufficiently reliable data to answer your question about "{safe_question}".
+            fallback_text = f"""I apologize. Based on my search, StillMe currently doesn't have sufficiently reliable data to answer your question about "{safe_question}".
         
         StillMe is a continuous learning system that automatically updates knowledge from RSS feeds, arXiv, and other trusted sources every 4 hours (6 times per day).
         
@@ -193,7 +219,8 @@ StillMe 是一个持续学习系统，每 4 小时（每天 6 次）自动从 RS
         - Rephrase your question or break it into smaller parts
         - Ask me to help find related topics
         
-        I prefer to answer accurately based on verified knowledge rather than guessing. Thank you for understanding."""
+        I prefer to answer accurately based on verified knowledge rather than guessing. Thank you for understanding.{citation_suffix}"""
+            return fallback_text
     
     def _get_language_mismatch_fallback(self, user_question: str, expected_lang: str, wrong_answer: str) -> str:
         """
