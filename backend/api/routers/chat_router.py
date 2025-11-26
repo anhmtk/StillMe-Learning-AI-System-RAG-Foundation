@@ -1942,6 +1942,73 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             logger.error(f"AI_SELF_MODEL handler error: {ai_self_model_error}", exc_info=True)
             # Continue to normal flow if AI_SELF_MODEL handler fails
         
+        # EXTERNAL DATA LAYER: Check for external data queries (weather, news, etc.)
+        # This bypasses RAG and fetches real-time data from external APIs
+        try:
+            from backend.external_data import ExternalDataOrchestrator, detect_external_data_intent
+            
+            external_data_intent = detect_external_data_intent(chat_request.message)
+            if external_data_intent and external_data_intent.confidence >= 0.7:
+                logger.info(f"🌐 External data intent detected: type={external_data_intent.type}, confidence={external_data_intent.confidence}")
+                
+                # Detect language for response formatting
+                detected_lang = detect_language(chat_request.message)
+                
+                # Route to external data provider
+                orchestrator = ExternalDataOrchestrator()
+                result = await orchestrator.route(external_data_intent)
+                
+                if result and result.success:
+                    # Format response with source + timestamp
+                    response_text = orchestrator.format_response(result, chat_request.message)
+                    
+                    # Log for audit
+                    logger.info(
+                        f"✅ External data fetched: source={result.source}, "
+                        f"cached={result.cached}, timestamp={result.timestamp.isoformat()}"
+                    )
+                    
+                    processing_steps.append(f"🌐 Fetched from {result.source} API")
+                    if result.cached:
+                        processing_steps.append("💾 Used cached data")
+                    
+                    return ChatResponse(
+                        response=response_text,
+                        confidence_score=0.9,  # High confidence for API data
+                        has_citation=True,  # External data has source attribution
+                        validation_info={
+                            "passed": True,
+                            "external_data_source": result.source,
+                            "external_data_timestamp": result.timestamp.isoformat(),
+                            "external_data_cached": result.cached
+                        },
+                        processing_steps=processing_steps,
+                        timing_logs={
+                            "total_time": time.time() - start_time,
+                            "rag_retrieval_latency": 0.0,
+                            "llm_inference_latency": 0.0
+                        },
+                        used_fallback=False
+                    )
+                elif result and not result.success:
+                    # API failed - fallback to RAG with transparent error message
+                    logger.warning(
+                        f"⚠️ External data fetch failed: source={result.source}, "
+                        f"error={result.error_message}. Falling back to RAG."
+                    )
+                    processing_steps.append(f"⚠️ External data unavailable ({result.source}), using RAG")
+                    # Continue to RAG pipeline below
+                else:
+                    # No result (no provider found) - continue to RAG
+                    logger.debug(f"⚠️ No external data provider found for intent: {external_data_intent.type}")
+                    # Continue to RAG pipeline below
+                    
+        except ImportError:
+            logger.debug("External data module not available, skipping external data detection")
+        except Exception as external_data_error:
+            logger.warning(f"External data handler error: {external_data_error}", exc_info=True)
+            # Continue to normal flow if external data handler fails
+        
         # Detect philosophical questions (consciousness/emotion/understanding) - use 3-layer processor
         # CRITICAL: This check happens AFTER AI_SELF_MODEL and honesty handler
         is_philosophical_consciousness = False
