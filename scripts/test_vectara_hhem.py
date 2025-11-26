@@ -153,10 +153,11 @@ class VectaraHHEMTester:
                 "context_limit": 3
             }
             
+            # Increased timeout for Railway (cold start + LLM latency): 60s -> 180s
             async with session.post(
                 self.chat_endpoint,
                 json=payload,
-                timeout=aiohttp.ClientTimeout(total=60)
+                timeout=aiohttp.ClientTimeout(total=180)
             ) as response:
                 if response.status != 200:
                     return {

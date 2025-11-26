@@ -4,6 +4,7 @@ External Data Orchestrator
 Routes external data intents to appropriate providers and manages caching.
 """
 
+import asyncio
 import logging
 from typing import List, Optional
 from datetime import datetime, timezone
@@ -109,22 +110,34 @@ class ExternalDataOrchestrator:
                 error_message=rate_limit_error
             )
         
-        # Fetch from provider with retry
+        # Fetch from provider with retry and timeout (fail-fast to avoid blocking RAG)
         try:
             # Record API call
             self.rate_limit_tracker.record_call(provider_name)
             
-            # Fetch with retry logic
-            result = await retry_with_backoff(
-                provider.fetch,
-                max_retries=2,
-                initial_delay=1.0,
-                max_delay=10.0,
-                backoff_factor=2.0,
-                exceptions=(Exception,),
-                intent_type=intent.type,
-                params=intent.params
-            )
+            # Fetch with retry logic and timeout (10s max to avoid blocking RAG pipeline)
+            # If external data takes too long, skip it and fallback to RAG
+            try:
+                result = await asyncio.wait_for(
+                    retry_with_backoff(
+                        provider.fetch,
+                        max_retries=2,
+                        initial_delay=1.0,
+                        max_delay=10.0,
+                        backoff_factor=2.0,
+                        exceptions=(Exception,),
+                        intent_type=intent.type,
+                        params=intent.params
+                    ),
+                    timeout=10.0  # Fail fast after 10s
+                )
+            except asyncio.TimeoutError:
+                self.logger.warning(
+                    f"External data timeout for {provider_name} (intent: {intent.type}), "
+                    f"falling back to RAG pipeline"
+                )
+                self._record_metrics(provider_name, success=False, cached=False)
+                return None  # Return None to skip external data and continue to RAG
             
             if not result:
                 # Retry failed

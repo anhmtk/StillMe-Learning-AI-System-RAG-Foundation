@@ -129,17 +129,64 @@ class BaseEvaluator(ABC):
             "use_server_keys": True  # CRITICAL: Use server API keys for evaluation
         }
         
-        try:
-            response = requests.post(url, json=payload, timeout=120)
-            response.raise_for_status()
-            return response.json()
-        except Exception as e:
-            self.logger.error(f"Error querying StillMe: {e}")
-            return {
-                "response": "",
-                "confidence_score": 0.0,
-                "validation_info": {"passed": False}
-            }
+        import time
+        max_retries = 3
+        
+        for attempt in range(max_retries):
+            try:
+                # Increased timeout for Railway (cold start + LLM latency): 120s -> 180s
+                response = requests.post(url, json=payload, timeout=180)
+                
+                # Handle HTTP 429 (Rate Limit) with retry
+                if response.status_code == 429:
+                    if attempt < max_retries - 1:
+                        wait_time = (attempt + 1) * 2  # Exponential backoff: 2s, 4s, 6s
+                        self.logger.warning(f"Rate limited (HTTP 429) for question '{question[:50]}...', retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                        time.sleep(wait_time)
+                        continue
+                    else:
+                        self.logger.error(f"Rate limit exceeded for question '{question[:50]}...' after {max_retries} attempts")
+                        return {
+                            "response": "",
+                            "confidence_score": 0.0,
+                            "validation_info": {"passed": False}
+                        }
+                
+                response.raise_for_status()
+                return response.json()
+            except requests.exceptions.Timeout:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    self.logger.warning(f"Timeout for question '{question[:50]}...', retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    self.logger.error(f"Timeout for question '{question[:50]}...' after {max_retries} attempts")
+                    return {
+                        "response": "",
+                        "confidence_score": 0.0,
+                        "validation_info": {"passed": False}
+                    }
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    self.logger.warning(f"Error querying StillMe: {e}, retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    self.logger.error(f"Error querying StillMe: {e}")
+                    return {
+                        "response": "",
+                        "confidence_score": 0.0,
+                        "validation_info": {"passed": False}
+                    }
+        
+        # Should not reach here, but just in case
+        return {
+            "response": "",
+            "confidence_score": 0.0,
+            "validation_info": {"passed": False}
+        }
     
     def extract_metrics(self, api_response: Dict[str, Any]) -> Dict[str, Any]:
         """

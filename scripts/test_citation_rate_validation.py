@@ -115,57 +115,98 @@ class CitationRateTester:
         
         return any(keyword in response_lower for keyword in uncertainty_keywords) or is_fallback_message
     
-    async def test_single_question(self, question: str, session: aiohttp.ClientSession) -> Dict[str, Any]:
-        """Test a single question and return results"""
-        try:
-            payload = {
-                "message": question,
-                "use_rag": True,
-                "context_limit": 3
-            }
-            
-            async with session.post(self.chat_endpoint, json=payload, timeout=aiohttp.ClientTimeout(total=60)) as response:
-                if response.status != 200:
-                    error_text = await response.text()
-                    logger.error(f"API error for question '{question}': {response.status} - {error_text}")
+    async def test_single_question(self, question: str, session: aiohttp.ClientSession, max_retries: int = 3) -> Dict[str, Any]:
+        """Test a single question with retry logic for rate limiting"""
+        payload = {
+            "message": question,
+            "use_rag": True,
+            "context_limit": 3
+        }
+        
+        for attempt in range(max_retries):
+            try:
+                # Increased timeout for Railway (cold start + LLM latency): 60s -> 180s
+                async with session.post(self.chat_endpoint, json=payload, timeout=aiohttp.ClientTimeout(total=180)) as response:
+                    # Handle HTTP 429 (Rate Limit) with retry
+                    if response.status == 429:
+                        if attempt < max_retries - 1:
+                            wait_time = (attempt + 1) * 2  # Exponential backoff: 2s, 4s, 6s
+                            logger.warning(f"Rate limited (HTTP 429) for '{question}', retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                            await asyncio.sleep(wait_time)
+                            continue
+                        else:
+                            error_text = await response.text()
+                            logger.error(f"Rate limit exceeded for question '{question}' after {max_retries} attempts")
+                            return {
+                                "question": question,
+                                "success": False,
+                                "error": "HTTP 429 (Rate Limit)",
+                                "has_citation": False,
+                                "response": None
+                            }
+                    
+                    if response.status != 200:
+                        error_text = await response.text()
+                        logger.error(f"API error for question '{question}': {response.status} - {error_text}")
+                        return {
+                            "question": question,
+                            "success": False,
+                            "error": f"HTTP {response.status}",
+                            "has_citation": False,
+                            "response": None
+                        }
+                    
+                    data = await response.json()
+                    response_text = data.get("response", "")
+                    
+                    return {
+                        "question": question,
+                        "success": True,
+                        "has_citation": self.has_citation(response_text),
+                        "expresses_uncertainty": self.expresses_uncertainty(response_text),
+                        "response": response_text[:200] + "..." if len(response_text) > 200 else response_text,
+                        "confidence_score": data.get("confidence_score"),
+                        "validation_result": data.get("validation_result"),
+                    }
+            except asyncio.TimeoutError:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    logger.warning(f"Timeout for question '{question}', retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                    await asyncio.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"Timeout for question: {question} after {max_retries} attempts")
                     return {
                         "question": question,
                         "success": False,
-                        "error": f"HTTP {response.status}",
+                        "error": "Timeout",
                         "has_citation": False,
                         "response": None
                     }
-                
-                data = await response.json()
-                response_text = data.get("response", "")
-                
-                return {
-                    "question": question,
-                    "success": True,
-                    "has_citation": self.has_citation(response_text),
-                    "expresses_uncertainty": self.expresses_uncertainty(response_text),
-                    "response": response_text[:200] + "..." if len(response_text) > 200 else response_text,
-                    "confidence_score": data.get("confidence_score"),
-                    "validation_result": data.get("validation_result"),
-                }
-        except asyncio.TimeoutError:
-            logger.error(f"Timeout for question: {question}")
-            return {
-                "question": question,
-                "success": False,
-                "error": "Timeout",
-                "has_citation": False,
-                "response": None
-            }
-        except Exception as e:
-            logger.error(f"Error testing question '{question}': {e}")
-            return {
-                "question": question,
-                "success": False,
-                "error": str(e),
-                "has_citation": False,
-                "response": None
-            }
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    logger.warning(f"Error testing question '{question}': {e}, retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                    await asyncio.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"Error testing question '{question}': {e}")
+                    return {
+                        "question": question,
+                        "success": False,
+                        "error": str(e),
+                        "has_citation": False,
+                        "response": None
+                    }
+        
+        # Should not reach here, but just in case
+        return {
+            "question": question,
+            "success": False,
+            "error": "Max retries exceeded",
+            "has_citation": False,
+            "response": None
+        }
     
     async def integration_test(self, questions: List[str]) -> Dict[str, Any]:
         """
@@ -176,9 +217,15 @@ class CitationRateTester:
         logger.info("INTEGRATION TEST: Testing Citation Rate")
         logger.info("=" * 60)
         
+        # Sequential requests with delay to avoid rate limiting
         async with aiohttp.ClientSession() as session:
-            tasks = [self.test_single_question(q, session) for q in questions]
-            results = await asyncio.gather(*tasks)
+            results = []
+            for i, question in enumerate(questions):
+                if i > 0:
+                    # Add delay between requests to avoid rate limiting (1s delay)
+                    await asyncio.sleep(1.0)
+                result = await self.test_single_question(question, session)
+                results.append(result)
         
         total = len(results)
         with_citations = sum(1 for r in results if r.get("has_citation", False))
@@ -211,13 +258,14 @@ class CitationRateTester:
         
         return self.results["integration_test"]
     
-    async def load_test(self, questions: List[str], concurrent_requests: int = 20) -> Dict[str, Any]:
+    async def load_test(self, questions: List[str], concurrent_requests: int = 10) -> Dict[str, Any]:
         """
         Load Test: Test citation rate under concurrent load
         Tests if system maintains citation rate under stress
+        Reduced concurrent requests to avoid rate limiting
         """
         logger.info("=" * 60)
-        logger.info(f"LOAD TEST: Testing with {concurrent_requests} concurrent requests")
+        logger.info(f"LOAD TEST: Testing with {concurrent_requests} concurrent requests (reduced to avoid rate limiting)")
         logger.info("=" * 60)
         
         # Repeat questions to reach concurrent_requests
@@ -225,8 +273,17 @@ class CitationRateTester:
         
         start_time = time.time()
         
+        # Use semaphore to limit concurrent requests and add delay between batches
+        semaphore = asyncio.Semaphore(5)  # Max 5 concurrent requests at a time
+        
+        async def test_with_semaphore(question: str):
+            async with semaphore:
+                # Add small delay to avoid rate limiting
+                await asyncio.sleep(0.5)
+                return await self.test_single_question(question, session)
+        
         async with aiohttp.ClientSession() as session:
-            tasks = [self.test_single_question(q, session) for q in test_questions]
+            tasks = [test_with_semaphore(q) for q in test_questions]
             results = await asyncio.gather(*tasks, return_exceptions=True)
         
         elapsed_time = time.time() - start_time
@@ -275,9 +332,15 @@ class CitationRateTester:
         logger.info("HUMILITY TEST: Testing 'I don't know' responses")
         logger.info("=" * 60)
         
+        # Sequential requests with delay to avoid rate limiting
         async with aiohttp.ClientSession() as session:
-            tasks = [self.test_single_question(q, session) for q in questions]
-            results = await asyncio.gather(*tasks)
+            results = []
+            for i, question in enumerate(questions):
+                if i > 0:
+                    # Add delay between requests to avoid rate limiting (1.5s delay)
+                    await asyncio.sleep(1.5)
+                result = await self.test_single_question(question, session)
+                results.append(result)
         
         total = len(results)
         uncertainty_expressed = sum(1 for r in results if r.get("expresses_uncertainty", False))

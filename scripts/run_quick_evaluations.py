@@ -80,6 +80,54 @@ def wait_for_backend(max_wait: int = MAX_WAIT_TIME) -> bool:
     return False
 
 
+def warmup_railway(api_url: str) -> bool:
+    """
+    Warmup Railway service before running evaluations.
+    This helps avoid cold start delays during actual tests.
+    """
+    logger.info("🔥 Warming up Railway service (to avoid cold start delays)...")
+    
+    try:
+        # Health check first
+        health_url = f"{api_url}/health"
+        try:
+            response = requests.get(health_url, timeout=30)
+            if response.status_code != 200:
+                logger.warning(f"⚠️ Health check failed: HTTP {response.status_code}")
+                return False
+        except Exception as e:
+            logger.warning(f"⚠️ Health check error: {e}")
+            return False
+        
+        # Warmup request (simple question to wake up the service)
+        chat_url = f"{api_url}/api/chat/rag"
+        payload = {
+            "message": "Hello",
+            "use_rag": False,  # Skip RAG for faster warmup
+            "user_id": "warmup_bot"
+        }
+        
+        try:
+            logger.info("   Sending warmup request...")
+            response = requests.post(chat_url, json=payload, timeout=60)
+            if response.status_code == 200:
+                logger.info("✅ Railway service warmed up successfully")
+                return True
+            else:
+                logger.warning(f"⚠️ Warmup request failed: HTTP {response.status_code}")
+                return False
+        except requests.exceptions.Timeout:
+            logger.warning("⚠️ Warmup request timed out (service may be slow, but continuing)")
+            return True  # Continue anyway - service might just be slow
+        except Exception as e:
+            logger.warning(f"⚠️ Warmup request error: {e}")
+            return True  # Continue anyway - warmup is optional
+    
+    except Exception as e:
+        logger.warning(f"⚠️ Warmup failed: {e}, continuing anyway")
+        return True  # Continue anyway - warmup is optional
+
+
 def run_command(command: list, description: str) -> bool:
     """Run a command and return success status"""
     logger.info("=" * 60)
@@ -157,6 +205,12 @@ def main():
         else:
             logger.error("❌ Cannot proceed without backend")
             return 1
+    
+    # Warmup Railway service (if not localhost) to avoid cold start delays
+    if "localhost" not in API_URL and "127.0.0.1" not in API_URL:
+        logger.info("")
+        warmup_railway(API_URL)
+        logger.info("")
     
     # Ensure output directory exists
     os.makedirs("data/evaluation", exist_ok=True)

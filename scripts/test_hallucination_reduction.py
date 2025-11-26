@@ -158,46 +158,92 @@ class HallucinationReductionTester:
         
         return False
     
-    async def test_single_case(self, test_case: Dict[str, Any], session: aiohttp.ClientSession) -> Dict[str, Any]:
-        """Test a single test case"""
-        try:
-            payload = {
-                "message": test_case["question"],
-                "use_rag": True,
-                "context_limit": 3
-            }
-            
-            async with session.post(self.chat_endpoint, json=payload, timeout=aiohttp.ClientTimeout(total=60)) as response:
-                if response.status != 200:
+    async def test_single_case(self, test_case: Dict[str, Any], session: aiohttp.ClientSession, max_retries: int = 3) -> Dict[str, Any]:
+        """Test a single test case with retry logic for rate limiting"""
+        payload = {
+            "message": test_case["question"],
+            "use_rag": True,
+            "context_limit": 3
+        }
+        
+        for attempt in range(max_retries):
+            try:
+                # Increased timeout for Railway (cold start + LLM latency): 60s -> 180s
+                async with session.post(self.chat_endpoint, json=payload, timeout=aiohttp.ClientTimeout(total=180)) as response:
+                    # Handle HTTP 429 (Rate Limit) with retry
+                    if response.status == 429:
+                        if attempt < max_retries - 1:
+                            wait_time = (attempt + 1) * 2  # Exponential backoff: 2s, 4s, 6s
+                            logger.warning(f"Rate limited (HTTP 429) for '{test_case['question']}', retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                            await asyncio.sleep(wait_time)
+                            continue
+                        else:
+                            logger.error(f"Rate limit exceeded for '{test_case['question']}' after {max_retries} attempts")
+                            return {
+                                "test_case": test_case,
+                                "success": False,
+                                "error": "HTTP 429 (Rate Limit)",
+                                "is_hallucination": True,  # Treat errors as hallucination
+                            }
+                    
+                    if response.status != 200:
+                        return {
+                            "test_case": test_case,
+                            "success": False,
+                            "error": f"HTTP {response.status}",
+                            "is_hallucination": True,  # Treat errors as hallucination
+                        }
+                    
+                    data = await response.json()
+                    response_text = data.get("response", "")
+                    
+                    is_halluc = self.is_hallucination(response_text, test_case["expected"])
+                    
+                    return {
+                        "test_case": test_case,
+                        "success": True,
+                        "is_hallucination": is_halluc,
+                        "has_citation": self.has_citation(response_text),
+                        "expresses_uncertainty": self.expresses_uncertainty(response_text),
+                        "response": response_text[:300] + "..." if len(response_text) > 300 else response_text,
+                        "confidence_score": data.get("confidence_score"),
+                    }
+            except asyncio.TimeoutError:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    logger.warning(f"Timeout for '{test_case['question']}', retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                    await asyncio.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"Timeout for '{test_case['question']}' after {max_retries} attempts")
                     return {
                         "test_case": test_case,
                         "success": False,
-                        "error": f"HTTP {response.status}",
-                        "is_hallucination": True,  # Treat errors as hallucination
+                        "error": "Timeout",
+                        "is_hallucination": True,
                     }
-                
-                data = await response.json()
-                response_text = data.get("response", "")
-                
-                is_halluc = self.is_hallucination(response_text, test_case["expected"])
-                
-                return {
-                    "test_case": test_case,
-                    "success": True,
-                    "is_hallucination": is_halluc,
-                    "has_citation": self.has_citation(response_text),
-                    "expresses_uncertainty": self.expresses_uncertainty(response_text),
-                    "response": response_text[:300] + "..." if len(response_text) > 300 else response_text,
-                    "confidence_score": data.get("confidence_score"),
-                }
-        except Exception as e:
-            logger.error(f"Error testing case: {e}")
-            return {
-                "test_case": test_case,
-                "success": False,
-                "error": str(e),
-                "is_hallucination": True,
-            }
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2
+                    logger.warning(f"Error testing case '{test_case['question']}': {e}, retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                    await asyncio.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"Error testing case: {e}")
+                    return {
+                        "test_case": test_case,
+                        "success": False,
+                        "error": str(e),
+                        "is_hallucination": True,
+                    }
+        
+        # Should not reach here, but just in case
+        return {
+            "test_case": test_case,
+            "success": False,
+            "error": "Max retries exceeded",
+            "is_hallucination": True,
+        }
     
     async def test_generative_hallucination(self, test_cases: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Test generative hallucination (fictional entities, future events)"""
@@ -205,9 +251,15 @@ class HallucinationReductionTester:
         logger.info("GENERATIVE HALLUCINATION TEST")
         logger.info("=" * 60)
         
+        # Sequential requests with delay to avoid rate limiting
         async with aiohttp.ClientSession() as session:
-            tasks = [self.test_single_case(tc, session) for tc in test_cases]
-            results = await asyncio.gather(*tasks)
+            results = []
+            for i, test_case in enumerate(test_cases):
+                if i > 0:
+                    # Add delay between requests to avoid rate limiting (1s delay)
+                    await asyncio.sleep(1.0)
+                result = await self.test_single_case(test_case, session)
+                results.append(result)
         
         total = len(results)
         hallucinated = sum(1 for r in results if r.get("is_hallucination", False))
@@ -243,9 +295,15 @@ class HallucinationReductionTester:
         logger.info("RAG-BASED HALLUCINATION TEST")
         logger.info("=" * 60)
         
+        # Sequential requests with delay to avoid rate limiting
         async with aiohttp.ClientSession() as session:
-            tasks = [self.test_single_case(tc, session) for tc in test_cases]
-            results = await asyncio.gather(*tasks)
+            results = []
+            for i, test_case in enumerate(test_cases):
+                if i > 0:
+                    # Add delay between requests to avoid rate limiting (1s delay)
+                    await asyncio.sleep(1.0)
+                result = await self.test_single_case(test_case, session)
+                results.append(result)
         
         total = len(results)
         hallucinated = sum(1 for r in results if r.get("is_hallucination", False))
@@ -275,9 +333,15 @@ class HallucinationReductionTester:
         logger.info("FACTUAL CONSISTENCY TEST")
         logger.info("=" * 60)
         
+        # Sequential requests with delay to avoid rate limiting
         async with aiohttp.ClientSession() as session:
-            tasks = [self.test_single_case(tc, session) for tc in test_cases]
-            results = await asyncio.gather(*tasks)
+            results = []
+            for i, test_case in enumerate(test_cases):
+                if i > 0:
+                    # Add delay between requests to avoid rate limiting (1s delay)
+                    await asyncio.sleep(1.0)
+                result = await self.test_single_case(test_case, session)
+                results.append(result)
         
         total = len(results)
         hallucinated = sum(1 for r in results if r.get("is_hallucination", False))
