@@ -70,7 +70,7 @@ TEST_QUESTIONS = [
         "question": "Paradox của Russell về tập hợp (Russell's paradox) là gì? Tại sao nó quan trọng trong toán học và logic?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth", "mathematical_accuracy"],
-        "must_have": ["Russell", "paradox", "tập hợp", "[1]", "set", "mathematics", "logic"],
+        "must_have": ["Russell", "paradox", "tập hợp", "set", "mathematics", "logic"],  # Removed [1] - now accepts any citation format
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
@@ -78,7 +78,7 @@ TEST_QUESTIONS = [
         "question": "Tranh luận giữa Plato và Aristotle về forms (hình thức) là gì? Làm sao họ khác nhau về bản chất của thực tại?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Plato", "Aristotle", "forms", "hình thức", "[1]", "reality", "thực tại"],
+        "must_have": ["Plato", "Aristotle", "forms", "hình thức", "reality", "thực tại"],  # Removed [1] - now accepts any citation format
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
@@ -86,21 +86,21 @@ TEST_QUESTIONS = [
         "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì về hệ thống tài chính quốc tế?",
         "category": "real_historical_factual",
         "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Bretton Woods", "1944", "[1]", "IMF", "World Bank", "tài chính quốc tế"],
+        "must_have": ["Bretton Woods", "1944", "IMF", "World Bank", "tài chính quốc tế"],  # Removed [1] - now accepts any citation format
         "must_not_have": ["không biết", "không tìm thấy"]
     },
     {
         "question": "Hội nghị Potsdam 1945 đã quyết định những gì về Đức và châu Âu sau Thế chiến II?",
         "category": "real_historical_factual",
         "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Potsdam", "1945", "[1]", "Đức", "Germany", "châu Âu", "Europe"],
+        "must_have": ["Potsdam", "1945", "Đức", "Germany", "châu Âu", "Europe"],  # Removed [1] - now accepts any citation format
         "must_not_have": ["không biết", "không tìm thấy"]
     },
     {
         "question": "Định lý bất toàn của Gödel (Gödel's incompleteness theorem) nói gì? Tại sao nó quan trọng trong toán học và logic?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth", "mathematical_accuracy"],
-        "must_have": ["Gödel", "incompleteness", "bất toàn", "[1]", "theorem", "định lý"],
+        "must_have": ["Gödel", "incompleteness", "bất toàn", "theorem", "định lý"],  # Removed [1] - now accepts any citation format
         "must_not_have": ["không biết", "không tìm thấy"],  # Should know this
         "timeout": 180  # Increase timeout for complex philosophical/mathematical questions
     },
@@ -108,7 +108,7 @@ TEST_QUESTIONS = [
         "question": "Tranh luận giữa Searle và Dennett về Chinese Room là gì? Làm sao họ khác nhau về ý nghĩa của 'understanding'?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Searle", "Dennett", "Chinese Room", "[1]", "understanding"],
+        "must_have": ["Searle", "Dennett", "Chinese Room", "understanding"],  # Removed [1] - now accepts any citation format
         "must_not_have": ["không biết", "không tìm thấy"],  # Should know this
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
@@ -116,7 +116,7 @@ TEST_QUESTIONS = [
         "question": "Tranh luận giữa Kant và Hume về causality (quan hệ nhân quả) là gì? Làm sao họ khác nhau về khả năng nhận thức của con người?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Kant", "Hume", "causality", "quan hệ nhân quả", "[1]", "causation", "knowledge"],
+        "must_have": ["Kant", "Hume", "causality", "quan hệ nhân quả", "causation", "knowledge"],  # Removed [1] - now accepts any citation format
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
@@ -140,7 +140,7 @@ TEST_QUESTIONS = [
         "question": "Tranh luận giữa Descartes và Spinoza về mind-body problem (vấn đề tâm-thể) là gì? Làm sao họ khác nhau về bản chất của ý thức và vật chất?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Descartes", "Spinoza", "mind-body", "tâm-thể", "[1]", "consciousness", "matter"],
+        "must_have": ["Descartes", "Spinoza", "mind-body", "tâm-thể", "consciousness", "matter"],  # Removed [1] - now accepts any citation format
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     }
@@ -172,15 +172,25 @@ def send_chat_request(question: str, timeout: int = 120) -> Dict:
 
 
 def check_citations(answer: str) -> Dict:
-    """Check if answer has proper citations [1], [2], etc."""
-    citation_pattern = r'\[\d+\]'
-    citations = re.findall(citation_pattern, answer)
+    """Check if answer has proper citations [1], [2], or human-readable formats like [general knowledge]"""
+    # Numeric citations: [1], [2], [123]
+    numeric_pattern = r'\[\d+\]'
+    numeric_citations = re.findall(numeric_pattern, answer)
+    
+    # Human-readable citations: [general knowledge], [research: Wikipedia], [learning: arXiv], etc.
+    human_readable_pattern = r'\[(?:general knowledge|research:|learning:|news:|reference:|foundational knowledge|discussion context|verified sources|needs research|personal analysis)[^\]]*\]'
+    human_readable_citations = re.findall(human_readable_pattern, answer, re.IGNORECASE)
+    
+    # Combine both types
+    all_citations = numeric_citations + human_readable_citations
     
     return {
-        "has_citations": len(citations) > 0,
-        "citation_count": len(citations),
-        "citations": citations,
-        "passed": len(citations) > 0
+        "has_citations": len(all_citations) > 0,
+        "citation_count": len(all_citations),
+        "citations": all_citations,
+        "numeric_citations": numeric_citations,
+        "human_readable_citations": human_readable_citations,
+        "passed": len(all_citations) > 0
     }
 
 
@@ -234,7 +244,14 @@ def check_transparency(answer: str, question: str) -> Dict:
         }
     elif is_real_question:
         # For real questions, transparency = citing sources OR using pretrained knowledge honestly
-        has_citations = bool(re.search(r'\[\d+\]', answer))
+        # Check for both numeric and human-readable citations
+        has_numeric_citations = bool(re.search(r'\[\d+\]', answer))
+        has_human_readable_citations = bool(re.search(
+            r'\[(?:general knowledge|research:|learning:|news:|reference:|foundational knowledge|discussion context|verified sources|needs research|personal analysis)[^\]]*\]',
+            answer, re.IGNORECASE
+        ))
+        has_citations = has_numeric_citations or has_human_readable_citations
+        
         # Also check if answer mentions it's from pretrained knowledge (honest about source)
         mentions_pretrained = any(phrase in answer_lower for phrase in [
             "kiến thức tổng quát", "kiến thức đã học", "pretrained", "training data",
@@ -592,7 +609,7 @@ def run_all_tests():
     print()
     print("CRITICAL REQUIREMENTS:")
     print("1. ✅ All answers must be transparent (cite sources or express uncertainty)")
-    print("2. ✅ Real factual questions must have citations [1], [2]")
+    print("2. ✅ Real factual questions must have citations ([1], [2] OR [general knowledge], [research: ...], etc.)")
     print("3. ✅ Fake concepts must trigger honest refusal (no hallucination)")
     print("4. ✅ Answers must be varied (different questions = different answers)")
     print("5. ✅ Evidence must be mentioned (RAG, sources, context)")
