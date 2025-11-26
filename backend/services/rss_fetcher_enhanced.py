@@ -55,6 +55,23 @@ FALLBACK_FEEDS = {
     # - https://www.lionsroar.com/feed/ (all variants failed)
     # - https://physicsworld.com/feed/ (all variants failed)
     # These feeds have been removed from the main list and replaced with reliable alternatives
+    
+    # Feeds with XML validation issues - add fallbacks
+    "https://www.pnas.org/action/showFeed?type=etoc&feed=rss&jc=PNAS": [
+        "https://www.pnas.org/feed/",
+        "https://www.pnas.org/rss/",
+        "https://www.pnas.org/action/showFeed?type=etoc&feed=rss"
+    ],
+    "https://www.historytoday.com/rss.xml": [
+        "https://www.historytoday.com/feed/",
+        "https://www.historytoday.com/rss/",
+        "https://www.historytoday.com/feed/rss"
+    ],
+    "https://www.firstthings.com/rss": [
+        "https://www.firstthings.com/feed/",
+        "https://www.firstthings.com/rss.xml",
+        "https://www.firstthings.com/feed/rss"
+    ],
 }
 
 # Retry configuration
@@ -68,17 +85,36 @@ def validate_xml_structure(xml_content: str) -> Tuple[bool, Optional[str]]:
     """
     Validate XML structure before parsing.
     
+    CRITICAL FIX: Use feedparser for lenient validation instead of strict ET.fromstring.
+    feedparser is more tolerant of malformed XML and can handle many edge cases.
+    
     Args:
         xml_content: XML content as string
         
     Returns:
         Tuple of (is_valid, error_message)
     """
+    # First try strict validation (for well-formed XML)
     try:
         ET.fromstring(xml_content)
         return True, None
-    except ET.ParseError as e:
-        return False, f"XML parse error: {str(e)}"
+    except ET.ParseError as strict_error:
+        # If strict validation fails, try feedparser (more lenient)
+        # feedparser can handle many malformed XML cases
+        try:
+            test_feed = feedparser.parse(xml_content)
+            # If feedparser can parse it (even with warnings), consider it valid
+            # We'll check for bozo later, but for now, if it doesn't crash, it's parseable
+            if not test_feed.bozo or (test_feed.bozo and test_feed.entries):
+                # feedparser parsed it successfully (may have warnings, but has entries)
+                logger.debug(f"Strict XML validation failed, but feedparser can parse: {strict_error}")
+                return True, None
+            else:
+                # feedparser also failed
+                return False, f"XML parse error: {str(strict_error)}"
+        except Exception as feedparser_error:
+            # Both strict and lenient parsing failed
+            return False, f"XML parse error: {str(strict_error)}"
     except Exception as e:
         return False, f"XML validation error: {str(e)}"
 
@@ -193,6 +229,13 @@ def sanitize_xml(xml_content: str) -> str:
             # Keep only printable characters and newlines
             cleaned_before = ''.join(c for c in before_xml if c.isprintable() or c in '\n\r\t')
             sanitized = cleaned_before + sanitized[xml_start:]
+        # CRITICAL FIX: Also check for BOM or other invisible characters at the very start
+        # Some feeds have BOM (Byte Order Mark) or other invisible characters
+        if sanitized.startswith('\ufeff'):
+            sanitized = sanitized[1:]  # Remove BOM
+        # Remove any remaining non-printable characters at the start
+        while sanitized and not sanitized[0].isprintable() and sanitized[0] not in '\n\r\t':
+            sanitized = sanitized[1:]
     
     # Ensure proper XML declaration if missing
     if not sanitized.strip().startswith('<?xml'):
@@ -213,8 +256,8 @@ def sanitize_xml(xml_content: str) -> str:
         ET.fromstring(sanitized)
     except ET.ParseError as parse_error:
         error_msg = str(parse_error).lower()
-        if "invalid token" in error_msg or "not well-formed" in error_msg:
-            # Try to remove problematic characters around the error location
+        if "invalid token" in error_msg or "not well-formed" in error_msg or "syntax error" in error_msg:
+            # CRITICAL FIX: Try to remove problematic characters around the error location
             # This is a heuristic - we try to fix common issues
             # Remove any characters that are not valid in XML 1.0
             # XML 1.0 allows: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
@@ -228,7 +271,19 @@ def sanitize_xml(xml_content: str) -> str:
                     sanitized,
                     flags=re.UNICODE
                 )
-                logger.debug("Removed invalid XML characters to fix 'invalid token' error")
+                logger.debug("Removed invalid XML characters to fix 'invalid token' or 'syntax error'")
+            
+            # CRITICAL FIX: Also try to fix "line 2, column 4" errors - often caused by invalid characters in first few lines
+            # Try to clean the first 100 characters more aggressively
+            if "line 2" in error_msg or "column" in error_msg:
+                lines = sanitized.split('\n')
+                if len(lines) > 1:
+                    # Clean first 2 lines more aggressively
+                    for i in range(min(2, len(lines))):
+                        # Remove any non-printable characters except newline
+                        lines[i] = ''.join(c for c in lines[i] if c.isprintable() or c == '\n')
+                    sanitized = '\n'.join(lines)
+                    logger.debug("Cleaned first 2 lines to fix 'line 2, column' error")
     
     return sanitized
 
@@ -267,26 +322,34 @@ async def fetch_feed_with_retry(
                 response = await client.get(feed_url)
                 response.raise_for_status()
                 
-                # Validate XML structure
+                # CRITICAL FIX: Try feedparser first (lenient), then validate if needed
+                # feedparser is more tolerant and can handle many malformed XML cases
                 xml_content = response.text
-                is_valid, error_msg = validate_xml_structure(xml_content)
                 
-                if not is_valid:
-                    # Try sanitizing
+                # Try parsing directly with feedparser (most lenient)
+                feed = feedparser.parse(xml_content)
+                
+                # If feedparser parsed successfully (has entries), use it
+                if not feed.bozo or (feed.bozo and feed.entries):
+                    # feedparser parsed it successfully (may have warnings, but has entries)
+                    logger.debug(f"Successfully parsed {feed_url} with feedparser (attempt {attempt + 1})")
+                else:
+                    # feedparser failed, try sanitizing and re-parsing
+                    logger.debug(f"feedparser failed for {feed_url}, trying sanitization...")
                     sanitized_xml = sanitize_xml(xml_content)
-                    is_valid, error_msg = validate_xml_structure(sanitized_xml)
-                    if is_valid:
-                        xml_content = sanitized_xml
-                    else:
+                    feed = feedparser.parse(sanitized_xml)
+                    
+                    if feed.bozo and not feed.entries:
+                        # Still failed after sanitization
+                        error_msg = str(feed.bozo_exception) if feed.bozo_exception else "Unknown parse error"
                         logger.warning(f"XML validation failed for {feed_url} (attempt {attempt + 1}): {error_msg}")
                         if attempt < max_retries - 1:
                             await asyncio.sleep(retry_delay)
                             retry_delay = min(retry_delay * RETRY_BACKOFF_MULTIPLIER, MAX_RETRY_DELAY)
                             continue
                         return None
-                
-                # Parse feed
-                feed = feedparser.parse(xml_content)
+                    else:
+                        logger.debug(f"Successfully parsed {feed_url} after sanitization (attempt {attempt + 1})")
                 
                 # Check for parsing errors
                 if feed.bozo and feed.bozo_exception:
