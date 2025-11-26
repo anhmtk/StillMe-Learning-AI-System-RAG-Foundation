@@ -139,6 +139,10 @@ app.add_middleware(HTTPCacheMiddleware)
 from backend.api.middleware.request_deduplication import RequestDeduplicationMiddleware
 app.add_middleware(RequestDeduplicationMiddleware)
 
+# Evaluation Bypass Middleware (Bypass rate limit for evaluation requests)
+from backend.api.middleware.evaluation_bypass import EvaluationBypassMiddleware
+app.add_middleware(EvaluationBypassMiddleware)
+
 # Security middleware (HTTPS enforcement, HSTS headers, etc.)
 security_middleware_list = get_security_middleware()
 for middleware_class in security_middleware_list:

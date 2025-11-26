@@ -80,16 +80,21 @@ def get_rate_limit_key_func(request: Request) -> str:
     
     Bypasses rate limit for evaluation requests (user_id="evaluation_bot").
     
+    CRITICAL: Check request.state.bypass_rate_limit flag set by EvaluationBypassMiddleware.
+    If flag is True, return special key that will bypass rate limiting.
+    
     Args:
         request: FastAPI request object
         
     Returns:
         Rate limit key string
     """
-    # CRITICAL: Bypass rate limit for evaluation requests
-    # Evaluation requests use user_id="evaluation_bot" and use_server_keys=True
-    # We need to check request body for user_id, but rate limit decorator runs before body parsing
-    # So we check the request body manually here
+    # CRITICAL: Check if EvaluationBypassMiddleware has set bypass flag
+    if hasattr(request.state, 'bypass_rate_limit') and request.state.bypass_rate_limit:
+        logger.info(f"✅ Evaluation request detected in key_func, using bypass key")
+        return "evaluation:bypass"
+    
+    # Fallback: Check request body manually (if middleware didn't run or flag not set)
     try:
         import json
         import asyncio
@@ -118,9 +123,8 @@ def get_rate_limit_key_func(request: Request) -> str:
                 use_server_keys = body_data.get("use_server_keys", False)
                 # Bypass rate limit for evaluation requests
                 if user_id == "evaluation_bot" and use_server_keys:
-                    # Use a special key that will have unlimited rate limit
-                    # We'll configure limiter to allow unlimited for this key
-                    return f"evaluation:{user_id}"
+                    logger.info(f"✅ Evaluation request detected in key_func (from body), using bypass key")
+                    return "evaluation:bypass"
             except (json.JSONDecodeError, AttributeError, UnicodeDecodeError):
                 pass
     except Exception:
