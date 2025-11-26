@@ -338,8 +338,15 @@ def _detect_time_intent(query: str, query_lower: str) -> Optional[ExternalDataIn
         r'\bthứ\s+mấy\b',
     ]
     
-    # Check if query contains time keywords
-    has_time_keyword = any(re.search(pattern, query_lower, re.IGNORECASE) for pattern in time_keywords)
+    # Check if query contains time keywords (either simple indicators or regex patterns)
+    has_time_keyword = has_simple_indicator
+    
+    if not has_time_keyword:
+        # Try regex patterns
+        for pattern in time_keywords:
+            if re.search(pattern, query_lower, re.IGNORECASE):
+                has_time_keyword = True
+                break
     
     if not has_time_keyword:
         return None
