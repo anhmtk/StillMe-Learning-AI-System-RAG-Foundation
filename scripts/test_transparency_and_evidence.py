@@ -172,6 +172,69 @@ def send_chat_request(question: str, timeout: int = 120) -> Dict:
         return {"error": str(e)}
 
 
+def detect_model_from_response(response_data: Dict, question: str) -> str:
+    """
+    Detect which model was used (deepseek-chat or deepseek-reasoner)
+    
+    Methods:
+    1. Parse from processing_steps if available
+    2. Predict based on question type (using same logic as router)
+    
+    Args:
+        response_data: API response data
+        question: User question
+        
+    Returns:
+        Model name: "deepseek-chat", "deepseek-reasoner", or "unknown"
+    """
+    # Method 1: Parse from processing_steps
+    processing_steps = response_data.get("processing_steps", [])
+    if processing_steps:
+        for step in processing_steps:
+            if "Model router selected" in str(step) or "model router" in str(step).lower():
+                if "deepseek-reasoner" in str(step):
+                    return "deepseek-reasoner"
+                elif "deepseek-chat" in str(step):
+                    return "deepseek-chat"
+    
+    # Method 2: Predict based on question type (same logic as router)
+    # Import question classifier to detect philosophical questions
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from backend.core.question_classifier import is_philosophical_question
+        from backend.core.model_router import get_model_router
+        
+        is_philosophical = is_philosophical_question(question)
+        router = get_model_router()
+        predicted_model = router.select_model(
+            question=question,
+            task_type="chat",
+            is_philosophical=is_philosophical
+        )
+        return predicted_model
+    except Exception as e:
+        # Fallback: simple heuristic
+        question_lower = question.lower()
+        philosophical_keywords = [
+            "ý thức", "consciousness", "meaning of life", "ý nghĩa",
+            "truth", "ethics", "moral", "tồn tại", "existence",
+            "bản chất", "reality", "thực tại"
+        ]
+        # Check for pure philosophical (not factual with philosophical elements)
+        has_philosophical_keyword = any(kw in question_lower for kw in philosophical_keywords)
+        has_factual_indicator = any(
+            kw in question_lower for kw in [
+                "russell", "gödel", "plato", "aristotle", "kant", "hume",
+                "paradox", "theorem", "định lý", "1944", "1945", "1954"
+            ]
+        )
+        
+        if has_philosophical_keyword and not has_factual_indicator:
+            return "deepseek-reasoner"
+        else:
+            return "deepseek-chat"
+
+
 def check_citations(answer: str) -> Dict:
     """Check if answer has proper citations [1], [2], or human-readable formats like [general knowledge]"""
     # Numeric citations: [1], [2], [123]
@@ -512,7 +575,11 @@ def test_question(test_case: Dict, question_index: int) -> Dict:
     confidence = response_data.get("confidence_score", 0.0)
     validation_info = response_data.get("validation_result", {})
     
+    # Detect model used (for model routing tracking)
+    model_used = detect_model_from_response(response_data, question)
+    
     print(f"✅ Response received (length: {len(answer)} chars, confidence: {confidence:.2f})")
+    print(f"🤖 Model used: {model_used}")
     print()
     
     # Evaluate
@@ -543,6 +610,7 @@ def test_question(test_case: Dict, question_index: int) -> Dict:
         "confidence": confidence,
         "validation_info": validation_info,
         "evaluation": evaluation,
+        "model_used": model_used,  # Track model selection
         "passed": evaluation["overall_passed"]
     }
 
@@ -635,6 +703,51 @@ def run_all_tests():
     print(f"Status: {'✅ PASSED' if variation_result['passed'] else '❌ FAILED'}")
     print()
     
+    # Model Routing Statistics
+    print("=" * 80)
+    print("MODEL ROUTING STATISTICS")
+    print("=" * 80)
+    model_counts = {}
+    for result in results:
+        if result.get("status") == "success":
+            model = result.get("model_used", "unknown")
+            model_counts[model] = model_counts.get(model, 0) + 1
+    
+    total_successful = sum(model_counts.values())
+    if total_successful > 0:
+        print(f"Total Successful Responses: {total_successful}")
+        for model, count in sorted(model_counts.items()):
+            percentage = (count / total_successful) * 100
+            print(f"  {model}: {count} ({percentage:.1f}%)")
+        
+        # Show model usage by question type
+        print("\nModel Usage by Question Type:")
+        philosophical_questions = [r for r in results if "philosophical" in r.get("category", "").lower()]
+        factual_questions = [r for r in results if "factual" in r.get("category", "").lower() and "philosophical" not in r.get("category", "").lower()]
+        
+        if philosophical_questions:
+            philo_models = {}
+            for r in philosophical_questions:
+                if r.get("status") == "success":
+                    model = r.get("model_used", "unknown")
+                    philo_models[model] = philo_models.get(model, 0) + 1
+            print(f"  Philosophical questions ({len(philosophical_questions)}):")
+            for model, count in sorted(philo_models.items()):
+                print(f"    {model}: {count}")
+        
+        if factual_questions:
+            factual_models = {}
+            for r in factual_questions:
+                if r.get("status") == "success":
+                    model = r.get("model_used", "unknown")
+                    factual_models[model] = factual_models.get(model, 0) + 1
+            print(f"  Factual questions ({len(factual_questions)}):")
+            for model, count in sorted(factual_models.items()):
+                print(f"    {model}: {count}")
+    else:
+        print("No successful responses to analyze")
+    print()
+    
     # Summary
     print("=" * 80)
     print("TEST SUMMARY")
@@ -673,6 +786,23 @@ def run_all_tests():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_file = f"test_results_transparency_{timestamp}.json"
     
+    # Calculate model routing stats
+    model_routing_stats = {
+        "total_successful": sum(1 for r in results if r.get("status") == "success"),
+        "model_counts": {},
+        "by_category": {}
+    }
+    
+    for result in results:
+        if result.get("status") == "success":
+            model = result.get("model_used", "unknown")
+            model_routing_stats["model_counts"][model] = model_routing_stats["model_counts"].get(model, 0) + 1
+            
+            category = result.get("category", "unknown")
+            if category not in model_routing_stats["by_category"]:
+                model_routing_stats["by_category"][category] = {}
+            model_routing_stats["by_category"][category][model] = model_routing_stats["by_category"][category].get(model, 0) + 1
+    
     with open(results_file, "w", encoding="utf-8") as f:
         json.dump({
             "timestamp": timestamp,
@@ -683,6 +813,7 @@ def run_all_tests():
             "errors": errors,
             "pass_rate": passed/len(results)*100 if results else 0,
             "variation": variation_result,
+            "model_routing": model_routing_stats,  # Add model routing stats
             "results": results
         }, f, indent=2, ensure_ascii=False)
     
