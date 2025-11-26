@@ -184,7 +184,7 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
             
             # Evaluation requests: unlimited (key starts with "evaluation:")
             if rate_limit_key.startswith("evaluation:"):
-                logger.debug(f"Rate limit for evaluation request: 10000/day (key: {rate_limit_key})")
+                logger.info(f"✅ Rate limit for evaluation request: 10000/day (key: {rate_limit_key})")
                 return "10000/day"
             
             # API key users: higher limit (key starts with "api_key:")
@@ -210,10 +210,10 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
                     use_server_keys = body_data.get("use_server_keys", False)
                     # Evaluation requests: unlimited
                     if user_id == "evaluation_bot" and use_server_keys:
-                        logger.debug(f"Rate limit for evaluation request (from body): 10000/day")
+                        logger.info(f"✅ Rate limit for evaluation request (from body): 10000/day")
                         return "10000/day"
-                except (json.JSONDecodeError, AttributeError, UnicodeDecodeError):
-                    pass
+                except (json.JSONDecodeError, AttributeError, UnicodeDecodeError) as e:
+                    logger.debug(f"Error parsing body: {e}")
         except Exception as e:
             logger.debug(f"Error checking body for evaluation request: {e}")
         
@@ -228,5 +228,7 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
     
     # IP-based users (no API key): strict limit (15/day)
     # This prevents abuse from anonymous users
-    return os.getenv("RATE_LIMIT_CHAT_IP", "15/day")
+    default_limit = os.getenv("RATE_LIMIT_CHAT_IP", "15/day")
+    logger.debug(f"Rate limit for IP-based user: {default_limit}")
+    return default_limit
 
