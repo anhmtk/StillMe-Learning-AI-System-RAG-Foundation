@@ -5167,6 +5167,19 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             # CRITICAL: Check if response is a fallback meta-answer (terminal response)
             if response and isinstance(response, str) and is_fallback_message(response):
                 logger.info("🛑 Fallback meta-answer detected (non-RAG) - skipping post-processing")
+                # CRITICAL: Pass fallback message through CitationRequired to add citations for factual questions
+                from backend.validators.citation import CitationRequired
+                citation_validator = CitationRequired(required=True)
+                citation_result = citation_validator.run(
+                    response, 
+                    ctx_docs=[],  # No context for non-RAG path
+                    is_philosophical=is_philosophical_non_rag,
+                    user_question=chat_request.message
+                )
+                if citation_result.patched_answer:
+                    response = citation_result.patched_answer
+                    logger.info(f"✅ Added citation to fallback message for factual question (non-RAG). Reasons: {citation_result.reasons}")
+                    processing_steps.append("✅ Citation added to fallback message for factual question (non-RAG)")
                 is_fallback_meta_answer_non_rag = True
                 is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
                 processing_steps.append("🛑 Fallback message - terminal response, skipping all post-processing")
