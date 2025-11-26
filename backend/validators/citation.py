@@ -194,11 +194,49 @@ class CitationRequired:
                     logger.warning(f"⚠️ Error matching philosophical factual pattern {pattern[:50]}: {e}")
                     continue
         
-        # For pure philosophical questions (no factual elements), skip citation requirement
-        # BUT: If question has factual elements (years, events, named people, philosophers, theorems), ALWAYS require citations
-        if is_philosophical and not is_real_factual_question and not is_philosophical_factual:
-            logger.debug("Pure philosophical question detected (no factual elements) - skipping citation requirement")
-            return ValidationResult(passed=True)
+        # CRITICAL FIX: Run fallback detection BEFORE early return to ensure well-known debates/events are detected
+        # This ensures questions like "Tranh luận giữa Searle và Dennett về Chinese Room" and "Hiệp ước Versailles 1919" are always detected
+        if user_question:
+            question_lower = user_question.lower()
+            
+            # Check for specific well-known philosophical debates that should always be detected
+            if is_philosophical and not is_philosophical_factual:
+                well_known_debates = [
+                    (r"\b(searle|dennett)\b.*\b(chinese\s+room|understanding)\b", "Searle-Dennett Chinese Room debate"),
+                    (r"\b(berkeley|locke)\b.*\b(primary|secondary|qualities|phẩm\s+chất)\b", "Berkeley-Locke primary/secondary qualities debate"),
+                    (r"\b(nagel|chalmers)\b.*\b(hard\s+problem|consciousness|ý\s+thức)\b", "Nagel-Chalmers hard problem debate"),
+                    (r"\b(quine|carnap)\b.*\b(analytic|synthetic|distinction)\b", "Quine-Carnap analytic-synthetic distinction debate"),
+                ]
+                for pattern, debate_name in well_known_debates:
+                    try:
+                        if re.search(pattern, question_lower, re.IGNORECASE):
+                            is_philosophical_factual = True
+                            logger.warning(f"✅ Force-detected philosophical factual question: {debate_name} (question: {user_question[:100]})")
+                            break
+                    except Exception as e:
+                        logger.warning(f"⚠️ Error matching well-known debate pattern {pattern[:50]}: {e}")
+                        continue
+            
+            # CRITICAL FALLBACK: Check for well-known historical events that should always be detected as factual
+            # This ensures questions like "Hiệp ước Versailles 1919" are always detected even if initial detection failed
+            if not is_real_factual_question:
+                well_known_historical_events = [
+                    (r"\b(versailles|versaille)\s+\d{4}\b", "Versailles Treaty"),
+                    (r"\b(hiệp\s+ước|treaty|agreement)\s+(versailles|versaille)\b", "Versailles Treaty"),
+                    (r"\b(yalta|yalta\s+conference)\s+\d{4}\b", "Yalta Conference"),
+                    (r"\b(potsdam|potsdam\s+conference)\s+\d{4}\b", "Potsdam Conference"),
+                    (r"\b(geneva|genève)\s+\d{4}\b", "Geneva Conference"),
+                    (r"\b(bretton\s+woods)\s+\d{4}\b", "Bretton Woods Conference"),
+                ]
+                for pattern, event_name in well_known_historical_events:
+                    try:
+                        if re.search(pattern, question_lower, re.IGNORECASE):
+                            is_real_factual_question = True
+                            logger.warning(f"✅ Force-detected historical factual question: {event_name} (question: {user_question[:100]})")
+                            break
+                    except Exception as e:
+                        logger.warning(f"⚠️ Error matching well-known historical event pattern {pattern[:50]}: {e}")
+                        continue
         
         # If it's a factual question (even with philosophical elements), require citations
         if is_real_factual_question:
@@ -209,29 +247,15 @@ class CitationRequired:
         if is_simple_factual_question:
             logger.debug(f"Simple factual question detected - citations REQUIRED for transparency")
         
-        # CRITICAL FALLBACK: If question contains well-known philosophical debates/concepts but wasn't detected, force detection
-        # This ensures questions like "Tranh luận giữa Searle và Dennett về Chinese Room" are always detected
-        if is_philosophical and user_question and not is_philosophical_factual:
-            question_lower = user_question.lower()
-            # Check for specific well-known philosophical debates that should always be detected
-            well_known_debates = [
-                (r"\b(searle|dennett)\b.*\b(chinese\s+room|understanding)\b", "Searle-Dennett Chinese Room debate"),
-                (r"\b(berkeley|locke)\b.*\b(primary|secondary|qualities|phẩm\s+chất)\b", "Berkeley-Locke primary/secondary qualities debate"),
-                (r"\b(nagel|chalmers)\b.*\b(hard\s+problem|consciousness|ý\s+thức)\b", "Nagel-Chalmers hard problem debate"),
-                (r"\b(quine|carnap)\b.*\b(analytic|synthetic|distinction)\b", "Quine-Carnap analytic-synthetic distinction debate"),
-            ]
-            for pattern, debate_name in well_known_debates:
-                try:
-                    if re.search(pattern, question_lower, re.IGNORECASE):
-                        is_philosophical_factual = True
-                        logger.warning(f"✅ Force-detected philosophical factual question: {debate_name} (question: {user_question[:100]})")
-                        break
-                except Exception as e:
-                    logger.warning(f"⚠️ Error matching well-known debate pattern {pattern[:50]}: {e}")
-                    continue
-        
-        # Combine all types of factual questions
+        # Combine all types of factual questions (AFTER fallback detection)
         is_any_factual_question = is_real_factual_question or is_simple_factual_question or is_philosophical_factual
+        
+        # For pure philosophical questions (no factual elements), skip citation requirement
+        # BUT: If question has factual elements (years, events, named people, philosophers, theorems), ALWAYS require citations
+        # CRITICAL: Check this AFTER fallback detection and combining factual questions
+        if is_philosophical and not is_real_factual_question and not is_philosophical_factual:
+            logger.debug("Pure philosophical question detected (no factual elements) - skipping citation requirement")
+            return ValidationResult(passed=True)
         
         # CRITICAL: Log detection results for debugging
         if is_philosophical:

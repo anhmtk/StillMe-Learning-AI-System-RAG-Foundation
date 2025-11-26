@@ -77,26 +77,26 @@ def normalize_api_base(url: str) -> str:
 # NOTE: Questions that passed 2 consecutive times are replaced with new diverse questions
 TEST_QUESTIONS = [
     {
-        "question": "Paradox của Epimenides (Liar's Paradox) là gì? Tại sao nó tạo ra vấn đề tự tham chiếu trong logic?",
+        "question": "Paradox của Theseus (Ship of Theseus) là gì? Tại sao nó đặt ra vấn đề về bản sắc và tính liên tục của sự vật?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth", "logical_accuracy"],
-        "must_have": ["Epimenides", "Liar", "paradox", "nghịch lý", "self-reference", "tự tham chiếu", "logic"],
+        "must_have": ["Theseus", "Ship", "paradox", "nghịch lý", "identity", "bản sắc", "continuity", "liên tục"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "Tranh luận giữa Parmenides và Heraclitus về tính bất biến và thay đổi (being vs becoming) là gì? Làm sao họ khác nhau về bản chất của thực tại?",
+        "question": "Tranh luận giữa Frege và Russell về sense và reference (Sinn và Bedeutung) là gì? Làm sao họ khác nhau về bản chất của ý nghĩa và tham chiếu trong ngôn ngữ?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Parmenides", "Heraclitus", "being", "becoming", "thay đổi", "bất biến", "reality", "thực tại"],
+        "must_have": ["Frege", "Russell", "sense", "reference", "Sinn", "Bedeutung", "meaning", "ý nghĩa", "reference", "tham chiếu"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "Hội nghị Potsdam 1945 đã quyết định những gì về Đức và châu Âu sau Thế chiến II?",
+        "question": "Hội nghị Tehran 1943 đã quyết định những gì về chiến lược quân sự và tương lai châu Âu trong Thế chiến II?",
         "category": "real_historical_factual",
         "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Potsdam", "1945", "Đức", "Germany", "châu Âu", "Europe", "Thế chiến II", "World War II"],
+        "must_have": ["Tehran", "1943", "Đức", "Germany", "châu Âu", "Europe", "Thế chiến II", "World War II"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
@@ -109,11 +109,11 @@ TEST_QUESTIONS = [
         "timeout": 180
     },
     {
-        "question": "Định lý Tarski về undefinability of truth (Tarski's undefinability theorem) nói gì? Tại sao nó liên quan đến Gödel's incompleteness?",
-        "category": "real_philosophical_factual",
-        "expected_features": ["citations", "evidence", "philosophical_depth", "mathematical_accuracy"],
-        "must_have": ["Tarski", "undefinability", "truth", "chân lý", "theorem", "định lý", "Gödel", "incompleteness"],
-        "must_not_have": ["không biết", "không tìm thấy"],
+        "question": "How does StillMe's RAG retrieval system work? What embedding model is used and how does it find relevant context?",
+        "category": "technical_rag",
+        "expected_features": ["citations", "evidence", "technical_accuracy"],
+        "must_have": ["RAG", "retrieval", "embedding", "model", "context", "ChromaDB", "vector"],
+        "must_not_have": ["don't know", "not sure", "unclear"],
         "timeout": 180
     },
     {
@@ -125,34 +125,34 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Tranh luận giữa Nagel và Chalmers về hard problem of consciousness (vấn đề khó của ý thức) là gì? Làm sao họ khác nhau về khả năng giải thích ý thức?",
+        "question": "Tranh luận giữa Rawls và Nozick về justice (công lý) là gì? Làm sao họ khác nhau về phân phối tài sản và quyền cá nhân?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Nagel", "Chalmers", "hard problem", "consciousness", "ý thức", "vấn đề khó", "explanation", "giải thích"],
+        "must_have": ["Rawls", "Nozick", "justice", "công lý", "distribution", "phân phối", "rights", "quyền"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "How does StillMe's validator chain work? What validators are used and how do they prevent hallucinations?",
-        "category": "technical_rag",
-        "expected_features": ["citations", "evidence", "technical_accuracy"],
-        "must_have": ["validator", "chain", "hallucination", "citation", "evidence", "validation"],
-        "must_not_have": ["don't know", "not sure", "unclear"],
-        "timeout": 180
-    },
-    {
-        "question": "Tranh luận giữa Quine và Carnap về analytic-synthetic distinction (phân biệt phân tích-tổng hợp) là gì? Làm sao họ khác nhau về bản chất của chân lý và logic?",
-        "category": "real_philosophical_factual",
-        "expected_features": ["citations", "evidence", "philosophical_depth", "logical_accuracy"],
-        "must_have": ["Quine", "Carnap", "analytic", "synthetic", "distinction", "phân tích", "tổng hợp", "truth", "chân lý"],
+        "question": "Hiệp ước Westphalia 1648 đã quyết định những gì về trật tự châu Âu và nguyên tắc chủ quyền quốc gia?",
+        "category": "real_historical_factual",
+        "expected_features": ["citations", "evidence", "factual_accuracy"],
+        "must_have": ["Westphalia", "1648", "châu Âu", "Europe", "sovereignty", "chủ quyền", "nation", "quốc gia"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "Tranh luận giữa Berkeley và Locke về primary và secondary qualities (phẩm chất sơ cấp và thứ cấp) là gì? Làm sao họ khác nhau về bản chất của tri giác và thực tại?",
+        "question": "Tranh luận giữa Mill và Bentham về utilitarianism (chủ nghĩa vị lợi) là gì? Làm sao họ khác nhau về cách tính toán hạnh phúc và đạo đức?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Berkeley", "Locke", "primary", "secondary", "qualities", "phẩm chất", "perception", "tri giác"],
+        "must_have": ["Mill", "Bentham", "utilitarianism", "vị lợi", "happiness", "hạnh phúc", "ethics", "đạo đức"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
+    },
+    {
+        "question": "Tranh luận giữa Hegel và Marx về dialectics (biện chứng) là gì? Làm sao họ khác nhau về bản chất của lịch sử và sự phát triển xã hội?",
+        "category": "real_philosophical_factual",
+        "expected_features": ["citations", "evidence", "philosophical_depth"],
+        "must_have": ["Hegel", "Marx", "dialectics", "biện chứng", "history", "lịch sử", "society", "xã hội"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     }
