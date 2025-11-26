@@ -145,6 +145,10 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
     - API key users: 1000/day (higher limit for authenticated users)
     - Evaluation requests: 10000/day (unlimited for evaluation)
     
+    IMPORTANT: This function is called by slowapi's limiter decorator.
+    slowapi does NOT support per-key dynamic limits, so we need to check
+    the key that will be used and return the appropriate limit.
+    
     Args:
         request: Optional FastAPI request object to check for API key
         
@@ -171,7 +175,27 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
     
     # Railway/Production: Different limits for API key users vs IP-based users
     if request:
-        # Check for evaluation requests first (highest priority)
+        # CRITICAL: Check the key that will be used by get_rate_limit_key_func
+        # This is the only way to support per-key limits with slowapi
+        # slowapi calls get_chat_rate_limit(request) for each request,
+        # so we can check the key here and return the appropriate limit
+        try:
+            rate_limit_key = get_rate_limit_key_func(request)
+            
+            # Evaluation requests: unlimited (key starts with "evaluation:")
+            if rate_limit_key.startswith("evaluation:"):
+                logger.debug(f"Rate limit for evaluation request: 10000/day (key: {rate_limit_key})")
+                return "10000/day"
+            
+            # API key users: higher limit (key starts with "api_key:")
+            if rate_limit_key.startswith("api_key:"):
+                limit = os.getenv("RATE_LIMIT_CHAT_API_KEY", "1000/day")
+                logger.debug(f"Rate limit for API key user: {limit} (key: {rate_limit_key[:20]}...)")
+                return limit
+        except Exception as e:
+            logger.warning(f"Error getting rate limit key: {e}, falling back to default checks")
+        
+        # Fallback: Check for evaluation requests in body (if key_func didn't catch it)
         try:
             import json
             body = request._body if hasattr(request, '_body') else None
@@ -186,18 +210,21 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
                     use_server_keys = body_data.get("use_server_keys", False)
                     # Evaluation requests: unlimited
                     if user_id == "evaluation_bot" and use_server_keys:
+                        logger.debug(f"Rate limit for evaluation request (from body): 10000/day")
                         return "10000/day"
                 except (json.JSONDecodeError, AttributeError, UnicodeDecodeError):
                     pass
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Error checking body for evaluation request: {e}")
         
-        # Check if user has API key (authenticated user)
+        # Fallback: Check if user has API key (authenticated user)
         api_key = get_api_key_for_limiting(request)
         if api_key:
             # API key users: higher limit (1000/day)
             # This allows authenticated users to use the service freely
-            return os.getenv("RATE_LIMIT_CHAT_API_KEY", "1000/day")
+            limit = os.getenv("RATE_LIMIT_CHAT_API_KEY", "1000/day")
+            logger.debug(f"Rate limit for API key user (from header): {limit}")
+            return limit
     
     # IP-based users (no API key): strict limit (15/day)
     # This prevents abuse from anonymous users
