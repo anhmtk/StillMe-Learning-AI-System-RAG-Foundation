@@ -3969,7 +3969,10 @@ Context: {context_text}
                             llm_api_key=chat_request.llm_api_key,
                             llm_api_url=chat_request.llm_api_url,
                             llm_model_name=chat_request.llm_model_name,
-                            use_server_keys=use_server_keys
+                            use_server_keys=use_server_keys,
+                            question=chat_request.message,  # Pass question for model routing
+                            task_type="chat",  # Main chat task
+                            is_philosophical=is_philosophical  # Pass philosophical flag
                         )
                         # CRITICAL: Log raw_response immediately after LLM call to trace response loss
                         logger.info(f"🔍 [TRACE] raw_response after LLM call (RAG path): length={len(raw_response) if raw_response else 0}, type={type(raw_response)}, preview={raw_response[:200] if raw_response else 'None'}")
@@ -4007,7 +4010,10 @@ Context: {context_text}
                             llm_api_key=chat_request.llm_api_key,
                             llm_api_url=chat_request.llm_api_url,
                             llm_model_name=chat_request.llm_model_name,
-                            use_server_keys=use_server_keys
+                            use_server_keys=use_server_keys,
+                            question=chat_request.message,  # Pass question for model routing
+                            task_type="chat",  # Main chat task
+                            is_philosophical=is_philosophical  # Pass philosophical flag
                         )
                         
                         is_option_b_processed = False

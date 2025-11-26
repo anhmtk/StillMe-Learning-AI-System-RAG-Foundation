@@ -391,7 +391,10 @@ async def generate_ai_response(
     llm_api_key: Optional[str] = None,
     llm_api_url: Optional[str] = None,
     llm_model_name: Optional[str] = None,
-    use_server_keys: bool = False  # Internal flag for admin/internal calls
+    use_server_keys: bool = False,  # Internal flag for admin/internal calls
+    question: Optional[str] = None,  # User question for model routing
+    task_type: str = "chat",  # Task type: "chat", "rewrite", "validation"
+    is_philosophical: Optional[bool] = None  # Pre-computed philosophical flag
 ) -> str:
     """Generate AI response with user-provided LLM provider and API key
     
@@ -451,6 +454,20 @@ async def generate_ai_response(
                     api_url=llm_api_url
                 )
             
+            # Pass question and task_type to DeepSeekProvider for model routing
+            if llm_provider == "deepseek" and hasattr(provider, 'generate'):
+                # Check if provider supports new parameters (DeepSeekProvider)
+                import inspect
+                sig = inspect.signature(provider.generate)
+                if 'question' in sig.parameters:
+                    return await provider.generate(
+                        prompt, 
+                        detected_lang=detected_lang,
+                        question=question,
+                        task_type=task_type,
+                        is_philosophical=is_philosophical
+                    )
+            
             return await provider.generate(prompt, detected_lang=detected_lang)
         
         # Fallback to server API keys ONLY if use_server_keys=True (internal/admin use)
@@ -487,6 +504,18 @@ async def generate_ai_response(
             if deepseek_key:
                 try:
                     provider = create_llm_provider("deepseek", deepseek_key, model_name=llm_model_name)
+                    # Pass question and task_type to DeepSeekProvider for model routing
+                    if hasattr(provider, 'generate'):
+                        import inspect
+                        sig = inspect.signature(provider.generate)
+                        if 'question' in sig.parameters:
+                            return await provider.generate(
+                                prompt, 
+                                detected_lang=detected_lang,
+                                question=question,
+                                task_type=task_type,
+                                is_philosophical=is_philosophical
+                            )
                     return await provider.generate(prompt, detected_lang=detected_lang)
                 except Exception as e:
                     logger.warning(f"DeepSeek error: {e}")

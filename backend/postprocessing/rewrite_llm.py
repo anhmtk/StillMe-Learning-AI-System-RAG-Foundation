@@ -110,6 +110,13 @@ class RewriteLLM:
                     f"timeout={timeout_duration}s, length={len(text)}, issues={len(quality_issues)}"
                 )
                 
+                # CRITICAL: Rewrite always uses chat model (function calling + speed)
+                # Even for philosophical questions, rewrite uses chat because:
+                # 1. Quality evaluator already flagged issues
+                # 2. Rewrite is about fixing specific issues, not deep reasoning
+                # 3. Chat model is faster and cheaper
+                model = "deepseek-chat"  # Always use chat for rewrite
+                
                 async with httpx.AsyncClient(timeout=timeout_duration) as client:
                     response = await client.post(
                         self.deepseek_base_url,
@@ -118,7 +125,7 @@ class RewriteLLM:
                             "Content-Type": "application/json"
                         },
                         json={
-                            "model": "deepseek-chat",
+                            "model": model,
                             "messages": [
                                 {
                                     "role": "system",

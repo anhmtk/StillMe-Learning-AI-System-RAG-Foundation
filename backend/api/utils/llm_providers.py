@@ -197,13 +197,38 @@ class LLMProvider:
 
 
 class DeepSeekProvider(LLMProvider):
-    """DeepSeek API provider"""
+    """DeepSeek API provider with intelligent model routing"""
     
-    async def generate_stream(self, prompt: str, detected_lang: str = 'en') -> AsyncIterator[str]:
-        """Generate streaming response from DeepSeek API"""
+    async def generate_stream(
+        self, 
+        prompt: str, 
+        detected_lang: str = 'en',
+        question: Optional[str] = None,
+        task_type: str = "chat",
+        is_philosophical: Optional[bool] = None
+    ) -> AsyncIterator[str]:
+        """Generate streaming response from DeepSeek API with model routing"""
         try:
             system_content = build_system_prompt_with_language(detected_lang)
-            model = self.model_name or "deepseek-chat"
+            
+            # Use model router to select optimal model
+            from backend.core.model_router import get_model_router
+            router = get_model_router()
+            model = router.select_model(
+                question=question or prompt[:500],  # Use question if provided, else extract from prompt
+                task_type=task_type,
+                is_philosophical=is_philosophical
+            )
+            
+            # Override with explicit model_name if set (for backward compatibility)
+            if self.model_name:
+                model = self.model_name
+                logger.debug(f"Using explicit model_name: {model} (overriding router)")
+            else:
+                logger.info(f"🤖 Model router selected: {model} for task_type={task_type}, is_philosophical={is_philosophical}")
+            
+            # Adjust max_tokens based on model (reasoner supports up to 64K)
+            max_tokens = 1500 if model == "deepseek-chat" else 8000
             
             async with httpx.AsyncClient(timeout=60.0) as client:
                 async with client.stream(
@@ -219,7 +244,7 @@ class DeepSeekProvider(LLMProvider):
                             {"role": "system", "content": system_content},
                             {"role": "user", "content": prompt}
                         ],
-                        "max_tokens": 1500,
+                        "max_tokens": max_tokens,
                         "temperature": 0.7,
                         "stream": True
                     }
@@ -246,11 +271,41 @@ class DeepSeekProvider(LLMProvider):
             logger.error(f"DeepSeek streaming error: {e}")
             yield f"DeepSeek streaming error: {str(e)}"
     
-    async def generate(self, prompt: str, detected_lang: str = 'en') -> str:
-        """Call DeepSeek API"""
+    async def generate(
+        self, 
+        prompt: str, 
+        detected_lang: str = 'en',
+        question: Optional[str] = None,
+        task_type: str = "chat",
+        is_philosophical: Optional[bool] = None
+    ) -> str:
+        """Call DeepSeek API with intelligent model routing"""
         try:
             system_content = build_system_prompt_with_language(detected_lang)
-            model = self.model_name or "deepseek-chat"
+            
+            # Use model router to select optimal model
+            from backend.core.model_router import get_model_router
+            router = get_model_router()
+            model = router.select_model(
+                question=question or prompt[:500],  # Use question if provided, else extract from prompt
+                task_type=task_type,
+                is_philosophical=is_philosophical
+            )
+            
+            # Override with explicit model_name if set (for backward compatibility)
+            if self.model_name:
+                model = self.model_name
+                logger.debug(f"Using explicit model_name: {model} (overriding router)")
+            else:
+                logger.info(f"🤖 Model router selected: {model} for task_type={task_type}, is_philosophical={is_philosophical}")
+            
+            # Adjust max_tokens based on model (reasoner supports up to 64K)
+            max_tokens = 1500  # Default for chat
+            if model == "deepseek-reasoner":
+                # Reasoner supports up to 64K output, but we'll use 8K for now to balance latency
+                # Can increase later if needed for very long philosophical responses
+                max_tokens = 8000
+                logger.debug(f"Using reasoner model - max_tokens set to {max_tokens}")
             
             async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(
@@ -265,7 +320,7 @@ class DeepSeekProvider(LLMProvider):
                             {"role": "system", "content": system_content},
                             {"role": "user", "content": prompt}
                         ],
-                        "max_tokens": 1500,
+                        "max_tokens": max_tokens,
                         "temperature": 0.7,
                         "stream": False
                     }
