@@ -314,7 +314,26 @@ def _extract_news_query(query: str, query_lower: str) -> str:
 def _detect_time_intent(query: str, query_lower: str) -> Optional[ExternalDataIntent]:
     """Detect time-related queries"""
     
-    # Time keywords (English + Vietnamese)
+    # Simple string matching for common Vietnamese patterns (more reliable than regex)
+    simple_indicators = [
+        'mấy giờ',
+        'thời gian hiện tại',
+        'thời gian hiện giờ',
+        'giờ hiện tại',
+        'giờ hiện giờ',
+        'ngày tháng năm',
+        'hôm nay là',
+        'thứ mấy',
+        'what time',
+        'current time',
+        'what date',
+        'current date',
+    ]
+    
+    # Check simple indicators first
+    has_simple_indicator = any(indicator in query_lower for indicator in simple_indicators)
+    
+    # Time keywords (English + Vietnamese) - regex patterns
     time_keywords = [
         # English
         r'\bcurrent\s+time\b',
@@ -326,16 +345,16 @@ def _detect_time_intent(query: str, query_lower: str) -> Optional[ExternalDataIn
         r'\btoday.*date\b',
         r'\bwhat.*day\b',
         r'\bwhat.*hour\b',
-        # Vietnamese
-        r'\bthời\s+gian\s+hiện\s+tại\b',
-        r'\bthời\s+gian\s+hiện\s+giờ\b',
-        r'\bmấy\s+giờ\b',
-        r'\bgiờ\s+hiện\s+tại\b',
-        r'\bgiờ\s+hiện\s+giờ\b',
-        r'\bngày\s+tháng\s+năm\b',
-        r'\bngày\s+hôm\s+nay\b',
-        r'\bhôm\s+nay\s+là\s+ngày\b',
-        r'\bthứ\s+mấy\b',
+        # Vietnamese - simpler patterns without word boundaries
+        r'thời\s+gian\s+hiện\s+tại',
+        r'thời\s+gian\s+hiện\s+giờ',
+        r'mấy\s+giờ',
+        r'giờ\s+hiện\s+tại',
+        r'giờ\s+hiện\s+giờ',
+        r'ngày\s+tháng\s+năm',
+        r'ngày\s+hôm\s+nay',
+        r'hôm\s+nay\s+là\s+ngày',
+        r'thứ\s+mấy',
     ]
     
     # Check if query contains time keywords (either simple indicators or regex patterns)
