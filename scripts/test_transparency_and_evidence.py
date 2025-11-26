@@ -56,10 +56,13 @@ if IS_LOCAL and ":" not in API_BASE.split("//")[-1]:
 def normalize_api_base(url: str) -> str:
     """Normalize API base URL (add https:// if missing)"""
     if not url.startswith(("http://", "https://")):
-        if "railway.app" in url or "localhost" not in url:
+        if "railway.app" in url.lower():
             return f"https://{url}"
-        else:
+        elif "localhost" in url.lower() or "127.0.0.1" in url:
             return f"http://{url}"
+        else:
+            # Default to https for production URLs
+            return f"https://{url}"
     return url
 
 
