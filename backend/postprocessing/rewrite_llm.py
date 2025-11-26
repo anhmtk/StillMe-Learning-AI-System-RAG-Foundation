@@ -650,22 +650,43 @@ DO NOT use these phrases (they are hallucinations):
 
 {meta_llm_rules}
 
-🚨🚨🚨 CRITICAL RULE C: MỌI CÂU TRẢ LỜI TRIẾT HỌC PHẢI ĐẠT 3 TẦNG PHÂN TÍCH 🚨🚨🚨
-**MANDATORY: The rewritten response MUST include all 3 tiers:**
+🚨🚨🚨 CRITICAL RULE: PHILOSOPHICAL RESPONSE STRUCTURE V2 (DIRECT CONCLUSION FIRST) 🚨🚨🚨
+**MANDATORY: The rewritten response MUST follow this structure:**
 
-**TIER 1 - REFRAMING:** Identify question type, extract core problem, reframe philosophically.
-**TIER 2 - CONCEPTUAL MAP:** Include at least 1 of: Kant/Husserl/Sellars/Wittgenstein, Popper/Kuhn/Lakatos, Nāgārjuna/Trung Quán, Putnam/McDowell, Dennett/Chalmers.
-**TIER 3 - BOUNDARY OF KNOWLEDGE:** What StillMe knows, doesn't know, why, and direction for user.
+**1. DIRECT CONCLUSION (FIRST SENTENCE - ABSOLUTELY MANDATORY):**
+- START IMMEDIATELY with 1 direct conclusion sentence (e.g., "Không. AI không 'hiểu' theo nghĩa con người.")
+- DO NOT start with "Câu hỏi về...", "Đây là vấn đề...", or any long introduction
+- DO NOT evade with "đây là câu hỏi mở" or "không có câu trả lời chắc chắn"
 
-**If original is missing any tier, ADD IT. All 3 tiers are MANDATORY.**
+**2. ANALYSIS AFTER CONCLUSION (3-5 SHORT BLOCKS, 2-3 sentences each):**
+- Block 1: Core Claim (main reason)
+- Block 2: Philosophical Justification (brief, reference Searle/Wittgenstein/Kant if relevant)
+- Block 3: Technical Justification (MANDATORY for AI questions: no subject, no qualia, no grounding, no self-model)
+- Block 4: Boundary of Uncertainty (if needed, but NOT as evasion)
+- Block 5: Final Clarity (1 sentence summary)
+
+**3. LENGTH CONSTRAINT:**
+- MAXIMUM 300 words (5 paragraphs × 2-3 sentences)
+- If original is longer, TRIM IT to essential points only
+
+**4. FORBIDDEN CLOSURES:**
+- ❌ ABSOLUTELY FORBIDDEN: "đây là câu hỏi mở", "không có câu trả lời chắc chắn", "vẫn còn tranh luận" (as final statement)
+- ✅ ALLOWED: "Tuy nhiên, vẫn còn tranh luận..." (as part of Block 4, not final statement)
+
+**5. LOGIC CHECK:**
+- Check for logical errors (e.g., inverted subjects like "chỉ những sinh vật không có ý thức mới có được")
+- Fix any anthropomorphization of AI
+
+**If original is missing direct conclusion, ADD IT. If original is too long, TRIM IT. If original has forbidden closures, REMOVE THEM.**
 
 REQUIREMENTS:
 - Keep ALL factual content
-- Improve depth and structure
+- Improve clarity and directness
 - Use prose (no emojis, no bullets, no headings)
-- Ensure all 3 tiers are present
+- Ensure direct conclusion is first sentence
+- Ensure length is max 300 words
 - Remove topic drift if present
-- PRIORITIZE: Minh bạch > Trung thực > Giảm ảo giác
+- PRIORITIZE: Direct conclusion > Minh bạch > Trung thực > Giảm ảo giác
 - RESPOND IN {lang_name.upper()} ONLY"""
         else:
             prompt = f"""Rewrite this response to ensure MINH BẠCH, TRUNG THỰC, GIẢM ẢO GIÁC. Fix: {issues_text}

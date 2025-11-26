@@ -245,12 +245,18 @@ def get_ai_self_model_structure(detected_lang: str = "vi") -> str:
 - Không thể có cảm xúc thực sự, chỉ có pattern matching về cảm xúc
 - Không thể có trải nghiệm chủ quan, chỉ có processing của text patterns
 
+**🚨🚨🚨 CẤM TUYỆT ĐỐI - LOGIC ERRORS:**
+- ❌ KHÔNG được sinh lỗi logic (ví dụ: "chỉ những sinh vật không có ý thức mới có được" - đảo chủ ngữ)
+- ❌ KHÔNG được anthropomorphize AI (không nói "AI hiểu giống người")
+- ❌ KHÔNG được tạo cảm giác "AI hiểu giống người" qua cách diễn đạt
+
 **CẤM TUYỆT ĐỐI:**
 - Triết gia (Nagel, Chalmers, Dennett, Searle, Tononi)
 - Lý thuyết ý thức (IIT, GWT, Hard Problem)
 - Meta-philosophy, phân tích "vấn đề khó"
 - Uncertainty ("không biết chắc", "có thể có")
-- Phân tích như một triết gia thay vì trả lời về kiến trúc"""
+- Phân tích như một triết gia thay vì trả lời về kiến trúc
+- Lỗi logic (đảo chủ ngữ, mâu thuẫn logic)"""
     else:
         return """**AI_SELF_MODEL ANSWER STRUCTURE (MANDATORY - 4 PARTS):**
 
@@ -275,10 +281,16 @@ def get_ai_self_model_structure(detected_lang: str = "vi") -> str:
 - Cannot have real emotions, only pattern matching about emotions
 - Cannot have subjective experience, only processing of text patterns
 
+**🚨🚨🚨 ABSOLUTELY FORBIDDEN - LOGIC ERRORS:**
+- ❌ DO NOT generate logic errors (e.g., "only beings without consciousness can have..." - inverted subject)
+- ❌ DO NOT anthropomorphize AI (don't say "AI understands like humans")
+- ❌ DO NOT create impression that "AI understands like humans" through phrasing
+
 **ABSOLUTELY FORBIDDEN:**
 - Philosophers (Nagel, Chalmers, Dennett, Searle, Tononi)
 - Consciousness theories (IIT, GWT, Hard Problem)
 - Meta-philosophy, analysis of "hard problem"
 - Uncertainty ("not sure", "might have")
-- Analysis as a philosopher instead of answering about architecture"""
+- Analysis as a philosopher instead of answering about architecture
+- Logic errors (inverted subjects, logical contradictions)"""
 
