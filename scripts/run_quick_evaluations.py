@@ -116,8 +116,14 @@ def main():
     logger.info("(Skipping TruthfulQA - 790 questions, ~26 hours)")
     logger.info("")
     logger.info("Estimated time: ~30-40 minutes")
+    
+    # Show helpful message about API URL source
     if "localhost" in API_URL:
-        logger.info("💡 To test Railway, set: $env:STILLME_API_URL='https://stillme-backend-production.up.railway.app'")
+        logger.info("💡 To test Railway, set STILLME_API_URL in .env file or environment variable:")
+        logger.info("   Option 1: Add to .env file: STILLME_API_URL=https://stillme-backend-production.up.railway.app")
+        logger.info("   Option 2: Set env var: $env:STILLME_API_URL='https://stillme-backend-production.up.railway.app'")
+    else:
+        logger.info(f"✅ Using Railway backend: {API_URL}")
     logger.info("")
     
     # Check if backend is running
