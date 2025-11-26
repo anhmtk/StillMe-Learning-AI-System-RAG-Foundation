@@ -167,7 +167,7 @@ class HTTPCacheMiddleware(BaseHTTPMiddleware):
                 elif "/rag/stats" in request.url.path:
                     ttl = 120  # 2 minutes for RAG stats
                 
-                self.cache_service.set(cache_key, cache_value, ttl_seconds=ttl)
+                self.cache_service.set(cache_key, cache_value, ttl=ttl)
                 logger.debug(f"💾 HTTP response cached: {request.url.path}")
                 
                 # Return response with cache headers

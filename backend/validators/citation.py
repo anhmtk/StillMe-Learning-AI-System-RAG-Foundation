@@ -154,22 +154,23 @@ class CitationRequired:
             question_lower = user_question.lower()
             # Check for specific philosophers, theorems, debates mentioned in question
             philosophical_factual_indicators = [
-                r"\b(russell|gödel|godel|plato|aristotle|kant|hume|descartes|spinoza|searle|dennett|popper|kuhn)\b",
+                r"\b(russell|gödel|godel|plato|aristotle|kant|hume|descartes|spinoza|searle|dennett|popper|kuhn|berkeley|locke|leibniz|feyerabend|lakatos)\b",
                 r"\b(paradox|nghịch\s+lý|theorem|định\s+lý|incompleteness|bất\s+toàn)\b",
                 r"\b(tranh\s+luận|debate|argument|forms|hình\s+thức|causality|quan\s+hệ\s+nhân\s+quả)\b",
                 r"\b(chinese\s+room|mind.*body|tâm.*thể)\b",
+                r"\b(monads|đơn tử|primary.*secondary|qualities|phẩm chất)\b",
                 # CRITICAL: Vietnamese patterns for philosophical factual questions
                 r"\b(paradox|nghịch\s+lý)\s+(của|of)\s+(russell|gödel|godel)\b",
                 r"\b(russell|gödel|godel).*(paradox|nghịch\s+lý)\b",
                 r"\b(định\s+lý|theorem)\s+(bất\s+toàn|incompleteness)\s+(của|of)\s+(gödel|godel)\b",
                 r"\b(gödel|godel).*(bất\s+toàn|incompleteness)\b",
-                r"\b(tranh\s+luận|debate)\s+(giữa|between)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza)\s+(và|and)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza)\b",
+                r"\b(tranh\s+luận|debate)\s+(giữa|between)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(và|and)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\b",
             ]
             for pattern in philosophical_factual_indicators:
                 try:
                     if re.search(pattern, question_lower, re.IGNORECASE):
                         is_philosophical_factual = True
-                        logger.debug(f"✅ Detected philosophical factual question with pattern: {pattern[:50]}... (question: {user_question[:100]})")
+                        logger.warning(f"✅ Detected philosophical factual question with pattern: {pattern[:50]}... (question: {user_question[:100]})")
                         break
                 except Exception as e:
                     logger.warning(f"⚠️ Error matching philosophical factual pattern {pattern[:50]}: {e}")
@@ -193,6 +194,10 @@ class CitationRequired:
         # Combine all types of factual questions
         is_any_factual_question = is_real_factual_question or is_simple_factual_question or is_philosophical_factual
         
+        # CRITICAL: Log detection results for debugging
+        if is_philosophical:
+            logger.warning(f"🔍 CitationRequired detection: is_philosophical=True, is_philosophical_factual={is_philosophical_factual}, is_real_factual_question={is_real_factual_question}, is_any_factual_question={is_any_factual_question}, has_context={bool(ctx_docs and len(ctx_docs) > 0)}, question: {user_question[:100] if user_question else 'unknown'}")
+        
         # CRITICAL FIX: For ANY factual questions, we should still try to enforce citations
         # even if context is empty, because the LLM might have base knowledge about these topics
         # However, we can only auto-add citations if we have context documents
@@ -202,17 +207,18 @@ class CitationRequired:
             # For ANY factual questions, we should still add citation for transparency
             # Even if no RAG context, the answer is based on base knowledge and should be cited
             if is_any_factual_question:
-                logger.warning(f"Factual question detected but no context documents available - adding citation for base knowledge transparency. Question: {user_question[:100]}")
+                logger.warning(f"🚨 Factual question detected but no context documents available - adding citation for base knowledge transparency. Question: {user_question[:100] if user_question else 'unknown'}, is_philosophical_factual={is_philosophical_factual}")
                 # CRITICAL: Add citation [general knowledge] even without RAG context to indicate base knowledge source
                 # This ensures transparency: user knows answer is from base knowledge, not RAG
                 patched_answer = self._add_citation_for_base_knowledge(answer)
+                logger.warning(f"✅ Added base knowledge citation. Original length: {len(answer)}, Patched length: {len(patched_answer)}")
                 return ValidationResult(
                     passed=False,  # Still mark as failed to track that RAG context was missing
                     reasons=["missing_citation_no_context", "added_citation_for_base_knowledge"],
                     patched_answer=patched_answer
                 )
             else:
-                logger.debug("No context documents available, citations not required")
+                logger.debug(f"No context documents available, citations not required (is_any_factual_question={is_any_factual_question})")
                 return ValidationResult(passed=True)
         
         # CRITICAL: Even if context is available, check if answer already has citation
@@ -325,21 +331,23 @@ class CitationRequired:
             citation = self.citation_formatter.get_citation_strategy("", [])
             return self.citation_formatter.add_citation_to_response(answer, citation)
         
-        # Fallback to legacy [1] format
+        # Fallback to [general knowledge] format (human-readable)
+        citation_text = " [general knowledge]"
+        
         if not answer or len(answer.strip()) == 0:
-            return answer + " [1]" if answer else "[1]"
+            return answer + citation_text if answer else citation_text.strip()
         
         if len(answer.strip()) < 5:
-            return answer.rstrip() + " [1]"
+            return answer.rstrip() + citation_text
         
-        # Find the best place to add citation
+        # Find the best place to add citation (prefer end of first sentence or end of answer)
         sentence_end = re.search(r'[.!?]\s+', answer)
         if sentence_end:
             insert_pos = sentence_end.end()
-            return answer[:insert_pos] + "[1] " + answer[insert_pos:]
+            return answer[:insert_pos] + citation_text + " " + answer[insert_pos:]
         
         # If no sentence end found, add at the end
-        return answer.rstrip() + " [1]"
+        return answer.rstrip() + citation_text
     
     def _add_citation(self, answer: str, ctx_docs: List[Any], user_question: str = "") -> str:
         """

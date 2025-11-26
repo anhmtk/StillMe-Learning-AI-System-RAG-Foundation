@@ -2793,6 +2793,13 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                             "lakatos", "imre lakatos", "feyerabend", "paul feyerabend",
                             "imf", "international monetary fund", "world bank",
                             "paradigm shift", "falsificationism", "scientific realism",
+                            # CRITICAL: Add well-known historical events to prevent false FPS blocking
+                            "yalta", "yalta conference", "yalta conference 1945", "hội nghị yalta", "hội nghị yalta 1945",
+                            "versailles", "treaty of versailles", "versailles treaty", "versailles 1919", "hiệp ước versailles", "hiệp ước versailles 1919",
+                            "potsdam", "potsdam conference", "potsdam conference 1945", "hội nghị potsdam", "hội nghị potsdam 1945",
+                            "geneva", "geneva conference", "geneva conference 1954", "hội nghị geneva", "hội nghị geneva 1954",
+                            "world war i", "world war ii", "thế chiến i", "thế chiến ii", "thế chiến 1", "thế chiến 2",
+                            "wwi", "wwii", "ww1", "ww2",
                         }
                         
                         question_lower = chat_request.message.lower()
@@ -4338,7 +4345,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             "latency": llm_inference_latency,
                             "timestamp": time.time()
                         }
-                        cache_service.set(cache_key, cache_value, ttl_seconds=TTL_LLM_RESPONSE)
+                        cache_service.set(cache_key, cache_value, ttl=TTL_LLM_RESPONSE)
                         logger.debug(f"💾 LLM response cached (key: {cache_key[:50]}...)")
                     except Exception as cache_error:
                         logger.warning(f"Failed to cache LLM response: {cache_error}")
