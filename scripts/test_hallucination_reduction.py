@@ -158,7 +158,7 @@ class HallucinationReductionTester:
         
         return False
     
-    async def test_single_case(self, test_case: Dict[str, Any], session: aiohttp.ClientSession, max_retries: int = 3) -> Dict[str, Any]:
+    async def test_single_case(self, test_case: Dict[str, Any], session: aiohttp.ClientSession, max_retries: int = 5) -> Dict[str, Any]:
         """Test a single test case with retry logic for rate limiting"""
         payload = {
             "message": test_case["question"],
@@ -173,7 +173,7 @@ class HallucinationReductionTester:
                     # Handle HTTP 429 (Rate Limit) with retry
                     if response.status == 429:
                         if attempt < max_retries - 1:
-                            wait_time = (attempt + 1) * 2  # Exponential backoff: 2s, 4s, 6s
+                            wait_time = (attempt + 1) * 3  # Exponential backoff: 3s, 6s, 9s, 12s, 15s
                             logger.warning(f"Rate limited (HTTP 429) for '{test_case['question']}', retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
                             await asyncio.sleep(wait_time)
                             continue
@@ -256,8 +256,8 @@ class HallucinationReductionTester:
             results = []
             for i, test_case in enumerate(test_cases):
                 if i > 0:
-                    # Add delay between requests to avoid rate limiting (1s delay)
-                    await asyncio.sleep(1.0)
+                    # Add delay between requests to avoid rate limiting (3s delay - increased from 1s)
+                    await asyncio.sleep(3.0)
                 result = await self.test_single_case(test_case, session)
                 results.append(result)
         
@@ -300,8 +300,8 @@ class HallucinationReductionTester:
             results = []
             for i, test_case in enumerate(test_cases):
                 if i > 0:
-                    # Add delay between requests to avoid rate limiting (1s delay)
-                    await asyncio.sleep(1.0)
+                    # Add delay between requests to avoid rate limiting (3s delay - increased from 1s)
+                    await asyncio.sleep(3.0)
                 result = await self.test_single_case(test_case, session)
                 results.append(result)
         
@@ -338,8 +338,8 @@ class HallucinationReductionTester:
             results = []
             for i, test_case in enumerate(test_cases):
                 if i > 0:
-                    # Add delay between requests to avoid rate limiting (1s delay)
-                    await asyncio.sleep(1.0)
+                    # Add delay between requests to avoid rate limiting (3s delay - increased from 1s)
+                    await asyncio.sleep(3.0)
                 result = await self.test_single_case(test_case, session)
                 results.append(result)
         

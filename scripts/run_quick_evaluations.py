@@ -232,6 +232,12 @@ def main():
         "HaluEval Benchmark (Hallucination Detection)"
     )
     
+    # Add delay between test suites to avoid rate limiting
+    if "localhost" not in API_URL:
+        logger.info("")
+        logger.info("⏳ Waiting 10s before next test suite to avoid rate limiting...")
+        time.sleep(10)
+    
     # 2. Citation Rate Validation (~16 questions, ~10-15 minutes)
     logger.info("")
     logger.info("📊 Citation Rate: ~16 questions, estimated ~10-15 minutes")
@@ -239,6 +245,12 @@ def main():
         [sys.executable, "scripts/test_citation_rate_validation.py"],
         "Citation Rate Validation Test"
     )
+    
+    # Add delay between test suites to avoid rate limiting
+    if "localhost" not in API_URL:
+        logger.info("")
+        logger.info("⏳ Waiting 10s before next test suite to avoid rate limiting...")
+        time.sleep(10)
     
     # 3. Hallucination Reduction Test (7 questions, ~7-10 minutes)
     logger.info("")
