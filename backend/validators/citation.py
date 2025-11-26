@@ -200,12 +200,34 @@ class CitationRequired:
             question_lower = user_question.lower()
             
             # Check for specific well-known philosophical debates that should always be detected
+            # CRITICAL: Also check for "tranh luận giữa X và Y" pattern with well-known philosophers
             if is_philosophical and not is_philosophical_factual:
                 well_known_debates = [
+                    # Searle-Dennett: Match if both names appear OR if "tranh luận giữa Searle và Dennett" pattern
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(searle|dennett).*(và|and).*(searle|dennett)\b", "Searle-Dennett debate"),
                     (r"\b(searle|dennett)\b.*\b(chinese\s+room|understanding)\b", "Searle-Dennett Chinese Room debate"),
+                    (r"\b(chinese\s+room)\b.*\b(searle|dennett)\b", "Searle-Dennett Chinese Room debate"),
+                    # Berkeley-Locke
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(berkeley|locke).*(và|and).*(berkeley|locke)\b", "Berkeley-Locke debate"),
                     (r"\b(berkeley|locke)\b.*\b(primary|secondary|qualities|phẩm\s+chất)\b", "Berkeley-Locke primary/secondary qualities debate"),
+                    # Nagel-Chalmers
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(nagel|chalmers).*(và|and).*(nagel|chalmers)\b", "Nagel-Chalmers debate"),
                     (r"\b(nagel|chalmers)\b.*\b(hard\s+problem|consciousness|ý\s+thức)\b", "Nagel-Chalmers hard problem debate"),
+                    # Quine-Carnap
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(quine|carnap).*(và|and).*(quine|carnap)\b", "Quine-Carnap debate"),
                     (r"\b(quine|carnap)\b.*\b(analytic|synthetic|distinction)\b", "Quine-Carnap analytic-synthetic distinction debate"),
+                    # Hegel-Marx
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(hegel|marx).*(và|and).*(hegel|marx)\b", "Hegel-Marx debate"),
+                    (r"\b(hegel|marx)\b.*\b(dialectics|biện\s+chứng)\b", "Hegel-Marx dialectics debate"),
+                    # Rawls-Nozick
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(rawls|nozick).*(và|and).*(rawls|nozick)\b", "Rawls-Nozick debate"),
+                    (r"\b(rawls|nozick)\b.*\b(justice|công\s+lý)\b", "Rawls-Nozick justice debate"),
+                    # Mill-Bentham
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(mill|bentham).*(và|and).*(mill|bentham)\b", "Mill-Bentham debate"),
+                    (r"\b(mill|bentham)\b.*\b(utilitarianism|vị\s+lợi)\b", "Mill-Bentham utilitarianism debate"),
+                    # Frege-Russell
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(frege|russell).*(và|and).*(frege|russell)\b", "Frege-Russell debate"),
+                    (r"\b(frege|russell)\b.*\b(sense|reference|Sinn|Bedeutung)\b", "Frege-Russell sense/reference debate"),
                 ]
                 for pattern, debate_name in well_known_debates:
                     try:
@@ -227,6 +249,9 @@ class CitationRequired:
                     (r"\b(potsdam|potsdam\s+conference)\s+\d{4}\b", "Potsdam Conference"),
                     (r"\b(geneva|genève)\s+\d{4}\b", "Geneva Conference"),
                     (r"\b(bretton\s+woods)\s+\d{4}\b", "Bretton Woods Conference"),
+                    (r"\b(tehran|tehran\s+conference)\s+\d{4}\b", "Tehran Conference"),
+                    (r"\b(westphalia|westphalia\s+peace)\s+\d{4}\b", "Westphalia Peace"),
+                    (r"\b(hiệp\s+ước|treaty|agreement)\s+(westphalia)\b", "Westphalia Peace"),
                 ]
                 for pattern, event_name in well_known_historical_events:
                     try:
