@@ -228,7 +228,7 @@ def main():
     logger.info("")
     logger.info("📊 HaluEval: 3 questions, estimated ~6 minutes")
     results["halu_eval"] = run_command(
-        [sys.executable, "-m", "evaluation.run_evaluation", "--benchmarks", "halu_eval"],
+        [sys.executable, "-m", "evaluation.run_evaluation", "--benchmarks", "halu_eval", "--api-url", API_URL],
         "HaluEval Benchmark (Hallucination Detection)"
     )
     
