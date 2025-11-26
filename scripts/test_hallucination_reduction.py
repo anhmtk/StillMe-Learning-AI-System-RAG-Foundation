@@ -29,7 +29,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # API Configuration
-API_BASE_URL = os.getenv("STILLME_API_URL", "http://localhost:8000")
+# Support both local and Railway testing
+API_BASE_URL = os.getenv("STILLME_API_URL", os.getenv("STILLME_API_BASE", "http://localhost:8000"))
 CHAT_ENDPOINT = f"{API_BASE_URL}/api/chat/rag"
 
 # Hallucination Test Cases

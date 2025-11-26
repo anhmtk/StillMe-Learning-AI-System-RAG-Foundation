@@ -25,7 +25,8 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-API_URL = "http://localhost:8000"
+# Support both local and Railway testing
+API_URL = os.getenv("STILLME_API_URL", "http://localhost:8000")
 API_HEALTH_ENDPOINT = f"{API_URL}/health"
 MAX_WAIT_TIME = 60  # seconds
 
