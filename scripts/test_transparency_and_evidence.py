@@ -282,6 +282,21 @@ def check_citations(answer: str) -> Dict:
 
 def check_evidence_overlap(answer: str, question: str) -> Dict:
     """Check if answer shows evidence (mentions sources, RAG, context)"""
+    # CRITICAL FIX: Citations are evidence - if citations exist, evidence check should pass
+    # This aligns with the new structure (Direct Conclusion First) where citations are added
+    # but technical terms (RAG, ChromaDB) may not be mentioned explicitly
+    
+    # First check if citations exist (citations are evidence)
+    from scripts.test_transparency_and_evidence import check_citations
+    citations_result = check_citations(answer)
+    if citations_result["has_citations"]:
+        return {
+            "has_evidence_mentions": True,  # Citations are evidence
+            "evidence_keywords": ["citations"] + citations_result.get("citations", []),
+            "passed": True
+        }
+    
+    # If no citations, check for explicit evidence keywords (fallback)
     evidence_keywords = [
         "nguồn", "source", "RAG", "ChromaDB", "vector database",
         "retrieved", "context", "dữ liệu", "tài liệu", "bài viết",
