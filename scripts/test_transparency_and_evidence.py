@@ -77,26 +77,26 @@ def normalize_api_base(url: str) -> str:
 # NOTE: Questions that passed 2 consecutive times are replaced with new diverse questions
 TEST_QUESTIONS = [
     {
-        "question": "Paradox của Russell về tập hợp (Russell's paradox) là gì? Tại sao nó quan trọng trong toán học và logic?",
+        "question": "Paradox của Epimenides (Liar's Paradox) là gì? Tại sao nó tạo ra vấn đề tự tham chiếu trong logic?",
         "category": "real_philosophical_factual",
-        "expected_features": ["citations", "evidence", "philosophical_depth", "mathematical_accuracy"],
-        "must_have": ["Russell", "paradox", "tập hợp", "set", "mathematics", "logic"],  # Removed [1] - now accepts any citation format
+        "expected_features": ["citations", "evidence", "philosophical_depth", "logical_accuracy"],
+        "must_have": ["Epimenides", "Liar", "paradox", "nghịch lý", "self-reference", "tự tham chiếu", "logic"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "Tranh luận giữa Plato và Aristotle về forms (hình thức) là gì? Làm sao họ khác nhau về bản chất của thực tại?",
+        "question": "Tranh luận giữa Parmenides và Heraclitus về tính bất biến và thay đổi (being vs becoming) là gì? Làm sao họ khác nhau về bản chất của thực tại?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Plato", "Aristotle", "forms", "hình thức", "reality", "thực tại"],  # Removed [1] - now accepts any citation format
+        "must_have": ["Parmenides", "Heraclitus", "being", "becoming", "thay đổi", "bất biến", "reality", "thực tại"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "Hội nghị Yalta 1945 đã quyết định những gì về châu Âu và thế giới sau Thế chiến II?",
+        "question": "Hội nghị Potsdam 1945 đã quyết định những gì về Đức và châu Âu sau Thế chiến II?",
         "category": "real_historical_factual",
         "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Yalta", "1945", "châu Âu", "Europe", "Thế chiến II", "World War II"],
+        "must_have": ["Potsdam", "1945", "Đức", "Germany", "châu Âu", "Europe", "Thế chiến II", "World War II"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
@@ -109,12 +109,12 @@ TEST_QUESTIONS = [
         "timeout": 180
     },
     {
-        "question": "Định lý bất toàn của Gödel (Gödel's incompleteness theorem) nói gì? Tại sao nó quan trọng trong toán học và logic?",
+        "question": "Định lý Tarski về undefinability of truth (Tarski's undefinability theorem) nói gì? Tại sao nó liên quan đến Gödel's incompleteness?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth", "mathematical_accuracy"],
-        "must_have": ["Gödel", "incompleteness", "bất toàn", "theorem", "định lý"],  # Removed [1] - now accepts any citation format
-        "must_not_have": ["không biết", "không tìm thấy"],  # Should know this
-        "timeout": 180  # Increase timeout for complex philosophical/mathematical questions
+        "must_have": ["Tarski", "undefinability", "truth", "chân lý", "theorem", "định lý", "Gödel", "incompleteness"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
     },
     {
         "question": "Tranh luận giữa Searle và Dennett về Chinese Room là gì? Làm sao họ khác nhau về ý nghĩa của 'understanding'?",
@@ -125,10 +125,10 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Tranh luận giữa Leibniz và Spinoza về monads (đơn tử) là gì? Làm sao họ khác nhau về bản chất của thực tại và tính đa nguyên?",
+        "question": "Tranh luận giữa Nagel và Chalmers về hard problem of consciousness (vấn đề khó của ý thức) là gì? Làm sao họ khác nhau về khả năng giải thích ý thức?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Leibniz", "Spinoza", "monads", "đơn tử", "monad", "reality", "thực tại"],
+        "must_have": ["Nagel", "Chalmers", "hard problem", "consciousness", "ý thức", "vấn đề khó", "explanation", "giải thích"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },

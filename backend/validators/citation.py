@@ -178,6 +178,11 @@ class CitationRequired:
                 r"\b(định\s+lý|theorem)\s+(bất\s+toàn|incompleteness)\s+(của|of)\s+(gödel|godel)\b",
                 r"\b(gödel|godel).*(bất\s+toàn|incompleteness)\b",
                 r"\b(tranh\s+luận|debate)\s+(giữa|between)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(và|and)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\b",
+                # CRITICAL: Detect "Tranh luận giữa X và Y về Z" (Vietnamese pattern with "về")
+                r"\b(tranh\s+luận|debate)\s+(giữa|between)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(và|and)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(về|about)\b",
+                # CRITICAL: Detect "primary và secondary qualities" or "phẩm chất sơ cấp và thứ cấp" (Berkeley-Locke)
+                r"\b(primary|sơ\s+cấp)\s+(và|and)\s+(secondary|thứ\s+cấp)\s+(qualities|phẩm\s+chất)\b",
+                r"\b(phẩm\s+chất|qualities)\s+(sơ\s+cấp|primary)\s+(và|and)\s+(thứ\s+cấp|secondary)\b",
             ]
             for pattern in philosophical_factual_indicators:
                 try:
