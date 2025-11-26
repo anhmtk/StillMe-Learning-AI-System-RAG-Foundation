@@ -233,10 +233,12 @@ def main():
     )
     
     # Add delay between test suites to avoid rate limiting
+    # Railway rate limit may be window-based (e.g., 60 requests/minute)
+    # Need longer delay to ensure rate limit counter resets
     if "localhost" not in API_URL:
         logger.info("")
-        logger.info("⏳ Waiting 10s before next test suite to avoid rate limiting...")
-        time.sleep(10)
+        logger.info("⏳ Waiting 60s (1 minute) before next test suite to reset rate limit counter...")
+        time.sleep(60)
     
     # 2. Citation Rate Validation (~16 questions, ~10-15 minutes)
     logger.info("")
@@ -247,10 +249,12 @@ def main():
     )
     
     # Add delay between test suites to avoid rate limiting
+    # Railway rate limit may be window-based (e.g., 60 requests/minute)
+    # Need longer delay to ensure rate limit counter resets
     if "localhost" not in API_URL:
         logger.info("")
-        logger.info("⏳ Waiting 10s before next test suite to avoid rate limiting...")
-        time.sleep(10)
+        logger.info("⏳ Waiting 60s (1 minute) before next test suite to reset rate limit counter...")
+        time.sleep(60)
     
     # 3. Hallucination Reduction Test (7 questions, ~7-10 minutes)
     logger.info("")
