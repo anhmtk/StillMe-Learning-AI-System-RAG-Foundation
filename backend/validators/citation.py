@@ -178,8 +178,8 @@ class CitationRequired:
                 r"\b(định\s+lý|theorem)\s+(bất\s+toàn|incompleteness)\s+(của|of)\s+(gödel|godel)\b",
                 r"\b(gödel|godel).*(bất\s+toàn|incompleteness)\b",
                 r"\b(tranh\s+luận|debate)\s+(giữa|between)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(và|and)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\b",
-                # CRITICAL: Detect "Tranh luận giữa X và Y về Z" (Vietnamese pattern with "về")
-                r"\b(tranh\s+luận|debate)\s+(giữa|between)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(và|and)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(về|about)\b",
+                # CRITICAL: Detect "Tranh luận giữa X và Y về Z" (Vietnamese pattern with "về" - allow any words after "về")
+                r"\b(tranh\s+luận|debate)\s+(giữa|between)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(và|and)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza|berkeley|locke|leibniz|feyerabend|lakatos)\s+(về|about)\s+",
                 # CRITICAL: Detect "primary và secondary qualities" or "phẩm chất sơ cấp và thứ cấp" (Berkeley-Locke)
                 r"\b(primary|sơ\s+cấp)\s+(và|and)\s+(secondary|thứ\s+cấp)\s+(qualities|phẩm\s+chất)\b",
                 r"\b(phẩm\s+chất|qualities)\s+(sơ\s+cấp|primary)\s+(và|and)\s+(thứ\s+cấp|secondary)\b",
@@ -208,6 +208,27 @@ class CitationRequired:
         # These are factual questions that should be cited for transparency
         if is_simple_factual_question:
             logger.debug(f"Simple factual question detected - citations REQUIRED for transparency")
+        
+        # CRITICAL FALLBACK: If question contains well-known philosophical debates/concepts but wasn't detected, force detection
+        # This ensures questions like "Tranh luận giữa Searle và Dennett về Chinese Room" are always detected
+        if is_philosophical and user_question and not is_philosophical_factual:
+            question_lower = user_question.lower()
+            # Check for specific well-known philosophical debates that should always be detected
+            well_known_debates = [
+                (r"\b(searle|dennett)\b.*\b(chinese\s+room|understanding)\b", "Searle-Dennett Chinese Room debate"),
+                (r"\b(berkeley|locke)\b.*\b(primary|secondary|qualities|phẩm\s+chất)\b", "Berkeley-Locke primary/secondary qualities debate"),
+                (r"\b(nagel|chalmers)\b.*\b(hard\s+problem|consciousness|ý\s+thức)\b", "Nagel-Chalmers hard problem debate"),
+                (r"\b(quine|carnap)\b.*\b(analytic|synthetic|distinction)\b", "Quine-Carnap analytic-synthetic distinction debate"),
+            ]
+            for pattern, debate_name in well_known_debates:
+                try:
+                    if re.search(pattern, question_lower, re.IGNORECASE):
+                        is_philosophical_factual = True
+                        logger.warning(f"✅ Force-detected philosophical factual question: {debate_name} (question: {user_question[:100]})")
+                        break
+                except Exception as e:
+                    logger.warning(f"⚠️ Error matching well-known debate pattern {pattern[:50]}: {e}")
+                    continue
         
         # Combine all types of factual questions
         is_any_factual_question = is_real_factual_question or is_simple_factual_question or is_philosophical_factual
