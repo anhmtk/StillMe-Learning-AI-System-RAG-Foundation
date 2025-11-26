@@ -121,16 +121,25 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
     return False, ""
 
 
-def get_fallback_message_for_error(error_type: str, detected_lang: str = "vi") -> str:
+def get_fallback_message_for_error(
+    error_type: str, 
+    detected_lang: str = "vi",
+    user_question: str = "",
+    is_philosophical: bool = False,
+    ctx_docs: list = None
+) -> str:
     """
     Get a user-friendly fallback message in the detected language.
     
     Args:
         error_type: Type of error ("context_overflow", "api_error", "generic")
         detected_lang: User's language code
+        user_question: Optional user question (to detect factual questions and add citations)
+        is_philosophical: Optional flag indicating if question is philosophical
+        ctx_docs: Optional context documents (for citation validation)
         
     Returns:
-        User-friendly error message in the detected language
+        User-friendly error message in the detected language (with citation if factual question)
     """
     if error_type == "context_overflow":
         messages = {
@@ -174,7 +183,27 @@ def get_fallback_message_for_error(error_type: str, detected_lang: str = "vi") -
             ),
         }
     
-    return messages.get(detected_lang, messages.get("en", "A technical error occurred."))
+    fallback_message = messages.get(detected_lang, messages.get("en", "A technical error occurred."))
+    
+    # CRITICAL: If this is a factual question, add citation for transparency
+    if user_question:
+        try:
+            from backend.validators.citation import CitationRequired
+            citation_validator = CitationRequired(required=True)
+            citation_result = citation_validator.run(
+                fallback_message,
+                ctx_docs=ctx_docs or [],
+                is_philosophical=is_philosophical,
+                user_question=user_question
+            )
+            if citation_result.patched_answer:
+                logger.info(f"✅ Added citation to fallback message for factual question. Reasons: {citation_result.reasons}")
+                return citation_result.patched_answer
+        except Exception as e:
+            logger.warning(f"⚠️ Error adding citation to fallback message: {e}")
+            # Return original message if citation addition fails
+    
+    return fallback_message
 
 
 def is_fallback_message(text: str) -> bool:
