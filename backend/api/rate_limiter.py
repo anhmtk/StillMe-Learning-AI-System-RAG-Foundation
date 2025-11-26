@@ -177,7 +177,14 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
         # Default: 1000 requests per day (should be enough for testing)
         return os.getenv("RATE_LIMIT_CHAT_LOCAL", "1000/day")
     
-    # Railway/Production: Different limits for API key users vs IP-based users
+    # Railway/Production: 
+    # TEMPORARY FIX: Increase default limit to 10000/day for evaluation
+    # This is because slowapi doesn't support dynamic per-key limits with callable functions
+    # TODO: Find a better solution or switch to a different rate limiting library
+    # For now, we'll use a high default limit and rely on EvaluationBypassMiddleware
+    # to detect evaluation requests (though it may not work if slowapi caches limits)
+    
+    # Different limits for API key users vs IP-based users
     if request:
         # CRITICAL: Check the key that will be used by get_rate_limit_key_func
         # This is the only way to support per-key limits with slowapi
@@ -230,9 +237,11 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
             logger.debug(f"Rate limit for API key user (from header): {limit}")
             return limit
     
-    # IP-based users (no API key): strict limit (15/day)
-    # This prevents abuse from anonymous users
-    default_limit = os.getenv("RATE_LIMIT_CHAT_IP", "15/day")
+    # IP-based users (no API key): 
+    # TEMPORARY: Increased to 10000/day to allow evaluation requests
+    # TODO: Implement proper per-key rate limiting or switch rate limiting library
+    # This is a workaround because slowapi doesn't call get_chat_rate_limit() as callable
+    default_limit = os.getenv("RATE_LIMIT_CHAT_IP", "10000/day")  # Changed from "15/day" to "10000/day"
     logger.debug(f"Rate limit for IP-based user: {default_limit}")
     return default_limit
 
