@@ -116,8 +116,9 @@ class ValidatorChain:
             try:
                 # Tier 3.5: Pass context quality to ConfidenceValidator
                 if validator_name == "ConfidenceValidator":
-                    # Pass previous reasons to ConfidenceValidator so it can detect source_contradiction
-                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical, is_religion_roleplay=is_religion_roleplay, previous_reasons=reasons)
+                    # Pass previous reasons and user_question to ConfidenceValidator so it can detect source_contradiction
+                    # and use human-readable citations in uncertainty templates
+                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical, is_religion_roleplay=is_religion_roleplay, previous_reasons=reasons, user_question=user_question)
                 elif validator_name == "CitationRequired":
                     # Pass is_philosophical and user_question to CitationRequired
                     # user_question is needed to detect real factual questions (even with philosophical elements)
