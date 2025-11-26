@@ -4432,6 +4432,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                         logger.warning(f"⚠️ Replaced technical error with user-friendly message in {detected_lang}")
                 
                 # CRITICAL: Check if response is a fallback message - if so, skip validation/post-processing
+                # BUT: Still pass through CitationRequired to add citations for factual questions
                 if raw_response and isinstance(raw_response, str) and is_fallback_message(raw_response):
                     logger.warning(
                         f"🛑 Fallback meta-answer detected - skipping validation, quality evaluation, and rewrite. "
@@ -4444,7 +4445,27 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                         f"LLM call completed: {llm_inference_latency:.2f}s, "
                         f"Response preview: {raw_response[:200]}"
                     )
-                    response = raw_response
+                    # CRITICAL: Pass fallback message through CitationRequired to add citations for factual questions
+                    from backend.validators.citation import CitationRequired
+                    citation_validator = CitationRequired(required=True)
+                    # Build ctx_docs for citation validator
+                    ctx_docs_for_citation = [
+                        doc["content"] for doc in context.get("knowledge_docs", [])
+                    ] + [
+                        doc["content"] for doc in context.get("conversation_docs", [])
+                    ]
+                    citation_result = citation_validator.run(
+                        raw_response, 
+                        ctx_docs=ctx_docs_for_citation,
+                        is_philosophical=is_philosophical,
+                        user_question=chat_request.message
+                    )
+                    if citation_result.patched_answer:
+                        response = citation_result.patched_answer
+                        logger.info(f"✅ Added citation to fallback message for factual question. Reasons: {citation_result.reasons}")
+                        processing_steps.append("✅ Citation added to fallback message for factual question")
+                    else:
+                        response = raw_response
                     # Skip validation, quality evaluator, rewrite, and learning
                     validation_info = None
                     confidence_score = 0.3  # Low confidence for fallback messages
