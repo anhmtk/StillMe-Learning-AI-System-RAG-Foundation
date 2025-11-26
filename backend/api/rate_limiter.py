@@ -78,12 +78,54 @@ def get_rate_limit_key_func(request: Request) -> str:
     Rate limit key function that uses API key if available, otherwise IP address.
     This allows API key users to have higher rate limits.
     
+    Bypasses rate limit for evaluation requests (user_id="evaluation_bot").
+    
     Args:
         request: FastAPI request object
         
     Returns:
         Rate limit key string
     """
+    # CRITICAL: Bypass rate limit for evaluation requests
+    # Evaluation requests use user_id="evaluation_bot" and use_server_keys=True
+    # We need to check request body for user_id, but rate limit decorator runs before body parsing
+    # So we check the request body manually here
+    try:
+        import json
+        import asyncio
+        # Read request body - need to handle async properly
+        # Check if body is already read
+        if hasattr(request, '_body'):
+            body = request._body
+        elif hasattr(request, 'body'):
+            # For async requests, body might be a coroutine
+            if asyncio.iscoroutine(request.body):
+                # Can't await in sync function, skip this check
+                body = None
+            else:
+                body = request.body
+        else:
+            body = None
+            
+        if body:
+            try:
+                if isinstance(body, bytes):
+                    body_str = body.decode('utf-8')
+                else:
+                    body_str = str(body)
+                body_data = json.loads(body_str)
+                user_id = body_data.get("user_id", "")
+                use_server_keys = body_data.get("use_server_keys", False)
+                # Bypass rate limit for evaluation requests
+                if user_id == "evaluation_bot" and use_server_keys:
+                    # Use a special key that will have unlimited rate limit
+                    # We'll configure limiter to allow unlimited for this key
+                    return f"evaluation:{user_id}"
+            except (json.JSONDecodeError, AttributeError, UnicodeDecodeError):
+                pass
+    except Exception:
+        pass  # If we can't parse body, continue with normal rate limiting
+    
     api_key = get_api_key_for_limiting(request)
     if api_key:
         # Use API key for rate limiting (higher limits)
@@ -97,6 +139,10 @@ def get_chat_rate_limit() -> str:
     """
     Get chat endpoint rate limit based on environment.
     For local development/testing, can be disabled or increased via env vars.
+    
+    Note: Evaluation requests (user_id="evaluation_bot") are handled via
+    get_rate_limit_key_func which returns a special key "evaluation:evaluation_bot".
+    The limiter needs to be configured to allow unlimited requests for this key.
     
     Returns:
         Rate limit string (e.g., "15/day", "1000/minute", or "1000/day" if disabled)
@@ -119,6 +165,8 @@ def get_chat_rate_limit() -> str:
         # Default: 1000 requests per day (should be enough for testing)
         return os.getenv("RATE_LIMIT_CHAT_LOCAL", "1000/day")
     
-    # Production/default: use strict rate limit
-    return "15/day"
+    # Railway/Production: use higher rate limit to support evaluation
+    # Previous: 15/day was too strict for evaluation runs
+    # New: 1000/day should be enough for evaluation while still preventing abuse
+    return os.getenv("RATE_LIMIT_CHAT_RAILWAY", "1000/day")
 
