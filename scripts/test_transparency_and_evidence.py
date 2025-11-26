@@ -705,15 +705,29 @@ def run_all_tests():
         if result.get("status") == "success":
             answers_for_variation_check.append(result["answer"])
     
-    # Check variation across all answers
-    print("=" * 80)
-    print("VARIATION CHECK")
-    print("=" * 80)
-    variation_result = check_variation(answers_for_variation_check)
-    print(f"Variation Score: {variation_result['variation_score']:.2%}")
-    print(f"Unique Answers: {variation_result['unique_answers']}/{variation_result['total_answers']}")
-    print(f"Status: {'✅ PASSED' if variation_result['passed'] else '❌ FAILED'}")
-    print()
+    # Check variation across all answers (only if we have answers)
+    if answers_for_variation_check:
+        print("=" * 80)
+        print("VARIATION CHECK")
+        print("=" * 80)
+        variation_result = check_variation(answers_for_variation_check)
+        print(f"Variation Score: {variation_result['variation_score']:.2%}")
+        print(f"Unique Answers: {variation_result['unique_answers']}/{variation_result['total_answers']}")
+        print(f"Status: {'✅ PASSED' if variation_result['passed'] else '❌ FAILED'}")
+        print()
+    else:
+        # No successful responses - skip variation check
+        variation_result = {
+            "passed": False,
+            "variation_score": 0.0,
+            "unique_answers": 0,
+            "total_answers": 0
+        }
+        print("=" * 80)
+        print("VARIATION CHECK")
+        print("=" * 80)
+        print("⚠️  No successful responses - skipping variation check")
+        print()
     
     # Model Routing Statistics (only if we have successful responses)
     successful_results = [r for r in results if r.get("status") == "success"]
