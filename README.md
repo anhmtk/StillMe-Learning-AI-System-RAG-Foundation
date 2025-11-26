@@ -33,6 +33,7 @@ StillMe is a **RAG-based AI system** that:
 - Provides context-aware responses using ChromaDB vector search
 - Validates responses to reduce hallucinations
 - Tracks learning metrics and knowledge retention
+- Accesses real-time data from external APIs (weather, news) with full transparency
 
 **Core Philosophy:** *"In the AI era, true value lies not in what AI can do, but in what AI chooses NOT to do."* — A truly intelligent AI knows what NOT to do, not that it can do everything. StillMe preserves what makes humans human by knowing its boundaries.
 
@@ -194,6 +195,7 @@ streamlit run dashboard.py --server.port 8501
 - `ENABLE_VALIDATORS=true` - Enable Validator Chain (reduces hallucinations)
 - `ENABLE_ARXIV=true` - Enable arXiv fetching (default: true)
 - `ENABLE_WIKIPEDIA=true` - Enable Wikipedia fetching (default: true)
+- `GNEWS_API_KEY` - GNews API key for news provider (optional, get at https://gnews.io/api)
 - `COMMUNITY_MIN_VOTES=10` - Minimum votes for community proposals (default: 10)
 
 See `env.example` for full list.
@@ -244,6 +246,15 @@ See `env.example` for full list.
 **Community Features:**
 - ✅ Community-Driven Learning - Voting system for learning proposals
 - ✅ Interactive Conversation Learning - Learn from user conversations with permission
+
+**External Data Layer:**
+- ✅ Real-time Weather Data - Open-Meteo API integration (no API key required)
+- ✅ News Provider - GNews API integration for latest news
+- ✅ Intent Detection - Automatic routing for weather/news queries (English + Vietnamese)
+- ✅ Caching - Redis support with in-memory fallback (reduces API calls)
+- ✅ Retry Logic - Exponential backoff for failed requests
+- ✅ Rate Limit Tracking - Prevents exceeding API limits
+- ✅ Full Transparency - Source attribution and timestamp in all responses
 
 **Dashboard:**
 - ✅ Streamlit UI - Real-time metrics, chat interface, RAG interface

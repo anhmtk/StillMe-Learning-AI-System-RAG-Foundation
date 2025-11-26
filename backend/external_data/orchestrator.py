@@ -10,6 +10,8 @@ from datetime import datetime
 
 from .intent_detector import ExternalDataIntent
 from .cache import ExternalDataCache
+from .retry import retry_with_backoff
+from .rate_limit_tracker import get_rate_limit_tracker
 from .providers.base import ExternalDataProvider, ExternalDataResult
 from .providers.weather import WeatherProvider
 from .providers.news import NewsProvider
@@ -24,10 +26,14 @@ class ExternalDataOrchestrator:
         """Initialize orchestrator with providers and cache"""
         self.providers: List[ExternalDataProvider] = []
         self.cache = ExternalDataCache()
+        self.rate_limit_tracker = get_rate_limit_tracker()
         self.logger = logging.getLogger(__name__)
         
         # Register default providers
         self._register_default_providers()
+        
+        # Initialize metrics tracking
+        self._init_metrics()
     
     def _register_default_providers(self):
         """Register default providers"""
@@ -72,27 +78,72 @@ class ExternalDataOrchestrator:
         
         if not provider:
             self.logger.warning(f"No provider found for intent type: {intent.type}")
+            self._record_metrics(provider_name=None, success=False, cached=False)
             return None
         
-        # Fetch from provider
+        provider_name = provider.get_provider_name()
+        
+        # Check rate limit
+        can_make_request, rate_limit_error = self.rate_limit_tracker.can_make_request(provider_name)
+        if not can_make_request:
+            self.logger.warning(f"Rate limit exceeded for {provider_name}: {rate_limit_error}")
+            self._record_metrics(provider_name, success=False, cached=False, rate_limited=True)
+            return ExternalDataResult(
+                data={},
+                source=provider_name,
+                timestamp=datetime.utcnow(),
+                cached=False,
+                success=False,
+                error_message=rate_limit_error
+            )
+        
+        # Fetch from provider with retry
         try:
-            result = await provider.fetch(intent.type, intent.params)
+            # Record API call
+            self.rate_limit_tracker.record_call(provider_name)
+            
+            # Fetch with retry logic
+            result = await retry_with_backoff(
+                provider.fetch,
+                max_retries=2,
+                initial_delay=1.0,
+                max_delay=10.0,
+                backoff_factor=2.0,
+                exceptions=(Exception,),
+                intent_type=intent.type,
+                params=intent.params
+            )
+            
+            if not result:
+                # Retry failed
+                self._record_metrics(provider_name, success=False, cached=False)
+                return ExternalDataResult(
+                    data={},
+                    source=provider_name,
+                    timestamp=datetime.utcnow(),
+                    cached=False,
+                    success=False,
+                    error_message="All retry attempts failed"
+                )
             
             # Cache successful results
             if result.success:
                 ttl = provider.get_cache_ttl(intent.type)
                 self.cache.set(cache_key, result, ttl)
-                self.logger.info(f"Fetched data from {provider.get_provider_name()}, cached with TTL: {ttl}s")
+                self.logger.info(f"Fetched data from {provider_name}, cached with TTL: {ttl}s")
+                self._record_metrics(provider_name, success=True, cached=False)
             else:
-                self.logger.warning(f"Provider {provider.get_provider_name()} returned error: {result.error_message}")
+                self.logger.warning(f"Provider {provider_name} returned error: {result.error_message}")
+                self._record_metrics(provider_name, success=False, cached=False)
             
             return result
             
         except Exception as e:
-            self.logger.error(f"Error fetching from provider {provider.get_provider_name()}: {e}", exc_info=True)
+            self.logger.error(f"Error fetching from provider {provider_name}: {e}", exc_info=True)
+            self._record_metrics(provider_name, success=False, cached=False)
             return ExternalDataResult(
                 data={},
-                source=provider.get_provider_name(),
+                source=provider_name,
                 timestamp=datetime.utcnow(),
                 cached=False,
                 success=False,
@@ -172,6 +223,46 @@ class ExternalDataOrchestrator:
         
         return response
     
+    def _init_metrics(self):
+        """Initialize metrics tracking for external data"""
+        try:
+            from backend.api.metrics_collector import get_metrics_collector
+            self.metrics_collector = get_metrics_collector()
+        except ImportError:
+            self.metrics_collector = None
+            self.logger.debug("Metrics collector not available")
+    
+    def _record_metrics(
+        self,
+        provider_name: Optional[str],
+        success: bool,
+        cached: bool,
+        rate_limited: bool = False
+    ):
+        """Record metrics for external data API calls"""
+        if not self.metrics_collector:
+            return
+        
+        try:
+            # Track external data calls
+            endpoint = f"external_data:{provider_name or 'unknown'}"
+            status_code = 200 if success else (429 if rate_limited else 500)
+            self.metrics_collector.increment_request("EXTERNAL", endpoint, status_code)
+            
+            # Track cache hits/misses
+            if cached:
+                # Cache hit - no API call needed
+                pass
+            else:
+                # API call made
+                if not success:
+                    # Track errors
+                    error_key = f"external_data:{provider_name or 'unknown'}:error"
+                    self.metrics_collector._error_counters[error_key] = \
+                        self.metrics_collector._error_counters.get(error_key, 0) + 1
+        except Exception as e:
+            self.logger.warning(f"Error recording metrics: {e}")
+    
     def _format_news_response(self, result: ExternalDataResult) -> str:
         """Format news data response"""
         data = result.data
@@ -210,6 +301,46 @@ class ExternalDataOrchestrator:
         
         return response
     
+    def _init_metrics(self):
+        """Initialize metrics tracking for external data"""
+        try:
+            from backend.api.metrics_collector import get_metrics_collector
+            self.metrics_collector = get_metrics_collector()
+        except ImportError:
+            self.metrics_collector = None
+            self.logger.debug("Metrics collector not available")
+    
+    def _record_metrics(
+        self,
+        provider_name: Optional[str],
+        success: bool,
+        cached: bool,
+        rate_limited: bool = False
+    ):
+        """Record metrics for external data API calls"""
+        if not self.metrics_collector:
+            return
+        
+        try:
+            # Track external data calls
+            endpoint = f"external_data:{provider_name or 'unknown'}"
+            status_code = 200 if success else (429 if rate_limited else 500)
+            self.metrics_collector.increment_request("EXTERNAL", endpoint, status_code)
+            
+            # Track cache hits/misses
+            if cached:
+                # Cache hit - no API call needed
+                pass
+            else:
+                # API call made
+                if not success:
+                    # Track errors
+                    error_key = f"external_data:{provider_name or 'unknown'}:error"
+                    self.metrics_collector._error_counters[error_key] = \
+                        self.metrics_collector._error_counters.get(error_key, 0) + 1
+        except Exception as e:
+            self.logger.warning(f"Error recording metrics: {e}")
+    
     def _format_generic_response(self, result: ExternalDataResult) -> str:
         """Format generic response"""
         timestamp_str = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
@@ -223,4 +354,44 @@ class ExternalDataOrchestrator:
         response += "]"
         
         return response
+    
+    def _init_metrics(self):
+        """Initialize metrics tracking for external data"""
+        try:
+            from backend.api.metrics_collector import get_metrics_collector
+            self.metrics_collector = get_metrics_collector()
+        except ImportError:
+            self.metrics_collector = None
+            self.logger.debug("Metrics collector not available")
+    
+    def _record_metrics(
+        self,
+        provider_name: Optional[str],
+        success: bool,
+        cached: bool,
+        rate_limited: bool = False
+    ):
+        """Record metrics for external data API calls"""
+        if not self.metrics_collector:
+            return
+        
+        try:
+            # Track external data calls
+            endpoint = f"external_data:{provider_name or 'unknown'}"
+            status_code = 200 if success else (429 if rate_limited else 500)
+            self.metrics_collector.increment_request("EXTERNAL", endpoint, status_code)
+            
+            # Track cache hits/misses
+            if cached:
+                # Cache hit - no API call needed
+                pass
+            else:
+                # API call made
+                if not success:
+                    # Track errors
+                    error_key = f"external_data:{provider_name or 'unknown'}:error"
+                    self.metrics_collector._error_counters[error_key] = \
+                        self.metrics_collector._error_counters.get(error_key, 0) + 1
+        except Exception as e:
+            self.logger.warning(f"Error recording metrics: {e}")
 

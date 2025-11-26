@@ -156,8 +156,19 @@ class MetricsCollector:
                     "embedding_operations_by_tier": dict(self._embedding_operations_by_tier),
                     "surprise_score_stats": surprise_stats,
                     "cycle_count": self._cycle_count
-                }
+                },
+                # External Data metrics (if available)
+                "external_data": self._get_external_data_metrics()
             }
+    
+    def _get_external_data_metrics(self) -> Dict:
+        """Get external data metrics"""
+        try:
+            from backend.external_data.rate_limit_tracker import get_rate_limit_tracker
+            tracker = get_rate_limit_tracker()
+            return tracker.get_stats()
+        except Exception:
+            return {}
 
 
 # Global metrics collector instance
