@@ -46,6 +46,11 @@ def detect_external_data_intent(query: str) -> Optional[ExternalDataIntent]:
     if news_intent:
         return news_intent
     
+    # Time intent detection
+    time_intent = _detect_time_intent(query, query_lower)
+    if time_intent:
+        return time_intent
+    
     return None
 
 
@@ -304,4 +309,55 @@ def _extract_news_query(query: str, query_lower: str) -> str:
         return "technology"  # Default to technology news
     
     return query.strip()
+
+
+def _detect_time_intent(query: str, query_lower: str) -> Optional[ExternalDataIntent]:
+    """Detect time-related queries"""
+    
+    # Time keywords (English + Vietnamese)
+    time_keywords = [
+        # English
+        r'\bcurrent\s+time\b',
+        r'\bwhat\s+time\b',
+        r'\bwhat.*time.*now\b',
+        r'\btime.*now\b',
+        r'\bwhat.*date\b',
+        r'\bcurrent\s+date\b',
+        r'\btoday.*date\b',
+        r'\bwhat.*day\b',
+        r'\bwhat.*hour\b',
+        # Vietnamese
+        r'\bthời\s+gian\s+hiện\s+tại\b',
+        r'\bthời\s+gian\s+hiện\s+giờ\b',
+        r'\bmấy\s+giờ\b',
+        r'\bgiờ\s+hiện\s+tại\b',
+        r'\bgiờ\s+hiện\s+giờ\b',
+        r'\bngày\s+tháng\s+năm\b',
+        r'\bngày\s+hôm\s+nay\b',
+        r'\bhôm\s+nay\s+là\s+ngày\b',
+        r'\bthứ\s+mấy\b',
+    ]
+    
+    # Check if query contains time keywords
+    has_time_keyword = any(re.search(pattern, query_lower, re.IGNORECASE) for pattern in time_keywords)
+    
+    if not has_time_keyword:
+        return None
+    
+    # Calculate confidence
+    confidence = 0.85  # High confidence for time queries
+    
+    # Decrease confidence if query seems too complex
+    if len(query.split()) > 20:
+        confidence *= 0.8
+    
+    # Only return if confidence is high enough
+    if confidence >= 0.7:
+        return ExternalDataIntent(
+            type="time",
+            params={},
+            confidence=confidence
+        )
+    
+    return None
 

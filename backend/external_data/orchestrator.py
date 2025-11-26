@@ -22,6 +22,7 @@ from .rate_limit_tracker import get_rate_limit_tracker
 from .providers.base import ExternalDataProvider, ExternalDataResult
 from .providers.weather import WeatherProvider
 from .providers.news import NewsProvider
+from .providers.time import TimeProvider
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,10 @@ class ExternalDataOrchestrator:
         # News provider (needs GNEWS_API_KEY)
         news_provider = NewsProvider()
         self.register_provider(news_provider)
+        
+        # Time provider (no API key needed)
+        time_provider = TimeProvider()
+        self.register_provider(time_provider)
         
         self.logger.info(f"Registered {len(self.providers)} external data providers")
     
@@ -210,6 +215,8 @@ class ExternalDataOrchestrator:
             return self._format_weather_response(result, detected_lang)
         elif result.data.get("articles"):  # News
             return self._format_news_response(result, detected_lang)
+        elif result.data.get("local_time"):  # Time
+            return self._format_time_response(result, detected_lang)
         else:
             # Generic format
             return self._format_generic_response(result, detected_lang)
