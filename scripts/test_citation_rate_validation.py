@@ -115,7 +115,7 @@ class CitationRateTester:
         
         return any(keyword in response_lower for keyword in uncertainty_keywords) or is_fallback_message
     
-    async def test_single_question(self, question: str, session: aiohttp.ClientSession, max_retries: int = 3) -> Dict[str, Any]:
+    async def test_single_question(self, question: str, session: aiohttp.ClientSession, max_retries: int = 5) -> Dict[str, Any]:
         """Test a single question with retry logic for rate limiting"""
         payload = {
             "message": question,
@@ -130,7 +130,7 @@ class CitationRateTester:
                     # Handle HTTP 429 (Rate Limit) with retry
                     if response.status == 429:
                         if attempt < max_retries - 1:
-                            wait_time = (attempt + 1) * 2  # Exponential backoff: 2s, 4s, 6s
+                            wait_time = (attempt + 1) * 3  # Exponential backoff: 3s, 6s, 9s, 12s, 15s
                             logger.warning(f"Rate limited (HTTP 429) for '{question}', retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
                             await asyncio.sleep(wait_time)
                             continue
@@ -222,8 +222,8 @@ class CitationRateTester:
             results = []
             for i, question in enumerate(questions):
                 if i > 0:
-                    # Add delay between requests to avoid rate limiting (1s delay)
-                    await asyncio.sleep(1.0)
+                    # Add delay between requests to avoid rate limiting (2s delay - increased from 1s)
+                    await asyncio.sleep(2.0)
                 result = await self.test_single_question(question, session)
                 results.append(result)
         
@@ -278,8 +278,8 @@ class CitationRateTester:
         
         async def test_with_semaphore(question: str):
             async with semaphore:
-                # Add small delay to avoid rate limiting
-                await asyncio.sleep(0.5)
+                # Add delay to avoid rate limiting (increased from 0.5s to 1s)
+                await asyncio.sleep(1.0)
                 return await self.test_single_question(question, session)
         
         async with aiohttp.ClientSession() as session:
@@ -337,8 +337,8 @@ class CitationRateTester:
             results = []
             for i, question in enumerate(questions):
                 if i > 0:
-                    # Add delay between requests to avoid rate limiting (1.5s delay)
-                    await asyncio.sleep(1.5)
+                    # Add delay between requests to avoid rate limiting (2.5s delay - increased from 1.5s)
+                    await asyncio.sleep(2.5)
                 result = await self.test_single_question(question, session)
                 results.append(result)
         
