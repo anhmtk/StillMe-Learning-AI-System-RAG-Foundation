@@ -329,6 +329,13 @@ class FactualPlausibilityScanner:
             "lakatos", "imre lakatos", "feyerabend", "paul feyerabend",
             "imf", "international monetary fund", "world bank",
             "paradigm shift", "falsificationism", "scientific realism",
+            # Historical events
+            "yalta", "yalta conference", "yalta conference 1945", "hội nghị yalta 1945",
+            "versailles", "treaty of versailles", "versailles 1919", "hiệp ước versailles 1919",
+            "potsdam", "potsdam conference", "potsdam conference 1945", "hội nghị potsdam 1945",
+            "geneva", "geneva conference", "geneva conference 1954", "hội nghị geneva 1954",
+            "world war i", "thế chiến i", "chiến tranh thế giới thứ nhất",
+            "world war ii", "thế chiến ii", "chiến tranh thế giới thứ hai",
         }
         
         # Check if question contains POTENTIALLY_REAL_ENTITIES

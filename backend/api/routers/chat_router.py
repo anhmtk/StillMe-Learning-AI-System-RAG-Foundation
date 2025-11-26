@@ -2118,7 +2118,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         fps_detected_explicit_fake = False
         try:
             from backend.knowledge.factual_scanner import scan_question
-            fps_result = scan_question(chat_request.message)
+            # CRITICAL: Apply query preprocessing BEFORE FPS to ensure proper entity recognition
+            # This fixes issues where "Hội nghị Yalta" is misinterpreted as "Hội"
+            from backend.core.query_preprocessor import enhance_query_for_retrieval
+            preprocessed_question = enhance_query_for_retrieval(chat_request.message)
+            fps_result = scan_question(preprocessed_question)
             
             # TASK 1: Auto-enable Option B if FPS detects EXPLICIT_FAKE_ENTITIES
             # Check if FPS detected a known fake entity (Veridian, Lumeria, Emerald, Daxonia)
@@ -5030,7 +5034,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
             logger.info(f"⏱️ LLM inference (non-RAG) took {llm_inference_latency:.2f}s")
             
-            # CRITICAL: Check language mismatch for non-RAG path (if validators enabled)
+            # CRITICAL: Check language mismatch and citations for non-RAG path (if validators enabled)
             if enable_validators and response and not is_fallback_meta_answer_non_rag:
                 from backend.api.utils.chat_helpers import detect_language as detect_lang_func
                 detected_output_lang = detect_lang_func(response)
@@ -5084,6 +5088,24 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     except Exception as retry_error:
                         logger.error(f"⚠️ Language retry failed (non-RAG): {retry_error}")
                         # Continue with original response
+                
+                # CRITICAL: Check citations for philosophical factual questions in non-RAG path
+                # Even though there's no RAG context, philosophical factual questions still need citations
+                if is_philosophical_non_rag:
+                    from backend.validators.citation import CitationRequired
+                    citation_validator = CitationRequired(required=True)
+                    # Non-RAG path has no context documents, but still need to check for citations
+                    citation_result = citation_validator.run(
+                        response, 
+                        ctx_docs=[],  # Empty context for non-RAG path
+                        is_philosophical=is_philosophical_non_rag,
+                        user_question=chat_request.message
+                    )
+                    # Use patched_answer if available (e.g., citation was auto-added)
+                    if citation_result.patched_answer:
+                        response = citation_result.patched_answer
+                        logger.info(f"✅ Citation added for philosophical factual question (non-RAG). Reasons: {citation_result.reasons}")
+                        processing_steps.append("✅ Citation auto-added for philosophical factual question")
             
             # CRITICAL: Hallucination Guard for non-RAG path
             # If factual question + no context + low confidence → override with safe refusal
@@ -5339,6 +5361,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                 
                 # CRITICAL: Final check - ensure response is not a technical error
                 if response:
+                    from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
                     is_error, error_type = is_technical_error(response)
                     if is_error:
                         logger.error(f"⚠️ Final response (non-RAG) is still a technical error (type: {error_type}) - replacing with fallback")
