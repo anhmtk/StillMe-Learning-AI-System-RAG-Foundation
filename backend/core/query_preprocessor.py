@@ -55,6 +55,19 @@ HISTORICAL_EVENTS_MAP = {
     "bretton woods": "Bretton Woods",
     "điện biên phủ 1954": "Dien Bien Phu 1954",
     "trận điện biên phủ": "Dien Bien Phu",
+    # CRITICAL: Add "Thế chiến" mappings to prevent misinterpretation
+    "thế chiến ii": "World War II",
+    "thế chiến 2": "World War II",
+    "thế chiến i": "World War I",
+    "thế chiến 1": "World War I",
+    "thế chiến thứ hai": "World War II",
+    "thế chiến thứ nhất": "World War I",
+    "yalta 1945": "Yalta Conference 1945",
+    "hội nghị yalta 1945": "Yalta Conference 1945",
+    "versailles 1919": "Treaty of Versailles 1919",
+    "hiệp ước versailles 1919": "Treaty of Versailles 1919",
+    "potsdam 1945": "Potsdam Conference 1945",
+    "hội nghị potsdam 1945": "Potsdam Conference 1945",
 }
 
 

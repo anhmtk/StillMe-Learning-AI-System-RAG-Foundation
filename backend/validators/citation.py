@@ -203,7 +203,7 @@ class CitationRequired:
             # Even if no RAG context, the answer is based on base knowledge and should be cited
             if is_any_factual_question:
                 logger.warning(f"Factual question detected but no context documents available - adding citation for base knowledge transparency. Question: {user_question[:100]}")
-                # CRITICAL: Add citation [1] even without RAG context to indicate base knowledge source
+                # CRITICAL: Add citation [general knowledge] even without RAG context to indicate base knowledge source
                 # This ensures transparency: user knows answer is from base knowledge, not RAG
                 patched_answer = self._add_citation_for_base_knowledge(answer)
                 return ValidationResult(
@@ -295,26 +295,9 @@ class CitationRequired:
             # AUTO-ENFORCE: Add citation to response for ALL questions when context is available
             # CRITICAL: Always add citation when context is available, regardless of question type
             # This ensures transparency - user knows what sources were reviewed
-            # NOTE: is_philosophical_factual is already checked earlier (before early return), so we can use it here
-            # But we also need to handle it here in case it wasn't caught earlier
-            if is_philosophical_factual:
-                if ctx_docs and len(ctx_docs) > 0:
-                    logger.warning(f"Philosophical factual question detected with context but missing citation - adding citation. Question: {user_question[:100] if user_question else 'unknown'}")
-                    patched_answer = self._add_citation(answer, ctx_docs, user_question)
-                    return ValidationResult(
-                        passed=False,  # Still mark as failed to track the issue
-                        reasons=["missing_citation_philosophical_factual", "added_citation"],
-                        patched_answer=patched_answer
-                    )
-                else:
-                    logger.warning(f"Philosophical factual question detected but no context - adding base knowledge citation. Question: {user_question[:100] if user_question else 'unknown'}")
-                    patched_answer = self._add_citation_for_base_knowledge(answer)
-                    return ValidationResult(
-                        passed=False,  # Still mark as failed to track that RAG context was missing
-                        reasons=["missing_citation_philosophical_factual_no_context", "added_citation_for_base_knowledge"],
-                        patched_answer=patched_answer
-                    )
-            elif ctx_docs and len(ctx_docs) > 0:
+            # NOTE: is_philosophical_factual is already included in is_any_factual_question above
+            # So if we reach here, it means it's not a factual question OR it was already handled
+            if ctx_docs and len(ctx_docs) > 0:
                 logger.info(f"Context available ({len(ctx_docs)} docs) but no citation - auto-adding citation for transparency")
                 patched_answer = self._add_citation(answer, ctx_docs, user_question)
                 return ValidationResult(

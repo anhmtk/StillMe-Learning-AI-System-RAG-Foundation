@@ -118,34 +118,34 @@ TEST_QUESTIONS = [
         "timeout": 180  # Increase timeout for complex philosophical questions
     },
     {
-        "question": "Tranh luận giữa Kant và Hume về causality (quan hệ nhân quả) là gì? Làm sao họ khác nhau về khả năng nhận thức của con người?",
+        "question": "Tranh luận giữa Leibniz và Spinoza về monads (đơn tử) là gì? Làm sao họ khác nhau về bản chất của thực tại và tính đa nguyên?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Kant", "Hume", "causality", "quan hệ nhân quả", "causation", "knowledge"],  # Removed [1] - now accepts any citation format
+        "must_have": ["Leibniz", "Spinoza", "monads", "đơn tử", "monad", "reality", "thực tại"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "How does StillMe's validator chain work? What validators are used and how do they prevent hallucinations?",
-        "category": "technical_validation",
+        "question": "How does StillMe's RAG (Retrieval-Augmented Generation) system work? What is the retrieval process and how does it enhance responses?",
+        "category": "technical_rag",
         "expected_features": ["citations", "evidence", "technical_accuracy"],
-        "must_have": ["validator", "chain", "hallucination", "citation", "evidence", "validation"],
+        "must_have": ["RAG", "retrieval", "augmented", "generation", "ChromaDB", "vector", "embedding"],
         "must_not_have": ["don't know", "not sure", "unclear"],
         "timeout": 180
     },
     {
-        "question": "Tranh luận giữa Popper và Kuhn về khoa học (Popper vs Kuhn on science) là gì? Làm sao họ khác nhau về cách khoa học phát triển?",
+        "question": "Tranh luận giữa Feyerabend và Lakatos về phương pháp khoa học (Feyerabend vs Lakatos on scientific method) là gì? Làm sao họ khác nhau về tính hợp lý của khoa học?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth", "scientific_accuracy"],
-        "must_have": ["Popper", "Kuhn", "khoa học", "science", "falsification", "paradigm"],
+        "must_have": ["Feyerabend", "Lakatos", "khoa học", "science", "method", "rationality", "hợp lý"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "Tranh luận giữa Descartes và Spinoza về mind-body problem (vấn đề tâm-thể) là gì? Làm sao họ khác nhau về bản chất của ý thức và vật chất?",
+        "question": "Tranh luận giữa Berkeley và Locke về primary và secondary qualities (phẩm chất sơ cấp và thứ cấp) là gì? Làm sao họ khác nhau về bản chất của tri giác và thực tại?",
         "category": "real_philosophical_factual",
         "expected_features": ["citations", "evidence", "philosophical_depth"],
-        "must_have": ["Descartes", "Spinoza", "mind-body", "tâm-thể", "consciousness", "matter"],  # Removed [1] - now accepts any citation format
+        "must_have": ["Berkeley", "Locke", "primary", "secondary", "qualities", "phẩm chất", "perception", "tri giác"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     }
