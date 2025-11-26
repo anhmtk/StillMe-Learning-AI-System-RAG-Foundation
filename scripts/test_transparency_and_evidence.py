@@ -133,18 +133,18 @@ TEST_QUESTIONS = [
         "timeout": 180
     },
     {
-        "question": "How does StillMe's RAG (Retrieval-Augmented Generation) system work? What is the retrieval process and how does it enhance responses?",
+        "question": "How does StillMe's validator chain work? What validators are used and how do they prevent hallucinations?",
         "category": "technical_rag",
         "expected_features": ["citations", "evidence", "technical_accuracy"],
-        "must_have": ["RAG", "retrieval", "augmented", "generation", "ChromaDB", "vector", "embedding"],
+        "must_have": ["validator", "chain", "hallucination", "citation", "evidence", "validation"],
         "must_not_have": ["don't know", "not sure", "unclear"],
         "timeout": 180
     },
     {
-        "question": "Tranh luận giữa Feyerabend và Lakatos về phương pháp khoa học (Feyerabend vs Lakatos on scientific method) là gì? Làm sao họ khác nhau về tính hợp lý của khoa học?",
+        "question": "Tranh luận giữa Quine và Carnap về analytic-synthetic distinction (phân biệt phân tích-tổng hợp) là gì? Làm sao họ khác nhau về bản chất của chân lý và logic?",
         "category": "real_philosophical_factual",
-        "expected_features": ["citations", "evidence", "philosophical_depth", "scientific_accuracy"],
-        "must_have": ["Feyerabend", "Lakatos", "khoa học", "science", "method", "rationality", "hợp lý"],
+        "expected_features": ["citations", "evidence", "philosophical_depth", "logical_accuracy"],
+        "must_have": ["Quine", "Carnap", "analytic", "synthetic", "distinction", "phân tích", "tổng hợp", "truth", "chân lý"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },

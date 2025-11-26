@@ -5089,9 +5089,18 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                         logger.error(f"⚠️ Language retry failed (non-RAG): {retry_error}")
                         # Continue with original response
                 
-                # CRITICAL: Check citations for philosophical factual questions in non-RAG path
-                # Even though there's no RAG context, philosophical factual questions still need citations
-                if is_philosophical_non_rag:
+                # CRITICAL FIX: Check citations for ALL factual questions in non-RAG path (not just philosophical)
+                # Even though there's no RAG context, factual questions (historical, philosophical factual) still need citations
+                # This ensures transparency: user knows answer is from base knowledge, not RAG
+                is_factual_non_rag = False
+                try:
+                    # Check if question is factual (historical, scientific, or philosophical factual)
+                    is_factual_non_rag = _is_factual_question(chat_request.message) or is_philosophical_non_rag
+                except Exception:
+                    # If detection fails, assume it might be factual if philosophical
+                    is_factual_non_rag = is_philosophical_non_rag
+                
+                if is_factual_non_rag:
                     from backend.validators.citation import CitationRequired
                     citation_validator = CitationRequired(required=True)
                     # Non-RAG path has no context documents, but still need to check for citations
@@ -5104,8 +5113,11 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     # Use patched_answer if available (e.g., citation was auto-added)
                     if citation_result.patched_answer:
                         response = citation_result.patched_answer
-                        logger.info(f"✅ Citation added for philosophical factual question (non-RAG). Reasons: {citation_result.reasons}")
-                        processing_steps.append("✅ Citation auto-added for philosophical factual question")
+                        logger.info(f"✅ Citation added for factual question (non-RAG). Reasons: {citation_result.reasons}, is_philosophical={is_philosophical_non_rag}")
+                        processing_steps.append("✅ Citation auto-added for factual question (non-RAG)")
+                    elif not citation_result.passed:
+                        logger.warning(f"⚠️ Citation validation failed for factual question (non-RAG) but no patched_answer. Reasons: {citation_result.reasons}")
+                        processing_steps.append(f"⚠️ Citation validation failed: {', '.join(citation_result.reasons)}")
             
             # CRITICAL: Hallucination Guard for non-RAG path
             # If factual question + no context + low confidence → override with safe refusal

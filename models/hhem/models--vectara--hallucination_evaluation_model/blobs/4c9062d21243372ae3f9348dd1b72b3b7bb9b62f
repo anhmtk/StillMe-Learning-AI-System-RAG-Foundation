@@ -1,0 +1,13 @@
+{
+  "architectures": [
+    "HHEMv2ForSequenceClassification"
+  ],
+  "auto_map": {
+    "AutoConfig": "configuration_hhem_v2.HHEMv2Config",
+    "AutoModelForSequenceClassification": "modeling_hhem_v2.HHEMv2ForSequenceClassification"
+  },
+  "model_type": "HHEMv2Config",
+  "torch_dtype": "float32",
+  "transformers_version": "4.39.3",
+  "id2label": {"0": "hallucinated", "1": "consistent"}
+}

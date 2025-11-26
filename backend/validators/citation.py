@@ -125,6 +125,19 @@ class CitationRequired:
                 # CRITICAL: Detect "Bretton Woods 1944" (case-insensitive)
                 r"\b(bretton\s+woods)\s+\d{4}\b",
                 r"\b(hội\s+nghị|conference)\s+(bretton\s+woods)\b",
+                # CRITICAL: Detect "Versailles 1919" or "Hiệp ước Versailles 1919" (case-insensitive)
+                r"\b(versailles|versaille)\s+\d{4}\b",
+                r"\b(hiệp\s+ước|treaty|agreement)\s+(versailles|versaille)\b",
+                # CRITICAL: Detect "Yalta 1945" or "Hội nghị Yalta 1945" (case-insensitive)
+                r"\b(yalta|yalta\s+conference)\s+\d{4}\b",
+                r"\b(hội\s+nghị|conference)\s+(yalta)\b",
+                # CRITICAL: Detect "Potsdam 1945" or "Hội nghị Potsdam 1945" (case-insensitive)
+                r"\b(potsdam|potsdam\s+conference)\s+\d{4}\b",
+                r"\b(hội\s+nghị|conference)\s+(potsdam)\b",
+                # CRITICAL: Detect "World War I" or "Thế chiến I" (case-insensitive)
+                r"\b(world\s+war\s+i|thế\s+chiến\s+i|chiến\s+tranh\s+thế\s+giới\s+thứ\s+nhất)\b",
+                # CRITICAL: Detect "World War II" or "Thế chiến II" (case-insensitive)
+                r"\b(world\s+war\s+ii|thế\s+chiến\s+ii|chiến\s+tranh\s+thế\s+giới\s+thứ\s+hai)\b",
                 # CRITICAL: Detect "17th parallel" or "vĩ tuyến 17" (case-insensitive)
                 r"\b(\d+th|\d+st|\d+nd|\d+rd)\s+parallel\b",
                 r"\b(vĩ\s+tuyến|parallel)\s+\d+\b",
