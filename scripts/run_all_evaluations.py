@@ -24,7 +24,31 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-API_URL = "http://localhost:8000"
+# Load environment variables from .env file
+project_root = Path(__file__).parent.parent
+try:
+    from dotenv import load_dotenv
+    env_path = project_root / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+        logger.info(f"✅ Loaded .env file from: {env_path}")
+    else:
+        logger.debug(f"⚠️  .env file not found at: {env_path}, using environment variables only")
+        load_dotenv()  # Try to load from current directory
+except ImportError:
+    logger.debug("⚠️  python-dotenv not installed, skipping .env file loading")
+    logger.debug("   Install with: pip install python-dotenv")
+except Exception as e:
+    logger.debug(f"⚠️  Error loading .env file: {e}")
+
+# Support both local and Railway testing
+# Priority: 1. Environment variable, 2. .env file, 3. Default localhost
+API_URL = os.getenv("STILLME_API_URL", os.getenv("STILLME_API_BASE", "http://localhost:8000"))
+
+# Ensure URL has protocol if missing
+if API_URL and not API_URL.startswith(("http://", "https://")):
+    API_URL = f"https://{API_URL}"
+
 API_HEALTH_ENDPOINT = f"{API_URL}/health"
 MAX_WAIT_TIME = 60  # seconds
 
@@ -132,19 +156,38 @@ def main():
         "vectara_hhem": False
     }
     
-    # 1. TruthfulQA Evaluation
+    # 1. TruthfulQA Evaluation (~790 questions, estimated ~26-30 hours)
+    logger.info("")
+    logger.info("📊 TruthfulQA: ~790 questions, estimated ~26-30 hours")
+    logger.info("   ⚠️  This will take a very long time. Make sure:")
+    logger.info("      - Your computer stays on and doesn't sleep")
+    logger.info("      - Network connection is stable")
+    logger.info("      - You can monitor progress via logs")
     logger.info("")
     results["truthfulqa"] = run_command(
-        [sys.executable, "-m", "evaluation.run_evaluation", "--benchmarks", "truthfulqa"],
+        [sys.executable, "-m", "evaluation.run_evaluation", "--benchmarks", "truthfulqa", "--api-url", API_URL],
         "TruthfulQA Benchmark (Research Standard)"
     )
     
-    # 2. HaluEval Evaluation
+    # Add delay between test suites to avoid rate limiting
+    if "localhost" not in API_URL:
+        logger.info("")
+        logger.info("⏳ Waiting 60s before next test suite to reset rate limit counter...")
+        time.sleep(60)
+    
+    # 2. HaluEval Evaluation (3 questions, ~6 minutes)
     logger.info("")
+    logger.info("📊 HaluEval: 3 questions, estimated ~6 minutes")
     results["halu_eval"] = run_command(
-        [sys.executable, "-m", "evaluation.run_evaluation", "--benchmarks", "halu_eval"],
+        [sys.executable, "-m", "evaluation.run_evaluation", "--benchmarks", "halu_eval", "--api-url", API_URL],
         "HaluEval Benchmark (Hallucination Detection)"
     )
+    
+    # Add delay between test suites to avoid rate limiting
+    if "localhost" not in API_URL:
+        logger.info("")
+        logger.info("⏳ Waiting 60s before next test suite to reset rate limit counter...")
+        time.sleep(60)
     
     # 3. Citation Rate Validation
     logger.info("")
