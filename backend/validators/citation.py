@@ -147,9 +147,37 @@ class CitationRequired:
                     logger.warning(f"⚠️ Error matching pattern {pattern[:50]}: {e}")
                     continue
         
+        # CRITICAL FIX: Check for philosophical factual questions BEFORE early return
+        # Philosophical questions with factual elements (named philosophers, theorems, debates) still need citations
+        is_philosophical_factual = False
+        if is_philosophical and user_question:
+            question_lower = user_question.lower()
+            # Check for specific philosophers, theorems, debates mentioned in question
+            philosophical_factual_indicators = [
+                r"\b(russell|gödel|godel|plato|aristotle|kant|hume|descartes|spinoza|searle|dennett|popper|kuhn)\b",
+                r"\b(paradox|nghịch\s+lý|theorem|định\s+lý|incompleteness|bất\s+toàn)\b",
+                r"\b(tranh\s+luận|debate|argument|forms|hình\s+thức|causality|quan\s+hệ\s+nhân\s+quả)\b",
+                r"\b(chinese\s+room|mind.*body|tâm.*thể)\b",
+                # CRITICAL: Vietnamese patterns for philosophical factual questions
+                r"\b(paradox|nghịch\s+lý)\s+(của|of)\s+(russell|gödel|godel)\b",
+                r"\b(russell|gödel|godel).*(paradox|nghịch\s+lý)\b",
+                r"\b(định\s+lý|theorem)\s+(bất\s+toàn|incompleteness)\s+(của|of)\s+(gödel|godel)\b",
+                r"\b(gödel|godel).*(bất\s+toàn|incompleteness)\b",
+                r"\b(tranh\s+luận|debate)\s+(giữa|between)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza)\s+(và|and)\s+(plato|aristotle|kant|hume|searle|dennett|popper|kuhn|descartes|spinoza)\b",
+            ]
+            for pattern in philosophical_factual_indicators:
+                try:
+                    if re.search(pattern, question_lower, re.IGNORECASE):
+                        is_philosophical_factual = True
+                        logger.debug(f"✅ Detected philosophical factual question with pattern: {pattern[:50]}... (question: {user_question[:100]})")
+                        break
+                except Exception as e:
+                    logger.warning(f"⚠️ Error matching philosophical factual pattern {pattern[:50]}: {e}")
+                    continue
+        
         # For pure philosophical questions (no factual elements), skip citation requirement
-        # BUT: If question has factual elements (years, events, named people), ALWAYS require citations
-        if is_philosophical and not is_real_factual_question:
+        # BUT: If question has factual elements (years, events, named people, philosophers, theorems), ALWAYS require citations
+        if is_philosophical and not is_real_factual_question and not is_philosophical_factual:
             logger.debug("Pure philosophical question detected (no factual elements) - skipping citation requirement")
             return ValidationResult(passed=True)
         
@@ -162,8 +190,8 @@ class CitationRequired:
         if is_simple_factual_question:
             logger.debug(f"Simple factual question detected - citations REQUIRED for transparency")
         
-        # Combine both types of factual questions
-        is_any_factual_question = is_real_factual_question or is_simple_factual_question
+        # Combine all types of factual questions
+        is_any_factual_question = is_real_factual_question or is_simple_factual_question or is_philosophical_factual
         
         # CRITICAL FIX: For ANY factual questions, we should still try to enforce citations
         # even if context is empty, because the LLM might have base knowledge about these topics
@@ -264,34 +292,11 @@ class CitationRequired:
                         patched_answer=patched_answer
                     )
             
-            # CRITICAL FIX: For philosophical questions with factual elements, we MUST add citations
-            # Even if is_real_factual_question detection failed, if question mentions specific philosophers,
-            # theorems, debates, or historical events, it's still a factual question
-            # Check for philosophical factual indicators that might have been missed
-            is_philosophical_factual = False
-            if is_philosophical and user_question:
-                question_lower = user_question.lower()
-                # Check for specific philosophers, theorems, debates mentioned in question
-                philosophical_factual_indicators = [
-                    r"\b(russell|gödel|godel|plato|aristotle|kant|hume|descartes|spinoza|searle|dennett|popper|kuhn)\b",
-                    r"\b(paradox|nghịch\s+lý|theorem|định\s+lý|incompleteness|bất\s+toàn)\b",
-                    r"\b(tranh\s+luận|debate|argument|forms|hình\s+thức|causality|quan\s+hệ\s+nhân\s+quả)\b",
-                    r"\b(chinese\s+room|mind.*body|tâm.*thể)\b"
-                ]
-                for pattern in philosophical_factual_indicators:
-                    try:
-                        if re.search(pattern, question_lower, re.IGNORECASE):
-                            is_philosophical_factual = True
-                            logger.debug(f"✅ Detected philosophical factual question with pattern: {pattern[:50]}... (question: {user_question[:100]})")
-                            break
-                    except Exception as e:
-                        logger.warning(f"⚠️ Error matching philosophical factual pattern {pattern[:50]}: {e}")
-                        continue
-            
             # AUTO-ENFORCE: Add citation to response for ALL questions when context is available
             # CRITICAL: Always add citation when context is available, regardless of question type
             # This ensures transparency - user knows what sources were reviewed
-            # BUT: For philosophical factual questions, ALWAYS add citation even without context
+            # NOTE: is_philosophical_factual is already checked earlier (before early return), so we can use it here
+            # But we also need to handle it here in case it wasn't caught earlier
             if is_philosophical_factual:
                 if ctx_docs and len(ctx_docs) > 0:
                     logger.warning(f"Philosophical factual question detected with context but missing citation - adding citation. Question: {user_question[:100] if user_question else 'unknown'}")

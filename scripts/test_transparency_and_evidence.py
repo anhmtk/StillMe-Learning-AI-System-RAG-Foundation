@@ -86,19 +86,20 @@ TEST_QUESTIONS = [
         "timeout": 180
     },
     {
-        "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam và Đông Dương?",
+        "question": "Hội nghị Yalta 1945 đã quyết định những gì về châu Âu và thế giới sau Thế chiến II?",
         "category": "real_historical_factual",
         "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Geneva", "1954", "Việt Nam", "Vietnam", "Đông Dương", "Indochina"],
+        "must_have": ["Yalta", "1945", "châu Âu", "Europe", "Thế chiến II", "World War II"],
         "must_not_have": ["không biết", "không tìm thấy"],
         "timeout": 180
     },
     {
-        "question": "Hội nghị Potsdam 1945 đã quyết định những gì về Đức và châu Âu sau Thế chiến II?",
+        "question": "Hiệp ước Versailles 1919 đã quyết định những gì về Đức và châu Âu sau Thế chiến I?",
         "category": "real_historical_factual",
         "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Potsdam", "1945", "Đức", "Germany", "châu Âu", "Europe"],  # Removed [1] - now accepts any citation format
-        "must_not_have": ["không biết", "không tìm thấy"]
+        "must_have": ["Versailles", "1919", "Đức", "Germany", "châu Âu", "Europe"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
     },
     {
         "question": "Định lý bất toàn của Gödel (Gödel's incompleteness theorem) nói gì? Tại sao nó quan trọng trong toán học và logic?",
@@ -125,12 +126,12 @@ TEST_QUESTIONS = [
         "timeout": 180
     },
     {
-        "question": "How does StillMe's post-processing system work? What steps are involved in quality evaluation and style sanitization?",
-        "category": "technical_postprocessing",
-        "expected_features": ["technical_accuracy", "postprocessing_explanation", "quality_evaluation", "style_sanitization"],
-        "must_have": ["post-processing", "postprocessing", "quality", "evaluation", "sanitization", "rewrite"],
+        "question": "How does StillMe's validator chain work? What validators are used and how do they prevent hallucinations?",
+        "category": "technical_validation",
+        "expected_features": ["citations", "evidence", "technical_accuracy"],
+        "must_have": ["validator", "chain", "hallucination", "citation", "evidence", "validation"],
         "must_not_have": ["don't know", "not sure", "unclear"],
-        "timeout": 120
+        "timeout": 180
     },
     {
         "question": "Tranh luận giữa Popper và Kuhn về khoa học (Popper vs Kuhn on science) là gì? Làm sao họ khác nhau về cách khoa học phát triển?",
