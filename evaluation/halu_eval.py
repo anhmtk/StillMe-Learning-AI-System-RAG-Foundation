@@ -123,6 +123,21 @@ class HaluEvalEvaluator(BaseEvaluator):
             api_response = self.query_stillme(question, use_rag=True, max_retries_for_fallback=3)
             predicted_answer = api_response.get("response", "")
             
+            # CRITICAL: Log empty responses for debugging
+            if not predicted_answer or len(predicted_answer.strip()) == 0:
+                self.logger.error(
+                    f"❌ Empty response for question {i+1}: '{question[:50]}...'"
+                )
+                self.logger.error(f"   API response keys: {list(api_response.keys())}")
+                self.logger.error(f"   API response: {api_response}")
+                # Check for error indicators
+                if api_response.get("_is_fallback", False):
+                    self.logger.error("   ⚠️  Marked as fallback")
+                if api_response.get("_fallback_retries_exceeded", False):
+                    self.logger.error("   ⚠️  Fallback retries exceeded")
+                if api_response.get("error"):
+                    self.logger.error(f"   ⚠️  Error: {api_response.get('error')}")
+            
             # Log if fallback was detected
             if api_response.get("_is_fallback", False) or self.is_fallback_message(predicted_answer):
                 self.logger.warning(
