@@ -6,7 +6,14 @@ Routes external data intents to appropriate providers and manages caching.
 
 import logging
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
+
+try:
+    import pytz
+    PYTZ_AVAILABLE = True
+except ImportError:
+    PYTZ_AVAILABLE = False
+    logging.getLogger(__name__).warning("pytz not available, using UTC timezone only")
 
 from .intent_detector import ExternalDataIntent
 from .cache import ExternalDataCache
@@ -171,55 +178,86 @@ class ExternalDataOrchestrator:
         params_hash = hashlib.md5(params_str.encode()).hexdigest()[:8]
         return f"{intent.type}:{params_hash}"
     
-    def format_response(self, result: ExternalDataResult, query: str) -> str:
+    def format_response(self, result: ExternalDataResult, query: str, detected_lang: str = "en") -> str:
         """
         Format API result into StillMe response format
         
         Args:
             result: ExternalDataResult from provider
             query: Original user query
+            detected_lang: Detected language code (default: 'en')
             
         Returns:
             Formatted response string with source attribution
         """
         if not result.success:
-            # Return error message with transparency
-            return (
-                f"StillMe cannot access {result.source} API right now. "
-                f"Error: {result.error_message}. "
-                f"You can try again later, or StillMe can attempt to answer using RAG knowledge."
-            )
+            # Return error message with transparency (in user's language)
+            if detected_lang == "vi":
+                return (
+                    f"StillMe không thể truy cập {result.source} API ngay bây giờ. "
+                    f"Lỗi: {result.error_message}. "
+                    f"Bạn có thể thử lại sau, hoặc StillMe có thể cố gắng trả lời bằng kiến thức RAG."
+                )
+            else:
+                return (
+                    f"StillMe cannot access {result.source} API right now. "
+                    f"Error: {result.error_message}. "
+                    f"You can try again later, or StillMe can attempt to answer using RAG knowledge."
+                )
         
         # Format based on intent type
         if result.data.get("location"):  # Weather
-            return self._format_weather_response(result)
+            return self._format_weather_response(result, detected_lang)
         elif result.data.get("articles"):  # News
-            return self._format_news_response(result)
+            return self._format_news_response(result, detected_lang)
         else:
             # Generic format
-            return self._format_generic_response(result)
+            return self._format_generic_response(result, detected_lang)
     
-    def _format_weather_response(self, result: ExternalDataResult) -> str:
+    def _format_weather_response(self, result: ExternalDataResult, detected_lang: str = "en") -> str:
         """Format weather data response"""
+        
         data = result.data
         location = data.get("location", "Unknown location")
         temp = data.get("temperature")
         humidity = data.get("humidity")
         description = data.get("weather_description", "Unknown")
         
-        # Format timestamp
-        timestamp_str = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
-        cache_status = " (cached)" if result.cached else ""
+        # Convert UTC to local timezone
+        if PYTZ_AVAILABLE:
+            try:
+                local_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+                local_time = result.timestamp.replace(tzinfo=timezone.utc).astimezone(local_tz)
+                timestamp_str_local = local_time.strftime("%Y-%m-%d %H:%M")
+                timestamp_str_utc = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
+                timestamp_display = f"{timestamp_str_local} ({timestamp_str_utc})"
+            except Exception:
+                timestamp_display = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
+        else:
+            timestamp_display = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
         
-        response = f"According to {result.source} API (retrieved at {timestamp_str}){cache_status}:\n\n"
-        response += f"**Weather in {location}:**\n"
-        response += f"- Temperature: {temp}°C\n" if temp is not None else ""
-        response += f"- Condition: {description}\n"
-        response += f"- Humidity: {humidity}%\n" if humidity is not None else ""
-        response += f"\n[Source: {result.source} | Timestamp: {result.timestamp.isoformat()}Z"
-        if result.cached:
-            response += f" | Cached: Yes"
-        response += "]"
+        cache_status = " (đã cache)" if result.cached else "" if detected_lang == "vi" else " (cached)" if result.cached else ""
+        
+        if detected_lang == "vi":
+            response = f"Theo {result.source} API (lấy lúc {timestamp_display}){cache_status}:\n\n"
+            response += f"**Thời tiết ở {location}:**\n"
+            response += f"- Nhiệt độ: {temp}°C\n" if temp is not None else ""
+            response += f"- Điều kiện: {description}\n"
+            response += f"- Độ ẩm: {humidity}%\n" if humidity is not None else ""
+            response += f"\n[Nguồn: {result.source} | Thời gian: {result.timestamp.isoformat()}Z"
+            if result.cached:
+                response += f" | Đã cache: Có"
+            response += " | Đã xác thực: Có (dữ liệu từ API)]"
+        else:
+            response = f"According to {result.source} API (retrieved at {timestamp_display}){cache_status}:\n\n"
+            response += f"**Weather in {location}:**\n"
+            response += f"- Temperature: {temp}°C\n" if temp is not None else ""
+            response += f"- Condition: {description}\n"
+            response += f"- Humidity: {humidity}%\n" if humidity is not None else ""
+            response += f"\n[Source: {result.source} | Timestamp: {result.timestamp.isoformat()}Z"
+            if result.cached:
+                response += f" | Cached: Yes"
+            response += " | Validated: Yes (data from API)]"
         
         return response
     
@@ -263,41 +301,78 @@ class ExternalDataOrchestrator:
         except Exception as e:
             self.logger.warning(f"Error recording metrics: {e}")
     
-    def _format_news_response(self, result: ExternalDataResult) -> str:
+    def _format_news_response(self, result: ExternalDataResult, detected_lang: str = "en") -> str:
         """Format news data response"""
         data = result.data
         query = data.get("query", "news")
         articles = data.get("articles", [])
         total = data.get("total_results", len(articles))
         
-        # Format timestamp
-        timestamp_str = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
-        cache_status = " (cached)" if result.cached else ""
+        # Convert UTC to local timezone
+        if PYTZ_AVAILABLE:
+            try:
+                local_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+                local_time = result.timestamp.replace(tzinfo=timezone.utc).astimezone(local_tz)
+                timestamp_str_local = local_time.strftime("%Y-%m-%d %H:%M")
+                timestamp_str_utc = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
+                timestamp_display = f"{timestamp_str_local} ({timestamp_str_utc})"
+            except Exception:
+                timestamp_display = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
+        else:
+            timestamp_display = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
         
-        response = f"According to {result.source} API (retrieved at {timestamp_str}){cache_status}:\n\n"
-        response += f"**News about '{query}'** ({total} total results):\n\n"
+        cache_status = " (đã cache)" if result.cached else "" if detected_lang == "vi" else " (cached)" if result.cached else ""
         
-        for i, article in enumerate(articles[:5], 1):  # Show max 5 articles
-            title = article.get("title", "No title")
-            description = article.get("description", "")
-            source = article.get("source", "Unknown source")
-            published = article.get("published_at", "")
-            url = article.get("url", "")
+        if detected_lang == "vi":
+            response = f"Theo {result.source} API (lấy lúc {timestamp_display}){cache_status}:\n\n"
+            response += f"**Tin tức về '{query}'** ({total} kết quả tổng cộng):\n\n"
             
-            response += f"{i}. **{title}**\n"
-            if description:
-                response += f"   {description[:150]}{'...' if len(description) > 150 else ''}\n"
-            response += f"   Source: {source}"
-            if published:
-                response += f" | Published: {published}"
-            if url:
-                response += f"\n   [Read more]({url})"
-            response += "\n\n"
-        
-        response += f"[Source: {result.source} | Timestamp: {result.timestamp.isoformat()}Z"
-        if result.cached:
-            response += f" | Cached: Yes"
-        response += "]"
+            for i, article in enumerate(articles[:5], 1):
+                title = article.get("title", "Không có tiêu đề")
+                description = article.get("description", "")
+                source = article.get("source", "Nguồn không xác định")
+                published = article.get("published_at", "")
+                url = article.get("url", "")
+                
+                response += f"{i}. **{title}**\n"
+                if description:
+                    response += f"   {description[:150]}{'...' if len(description) > 150 else ''}\n"
+                response += f"   Nguồn: {source}"
+                if published:
+                    response += f" | Đăng lúc: {published}"
+                if url:
+                    response += f"\n   [Đọc thêm]({url})"
+                response += "\n\n"
+            
+            response += f"[Nguồn: {result.source} | Thời gian: {result.timestamp.isoformat()}Z"
+            if result.cached:
+                response += f" | Đã cache: Có"
+            response += " | Đã xác thực: Có (dữ liệu từ API)]"
+        else:
+            response = f"According to {result.source} API (retrieved at {timestamp_display}){cache_status}:\n\n"
+            response += f"**News about '{query}'** ({total} total results):\n\n"
+            
+            for i, article in enumerate(articles[:5], 1):
+                title = article.get("title", "No title")
+                description = article.get("description", "")
+                source = article.get("source", "Unknown source")
+                published = article.get("published_at", "")
+                url = article.get("url", "")
+                
+                response += f"{i}. **{title}**\n"
+                if description:
+                    response += f"   {description[:150]}{'...' if len(description) > 150 else ''}\n"
+                response += f"   Source: {source}"
+                if published:
+                    response += f" | Published: {published}"
+                if url:
+                    response += f"\n   [Read more]({url})"
+                response += "\n\n"
+            
+            response += f"[Source: {result.source} | Timestamp: {result.timestamp.isoformat()}Z"
+            if result.cached:
+                response += f" | Cached: Yes"
+            response += " | Validated: Yes (data from API)]"
         
         return response
     
@@ -341,17 +416,36 @@ class ExternalDataOrchestrator:
         except Exception as e:
             self.logger.warning(f"Error recording metrics: {e}")
     
-    def _format_generic_response(self, result: ExternalDataResult) -> str:
+    def _format_generic_response(self, result: ExternalDataResult, detected_lang: str = "en") -> str:
         """Format generic response"""
-        timestamp_str = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
-        cache_status = " (cached)" if result.cached else ""
+        if PYTZ_AVAILABLE:
+            try:
+                local_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+                local_time = result.timestamp.replace(tzinfo=timezone.utc).astimezone(local_tz)
+                timestamp_str_local = local_time.strftime("%Y-%m-%d %H:%M")
+                timestamp_str_utc = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
+                timestamp_display = f"{timestamp_str_local} ({timestamp_str_utc})"
+            except Exception:
+                timestamp_display = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
+        else:
+            timestamp_display = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
         
-        response = f"According to {result.source} API (retrieved at {timestamp_str}){cache_status}:\n\n"
-        response += f"Data: {result.data}\n\n"
-        response += f"[Source: {result.source} | Timestamp: {result.timestamp.isoformat()}Z"
-        if result.cached:
-            response += f" | Cached: Yes"
-        response += "]"
+        cache_status = " (đã cache)" if result.cached else "" if detected_lang == "vi" else " (cached)" if result.cached else ""
+        
+        if detected_lang == "vi":
+            response = f"Theo {result.source} API (lấy lúc {timestamp_display}){cache_status}:\n\n"
+            response += f"Dữ liệu: {result.data}\n\n"
+            response += f"[Nguồn: {result.source} | Thời gian: {result.timestamp.isoformat()}Z"
+            if result.cached:
+                response += f" | Đã cache: Có"
+            response += " | Đã xác thực: Có (dữ liệu từ API)]"
+        else:
+            response = f"According to {result.source} API (retrieved at {timestamp_display}){cache_status}:\n\n"
+            response += f"Data: {result.data}\n\n"
+            response += f"[Source: {result.source} | Timestamp: {result.timestamp.isoformat()}Z"
+            if result.cached:
+                response += f" | Cached: Yes"
+            response += " | Validated: Yes (data from API)]"
         
         return response
     

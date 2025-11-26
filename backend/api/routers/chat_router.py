@@ -1959,8 +1959,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 result = await orchestrator.route(external_data_intent)
                 
                 if result and result.success:
-                    # Format response with source + timestamp
-                    response_text = orchestrator.format_response(result, chat_request.message)
+                    # Format response with source + timestamp (in user's language)
+                    response_text = orchestrator.format_response(result, chat_request.message, detected_lang)
                     
                     # Log for audit
                     logger.info(
