@@ -88,10 +88,13 @@ def main():
     """Run quick evaluations (skip TruthfulQA)"""
     logger.info("=" * 60)
     logger.info("STILLME QUICK EVALUATION SUITE")
-    logger.info("(Skipping TruthfulQA - 790 questions, ~26 hours)")
     logger.info("=" * 60)
+    logger.info(f"API URL: {API_URL}")
+    logger.info("(Skipping TruthfulQA - 790 questions, ~26 hours)")
     logger.info("")
     logger.info("Estimated time: ~30-40 minutes")
+    if "localhost" in API_URL:
+        logger.info("💡 To test Railway, set: $env:STILLME_API_URL='https://stillme-backend-production.up.railway.app'")
     logger.info("")
     
     # Check if backend is running
