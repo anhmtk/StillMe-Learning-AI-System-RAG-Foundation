@@ -129,12 +129,33 @@ def run_transparency_study(output_dir: str) -> Dict[str, Any]:
 
 def main():
     """Main evaluation runner"""
+    # Load environment variables from .env file if available
+    try:
+        from dotenv import load_dotenv
+        from pathlib import Path
+        project_root = Path(__file__).parent.parent.parent
+        env_path = project_root / ".env"
+        if env_path.exists():
+            load_dotenv(env_path)
+        else:
+            load_dotenv()  # Try to load from current directory
+    except ImportError:
+        pass  # python-dotenv not installed, skip
+    except Exception:
+        pass  # Error loading .env, continue with environment variables
+    
+    # Get API URL from environment variable if available
+    default_api_url = os.getenv("STILLME_API_URL", os.getenv("STILLME_API_BASE", "http://localhost:8000"))
+    # Ensure URL has protocol if missing
+    if default_api_url and not default_api_url.startswith(("http://", "https://")):
+        default_api_url = f"https://{default_api_url}"
+    
     parser = argparse.ArgumentParser(description="Run StillMe comprehensive evaluation")
     parser.add_argument(
         "--api-url",
         type=str,
-        default="http://localhost:8000",
-        help="StillMe API base URL"
+        default=default_api_url,
+        help=f"StillMe API base URL (default: from STILLME_API_URL env var or {default_api_url})"
     )
     parser.add_argument(
         "--output-dir",
