@@ -101,40 +101,48 @@ class FallbackHandler:
         """
         import re
         
+        # Get human-readable citation using CitationFormatter
+        citation_text = " [1]"  # Fallback to numeric if formatter fails
+        try:
+            from backend.utils.citation_formatter import get_citation_formatter
+            formatter = get_citation_formatter()
+            citation_text = f" {formatter.get_citation_strategy(user_question, ctx_docs)}"
+            logger.debug(f"FallbackHandler: Using human-readable citation: '{citation_text.strip()}'")
+        except Exception as e:
+            logger.warning(f"FallbackHandler: Could not get citation formatter: {e}, using [1]")
+        
         # Edge case: Empty or whitespace-only answer
         if not answer or len(answer.strip()) == 0:
             logger.warning("FallbackHandler: Cannot add citation to empty answer")
-            return answer + " [1]" if answer else "[1]"
+            return answer + citation_text if answer else citation_text.strip()
         
-        # Check if already has citation
-        if re.search(r'\[\d+\]', answer):
+        # Check if already has citation (both numeric and human-readable)
+        if re.search(r'\[\d+\]', answer) or re.search(r'\[(?:general knowledge|research:|learning:)', answer, re.IGNORECASE):
             return answer
         
         # Edge case: Very short answer (< 5 chars) - just add at the end
         if len(answer.strip()) < 5:
-            return answer.rstrip() + " [1]"
+            return answer.rstrip() + citation_text
         
         # Find best place to add citation
-        # Strategy: Add [1] after first sentence or at natural break point
+        # Strategy: Add citation after first sentence or at natural break point
         
         # Try to find first sentence (ends with . ! ?)
         sentence_end = re.search(r'[.!?]\s+', answer)
         if sentence_end:
             insert_pos = sentence_end.end()
-            citation = " [1]"
-            patched = answer[:insert_pos] + citation + answer[insert_pos:]
+            patched = answer[:insert_pos] + citation_text + answer[insert_pos:]
         else:
             # Add at the end of first paragraph or beginning
             first_newline = answer.find('\n')
             if first_newline > 0 and first_newline < 150:  # Reasonable paragraph break
                 insert_pos = first_newline
-                citation = " [1]"
-                patched = answer[:insert_pos] + citation + answer[insert_pos:]
+                patched = answer[:insert_pos] + citation_text + answer[insert_pos:]
             else:
                 # Add at the end
-                patched = answer.rstrip() + " [1]"
+                patched = answer.rstrip() + citation_text
         
-        logger.info(f"FallbackHandler: Added citation [1] to answer (context docs: {len(ctx_docs)})")
+        logger.info(f"FallbackHandler: Added citation '{citation_text.strip()}' to answer (context docs: {len(ctx_docs)})")
         return patched
     
     def _get_no_context_fallback(self, user_question: str, detected_lang: str = 'en') -> str:
