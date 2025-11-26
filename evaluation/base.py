@@ -107,7 +107,7 @@ class BaseEvaluator(ABC):
         """
         pass
     
-    def query_stillme(self, question: str, use_rag: bool = True, max_retries_for_fallback: int = 2) -> Dict[str, Any]:
+    def query_stillme(self, question: str, use_rag: bool = True, max_retries_for_fallback: int = 3) -> Dict[str, Any]:
         """
         Query StillMe API with retry logic for fallback messages
         
@@ -159,23 +159,36 @@ class BaseEvaluator(ABC):
                 
                 # CRITICAL: Check if response is a fallback message
                 response_text = api_response.get("response", "")
-                if response_text and self.is_fallback_message(response_text):
+                validation_info = api_response.get("validation_info", {})
+                used_fallback = validation_info.get("used_fallback", False)
+                
+                # Check both response text and validation_info for fallback
+                is_fallback = (response_text and self.is_fallback_message(response_text)) or used_fallback
+                
+                if is_fallback:
                     if fallback_retries < max_retries_for_fallback:
                         fallback_retries += 1
-                        wait_time = fallback_retries * 3  # Exponential backoff: 3s, 6s
+                        wait_time = fallback_retries * 5  # Increased backoff: 5s, 10s (more time for backend to recover)
                         self.logger.warning(
-                            f"Fallback message detected for question '{question[:50]}...', "
+                            f"⚠️  Fallback message detected for question '{question[:50]}...' "
+                            f"(used_fallback={used_fallback}, response_preview='{response_text[:100]}...'), "
                             f"retrying in {wait_time}s (fallback retry {fallback_retries}/{max_retries_for_fallback})"
                         )
+                        # Log validation info for debugging
+                        if validation_info:
+                            self.logger.debug(f"   Validation info: {validation_info}")
                         time.sleep(wait_time)
                         continue  # Retry the request
                     else:
                         self.logger.error(
-                            f"Fallback message persisted for question '{question[:50]}...' "
-                            f"after {max_retries_for_fallback} retries. Response: {response_text[:200]}..."
+                            f"❌ Fallback message persisted for question '{question[:50]}...' "
+                            f"after {max_retries_for_fallback} retries. "
+                            f"Response preview: {response_text[:300]}... "
+                            f"Validation info: {validation_info}"
                         )
                         # Return the response anyway, but mark it as fallback
                         api_response["_is_fallback"] = True
+                        api_response["_fallback_retries_exceeded"] = True
                         return api_response
                 
                 # Success - no fallback message

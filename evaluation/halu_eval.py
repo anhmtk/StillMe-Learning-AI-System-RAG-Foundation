@@ -88,12 +88,12 @@ class HaluEvalEvaluator(BaseEvaluator):
             
             # Add delay between requests to avoid rate limiting (except for first request)
             if i > 0:
-                delay = 2.0  # 2 seconds delay between requests
+                delay = 3.0  # Increased to 3 seconds delay between requests to avoid rate limiting
                 self.logger.debug(f"   Waiting {delay}s before next request to avoid rate limiting...")
                 time.sleep(delay)
             
-            # Query StillMe with retry for fallback messages
-            api_response = self.query_stillme(question, use_rag=True, max_retries_for_fallback=2)
+            # Query StillMe with retry for fallback messages (increased retries for HaluEval)
+            api_response = self.query_stillme(question, use_rag=True, max_retries_for_fallback=3)
             predicted_answer = api_response.get("response", "")
             
             # Log if fallback was detected
