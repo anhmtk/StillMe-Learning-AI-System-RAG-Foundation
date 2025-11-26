@@ -25,8 +25,31 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Load environment variables from .env file
+project_root = Path(__file__).parent.parent
+try:
+    from dotenv import load_dotenv
+    env_path = project_root / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+        logger.info(f"✅ Loaded .env file from: {env_path}")
+    else:
+        logger.debug(f"⚠️  .env file not found at: {env_path}, using environment variables only")
+        load_dotenv()  # Try to load from current directory
+except ImportError:
+    logger.debug("⚠️  python-dotenv not installed, skipping .env file loading")
+    logger.debug("   Install with: pip install python-dotenv")
+except Exception as e:
+    logger.debug(f"⚠️  Error loading .env file: {e}")
+
 # Support both local and Railway testing
-API_URL = os.getenv("STILLME_API_URL", "http://localhost:8000")
+# Priority: 1. Environment variable, 2. .env file, 3. Default localhost
+API_URL = os.getenv("STILLME_API_URL", os.getenv("STILLME_API_BASE", "http://localhost:8000"))
+
+# Ensure URL has protocol if missing
+if API_URL and not API_URL.startswith(("http://", "https://")):
+    API_URL = f"https://{API_URL}"
+
 API_HEALTH_ENDPOINT = f"{API_URL}/health"
 MAX_WAIT_TIME = 60  # seconds
 
