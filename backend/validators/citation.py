@@ -203,31 +203,47 @@ class CitationRequired:
             # CRITICAL: Also check for "tranh luận giữa X và Y" pattern with well-known philosophers
             if is_philosophical and not is_philosophical_factual:
                 well_known_debates = [
-                    # Searle-Dennett: Match if both names appear OR if "tranh luận giữa Searle và Dennett" pattern
-                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(searle|dennett).*(và|and).*(searle|dennett)\b", "Searle-Dennett debate"),
-                    (r"\b(searle|dennett)\b.*\b(chinese\s+room|understanding)\b", "Searle-Dennett Chinese Room debate"),
+                    # Searle-Dennett: Match if "tranh luận giữa Searle và Dennett" OR if both names appear with Chinese Room
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(searle)\b.*\b(dennett)\b", "Searle-Dennett debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(dennett)\b.*\b(searle)\b", "Searle-Dennett debate"),
+                    (r"\b(searle)\b.*\b(dennett)\b.*\b(chinese\s+room|understanding)\b", "Searle-Dennett Chinese Room debate"),
+                    (r"\b(dennett)\b.*\b(searle)\b.*\b(chinese\s+room|understanding)\b", "Searle-Dennett Chinese Room debate"),
                     (r"\b(chinese\s+room)\b.*\b(searle|dennett)\b", "Searle-Dennett Chinese Room debate"),
                     # Berkeley-Locke
-                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(berkeley|locke).*(và|and).*(berkeley|locke)\b", "Berkeley-Locke debate"),
-                    (r"\b(berkeley|locke)\b.*\b(primary|secondary|qualities|phẩm\s+chất)\b", "Berkeley-Locke primary/secondary qualities debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(berkeley)\b.*\b(locke)\b", "Berkeley-Locke debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(locke)\b.*\b(berkeley)\b", "Berkeley-Locke debate"),
+                    (r"\b(berkeley)\b.*\b(locke)\b.*\b(primary|secondary|qualities|phẩm\s+chất)\b", "Berkeley-Locke primary/secondary qualities debate"),
+                    (r"\b(locke)\b.*\b(berkeley)\b.*\b(primary|secondary|qualities|phẩm\s+chất)\b", "Berkeley-Locke primary/secondary qualities debate"),
                     # Nagel-Chalmers
-                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(nagel|chalmers).*(và|and).*(nagel|chalmers)\b", "Nagel-Chalmers debate"),
-                    (r"\b(nagel|chalmers)\b.*\b(hard\s+problem|consciousness|ý\s+thức)\b", "Nagel-Chalmers hard problem debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(nagel)\b.*\b(chalmers)\b", "Nagel-Chalmers debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(chalmers)\b.*\b(nagel)\b", "Nagel-Chalmers debate"),
+                    (r"\b(nagel)\b.*\b(chalmers)\b.*\b(hard\s+problem|consciousness|ý\s+thức)\b", "Nagel-Chalmers hard problem debate"),
+                    (r"\b(chalmers)\b.*\b(nagel)\b.*\b(hard\s+problem|consciousness|ý\s+thức)\b", "Nagel-Chalmers hard problem debate"),
                     # Quine-Carnap
-                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(quine|carnap).*(và|and).*(quine|carnap)\b", "Quine-Carnap debate"),
-                    (r"\b(quine|carnap)\b.*\b(analytic|synthetic|distinction)\b", "Quine-Carnap analytic-synthetic distinction debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(quine)\b.*\b(carnap)\b", "Quine-Carnap debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(carnap)\b.*\b(quine)\b", "Quine-Carnap debate"),
+                    (r"\b(quine)\b.*\b(carnap)\b.*\b(analytic|synthetic|distinction)\b", "Quine-Carnap analytic-synthetic distinction debate"),
+                    (r"\b(carnap)\b.*\b(quine)\b.*\b(analytic|synthetic|distinction)\b", "Quine-Carnap analytic-synthetic distinction debate"),
                     # Hegel-Marx
-                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(hegel|marx).*(và|and).*(hegel|marx)\b", "Hegel-Marx debate"),
-                    (r"\b(hegel|marx)\b.*\b(dialectics|biện\s+chứng)\b", "Hegel-Marx dialectics debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(hegel)\b.*\b(marx)\b", "Hegel-Marx debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(marx)\b.*\b(hegel)\b", "Hegel-Marx debate"),
+                    (r"\b(hegel)\b.*\b(marx)\b.*\b(dialectics|biện\s+chứng)\b", "Hegel-Marx dialectics debate"),
+                    (r"\b(marx)\b.*\b(hegel)\b.*\b(dialectics|biện\s+chứng)\b", "Hegel-Marx dialectics debate"),
                     # Rawls-Nozick
-                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(rawls|nozick).*(và|and).*(rawls|nozick)\b", "Rawls-Nozick debate"),
-                    (r"\b(rawls|nozick)\b.*\b(justice|công\s+lý)\b", "Rawls-Nozick justice debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(rawls)\b.*\b(nozick)\b", "Rawls-Nozick debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(nozick)\b.*\b(rawls)\b", "Rawls-Nozick debate"),
+                    (r"\b(rawls)\b.*\b(nozick)\b.*\b(justice|công\s+lý)\b", "Rawls-Nozick justice debate"),
+                    (r"\b(nozick)\b.*\b(rawls)\b.*\b(justice|công\s+lý)\b", "Rawls-Nozick justice debate"),
                     # Mill-Bentham
-                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(mill|bentham).*(và|and).*(mill|bentham)\b", "Mill-Bentham debate"),
-                    (r"\b(mill|bentham)\b.*\b(utilitarianism|vị\s+lợi)\b", "Mill-Bentham utilitarianism debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(mill)\b.*\b(bentham)\b", "Mill-Bentham debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(bentham)\b.*\b(mill)\b", "Mill-Bentham debate"),
+                    (r"\b(mill)\b.*\b(bentham)\b.*\b(utilitarianism|vị\s+lợi)\b", "Mill-Bentham utilitarianism debate"),
+                    (r"\b(bentham)\b.*\b(mill)\b.*\b(utilitarianism|vị\s+lợi)\b", "Mill-Bentham utilitarianism debate"),
                     # Frege-Russell
-                    (r"\b(tranh\s+luận|debate).*(giữa|between).*(frege|russell).*(và|and).*(frege|russell)\b", "Frege-Russell debate"),
-                    (r"\b(frege|russell)\b.*\b(sense|reference|Sinn|Bedeutung)\b", "Frege-Russell sense/reference debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(frege)\b.*\b(russell)\b", "Frege-Russell debate"),
+                    (r"\b(tranh\s+luận|debate).*(giữa|between).*\b(russell)\b.*\b(frege)\b", "Frege-Russell debate"),
+                    (r"\b(frege)\b.*\b(russell)\b.*\b(sense|reference|Sinn|Bedeutung)\b", "Frege-Russell sense/reference debate"),
+                    (r"\b(russell)\b.*\b(frege)\b.*\b(sense|reference|Sinn|Bedeutung)\b", "Frege-Russell sense/reference debate"),
                 ]
                 for pattern, debate_name in well_known_debates:
                     try:
@@ -285,6 +301,10 @@ class CitationRequired:
         # CRITICAL: Log detection results for debugging
         if is_philosophical:
             logger.warning(f"🔍 CitationRequired detection: is_philosophical=True, is_philosophical_factual={is_philosophical_factual}, is_real_factual_question={is_real_factual_question}, is_any_factual_question={is_any_factual_question}, has_context={bool(ctx_docs and len(ctx_docs) > 0)}, question: {user_question[:100] if user_question else 'unknown'}")
+        
+        # CRITICAL: Also log for non-philosophical questions to debug historical factual questions
+        if not is_philosophical and user_question:
+            logger.warning(f"🔍 CitationRequired detection (non-philosophical): is_real_factual_question={is_real_factual_question}, is_any_factual_question={is_any_factual_question}, has_context={bool(ctx_docs and len(ctx_docs) > 0)}, question: {user_question[:100] if user_question else 'unknown'}")
         
         # CRITICAL FIX: For ANY factual questions, we should still try to enforce citations
         # even if context is empty, because the LLM might have base knowledge about these topics
