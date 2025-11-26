@@ -111,7 +111,20 @@ def _detect_weather_intent(query: str, query_lower: str) -> Optional[ExternalDat
 def _detect_news_intent(query: str, query_lower: str) -> Optional[ExternalDataIntent]:
     """Detect news-related queries"""
     
-    # News keywords (English + Vietnamese)
+    # First, check for simple Vietnamese patterns that are very common
+    # "mới nhất về" or "thông tin mới nhất" are strong indicators
+    simple_indicators = [
+        'mới nhất về',
+        'thông tin mới nhất',
+        'thông tin mới',
+        'tin tức mới nhất',
+        'tin mới nhất',
+    ]
+    
+    # Check if query contains any of these simple indicators
+    has_simple_indicator = any(indicator in query_lower for indicator in simple_indicators)
+    
+    # News keywords (English + Vietnamese) - more specific patterns
     news_keywords = [
         # English
         r'\bnews\b',
@@ -126,7 +139,7 @@ def _detect_news_intent(query: str, query_lower: str) -> Optional[ExternalDataIn
         r'\bbreaking\s+news\b',
         r'\btoday.*news\b',
         r'\brecent.*news\b',
-        # Vietnamese
+        # Vietnamese - explicit news keywords
         r'\btin\s+tức\b',
         r'\btin\s+mới\b',
         r'\btin\s+tức\s+mới\s+nhất\b',
@@ -134,12 +147,36 @@ def _detect_news_intent(query: str, query_lower: str) -> Optional[ExternalDataIn
         r'\btin\s+tức\s+liên\s+quan\b',
         r'\bthời\s+sự\b',
         r'\bheadline\b',
+        # Vietnamese - "thông tin mới nhất" patterns (common way to ask for latest news)
+        # Note: Using simpler patterns without strict word boundaries for Vietnamese
+        r'thông\s+tin\s+mới\s+nhất',
+        r'thông\s+tin\s+mới',
+        r'thông\s+tin\s+về',
+        r'thông\s+tin\s+ngày\s+hôm\s+nay',
+        r'thông\s+tin\s+mới\s+nhất\s+về',
+        r'thông\s+tin\s+mới\s+nhất\s+ngày\s+hôm\s+nay',
+        r'có\s+biết\s+thông\s+tin\s+mới\s+nhất',
+        # Additional patterns for common Vietnamese news queries
+        r'mới\s+nhất\s+về',
+        r'thông\s+tin\s+.*\s+mới',
+        r'tin\s+tức\s+.*\s+mới',
     ]
     
-    # Check if query contains news keywords
-    has_news_keyword = any(re.search(pattern, query_lower, re.IGNORECASE) for pattern in news_keywords)
+    # Check if query contains news keywords (either simple indicators or regex patterns)
+    has_news_keyword = has_simple_indicator
     
     if not has_news_keyword:
+        # Try regex patterns
+        matched_pattern = None
+        for pattern in news_keywords:
+            if re.search(pattern, query_lower, re.IGNORECASE):
+                has_news_keyword = True
+                matched_pattern = pattern
+                logger.debug(f"News keyword matched: pattern={pattern}, query={query[:50]}")
+                break
+    
+    if not has_news_keyword:
+        logger.debug(f"No news keyword found in query: {query[:50]}")
         return None
     
     # Extract query/topic
@@ -210,14 +247,23 @@ def _extract_news_query(query: str, query_lower: str) -> str:
     
     # Remove news keywords to get the actual topic
     news_removal_patterns = [
+        # English patterns
         r'\bnews\s+about\s+',
         r'\bnews\s+on\s+',
         r'\bnews\s+regarding\s+',
-        r'\btin\s+tức\s+về\s+',
-        r'\btin\s+tức\s+liên\s+quan\s+',
         r'\bwhat.*news\s+about\s+',
         r'\blatest\s+news\s+on\s+',
         r'\brecent\s+news\s+about\s+',
+        # Vietnamese - explicit "tin tức" patterns
+        r'\btin\s+tức\s+về\s+',
+        r'\btin\s+tức\s+liên\s+quan\s+',
+        r'\btin\s+tức\s+mới\s+nhất\s+về\s+',
+        # Vietnamese - "thông tin mới nhất" patterns
+        r'\bthông\s+tin\s+mới\s+nhất\s+về\s+',
+        r'\bthông\s+tin\s+mới\s+nhất\s+ngày\s+hôm\s+nay\s+về\s+',
+        r'\bthông\s+tin\s+về\s+',
+        r'\bthông\s+tin\s+mới\s+nhất\s+',
+        r'\bcó\s+biết\s+thông\s+tin\s+mới\s+nhất\s+về\s+',
     ]
     
     topic = query
@@ -225,14 +271,36 @@ def _extract_news_query(query: str, query_lower: str) -> str:
         match = re.search(pattern, query_lower, re.IGNORECASE)
         if match:
             topic = query[match.end():].strip()
-            # Remove trailing punctuation
+            # Remove trailing punctuation and question words
             topic = re.sub(r'[?.,!]+$', '', topic).strip()
+            topic = re.sub(r'^(về|about|on|regarding)\s+', '', topic, flags=re.IGNORECASE).strip()
+            # Remove common time/question words
+            topic = re.sub(r'\b(ngày\s+hôm\s+nay|hôm\s+nay|today|ko|không|gì|what|mới\s+nhất|latest|recent)\b', '', topic, flags=re.IGNORECASE).strip()
             if topic:
+                return topic
+    
+    # Try to extract topic after "về" or "about" if present
+    # Pattern: "thông tin mới nhất về [topic]"
+    about_patterns = [
+        r'về\s+([^?.,!]+)',
+        r'about\s+([^?.,!]+)',
+        r'on\s+([^?.,!]+)',
+    ]
+    
+    for pattern in about_patterns:
+        match = re.search(pattern, query_lower, re.IGNORECASE)
+        if match:
+            topic = match.group(1).strip()
+            # Remove common question words and time references
+            topic = re.sub(r'\b(ngày\s+hôm\s+nay|hôm\s+nay|today|ko|không|gì|what|mới\s+nhất|latest|recent)\b', '', topic, flags=re.IGNORECASE).strip()
+            # Remove trailing question marks and punctuation
+            topic = re.sub(r'[?.,!]+$', '', topic).strip()
+            if topic and len(topic) > 1:  # Allow single character topics like "AI"
                 return topic
     
     # If no specific topic, return generic query
     # For "news" or "tin tức" without topic, we'll search for general news
-    if re.search(r'^(news|tin\s+tức)', query_lower):
+    if re.search(r'^(news|tin\s+tức|thông\s+tin)', query_lower):
         return "technology"  # Default to technology news
     
     return query.strip()
