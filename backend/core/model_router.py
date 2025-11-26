@@ -28,13 +28,22 @@ logger = logging.getLogger(__name__)
 class DeepSeekModelRouter:
     """
     Intelligent router for selecting between deepseek-chat and deepseek-reasoner
+    
+    Cost-aware routing that prioritizes philosophical depth while optimizing costs.
     """
     
     def __init__(self):
         """Initialize model router"""
         self.chat_model = "deepseek-chat"
         self.reasoner_model = "deepseek-reasoner"
-        logger.info("DeepSeekModelRouter initialized")
+        
+        # Cost information (for logging and optimization)
+        self.chat_input_cost = 0.28  # $ per 1M input tokens
+        self.chat_output_cost = 0.42  # $ per 1M output tokens
+        self.reasoner_input_cost = 0.28  # Same as chat
+        self.reasoner_output_cost = 0.42  # Same as chat
+        
+        logger.info("DeepSeekModelRouter initialized (cost-aware)")
     
     def select_model(
         self, 

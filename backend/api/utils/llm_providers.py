@@ -334,6 +334,27 @@ class DeepSeekProvider(LLMProvider):
                         if not content or not content.strip():
                             logger.warning("DeepSeek API returned empty or None content")
                             return "DeepSeek API returned empty response"
+                        
+                        # Track cost if usage information available
+                        if "usage" in data:
+                            usage = data["usage"]
+                            input_tokens = usage.get("prompt_tokens", 0)
+                            output_tokens = usage.get("completion_tokens", 0)
+                            
+                            # Track cost (optional - only if cost monitor is available)
+                            try:
+                                from backend.services.cost_monitor import get_cost_monitor
+                                cost_monitor = get_cost_monitor()
+                                tracking_info = cost_monitor.track_usage(
+                                    question=question or prompt[:500],
+                                    input_tokens=input_tokens,
+                                    output_tokens=output_tokens,
+                                    model=model
+                                )
+                                logger.debug(f"💰 Cost tracked: ${tracking_info['cost']:.4f} (philosophical={tracking_info['is_philosophical']})")
+                            except Exception as e:
+                                logger.debug(f"Cost tracking not available: {e}")
+                        
                         return content
                     else:
                         return "DeepSeek API returned unexpected response format"
