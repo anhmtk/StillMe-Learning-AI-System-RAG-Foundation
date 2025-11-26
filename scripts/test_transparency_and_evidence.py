@@ -214,25 +214,29 @@ def detect_model_from_response(response_data: Dict, question: str) -> str:
         return predicted_model
     except Exception as e:
         # Fallback: simple heuristic
-        question_lower = question.lower()
-        philosophical_keywords = [
-            "ý thức", "consciousness", "meaning of life", "ý nghĩa",
-            "truth", "ethics", "moral", "tồn tại", "existence",
-            "bản chất", "reality", "thực tại"
-        ]
-        # Check for pure philosophical (not factual with philosophical elements)
-        has_philosophical_keyword = any(kw in question_lower for kw in philosophical_keywords)
-        has_factual_indicator = any(
-            kw in question_lower for kw in [
-                "russell", "gödel", "plato", "aristotle", "kant", "hume",
-                "paradox", "theorem", "định lý", "1944", "1945", "1954"
+        try:
+            question_lower = question.lower()
+            philosophical_keywords = [
+                "ý thức", "consciousness", "meaning of life", "ý nghĩa",
+                "truth", "ethics", "moral", "tồn tại", "existence",
+                "bản chất", "reality", "thực tại"
             ]
-        )
-        
-        if has_philosophical_keyword and not has_factual_indicator:
-            return "deepseek-reasoner"
-        else:
-            return "deepseek-chat"
+            # Check for pure philosophical (not factual with philosophical elements)
+            has_philosophical_keyword = any(kw in question_lower for kw in philosophical_keywords)
+            has_factual_indicator = any(
+                kw in question_lower for kw in [
+                    "russell", "gödel", "plato", "aristotle", "kant", "hume",
+                    "paradox", "theorem", "định lý", "1944", "1945", "1954"
+                ]
+            )
+            
+            if has_philosophical_keyword and not has_factual_indicator:
+                return "deepseek-reasoner"
+            else:
+                return "deepseek-chat"
+        except Exception as fallback_error:
+            # Final fallback: return unknown if all methods fail
+            return "unknown"
 
 
 def check_citations(answer: str) -> Dict:
@@ -575,11 +579,19 @@ def test_question(test_case: Dict, question_index: int) -> Dict:
     confidence = response_data.get("confidence_score", 0.0)
     validation_info = response_data.get("validation_result", {})
     
-    # Detect model used (for model routing tracking)
-    model_used = detect_model_from_response(response_data, question)
+    # Detect model used (for model routing tracking) - only if response is successful
+    model_used = "unknown"
+    try:
+        if answer and not response_data.get("error"):
+            model_used = detect_model_from_response(response_data, question)
+    except Exception as e:
+        # If model detection fails, use fallback
+        print(f"⚠️ Could not detect model: {e}")
+        model_used = "unknown"
     
     print(f"✅ Response received (length: {len(answer)} chars, confidence: {confidence:.2f})")
-    print(f"🤖 Model used: {model_used}")
+    if model_used != "unknown":
+        print(f"🤖 Model used: {model_used}")
     print()
     
     # Evaluate
@@ -703,50 +715,47 @@ def run_all_tests():
     print(f"Status: {'✅ PASSED' if variation_result['passed'] else '❌ FAILED'}")
     print()
     
-    # Model Routing Statistics
-    print("=" * 80)
-    print("MODEL ROUTING STATISTICS")
-    print("=" * 80)
-    model_counts = {}
-    for result in results:
-        if result.get("status") == "success":
+    # Model Routing Statistics (only if we have successful responses)
+    successful_results = [r for r in results if r.get("status") == "success"]
+    if successful_results:
+        print("=" * 80)
+        print("MODEL ROUTING STATISTICS")
+        print("=" * 80)
+        model_counts = {}
+        for result in successful_results:
             model = result.get("model_used", "unknown")
             model_counts[model] = model_counts.get(model, 0) + 1
-    
-    total_successful = sum(model_counts.values())
-    if total_successful > 0:
-        print(f"Total Successful Responses: {total_successful}")
-        for model, count in sorted(model_counts.items()):
-            percentage = (count / total_successful) * 100
-            print(f"  {model}: {count} ({percentage:.1f}%)")
         
-        # Show model usage by question type
-        print("\nModel Usage by Question Type:")
-        philosophical_questions = [r for r in results if "philosophical" in r.get("category", "").lower()]
-        factual_questions = [r for r in results if "factual" in r.get("category", "").lower() and "philosophical" not in r.get("category", "").lower()]
-        
-        if philosophical_questions:
-            philo_models = {}
-            for r in philosophical_questions:
-                if r.get("status") == "success":
+        total_successful = sum(model_counts.values())
+        if total_successful > 0:
+            print(f"Total Successful Responses: {total_successful}")
+            for model, count in sorted(model_counts.items()):
+                percentage = (count / total_successful) * 100
+                print(f"  {model}: {count} ({percentage:.1f}%)")
+            
+            # Show model usage by question type
+            print("\nModel Usage by Question Type:")
+            philosophical_questions = [r for r in successful_results if "philosophical" in r.get("category", "").lower()]
+            factual_questions = [r for r in successful_results if "factual" in r.get("category", "").lower() and "philosophical" not in r.get("category", "").lower()]
+            
+            if philosophical_questions:
+                philo_models = {}
+                for r in philosophical_questions:
                     model = r.get("model_used", "unknown")
                     philo_models[model] = philo_models.get(model, 0) + 1
-            print(f"  Philosophical questions ({len(philosophical_questions)}):")
-            for model, count in sorted(philo_models.items()):
-                print(f"    {model}: {count}")
-        
-        if factual_questions:
-            factual_models = {}
-            for r in factual_questions:
-                if r.get("status") == "success":
+                print(f"  Philosophical questions ({len(philosophical_questions)}):")
+                for model, count in sorted(philo_models.items()):
+                    print(f"    {model}: {count}")
+            
+            if factual_questions:
+                factual_models = {}
+                for r in factual_questions:
                     model = r.get("model_used", "unknown")
                     factual_models[model] = factual_models.get(model, 0) + 1
-            print(f"  Factual questions ({len(factual_questions)}):")
-            for model, count in sorted(factual_models.items()):
-                print(f"    {model}: {count}")
-    else:
-        print("No successful responses to analyze")
-    print()
+                print(f"  Factual questions ({len(factual_questions)}):")
+                for model, count in sorted(factual_models.items()):
+                    print(f"    {model}: {count}")
+        print()
     
     # Summary
     print("=" * 80)
