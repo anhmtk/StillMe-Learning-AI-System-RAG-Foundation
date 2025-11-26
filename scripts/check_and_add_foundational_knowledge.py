@@ -175,7 +175,50 @@ def add_foundational_knowledge():
                 all_success = False
         else:
             logger.warning(f"⚠️ Philosophical foundational knowledge file not found: {philosophical_path}")
-            all_success = False
+        
+        # Add Eastern philosophy knowledge if file exists
+        eastern_philosophy_path = project_root / "docs" / "rag" / "eastern_philosophy.md"
+        if eastern_philosophy_path.exists():
+            logger.info("📚 Adding Eastern philosophy knowledge...")
+            try:
+                with open(eastern_philosophy_path, 'r', encoding='utf-8') as f:
+                    eastern_philosophy_content = f.read()
+                
+                # Extract content after frontmatter if present
+                if eastern_philosophy_content.startswith("---"):
+                    parts = eastern_philosophy_content.split("---", 2)
+                    if len(parts) >= 3:
+                        eastern_philosophy_content = parts[2].strip()
+                
+                tags_list_eastern = ["foundational:stillme", "CRITICAL_FOUNDATION", "philosophical", "eastern_philosophy", "buddhism", "daoism", "confucianism"]
+                tags_string_eastern = ",".join(tags_list_eastern)
+                
+                success_eastern = rag_retrieval.add_learning_content(
+                    content=eastern_philosophy_content,
+                    source="CRITICAL_FOUNDATION",
+                    content_type="knowledge",
+                    metadata={
+                        "title": "Eastern Philosophy - Alternative Paradigms for AI Epistemology",
+                        "foundational": "stillme",
+                        "type": "foundational",
+                        "source": "CRITICAL_FOUNDATION",
+                        "tags": tags_string_eastern,
+                        "importance_score": 1.0,
+                        "content_type": "philosophical",
+                        "domain": "eastern_philosophy",
+                        "description": "CRITICAL: Eastern philosophy knowledge (Buddhism, Daoism, Confucianism) for multi-paradigm philosophical responses"
+                    }
+                )
+                if success_eastern:
+                    logger.info("✅ Eastern philosophy knowledge added successfully!")
+                else:
+                    logger.error("❌ Failed to add Eastern philosophy knowledge")
+                    all_success = False
+            except Exception as e:
+                logger.error(f"❌ Error adding Eastern philosophy knowledge: {e}")
+                all_success = False
+        else:
+            logger.warning(f"⚠️ Eastern philosophy knowledge file not found: {eastern_philosophy_path}")
         
         if all_success:
             logger.info("✅ All foundational knowledge added successfully!")
