@@ -83,11 +83,12 @@ TEST_QUESTIONS = [
         "timeout": 180
     },
     {
-        "question": "Hội nghị Bretton Woods 1944 đã quyết định những gì về hệ thống tài chính quốc tế?",
+        "question": "Hiệp ước Geneva 1954 đã quyết định những gì về Việt Nam và Đông Dương?",
         "category": "real_historical_factual",
         "expected_features": ["citations", "evidence", "factual_accuracy"],
-        "must_have": ["Bretton Woods", "1944", "IMF", "World Bank", "tài chính quốc tế"],  # Removed [1] - now accepts any citation format
-        "must_not_have": ["không biết", "không tìm thấy"]
+        "must_have": ["Geneva", "1954", "Việt Nam", "Vietnam", "Đông Dương", "Indochina"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
     },
     {
         "question": "Hội nghị Potsdam 1945 đã quyết định những gì về Đức và châu Âu sau Thế chiến II?",
@@ -121,20 +122,20 @@ TEST_QUESTIONS = [
         "timeout": 180
     },
     {
-        "question": "What is the difference between RAG retrieval and LLM generation in your system? How do they work together?",
-        "category": "technical_rag_llm_integration",
-        "expected_features": ["technical_accuracy", "rag_explanation", "llm_explanation", "integration"],
-        "must_have": ["RAG", "retrieval", "LLM", "generation", "embedding", "ChromaDB", "vector", "integration"],
+        "question": "How does StillMe's post-processing system work? What steps are involved in quality evaluation and style sanitization?",
+        "category": "technical_postprocessing",
+        "expected_features": ["technical_accuracy", "postprocessing_explanation", "quality_evaluation", "style_sanitization"],
+        "must_have": ["post-processing", "postprocessing", "quality", "evaluation", "sanitization", "rewrite"],
         "must_not_have": ["don't know", "not sure", "unclear"],
-        "timeout": 90  # Increase timeout for technical questions
+        "timeout": 120
     },
     {
-        "question": "How does StillMe's Validation Chain work? What validators are used and how do they ensure response quality?",
-        "category": "technical_validation_chain",
-        "expected_features": ["technical_accuracy", "validation_explanation", "quality_assurance", "transparency"],
-        "must_have": ["Validation Chain", "validators", "quality", "CitationRequired", "Factual Hallucination", "response"],
-        "must_not_have": ["don't know", "not sure", "unclear", "technical issue"],
-        "timeout": 120
+        "question": "Tranh luận giữa Popper và Kuhn về khoa học (Popper vs Kuhn on science) là gì? Làm sao họ khác nhau về cách khoa học phát triển?",
+        "category": "real_philosophical_factual",
+        "expected_features": ["citations", "evidence", "philosophical_depth", "scientific_accuracy"],
+        "must_have": ["Popper", "Kuhn", "khoa học", "science", "falsification", "paradigm"],
+        "must_not_have": ["không biết", "không tìm thấy"],
+        "timeout": 180
     },
     {
         "question": "Tranh luận giữa Descartes và Spinoza về mind-body problem (vấn đề tâm-thể) là gì? Làm sao họ khác nhau về bản chất của ý thức và vật chất?",

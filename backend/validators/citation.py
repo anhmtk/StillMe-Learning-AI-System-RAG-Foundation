@@ -86,6 +86,7 @@ class CitationRequired:
             
             # Detect factual indicators: years, historical events, specific people, conferences, treaties
             # CRITICAL: Expanded patterns to catch ALL factual questions, including philosophical ones with factual elements
+            # IMPORTANT: Patterns must work for both English and Vietnamese questions
             factual_indicators = [
                 r"\b\d{4}\b",  # Years (e.g., 1944, 1943, 1954)
                 r"\b(conference|hội nghị|treaty|hiệp ước|agreement|hiệp định)\b",
@@ -96,23 +97,26 @@ class CitationRequired:
                 r"\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b",  # Two capitalized words (e.g., "Searle và Dennett", "Popper và Kuhn")
                 r"\b([A-Z][a-z]+)\s+(và|and|vs|versus)\s+([A-Z][a-z]+)\b",  # "Searle và Dennett", "Popper vs Kuhn", "Plato và Aristotle", "Kant và Hume", "Descartes và Spinoza"
                 # CRITICAL: Detect theorems, debates, arguments about specific people/concepts
-                r"\b(định\s+lý|theorem|tranh\s+luận|debate|argument|paradox|nghịch\s+lý)\s+(của|of|về|about)\s+([A-Z][a-z]+)",  # "Định lý của Gödel", "Tranh luận về Searle", "Paradox của Russell"
+                # Vietnamese: "Định lý của Gödel", "Tranh luận về Searle", "Paradox của Russell"
+                # English: "Gödel's theorem", "Searle's argument", "Russell's paradox"
+                r"\b(định\s+lý|theorem|tranh\s+luận|debate|argument|paradox|nghịch\s+lý|nghịch\s+lí)\s+(của|of|về|about)\s+([A-Z][a-z]+)",  # "Định lý của Gödel", "Tranh luận về Searle", "Paradox của Russell"
+                r"\b([A-Z][a-z]+)'?s\s+(theorem|paradox|argument|debate|incompleteness)",  # "Gödel's theorem", "Russell's paradox"
                 r"\b(gödel|godel|searle|dennett|popper|kuhn|russell|plato|aristotle|kant|hume|descartes|spinoza)\b",  # Direct mentions of well-known philosophers/scientists (case-insensitive)
                 r"\b(incompleteness|bất\s+toàn|chinese\s+room|russell.*paradox|paradox.*russell|russell.*tập\s+hợp)\b",  # Well-known concepts/theorems
-                # CRITICAL: Detect "Paradox của Russell" or "Russell's paradox" (case-insensitive)
-                r"\b(russell|russell's)\s+(paradox|nghịch\s+lý)\b",
-                r"\b(paradox|nghịch\s+lý)\s+(của|of)\s+(russell|russell's)\b",
-                r"\b(russell|russell's)\b.*\b(paradox|nghịch\s+lý)\b",  # "Russell...paradox" (words can be separated)
-                r"\b(paradox|nghịch\s+lý)\b.*\b(russell|russell's)\b",  # "paradox...Russell" (words can be separated)
-                # CRITICAL: Detect "Tranh luận giữa X và Y" pattern (case-insensitive)
+                # CRITICAL: Detect "Paradox của Russell" or "Russell's paradox" (case-insensitive, flexible word order)
+                r"\b(russell|russell's)\s+(paradox|nghịch\s+lý|nghịch\s+lí)\b",
+                r"\b(paradox|nghịch\s+lý|nghịch\s+lí)\s+(của|of)\s+(russell|russell's)\b",
+                r"\b(russell|russell's)\b.*\b(paradox|nghịch\s+lý|nghịch\s+lí)\b",  # "Russell...paradox" (words can be separated)
+                r"\b(paradox|nghịch\s+lý|nghịch\s+lí)\b.*\b(russell|russell's)\b",  # "paradox...Russell" (words can be separated)
+                # CRITICAL: Detect "Tranh luận giữa X và Y" pattern (case-insensitive, Vietnamese)
                 r"\b(tranh\s+luận|debate|argument)\s+(giữa|between)\s+([A-Z][a-z]+)\s+(và|and)\s+([A-Z][a-z]+)\b",
-                # CRITICAL: Detect "forms" (hình thức) with Plato/Aristotle (case-insensitive)
+                # CRITICAL: Detect "forms" (hình thức) with Plato/Aristotle (case-insensitive, flexible word order)
                 r"\b(plato|aristotle).*(forms|hình\s+thức|thực\s+tại|reality)\b",
                 r"\b(forms|hình\s+thức).*(plato|aristotle)\b",
-                # CRITICAL: Detect "causality" (quan hệ nhân quả) with Kant/Hume (case-insensitive)
+                # CRITICAL: Detect "causality" (quan hệ nhân quả) with Kant/Hume (case-insensitive, flexible word order)
                 r"\b(kant|hume).*(causality|quan\s+hệ\s+nhân\s+quả|causation)\b",
                 r"\b(causality|quan\s+hệ\s+nhân\s+quả|causation).*(kant|hume)\b",
-                # CRITICAL: Detect "mind-body" (tâm-thể) with Descartes/Spinoza (case-insensitive)
+                # CRITICAL: Detect "mind-body" (tâm-thể) with Descartes/Spinoza (case-insensitive, flexible word order)
                 r"\b(descartes|spinoza).*(mind.*body|tâm.*thể|consciousness|ý\s+thức|matter|vật\s+chất)\b",
                 r"\b(mind.*body|tâm.*thể).*(descartes|spinoza)\b",
                 # CRITICAL: Detect "Geneva 1954" or "Hiệp ước Geneva 1954" (case-insensitive)
@@ -124,10 +128,12 @@ class CitationRequired:
                 # CRITICAL: Detect "17th parallel" or "vĩ tuyến 17" (case-insensitive)
                 r"\b(\d+th|\d+st|\d+nd|\d+rd)\s+parallel\b",
                 r"\b(vĩ\s+tuyến|parallel)\s+\d+\b",
-                # CRITICAL: Detect "Gödel's incompleteness theorem" or "Định lý bất toàn của Gödel" (case-insensitive)
+                # CRITICAL: Detect "Gödel's incompleteness theorem" or "Định lý bất toàn của Gödel" (case-insensitive, flexible word order)
                 r"\b(gödel|godel).*(incompleteness|bất\s+toàn)\b",
                 r"\b(incompleteness|bất\s+toàn).*(gödel|godel)\b",
-                # CRITICAL: Detect "Chinese Room" with Searle/Dennett (case-insensitive)
+                r"\b(định\s+lý|theorem)\s+(bất\s+toàn|incompleteness)\s+(của|of)\s+(gödel|godel)\b",
+                r"\b(bất\s+toàn|incompleteness)\s+(của|of)\s+(gödel|godel)\b",
+                # CRITICAL: Detect "Chinese Room" with Searle/Dennett (case-insensitive, flexible word order)
                 r"\b(chinese\s+room|phòng\s+trung\s+quốc).*(searle|dennett)\b",
                 r"\b(searle|dennett).*(chinese\s+room|phòng\s+trung\s+quốc)\b",
             ]
@@ -258,10 +264,52 @@ class CitationRequired:
                         patched_answer=patched_answer
                     )
             
+            # CRITICAL FIX: For philosophical questions with factual elements, we MUST add citations
+            # Even if is_real_factual_question detection failed, if question mentions specific philosophers,
+            # theorems, debates, or historical events, it's still a factual question
+            # Check for philosophical factual indicators that might have been missed
+            is_philosophical_factual = False
+            if is_philosophical and user_question:
+                question_lower = user_question.lower()
+                # Check for specific philosophers, theorems, debates mentioned in question
+                philosophical_factual_indicators = [
+                    r"\b(russell|gödel|godel|plato|aristotle|kant|hume|descartes|spinoza|searle|dennett|popper|kuhn)\b",
+                    r"\b(paradox|nghịch\s+lý|theorem|định\s+lý|incompleteness|bất\s+toàn)\b",
+                    r"\b(tranh\s+luận|debate|argument|forms|hình\s+thức|causality|quan\s+hệ\s+nhân\s+quả)\b",
+                    r"\b(chinese\s+room|mind.*body|tâm.*thể)\b"
+                ]
+                for pattern in philosophical_factual_indicators:
+                    try:
+                        if re.search(pattern, question_lower, re.IGNORECASE):
+                            is_philosophical_factual = True
+                            logger.debug(f"✅ Detected philosophical factual question with pattern: {pattern[:50]}... (question: {user_question[:100]})")
+                            break
+                    except Exception as e:
+                        logger.warning(f"⚠️ Error matching philosophical factual pattern {pattern[:50]}: {e}")
+                        continue
+            
             # AUTO-ENFORCE: Add citation to response for ALL questions when context is available
             # CRITICAL: Always add citation when context is available, regardless of question type
             # This ensures transparency - user knows what sources were reviewed
-            if ctx_docs and len(ctx_docs) > 0:
+            # BUT: For philosophical factual questions, ALWAYS add citation even without context
+            if is_philosophical_factual:
+                if ctx_docs and len(ctx_docs) > 0:
+                    logger.warning(f"Philosophical factual question detected with context but missing citation - adding citation. Question: {user_question[:100] if user_question else 'unknown'}")
+                    patched_answer = self._add_citation(answer, ctx_docs, user_question)
+                    return ValidationResult(
+                        passed=False,  # Still mark as failed to track the issue
+                        reasons=["missing_citation_philosophical_factual", "added_citation"],
+                        patched_answer=patched_answer
+                    )
+                else:
+                    logger.warning(f"Philosophical factual question detected but no context - adding base knowledge citation. Question: {user_question[:100] if user_question else 'unknown'}")
+                    patched_answer = self._add_citation_for_base_knowledge(answer)
+                    return ValidationResult(
+                        passed=False,  # Still mark as failed to track that RAG context was missing
+                        reasons=["missing_citation_philosophical_factual_no_context", "added_citation_for_base_knowledge"],
+                        patched_answer=patched_answer
+                    )
+            elif ctx_docs and len(ctx_docs) > 0:
                 logger.info(f"Context available ({len(ctx_docs)} docs) but no citation - auto-adding citation for transparency")
                 patched_answer = self._add_citation(answer, ctx_docs, user_question)
                 return ValidationResult(
