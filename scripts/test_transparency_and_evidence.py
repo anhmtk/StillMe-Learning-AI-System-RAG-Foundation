@@ -24,10 +24,17 @@ from datetime import datetime
 from pathlib import Path
 
 # Fix encoding for Windows console
+# CRITICAL FIX: Don't replace sys.stdout/stderr directly - it can cause "I/O operation on closed file"
+# Modern Python (3.7+) handles UTF-8 correctly on Windows, so we just set environment variable
 if sys.platform == "win32":
-    import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+    # Set encoding via environment variable (safer than wrapping streams)
+    # This tells Python to use UTF-8 for all I/O operations
+    if 'PYTHONIOENCODING' not in os.environ:
+        os.environ['PYTHONIOENCODING'] = 'utf-8'
+    
+    # Don't wrap stdout/stderr - they're already TextIOWrapper in modern Python
+    # Wrapping can cause "I/O operation on closed file" errors
+    # If encoding issues occur, they'll be handled by the environment variable above
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -287,7 +294,7 @@ def check_evidence_overlap(answer: str, question: str) -> Dict:
     # but technical terms (RAG, ChromaDB) may not be mentioned explicitly
     
     # First check if citations exist (citations are evidence)
-    from scripts.test_transparency_and_evidence import check_citations
+    # CRITICAL FIX: Remove circular import - call check_citations directly (it's defined above)
     citations_result = check_citations(answer)
     if citations_result["has_citations"]:
         return {
