@@ -171,8 +171,22 @@ def send_chat_request(question: str, timeout: int = 120) -> Dict:
         )
         response.raise_for_status()
         return response.json()
+    except requests.exceptions.ConnectionError as e:
+        # More specific error message for connection issues
+        error_msg = str(e)
+        if "NameResolutionError" in error_msg or "Failed to resolve" in error_msg:
+            return {
+                "error": f"Connection failed: Cannot resolve hostname '{API_BASE}'. "
+                        f"Please check if the service is running and the URL is correct. "
+                        f"Full error: {error_msg}"
+            }
+        return {"error": f"Connection error: {error_msg}"}
+    except requests.exceptions.Timeout as e:
+        return {"error": f"Request timeout after {timeout}s: {str(e)}"}
+    except requests.exceptions.HTTPError as e:
+        return {"error": f"HTTP error {response.status_code}: {str(e)}"}
     except Exception as e:
-        return {"error": str(e)}
+        return {"error": f"Unexpected error: {str(e)}"}
 
 
 def detect_model_from_response(response_data: Dict, question: str) -> str:
