@@ -130,13 +130,14 @@ class IdentityCheckValidator:
             f"(strict_mode={strict_mode}, require_humility_when_no_context={require_humility_when_no_context})"
         )
     
-    def run(self, answer: str, ctx_docs: List[str]) -> ValidationResult:
+    def run(self, answer: str, ctx_docs: List[str], is_philosophical: bool = False) -> ValidationResult:
         """
         Check if answer matches StillMe's identity and philosophy
         
         Args:
             answer: The answer to validate
             ctx_docs: List of context documents from RAG
+            is_philosophical: If True, this is a philosophical question (theoretical reasoning doesn't require RAG context)
             
         Returns:
             ValidationResult with passed status and reasons
@@ -230,9 +231,15 @@ class IdentityCheckValidator:
                     logger.debug(f"⚠️ Warning: Exaggerated tone detected (non-strict mode)")
         
         # 5. Check for humility when no context (GOOD - matches identity)
+        # BUT: Skip for philosophical questions (theoretical reasoning doesn't require RAG context)
+        # Philosophical questions can be answered from base knowledge without requiring humility expressions
         if not ctx_docs or len(ctx_docs) == 0:
             if self.require_humility_when_no_context:
-                if not has_humility:
+                # CRITICAL FIX: Philosophical questions don't need humility when no context
+                # because they are theoretical reasoning questions, not factual questions requiring RAG context
+                if is_philosophical:
+                    logger.debug(f"✅ Philosophical question - skipping humility requirement when no context (theoretical reasoning doesn't need RAG)")
+                elif not has_humility:
                     violations.append("missing_humility_no_context")
                     logger.warning(f"❌ Identity violation: No humility expression when no context available")
                 else:

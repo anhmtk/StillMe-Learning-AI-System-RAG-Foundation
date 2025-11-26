@@ -129,6 +129,10 @@ class ValidatorChain:
                 elif validator_name == "SourceConsensusValidator":
                     # Pass user_question to SourceConsensusValidator for context
                     result = validator.run(patched, ctx_docs, user_question=user_question)
+                elif validator_name == "IdentityCheckValidator":
+                    # Pass is_philosophical to IdentityCheckValidator
+                    # Philosophical questions don't require humility when no context (theoretical reasoning)
+                    result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical)
                 else:
                     result = validator.run(patched, ctx_docs)
                 
