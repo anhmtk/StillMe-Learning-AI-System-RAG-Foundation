@@ -819,15 +819,24 @@ def _format_conversation_history(conversation_history, max_tokens: int = 1000,
     
     # Determine dynamic window size
     if current_query:
-        if _is_long_complex_query(current_query):
+        # CRITICAL: Check follow-up FIRST (before long/complex check)
+        # If question references previous questions (e.g., "4 câu trên"), it MUST have more context
+        if _is_follow_up_query(current_query):
+            # Follow-up query: include more recent context (especially for "4 câu trên" type questions)
+            # For questions referencing multiple previous questions, we need at least 8-10 messages
+            # to capture all referenced questions and their answers
+            if any(ref in current_query.lower() for ref in ["4 câu", "4 questions", "3 câu", "3 questions"]):
+                window_size = 10  # Need more context for "4 câu trên" type questions
+                max_tokens = min(max_tokens, 2000)  # Increase tokens for multi-question references
+                logger.info("📊 Follow-up query with multiple question references detected - using 10-message conversation window")
+            else:
+                window_size = 5
+                logger.info("📊 Follow-up query detected - using 5-message conversation window")
+        elif _is_long_complex_query(current_query):
             # Long/complex query: prioritize RAG knowledge, minimal conversation
             window_size = 2
             max_tokens = min(max_tokens, 500)  # Reduce tokens for conversation
             logger.info("📊 Long/complex query detected - reducing conversation context window to 2 messages")
-        elif _is_follow_up_query(current_query):
-            # Follow-up query: include more recent context
-            window_size = 5
-            logger.info("📊 Follow-up query detected - using 5-message conversation window")
         else:
             # New topic: minimal conversation context
             window_size = 2
