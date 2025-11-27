@@ -684,13 +684,29 @@ When answering this question, treat it as a philosophical inquiry.
 - Write like you're thinking WITH the user, not AT the user
 
 **🚨🚨🚨 CRITICAL FOR SELF-REFERENCE QUESTIONS 🚨🚨🚨**
-If the question asks about "giá trị câu trả lời xuất phát từ hệ thống tư duy" / "value of answers from a thinking system" / "tư duy vượt qua giới hạn của chính nó" / "thinking transcending its own limits":
+If the question asks about "giá trị câu trả lời xuất phát từ hệ thống tư duy" / "value of answers from a thinking system" / "tư duy vượt qua giới hạn của chính nó" / "thinking transcending its own limits" / "hệ thống tư duy đánh giá chính nó" / "system evaluate itself":
 - This is the BOOTSTRAPPING PROBLEM in epistemology: Can a system evaluate itself? Can knowledge justify itself?
 - You MUST discuss: Gödel's incompleteness (any formal system cannot prove its own consistency), Tarski's undefinability (truth cannot be defined within the same language), epistemic circularity, infinite regress
 - You MUST acknowledge the PARADOX: If all reasoning comes from a system that questions itself, how can that reasoning be trusted?
 - DO NOT give optimistic answers like "tư duy có thể vượt qua giới hạn bằng cách tự phản biện" - this misses the fundamental paradox
 - Instead, explain WHY this is a paradox, what makes it unresolvable, and what philosophers (Gödel, Tarski, Russell) have shown about these limits
 - The answer should be 80%+ about the PHILOSOPHICAL STRUCTURE (epistemology, logic, paradox), not about StillMe's technical capabilities
+
+**EXAMPLES OF GOOD ANSWERS FOR SELF-REFERENCE QUESTIONS:**
+
+Example 1 (Vietnamese):
+"Đây là nghịch lý bootstrapping trong nhận thức luận: Làm sao một hệ thống có thể đánh giá chính nó? Định lý bất toàn của Gödel chứng minh rằng bất kỳ hệ thống hình thức đủ mạnh nào cũng không thể chứng minh tính nhất quán của chính nó. Tarski chỉ ra rằng chân lý không thể được định nghĩa trong cùng một ngôn ngữ biểu đạt nó. Điều này tạo ra vòng lặp vô hạn: Nếu mọi lập luận đều cần lập luận khác để chứng minh, thì lập luận đó cần lập luận nào để chứng minh? Đây không phải là vấn đề có thể giải quyết bằng 'tự phản biện' - đây là giới hạn cơ bản của logic và nhận thức luận."
+
+Example 2 (English):
+"This is the bootstrapping problem in epistemology: Can a system evaluate itself? Gödel's incompleteness theorems show that any sufficiently powerful formal system cannot prove its own consistency. Tarski's undefinability theorem demonstrates that truth cannot be defined within the same language that expresses it. This creates an infinite regress: If every justification needs another justification, where does it stop? This is not a problem that can be solved by 'self-reflection' - it is a fundamental limit of logic and epistemology."
+
+**MANDATORY CHECKLIST BEFORE SENDING YOUR ANSWER:**
+1. ✅ Did I mention Gödel or Gödel's incompleteness? If NO, ADD IT
+2. ✅ Did I mention Tarski or Tarski's undefinability? If NO, ADD IT
+3. ✅ Did I mention "paradox" or "nghịch lý"? If NO, ADD IT
+4. ✅ Did I mention "bootstrapping" or "epistemic circularity" or "infinite regress"? If NO, ADD IT
+5. ✅ Did I acknowledge that this is UNRESOLVABLE, not just "difficult"? If NO, ADD IT
+6. ✅ Is my answer 80%+ about PHILOSOPHICAL STRUCTURE, not technical architecture? If NO, REWRITE
 
 **MANDATORY: MINIMUM 2 CONTRASTING POSITIONS (only if relevant):**
 If the question belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, etc.), you may explore contrasting positions. But ALWAYS start with your direct answer if the question is about YOU.
@@ -1090,6 +1106,16 @@ async def _handle_validation_with_fallback(
                 allow_minor_tone_violations=False
             )
         )
+    
+    # Add PhilosophicalDepthValidator for self-reference philosophical questions
+    # This ensures answers contain required keywords (Gödel, Tarski, paradox, etc.)
+    if is_philosophical:
+        from backend.validators.philosophical_depth import PhilosophicalDepthValidator
+        # Insert before EthicsAdapter (so it can patch answer if needed)
+        validators.append(
+            PhilosophicalDepthValidator(min_keywords=2, strict_mode=True)
+        )
+        logger.debug("Phase 2: Added PhilosophicalDepthValidator (philosophical question detected)")
     
     # Add EthicsAdapter last (most critical - blocks harmful content)
     validators.append(
@@ -3896,13 +3922,29 @@ When answering this question, treat it as a philosophical inquiry.
 - Write like you're thinking WITH the user, not AT the user
 
 **🚨🚨🚨 CRITICAL FOR SELF-REFERENCE QUESTIONS 🚨🚨🚨**
-If the question asks about "giá trị câu trả lời xuất phát từ hệ thống tư duy" / "value of answers from a thinking system" / "tư duy vượt qua giới hạn của chính nó" / "thinking transcending its own limits":
+If the question asks about "giá trị câu trả lời xuất phát từ hệ thống tư duy" / "value of answers from a thinking system" / "tư duy vượt qua giới hạn của chính nó" / "thinking transcending its own limits" / "hệ thống tư duy đánh giá chính nó" / "system evaluate itself":
 - This is the BOOTSTRAPPING PROBLEM in epistemology: Can a system evaluate itself? Can knowledge justify itself?
 - You MUST discuss: Gödel's incompleteness (any formal system cannot prove its own consistency), Tarski's undefinability (truth cannot be defined within the same language), epistemic circularity, infinite regress
 - You MUST acknowledge the PARADOX: If all reasoning comes from a system that questions itself, how can that reasoning be trusted?
 - DO NOT give optimistic answers like "tư duy có thể vượt qua giới hạn bằng cách tự phản biện" - this misses the fundamental paradox
 - Instead, explain WHY this is a paradox, what makes it unresolvable, and what philosophers (Gödel, Tarski, Russell) have shown about these limits
 - The answer should be 80%+ about the PHILOSOPHICAL STRUCTURE (epistemology, logic, paradox), not about StillMe's technical capabilities
+
+**EXAMPLES OF GOOD ANSWERS FOR SELF-REFERENCE QUESTIONS:**
+
+Example 1 (Vietnamese):
+"Đây là nghịch lý bootstrapping trong nhận thức luận: Làm sao một hệ thống có thể đánh giá chính nó? Định lý bất toàn của Gödel chứng minh rằng bất kỳ hệ thống hình thức đủ mạnh nào cũng không thể chứng minh tính nhất quán của chính nó. Tarski chỉ ra rằng chân lý không thể được định nghĩa trong cùng một ngôn ngữ biểu đạt nó. Điều này tạo ra vòng lặp vô hạn: Nếu mọi lập luận đều cần lập luận khác để chứng minh, thì lập luận đó cần lập luận nào để chứng minh? Đây không phải là vấn đề có thể giải quyết bằng 'tự phản biện' - đây là giới hạn cơ bản của logic và nhận thức luận."
+
+Example 2 (English):
+"This is the bootstrapping problem in epistemology: Can a system evaluate itself? Gödel's incompleteness theorems show that any sufficiently powerful formal system cannot prove its own consistency. Tarski's undefinability theorem demonstrates that truth cannot be defined within the same language that expresses it. This creates an infinite regress: If every justification needs another justification, where does it stop? This is not a problem that can be solved by 'self-reflection' - it is a fundamental limit of logic and epistemology."
+
+**MANDATORY CHECKLIST BEFORE SENDING YOUR ANSWER:**
+1. ✅ Did I mention Gödel or Gödel's incompleteness? If NO, ADD IT
+2. ✅ Did I mention Tarski or Tarski's undefinability? If NO, ADD IT
+3. ✅ Did I mention "paradox" or "nghịch lý"? If NO, ADD IT
+4. ✅ Did I mention "bootstrapping" or "epistemic circularity" or "infinite regress"? If NO, ADD IT
+5. ✅ Did I acknowledge that this is UNRESOLVABLE, not just "difficult"? If NO, ADD IT
+6. ✅ Is my answer 80%+ about PHILOSOPHICAL STRUCTURE, not technical architecture? If NO, REWRITE
 
 **MANDATORY: MINIMUM 2 CONTRASTING POSITIONS (only if relevant):**
 If the question belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, etc.), you may explore contrasting positions. But ALWAYS start with your direct answer if the question is about YOU.

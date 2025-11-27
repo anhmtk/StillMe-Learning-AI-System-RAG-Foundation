@@ -22,6 +22,7 @@ from .self_critic_experience import SelfCriticExperience, self_correct_experienc
 from .step_detector import StepDetector, Step
 from .step_validator import StepValidator, StepValidationResult
 from .consistency_checker import ConsistencyChecker, Claim
+from .philosophical_depth import PhilosophicalDepthValidator
 
 __all__ = [
     "Validator",
@@ -48,5 +49,6 @@ __all__ = [
     "StepValidationResult",
     "ConsistencyChecker",
     "Claim",
+    "PhilosophicalDepthValidator",
 ]
 
