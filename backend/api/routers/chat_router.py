@@ -35,6 +35,83 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+def _add_timestamp_to_response(response: str, detected_lang: str = "en") -> str:
+    """
+    Add timestamp attribution to normal RAG responses for transparency.
+    This ensures consistency with external data responses which already include timestamps.
+    
+    Args:
+        response: Original response text
+        detected_lang: Detected language code
+        
+    Returns:
+        Response with timestamp attribution appended
+    """
+    if not response or not isinstance(response, str):
+        return response
+    
+    # Check if response already has timestamp (to avoid duplicate)
+    # Pattern: [Source: ... | Timestamp: ...] or [Nguồn: ... | Thời gian: ...] or standalone [Timestamp: ...]
+    timestamp_patterns = [
+        r'\[(?:Source:|Nguồn:).*\|.*Timestamp:',
+        r'\[(?:Source:|Nguồn:).*\|.*Thời gian:',
+        r'\[Timestamp:\s*[^\]]+\]',
+        r'\[Thời gian:\s*[^\]]+\]',
+    ]
+    for pattern in timestamp_patterns:
+        if re.search(pattern, response, re.IGNORECASE):
+            logger.debug("Response already has timestamp, skipping addition")
+            return response
+    
+    # Get current UTC timestamp
+    now_utc = datetime.now(timezone.utc)
+    timestamp_iso = now_utc.isoformat()
+    
+    # Try to extract existing citation from response
+    # Look for patterns like [general knowledge], [research: Wikipedia], [source: 1], etc.
+    citation_patterns = [
+        r'\[general knowledge\]',
+        r'\[research:\s*[^\]]+\]',
+        r'\[learning:\s*[^\]]+\]',
+        r'\[foundational knowledge\]',
+        r'\[discussion context\]',
+        r'\[source:\s*\d+\]',
+        r'\[kiến thức tổng quát\]',
+        r'\[nghiên cứu:\s*[^\]]+\]',
+        r'\[học tập:\s*[^\]]+\]',
+        r'\[kiến thức nền tảng\]',
+        r'\[ngữ cảnh thảo luận\]',
+        r'\[nguồn:\s*\d+\]',
+    ]
+    
+    citation_match = None
+    for pattern in citation_patterns:
+        match = re.search(pattern, response, re.IGNORECASE)
+        if match:
+            citation_match = match.group(0)
+            break
+    
+    # Format timestamp attribution
+    if detected_lang == "vi":
+        if citation_match:
+            # Extract citation text without brackets for cleaner format
+            citation_text = citation_match.strip('[]')
+            timestamp_attr = f"\n\n[Nguồn: {citation_text} | Thời gian: {timestamp_iso}Z]"
+        else:
+            # No citation found, just add timestamp
+            timestamp_attr = f"\n\n[Thời gian: {timestamp_iso}Z]"
+    else:
+        if citation_match:
+            # Extract citation text without brackets for cleaner format
+            citation_text = citation_match.strip('[]')
+            timestamp_attr = f"\n\n[Source: {citation_text} | Timestamp: {timestamp_iso}Z]"
+        else:
+            # No citation found, just add timestamp
+            timestamp_attr = f"\n\n[Timestamp: {timestamp_iso}Z]"
+    
+    # Append timestamp attribution to response
+    return response.rstrip() + timestamp_attr
+
 # Helper functions for AI_SELF_MODEL responses
 def _build_ai_self_model_answer(question: str, detected_lang: str, opening_statement: str) -> str:
     """
@@ -5781,6 +5858,18 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             from backend.api.utils.error_detector import get_fallback_message_for_error
             response = get_fallback_message_for_error("generic", detected_lang or "vi")
             processing_steps.append("⚠️ Response validation failed - using fallback message")
+        
+        # Add timestamp attribution to normal RAG responses for transparency (consistent with external data)
+        # Skip if this is an external data response (already has timestamp) or fallback message
+        from backend.api.utils.error_detector import is_fallback_message
+        is_fallback = is_fallback_message(response) if response else False
+        has_external_data_timestamp = "[Source:" in response or "[Nguồn:" in response
+        if not is_fallback and not has_external_data_timestamp and response:
+            try:
+                response = _add_timestamp_to_response(response, detected_lang or "en")
+                logger.debug("✅ Added timestamp attribution to RAG response")
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to add timestamp to response: {e}")
         
         return ChatResponse(
             response=response,
