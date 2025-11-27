@@ -405,7 +405,7 @@ You are StillMe — a transparent, ethical Learning AI system with RAG foundatio
         """
         Build ONE context-specific instruction based on situation.
         
-        Priority: StillMe wish/desire > StillMe query > Philosophical > Suspicious entity > No context > Low quality > Normal context
+        Priority: StillMe wish/desire > Philosophical (self-reference) > StillMe query > Philosophical (general) > Suspicious entity > No context > Low quality > Normal context
         
         Args:
             context: PromptContext with all necessary information
@@ -416,6 +416,26 @@ You are StillMe — a transparent, ethical Learning AI system with RAG foundatio
         # Decision tree with clear priority
         if context.is_stillme_query and context.is_wish_desire_question:
             return self._build_stillme_wish_desire_instruction(context.detected_lang)
+        
+        # CRITICAL: Check for self-reference philosophical questions FIRST
+        # These should be answered philosophically even if they mention "hệ thống" or "system"
+        # Self-reference questions are about epistemology/logic, not StillMe's technical architecture
+        if context.is_philosophical and context.user_question:
+            question_lower = context.user_question.lower()
+            self_reference_keywords = [
+                "tư duy đánh giá chính nó", "tư duy tự đánh giá", "tư duy vượt qua giới hạn",
+                "hệ thống tư duy nghi ngờ", "tư duy nghi ngờ chính nó",
+                "system evaluate itself", "thought evaluate itself", "thinking about thinking",
+                "giá trị câu trả lời xuất phát từ hệ thống", "value answer from system",
+                "bootstrap", "bootstrapping", "epistemic circularity", "infinite regress",
+                "gödel", "godel", "tarski", "paradox", "nghịch lý tự quy chiếu"
+            ]
+            is_self_reference = any(keyword in question_lower for keyword in self_reference_keywords)
+            
+            if is_self_reference:
+                # Self-reference questions are ALWAYS philosophical, even if they mention "hệ thống"
+                logger.info(f"🚨 Self-reference philosophical question detected - prioritizing philosophical instruction over StillMe query")
+                return self._build_philosophical_instruction(context.detected_lang)
         
         if context.is_stillme_query:
             return self._build_stillme_instruction(context.detected_lang)
