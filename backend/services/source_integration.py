@@ -380,10 +380,16 @@ class SourceIntegration:
     
     def get_source_stats(self) -> Dict[str, Any]:
         """Get statistics for all sources"""
+        # Get RSS stats including failed feeds
+        rss_stats = None
+        if self.rss_fetcher:
+            rss_stats = self.rss_fetcher.get_stats()
+        
         stats = {
             "rss": {
                 "enabled": True,
-                "feeds_count": len(self.rss_fetcher.feeds) if self.rss_fetcher else 0
+                "feeds_count": len(self.rss_fetcher.feeds) if self.rss_fetcher else 0,
+                "stats": rss_stats  # Include full RSS stats (failed_feeds, successful_feeds, last_error, etc.)
             },
             "arxiv": {
                 "enabled": ENABLE_ARXIV,

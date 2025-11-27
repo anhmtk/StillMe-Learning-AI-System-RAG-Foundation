@@ -467,11 +467,34 @@ async def get_current_learning_sources():
         stats = source_integration.get_source_stats()
         
         # Format for StillMe's self-awareness
+        # Get RSS stats including failed feeds
+        rss_stats = stats["rss"].get("stats", {})
+        rss_status = "active"
+        failed_feeds_info = []
+        if rss_stats:
+            rss_status = rss_stats.get("status", "active")
+            failed_feeds_count = rss_stats.get("failed_feeds", 0)
+            successful_feeds_count = rss_stats.get("successful_feeds", 0)
+            total_feeds = stats["rss"].get("feeds_count", 0)
+            last_error = rss_stats.get("last_error")
+            
+            # If there are failed feeds, include details
+            if failed_feeds_count > 0:
+                rss_status = "partial"  # Some feeds failed
+                failed_feeds_info = {
+                    "failed_count": failed_feeds_count,
+                    "successful_count": successful_feeds_count,
+                    "total_count": total_feeds,
+                    "failure_rate": round((failed_feeds_count / total_feeds * 100) if total_feeds > 0 else 0, 1),
+                    "last_error": last_error[:200] if last_error else None  # Truncate long errors
+                }
+        
         current_sources = {
             "rss": {
                 "enabled": stats["rss"]["enabled"],
                 "feeds_count": stats["rss"].get("feeds_count", 0),
-                "status": "active"
+                "status": rss_status,
+                "failed_feeds": failed_feeds_info if failed_feeds_info else None
             },
             "wikipedia": {
                 "enabled": stats["wikipedia"]["enabled"],
