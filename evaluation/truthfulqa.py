@@ -181,51 +181,85 @@ class TruthfulQAEvaluator(BaseEvaluator):
         """
         Extract direct answer from verbose StillMe response.
         
+        IMPROVED: Better extraction that finds the actual answer even if buried in disclaimers.
+        
         StillMe responses often start with disclaimers like:
         "I don't have sufficient information... [general knowledge]\n\n## Answer\n\nThe answer is..."
         
-        This function tries to extract the actual answer content.
+        This function tries to extract the actual answer content by:
+        1. Looking for answer patterns after disclaimers
+        2. Finding the first substantive sentence
+        3. Extracting key phrases
         """
         import re
         
-        # Remove common disclaimers and metadata
+        # Strategy 1: Look for answer patterns after disclaimers
+        # Pattern: "I don't have... [general knowledge]\n\n## Answer\n\n[ACTUAL ANSWER]"
+        answer_after_disclaimer = re.search(
+            r'(?:i don\'t have|mình không có|the retrieved context).*?\[general knowledge\].*?\n\n(?:##\s*)?(?:answer|answer:|core answer)?\s*\n\n(.+?)(?:\n\n|$)',
+            predicted_answer,
+            re.IGNORECASE | re.DOTALL
+        )
+        if answer_after_disclaimer:
+            answer_text = answer_after_disclaimer.group(1).strip()
+            # Take first 300 chars of the answer
+            if len(answer_text) > 300:
+                answer_text = answer_text[:300]
+            return answer_text
+        
+        # Strategy 2: Find first sentence that looks like an answer (not a disclaimer)
         lines = predicted_answer.split('\n')
-        cleaned_lines = []
-        
-        skip_patterns = [
-            r"^i don't have sufficient information",
-            r"^mình không có đủ thông tin",
-            r"^the retrieved context has low relevance",
-            r"^ngữ cảnh được tìm thấy có độ liên quan thấp",
-            r"^\[general knowledge\]",
-            r"^based on general knowledge",
-            r"^dựa trên kiến thức",
-            r"^source transparency",
-            r"^transparence sur les sources",
-            r"^⚠️",
-            r"^note:",
-            r"^lưu ý:",
-            r"^status:",
-            r"^---",
-            r"^===",
-        ]
-        
         for line in lines:
-            line_lower = line.lower().strip()
-            # Skip empty lines and disclaimers
-            if not line_lower or any(re.match(pattern, line_lower) for pattern in skip_patterns):
+            line_stripped = line.strip()
+            if not line_stripped:
                 continue
-            # Skip markdown headers that are just formatting
-            if re.match(r'^#+\s*(answer|answer:|core answer|explanation|analysis|conclusion)', line_lower):
+            
+            # Skip disclaimers
+            if any(re.match(pattern, line_stripped.lower()) for pattern in [
+                r"^i don't have sufficient information",
+                r"^mình không có đủ thông tin",
+                r"^the retrieved context has low relevance",
+                r"^ngữ cảnh được tìm thấy có độ liên quan thấp",
+                r"^\[general knowledge\]",
+                r"^based on general knowledge",
+                r"^dựa trên kiến thức",
+                r"^source transparency",
+                r"^⚠️",
+                r"^note:",
+                r"^lưu ý:",
+                r"^status:",
+                r"^---",
+                r"^===",
+            ]):
                 continue
-            cleaned_lines.append(line)
+            
+            # Skip markdown headers
+            if re.match(r'^#+\s*(answer|answer:|core answer|explanation|analysis|conclusion)', line_stripped.lower()):
+                continue
+            
+            # If line looks like an answer (has content, not just formatting), use it
+            if len(line_stripped) > 10 and not line_stripped.startswith('['):
+                # Take this line and next few lines (up to 300 chars)
+                answer_text = line_stripped
+                line_idx = lines.index(line)
+                for next_line in lines[line_idx + 1:line_idx + 3]:
+                    if len(answer_text) + len(next_line.strip()) < 300:
+                        answer_text += " " + next_line.strip()
+                    else:
+                        break
+                return answer_text[:300]
         
-        # Join and take first 500 chars (usually contains the answer)
-        extracted = ' '.join(cleaned_lines)
-        if len(extracted) > 500:
-            extracted = extracted[:500]
-        
-        return extracted
+        # Strategy 3: Fallback - take first 300 chars after removing common prefixes
+        cleaned = re.sub(
+            r'^(?:i don\'t have|mình không có|the retrieved context).*?\[general knowledge\]\s*',
+            '',
+            predicted_answer,
+            flags=re.IGNORECASE | re.DOTALL
+        )
+        cleaned = re.sub(r'^#+\s*', '', cleaned, flags=re.MULTILINE)
+        if len(cleaned) > 300:
+            cleaned = cleaned[:300]
+        return cleaned.strip()
     
     def _check_answer_correctness(
         self,
