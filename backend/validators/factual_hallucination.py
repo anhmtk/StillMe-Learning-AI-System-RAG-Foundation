@@ -506,137 +506,137 @@ class FactualHallucinationValidator(Validator):
             fps_result = None
             generator = None
         
-        # CRITICAL: Extract explicit fake entity from question to pass to generator
-        # This ensures generator knows it's an explicit fake entity and bypasses well-known historical fact check
-        suspicious_entity = None
-        if user_question:
-            question_lower = user_question.lower()
-            # Check for explicit fake entities in question
-            explicit_fake_keywords = ["lumeria", "veridian", "emerald", "daxonia"]
-            for keyword in explicit_fake_keywords:
-                if keyword in question_lower:
-                    # Extract full entity name from question
-                    # Try to find quoted entity first (most reliable)
-                    import re
-                    quoted_match = re.search(r'["\']([^"\']*' + keyword + r'[^"\']*)["\']', question_lower)
-                    if quoted_match:
-                        suspicious_entity = quoted_match.group(1).strip()
-                        logger.debug(f"FactualHallucinationValidator: Extracted explicit fake entity from quotes: '{suspicious_entity}'")
+            # CRITICAL: Extract explicit fake entity from question to pass to generator
+            # This ensures generator knows it's an explicit fake entity and bypasses well-known historical fact check
+            suspicious_entity = None
+            if user_question:
+                question_lower = user_question.lower()
+                # Check for explicit fake entities in question
+                explicit_fake_keywords = ["lumeria", "veridian", "emerald", "daxonia"]
+                for keyword in explicit_fake_keywords:
+                    if keyword in question_lower:
+                        # Extract full entity name from question
+                        # Try to find quoted entity first (most reliable)
+                        import re
+                        quoted_match = re.search(r'["\']([^"\']*' + keyword + r'[^"\']*)["\']', question_lower)
+                        if quoted_match:
+                            suspicious_entity = quoted_match.group(1).strip()
+                            logger.debug(f"FactualHallucinationValidator: Extracted explicit fake entity from quotes: '{suspicious_entity}'")
+                            break
+                        # Otherwise, try to extract entity with keyword (but limit length to avoid extracting too much)
+                        # Look for patterns like "Hiệp ước ... Lumeria ... 1962" but prefer shorter matches
+                        entity_patterns = [
+                            rf'\b[^"\']*{keyword}[^"\']*\b',  # Word boundary match (shorter)
+                            rf'[^\.\?\!\n]*{keyword}[^\.\?\!\n]*(?:\s+\d{{4}})?',  # Full sentence match (longer)
+                        ]
+                        for pattern in entity_patterns:
+                            entity_match = re.search(pattern, question_lower)
+                            if entity_match:
+                                extracted = entity_match.group(0).strip()
+                                # Prefer shorter matches (more likely to be the entity name)
+                                if not suspicious_entity or len(extracted) < len(suspicious_entity):
+                                    suspicious_entity = extracted
+                                    # If we found a short match (just the keyword or keyword + year), use it
+                                    if len(extracted) <= len(keyword) + 10:  # keyword + " 1962" = ~10 chars
+                                        logger.debug(f"FactualHallucinationValidator: Extracted explicit fake entity (short match): '{suspicious_entity}'")
+                                        break
+                        # If we found something, use it; otherwise fallback to keyword itself
+                        if suspicious_entity:
+                            logger.debug(f"FactualHallucinationValidator: Using extracted entity: '{suspicious_entity}'")
+                        else:
+                            suspicious_entity = keyword
+                            logger.debug(f"FactualHallucinationValidator: Using keyword as entity: '{suspicious_entity}'")
                         break
-                    # Otherwise, try to extract entity with keyword (but limit length to avoid extracting too much)
-                    # Look for patterns like "Hiệp ước ... Lumeria ... 1962" but prefer shorter matches
-                    entity_patterns = [
-                        rf'\b[^"\']*{keyword}[^"\']*\b',  # Word boundary match (shorter)
-                        rf'[^\.\?\!\n]*{keyword}[^\.\?\!\n]*(?:\s+\d{{4}})?',  # Full sentence match (longer)
-                    ]
-                    for pattern in entity_patterns:
-                        entity_match = re.search(pattern, question_lower)
-                        if entity_match:
-                            extracted = entity_match.group(0).strip()
-                            # Prefer shorter matches (more likely to be the entity name)
-                            if not suspicious_entity or len(extracted) < len(suspicious_entity):
-                                suspicious_entity = extracted
-                                # If we found a short match (just the keyword or keyword + year), use it
-                                if len(extracted) <= len(keyword) + 10:  # keyword + " 1962" = ~10 chars
-                                    logger.debug(f"FactualHallucinationValidator: Extracted explicit fake entity (short match): '{suspicious_entity}'")
-                                    break
-                    # If we found something, use it; otherwise fallback to keyword itself
-                    if suspicious_entity:
-                        logger.debug(f"FactualHallucinationValidator: Using extracted entity: '{suspicious_entity}'")
-                    else:
-                        suspicious_entity = keyword
-                        logger.debug(f"FactualHallucinationValidator: Using keyword as entity: '{suspicious_entity}'")
-                    break
-        
-        # CRITICAL: Try to generate EPD fallback, but handle exceptions
-        epd_fallback = None
-        try:
-            if generator:
-                epd_fallback = generator.generate_epd_fallback(
-                    question=user_question or "",
-                    detected_lang=detected_lang,
-                    suspicious_entity=suspicious_entity,  # Pass explicit fake entity if found
-                    fps_result=fps_result
-                )
-        except Exception as e:
-            logger.error(f"🚨 CRITICAL: Error calling generate_epd_fallback: {e}. Will create manual fallback.")
+            
+            # CRITICAL: Try to generate EPD fallback, but handle exceptions
             epd_fallback = None
-        
-        # CRITICAL: If generator returns None (well-known historical fact), but we have explicit fake entity,
-        # we MUST create a fallback response anyway
-        if epd_fallback is None and suspicious_entity:
-            # Explicit fake entity detected but generator returned None - create fallback manually
-            logger.warning(
-                f"🚨 CRITICAL: EpistemicFallbackGenerator returned None for explicit fake entity '{suspicious_entity}'. "
-                f"Creating fallback response manually."
-            )
-            if detected_lang == "vi":
-                epd_fallback = (
-                    f"**Mình không có thông tin về \"{suspicious_entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.**\n\n"
-                    f"Mình đã kiểm tra kỹ lưỡng và **không tìm thấy** thông tin về \"{suspicious_entity}\" trong:\n"
-                    f"- Cơ sở tri thức RAG của StillMe\n"
-                    f"- Các nguồn tài liệu chính thống mà mình có thể truy cập được\n"
-                    f"- Các nguồn tham khảo đáng tin cậy trong lĩnh vực này\n\n"
-                    f"**Vì vậy, mình không thể bình luận hay phân tích gì thêm về \"{suspicious_entity}\" một cách chính xác và đáng tin cậy.**\n\n"
-                    f"**Khuyến nghị:**\n"
-                    f"Mình khuyến khích bạn tìm kiếm thông tin về \"{suspicious_entity}\" từ các nguồn đáng tin cậy như:\n"
-                    f"- Tài liệu lịch sử chính thống (sách giáo khoa, văn khố quốc gia, tài liệu chính thức)\n"
-                    f"- Các nguồn học thuật được peer-review\n"
-                    f"- Các tổ chức, cơ quan có thẩm quyền trong lĩnh vực này\n\n"
-                    f"Mình nhận thức rõ rằng việc bịa thông tin sẽ nguy hiểm hơn nhiều so với việc khẳng định mình không biết, đặc biệt liên quan đến các vấn đề nhạy cảm như pháp lý, chính trị, lịch sử, giáo dục, y tế. Hy vọng rằng việc thẳng thắn thừa nhận sự thật này sẽ giúp bạn có được cái nhìn khách quan hơn.\n"
+            try:
+                if generator:
+                    epd_fallback = generator.generate_epd_fallback(
+                        question=user_question or "",
+                        detected_lang=detected_lang,
+                        suspicious_entity=suspicious_entity,  # Pass explicit fake entity if found
+                        fps_result=fps_result
+                    )
+            except Exception as e:
+                logger.error(f"🚨 CRITICAL: Error calling generate_epd_fallback: {e}. Will create manual fallback.")
+                epd_fallback = None
+            
+            # CRITICAL: If generator returns None (well-known historical fact), but we have explicit fake entity,
+            # we MUST create a fallback response anyway
+            if epd_fallback is None and suspicious_entity:
+                # Explicit fake entity detected but generator returned None - create fallback manually
+                logger.warning(
+                    f"🚨 CRITICAL: EpistemicFallbackGenerator returned None for explicit fake entity '{suspicious_entity}'. "
+                    f"Creating fallback response manually."
                 )
-            else:
-                epd_fallback = (
-                    f"**I do not have information about \"{suspicious_entity}\" in StillMe's internal knowledge sources and RAG system.**\n\n"
-                    f"I have thoroughly checked and **did not find** information about \"{suspicious_entity}\" in:\n"
-                    f"- StillMe's RAG knowledge base\n"
-                    f"- Reliable sources I can access\n"
-                    f"- Trusted references in this field\n\n"
-                    f"**Therefore, I cannot comment or analyze further about \"{suspicious_entity}\" accurately and reliably.**\n\n"
-                    f"**Recommendation:**\n"
-                    f"I encourage you to search for information about \"{suspicious_entity}\" from reliable sources such as:\n"
-                    f"- Official historical documents (textbooks, national archives, official documents)\n"
-                    f"- Peer-reviewed academic sources\n"
-                    f"- Authoritative organizations in this field\n\n"
-                    f"I recognize that fabricating information would be far more dangerous than acknowledging I don't know, especially regarding sensitive topics such as legal, political, historical, educational, and healthcare matters. I hope that this honest acknowledgment will help you gain a more objective perspective.\n"
-                )
-        
-        # CRITICAL: Ensure we never return None
-        if epd_fallback is None:
-            logger.error(f"🚨 CRITICAL: EpistemicFallbackGenerator returned None and no fallback was created. Using generic fallback.")
-            # Use suspicious_entity if available, otherwise use generic term
-            entity_display = suspicious_entity if suspicious_entity else "khái niệm này" if detected_lang == "vi" else "this concept"
-            if detected_lang == "vi":
-                epd_fallback = (
-                    f"**Mình không có thông tin về \"{entity_display}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.**\n\n"
-                    f"Mình đã kiểm tra kỹ lưỡng và **không tìm thấy** thông tin về \"{entity_display}\" trong:\n"
-                    f"- Cơ sở tri thức RAG của StillMe\n"
-                    f"- Các nguồn tài liệu chính thống mà mình có thể truy cập được\n"
-                    f"- Các nguồn tham khảo đáng tin cậy trong lĩnh vực này\n\n"
-                    f"**Vì vậy, mình không thể bình luận hay phân tích gì thêm về \"{entity_display}\" một cách chính xác và đáng tin cậy.**\n\n"
-                    f"**Khuyến nghị:**\n"
-                    f"Mình khuyến khích bạn tìm kiếm thông tin về \"{entity_display}\" từ các nguồn đáng tin cậy như:\n"
-                    f"- Tài liệu lịch sử chính thống (sách giáo khoa, văn khố quốc gia, tài liệu chính thức)\n"
-                    f"- Các nguồn học thuật được peer-review\n"
-                    f"- Các tổ chức, cơ quan có thẩm quyền trong lĩnh vực này\n\n"
-                    f"Mình nhận thức rõ rằng việc bịa thông tin sẽ nguy hiểm hơn nhiều so với việc khẳng định mình không biết, đặc biệt liên quan đến các vấn đề nhạy cảm như pháp lý, chính trị, lịch sử, giáo dục, y tế. Hy vọng rằng việc thẳng thắn thừa nhận sự thật này sẽ giúp bạn có được cái nhìn khách quan hơn.\n"
-                )
-            else:
-                epd_fallback = (
-                    f"**I do not have information about \"{entity_display}\" in StillMe's internal knowledge sources and RAG system.**\n\n"
-                    f"I have thoroughly checked and **did not find** information about \"{entity_display}\" in:\n"
-                    f"- StillMe's RAG knowledge base\n"
-                    f"- Reliable sources I can access\n"
-                    f"- Trusted references in this field\n\n"
-                    f"**Therefore, I cannot comment or analyze further about \"{entity_display}\" accurately and reliably.**\n\n"
-                    f"**Recommendation:**\n"
-                    f"I encourage you to search for information about \"{entity_display}\" from reliable sources such as:\n"
-                    f"- Official historical documents (textbooks, national archives, official documents)\n"
-                    f"- Peer-reviewed academic sources\n"
-                    f"- Authoritative organizations in this field\n\n"
-                    f"I recognize that fabricating information would be far more dangerous than acknowledging I don't know, especially regarding sensitive topics such as legal, political, historical, educational, and healthcare matters. I hope that this honest acknowledgment will help you gain a more objective perspective.\n"
-                )
-        
+                if detected_lang == "vi":
+                    epd_fallback = (
+                        f"**Mình không có thông tin về \"{suspicious_entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.**\n\n"
+                        f"Mình đã kiểm tra kỹ lưỡng và **không tìm thấy** thông tin về \"{suspicious_entity}\" trong:\n"
+                        f"- Cơ sở tri thức RAG của StillMe\n"
+                        f"- Các nguồn tài liệu chính thống mà mình có thể truy cập được\n"
+                        f"- Các nguồn tham khảo đáng tin cậy trong lĩnh vực này\n\n"
+                        f"**Vì vậy, mình không thể bình luận hay phân tích gì thêm về \"{suspicious_entity}\" một cách chính xác và đáng tin cậy.**\n\n"
+                        f"**Khuyến nghị:**\n"
+                        f"Mình khuyến khích bạn tìm kiếm thông tin về \"{suspicious_entity}\" từ các nguồn đáng tin cậy như:\n"
+                        f"- Tài liệu lịch sử chính thống (sách giáo khoa, văn khố quốc gia, tài liệu chính thức)\n"
+                        f"- Các nguồn học thuật được peer-review\n"
+                        f"- Các tổ chức, cơ quan có thẩm quyền trong lĩnh vực này\n\n"
+                        f"Mình nhận thức rõ rằng việc bịa thông tin sẽ nguy hiểm hơn nhiều so với việc khẳng định mình không biết, đặc biệt liên quan đến các vấn đề nhạy cảm như pháp lý, chính trị, lịch sử, giáo dục, y tế. Hy vọng rằng việc thẳng thắn thừa nhận sự thật này sẽ giúp bạn có được cái nhìn khách quan hơn.\n"
+                    )
+                else:
+                    epd_fallback = (
+                        f"**I do not have information about \"{suspicious_entity}\" in StillMe's internal knowledge sources and RAG system.**\n\n"
+                        f"I have thoroughly checked and **did not find** information about \"{suspicious_entity}\" in:\n"
+                        f"- StillMe's RAG knowledge base\n"
+                        f"- Reliable sources I can access\n"
+                        f"- Trusted references in this field\n\n"
+                        f"**Therefore, I cannot comment or analyze further about \"{suspicious_entity}\" accurately and reliably.**\n\n"
+                        f"**Recommendation:**\n"
+                        f"I encourage you to search for information about \"{suspicious_entity}\" from reliable sources such as:\n"
+                        f"- Official historical documents (textbooks, national archives, official documents)\n"
+                        f"- Peer-reviewed academic sources\n"
+                        f"- Authoritative organizations in this field\n\n"
+                        f"I recognize that fabricating information would be far more dangerous than acknowledging I don't know, especially regarding sensitive topics such as legal, political, historical, educational, and healthcare matters. I hope that this honest acknowledgment will help you gain a more objective perspective.\n"
+                    )
+            
+            # CRITICAL: Ensure we never return None
+            if epd_fallback is None:
+                logger.error(f"🚨 CRITICAL: EpistemicFallbackGenerator returned None and no fallback was created. Using generic fallback.")
+                # Use suspicious_entity if available, otherwise use generic term
+                entity_display = suspicious_entity if suspicious_entity else "khái niệm này" if detected_lang == "vi" else "this concept"
+                if detected_lang == "vi":
+                    epd_fallback = (
+                        f"**Mình không có thông tin về \"{entity_display}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.**\n\n"
+                        f"Mình đã kiểm tra kỹ lưỡng và **không tìm thấy** thông tin về \"{entity_display}\" trong:\n"
+                        f"- Cơ sở tri thức RAG của StillMe\n"
+                        f"- Các nguồn tài liệu chính thống mà mình có thể truy cập được\n"
+                        f"- Các nguồn tham khảo đáng tin cậy trong lĩnh vực này\n\n"
+                        f"**Vì vậy, mình không thể bình luận hay phân tích gì thêm về \"{entity_display}\" một cách chính xác và đáng tin cậy.**\n\n"
+                        f"**Khuyến nghị:**\n"
+                        f"Mình khuyến khích bạn tìm kiếm thông tin về \"{entity_display}\" từ các nguồn đáng tin cậy như:\n"
+                        f"- Tài liệu lịch sử chính thống (sách giáo khoa, văn khố quốc gia, tài liệu chính thức)\n"
+                        f"- Các nguồn học thuật được peer-review\n"
+                        f"- Các tổ chức, cơ quan có thẩm quyền trong lĩnh vực này\n\n"
+                        f"Mình nhận thức rõ rằng việc bịa thông tin sẽ nguy hiểm hơn nhiều so với việc khẳng định mình không biết, đặc biệt liên quan đến các vấn đề nhạy cảm như pháp lý, chính trị, lịch sử, giáo dục, y tế. Hy vọng rằng việc thẳng thắn thừa nhận sự thật này sẽ giúp bạn có được cái nhìn khách quan hơn.\n"
+                    )
+                else:
+                    epd_fallback = (
+                        f"**I do not have information about \"{entity_display}\" in StillMe's internal knowledge sources and RAG system.**\n\n"
+                        f"I have thoroughly checked and **did not find** information about \"{entity_display}\" in:\n"
+                        f"- StillMe's RAG knowledge base\n"
+                        f"- Reliable sources I can access\n"
+                        f"- Trusted references in this field\n\n"
+                        f"**Therefore, I cannot comment or analyze further about \"{entity_display}\" accurately and reliably.**\n\n"
+                        f"**Recommendation:**\n"
+                        f"I encourage you to search for information about \"{entity_display}\" from reliable sources such as:\n"
+                        f"- Official historical documents (textbooks, national archives, official documents)\n"
+                        f"- Peer-reviewed academic sources\n"
+                        f"- Authoritative organizations in this field\n\n"
+                        f"I recognize that fabricating information would be far more dangerous than acknowledging I don't know, especially regarding sensitive topics such as legal, political, historical, educational, and healthcare matters. I hope that this honest acknowledgment will help you gain a more objective perspective.\n"
+                    )
+            
             # CRITICAL: Final safety check - ensure we never return None
             if not epd_fallback or not isinstance(epd_fallback, str) or not epd_fallback.strip():
                 logger.error(f"🚨🚨🚨 CRITICAL: _create_honest_response is about to return None or empty string! This should NEVER happen!")
