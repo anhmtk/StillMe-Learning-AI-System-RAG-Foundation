@@ -50,21 +50,29 @@ def is_philosophical_question(text: str) -> bool:
         # Self-reference and meta-cognition (CRITICAL: These are philosophical even if they mention "system" or "thinking")
         "tư duy tự đánh giá", "tư duy tự phê bình", "tư duy vượt qua giới hạn",
         "tư duy đánh giá chính nó", "hệ thống tư duy nghi ngờ", "tư duy nghi ngờ chính nó",
+        "hệ thống tư duy.*đánh giá", "hệ thống.*đánh giá.*chính nó", "đánh giá.*chính nó",
         "thinking about thinking", "meta-cognition", "meta cognitive", "metacognition",
         "self-evaluation", "self-evaluating", "system evaluate itself", "thought evaluate itself",
         "bootstrap", "bootstrapping", "infinite regress", "vòng lặp vô hạn",
         "tarski", "undefinability", "giá trị câu trả lời", "giá trị câu trả lời xuất phát từ hệ thống",
         "value answer from system", "value of answer", "giới hạn của tư duy", "limits of thinking",
-        "câu trả lời đó có giá trị", "answer.*value", "giá trị.*câu trả lời"
+        "câu trả lời đó có giá trị", "answer.*value", "giá trị.*câu trả lời",
+        "đánh giá.*có giá trị", "đánh giá.*giá trị", "có giá trị.*đánh giá"
     ]
     
     for marker in priority_markers:
         # Use regex for flexible matching (handles quotes, punctuation, etc.)
         import re
-        # Escape special regex characters in marker
-        escaped_marker = re.escape(marker)
-        # Match marker as whole word or phrase (allows for punctuation/whitespace variations)
-        pattern = r'\b' + escaped_marker + r'\b'
+        # Check if marker contains regex patterns (like ".*")
+        if ".*" in marker or ".*" in marker:
+            # Marker is already a regex pattern - use it directly
+            pattern = marker
+        else:
+            # Escape special regex characters in marker
+            escaped_marker = re.escape(marker)
+            # Match marker as whole word or phrase (allows for punctuation/whitespace variations)
+            pattern = r'\b' + escaped_marker + r'\b'
+        
         if re.search(pattern, lower, re.IGNORECASE):
             logger.info(f"Philosophical question detected: True (priority marker: '{marker}', text='{text[:80]}...')")
             return True
