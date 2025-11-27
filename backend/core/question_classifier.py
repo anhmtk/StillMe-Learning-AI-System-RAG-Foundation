@@ -50,21 +50,22 @@ def is_philosophical_question(text: str) -> bool:
         # Self-reference and meta-cognition (CRITICAL: These are philosophical even if they mention "system" or "thinking")
         "tư duy tự đánh giá", "tư duy tự phê bình", "tư duy vượt qua giới hạn",
         "tư duy đánh giá chính nó", "hệ thống tư duy nghi ngờ", "tư duy nghi ngờ chính nó",
-        "hệ thống tư duy.*đánh giá", "hệ thống.*đánh giá.*chính nó", "đánh giá.*chính nó",
+        r"hệ\s+thống\s+tư\s+duy.*đánh\s+giá", r"hệ\s+thống.*đánh\s+giá.*chính\s+nó", r"đánh\s+giá.*chính\s+nó",
         "thinking about thinking", "meta-cognition", "meta cognitive", "metacognition",
         "self-evaluation", "self-evaluating", "system evaluate itself", "thought evaluate itself",
+        r"system.*evaluate.*itself", r"thought.*evaluate.*itself",
         "bootstrap", "bootstrapping", "infinite regress", "vòng lặp vô hạn",
         "tarski", "undefinability", "giá trị câu trả lời", "giá trị câu trả lời xuất phát từ hệ thống",
         "value answer from system", "value of answer", "giới hạn của tư duy", "limits of thinking",
-        "câu trả lời đó có giá trị", "answer.*value", "giá trị.*câu trả lời",
-        "đánh giá.*có giá trị", "đánh giá.*giá trị", "có giá trị.*đánh giá"
+        "câu trả lời đó có giá trị", r"answer.*value", r"giá\s+trị.*câu\s+trả\s+lời",
+        r"đánh\s+giá.*có\s+giá\s+trị", r"đánh\s+giá.*giá\s+trị", r"có\s+giá\s+trị.*đánh\s+giá"
     ]
     
     for marker in priority_markers:
         # Use regex for flexible matching (handles quotes, punctuation, etc.)
         import re
-        # Check if marker contains regex patterns (like ".*")
-        if ".*" in marker or ".*" in marker:
+        # Check if marker is already a regex pattern (contains \s+ or .*)
+        if r'\s+' in marker or '.*' in marker:
             # Marker is already a regex pattern - use it directly
             pattern = marker
         else:
