@@ -526,14 +526,15 @@ class EpistemicFallbackGenerator:
         # Combine parts
         answer = part_a + part_b + part_c + part_d
         
-        # Add short philosophical note (DỨT KHOÁT - Tự hào và dũng cảm khi nói "không biết")
-        philosophical_notes = [
-            "**Mình tự hào và dũng cảm khi dám nói thẳng 'mình không biết' khi thực sự không biết.** Thà nói 'không biết' 100 lần còn hơn bịa đặt 1 lần.",
-            "**Trung thực trước, thông minh sau:** Mình không thể tạo ra thông tin mới khi không có bằng chứng. Đây là ranh giới tri thức mà mình tôn trọng.",
-            "**Dám nói 'không biết' là dũng cảm:** Mình tự hào khi dám thừa nhận giới hạn của mình thay vì tạo ra thông tin không có căn cứ.",
+        # Add short note (BÌNH DÂN, THỰC TẾ - Nhấn mạnh sự nguy hiểm của việc bịa thông tin)
+        # Tone: Bình dân, không kiêu ngạo, không máy móc, nhấn mạnh về sự nguy hiểm đặc biệt với các vấn đề nhạy cảm
+        practical_notes = [
+            "Mình nhận thức rõ rằng việc bịa thông tin sẽ nguy hiểm hơn nhiều so với việc khẳng định mình không biết, đặc biệt liên quan đến các vấn đề nhạy cảm như pháp lý, chính trị, lịch sử, giáo dục, y tế. Hy vọng rằng việc thẳng thắn thừa nhận sự thật này sẽ giúp bạn có được cái nhìn khách quan hơn.",
+            "Thông tin sai lệch, đặc biệt về các chủ đề nhạy cảm như lịch sử, chính trị, pháp lý, có thể gây hậu quả nghiêm trọng. Vì vậy, mình chọn cách thừa nhận khi không biết thay vì tạo ra thông tin không có căn cứ. Điều này giúp bạn có thể tự tìm kiếm và xác minh từ các nguồn đáng tin cậy.",
+            "Mình hiểu rằng việc tạo ra thông tin không có căn cứ, đặc biệt về các vấn đề nhạy cảm, có thể dẫn đến hiểu lầm hoặc quyết định sai lầm. Vì vậy, mình chọn cách trung thực: thừa nhận khi không biết và khuyến khích bạn tìm kiếm từ các nguồn chính thống. Đây là cách mình tôn trọng bạn và tôn trọng sự thật.",
         ]
         import random
-        answer += f"{random.choice(philosophical_notes)}\n"
+        answer += f"\n{random.choice(practical_notes)}\n"
         
         return answer
     
