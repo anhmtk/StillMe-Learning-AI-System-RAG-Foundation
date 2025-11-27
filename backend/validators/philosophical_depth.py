@@ -22,7 +22,9 @@ SELF_REFERENCE_KEYWORDS = {
 
 # Patterns that indicate self-reference questions
 SELF_REFERENCE_PATTERNS = [
+    r"hệ\s+thống\s+tư\s+duy.*đánh\s+giá",  # Match "hệ thống tư duy...đánh giá" (flexible)
     r"hệ\s+thống\s+tư\s+duy.*đánh\s+giá.*chính\s+nó",
+    r"hệ\s+thống.*đánh\s+giá.*chính\s+nó",  # Match "hệ thống...đánh giá...chính nó"
     r"tư\s+duy.*đánh\s+giá.*chính\s+nó",
     r"tư\s+duy.*vượt.*qua.*giới\s+hạn",
     r"system.*evaluate.*itself",
