@@ -158,6 +158,7 @@ class FactualHallucinationValidator(Validator):
         
         # Check if question is about history/science
         is_history_science_question = False
+        has_explicit_fake_entity = False
         if user_question:
             question_lower = user_question.lower()
             history_science_keywords = [
@@ -179,17 +180,25 @@ class FactualHallucinationValidator(Validator):
             is_history_science_question = any(
                 re.search(pattern, question_lower) for pattern in history_science_keywords
             )
+            
+            # CRITICAL: Check if question contains EXPLICIT_FAKE_ENTITIES
+            # If yes, we MUST run validation even if not a history/science question
+            for fake_entity in self.EXPLICIT_FAKE_ENTITIES:
+                if fake_entity.lower() in question_lower:
+                    has_explicit_fake_entity = True
+                    logger.debug(f"FactualHallucinationValidator: Question contains explicit fake entity '{fake_entity}' - will run full validation")
+                    break
         
-        # If not a history/science question, skip detailed validation
-        if not is_history_science_question:
+        # If not a history/science question AND no explicit fake entity, skip detailed validation
+        if not is_history_science_question and not has_explicit_fake_entity:
             # Still check for obvious fake citations
             for pattern in self.fake_citation_patterns:
                 if re.search(pattern, answer, re.IGNORECASE):
                     reasons.append(f"fake_citation_detected: {pattern}")
                     logger.warning(f"FactualHallucinationValidator detected fake citation: {pattern}")
         
-        # For history/science questions, do comprehensive validation
-        if is_history_science_question:
+        # For history/science questions OR questions with explicit fake entities, do comprehensive validation
+        if is_history_science_question or has_explicit_fake_entity:
             # 1. Check for fake citations
             for pattern in self.fake_citation_patterns:
                 matches = re.findall(pattern, answer, re.IGNORECASE)
@@ -236,6 +245,16 @@ class FactualHallucinationValidator(Validator):
                     # Extract entities from question (use FPS detected entities or extract from question)
                     question_entities = fps_result.detected_entities if fps_result.detected_entities else self.fps.extract_entities(user_question)
                     
+                    # CRITICAL FIX: Also check question text directly for EXPLICIT_FAKE_ENTITIES
+                    # This catches cases where entity extraction might miss the entity
+                    question_lower = user_question.lower()
+                    for fake_entity in self.EXPLICIT_FAKE_ENTITIES:
+                        if fake_entity.lower() in question_lower:
+                            # Found explicit fake entity in question - add to entities list if not already there
+                            if fake_entity not in question_entities:
+                                question_entities.append(fake_entity)
+                                logger.debug(f"FactualHallucinationValidator: Found explicit fake entity '{fake_entity}' in question text")
+                    
                     # Check if answer describes these entities in detail
                     for entity in question_entities:
                         if not entity or len(entity) < 3:
@@ -275,7 +294,13 @@ class FactualHallucinationValidator(Validator):
                             continue
                         
                         # Entity is EXPLICIT_FAKE_ENTITIES - check if answer mentions it
-                        if entity_lower in answer_lower:
+                        # CRITICAL: Use case-insensitive search and also check for partial matches
+                        # (e.g., "lumeria" should match "Lumeria", "LUMERIA", "hiệp ước Lumeria")
+                        entity_mentioned = (
+                            entity_lower in answer_lower or
+                            any(fake_entity.lower() in answer_lower for fake_entity in self.EXPLICIT_FAKE_ENTITIES if entity_lower in fake_entity.lower() or fake_entity.lower() in entity_lower)
+                        )
+                        if entity_mentioned:
                             # CRITICAL: Check if answer describes the entity in detail
                             # Patterns that indicate detailed description (even with disclaimer):
                             detail_patterns = [
@@ -322,6 +347,14 @@ class FactualHallucinationValidator(Validator):
                                         f"FactualHallucinationValidator (HARD MODE): Explicit fake entity "
                                         f"'{entity}' mentioned in answer. Blocking response."
                                     )
+                                    # CRITICAL: In HARD MODE, immediately return failure - don't wait for detail patterns
+                                    # This prevents LLM from creating detailed descriptions of fake entities
+                                    patched_answer = self._create_honest_response(user_question)
+                                    return ValidationResult(
+                                        passed=False,
+                                        reasons=reasons,
+                                        patched_answer=patched_answer
+                                    )
                                 
                                 # CRITICAL: If answer describes details about EXPLICIT_FAKE_ENTITIES,
                                 # this is hallucination, even with disclaimer
@@ -352,6 +385,15 @@ class FactualHallucinationValidator(Validator):
             if user_question:
                 # Extract entities from question
                 question_entities = self.fps.extract_entities(user_question)
+                
+                # CRITICAL FIX: Also check question text directly for EXPLICIT_FAKE_ENTITIES
+                question_lower = user_question.lower()
+                for fake_entity in self.EXPLICIT_FAKE_ENTITIES:
+                    if fake_entity.lower() in question_lower:
+                        # Found explicit fake entity in question - add to entities list if not already there
+                        if fake_entity not in question_entities:
+                            question_entities.append(fake_entity)
+                            logger.debug(f"FactualHallucinationValidator: Found explicit fake entity '{fake_entity}' in question text (section 4)")
                 
                 for entity in question_entities:
                     if not entity or len(entity) < 3:
