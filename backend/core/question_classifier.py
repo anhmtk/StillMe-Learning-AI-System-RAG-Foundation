@@ -67,7 +67,8 @@ def is_philosophical_question(text: str) -> bool:
         # Check if marker is already a regex pattern (contains \s+ or .*)
         # Note: Raw strings are stored as regular strings, so we check for literal backslash-s
         # r'\s+' is stored as '\\s+' in the string, so we check for '\\s+'
-        if '\\s+' in marker or '.*' in marker:
+        is_regex_pattern = '\\s+' in marker or '.*' in marker
+        if is_regex_pattern:
             # Marker is already a regex pattern - use it directly
             pattern = marker
         else:
@@ -76,8 +77,9 @@ def is_philosophical_question(text: str) -> bool:
             # Match marker as whole word or phrase (allows for punctuation/whitespace variations)
             pattern = r'\b' + escaped_marker + r'\b'
         
-        if re.search(pattern, lower, re.IGNORECASE):
-            logger.info(f"Philosophical question detected: True (priority marker: '{marker}', text='{text[:80]}...')")
+        match_result = re.search(pattern, lower, re.IGNORECASE)
+        if match_result:
+            logger.info(f"Philosophical question detected: True (priority marker: '{marker}', pattern: '{pattern}', matched: '{match_result.group(0)[:50]}...', text='{text[:80]}...')")
             return True
     
     # English keywords
