@@ -61,9 +61,9 @@ def is_philosophical_question(text: str) -> bool:
         r"đánh\s+giá.*có\s+giá\s+trị", r"đánh\s+giá.*giá\s+trị", r"có\s+giá\s+trị.*đánh\s+giá"
     ]
     
-    for marker in priority_markers:
+    import re
+    for i, marker in enumerate(priority_markers):
         # Use regex for flexible matching (handles quotes, punctuation, etc.)
-        import re
         # Check if marker is already a regex pattern (contains \s+ or .*)
         # Note: Raw strings are stored as regular strings, so we check for literal backslash-s
         # r'\s+' is stored as '\\s+' in the string, so we check for '\\s+'
@@ -79,8 +79,11 @@ def is_philosophical_question(text: str) -> bool:
         
         match_result = re.search(pattern, lower, re.IGNORECASE)
         if match_result:
-            logger.info(f"Philosophical question detected: True (priority marker: '{marker}', pattern: '{pattern}', matched: '{match_result.group(0)[:50]}...', text='{text[:80]}...')")
+            logger.info(f"Philosophical question detected: True (priority marker #{i}: '{marker}', pattern: '{pattern}', matched: '{match_result.group(0)[:50]}...', text='{text[:80]}...')")
             return True
+        # Debug: Log first few markers that don't match (for self-reference patterns)
+        elif i < 10 and ('hệ' in marker or 'đánh' in marker or 'giá' in marker):
+            logger.debug(f"Priority marker #{i} '{marker}' did not match (is_regex={is_regex_pattern}, pattern='{pattern}')")
     
     # English keywords
     en_keywords = [
