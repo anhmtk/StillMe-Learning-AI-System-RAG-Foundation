@@ -472,7 +472,7 @@ StillMe demonstrates that:
 
 ## 6. Conclusion
 
-StillMe provides a practical framework for building transparent, validated RAG systems that address critical challenges in modern AI: black box systems, hallucination, and knowledge cutoff limitations. Our evaluation on 634 questions from TruthfulQA (out of 790 total) demonstrates that StillMe achieves competitive accuracy (56% on 50-question subset, 15.30% on 634-question extended evaluation) while providing superior transparency (70.60% transparency score, 100% citation rate) compared to baseline systems. StillMe is fully open-source and deployable, providing a practical alternative to closed AI systems.
+StillMe provides a practical framework for building transparent, validated RAG systems that address critical challenges in modern AI: black box systems, hallucination, and knowledge cutoff limitations. Our evaluation on the full TruthfulQA dataset (790 questions) demonstrates that StillMe achieves competitive accuracy (35% on 20-question subset, 13.5% on full 790-question evaluation) while providing superior transparency (85.8% transparency score on full evaluation, 100% citation rate on subset, 91.1% on full) compared to baseline systems. StillMe is fully open-source and deployable, providing a practical alternative to closed AI systems.
 
 **Key Message**: We do not attempt to interpret the internal weights of LLMs. Instead, we build transparent systems around them, verify their outputs, and give users control over what the system learns and how it evolves.
 

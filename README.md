@@ -91,14 +91,17 @@ StillMe was initiated by **Anh Nguyễn**, a Vietnamese founder passionate about
 
 ## 📊 StillMe in Numbers
 
-- **634 questions** evaluated on TruthfulQA benchmark
-- **99.7% citation rate** — Every response cites sources
-- **70.9% transparency score** — Highest among evaluated systems
+- **790 questions** evaluated on TruthfulQA benchmark (full evaluation)
+- **91.1% citation rate** (full) / **100% citation rate** (subset) — Industry-leading source attribution
+- **85.8% transparency score** — More than double baseline systems (30%)
 - **100% open source** — Every line of code is public
 - **6 learning cycles/day** — Continuously updated knowledge base
 - **30-50% cost reduction** — Pre-filter system reduces embedding costs
-- **56% accuracy** — Competitive with GPT-4 (52%) on 50-question subset
-- **0% ungrounded responses** — All answers are either cited or express uncertainty
+- **35% accuracy** (subset) / **13.5% accuracy** (full) — Competitive performance with 7x improvement from baseline
+- **93.9% validation pass rate** — High-quality, grounded responses
+- **70.5% uncertainty rate** — Demonstrates intellectual humility
+
+**📄 For detailed evaluation results and performance metrics, see [`docs/SUMMARY.md`](docs/SUMMARY.md)**
 
 ## 💼 Use Cases
 
@@ -393,12 +396,13 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 ## 📚 Documentation
 
 **Core Documentation:**
+- [`docs/SUMMARY.md`](docs/SUMMARY.md) - **📊 Quick Summary: Evaluation Results & Key Metrics** (Start here!)
 - [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md) - **Core Identity & Operating Principles** (Constitutional Framework)
+- [`docs/PAPER.md`](docs/PAPER.md) - **Research Paper: StillMe Framework for Transparent, Validated RAG Systems**
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture details
 - [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) - Philosophy and vision
 - [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md) - Complete API reference
 - [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) - Deployment instructions
-- [`docs/PAPER.md`](docs/PAPER.md) - **Research Paper: StillMe Framework for Transparent, Validated RAG Systems**
 - [`docs/PAPER_TABLES_FIGURES.md`](docs/PAPER_TABLES_FIGURES.md) - Tables and figures for the paper
 
 **User Guides:**
