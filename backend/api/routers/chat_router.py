@@ -67,6 +67,22 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en") -> str:
     now_utc = datetime.now(timezone.utc)
     timestamp_iso = now_utc.isoformat()
     
+    # Convert UTC to local timezone for display (Asia/Ho_Chi_Minh)
+    timestamp_display = timestamp_iso
+    try:
+        import pytz
+        local_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+        local_time = now_utc.replace(tzinfo=timezone.utc).astimezone(local_tz)
+        timestamp_str_local = local_time.strftime("%Y-%m-%d %H:%M:%S %Z%z")
+        timestamp_str_utc = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
+        timestamp_display = f"{timestamp_str_local} ({timestamp_str_utc})"
+    except ImportError:
+        # pytz not available, use UTC only
+        timestamp_display = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
+    except Exception as e:
+        logger.warning(f"Could not convert timestamp to local timezone: {e}")
+        timestamp_display = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
+    
     # Try to extract existing citation from response
     # Look for patterns like [general knowledge], [research: Wikipedia], [source: 1], etc.
     citation_patterns = [
@@ -96,18 +112,18 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en") -> str:
         if citation_match:
             # Extract citation text without brackets for cleaner format
             citation_text = citation_match.strip('[]')
-            timestamp_attr = f"\n\n[Nguồn: {citation_text} | Thời gian: {timestamp_iso}Z]"
+            timestamp_attr = f"\n\n[Nguồn: {citation_text} | Thời gian: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
         else:
             # No citation found, just add timestamp
-            timestamp_attr = f"\n\n[Thời gian: {timestamp_iso}Z]"
+            timestamp_attr = f"\n\n[Thời gian: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
     else:
         if citation_match:
             # Extract citation text without brackets for cleaner format
             citation_text = citation_match.strip('[]')
-            timestamp_attr = f"\n\n[Source: {citation_text} | Timestamp: {timestamp_iso}Z]"
+            timestamp_attr = f"\n\n[Source: {citation_text} | Time: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
         else:
             # No citation found, just add timestamp
-            timestamp_attr = f"\n\n[Timestamp: {timestamp_iso}Z]"
+            timestamp_attr = f"\n\n[Time: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
     
     # Append timestamp attribution to response
     return response.rstrip() + timestamp_attr
@@ -1213,14 +1229,37 @@ async def _handle_validation_with_fallback(
     
     # OpenAI Fallback Mechanism: Retry with OpenAI if confidence is low or validation failed
     # This uses the $40 credit efficiently by only using OpenAI when needed
+    # CRITICAL: DO NOT use OpenAI fallback if FactualHallucinationValidator detected explicit fake entities
+    # Hallucination about non-existent entities is a critical failure, not a quality issue
+    has_factual_hallucination = False
+    if validation_result.reasons:
+        factual_hallucination_indicators = [
+            "non_existent_concept_mentioned",
+            "explicit_fake_entity",
+            "detailed_description_of_explicit_fake_entity",
+            "assertive_description_of_explicit_fake_entity",
+            "assertive_claim_without_citation_for_explicit_fake_entity"
+        ]
+        has_factual_hallucination = any(
+            any(indicator in reason for indicator in factual_hallucination_indicators)
+            for reason in validation_result.reasons
+        )
+        if has_factual_hallucination:
+            logger.warning(
+                f"🚨 CRITICAL: FactualHallucinationValidator detected explicit fake entity. "
+                f"BLOCKING OpenAI fallback to prevent hallucination. Reasons: {validation_result.reasons}"
+            )
+    
     enable_openai_fallback = os.getenv("ENABLE_OPENAI_FALLBACK", "true").lower() == "true"
     openai_fallback_threshold = float(os.getenv("OPENAI_FALLBACK_CONFIDENCE_THRESHOLD", "0.5"))
     openai_api_key = os.getenv("OPENAI_API_KEY")
     
     # Check if we should try OpenAI fallback
+    # CRITICAL: Do NOT use OpenAI fallback if FactualHallucinationValidator detected explicit fake entities
     should_try_openai = (
         enable_openai_fallback and
         openai_api_key and
+        not has_factual_hallucination and  # BLOCK fallback if hallucination detected
         (
             confidence_score < openai_fallback_threshold or
             not validation_result.passed
@@ -1246,23 +1285,52 @@ async def _handle_validation_with_fallback(
             )
             
             # Re-validate OpenAI response
-            openai_validation_result = chain.run(openai_response, ctx_docs)
+            # CRITICAL: Must pass user_question to FactualHallucinationValidator
+            openai_validation_result = chain.run(
+                openai_response, 
+                ctx_docs,
+                user_question=chat_request.message
+            )
             openai_confidence = _calculate_confidence_score(
                 context_docs_count=len(ctx_docs),
                 validation_result=openai_validation_result,
                 context=context
             )
             
-            # Use OpenAI response if it's better
-            if openai_confidence > confidence_score or openai_validation_result.passed:
+            # CRITICAL: Check if OpenAI response also contains explicit fake entities
+            openai_has_factual_hallucination = False
+            if openai_validation_result.reasons:
+                factual_hallucination_indicators = [
+                    "non_existent_concept_mentioned",
+                    "explicit_fake_entity",
+                    "detailed_description_of_explicit_fake_entity",
+                    "assertive_description_of_explicit_fake_entity",
+                    "assertive_claim_without_citation_for_explicit_fake_entity"
+                ]
+                openai_has_factual_hallucination = any(
+                    any(indicator in reason for indicator in factual_hallucination_indicators)
+                    for reason in openai_validation_result.reasons
+                )
+                if openai_has_factual_hallucination:
+                    logger.warning(
+                        f"🚨 CRITICAL: OpenAI fallback response also contains explicit fake entity! "
+                        f"REJECTING OpenAI fallback. Reasons: {openai_validation_result.reasons}"
+                    )
+            
+            # Use OpenAI response if it's better AND doesn't contain explicit fake entities
+            if not openai_has_factual_hallucination and (openai_confidence > confidence_score or openai_validation_result.passed):
                 raw_response = openai_response
                 validation_result = openai_validation_result
                 confidence_score = openai_confidence
                 logger.info(f"✅ OpenAI fallback succeeded (confidence: {openai_confidence:.2f})")
                 processing_steps.append(f"✅ OpenAI fallback succeeded (confidence: {openai_confidence:.2f})")
             else:
-                logger.info(f"⚠️ OpenAI fallback didn't improve quality, using original response")
-                processing_steps.append("⚠️ OpenAI fallback didn't improve quality")
+                if openai_has_factual_hallucination:
+                    logger.warning(f"⚠️ OpenAI fallback rejected: contains explicit fake entity")
+                    processing_steps.append("⚠️ OpenAI fallback rejected: contains explicit fake entity")
+                else:
+                    logger.info(f"⚠️ OpenAI fallback didn't improve quality, using original response")
+                    processing_steps.append("⚠️ OpenAI fallback didn't improve quality")
                 
         except InsufficientQuotaError as quota_error:
             # OpenAI credit exhausted - gracefully fall back to original response
