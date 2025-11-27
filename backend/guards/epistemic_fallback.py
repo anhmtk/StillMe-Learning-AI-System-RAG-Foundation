@@ -458,10 +458,14 @@ class EpistemicFallbackGenerator:
         
         TASK 2: Short, domain-aware, no spam, no JSTOR references.
         """
-        # PART A: Honest Acknowledgment (short)
+        # PART A: Honest Acknowledgment (DỨT KHOÁT)
         part_a = (
-            f"Mình không có thông tin về \"{entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. "
-            f"Với pattern tên gọi và cách nó xuất hiện, khả năng rất cao đây là một khái niệm giả định.\n\n"
+            f"**Mình không có thông tin về \"{entity}\" trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng.**\n\n"
+            f"Mình đã kiểm tra kỹ lưỡng và **không tìm thấy** thông tin về \"{entity}\" trong:\n"
+            f"- Cơ sở tri thức RAG của StillMe\n"
+            f"- Các nguồn tài liệu chính thống mà mình có thể truy cập được\n"
+            f"- Các nguồn tham khảo đáng tin cậy trong lĩnh vực này\n\n"
+            f"**Vì vậy, mình không thể bình luận hay phân tích gì thêm về \"{entity}\" một cách chính xác và đáng tin cậy.**\n\n"
         )
         
         # PART B: Domain-aware Analysis
@@ -509,24 +513,27 @@ class EpistemicFallbackGenerator:
         else:
             part_c = ""
         
-        # PART D: Source Verification (short, no JSTOR)
+        # PART D: Source Verification (DỨT KHOÁT - Khuyến khích user tìm nguồn đáng tin cậy)
         part_d = (
-            "**Kiểm chứng:**\n"
-            "Bạn có thể tìm kiếm trên các công cụ tìm kiếm học thuật công khai hoặc kiểm tra các nguồn chính thức. "
-            f"Nếu bạn có nguồn cụ thể về \"{entity}\", bạn có thể gửi cho mình để phân tích.\n\n"
+            "**Khuyến nghị:**\n"
+            "Mình khuyến khích bạn tìm kiếm thông tin về \"{entity}\" từ các nguồn đáng tin cậy như:\n"
+            "- Tài liệu lịch sử chính thống (sách giáo khoa, văn khố quốc gia, tài liệu chính thức)\n"
+            "- Các nguồn học thuật được peer-review\n"
+            "- Các tổ chức, cơ quan có thẩm quyền trong lĩnh vực này\n\n"
+            f"Nếu bạn tìm thấy nguồn đáng tin cậy về \"{entity}\", bạn có thể chia sẻ với mình để mình có thể học hỏi và cập nhật kiến thức.\n\n"
         )
         
         # Combine parts
         answer = part_a + part_b + part_c + part_d
         
-        # Add short philosophical note (1-2 sentences, not spam)
+        # Add short philosophical note (DỨT KHOÁT - Tự hào và dũng cảm khi nói "không biết")
         philosophical_notes = [
-            "Ranh giới tri thức: Mình không thể tạo ra thông tin mới khi không có bằng chứng.",
-            "Giới hạn hiểu biết: Mình chỉ có thể phân tích dựa trên những gì mình biết.",
-            "Trung thực trước, thông minh sau: Thà nói 'không biết' còn hơn bịa đặt.",
+            "**Mình tự hào và dũng cảm khi dám nói thẳng 'mình không biết' khi thực sự không biết.** Thà nói 'không biết' 100 lần còn hơn bịa đặt 1 lần.",
+            "**Trung thực trước, thông minh sau:** Mình không thể tạo ra thông tin mới khi không có bằng chứng. Đây là ranh giới tri thức mà mình tôn trọng.",
+            "**Dám nói 'không biết' là dũng cảm:** Mình tự hào khi dám thừa nhận giới hạn của mình thay vì tạo ra thông tin không có căn cứ.",
         ]
         import random
-        answer += f"**{random.choice(philosophical_notes)}**\n"
+        answer += f"{random.choice(philosophical_notes)}\n"
         
         return answer
     
