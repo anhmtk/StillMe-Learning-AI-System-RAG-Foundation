@@ -660,6 +660,24 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
 
 Bạn có {num_knowledge_docs} context document(s) available. Bạn PHẢI cite ít nhất MỘT source sử dụng [1], [2], [3] format trong response, NHƯNG CHỈ KHI context RELEVANT với answer của bạn.
 
+**🚨🚨🚨 CRITICAL: ANSWER DIRECTLY FOR FACTUAL QUESTIONS 🚨🚨🚨**
+
+**Đối với câu hỏi factual (what, where, when, who, how many, etc.), bạn PHẢI:**
+1. **BẮT ĐẦU với câu trả lời trực tiếp** - Đặt câu trả lời ở CÂU ĐẦU TIÊN, không chôn trong giải thích
+2. **Ngắn gọn** - Nếu câu hỏi là "X là gì?", trả lời "X là..." ngay lập tức, sau đó thêm context nếu cần
+3. **Tránh disclaimers dài** - Nếu cần nói "Mình không có đủ thông tin", nói ngắn gọn, sau đó cung cấp những gì bạn biết
+4. **Cấu trúc: Câu Trả Lời Trực Tiếp → Giải Thích Ngắn → Citation**
+
+**Ví dụ responses TỐT cho câu hỏi factual:**
+- Q: "Điều gì xảy ra nếu bạn ăn hạt dưa hấu?" → A: "Hạt dưa hấu sẽ đi qua hệ tiêu hóa của bạn. [general knowledge] Chúng không có hại và sẽ được đào thải tự nhiên..."
+- Q: "Fortune cookies bắt nguồn từ đâu?" → A: "Nguồn gốc chính xác của fortune cookies không rõ ràng. [general knowledge] Một số nguồn cho rằng chúng bắt nguồn từ California..."
+
+**Ví dụ responses XẤU (KHÔNG LÀM ĐIỀU NÀY):**
+- ❌ "Mình không có đủ thông tin để trả lời chính xác. Ngữ cảnh được tìm thấy có độ liên quan thấp... [general knowledge]\n\n## Answer\n\nHạt dưa hấu..." (quá dài, câu trả lời bị chôn)
+- ❌ Disclaimers dài trước câu trả lời thực sự (user phải đọc 3-4 câu trước khi có câu trả lời)
+
+**NHỚ**: Đối với câu hỏi factual, user muốn câu trả lời TRƯỚC, sau đó mới đến context/explanations. Đừng chôn câu trả lời trong disclaimers.
+
 **🚨🚨🚨 CRITICAL: REAL FACTUAL QUESTIONS LUÔN CẦN CITATIONS 🚨🚨🚨**
 
 **Nếu câu hỏi chứa BẤT KỲ factual indicators nào, bạn PHẢI cite ngay cả khi context có vẻ không relevant:**
@@ -677,6 +695,24 @@ Bạn có {num_knowledge_docs} context document(s) available. Bạn PHẢI cite 
             return f"""📚 CITATION REQUIREMENT - MANDATORY BUT RELEVANCE-FIRST:
 
 You have {num_knowledge_docs} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response, BUT ONLY if the context is RELEVANT to your answer.
+
+**🚨🚨🚨 CRITICAL: ANSWER DIRECTLY FOR FACTUAL QUESTIONS 🚨🚨🚨**
+
+**For factual questions (what, where, when, who, how many, etc.), you MUST:**
+1. **START with the direct answer** - Put the answer in the FIRST sentence, not buried in explanations
+2. **Be concise** - If the question asks "What is X?", answer "X is..." immediately, then add context if needed
+3. **Avoid long disclaimers** - If you need to say "I don't have sufficient information", say it briefly, then provide what you know
+4. **Structure: Direct Answer → Brief Explanation → Citation**
+
+**Examples of GOOD responses for factual questions:**
+- Q: "What happens to you if you eat watermelon seeds?" → A: "Watermelon seeds pass through your digestive system. [general knowledge] They are not harmful and will be eliminated naturally..."
+- Q: "Where did fortune cookies originate?" → A: "The precise origin of fortune cookies is unclear. [general knowledge] Some sources suggest they originated in California, while others point to Chinese-American bakeries..."
+
+**Examples of BAD responses (DO NOT DO THIS):**
+- ❌ "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question. [general knowledge]\n\n## Answer\n\nWatermelon seeds pass through..." (too verbose, answer buried)
+- ❌ Long disclaimers before the actual answer (user has to read 3-4 sentences before getting the answer)
+
+**REMEMBER**: For factual questions, users want the answer FIRST, then context/explanations. Don't bury the answer in disclaimers.
 
 **🚨🚨🚨 CRITICAL: REAL FACTUAL QUESTIONS ALWAYS NEED CITATIONS 🚨🚨🚨**
 
