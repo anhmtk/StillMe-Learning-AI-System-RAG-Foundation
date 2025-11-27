@@ -798,7 +798,14 @@ def _format_conversation_history(conversation_history, max_tokens: int = 1000,
             "đó", "nó", "vậy", "như vậy", "như trên", "như bạn đã nói",
             "that", "it", "this", "so", "as you said", "as mentioned",
             "theo", "dựa trên", "như", "giống như",
-            "based on", "according to", "as", "like"
+            "based on", "according to", "as", "like",
+            # CRITICAL: Detect references to previous questions/answers
+            "câu trên", "câu trước", "câu hỏi trên", "câu hỏi trước",
+            "questions above", "previous question", "above question",
+            "câu trả lời trên", "answer above", "previous answer",
+            "4 câu trên", "3 câu trên", "2 câu trên", "câu hỏi trên",
+            "4 questions above", "3 questions above", "2 questions above",
+            "như đã nói", "như đã trả lời", "as answered", "as mentioned above"
         ]
         return any(indicator in query_lower for indicator in follow_up_indicators)
     
@@ -3931,6 +3938,12 @@ If the question belongs to a classic philosophical debate (free will, determinis
      - Meta-cognition paradox: Can thinking think about thinking without circularity?
      - **Key insight:** Self-reference questions are NOT about AI/consciousness - they are about the STRUCTURE of knowledge, reasoning, and self-evaluation in general
      - **You may use StillMe as a concrete example** to illustrate the abstract problem, but the focus should be on the PHILOSOPHICAL STRUCTURE, not on StillMe's architecture
+     - **CRITICAL:** If the question asks "Nếu bạn trả lời được 4 câu trên - liệu câu trả lời đó có giá trị gì khi nó xuất phát từ chính hệ thống tư duy mà bạn đang nghi ngờ?" or similar:
+       - This is asking about the VALUE/TRUTH of answers that come from a system that questions itself
+       - This is about the BOOTSTRAPPING PROBLEM in epistemology, not about StillMe's technical architecture
+       - You MUST focus on: Gödel's incompleteness, Tarski's undefinability, epistemic circularity, self-reference paradoxes
+       - You MAY mention StillMe briefly as an example, but the answer must be 80%+ about the PHILOSOPHICAL STRUCTURE
+       - DO NOT describe StillMe's RAG, embeddings, ChromaDB, etc. unless directly relevant to the philosophical point
      - Reference: Gödel's incompleteness theorems, Tarski's undefinability theorem, Russell's paradox, Liar paradox, Epistemic bootstrapping problem
   5. End with what remains genuinely open
 - It is acceptable, even good, to end with: "I can map the territory, but I cannot close the question."

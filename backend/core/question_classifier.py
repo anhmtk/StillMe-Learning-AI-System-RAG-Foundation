@@ -53,12 +53,19 @@ def is_philosophical_question(text: str) -> bool:
         "thinking about thinking", "meta-cognition", "meta cognitive", "metacognition",
         "self-evaluation", "self-evaluating", "system evaluate itself", "thought evaluate itself",
         "bootstrap", "bootstrapping", "infinite regress", "vòng lặp vô hạn",
-        "tarski", "undefinability", "giá trị câu trả lời xuất phát từ hệ thống",
-        "value answer from system", "giới hạn của tư duy", "limits of thinking"
+        "tarski", "undefinability", "giá trị câu trả lời", "giá trị câu trả lời xuất phát từ hệ thống",
+        "value answer from system", "value of answer", "giới hạn của tư duy", "limits of thinking",
+        "câu trả lời đó có giá trị", "answer.*value", "giá trị.*câu trả lời"
     ]
     
     for marker in priority_markers:
-        if marker in lower:
+        # Use regex for flexible matching (handles quotes, punctuation, etc.)
+        import re
+        # Escape special regex characters in marker
+        escaped_marker = re.escape(marker)
+        # Match marker as whole word or phrase (allows for punctuation/whitespace variations)
+        pattern = r'\b' + escaped_marker + r'\b'
+        if re.search(pattern, lower, re.IGNORECASE):
             logger.info(f"Philosophical question detected: True (priority marker: '{marker}', text='{text[:80]}...')")
             return True
     
