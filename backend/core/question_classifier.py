@@ -46,7 +46,15 @@ def is_philosophical_question(text: str) -> bool:
         "tánh không", "tự tính",
         "paradox", "nghịch lý", "nghịch lí", "tự quy chiếu", "self-reference", "self referential",
         "liar paradox", "incompleteness",
-        "madhyamaka", "emptiness"
+        "madhyamaka", "emptiness",
+        # Self-reference and meta-cognition (CRITICAL: These are philosophical even if they mention "system" or "thinking")
+        "tư duy tự đánh giá", "tư duy tự phê bình", "tư duy vượt qua giới hạn",
+        "tư duy đánh giá chính nó", "hệ thống tư duy nghi ngờ", "tư duy nghi ngờ chính nó",
+        "thinking about thinking", "meta-cognition", "meta cognitive", "metacognition",
+        "self-evaluation", "self-evaluating", "system evaluate itself", "thought evaluate itself",
+        "bootstrap", "bootstrapping", "infinite regress", "vòng lặp vô hạn",
+        "tarski", "undefinability", "giá trị câu trả lời xuất phát từ hệ thống",
+        "value answer from system", "giới hạn của tư duy", "limits of thinking"
     ]
     
     for marker in priority_markers:

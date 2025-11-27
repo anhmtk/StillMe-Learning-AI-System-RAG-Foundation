@@ -637,14 +637,14 @@ class FactualHallucinationValidator(Validator):
                     f"I recognize that fabricating information would be far more dangerous than acknowledging I don't know, especially regarding sensitive topics such as legal, political, historical, educational, and healthcare matters. I hope that this honest acknowledgment will help you gain a more objective perspective.\n"
                 )
         
-        # CRITICAL: Final safety check - ensure we never return None
-        if not epd_fallback or not isinstance(epd_fallback, str) or not epd_fallback.strip():
-            logger.error(f"🚨🚨🚨 CRITICAL: _create_honest_response is about to return None or empty string! This should NEVER happen!")
-            if detected_lang == "vi":
-                epd_fallback = "Mình không có thông tin về khái niệm này trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. Mình đã kiểm tra kỹ lưỡng và không tìm thấy thông tin trong các nguồn đáng tin cậy. Vì vậy, mình không thể bình luận hay phân tích gì thêm một cách chính xác và đáng tin cậy."
-            else:
-                epd_fallback = "I do not have information about this concept in StillMe's internal knowledge sources and RAG system. I have thoroughly checked and did not find information in reliable sources. Therefore, I cannot comment or analyze further accurately and reliably."
-        
+            # CRITICAL: Final safety check - ensure we never return None
+            if not epd_fallback or not isinstance(epd_fallback, str) or not epd_fallback.strip():
+                logger.error(f"🚨🚨🚨 CRITICAL: _create_honest_response is about to return None or empty string! This should NEVER happen!")
+                if detected_lang == "vi":
+                    epd_fallback = "Mình không có thông tin về khái niệm này trong các nguồn tri thức nội bộ và RAG mà StillMe đang sử dụng. Mình đã kiểm tra kỹ lưỡng và không tìm thấy thông tin trong các nguồn đáng tin cậy. Vì vậy, mình không thể bình luận hay phân tích gì thêm một cách chính xác và đáng tin cậy."
+                else:
+                    epd_fallback = "I do not have information about this concept in StillMe's internal knowledge sources and RAG system. I have thoroughly checked and did not find information in reliable sources. Therefore, I cannot comment or analyze further accurately and reliably."
+            
             return epd_fallback
         except Exception as e:
             # CRITICAL: If ANY exception occurs, return a safe fallback string

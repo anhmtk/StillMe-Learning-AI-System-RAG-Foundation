@@ -473,6 +473,11 @@ class QualityEvaluator:
         - But response mentions: consciousness, LLM, IIT, GWT, Dennett, embedding, etc.
         - Then this is DRIFT and must be rewritten 100%.
         
+        EXCEPTION: If question is about self-reference, meta-cognition, or "tư duy tự đánh giá"
+        (thinking about thinking), then mentioning StillMe/AI as an EXAMPLE is NOT drift.
+        This is because self-reference questions are inherently meta-cognitive and may use
+        StillMe as a concrete example to illustrate the abstract problem.
+        
         Returns: 1.0 = good (no drift), 0.0 = bad (strong drift detected)
         """
         question_lower = original_question.lower()
@@ -486,6 +491,61 @@ class QualityEvaluator:
         # If question IS about AI/consciousness, then talking about it is NOT drift
         if is_legitimate_context:
             return 1.0  # No drift - legitimate context
+        
+        # CRITICAL EXCEPTION: Check if question is about self-reference, meta-cognition, or "tư duy tự đánh giá"
+        # These are philosophical questions about "thinking about thinking" where mentioning StillMe/AI
+        # as an example is legitimate, not drift.
+        self_reference_keywords = [
+            r"tư\s+duy.*tự.*đánh\s+giá", r"tư\s+duy.*tự.*phê\s+bình",
+            r"tư\s+duy.*vượt.*qua.*giới\s+hạn", r"tư\s+duy.*đánh\s+giá.*chính\s+nó",
+            r"hệ\s+thống.*tư\s+duy.*nghi\s+ngờ", r"tư\s+duy.*nghi\s+ngờ.*chính\s+nó",
+            r"thinking.*about.*thinking", r"meta.*cognition", r"meta.*cognitive",
+            r"self.*reference", r"self.*referential", r"self.*evaluation",
+            r"system.*evaluate.*itself", r"thought.*evaluate.*itself",
+            r"giá\s+trị.*câu\s+trả\s+lời.*xuất\s+phát.*từ.*hệ\s+thống",
+            r"value.*answer.*from.*system", r"bootstrap", r"bootstrapping",
+            r"infinite\s+regress", r"vòng\s+lặp.*vô\s+hạn",
+            r"gödel.*incompleteness", r"godel.*incompleteness", r"tarski.*undefinability",
+            r"paradox.*self", r"nghịch\s+lý.*tự.*quy\s+chiếu"
+        ]
+        
+        is_self_reference_question = any(
+            re.search(pattern, question_lower, re.IGNORECASE)
+            for pattern in self_reference_keywords
+        )
+        
+        # If question is about self-reference/meta-cognition, allow StillMe/AI as example
+        if is_self_reference_question:
+            logger.info(
+                f"Self-reference/meta-cognition question detected - allowing StillMe/AI as example. "
+                f"Question: {original_question[:100]}..."
+            )
+            # Still check for excessive drift (if response ONLY talks about StillMe without addressing the philosophical question)
+            # But be more lenient - allow 1-2 mentions of StillMe/AI as example
+            drift_matches = sum(
+                1 for pattern in self.drift_indicators 
+                if re.search(pattern, text_lower, re.IGNORECASE)
+            )
+            # Only flag as drift if there are MANY drift indicators (>= 4) AND response doesn't address the philosophical question
+            if drift_matches >= 4:
+                # Check if response actually addresses the philosophical question (self-reference, meta-cognition, etc.)
+                philosophical_indicators = [
+                    r"gödel", r"godel", r"tarski", r"incompleteness", r"undefinability",
+                    r"self.*reference", r"meta.*cognition", r"bootstrap", r"paradox",
+                    r"tự.*quy.*chiếu", r"nghịch.*lý", r"giới.*hạn.*nhận.*thức"
+                ]
+                has_philosophical_content = any(
+                    re.search(pattern, text_lower, re.IGNORECASE)
+                    for pattern in philosophical_indicators
+                )
+                if not has_philosophical_content:
+                    logger.warning(
+                        f"Topic drift detected in self-reference question: Response has {drift_matches} drift indicators "
+                        f"but lacks philosophical content. Question: {original_question[:100]}..."
+                    )
+                    return 0.0  # Strong drift - response only talks about StillMe, doesn't address philosophy
+            # Otherwise, allow it (StillMe/AI as example is legitimate for self-reference questions)
+            return 1.0  # No drift - legitimate use of StillMe/AI as example
         
         # Check if response contains drift indicators
         drift_matches = sum(
