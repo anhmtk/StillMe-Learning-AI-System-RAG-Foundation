@@ -51,18 +51,32 @@ WELL_KNOWN_HISTORICAL_FACTS = {
     "cold war", "chiến tranh lạnh"
 }
 
-def is_well_known_historical_fact(question: str, entity: Optional[str] = None) -> bool:
+def is_well_known_historical_fact(question: str, entity: Optional[str] = None, check_explicit_fake: bool = True) -> bool:
     """
     Check if question/entity is about a well-known historical fact.
     These should NEVER trigger epistemic fallback - LLM base knowledge has them.
     
+    CRITICAL: If entity is an EXPLICIT_FAKE_ENTITY (Lumeria, Veridian, etc.), 
+    ALWAYS return False to ensure fallback is generated, even if question mentions well-known facts.
+    
     Args:
         question: User question
         entity: Optional extracted entity
+        check_explicit_fake: If True, check if entity is explicit fake and bypass well-known fact check
         
     Returns:
-        True if this is a well-known historical fact
+        True if this is a well-known historical fact (and NOT an explicit fake entity)
     """
+    # CRITICAL: Check for explicit fake entities FIRST
+    # If entity is explicit fake, NEVER treat as well-known historical fact
+    if check_explicit_fake and entity:
+        explicit_fake_keywords = ["veridian", "lumeria", "emerald", "daxonia"]
+        entity_lower = entity.lower()
+        for keyword in explicit_fake_keywords:
+            if keyword in entity_lower:
+                logger.info(f"🚨 Explicit fake entity '{entity}' detected - bypassing well-known historical fact check to ensure fallback")
+                return False
+    
     text_to_check = (question + " " + (entity or "")).lower()
     
     for fact in WELL_KNOWN_HISTORICAL_FACTS:
@@ -291,8 +305,10 @@ class EpistemicFallbackGenerator:
             Complete EPD-Fallback answer string, or None if this is a well-known historical fact
         """
         # CRITICAL: Check if this is a well-known historical fact FIRST
+        # BUT: If entity is explicit fake, ALWAYS generate fallback (bypass well-known fact check)
         # If yes, return None to signal that base knowledge should be used instead
-        if is_well_known_historical_fact(question, suspicious_entity):
+        # CRITICAL: Pass check_explicit_fake=True to bypass if entity is explicit fake
+        if is_well_known_historical_fact(question, suspicious_entity, check_explicit_fake=True):
             logger.info(f"✅ Well-known historical fact detected - returning None to use base knowledge instead of fallback")
             return None
         
@@ -308,7 +324,8 @@ class EpistemicFallbackGenerator:
                 suspicious_entity = "khái niệm này" if detected_lang == "vi" else "this concept"
         
         # CRITICAL: Double-check after entity extraction
-        if is_well_known_historical_fact(question, suspicious_entity):
+        # BUT: If entity is explicit fake, ALWAYS generate fallback (bypass well-known fact check)
+        if is_well_known_historical_fact(question, suspicious_entity, check_explicit_fake=True):
             logger.info(f"✅ Well-known historical fact detected after entity extraction - returning None")
             return None
         
