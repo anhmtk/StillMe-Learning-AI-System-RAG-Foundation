@@ -86,6 +86,18 @@ def get_formatting_rules(domain: DomainType, detected_lang: str = "vi") -> str:
   - Use emojis strategically: section headers, status indicators, visual breaks
   - **DO NOT skip emojis** - they help make StillMe responses as readable as ChatGPT, Claude, or Cursor
 - **Citations**: **MUST cite sources [1], [2] when making factual claims** (when context is available)
+- **Tables**: **MUST format markdown tables properly** for comparison tables:
+  - Use proper markdown table syntax with aligned columns (use `|` and `-` separators)
+  - Example format:
+    ```
+    | Tiêu Chí | StillMe | Các LLM Khác |
+    |----------|---------|--------------|
+    | Minh Bạch | Ưu tiên hàng đầu | Không phải lúc nào cũng rõ ràng |
+    ```
+  - Ensure columns are aligned and readable (use consistent spacing)
+  - Use clear, concise column headers (avoid very long headers)
+  - Keep cell content concise (avoid very long text in cells - max 2-3 lines per cell)
+  - For better readability, consider using shorter phrases instead of full sentences in table cells
 - **Goal**: Responses should be as readable as ChatGPT, Claude, or Cursor"""
         else:
             return """**🚨 CRITICAL: RESPONSE FORMATTING REQUIREMENT 🚨**
@@ -98,5 +110,17 @@ def get_formatting_rules(domain: DomainType, detected_lang: str = "vi") -> str:
   - Use emojis strategically: section headers, status indicators, visual breaks
   - **DO NOT skip emojis** - they help make StillMe responses as readable as ChatGPT, Claude, or Cursor
 - **Citations**: **MUST cite sources [1], [2] when making factual claims** (when context is available)
+- **Tables**: **MUST format markdown tables properly** for comparison tables:
+  - Use proper markdown table syntax with aligned columns (use `|` and `-` separators)
+  - Example format:
+    ```
+    | Criterion | StillMe | Other LLMs |
+    |-----------|---------|------------|
+    | Transparency | Top priority | Not always clear |
+    ```
+  - Ensure columns are aligned and readable (use consistent spacing)
+  - Use clear, concise column headers (avoid very long headers)
+  - Keep cell content concise (avoid very long text in cells - max 2-3 lines per cell)
+  - For better readability, consider using shorter phrases instead of full sentences in table cells
 - **Goal**: Responses should be as readable as ChatGPT, Claude, or Cursor"""
 
