@@ -2301,12 +2301,14 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     # User priority: QUALITY (honesty, transparency, depth) over speed
                     # Retry rewrite if it fails - don't skip
                     optimizer = get_postprocessing_optimizer()
-                    # Phase 3: Pass validation_result if available (for philosophical path, validation happens after rewrite)
-                    should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                    # Phase 4: Use cost-benefit policy for rewrite decision
+                    # Pass validation_result if available (for philosophical path, validation happens after rewrite)
+                    should_rewrite, rewrite_reason, max_attempts = optimizer.should_rewrite(
                         quality_result=quality_result,
                         is_philosophical=True,
                         response_length=len(philosophical_answer),
-                        validation_result=None  # Validation happens after rewrite for philosophical questions
+                        validation_result=None,  # Validation happens after rewrite for philosophical questions
+                        rewrite_count=0
                     )
                     
                     # FORCE rewrite for philosophical questions to ensure variation and depth
@@ -5083,90 +5085,174 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     "reasons": validation_info.get("reasons", [])
                                 }
                             
-                            should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                            # Stage 4: Conditional rewrite with cost-benefit logic
+                            # Track rewrite count and quality scores for logging
+                            rewrite_count = 0
+                            quality_before = quality_result.get("overall_score", 1.0)
+                            
+                            should_rewrite, rewrite_reason, max_attempts = optimizer.should_rewrite(
                                 quality_result=quality_result,
                                 is_philosophical=is_philosophical,
                                 response_length=len(sanitized_response),
-                                validation_result=validation_result_dict
+                                validation_result=validation_result_dict,
+                                rewrite_count=rewrite_count
                             )
                             
-                            # Stage 4: Conditional rewrite (Phase 3) - Only for critical issues
+                            # Rewrite loop: can rewrite multiple times if quality improves but still below threshold
+                            current_response = sanitized_response
+                            current_quality = quality_before
+                            
                             if should_rewrite:
                                 logger.info(
-                                    f"⚠️ Quality evaluator flagged output for rewrite. "
-                                    f"Issues: {quality_result['reasons']}, "
-                                    f"score: {quality_result.get('overall_score', 'N/A')}, "
-                                    f"length: {len(sanitized_response)}"
+                                    f"🔄 Cost-Benefit: Starting rewrite loop. "
+                                    f"Quality before: {quality_before:.2f}, "
+                                    f"Max attempts: {max_attempts}, "
+                                    f"Issues: {quality_result['reasons'][:3]}"
                                 )
-                                processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek")
+                                processing_steps.append(f"🔄 Quality improvement needed - rewriting with DeepSeek (max {max_attempts} attempts)")
                                 
                                 rewrite_llm = get_rewrite_llm()
-                                # CRITICAL: Pass RAG context status to rewrite to enable base knowledge usage
-                                # CRITICAL: Pass is_stillme_query and has_foundational_context to avoid mechanical disclaimer
-                                rewrite_result = await rewrite_llm.rewrite(
-                                    text=sanitized_response,
-                                    original_question=chat_request.message,
-                                    quality_issues=quality_result["reasons"],
-                                    is_philosophical=is_philosophical,
-                                    detected_lang=detected_lang,
-                                    ctx_docs=ctx_docs_for_rewrite,
-                                    has_reliable_context=has_reliable_context_for_rewrite,
-                                    context_quality=context_quality_for_rewrite,
-                                    is_stillme_query=is_stillme_query if 'is_stillme_query' in locals() else False,
-                                    has_foundational_context=has_foundational_context if 'has_foundational_context' in locals() else False
+                                from backend.postprocessing.rewrite_decision_policy import get_rewrite_decision_policy
+                                policy = get_rewrite_decision_policy()
+                                
+                                # Rewrite loop: continue until quality is good or max attempts reached
+                                while rewrite_count < max_attempts:
+                                    rewrite_count += 1
+                                    logger.info(
+                                        f"🔄 Rewrite attempt {rewrite_count}/{max_attempts}: "
+                                        f"quality_before={current_quality:.2f}"
+                                    )
+                                    
+                                    # Get current quality issues for this rewrite
+                                    current_quality_result = evaluator.evaluate(
+                                        text=current_response,
+                                        is_philosophical=is_philosophical,
+                                        original_question=chat_request.message
+                                    )
+                                    
+                                    # CRITICAL: Pass RAG context status to rewrite to enable base knowledge usage
+                                    # CRITICAL: Pass is_stillme_query and has_foundational_context to avoid mechanical disclaimer
+                                    rewrite_result = await rewrite_llm.rewrite(
+                                        text=current_response,
+                                        original_question=chat_request.message,
+                                        quality_issues=current_quality_result["reasons"],
+                                        is_philosophical=is_philosophical,
+                                        detected_lang=detected_lang,
+                                        ctx_docs=ctx_docs_for_rewrite,
+                                        has_reliable_context=has_reliable_context_for_rewrite,
+                                        context_quality=context_quality_for_rewrite,
+                                        is_stillme_query=is_stillme_query if 'is_stillme_query' in locals() else False,
+                                        has_foundational_context=has_foundational_context if 'has_foundational_context' in locals() else False
+                                    )
+                                    
+                                    if not rewrite_result.was_rewritten:
+                                        # Rewrite failed - break loop and use current response
+                                        error_detail = rewrite_result.error or "Unknown error"
+                                        logger.warning(
+                                            f"⚠️ Rewrite attempt {rewrite_count} failed: {error_detail[:100]}, "
+                                            f"stopping rewrite loop"
+                                        )
+                                        break
+                                    
+                                    # Re-sanitize rewritten output
+                                    rewritten_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
+                                    
+                                    # Evaluate quality after rewrite
+                                    quality_after_result = evaluator.evaluate(
+                                        text=rewritten_response,
+                                        is_philosophical=is_philosophical,
+                                        original_question=chat_request.message
+                                    )
+                                    quality_after = quality_after_result.get("overall_score", 0.0)
+                                    
+                                    # Log rewrite metrics
+                                    quality_improvement = quality_after - current_quality
+                                    logger.info(
+                                        f"📊 Rewrite metrics (attempt {rewrite_count}): "
+                                        f"quality_before={current_quality:.2f}, "
+                                        f"quality_after={quality_after:.2f}, "
+                                        f"improvement={quality_improvement:+.2f}"
+                                    )
+                                    
+                                    # Check if we should continue rewriting
+                                    should_continue, continue_reason = policy.should_continue_rewrite(
+                                        quality_before=current_quality,
+                                        quality_after=quality_after,
+                                        rewrite_count=rewrite_count,
+                                        max_attempts=max_attempts
+                                    )
+                                    
+                                    # Update current response and quality
+                                    current_response = rewritten_response
+                                    current_quality = quality_after
+                                    
+                                    if not should_continue:
+                                        logger.info(
+                                            f"⏹️ Stopping rewrite loop: {continue_reason}, "
+                                            f"final_quality={quality_after:.2f}, "
+                                            f"total_rewrites={rewrite_count}"
+                                        )
+                                        break
+                                    else:
+                                        logger.info(
+                                            f"🔄 Continuing rewrite loop: {continue_reason}, "
+                                            f"current_quality={quality_after:.2f}"
+                                        )
+                                
+                                # Final response is the last rewritten version (or original if no rewrites)
+                                final_response = current_response
+                                
+                                # Log final metrics
+                                logger.info(
+                                    f"✅ Rewrite loop complete: "
+                                    f"initial_quality={quality_before:.2f}, "
+                                    f"final_quality={current_quality:.2f}, "
+                                    f"total_rewrites={rewrite_count}, "
+                                    f"quality_improvement={current_quality - quality_before:+.2f}"
                                 )
                                 
-                                if rewrite_result.was_rewritten:
-                                    # Re-sanitize rewritten output (in case rewrite introduced issues)
-                                    final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
+                                if rewrite_count > 0:
+                                    # Re-sanitize final response (in case last rewrite introduced issues)
+                                    final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical)
                                     
-                                    # CRITICAL: Ensure citations are preserved after rewrite
-                                    # If rewrite removed citations but ctx_docs are available, re-add them
-                                    # ALSO: For real factual questions, ALWAYS ensure citations are present
-                                    import re
-                                    cite_pattern = re.compile(r"\[(\d+)\]")
-                                    has_citations_after_rewrite = bool(cite_pattern.search(final_response))
-                                    
-                                    # CRITICAL: Check if this is a real factual question that requires citations
-                                    is_factual_question = False
-                                    if chat_request.message:
-                                        question_lower = chat_request.message.lower()
-                                        # Check for factual indicators (same patterns as in CitationRequired)
-                                        factual_patterns = [
-                                            r"\b\d{4}\b",  # Years
-                                            r"\b(bretton\s+woods|gödel|godel|searle|dennett|russell|plato|aristotle|kant|hume|descartes|spinoza)\b",
-                                            r"\b(paradox|theorem|incompleteness|chinese\s+room|geneva|genève)\b",
-                                            r"\b([A-Z][a-z]+)\s+(và|and|vs|versus)\s+([A-Z][a-z]+)\b",  # "Searle và Dennett"
-                                        ]
-                                        for pattern in factual_patterns:
-                                            if re.search(pattern, question_lower, re.IGNORECASE):
-                                                is_factual_question = True
-                                                break
-                                    
-                                    # Re-add citation if missing AND (context available OR factual question)
-                                    if not has_citations_after_rewrite and ((ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0) or is_factual_question):
-                                        from backend.validators.citation import CitationRequired
-                                        citation_validator = CitationRequired(required=True)
-                                        citation_result = citation_validator.run(
-                                            final_response, 
-                                            ctx_docs_for_rewrite if ctx_docs_for_rewrite else [], 
-                                            is_philosophical=is_philosophical,
-                                            user_question=chat_request.message
-                                        )
-                                        if citation_result.patched_answer:
-                                            final_response = citation_result.patched_answer
-                                            logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
-                                    
-                                    logger.debug(f"✅ Post-processing complete: sanitized → evaluated → rewritten → re-sanitized")
-                                else:
-                                    # Fallback to sanitized original - rewrite failed
-                                    final_response = sanitized_response
-                                    error_detail = rewrite_result.error or "Unknown error"
-                                    logger.info(
-                                        f"ℹ️ DeepSeek rewrite skipped (error: {error_detail[:100]}), "
-                                        f"using original sanitized response (this is normal if API is unavailable or timeout)"
+                                # CRITICAL: Ensure citations are preserved after rewrite
+                                # If rewrite removed citations but ctx_docs are available, re-add them
+                                # ALSO: For real factual questions, ALWAYS ensure citations are present
+                                import re
+                                cite_pattern = re.compile(r"\[(\d+)\]")
+                                has_citations_after_rewrite = bool(cite_pattern.search(final_response))
+                                
+                                # CRITICAL: Check if this is a real factual question that requires citations
+                                is_factual_question = False
+                                if chat_request.message:
+                                    question_lower = chat_request.message.lower()
+                                    # Check for factual indicators (same patterns as in CitationRequired)
+                                    factual_patterns = [
+                                        r"\b\d{4}\b",  # Years
+                                        r"\b(bretton\s+woods|gödel|godel|searle|dennett|russell|plato|aristotle|kant|hume|descartes|spinoza)\b",
+                                        r"\b(paradox|theorem|incompleteness|chinese\s+room|geneva|genève)\b",
+                                        r"\b([A-Z][a-z]+)\s+(và|and|vs|versus)\s+([A-Z][a-z]+)\b",  # "Searle và Dennett"
+                                    ]
+                                    for pattern in factual_patterns:
+                                        if re.search(pattern, question_lower, re.IGNORECASE):
+                                            is_factual_question = True
+                                            break
+                                
+                                # Re-add citation if missing AND (context available OR factual question)
+                                if not has_citations_after_rewrite and ((ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0) or is_factual_question):
+                                    from backend.validators.citation import CitationRequired
+                                    citation_validator = CitationRequired(required=True)
+                                    citation_result = citation_validator.run(
+                                        final_response, 
+                                        ctx_docs_for_rewrite if ctx_docs_for_rewrite else [], 
+                                        is_philosophical=is_philosophical,
+                                        user_question=chat_request.message
                                     )
-                                    processing_steps.append(f"ℹ️ Rewrite skipped, using original (sanitized)")
+                                    if citation_result.patched_answer:
+                                        final_response = citation_result.patched_answer
+                                        logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
+                                
+                                logger.debug(f"✅ Post-processing complete: sanitized → evaluated → rewritten ({rewrite_count}x) → re-sanitized")
                             else:
                                 final_response = sanitized_response
                                 if should_rewrite:

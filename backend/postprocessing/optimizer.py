@@ -146,90 +146,58 @@ class PostProcessingOptimizer:
         quality_result: Dict,
         is_philosophical: bool,
         response_length: int,
-        validation_result: Optional[Dict] = None
-    ) -> Tuple[bool, str]:
+        validation_result: Optional[Dict] = None,
+        rewrite_count: int = 0
+    ) -> Tuple[bool, str, int]:
         """
-        Determine if rewrite is really needed (Phase 3: Only rewrite critical issues)
+        Determine if rewrite should be performed using cost-benefit policy
         
-        Phase 3 Optimization: "Less is More"
-        - Chỉ rewrite khi có CRITICAL issues:
-          1. Missing citation (critical) - khi có context nhưng không có citation
-          2. Anthropomorphic language (critical) - "in my experience", "tôi cảm thấy"
-          3. Language mismatch (critical) - trả lời sai ngôn ngữ
-        - KHÔNG rewrite cho:
-          - Minor formatting issues (thiếu emoji, markdown format)
-          - Style preferences (paragraph structure khác nhau)
-          - Natural variation (cùng câu hỏi nhưng cách diễn đạt khác)
-          - Depth, unpacking (optional - không phải critical)
+        Phase 4: Cost-Benefit Logic
+        - Uses RewriteDecisionPolicy for intelligent rewrite decisions
+        - Respects SELF_CORRECTION_MODE (off/light/aggressive)
+        - Tracks rewrite count to prevent excessive rewrites
+        - Considers quality score thresholds
         
         Args:
             quality_result: Quality evaluation result
             is_philosophical: Whether question is philosophical
             response_length: Length of response
             validation_result: Optional validation result from validator chain
+            rewrite_count: Number of rewrites already performed (default: 0)
             
         Returns:
-            Tuple of (should_rewrite, reason)
+            Tuple of (should_rewrite, reason, max_attempts)
         """
-        quality = quality_result.get("quality", "good")
+        from backend.postprocessing.rewrite_decision_policy import get_rewrite_decision_policy
+        
+        policy = get_rewrite_decision_policy()
         overall_score = quality_result.get("overall_score", 1.0)
-        reasons = quality_result.get("reasons", [])
         
-        # Phase 3: Check for CRITICAL issues only
-        critical_issues = []
-        
-        # 1. Check for anthropomorphic language (CRITICAL)
-        has_anthropomorphic = any(
-            "anthropomorphic" in r.lower() or 
-            "contains anthropomorphic" in r.lower() or
-            "claims experience" in r.lower() or
-            "claims feelings" in r.lower()
-            for r in reasons
+        # Use policy to make decision
+        decision = policy.should_rewrite(
+            quality_score=overall_score,
+            quality_result=quality_result,
+            rewrite_count=rewrite_count,
+            validation_result=validation_result
         )
-        if has_anthropomorphic:
-            critical_issues.append("anthropomorphic_language")
         
-        # 2. Check for missing citation (CRITICAL) - from validation_result if available
-        if validation_result:
-            validation_reasons = validation_result.get("reasons", [])
-            has_missing_citation = any("missing_citation" in r for r in validation_reasons)
-            if has_missing_citation:
-                critical_issues.append("missing_citation")
-        
-        # 3. Check for language mismatch (CRITICAL) - from validation_result if available
-        if validation_result:
-            validation_reasons = validation_result.get("reasons", [])
-            has_language_mismatch = any("language_mismatch" in r for r in validation_reasons)
-            if has_language_mismatch:
-                critical_issues.append("language_mismatch")
-        
-        # 4. Check for topic drift (CRITICAL - StillMe talking about consciousness/LLM when not asked)
-        has_topic_drift = any("topic drift" in r.lower() for r in reasons)
-        if has_topic_drift:
-            critical_issues.append("topic_drift")
-        
-        # 5. Check for template-like response (CRITICAL - too mechanical)
-        has_template_like = any("template-like" in r.lower() for r in reasons)
-        if has_template_like:
-            critical_issues.append("template_like")
-        
-        # Phase 3: Only rewrite if there are CRITICAL issues
-        if critical_issues:
+        # Log decision
+        if decision.should_rewrite:
             logger.info(
-                f"🔄 Phase 3: Rewriting due to CRITICAL issues: {critical_issues}, "
-                f"quality={quality}, score={overall_score:.2f}, "
-                f"philosophical={is_philosophical}, length={response_length}"
+                f"🔄 Cost-Benefit: Rewrite decision - {decision.reason}, "
+                f"quality_before={decision.quality_before:.2f}, "
+                f"rewrite_count={rewrite_count}/{decision.max_attempts}, "
+                f"mode={decision.mode}"
             )
-            return True, f"critical_issues: {', '.join(critical_issues)}"
+        else:
+            logger.info(
+                f"⏭️ Cost-Benefit: Skip rewrite - {decision.reason}, "
+                f"quality_before={decision.quality_before:.2f}, "
+                f"rewrite_count={rewrite_count}/{decision.max_attempts}, "
+                f"mode={decision.mode}"
+            )
         
-        # No critical issues - skip rewrite (allow natural variation)
-        logger.info(
-            f"⏭️ Phase 3: Skipping rewrite - no critical issues, "
-            f"quality={quality}, score={overall_score:.2f}, "
-            f"philosophical={is_philosophical}, length={response_length}, "
-            f"non_critical_reasons={reasons[:2] if reasons else 'none'}"
-        )
-        return False, "no_critical_issues"
+        return decision.should_rewrite, decision.reason, decision.max_attempts
 
 
 def get_postprocessing_optimizer() -> PostProcessingOptimizer:
