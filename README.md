@@ -226,8 +226,12 @@ See `env.example` for full list.
 - ✅ Post-Processing System - Quality enhancement and variation
   - Quality evaluator - Rule-based quality assessment (0 token cost)
   - Rewrite engine - LLM-based answer refinement with retry mechanism
+  - Cost-benefit logic - Intelligent rewrite decisions (prevents unnecessary rewrites)
   - Style sanitizer - Removes anthropomorphic language
   - Honesty handler - Specialized processing for transparency questions
+- ✅ Epistemic State Classification - Response certainty indicators
+  - KNOWN/UNCERTAIN/UNKNOWN states - Transparent knowledge classification
+  - Rule-based classifier - Based on citations, confidence, and validation results
 - ✅ Philosophical Question Processor - 3-layer system for consciousness/emotion questions
   - Intent classification (consciousness, emotion, understanding, mixed)
   - Sub-type detection (paradox, epistemic, meta, definitional, direct)
@@ -417,6 +421,8 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 **Features:**
 - [`docs/SPICE_ARCHITECTURE.md`](docs/SPICE_ARCHITECTURE.md) - SPICE framework
 - [`docs/CONFIDENCE_AND_FALLBACK.md`](docs/CONFIDENCE_AND_FALLBACK.md) - Validation system
+- [`docs/COST_BENEFIT_REWRITE.md`](docs/COST_BENEFIT_REWRITE.md) - Cost-benefit logic for RewriteLLM
+- [`docs/EPISTEMIC_STATE.md`](docs/EPISTEMIC_STATE.md) - Epistemic state classification (KNOWN/UNCERTAIN/UNKNOWN)
 
 ## ⚠️ Known Limitations & Improvements
 

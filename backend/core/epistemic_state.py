@@ -162,10 +162,11 @@ def calculate_epistemic_state(
         (conf_score is None or conf_score >= 0.7) and
         not has_warnings
     ):
+        conf_display = f"{conf_score:.2f}" if conf_score is not None else "N/A"
         logger.debug(
             f"EpistemicState: KNOWN "
             f"(passed={validation_passed}, citations={has_citations}, "
-            f"ctx_docs={ctx_docs_count}, confidence={conf_score:.2f if conf_score else 'N/A'})"
+            f"ctx_docs={ctx_docs_count}, confidence={conf_display})"
         )
         return EpistemicState.KNOWN
     
@@ -189,10 +190,11 @@ def calculate_epistemic_state(
         (validation_passed and has_warnings) or
         (has_citations and ctx_docs_count == 0)  # Citations but no context (general knowledge)
     ):
+        conf_display = f"{conf_score:.2f}" if conf_score is not None else "N/A"
         logger.debug(
             f"EpistemicState: UNCERTAIN "
             f"(citations={has_citations}, ctx_docs={ctx_docs_count}, "
-            f"confidence={conf_score:.2f if conf_score else 'N/A'}, warnings={has_warnings})"
+            f"confidence={conf_display}, warnings={has_warnings})"
         )
         return EpistemicState.UNCERTAIN
     
