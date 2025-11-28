@@ -7,7 +7,15 @@ import requests
 import streamlit as st
 import streamlit.components.v1 as components
 import plotly.graph_objects as go
-import pandas as pd
+
+# Import pandas with error handling
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    pd = None
+    PANDAS_AVAILABLE = False
+    st.warning("⚠️ pandas is not installed. Some features may not work correctly.")
 
 # Import floating chat widget
 try:
@@ -1570,9 +1578,19 @@ def page_learning():
                 })
             
             if table_data:
-                import pandas as pd
-                df = pd.DataFrame(table_data)
-                st.dataframe(df, use_container_width=True, height=400)
+                if PANDAS_AVAILABLE and pd is not None:
+                    try:
+                        df = pd.DataFrame(table_data)
+                        st.dataframe(df, use_container_width=True, height=400)
+                    except Exception as e:
+                        st.error(f"⚠️ Error creating DataFrame: {str(e)}")
+                        # Fallback: display as list
+                        for item in table_data:
+                            st.json(item)
+                else:
+                    st.warning("⚠️ pandas is not available. Displaying data as JSON:")
+                    for item in table_data:
+                        st.json(item)
                 
                 # Show details in expander
                 st.markdown("### Item Details")
@@ -1698,29 +1716,50 @@ def page_validation():
             if validators:
                 st.markdown("**Per-Validator Breakdown:**")
                 
-                # Create DataFrame for table display
-                table_data = []
-                for v in validators:
-                    table_data.append({
-                        "Validator": v.get("name", "Unknown"),
-                        "Total Checks": v.get("total_checks", 0),
-                        "Passed": v.get("passed", 0),
-                        "Failed": v.get("failed", 0),
-                        "Pass Rate": f"{v.get('pass_rate', 0.0):.1%}",
-                        "Status": "✅" if v.get("pass_rate", 0.0) >= 0.8 else "⚠️" if v.get("pass_rate", 0.0) >= 0.5 else "❌"
-                    })
-                
-                df_validators = pd.DataFrame(table_data)
-                st.dataframe(df_validators, use_container_width=True, hide_index=True)
-                
-                # Bar chart for pass rates
-                if len(validators) > 0:
-                    st.markdown("**Pass Rate by Validator:**")
-                    chart_data = pd.DataFrame({
-                        "Validator": [v.get("name", "Unknown") for v in validators],
-                        "Pass Rate": [v.get("pass_rate", 0.0) * 100 for v in validators]
-                    })
-                    st.bar_chart(chart_data.set_index("Validator"), height=300)
+                # Check if pandas is available
+                if not PANDAS_AVAILABLE or pd is None:
+                    st.error("⚠️ pandas is not available. Cannot display per-validator table.")
+                    # Fallback: display as markdown table
+                    st.markdown("| Validator | Total Checks | Passed | Failed | Pass Rate | Status |")
+                    st.markdown("|-----------|--------------|--------|--------|-----------|--------|")
+                    for v in validators:
+                        pass_rate = v.get('pass_rate', 0.0)
+                        status = "✅" if pass_rate >= 0.8 else "⚠️" if pass_rate >= 0.5 else "❌"
+                        st.markdown(f"| {v.get('name', 'Unknown')} | {v.get('total_checks', 0)} | {v.get('passed', 0)} | {v.get('failed', 0)} | {pass_rate:.1%} | {status} |")
+                else:
+                    try:
+                        # Create DataFrame for table display
+                        table_data = []
+                        for v in validators:
+                            table_data.append({
+                                "Validator": v.get("name", "Unknown"),
+                                "Total Checks": v.get("total_checks", 0),
+                                "Passed": v.get("passed", 0),
+                                "Failed": v.get("failed", 0),
+                                "Pass Rate": f"{v.get('pass_rate', 0.0):.1%}",
+                                "Status": "✅" if v.get("pass_rate", 0.0) >= 0.8 else "⚠️" if v.get("pass_rate", 0.0) >= 0.5 else "❌"
+                            })
+                        
+                        df_validators = pd.DataFrame(table_data)
+                        st.dataframe(df_validators, use_container_width=True, hide_index=True)
+                        
+                        # Bar chart for pass rates
+                        if len(validators) > 0:
+                            st.markdown("**Pass Rate by Validator:**")
+                            chart_data = pd.DataFrame({
+                                "Validator": [v.get("name", "Unknown") for v in validators],
+                                "Pass Rate": [v.get("pass_rate", 0.0) * 100 for v in validators]
+                            })
+                            st.bar_chart(chart_data.set_index("Validator"), height=300)
+                    except Exception as pd_error:
+                        st.error(f"⚠️ Error creating per-validator table: {str(pd_error)}")
+                        # Fallback: display as markdown table
+                        st.markdown("| Validator | Total Checks | Passed | Failed | Pass Rate | Status |")
+                        st.markdown("|-----------|--------------|--------|--------|-----------|--------|")
+                        for v in validators:
+                            pass_rate = v.get('pass_rate', 0.0)
+                            status = "✅" if pass_rate >= 0.8 else "⚠️" if pass_rate >= 0.5 else "❌"
+                            st.markdown(f"| {v.get('name', 'Unknown')} | {v.get('total_checks', 0)} | {v.get('passed', 0)} | {v.get('failed', 0)} | {pass_rate:.1%} | {status} |")
                 
                 # Failure reasons breakdown (expandable)
                 with st.expander("🔍 Detailed Failure Reasons"):
@@ -1826,9 +1865,19 @@ def page_validation():
                         "Retention Score": f"{item.get('retention_score', 0.0):.2f}"
                     })
                 
-                import pandas as pd
-                df = pd.DataFrame(table_data)
-                st.dataframe(df, use_container_width=True, height=400)
+                if PANDAS_AVAILABLE and pd is not None:
+                    try:
+                        df = pd.DataFrame(table_data)
+                        st.dataframe(df, use_container_width=True, height=400)
+                    except Exception as e:
+                        st.error(f"⚠️ Error creating DataFrame: {str(e)}")
+                        # Fallback: display as list
+                        for item in table_data:
+                            st.json(item)
+                else:
+                    st.warning("⚠️ pandas is not available. Displaying data as JSON:")
+                    for item in table_data:
+                        st.json(item)
                 
                 # Show details in expander
                 st.markdown("### Item Details")
