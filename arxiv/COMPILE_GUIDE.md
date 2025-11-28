@@ -171,10 +171,27 @@ miktex packages install <package-name>
    Keywords: RAG, Transparency, Validation, Hallucination Reduction, Open Source AI, Continuous Learning
    
    Version: 0.2
-   
-   Related Identifiers:
-   - IsNewVersionOf: 10.5281/zenodo.17637315 (DOI của version cũ)
    ```
+
+5. **⚠️ QUAN TRỌNG: Related Identifiers (KHÔNG PHẢI Alternate Identifiers):**
+   
+   **LỖI THƯỜNG GẶP:** Không nhập DOI vào "Alternate identifiers" với scheme "ARK"!
+   
+   **CÁCH ĐÚNG:**
+   - Scroll xuống phần **"Related identifiers"** (KHÔNG phải "Alternate identifiers")
+   - Click **"Add identifier"**
+   - Điền:
+     ```
+     Identifier: 10.5281/zenodo.17637315
+     Relation type: IsNewVersionOf (hoặc IsVersionOf)
+     Scheme: DOI
+     ```
+   - Click **"Add identifier"** để lưu
+   
+   **LƯU Ý:**
+   - "Alternate identifiers" dùng cho ARK, Handle, PURL, etc. (KHÔNG phải DOI)
+   - "Related identifiers" dùng để link với version cũ, GitHub repo, etc.
+   - Nếu đã nhập sai vào "Alternate identifiers", click **"X"** để xóa entry đó
 
 5. **Link với GitHub (Optional):**
    - Trong "Related Identifiers", thêm:
