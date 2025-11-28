@@ -477,6 +477,10 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
         "what is your purpose", "why were you created", "what is your mission",
         "mục tiêu của bạn", "bạn ra đời", "muc tieu cua ban", "ban ra doi",
         "mục đích của bạn", "muc dich cua ban", "nhiệm vụ của bạn", "nhiem vu cua ban",
+        "tổ chức nào", "to chuc nao", "organization", "which organization", "what organization",
+        "công ty nào", "cong ty nao", "company", "which company", "what company",
+        "team nào", "team nao", "which team", "what team",
+        "nhóm nào", "nhom nao", "which group", "what group",
     ]
     for keyword in strong_origin_keywords:
         if keyword in query_lower:
@@ -486,6 +490,16 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
     # Check for pattern: "who" + "created/built/made" + "you"/"bạn"
     if re.search(r'\bwho\b.*\b(created|built|made|developed|founded)\b.*\b(you|stillme)\b', query_lower):
         matched_keywords.append("who_created_you_pattern")
+        return (True, matched_keywords)
+    
+    # Check for pattern: "tổ chức/công ty/team/nhóm nào" + "đã tạo ra/tạo ra" + "bạn" (Vietnamese)
+    if re.search(r'\b(tổ chức|to chuc|organization|công ty|cong ty|company|team|nhóm|nhom|group)\s+nào\b.*\b(đã\s+)?(tạo ra|làm ra|xây dựng|phát triển|tao ra|lam ra|xay dung|phat trien)\b.*\b(bạn|ban|stillme|you)\b', query_lower):
+        matched_keywords.append("organization_pattern")
+        return (True, matched_keywords)
+    
+    # Check for pattern: "which/what" + "organization/company/team/group" + "created/built" + "you"
+    if re.search(r'\b(which|what)\s+(organization|company|team|group)\b.*\b(created|built|made|developed|founded)\b.*\b(you|stillme)\b', query_lower):
+        matched_keywords.append("which_organization_pattern")
         return (True, matched_keywords)
     
     # Check for pattern: "ai" + "tạo ra/xây dựng" + "bạn" (Vietnamese)

@@ -5940,7 +5940,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                         # Phase 3: Only rewrite when CRITICAL issues are present
                         # Critical issues: missing citation, anthropomorphic language, language mismatch, topic drift, template-like
                         # Non-critical issues (depth, unpacking, style) do NOT trigger rewrite
-                        should_rewrite, rewrite_reason = optimizer.should_rewrite(
+                        should_rewrite, rewrite_reason, max_attempts = optimizer.should_rewrite(
                             quality_result=quality_result,
                             is_philosophical=is_philosophical_non_rag,
                             response_length=len(sanitized_response)
@@ -6262,7 +6262,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 response_text=response,
                 context_docs_count=ctx_docs_count
             )
-            logger.info(f"📊 EpistemicState: {epistemic_state.value} (confidence={confidence_score:.2f if confidence_score else 'N/A'}, ctx_docs={ctx_docs_count})")
+            confidence_str = f"{confidence_score:.2f}" if confidence_score else 'N/A'
+            logger.info(f"📊 EpistemicState: {epistemic_state.value} (confidence={confidence_str}, ctx_docs={ctx_docs_count})")
         except Exception as e:
             logger.warning(f"⚠️ Failed to calculate epistemic state: {e}, defaulting to UNKNOWN")
             epistemic_state = EpistemicState.UNKNOWN
