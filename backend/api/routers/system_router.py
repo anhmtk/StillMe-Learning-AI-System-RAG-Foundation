@@ -481,6 +481,44 @@ async def get_validation_metrics(days: int = None):
             }
         }
 
+@router.get("/api/admin/validation-metrics")
+async def get_admin_validation_metrics(days: int = 7):
+    """
+    Get detailed validation metrics for admin dashboard
+    
+    This endpoint provides per-validator breakdown including:
+    - Total responses validated in the time period
+    - Per-validator pass/fail counts and rates
+    - Fallback usage statistics
+    - Confidence score distribution
+    
+    Args:
+        days: Number of days to analyze (default: 7)
+    
+    Returns:
+        Dictionary with per-validator metrics and overall statistics
+    """
+    try:
+        from backend.services.validation_metrics_service import get_validation_metrics_service
+        service = get_validation_metrics_service()
+        metrics = service.get_per_validator_metrics(days=days, use_persistent_tracker=True)
+        return metrics
+    except Exception as e:
+        logger.error(f"Admin validation metrics error: {e}", exc_info=True)
+        return {
+            "total_responses": 0,
+            "total_fallbacks": 0,
+            "time_period_days": days,
+            "validators": [],
+            "confidence_distribution": {
+                "min": 0.0,
+                "max": 0.0,
+                "avg": 0.0,
+                "count": 0
+            },
+            "error": str(e)
+        }
+
 @router.get("/api/validators/metrics/patterns")
 async def get_validation_patterns(days: int = 7):
     """

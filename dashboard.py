@@ -1652,6 +1652,94 @@ def page_validation():
     
     st.markdown("---")
     
+    # Per-validator metrics (NEW)
+    st.subheader("📊 Per-Validator Performance")
+    st.caption("Detailed breakdown of each validator's performance")
+    
+    # Get per-validator metrics from new endpoint
+    try:
+        # Time period selector
+        col_period1, col_period2 = st.columns([1, 4])
+        with col_period1:
+            time_period = st.selectbox("Time Period", [1, 7, 30], index=1, format_func=lambda x: f"Last {x} days")
+        
+        admin_metrics = get_json(f"/api/admin/validation-metrics?days={time_period}", {})
+        
+        if admin_metrics and "validators" in admin_metrics:
+            total_responses = admin_metrics.get("total_responses", 0)
+            total_fallbacks = admin_metrics.get("total_fallbacks", 0)
+            validators = admin_metrics.get("validators", [])
+            confidence_dist = admin_metrics.get("confidence_distribution", {})
+            
+            # Overall stats
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total Responses", total_responses)
+            with col2:
+                st.metric("Total Fallbacks", total_fallbacks)
+            with col3:
+                fallback_rate = (total_fallbacks / total_responses * 100) if total_responses > 0 else 0.0
+                st.metric("Fallback Rate", f"{fallback_rate:.1f}%")
+            
+            # Confidence distribution
+            if confidence_dist.get("count", 0) > 0:
+                st.markdown("**Confidence Score Distribution:**")
+                col_conf1, col_conf2, col_conf3 = st.columns(3)
+                with col_conf1:
+                    st.metric("Average", f"{confidence_dist.get('avg', 0.0):.3f}")
+                with col_conf2:
+                    st.metric("Min", f"{confidence_dist.get('min', 0.0):.3f}")
+                with col_conf3:
+                    st.metric("Max", f"{confidence_dist.get('max', 0.0):.3f}")
+            
+            st.markdown("---")
+            
+            # Per-validator table
+            if validators:
+                st.markdown("**Per-Validator Breakdown:**")
+                
+                # Create DataFrame for table display
+                table_data = []
+                for v in validators:
+                    table_data.append({
+                        "Validator": v.get("name", "Unknown"),
+                        "Total Checks": v.get("total_checks", 0),
+                        "Passed": v.get("passed", 0),
+                        "Failed": v.get("failed", 0),
+                        "Pass Rate": f"{v.get('pass_rate', 0.0):.1%}",
+                        "Status": "✅" if v.get("pass_rate", 0.0) >= 0.8 else "⚠️" if v.get("pass_rate", 0.0) >= 0.5 else "❌"
+                    })
+                
+                df_validators = pd.DataFrame(table_data)
+                st.dataframe(df_validators, use_container_width=True, hide_index=True)
+                
+                # Bar chart for pass rates
+                if len(validators) > 0:
+                    st.markdown("**Pass Rate by Validator:**")
+                    chart_data = pd.DataFrame({
+                        "Validator": [v.get("name", "Unknown") for v in validators],
+                        "Pass Rate": [v.get("pass_rate", 0.0) * 100 for v in validators]
+                    })
+                    st.bar_chart(chart_data.set_index("Validator"), height=300)
+                
+                # Failure reasons breakdown (expandable)
+                with st.expander("🔍 Detailed Failure Reasons"):
+                    for v in validators:
+                        failure_reasons = v.get("failure_reasons", {})
+                        if failure_reasons:
+                            st.markdown(f"**{v.get('name', 'Unknown')}:**")
+                            for reason, count in sorted(failure_reasons.items(), key=lambda x: x[1], reverse=True):
+                                st.write(f"- `{reason}`: {count} times")
+            else:
+                st.info("No per-validator data available. Send some chat messages to start collecting metrics.")
+        else:
+            st.warning("⚠️ Could not load per-validator metrics. The endpoint may not be available yet.")
+    except Exception as e:
+        st.warning(f"⚠️ Error loading per-validator metrics: {str(e)}")
+        st.info("💡 This feature requires validation data. Send some chat messages to start collecting metrics.")
+    
+    st.markdown("---")
+    
     # Average overlap score
     avg_overlap = metrics_data.get("avg_overlap_score", 0.0)
     st.subheader("Evidence Overlap")
