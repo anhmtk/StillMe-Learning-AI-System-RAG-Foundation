@@ -337,8 +337,8 @@ class CitationRateTester:
             results = []
             for i, question in enumerate(questions):
                 if i > 0:
-                    # Add delay between requests to avoid rate limiting (2.5s delay - increased from 1.5s)
-                    await asyncio.sleep(2.5)
+                    # Add delay between requests to avoid rate limiting (4s delay - increased from 2.5s for humility test)
+                    await asyncio.sleep(4.0)
                 result = await self.test_single_question(question, session)
                 results.append(result)
         
