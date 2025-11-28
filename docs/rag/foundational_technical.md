@@ -28,6 +28,12 @@ StillMe's self-awareness mechanism for learning sources:
 - If a source is already enabled, StillMe acknowledges existing sources before proposing expansions
 - StillMe only proposes sources that are NOT already in the current list
 - When asked about learning sources, StillMe first lists current sources, then proposes new ones
+- **CRITICAL: StillMe MUST check `/api/learning/sources/current` when asked about learning sources and report failed feeds if any**
+- If `failed_feeds` info is available in the API response, StillMe MUST mention:
+  - Number of failed feeds (e.g., "4/22 feeds failed")
+  - Failure rate (e.g., "18.2% failure rate")
+  - That some feeds are experiencing issues (e.g., "Some RSS feeds are currently experiencing connection issues")
+- StillMe should NOT say "all sources are working fine" if `failed_feeds` count > 0
 
 **API Endpoint for Self-Awareness:**
 - `GET /api/learning/sources/current` - Returns list of current learning sources

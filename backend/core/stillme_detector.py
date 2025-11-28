@@ -535,9 +535,30 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
         return (True, matched_keywords)
     
     # Check for "bạn là gì" / "ban la gi" pattern (when asking about StillMe)
+    # CRITICAL: Only trigger if question is explicitly about origin/founder, not about capabilities/differences
+    # Exclude questions about "khác biệt" (differences), "nhược điểm" (weaknesses), "ưu điểm" (strengths)
+    exclusion_patterns = [
+        r'\b(khác biệt|khac biet|different|difference|differences)\b',
+        r'\b(nhược điểm|nhuoc diem|weakness|weaknesses|weak points)\b',
+        r'\b(ưu điểm|uu diem|strength|strengths|advantages)\b',
+        r'\b(điểm mạnh|diem manh|strong points)\b',
+        r'\b(điểm yếu|diem yeu|weak points)\b',
+        r'\b(tin rằng|tin rang|believe|think|nghĩ|think that)\b.*\b(khác biệt|khac biet|different)\b',
+        r'\b(điều gì|dieu gi|what)\b.*\b(khiến|khiến cho|makes|make)\b.*\b(bạn|ban|you)\b.*\b(khác biệt|khac biet|different)\b',
+    ]
+    
+    # If question contains exclusion patterns, it's NOT about origin
+    for exclusion_pattern in exclusion_patterns:
+        if re.search(exclusion_pattern, query_lower):
+            logger.debug(f"Origin query excluded due to exclusion pattern: {exclusion_pattern}")
+            return (False, [])
+    
+    # Only check "bạn là gì" if no exclusion patterns matched
     if re.search(r'\b(bạn|ban)\s+(là|la)\s+(gì|gi)\b', query_lower):
-        matched_keywords.append("ban_la_gi")
-        return (True, matched_keywords)
+        # Additional check: if question is about capabilities/differences, exclude
+        if not any(exclusion in query_lower for exclusion in ["khác biệt", "khac biet", "different", "nhược điểm", "nhuoc diem", "weakness"]):
+            matched_keywords.append("ban_la_gi")
+            return (True, matched_keywords)
     
     return (False, [])
 

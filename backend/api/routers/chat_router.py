@@ -3711,6 +3711,27 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                         active_sources = current_learning_sources.get("summary", {}).get("active_sources", [])
                         enabled_sources = [name for name, info in sources_list.items() if info.get("enabled")]
                         
+                        # Check for failed feeds in RSS stats
+                        rss_info = sources_list.get("rss", {})
+                        failed_feeds_info = rss_info.get("failed_feeds")
+                        failed_feeds_text = ""
+                        if failed_feeds_info:
+                            failed_count = failed_feeds_info.get("failed_count", 0)
+                            successful_count = failed_feeds_info.get("successful_count", 0)
+                            total_count = failed_feeds_info.get("total_count", 0)
+                            failure_rate = failed_feeds_info.get("failure_rate", 0)
+                            last_error = failed_feeds_info.get("last_error")
+                            
+                            if failed_count > 0:
+                                failed_feeds_text = f"""
+**⚠️ RSS FEEDS STATUS (CRITICAL - MUST REPORT):**
+- **Failed Feeds**: {failed_count}/{total_count} feeds are currently failing ({failure_rate}% failure rate)
+- **Successful Feeds**: {successful_count}/{total_count} feeds are working
+- **Last Error**: {last_error[:150] if last_error else 'Unknown error'}
+- **CRITICAL**: You MUST mention that some RSS feeds are experiencing issues. Do NOT say "all sources are working fine" or "all feeds are active" when {failed_count} feeds have failed.
+- **You MUST be honest**: Say something like "StillMe is currently learning from {len(enabled_sources)} sources, but {failed_count} RSS feeds are experiencing connection issues (failure rate: {failure_rate}%). The system is still learning from {successful_count} working feeds."
+"""
+                        
                         learning_sources_instruction = f"""
 
 📚 LEARNING SOURCES QUERY DETECTED - CURRENT SOURCES DATA AVAILABLE:
@@ -3718,10 +3739,11 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 **CRITICAL: You MUST list ALL current learning sources from the API data below:**
 
 **Current Learning Sources (from `/api/learning/sources/current` API):**
-{chr(10).join(f"- **{name.upper()}**: {'Enabled' if info.get('enabled') else 'Disabled'} - Status: {info.get('status', 'unknown')}" for name, info in sources_list.items())}
+{chr(10).join(f"- **{name.upper()}**: {'Enabled' if info.get('enabled') else 'Disabled'} - Status: {info.get('status', 'unknown')}" + (f" - Failed Feeds: {info.get('failed_feeds', {}).get('failed_count', 0)}/{info.get('failed_feeds', {}).get('total_count', 0)}" if name == "rss" and info.get("failed_feeds") else "") for name, info in sources_list.items())}
 
 **Active Sources**: {', '.join(active_sources) if active_sources else 'None'}
 **Total Enabled**: {len(enabled_sources)} sources
+{failed_feeds_text}
 
 **MANDATORY RESPONSE REQUIREMENTS:**
 1. **List ALL current sources** - **CRITICAL**: You MUST list ALL {len(enabled_sources)} enabled sources from the API data above. Do NOT just say "RSS, arXiv, Wikipedia" - you MUST list ALL sources: {', '.join([name.upper() for name in enabled_sources]) if enabled_sources else 'ALL SOURCES FROM API DATA ABOVE'}
