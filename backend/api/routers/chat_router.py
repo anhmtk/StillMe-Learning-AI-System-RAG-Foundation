@@ -2244,7 +2244,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             "rag_retrieval_latency": 0.0,
                             "llm_inference_latency": 0.0
                         },
-                        epistemic_state=EpistemicState.KNOWN.value  # External API data is KNOWN
+                        epistemic_state=EpistemicState.KNOWN.value,  # External API data is KNOWN
                         used_fallback=False
                     )
                 elif result and not result.success:
