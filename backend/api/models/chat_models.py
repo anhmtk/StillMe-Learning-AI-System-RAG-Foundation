@@ -174,6 +174,7 @@ class ChatResponse(BaseModel):
     accuracy_score: Optional[float] = Field(None, ge=0.0, le=1.0)
     confidence_score: Optional[float] = Field(None, ge=0.0, le=1.0, description="AI confidence in the answer (0.0 = uncertain, 1.0 = very confident)")
     validation_info: Optional[Dict[str, Any]] = Field(None, description="Validation results and fallback information")
+    epistemic_state: Optional[str] = Field(None, description="Epistemic state: KNOWN (clear evidence), UNCERTAIN (some info but thin), UNKNOWN (system doesn't know)")
     learning_suggestions: Optional[List[str]] = Field(None, description="Suggested topics to learn based on knowledge gaps")
     learning_session_id: Optional[int] = None
     knowledge_alert: Optional[Dict[str, Any]] = None

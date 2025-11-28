@@ -2068,12 +2068,14 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 system_truth_answer = get_system_origin_answer(detected_lang)
                 
                 # Return immediately with system truth - no LLM processing needed
+                from backend.core.epistemic_state import EpistemicState
                 return ChatResponse(
                     response=system_truth_answer,  # CRITICAL: Use 'response' field, not 'message'
                     confidence_score=1.0,  # 100% confidence - this is ground truth
                     processing_steps=["🎯 Identity Truth Override: Used SYSTEM_ORIGIN ground truth"],
                     validation_info={},
-                    timing={}
+                    timing={},
+                    epistemic_state=EpistemicState.KNOWN.value  # System truth is KNOWN
                 )
             except Exception as origin_error:
                 logger.error(f"❌ Failed to get SYSTEM_ORIGIN answer: {origin_error}, falling back to normal processing")
@@ -2107,12 +2109,14 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 religion_rejection_answer = get_religion_rejection_answer(detected_lang)
                 
                 # Return immediately with religion rejection - no LLM processing needed
+                from backend.core.epistemic_state import EpistemicState
                 return ChatResponse(
                     response=religion_rejection_answer,  # CRITICAL: Use 'response' field, not 'message'
                     confidence_score=1.0,  # 100% confidence - this is ground truth
                     processing_steps=["🚨 RELIGION_CHOICE REJECTION: StillMe cannot choose any religion"],
                     validation_info={},
-                    timing={}
+                    timing={},
+                    epistemic_state=EpistemicState.KNOWN.value  # System policy is KNOWN
                 )
             except Exception as religion_error:
                 logger.error(f"❌ Failed to get religion rejection answer: {religion_error}, falling back to normal processing")
@@ -2222,6 +2226,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     if result.cached:
                         processing_steps.append("💾 Used cached data")
                     
+                    from backend.core.epistemic_state import EpistemicState
                     return ChatResponse(
                         response=response_text,
                         confidence_score=0.9,  # High confidence for API data
@@ -2230,7 +2235,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             "passed": True,
                             "external_data_source": result.source,
                             "external_data_timestamp": result.timestamp.isoformat(),
-                            "external_data_cached": result.cached
+                            "external_data_cached": result.cached,
+                            "context_docs_count": 0  # External data, no RAG context
                         },
                         processing_steps=processing_steps,
                         timing_logs={
@@ -2238,6 +2244,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             "rag_retrieval_latency": 0.0,
                             "llm_inference_latency": 0.0
                         },
+                        epistemic_state=EpistemicState.KNOWN.value  # External API data is KNOWN
                         used_fallback=False
                     )
                 elif result and not result.success:
@@ -2413,6 +2420,19 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 
                 # Return response with validation info
                 processing_steps.append("✅ Detected philosophical question - returning 3-layer processed answer (with rewrite and validation)")
+                # Calculate epistemic state for philosophical answer
+                from backend.core.epistemic_state import calculate_epistemic_state, EpistemicState
+                try:
+                    philosophical_epistemic_state = calculate_epistemic_state(
+                        validation_info=validation_info,
+                        confidence_score=confidence_score,
+                        response_text=philosophical_answer,
+                        context_docs_count=0  # Philosophical answers don't use RAG context
+                    )
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to calculate epistemic state for philosophical answer: {e}")
+                    philosophical_epistemic_state = EpistemicState.UNCERTAIN  # Default for philosophical
+                
                 return ChatResponse(
                     response=philosophical_answer,
                     confidence_score=confidence_score,
@@ -2425,7 +2445,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         "rewrite_success": rewrite_success
                     },
                     validation_result=validation_info,
-                    used_fallback=used_fallback
+                    used_fallback=used_fallback,
+                    epistemic_state=philosophical_epistemic_state.value
                 )
         except Exception as philosophy_processor_error:
             logger.warning(f"Philosophy processor error: {philosophy_processor_error}")
@@ -2509,10 +2530,12 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     # Continue with normal flow (will use base knowledge instruction)
                 else:
                     processing_steps.append("⚠️ FPS detected non-existent concept - returning honest response")
+                    from backend.core.epistemic_state import EpistemicState
                     return ChatResponse(
                         response=honest_response,
                         confidence_score=1.0,  # High confidence in honesty
-                        processing_steps=processing_steps
+                        processing_steps=processing_steps,
+                        epistemic_state=EpistemicState.UNKNOWN.value  # FPS detected non-existent concept
                     )
             elif use_option_b and not fps_result.is_plausible and fps_result.confidence < 0.3:
                 # For Option B, mark for blocking but let Option B handle it with EPD-Fallback
@@ -3199,6 +3222,7 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                             # Calculate confidence score (low because no context)
                             confidence_score = 1.0  # High confidence in honesty
                             
+                            from backend.core.epistemic_state import EpistemicState
                             return ChatResponse(
                                 response=honest_response,
                                 confidence_score=confidence_score,
@@ -3209,7 +3233,8 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                                     "llm_inference_latency": 0.0  # No LLM call
                                 },
                                 validation_result=None,
-                                used_fallback=False
+                                used_fallback=False,
+                                epistemic_state=EpistemicState.UNKNOWN.value  # No context, honest "I don't know"
                             )
                     except Exception as fps_error:
                         logger.warning(f"Pre-LLM FPS error (RAG path): {fps_error}, continuing with normal flow")
@@ -4450,6 +4475,7 @@ Context: {context_text}
                                 fps_result=fps_result
                             )
                             processing_steps.append("🛡️ Option B: FPS blocked - EPD-Fallback returned")
+                            from backend.core.epistemic_state import EpistemicState
                             return ChatResponse(
                                 response=fallback_text,
                                 confidence_score=1.0,
@@ -4460,7 +4486,8 @@ Context: {context_text}
                                     "llm_inference_latency": 0.0
                                 },
                                 validation_result=None,
-                                used_fallback=True
+                                used_fallback=True,
+                                epistemic_state=EpistemicState.UNKNOWN.value  # FPS blocked, fallback triggered
                             )
                         
                         # Generate LLM response (Step 4)
@@ -6219,6 +6246,27 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             except Exception as e:
                 logger.warning(f"⚠️ Failed to add timestamp to response: {e}")
         
+        # Calculate epistemic state (after validation, before returning response)
+        from backend.core.epistemic_state import calculate_epistemic_state, EpistemicState
+        try:
+            # Extract context_docs_count from context or validation_info
+            ctx_docs_count = 0
+            if context and isinstance(context, dict):
+                ctx_docs_count = context.get("total_context_docs", 0)
+            elif validation_info and isinstance(validation_info, dict):
+                ctx_docs_count = validation_info.get("context_docs_count", 0)
+            
+            epistemic_state = calculate_epistemic_state(
+                validation_info=validation_info,
+                confidence_score=confidence_score,
+                response_text=response,
+                context_docs_count=ctx_docs_count
+            )
+            logger.info(f"📊 EpistemicState: {epistemic_state.value} (confidence={confidence_score:.2f if confidence_score else 'N/A'}, ctx_docs={ctx_docs_count})")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to calculate epistemic state: {e}, defaulting to UNKNOWN")
+            epistemic_state = EpistemicState.UNKNOWN
+        
         return ChatResponse(
             response=response,
             message_id=message_id,
@@ -6233,7 +6281,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             permission_request=permission_request,  # Permission request message
             timing=timing_logs,
             latency_metrics=latency_metrics_text,  # BẮT BUỘC HIỂN THỊ LOG trong response cho frontend
-            processing_steps=processing_steps  # Real-time processing steps for status indicator
+            processing_steps=processing_steps,  # Real-time processing steps for status indicator
+            epistemic_state=epistemic_state.value if epistemic_state else None  # Epistemic state: KNOWN/UNCERTAIN/UNKNOWN
         )
         
     except HTTPException:
