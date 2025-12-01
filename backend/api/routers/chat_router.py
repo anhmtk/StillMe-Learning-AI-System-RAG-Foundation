@@ -4878,7 +4878,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             "latency": llm_inference_latency,
                             "timestamp": time.time()
                         }
-                        cache_service.set(cache_key, cache_value, ttl=TTL_LLM_RESPONSE)
+                        cache_service.set(cache_key, cache_value, ttl_seconds=TTL_LLM_RESPONSE)
                         logger.debug(f"💾 LLM response cached (key: {cache_key[:50]}...)")
                     except Exception as cache_error:
                         logger.warning(f"Failed to cache LLM response: {cache_error}")
