@@ -262,7 +262,7 @@ class LearningScheduler:
                 # Wait for next interval
                 wait_seconds = self.interval_hours * 3600
                 logger.info(f"⏳ Waiting {self.interval_hours} hours until next learning cycle...")
-                logger.debug(f"🔍 Scheduler loop: is_running={self.is_running}, wait_seconds={wait_seconds}")
+                logger.info(f"🔍 Scheduler loop: is_running={self.is_running}, wait_seconds={wait_seconds}, next_run_time={self.next_run_time.isoformat() if self.next_run_time else 'N/A'}")
                 
                 # Use stop event to allow immediate cancellation
                 try:
@@ -285,7 +285,7 @@ class LearningScheduler:
                 
                 logger.info("🔄 Scheduler loop: About to run next learning cycle...")
                 await self.run_learning_cycle()
-                logger.debug("✅ Scheduler loop: Learning cycle completed, continuing loop...")
+                logger.info("✅ Scheduler loop: Learning cycle completed, continuing loop...")
                     
             except asyncio.CancelledError:
                 logger.info("🛑 Learning scheduler task cancelled")

@@ -978,7 +978,7 @@ async def startup_event():
                     # Scheduler is running - log status periodically (every 30 minutes = 6 checks)
                     import time
                     if int(time.time()) % 1800 < 300:  # Log roughly every 30 minutes
-                        logger.debug(f"✅ Learning scheduler watchdog: Scheduler is running (is_running={is_running}, task_done={task_done}, cycle_count={learning_scheduler.cycle_count})")
+                        logger.info(f"✅ Learning scheduler watchdog: Scheduler is running (is_running={is_running}, task_done={task_done}, cycle_count={learning_scheduler.cycle_count}, next_run={learning_scheduler.next_run_time.isoformat() if learning_scheduler.next_run_time else 'N/A'})")
                 
             except asyncio.CancelledError:
                 logger.info("Scheduler watchdog cancelled")
