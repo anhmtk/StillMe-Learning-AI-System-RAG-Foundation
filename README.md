@@ -334,11 +334,33 @@ POST /api/learning/rss/fetch?max_items=5&auto_add=false
 
 ## 🔧 Architecture
 
-```
-External Sources → Learning Pipeline → Vector DB → RAG → Validator Chain → Post-Processing → Response
+### System Flow Overview
+
+```mermaid
+graph LR
+    A[User Query] --> B{Intent Detection}
+    B -->|External Data| C[Weather/News API]
+    B -->|Normal Query| D[RAG Retrieval]
+    D --> E[ChromaDB<br/>Vector Search]
+    E --> F[LLM Generation]
+    F --> G[Validator Chain<br/>12+ Validators]
+    G --> H{Validation Pass?}
+    H -->|Yes| I[Post-Processing]
+    H -->|No| J[Fallback Handler]
+    I --> K[Final Response<br/>with Citations]
+    J --> K
+    
+    L[Learning Pipeline<br/>Every 4 hours] --> M[RSS/arXiv/Wikipedia]
+    M --> N[Pre-Filter]
+    N --> O[Embedding]
+    O --> E
+    
+    style G fill:#90EE90
+    style K fill:#87CEEB
+    style L fill:#FFD700
 ```
 
-**Components:**
+### Architecture Components
 - **External Sources**: RSS, arXiv, CrossRef, Wikipedia, Stanford Encyclopedia
 - **Learning Pipeline**: Scheduler → Source Integration → Pre-Filter → Content Curator → Embedding → ChromaDB
 - **RAG System**: ChromaDB (vector search) + LLM (response generation)
@@ -348,14 +370,22 @@ External Sources → Learning Pipeline → Vector DB → RAG → Validator Chain
 - **Dashboard**: Streamlit UI for monitoring and interaction
 
 **Data Flow:**
-1. Scheduler triggers learning cycle every 4 hours
-2. Source Integration fetches from enabled sources
-3. Pre-Filter removes low-quality content (saves embedding costs by 30-50%)
-4. Content Curator prioritizes based on knowledge gaps
-5. Embedding Service converts text to vectors (all-MiniLM-L6-v2, 384 dims)
-6. ChromaDB stores vectors for semantic search
-7. User query → Intent detection (philosophical/factual) → RAG retrieval → LLM generation
-8. Response → Validator Chain (11 validators) → Post-processing (quality eval + rewrite) → Final response
+
+**Learning Cycle (Background, every 4 hours):**
+1. Scheduler triggers learning cycle
+2. Fetch from RSS, arXiv, CrossRef, Wikipedia
+3. Pre-Filter removes low-quality content (saves 30-50% embedding costs)
+4. Embedding Service converts text to vectors (paraphrase-multilingual-MiniLM-L12-v2, 384 dims)
+5. Store in ChromaDB for semantic search
+
+**Query Processing (Real-time):**
+1. User query → Intent detection (external data / normal / philosophical)
+2. If external data → Direct API call (weather/news/time)
+3. If normal query → RAG retrieval from ChromaDB
+4. LLM generates response with context
+5. Validator Chain (12+ validators) checks quality
+6. Post-processing (quality eval + rewrite if needed)
+7. Final response with citations and transparency metadata
 
 **Anti-Anthropomorphism Mechanisms:**
 - **Identity Check Validator**: Detects and prevents anthropomorphic language
