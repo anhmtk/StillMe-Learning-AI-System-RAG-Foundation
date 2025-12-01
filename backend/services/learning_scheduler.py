@@ -262,6 +262,7 @@ class LearningScheduler:
                 # Wait for next interval
                 wait_seconds = self.interval_hours * 3600
                 logger.info(f"⏳ Waiting {self.interval_hours} hours until next learning cycle...")
+                logger.debug(f"🔍 Scheduler loop: is_running={self.is_running}, wait_seconds={wait_seconds}")
                 
                 # Use stop event to allow immediate cancellation
                 try:
@@ -274,10 +275,17 @@ class LearningScheduler:
                     break
                 except asyncio.TimeoutError:
                     # Timeout means we should run the next cycle
+                    logger.info(f"⏰ Wait timeout reached - time to run next learning cycle (waited {wait_seconds}s)")
                     pass
                 
-                if self.is_running:
-                    await self.run_learning_cycle()
+                # CRITICAL: Check is_running again after wait (may have changed)
+                if not self.is_running:
+                    logger.warning("⚠️ Scheduler is_running is False after wait - stopping loop")
+                    break
+                
+                logger.info("🔄 Scheduler loop: About to run next learning cycle...")
+                await self.run_learning_cycle()
+                logger.debug("✅ Scheduler loop: Learning cycle completed, continuing loop...")
                     
             except asyncio.CancelledError:
                 logger.info("🛑 Learning scheduler task cancelled")
@@ -285,7 +293,12 @@ class LearningScheduler:
             except Exception as e:
                 logger.error(f"❌ Error in scheduler loop: {e}", exc_info=True)
                 # Wait a bit before retrying to avoid tight error loops
+                logger.warning(f"⏳ Waiting 60s before retrying scheduler loop after error...")
                 await asyncio.sleep(60)
+                # Continue loop (don't break) to keep scheduler running
+                logger.info("🔄 Scheduler loop: Retrying after error...")
+        
+        logger.warning(f"⚠️ Scheduler loop exited. is_running={self.is_running}")
     
     async def start(self):
         """
@@ -302,7 +315,31 @@ class LearningScheduler:
         
         self.is_running = True
         self._stop_event.clear()
+        
+        # Cancel old task if it exists (shouldn't happen, but defensive)
+        if self._task and not self._task.done():
+            logger.warning("⚠️ Cancelling existing scheduler task before starting new one")
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+        
         self._task = asyncio.create_task(self._scheduler_loop())
+        
+        # Add done callback to detect if task dies unexpectedly
+        def task_done_callback(task):
+            if task.cancelled():
+                logger.warning("⚠️ Scheduler task was cancelled")
+            elif task.exception():
+                logger.error(f"❌ Scheduler task died with exception: {task.exception()}", exc_info=task.exception())
+            else:
+                logger.warning("⚠️ Scheduler task completed unexpectedly (should run forever)")
+            # If task died but is_running is still True, that's a bug
+            if self.is_running:
+                logger.error("❌ CRITICAL: Scheduler task died but is_running=True - scheduler will not continue!")
+        
+        self._task.add_done_callback(task_done_callback)
         
         logger.info(f"✅ Learning scheduler started - will run every {self.interval_hours} hours")
     

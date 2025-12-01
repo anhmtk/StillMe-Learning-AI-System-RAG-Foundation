@@ -960,13 +960,25 @@ async def startup_event():
                 if not learning_scheduler:
                     continue
                 
-                if not learning_scheduler.is_running:
-                    logger.warning("⚠️ Learning scheduler watchdog: Scheduler is not running but should be - restarting...")
+                # Check both is_running flag and task status
+                task_done = learning_scheduler._task is None or learning_scheduler._task.done() if hasattr(learning_scheduler, '_task') else True
+                is_running = learning_scheduler.is_running
+                
+                # If scheduler should be running but task is done or is_running is False
+                if (not is_running) or (is_running and task_done):
+                    if task_done and is_running:
+                        logger.error(f"❌ Learning scheduler watchdog: Task is done but is_running=True - this indicates a bug! Task exception: {learning_scheduler._task.exception() if learning_scheduler._task and learning_scheduler._task.done() else 'N/A'}")
+                    logger.warning(f"⚠️ Learning scheduler watchdog: Scheduler is not running (is_running={is_running}, task_done={task_done}) but should be - restarting...")
                     try:
                         await learning_scheduler.start()
                         logger.info("✅ Learning scheduler watchdog: Successfully restarted scheduler")
                     except Exception as restart_error:
-                        logger.error(f"❌ Learning scheduler watchdog: Failed to restart scheduler: {restart_error}")
+                        logger.error(f"❌ Learning scheduler watchdog: Failed to restart scheduler: {restart_error}", exc_info=True)
+                else:
+                    # Scheduler is running - log status periodically (every 30 minutes = 6 checks)
+                    import time
+                    if int(time.time()) % 1800 < 300:  # Log roughly every 30 minutes
+                        logger.debug(f"✅ Learning scheduler watchdog: Scheduler is running (is_running={is_running}, task_done={task_done}, cycle_count={learning_scheduler.cycle_count})")
                 
             except asyncio.CancelledError:
                 logger.info("Scheduler watchdog cancelled")
