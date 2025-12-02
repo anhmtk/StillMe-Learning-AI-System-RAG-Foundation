@@ -30,20 +30,33 @@ TIME_ESTIMATION_KEYWORDS = {
     "time needed",
     "time required",
     
-    # Vietnamese
+    # Vietnamese (with and without tone marks)
     "bao lâu",
+    "bao lau",
     "mất bao lâu",
+    "mat bao lau",
     "tốn bao lâu",
+    "ton bao lau",
     "cần bao lâu",
+    "can bao lau",
     "sẽ mất",
+    "se mat",
     "sẽ tốn",
+    "se ton",
     "sẽ cần",
+    "se can",
     "ước tính",
+    "uoc tinh",
     "thời gian",
+    "thoi gian",
     "thời lượng",
+    "thoi luong",
     "mất thời gian",
+    "mat thoi gian",
     "tốn thời gian",
+    "ton thoi gian",
     "cần thời gian",
+    "can thoi gian",
 }
 
 
@@ -73,25 +86,39 @@ def detect_time_estimation_intent(query: str) -> Tuple[bool, Optional[str]]:
     task_description = None
     
     # First, try Vietnamese patterns (more reliable without regex)
-    if "bao lâu" in query_lower:
-        # Pattern: "bao lâu để [task]"
-        if "để" in query_lower:
-            parts = query_lower.split("để", 1)
+    # Handle both "bao lâu" (with tone) and "bao lau" (without tone)
+    if "bao lâu" in query_lower or "bao lau" in query_lower:
+        # Pattern: "bao lâu để [task]" or "bao lau de [task]"
+        if "để" in query_lower or "de" in query_lower:
+            # Try with tone mark first
+            if "để" in query_lower:
+                parts = query_lower.split("để", 1)
+            else:
+                parts = query_lower.split("de", 1)
             if len(parts) > 1:
                 task_description = parts[1].strip().rstrip("?")
-        # Pattern: "[task] mất bao lâu"
-        elif "mất bao lâu" in query_lower:
-            parts = query_lower.split("mất bao lâu", 1)
+        # Pattern: "[task] mất bao lâu" or "[task] mat bao lau"
+        elif "mất bao lâu" in query_lower or "mat bao lau" in query_lower:
+            if "mất bao lâu" in query_lower:
+                parts = query_lower.split("mất bao lâu", 1)
+            else:
+                parts = query_lower.split("mat bao lau", 1)
             if len(parts) > 0:
                 task_description = parts[0].strip()
-        # Pattern: "[task] tốn bao lâu"
-        elif "tốn bao lâu" in query_lower:
-            parts = query_lower.split("tốn bao lâu", 1)
+        # Pattern: "[task] tốn bao lâu" or "[task] ton bao lau"
+        elif "tốn bao lâu" in query_lower or "ton bao lau" in query_lower:
+            if "tốn bao lâu" in query_lower:
+                parts = query_lower.split("tốn bao lâu", 1)
+            else:
+                parts = query_lower.split("ton bao lau", 1)
             if len(parts) > 0:
                 task_description = parts[0].strip()
-        # Pattern: "[task] cần bao lâu"
-        elif "cần bao lâu" in query_lower:
-            parts = query_lower.split("cần bao lâu", 1)
+        # Pattern: "[task] cần bao lâu" or "[task] can bao lau"
+        elif "cần bao lâu" in query_lower or "can bao lau" in query_lower:
+            if "cần bao lâu" in query_lower:
+                parts = query_lower.split("cần bao lâu", 1)
+            else:
+                parts = query_lower.split("can bao lau", 1)
             if len(parts) > 0:
                 task_description = parts[0].strip()
     

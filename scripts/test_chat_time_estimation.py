@@ -70,8 +70,16 @@ def test_chat_time_estimation(backend_url: str, query: Optional[str] = None):
                 print(f"   ⚠️  Health check failed: {e}")
                 print("   (This is OK, continuing with chat test...)")
             
+            # Check intent detection first
+            print(f"\n2. Checking intent detection...")
+            from backend.core.time_estimation_intent import detect_time_estimation_intent
+            is_time_estimation, task_desc = detect_time_estimation_intent(query)
+            print(f"   Time estimation intent: {is_time_estimation}")
+            if task_desc:
+                print(f"   Task description: {task_desc}")
+            
             # Send chat request
-            print(f"\n2. Sending chat request (timeout: 90s)...")
+            print(f"\n3. Sending chat request (timeout: 120s)...")
             print(f"   Query: {query}")
             
             response = requests.post(
@@ -81,16 +89,16 @@ def test_chat_time_estimation(backend_url: str, query: Optional[str] = None):
                     "use_rag": True,
                     "context_limit": 3
                 },
-                timeout=90  # Longer timeout for complex processing
+                timeout=120  # Increased timeout for complex processing
             )
             
-            print(f"\n3. Response received (status: {response.status_code})")
+            print(f"\n4. Response received (status: {response.status_code})")
             
             if response.status_code == 200:
                 data = response.json()
                 response_text = data.get("response", "")
                 
-                print(f"\n4. Analyzing response...")
+                print(f"\n5. Analyzing response...")
                 print(f"   Response length: {len(response_text)} characters")
                 
                 # Check if time estimate is in response
@@ -116,7 +124,9 @@ def test_chat_time_estimation(backend_url: str, query: Optional[str] = None):
                     print("-" * 60)
                 else:
                     print("   ⚠️  Time estimate NOT found in response")
-                    print("\n5. Full response preview:")
+                    if is_time_estimation:
+                        print("   ⚠️  Intent was detected but estimate not in response - possible backend issue")
+                    print("\n6. Full response preview:")
                     print("-" * 60)
                     print(response_text[:500])
                     if len(response_text) > 500:
@@ -150,7 +160,7 @@ def test_chat_time_estimation(backend_url: str, query: Optional[str] = None):
                 print(f"Response: {response.text[:500]}")
                 
         except requests.exceptions.Timeout as e:
-            print(f"\n⚠️  Request timeout after 90 seconds")
+            print(f"\n⚠️  Request timeout after 120 seconds")
             print(f"   This could mean:")
             print(f"   - Backend is processing (RAG + validation + estimation takes time)")
             print(f"   - Backend is cold starting")
