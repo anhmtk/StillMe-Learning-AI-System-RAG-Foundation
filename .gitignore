@@ -122,3 +122,7 @@ test_results_transparency_*.json
 responsive*
 tatus*
 "ys; print*"
+
+# Marketing/internal strategy docs (temporary, not for public repo)
+docs/MARKETING_STRATEGY.md
+scripts/capture_screenshots.py
