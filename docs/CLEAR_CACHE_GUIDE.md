@@ -8,15 +8,29 @@ StillMe responses may contain outdated information (e.g., incorrect model names)
 
 ### Option 1: Clear All Cache
 
+**PowerShell (Windows):**
+```powershell
+Invoke-WebRequest -Uri "https://stillme-backend-production.up.railway.app/api/cache/clear" -Method POST
+```
+
+**Bash/Linux/Mac:**
 ```bash
 curl -X POST https://stillme-backend-production.up.railway.app/api/cache/clear
 ```
 
 ### Option 2: Clear Only LLM Response Cache (Recommended)
 
+**PowerShell (Windows):**
+```powershell
+Invoke-WebRequest -Uri "https://stillme-backend-production.up.railway.app/api/cache/clear?pattern=llm:response:*" -Method POST
+```
+
+**Bash/Linux/Mac:**
 ```bash
 curl -X POST "https://stillme-backend-production.up.railway.app/api/cache/clear?pattern=llm:response:*"
 ```
+
+**Note**: On Windows PowerShell, `curl` is an alias for `Invoke-WebRequest` which doesn't support `-X`. Use `Invoke-WebRequest` directly or `curl.exe` if you have it installed.
 
 This will clear only LLM response cache, keeping RAG and HTTP caches intact.
 
