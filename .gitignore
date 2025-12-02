@@ -125,4 +125,5 @@ tatus*
 
 # Marketing/internal strategy docs (temporary, not for public repo)
 docs/MARKETING_STRATEGY.md
+docs/CAPTURE_STRATEGY.md
 scripts/capture_screenshots.py
