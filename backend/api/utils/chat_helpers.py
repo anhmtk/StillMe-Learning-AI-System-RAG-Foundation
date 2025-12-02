@@ -27,6 +27,19 @@ def detect_language(text: str) -> str:
     
     text_lower = text.lower()
     
+    # CRITICAL: Check Vietnamese keywords FIRST (before langdetect)
+    # This prevents false French detection for Vietnamese queries without tone marks
+    # Vietnamese keywords (even without tone marks)
+    vietnamese_keywords = [
+        'bao lau', 'bao lâu', 'mat bao lau', 'mất bao lâu',
+        'hoc', 'học', 'bai viet', 'bài viết', 'bai', 'bài',
+        'de', 'để', 'cho', 'cua', 'của', 'voi', 'với',
+        'la gi', 'là gì', 'the nao', 'thế nào', 'nhu the nao', 'như thế nào',
+        'co the', 'có thể', 'khong', 'không', 'khong biet', 'không biết',
+        'ban', 'bạn', 'minh', 'mình', 'toi', 'tôi'
+    ]
+    has_vietnamese_keywords = any(keyword in text_lower for keyword in vietnamese_keywords)
+    
     # OPTIMIZATION: Try langdetect FIRST for better accuracy, especially for mixed-language text
     # Then check for explicit language requests (which override detection)
     detected_lang = None
@@ -60,6 +73,12 @@ def detect_language(text: str) -> str:
         elif detected in lang_map:
             detected_lang = lang_map[detected]
             logger.info(f"🌐 langdetect detected: {detected} -> {detected_lang}")
+            
+        # CRITICAL: Override langdetect if Vietnamese keywords found
+        # This fixes false French detection for Vietnamese queries without tone marks
+        if has_vietnamese_keywords and detected_lang != 'vi':
+            logger.info(f"🌐 Vietnamese keywords detected, overriding langdetect result: {detected_lang} -> vi")
+            detected_lang = 'vi'
             
     except ImportError:
         # langdetect not available - will use rule-based detection
@@ -98,7 +117,12 @@ def detect_language(text: str) -> str:
             return lang_code
     
     # If explicit request found, return it; otherwise use detected language
+    # CRITICAL: Also check Vietnamese keywords here (in case langdetect wasn't used)
     if detected_lang:
+        # Override if Vietnamese keywords found (double-check)
+        if has_vietnamese_keywords and detected_lang != 'vi':
+            logger.info(f"🌐 Vietnamese keywords detected, overriding detected_lang: {detected_lang} -> vi")
+            return 'vi'
         return detected_lang
     
     # Fallback to rule-based detection if langdetect failed

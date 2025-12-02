@@ -6287,8 +6287,16 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                     # Format with AI identity
                     estimate_text = format_self_aware_response(estimate, include_identity=True)
                     
-                    # Append to response
-                    if detected_lang == "vi":
+                    # Append to response with language-appropriate format
+                    # Check if response is in Vietnamese (even if detected_lang was wrong)
+                    response_lower = response.lower()
+                    is_vietnamese_response = (
+                        "tiếng việt" in response_lower or
+                        "vietnamese" in response_lower or
+                        any(char in "àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ" for char in response)
+                    )
+                    
+                    if detected_lang == "vi" or is_vietnamese_response:
                         response = f"{response}\n\n---\n\n⏱️ **Ước tính thời gian:**\n{estimate_text}"
                     else:
                         response = f"{response}\n\n---\n\n⏱️ **Time Estimate:**\n{estimate_text}"
