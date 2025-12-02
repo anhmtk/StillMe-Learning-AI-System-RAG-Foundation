@@ -3,17 +3,7 @@ Content Curator for StillMe
 Prioritizes and optimizes learning content based on quality and effectiveness
 Includes Pre-Filter mechanism to reduce costs by filtering before embedding
 Now includes ReviewAdapter for simulated peer review evaluation
-
-⚠️ MIGRATION NOTE: This module is being migrated to stillme_core.learning.curator.
-During migration, imports are forwarded from stillme_core.learning.curator for backward compatibility.
 """
-
-# During migration: Forward imports from stillme_core.learning.curator
-try:
-    from stillme_core.learning.curator import ContentCurator
-except ImportError:
-    # Fallback to local implementation if stillme_core is not available yet
-    import os
 
 from typing import List, Dict, Any, Optional, Tuple
 import logging
@@ -74,7 +64,7 @@ class ContentCurator:
         
         if enable_review_adapter:
             try:
-                from backend.validators.review_adapter import ReviewAdapter
+                from stillme_core.validation.review_adapter import ReviewAdapter
                 self.review_adapter = ReviewAdapter(enable_cache=True)
                 logger.info("Content Curator initialized with Pre-Filter + ReviewAdapter")
             except Exception as e:

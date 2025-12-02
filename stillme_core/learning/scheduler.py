@@ -2,9 +2,6 @@
 Learning Scheduler Service for StillMe
 Automatically runs learning cycles every N hours to fetch content and add to RAG
 CRITICAL: This is a core feature - must always be enabled and running
-
-⚠️ MIGRATION NOTE: This module is being migrated to stillme_core.learning.scheduler.
-During migration, this file serves as fallback. New code should use stillme_core.learning.scheduler.
 """
 
 import asyncio
@@ -14,10 +11,12 @@ from typing import Dict, Any, Optional, List
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    # Core components (migrated to stillme_core)
+    from stillme_core.rag.rag_retrieval import RAGRetrieval
+    from stillme_core.learning.curator import ContentCurator
+    # StillMe-specific components (remain in backend)
     from backend.services.rss_fetcher import RSSFetcher
     from backend.services.source_integration import SourceIntegration
-    from backend.vector_db.rag_retrieval import RAGRetrieval
-    from backend.services.content_curator import ContentCurator
     from backend.learning.continuum_memory import ContinuumMemory
     from backend.services.rss_fetch_history import RSSFetchHistory
 
@@ -99,8 +98,13 @@ class LearningScheduler:
         
         logger.info(f"LearningScheduler initialized: interval={interval_hours}h, auto_add_to_rag={auto_add_to_rag}")
     
-    def set_rag_retrieval(self, rag_retrieval: "RAGRetrieval"):
-        """Set RAG retrieval instance (injected after initialization)"""
+    def set_rag_retrieval(self, rag_retrieval):
+        """
+        Set RAG retrieval instance (injected after initialization)
+        
+        Args:
+            rag_retrieval: RAGRetrieval instance from stillme_core.rag
+        """
         self.rag_retrieval = rag_retrieval
         logger.info("RAG retrieval instance set for LearningScheduler")
     

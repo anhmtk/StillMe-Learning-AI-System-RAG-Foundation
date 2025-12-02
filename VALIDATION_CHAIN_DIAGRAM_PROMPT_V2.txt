@@ -1,0 +1,163 @@
+=== CRITICAL: COPY EXACT TEXT BELOW - DO NOT MODIFY OR INTERPRET ===
+
+Create a professional flowchart diagram with EXACT text as specified below.
+
+=== TITLE ===
+"StillMe Validation Chain: Multi-Layer Hallucination Reduction"
+Subtitle: "12+ Validators | Validation Pass Rate 93.9% | Zero Hallucination in Custom Tests"
+
+=== START ===
+Grey box: "Start: RAG Response"
+Arrow down
+
+=== MAIN VALIDATION BLOCK ===
+Grey container: "StillMe Validation Chain (12+ Validators)"
+
+LEFT COLUMN - Core Validators (GREEN boxes, exact text):
+
+1. Box text:
+   "LanguageValidator"
+   "Check language match"
+
+2. Box text:
+   "CitationRequired"
+   "Ensure citations are present"
+
+3. Box text:
+   "CitationRelevance"
+   "Validate citation quality"
+
+4. Box text:
+   "NumericUnitsBasic"
+   "Validate numeric/units claims"
+
+5. Box text:
+   "ConfidenceValidator"
+   "Detect when to express uncertainty"
+
+6. Box text:
+   "FactualHallucinationValidator"
+   "Detect factual errors"
+
+7. Box text:
+   "ReligiousChoiceValidator"
+   "Reject religion choice in responses"
+
+RIGHT COLUMN - Conditional Validators (GREEN boxes, exact text):
+
+8. Box text:
+   "EvidenceOverlap"
+   "Check content matches context"
+   "(Only when has context)"
+
+9. Box text:
+   "SourceConsensusValidator"
+   "Detect contradictions between sources"
+   "(Only when has 2+ sources)"
+
+10. Box text:
+    "EgoNeutralityValidator"
+    "Catch 'Hallucination of Experience'"
+    "(Only when has context)"
+
+11. Box text:
+    "IdentityCheckValidator"
+    "Prevent anthropomorphism"
+    "(If enabled)"
+
+12. Box text:
+    "PhilosophicalDepthValidator"
+    "Validate philosophical depth"
+    "(Only for philosophical questions)"
+
+13. Box text:
+    "EthicsAdapter"
+    "Ethical content filtering"
+
+=== ARROWS ===
+Connect validators with arrows as shown in flow.
+
+=== DECISION POINT 1 ===
+YELLOW diamond: "All Validations Passed?"
+
+IF YES → RIGHT arrow to:
+GREEN box: "Final Response with Citations + Transparency Metadata"
+Inside box (3 lines):
+- "93.9% Validation Pass Rate"
+- "Zero Hallucination in Custom Tests"
+- "91.1% Citation Rate (full) / 100% (subset)"
+
+IF NO → DOWN arrow to:
+
+=== DECISION POINT 2 ===
+YELLOW diamond: "Critical Failure?"
+
+IF YES → RIGHT arrow to:
+RED box: "Fallback Handler"
+Inside box (2 lines):
+- "Epistemic Fallback Response"
+- "Honest 'I don't know' answer"
+
+IF NO → DOWN arrow to:
+ORANGE box: "Response with Warning"
+Inside box (2 lines):
+- "Uncertainty + Validator Flags"
+- "Non-critical warnings"
+
+=== SPELLING CHECKLIST - VERIFY EVERY WORD ===
+✓ "LanguageValidator" (not "Language Validator" or "LanguageValidator")
+✓ "CitationRequired" (not "Citation Required" or "CitationRequire")
+✓ "CitationRelevance" (not "CitationReletance" or "Citation Relevance")
+✓ "NumericUnitsBasic" (not "NumericUnits" or "Numeric Units Basic")
+✓ "ConfidenceValidator" (not "Confidence Validator" or "Facfdence Validator")
+✓ "FactualHallucinationValidator" (not "FactualHallucination" or "Reject HalluchationValidator" or "Halluchation")
+✓ "ReligiousChoiceValidator" (not "Religious Choice Validator")
+✓ "EvidenceOverlap" (not "Evidence Overlap" or "EvidenceOverlapValidator")
+✓ "SourceConsensusValidator" (not "SourceConsneusValidator" or "Source Consensus Validator")
+✓ "EgoNeutralityValidator" (not "EgoNeutrality" or "Ego Neutrality Validator")
+✓ "IdentityCheckValidator" (not "IdentityCheriity Validator" or "Identity Check Validator")
+✓ "PhilosophicalDepthValidator" (not "PhilospocicalDepth Validator" or "Philosophical Depth Validator")
+✓ "EthicsAdapter" (not "EthicsAdapter" or "Ethics oment filterkng")
+
+✓ "anthropomorphism" (not "antrhoporrgrism" or "anthropophism")
+✓ "hallucination" (not "hailucination" or "Halluccination" or "Halluchation" or "Hallucation")
+✓ "uncertainty" (not "uncertianty" or "Uncertimity")
+✓ "Epistemic" (not "Epistettic")
+✓ "sources" (not "sontext" or "sourtest")
+✓ "philosophical" (not "phliosocnical")
+✓ "YES" (not "YÓ")
+✓ "NO" (not "NÓ")
+✓ "are present" (not "are presnt" or "are ptiee" or "arepresent")
+✓ "matches" (not "matthes")
+✓ "content" (not "conten" or "contet")
+
+=== EXACT PHRASES TO USE ===
+- "Check language match" (not "language are presnt")
+- "Ensure citations are present" (not "Ensure citations are ptiee")
+- "Validate citation quality" (not "validates numeric/units claims" - that's for NumericUnitsBasic)
+- "Validate numeric/units claims" (for NumericUnitsBasic only)
+- "Detect when to express uncertainty" (not "uncertianty")
+- "Detect factual errors" (not "Detect factual erros")
+- "Catch 'Hallucination of Experience'" (not "Hallucation" or "Halluchation")
+- "Prevent anthropomorphism" (not "antrhoporrgrism")
+- "Detect contradictions between sources" (not "between sontext" or "sourtest")
+- "Check content matches context" (not "Vallect content matthes context")
+- "Validate philosophical depth" (not "phliosocnical")
+- "Ethical content filtering" (not "Ethics oment filterkng")
+
+=== FINAL VERIFICATION ===
+Before generating, check:
+1. All validator names are EXACTLY as listed above
+2. All descriptions use EXACT phrases above
+3. NO typos in: hallucination, anthropomorphism, uncertainty, epistemic, philosophical, sources, matches, content
+4. Decision points say "YES" and "NO" (not "YÓ" or "NÓ")
+5. All percentages are correct: 93.9%, 91.1%, 100%
+6. "12+ Validators" (not "11" or "12 Validators")
+
+=== DESIGN ===
+- Professional, clean flowchart
+- Clear top-to-bottom flow
+- Color coding: GREY (start/container), GREEN (validators/success), YELLOW (decisions), RED (failures), ORANGE (warnings)
+- Arrows show flow direction clearly
+- Text is readable and properly spaced
+
