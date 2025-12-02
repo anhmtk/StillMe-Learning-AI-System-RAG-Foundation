@@ -119,12 +119,28 @@ class LearningScheduler:
         Returns:
             Dict with cycle results: cycle_number, entries_fetched, entries_added_to_rag, etc.
         """
-        start_time = datetime.now()
         cycle_number = self.cycle_count + 1
         
-        logger.info(f"🔄 Starting learning cycle #{cycle_number}...")
+        # Track learning cycle execution time
+        from stillme_core.monitoring import track_task_execution
         
-        try:
+        # Determine complexity and size (will be updated after fetch)
+        complexity = "moderate"
+        size = 50  # Default estimate
+        
+        with track_task_execution(
+            task_description=f"Learning cycle #{cycle_number}",
+            task_type="learning",
+            complexity=complexity,
+            size=size,
+            metadata={"cycle_number": cycle_number},
+            communicate_estimate=False  # Internal tracking only
+        ):
+            start_time = datetime.now()
+            
+            logger.info(f"🔄 Starting learning cycle #{cycle_number}...")
+            
+            try:
             # Step 1: Fetch from all sources
             all_entries = self.source_integration.fetch_all_sources(
                 max_items_per_source=5,
@@ -234,11 +250,11 @@ class LearningScheduler:
                 "status": "success"
             }
             
-            logger.info(f"✅ Learning cycle #{cycle_number} completed: {entries_added_to_rag} entries added to RAG in {processing_time:.2f}s")
-            
-            return result
-            
-        except Exception as e:
+                logger.info(f"✅ Learning cycle #{cycle_number} completed: {entries_added_to_rag} entries added to RAG in {processing_time:.2f}s")
+                
+                return result
+                
+            except Exception as e:
             logger.error(f"❌ Error in learning cycle #{cycle_number}: {e}", exc_info=True)
             
             # Record error in unified metrics

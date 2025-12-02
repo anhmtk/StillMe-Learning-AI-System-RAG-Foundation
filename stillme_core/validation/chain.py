@@ -107,11 +107,29 @@ class ValidationEngine:
         Returns:
             ValidationResult with overall status
         """
-        reasons: List[str] = []
-        patched = answer
-        has_citation = False
-        low_overlap_only = False
-        has_critical_failure = False  # Track if any critical validator failed without patch
+        # Track validation execution time (internal tracking)
+        from stillme_core.monitoring import track_task_execution
+        
+        num_validators = len(self.validators)
+        response_length = len(answer)
+        
+        with track_task_execution(
+            task_description=f"Validation: {num_validators} validators",
+            task_type="validation",
+            complexity="moderate",
+            size=response_length,
+            metadata={
+                "num_validators": num_validators,
+                "num_context_docs": len(ctx_docs),
+                "is_philosophical": is_philosophical
+            },
+            communicate_estimate=False  # Internal tracking only
+        ):
+            reasons: List[str] = []
+            patched = answer
+            has_citation = False
+            low_overlap_only = False
+            has_critical_failure = False  # Track if any critical validator failed without patch
         
         # Group validators into sequential and parallel groups
         sequential_validators = []
