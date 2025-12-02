@@ -132,7 +132,20 @@ def detect_language(text: str) -> str:
     # Vietnamese - Check for Vietnamese characters (PRIORITY: Check Vietnamese FIRST in rule-based)
     # Vietnamese has many unique characters that are strong indicators
     vietnamese_chars = set('àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ')
-    has_vietnamese = any(char in vietnamese_chars for char in text_lower)
+    has_vietnamese_chars = any(char in vietnamese_chars for char in text_lower)
+    
+    # Also check for Vietnamese keywords (even without tone marks)
+    # This helps detect Vietnamese queries like "Bao lau de hoc 100 bai viet?" (without tone marks)
+    vietnamese_keywords = [
+        'bao lau', 'bao lâu', 'mat bao lau', 'mất bao lâu',
+        'hoc', 'học', 'bai viet', 'bài viết', 'bai', 'bài',
+        'de', 'để', 'cho', 'cua', 'của', 'voi', 'với',
+        'la gi', 'là gì', 'the nao', 'thế nào', 'nhu the nao', 'như thế nào',
+        'co the', 'có thể', 'khong', 'không', 'khong biet', 'không biết'
+    ]
+    has_vietnamese_keywords = any(keyword in text_lower for keyword in vietnamese_keywords)
+    
+    has_vietnamese = has_vietnamese_chars or has_vietnamese_keywords
     vietnamese_indicators = ['là', 'của', 'và', 'với', 'cho', 'từ', 'trong', 'này', 'đó', 'bạn', 'mình', 'tôi', 'có', 'không', 'được', 'như', 'thế', 'nào', 'gì', 'ai', 'đâu', 'sao', 'nhưng', 'vì', 'nên', 'đã', 'sẽ', 'đang', 'hãy', 'phân tích', 'dự án']
     has_vietnamese_words = any(word in text_lower for word in vietnamese_indicators)
     if has_vietnamese or has_vietnamese_words:
