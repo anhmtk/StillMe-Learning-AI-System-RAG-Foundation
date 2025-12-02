@@ -18,6 +18,7 @@ from .metrics import (
 )
 from .task_tracker import TaskTracker, TaskRecord, get_task_tracker
 from .time_estimation import TimeEstimationEngine, TimeEstimate, get_estimation_engine
+from .self_tracking import track_task_execution, estimate_and_track, format_self_aware_response
 
 __all__ = [
     "UnifiedMetricsCollector",
@@ -30,5 +31,8 @@ __all__ = [
     "TimeEstimationEngine",
     "TimeEstimate",
     "get_estimation_engine",
+    "track_task_execution",
+    "estimate_and_track",
+    "format_self_aware_response",
 ]
 

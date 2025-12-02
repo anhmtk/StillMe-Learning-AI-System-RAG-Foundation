@@ -70,20 +70,9 @@ def detect_time_estimation_intent(query: str) -> Tuple[bool, Optional[str]]:
     if not has_time_keyword:
         return (False, None)
     
-    # Try to extract task description
-    # Patterns like "how long to [task]" or "bao lâu để [task]"
-    patterns = [
-        r'how\s+long\s+(?:will\s+it\s+)?(?:take\s+)?(?:to\s+)?(.+?)(?:\?|$)',
-        r'how\s+much\s+time\s+(?:will\s+it\s+)?(?:take\s+)?(?:to\s+)?(.+?)(?:\?|$)',
-        r'bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
-        r'mất\s+bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
-        r'tốn\s+bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
-        r'cần\s+bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
-        r'ước\s+tính\s+(?:thời\s+gian\s+)?(?:cho\s+)?(.+?)(?:\?|$)',
-        r'(.+?)\s+(?:mất|tốn|cần)\s+bao\s+lâu',  # "[task] mất bao lâu"
-    ]
+    task_description = None
     
-    # Also check for Vietnamese patterns without regex (more reliable)
+    # First, try Vietnamese patterns (more reliable without regex)
     if "bao lâu" in query_lower:
         # Pattern: "bao lâu để [task]"
         if "để" in query_lower:
@@ -106,18 +95,29 @@ def detect_time_estimation_intent(query: str) -> Tuple[bool, Optional[str]]:
             if len(parts) > 0:
                 task_description = parts[0].strip()
     
-    task_description = None
-    for pattern in patterns:
-        match = re.search(pattern, query_lower, re.IGNORECASE)
-        if match:
-            task_description = match.group(1).strip()
-            # Clean up common trailing words
-            task_description = re.sub(r'\s+(?:to|for|để|cho)\s*$', '', task_description)
-            break
+    # If Vietnamese pattern didn't match, try regex patterns
+    if not task_description:
+        patterns = [
+            r'how\s+long\s+(?:will\s+it\s+)?(?:take\s+)?(?:to\s+)?(.+?)(?:\?|$)',
+            r'how\s+much\s+time\s+(?:will\s+it\s+)?(?:take\s+)?(?:to\s+)?(.+?)(?:\?|$)',
+            r'bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
+            r'mất\s+bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
+            r'tốn\s+bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
+            r'cần\s+bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
+            r'ước\s+tính\s+(?:thời\s+gian\s+)?(?:cho\s+)?(.+?)(?:\?|$)',
+            r'(.+?)\s+(?:mất|tốn|cần)\s+bao\s+lâu',  # "[task] mất bao lâu"
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, query_lower, re.IGNORECASE)
+            if match:
+                task_description = match.group(1).strip()
+                # Clean up common trailing words
+                task_description = re.sub(r'\s+(?:to|for|để|cho)\s*$', '', task_description)
+                break
     
     # If no specific task found, use query as task description
     if not task_description:
         task_description = query.strip()
     
     return (True, task_description)
-
