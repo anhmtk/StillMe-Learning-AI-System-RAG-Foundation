@@ -57,6 +57,34 @@ StillMe's foundational principle: **"I don't build an AI that knows everything. 
 - **Frontend**: Streamlit dashboard
 - **LLM**: DeepSeek, OpenAI GPT (configurable)
 
+## 🏗️ StillMe Core Framework
+
+StillMe is built on **StillMe Core** - a modular framework for building transparent, validation-first AI systems.
+
+**Framework Structure:**
+```
+stillme_core/
+├── validation/          # 27+ validators for response quality
+├── rag/                 # RAG system (ChromaDB, embeddings)
+├── external_data/       # External data providers
+├── learning/            # Continuous learning pipeline
+├── postprocessing/      # Post-processing and quality improvement
+├── monitoring/          # Unified metrics and monitoring
+├── self_improvement/    # Self-improvement mechanisms
+└── config/             # Configuration management
+```
+
+**Key Features:**
+- ✅ **Modular Design**: Each component is independent and reusable
+- ✅ **Self-Aware**: Tracks its own performance and improves over time
+- ✅ **Transparent**: All decisions are logged and explainable
+- ✅ **Extensible**: Easy to add new validators, fetchers, providers
+
+**Framework Philosophy:**
+> "We're building a framework, not just an app. Everything we build for StillMe today must be usable by other AI systems tomorrow."
+
+📚 **Framework Documentation**: [docs/framework/](docs/framework/)
+
 ## 🤔 Why StillMe?
 
 **The Problem:**
@@ -263,10 +291,28 @@ See `env.example` for full list.
 - ✅ Rate Limit Tracking - Prevents exceeding API limits
 - ✅ Full Transparency - Source attribution and timestamp in all responses
 
+**Self-Awareness & Monitoring:**
+- ✅ **Unified Metrics System** - Centralized metrics collection from all components
+- ✅ **Self-Improvement** - Analyzes patterns and suggests improvements
+- ✅ **Time Estimation** - Estimates task completion based on historical performance
+  - Calibrated estimates with confidence intervals
+  - Conservative bias (slightly overestimate for reliability)
+  - Transparent uncertainty communication
+  - Learning from actual vs estimated time
+
 **Dashboard:**
 - ✅ Streamlit UI - Real-time metrics, chat interface, RAG interface
 - ✅ Validation Panel - Monitor validator performance
 - ✅ Memory Health - Track tier statistics and forgetting metrics
+
+**Self-Awareness & Monitoring:**
+- ✅ **Unified Metrics System** - Centralized metrics collection from all components
+- ✅ **Self-Improvement** - Analyzes patterns and suggests improvements
+- ✅ **Time Estimation** - Estimates task completion based on historical performance
+  - Calibrated estimates with confidence intervals
+  - Conservative bias (slightly overestimate for reliability)
+  - Transparent uncertainty communication
+  - Learning from actual vs estimated time
 
 ### 🚧 Experimental
 
@@ -360,6 +406,21 @@ graph LR
     style L fill:#FFD700
 ```
 
+### Framework + Application Architecture
+
+StillMe follows a **two-layer architecture**:
+
+1. **StillMe Core Framework** (`stillme_core/`):
+   - Modular, reusable components
+   - Framework-first design
+   - Can be used by other AI systems
+   - Components: Validation, RAG, Learning, Monitoring, Self-Improvement
+
+2. **StillMe Application** (`backend/`, `dashboard.py`):
+   - Uses StillMe Core as dependency
+   - Application-specific logic (identity, philosophy, API)
+   - Built on top of framework
+
 ### Architecture Components
 - **External Sources**: RSS, arXiv, CrossRef, Wikipedia, Stanford Encyclopedia
 - **Learning Pipeline**: Scheduler → Source Integration → Pre-Filter → Content Curator → Embedding → ChromaDB
@@ -428,6 +489,13 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 - [Pull Requests](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/pulls)
 
 ## 📚 Documentation
+
+**Framework Documentation:**
+- [`docs/framework/ARCHITECTURE.md`](docs/framework/ARCHITECTURE.md) - Framework architecture overview
+- [`docs/framework/API.md`](docs/framework/API.md) - Framework API reference
+- [`docs/framework/VALIDATION.md`](docs/framework/VALIDATION.md) - Validation system guide
+- [`docs/framework/SELF_IMPROVEMENT.md`](docs/framework/SELF_IMPROVEMENT.md) - Self-improvement guide
+- [`docs/MIGRATION_GUIDE.md`](docs/MIGRATION_GUIDE.md) - Migration from old structure
 
 **Core Documentation:**
 - [`docs/SUMMARY.md`](docs/SUMMARY.md) - **📊 Quick Summary: Evaluation Results & Key Metrics** (Start here!)

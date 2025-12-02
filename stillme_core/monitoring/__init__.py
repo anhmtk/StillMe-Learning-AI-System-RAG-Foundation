@@ -16,11 +16,19 @@ from .metrics import (
     MetricRecord,
     get_metrics_collector,
 )
+from .task_tracker import TaskTracker, TaskRecord, get_task_tracker
+from .time_estimation import TimeEstimationEngine, TimeEstimate, get_estimation_engine
 
 __all__ = [
     "UnifiedMetricsCollector",
     "MetricCategory",
     "MetricRecord",
     "get_metrics_collector",
+    "TaskTracker",
+    "TaskRecord",
+    "get_task_tracker",
+    "TimeEstimationEngine",
+    "TimeEstimate",
+    "get_estimation_engine",
 ]
 
