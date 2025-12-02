@@ -839,22 +839,63 @@ async def get_cache_stats():
         }
 
 @router.post("/api/cache/clear")
-async def clear_cache():
-    """Clear all Redis cache (use with caution!)"""
+async def clear_cache(pattern: Optional[str] = None):
+    """Clear cache (use with caution!)
+    
+    Args:
+        pattern: Optional pattern to match (e.g., "llm:response:*" to clear only LLM cache)
+                 If not provided, clears all cache
+    """
     try:
-        from backend.services.redis_cache import get_cache_service
+        from backend.services.cache_service import get_cache_service, CACHE_PREFIX_LLM
+        
         cache_service = get_cache_service()
         if not cache_service:
-            raise HTTPException(status_code=503, detail="Redis cache not available")
+            raise HTTPException(status_code=503, detail="Cache service not available")
         
-        success = cache_service.clear_all()
-        if success:
-            return {
-                "status": "success",
-                "message": "All cache cleared"
-            }
+        if pattern:
+            # Clear by pattern
+            if hasattr(cache_service, 'clear_pattern'):
+                cleared = cache_service.clear_pattern(pattern)
+                return {
+                    "status": "success",
+                    "message": f"Cleared {cleared} cache entries matching pattern: {pattern}",
+                    "pattern": pattern,
+                    "cleared_count": cleared
+                }
+            else:
+                raise HTTPException(status_code=400, detail="Pattern clearing not supported by cache backend")
         else:
-            raise HTTPException(status_code=500, detail="Failed to clear cache")
+            # Clear all cache
+            if hasattr(cache_service, 'clear_all'):
+                success = cache_service.clear_all()
+                if success:
+                    return {
+                        "status": "success",
+                        "message": "All cache cleared"
+                    }
+                else:
+                    raise HTTPException(status_code=500, detail="Failed to clear cache")
+            elif hasattr(cache_service, 'clear_pattern'):
+                # Fallback: clear by known patterns
+                patterns = [
+                    f"{CACHE_PREFIX_LLM}:*",
+                    "rag:retrieval:*",
+                    "http:response:*"
+                ]
+                total_cleared = 0
+                for p in patterns:
+                    cleared = cache_service.clear_pattern(p)
+                    total_cleared += cleared
+                
+                return {
+                    "status": "success",
+                    "message": f"Cleared {total_cleared} cache entries",
+                    "cleared_count": total_cleared
+                }
+            else:
+                raise HTTPException(status_code=500, detail="Cache clearing not supported")
+                
     except HTTPException:
         raise
     except Exception as e:
