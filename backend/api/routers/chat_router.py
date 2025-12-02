@@ -6284,24 +6284,72 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         size=size
                     )
                     
-                    # Format with AI identity
-                    estimate_text = format_self_aware_response(estimate, include_identity=True)
-                    
-                    # Append to response with language-appropriate format
-                    # Check if response is in Vietnamese (even if detected_lang was wrong)
+                    # CONTEXTUAL RELEVANCE CHECK: Only add time estimate if it's contextually relevant
+                    # Don't add if response is about human learning or general knowledge (not StillMe's task execution)
                     response_lower = response.lower()
-                    is_vietnamese_response = (
-                        "tiếng việt" in response_lower or
-                        "vietnamese" in response_lower or
-                        any(char in "àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ" for char in response)
+                    
+                    # Check if response is about human learning (not StillMe's task execution)
+                    human_learning_indicators = [
+                        "your learning", "your pace", "you can", "you will", "for you",
+                        "human learning", "con người học", "bạn học", "người học",
+                        "personal", "individual", "your specific", "your cognitive",
+                        "hours total", "hours of", "tens to hundreds of hours",
+                        "20-50 hours", "50-150 hours", "150-300 hours",
+                        "based on general knowledge", "general learning principles",
+                        "learning theory", "cognitive psychology"
+                    ]
+                    
+                    is_about_human_learning = any(
+                        indicator in response_lower for indicator in human_learning_indicators
                     )
                     
-                    if detected_lang == "vi" or is_vietnamese_response:
-                        response = f"{response}\n\n---\n\n⏱️ **Ước tính thời gian:**\n{estimate_text}"
-                    else:
-                        response = f"{response}\n\n---\n\n⏱️ **Time Estimate:**\n{estimate_text}"
+                    # Check if response is about StillMe's task execution or capabilities
+                    stillme_task_indicators = [
+                        "stillme", "my execution", "my task", "my performance",
+                        "i track", "i estimate", "my historical",
+                        "hệ thống stillme", "stillme thực thi", "stillme ước lượng"
+                    ]
                     
-                    logger.info(f"✅ Added time estimation to response: {task_description}")
+                    is_about_stillme_task = any(
+                        indicator in response_lower for indicator in stillme_task_indicators
+                    )
+                    
+                    # Only add time estimate if:
+                    # 1. Response is about StillMe's task execution/capabilities, OR
+                    # 2. Question explicitly asks about StillMe (not human learning)
+                    question_lower = chat_request.message.lower()
+                    question_about_stillme = any(
+                        phrase in question_lower for phrase in [
+                            "stillme", "you ", "do you", "can you", "does stillme",
+                            "bạn ", "stillme ", "hệ thống"
+                        ]
+                    )
+                    
+                    # Decision: Add estimate only if contextually relevant
+                    should_add_estimate = (
+                        is_about_stillme_task or  # Response is about StillMe
+                        (question_about_stillme and not is_about_human_learning)  # Question is about StillMe, response not about human learning
+                    )
+                    
+                    if should_add_estimate:
+                        # Format with AI identity
+                        estimate_text = format_self_aware_response(estimate, include_identity=True)
+                        
+                        # Check if response is in Vietnamese (even if detected_lang was wrong)
+                        is_vietnamese_response = (
+                            "tiếng việt" in response_lower or
+                            "vietnamese" in response_lower or
+                            any(char in "àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ" for char in response)
+                        )
+                        
+                        if detected_lang == "vi" or is_vietnamese_response:
+                            response = f"{response}\n\n---\n\n⏱️ **Ước tính thời gian:**\n{estimate_text}"
+                        else:
+                            response = f"{response}\n\n---\n\n⏱️ **Time Estimate:**\n{estimate_text}"
+                        
+                        logger.info(f"✅ Added time estimation to response: {task_description}")
+                    else:
+                        logger.info(f"⏭️ Skipped time estimation: Response is about human learning, not StillMe's task execution")
                 except Exception as e:
                     logger.warning(f"⚠️ Failed to add time estimation: {e}")
         except ImportError as e:
