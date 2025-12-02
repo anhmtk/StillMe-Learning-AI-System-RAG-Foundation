@@ -6246,6 +6246,61 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             except Exception as e:
                 logger.warning(f"⚠️ Failed to add timestamp to response: {e}")
         
+        # Time Estimation Integration: Check if user is asking about time estimation
+        try:
+            from backend.core.time_estimation_intent import detect_time_estimation_intent
+            from stillme_core.monitoring import get_estimation_engine, format_self_aware_response
+            
+            is_time_estimation, task_description = detect_time_estimation_intent(chat_request.message)
+            
+            if is_time_estimation and task_description and not is_fallback:
+                try:
+                    estimator = get_estimation_engine()
+                    
+                    # Determine task type and complexity from query
+                    task_type = "learning"  # Default for StillMe chatbot
+                    complexity = "moderate"  # Default
+                    size = 100  # Default
+                    
+                    # Try to infer from task description
+                    task_lower = task_description.lower()
+                    if "learn" in task_lower or "học" in task_lower:
+                        task_type = "learning"
+                        # Try to extract number of items
+                        import re
+                        num_match = re.search(r'(\d+)', task_description)
+                        if num_match:
+                            size = int(num_match.group(1))
+                    elif "validate" in task_lower or "kiểm tra" in task_lower:
+                        task_type = "validation"
+                    elif "refactor" in task_lower or "migrate" in task_lower:
+                        task_type = "refactoring"
+                    
+                    # Estimate time
+                    estimate = estimator.estimate(
+                        task_description=task_description,
+                        task_type=task_type,
+                        complexity=complexity,
+                        size=size
+                    )
+                    
+                    # Format with AI identity
+                    estimate_text = format_self_aware_response(estimate, include_identity=True)
+                    
+                    # Append to response
+                    if detected_lang == "vi":
+                        response = f"{response}\n\n---\n\n⏱️ **Ước tính thời gian:**\n{estimate_text}"
+                    else:
+                        response = f"{response}\n\n---\n\n⏱️ **Time Estimate:**\n{estimate_text}"
+                    
+                    logger.info(f"✅ Added time estimation to response: {task_description}")
+                except Exception as e:
+                    logger.warning(f"⚠️ Failed to add time estimation: {e}")
+        except ImportError as e:
+            logger.debug(f"Time estimation not available: {e}")
+        except Exception as e:
+            logger.warning(f"⚠️ Error in time estimation integration: {e}")
+        
         # Calculate epistemic state (after validation, before returning response)
         from backend.core.epistemic_state import calculate_epistemic_state, EpistemicState
         try:
