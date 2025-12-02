@@ -198,6 +198,45 @@ class ConfidenceValidator:
         # BUT: Skip for philosophical questions (theoretical reasoning doesn't need context)
         # AND: Skip for religion/roleplay questions (they should answer from identity prompt, not RAG context)
         if not is_philosophical and not is_religion_roleplay and (context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
+            # CRITICAL: Exception for StillMe self-knowledge queries
+            # StillMe should always be able to answer questions about its own features/capabilities
+            # even if RAG retrieval fails (it has foundational knowledge about itself)
+            is_stillme_self_query = False
+            if user_question:
+                question_lower = user_question.lower()
+                stillme_self_patterns = [
+                    r'do you (track|have|support|can|use|provide|follow)',
+                    r'can you (track|have|support|use|provide|follow)',
+                    r'does (stillme|it|the system) (track|have|support|use|provide|follow)',
+                    r'bạn (có|đã) (theo dõi|có|hỗ trợ|sử dụng|cung cấp)',
+                    r'stillme (có|đã) (theo dõi|có|hỗ trợ|sử dụng|cung cấp)',
+                    r'hệ thống (có|đã) (theo dõi|có|hỗ trợ|sử dụng|cung cấp)',
+                    r'what (features|capabilities|functions) (does|has) (stillme|it|the system)',
+                    r'stillme (features|capabilities|functions)',
+                    r'tính năng (nào|gì) (của|mà) (stillme|hệ thống)',
+                    r'khả năng (nào|gì) (của|mà) (stillme|hệ thống)',
+                    r'how does stillme (work|track|learn|validate)',
+                    r'stillme (architecture|system|design)',
+                ]
+                is_stillme_self_query = any(
+                    re.search(pattern, question_lower, re.IGNORECASE)
+                    for pattern in stillme_self_patterns
+                )
+            
+            # If this is a StillMe self-knowledge query, don't force uncertainty
+            # StillMe should be able to answer about itself even without RAG context
+            if is_stillme_self_query:
+                logger.info("✅ StillMe self-knowledge query detected - skipping forced uncertainty (StillMe should know about itself)")
+                # Still check if answer already expresses uncertainty (it might be appropriate)
+                has_uncertainty = any(
+                    re.search(pattern, answer_lower, re.IGNORECASE)
+                    for pattern in UNCERTAINTY_PATTERNS
+                )
+                if not has_uncertainty:
+                    # Answer doesn't express uncertainty, which is fine for self-knowledge
+                    return ValidationResult(passed=True)
+                # If answer does express uncertainty, continue to normal validation
+            
             # Check if answer already expresses uncertainty
             has_uncertainty = any(
                 re.search(pattern, answer_lower, re.IGNORECASE)

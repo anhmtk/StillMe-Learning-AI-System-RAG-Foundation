@@ -74,6 +74,25 @@ def detect_time_estimation_intent(query: str) -> Tuple[bool, Optional[str]]:
     """
     query_lower = query.lower()
     
+    # NEGATIVE PATTERNS: Exclude capability questions
+    # These patterns indicate the user is asking about capability/feature, not time estimation
+    negative_patterns = [
+        r'do you (track|have|support|can|use|provide)',
+        r'can you (track|have|support|use|provide)',
+        r'does (stillme|it|the system) (track|have|support|use|provide)',
+        r'bạn (có|đã) (theo dõi|có|hỗ trợ|sử dụng|cung cấp)',
+        r'stillme (có|đã) (theo dõi|có|hỗ trợ|sử dụng|cung cấp)',
+        r'hệ thống (có|đã) (theo dõi|có|hỗ trợ|sử dụng|cung cấp)',
+        r'what (features|capabilities|functions)',
+        r'tính năng (nào|gì)',
+        r'khả năng (nào|gì)',
+    ]
+    
+    # If query matches negative patterns, it's NOT a time estimation question
+    for pattern in negative_patterns:
+        if re.search(pattern, query_lower, re.IGNORECASE):
+            return (False, None)
+    
     # Check for time estimation keywords
     has_time_keyword = any(
         keyword in query_lower 
