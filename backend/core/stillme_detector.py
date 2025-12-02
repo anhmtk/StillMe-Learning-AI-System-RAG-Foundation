@@ -67,7 +67,16 @@ STILLME_KEYWORDS = {
     
     # Update-related
     "cập nhật", "update", "updates", "cập nhật tri thức",
-    "knowledge update", "daily learning"
+    "knowledge update", "daily learning",
+    
+    # Self-tracking & execution time (CRITICAL for self-awareness questions)
+    "track", "tracking", "execution time", "execution time tracking",
+    "self-tracking", "self tracking", "track your own", "track yourself",
+    "theo dõi", "theo dõi thời gian", "theo dõi thực thi",
+    "theo dõi chính mình", "theo dõi bản thân", "theo dõi thời gian thực thi",
+    "track performance", "performance tracking", "monitor", "monitoring",
+    "time estimation", "estimate time", "ước tính thời gian",
+    "task tracking", "task execution", "thực thi", "thời gian thực thi"
 }
 
 
@@ -104,6 +113,11 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
             "bạn.*hệ thống", "hệ thống.*bạn", "của bạn", "bạn.*sử dụng"
         ]
     )
+    
+    # CRITICAL: If question has "your own" + self-tracking keywords, it's about StillMe
+    if has_your_own and has_self_tracking_keyword:
+        matched_keywords.append("self_tracking")
+        return (True, matched_keywords)
     
     # If question has technical keywords AND "your system", it's definitely about StillMe
     for keyword in technical_keywords:
