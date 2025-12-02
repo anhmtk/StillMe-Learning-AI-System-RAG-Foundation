@@ -2,7 +2,7 @@
 
 ## Quick Start
 
-Run the comprehensive test suite:
+### Option 1: Comprehensive Test Suite
 
 ```bash
 # Test all features (without backend)
@@ -10,11 +10,25 @@ python scripts/test_time_estimation_features.py
 
 # Test with backend (chat integration)
 python scripts/test_time_estimation_features.py --backend-url stillme-backend-production.up.railway.app
-# Or with full URL:
-python scripts/test_time_estimation_features.py --backend-url https://stillme-backend-production.up.railway.app
 ```
 
 **Note**: The script automatically adds `https://` if no scheme is provided.
+
+### Option 2: Simple Chat Test (Recommended for Quick Testing)
+
+```bash
+# Test chat integration with detailed output
+python scripts/test_chat_time_estimation.py --backend-url stillme-backend-production.up.railway.app
+
+# Test with custom query
+python scripts/test_chat_time_estimation.py --backend-url stillme-backend-production.up.railway.app --query "How long will it take?"
+```
+
+**This script is recommended for testing chat integration** as it provides:
+- Health check before testing
+- Detailed response analysis
+- Shows time estimate section if found
+- Better timeout handling
 
 ## Test Coverage
 
@@ -48,13 +62,15 @@ python scripts/test_time_estimation_features.py --backend-url https://stillme-ba
 
 **Current Status:**
 - ✅ 4/5 tests passing (core functionality works)
-- ⚠️ Chat integration may timeout on first request (cold start)
+- ✅ **Chat integration works on Railway** (confirmed with simple test script)
+- ⚠️ Comprehensive test may timeout due to multiple sequential requests
 - ⚠️ Vietnamese pattern detection needs improvement
 
 **All core features are functional:**
-- Time estimation engine works correctly
-- Task tracking works correctly
-- Self-tracking integration works correctly
+- ✅ Time estimation engine works correctly
+- ✅ Task tracking works correctly
+- ✅ Self-tracking integration works correctly
+- ✅ **Chat integration works correctly** (tested on Railway)
 
 ## Manual Testing
 
