@@ -80,6 +80,9 @@ def track_task_execution(
         estimate_text = estimator.format_estimate(estimate)
         logger.info(f"📊 StillMe self-estimate: {estimate_text}")
         logger.info(f"   I'm an AI system that tracks my own performance to improve estimates over time.")
+    else:
+        # Still log at debug level for internal tracking visibility
+        logger.debug(f"📊 StillMe tracking: {task_description} (estimate: {estimate.estimated_minutes:.2f} min, confidence: {estimate.confidence:.0%})")
     
     try:
         # Yield estimate for use in task
