@@ -80,6 +80,7 @@ def detect_time_estimation_intent(query: str) -> Tuple[bool, Optional[str]]:
         r'tốn\s+bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
         r'cần\s+bao\s+lâu\s+(?:để\s+)?(.+?)(?:\?|$)',
         r'ước\s+tính\s+(?:thời\s+gian\s+)?(?:cho\s+)?(.+?)(?:\?|$)',
+        r'(.+?)\s+(?:mất|tốn|cần)\s+bao\s+lâu',  # "[task] mất bao lâu"
     ]
     
     task_description = None
