@@ -83,6 +83,29 @@ def detect_time_estimation_intent(query: str) -> Tuple[bool, Optional[str]]:
         r'(.+?)\s+(?:mất|tốn|cần)\s+bao\s+lâu',  # "[task] mất bao lâu"
     ]
     
+    # Also check for Vietnamese patterns without regex (more reliable)
+    if "bao lâu" in query_lower:
+        # Pattern: "bao lâu để [task]"
+        if "để" in query_lower:
+            parts = query_lower.split("để", 1)
+            if len(parts) > 1:
+                task_description = parts[1].strip().rstrip("?")
+        # Pattern: "[task] mất bao lâu"
+        elif "mất bao lâu" in query_lower:
+            parts = query_lower.split("mất bao lâu", 1)
+            if len(parts) > 0:
+                task_description = parts[0].strip()
+        # Pattern: "[task] tốn bao lâu"
+        elif "tốn bao lâu" in query_lower:
+            parts = query_lower.split("tốn bao lâu", 1)
+            if len(parts) > 0:
+                task_description = parts[0].strip()
+        # Pattern: "[task] cần bao lâu"
+        elif "cần bao lâu" in query_lower:
+            parts = query_lower.split("cần bao lâu", 1)
+            if len(parts) > 0:
+                task_description = parts[0].strip()
+    
     task_description = None
     for pattern in patterns:
         match = re.search(pattern, query_lower, re.IGNORECASE)
