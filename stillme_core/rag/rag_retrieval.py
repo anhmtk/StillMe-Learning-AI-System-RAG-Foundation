@@ -626,6 +626,23 @@ class RAGRetrieval:
                 except Exception as cache_error:
                     logger.warning(f"Failed to cache RAG retrieval: {cache_error}")
             
+            # Record RAG metrics to unified metrics collector
+            try:
+                import time
+                retrieval_time_ms = (time.time() - start_time) * 1000 if 'start_time' in locals() else 0.0
+                from stillme_core.monitoring import get_metrics_collector, MetricCategory
+                unified_metrics = get_metrics_collector()
+                unified_metrics.record_rag_retrieval(
+                    query=query,
+                    num_results=len(filtered_knowledge),
+                    avg_similarity=avg_similarity,
+                    context_quality=context_quality,
+                    retrieval_time_ms=retrieval_time_ms,
+                    metadata={"has_reliable_context": has_reliable_context}
+                )
+            except Exception as metrics_error:
+                logger.debug(f"Failed to record RAG metrics (may not be initialized): {metrics_error}")
+            
             return context_result
         except Exception as e:
             logger.error(f"Error retrieving context: {e}")

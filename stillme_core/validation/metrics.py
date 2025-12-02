@@ -101,7 +101,7 @@ class ValidationMetrics:
         # CRITICAL: Also record to persistent tracker for self-improvement
         if question and answer:
             try:
-                from backend.validators.validation_metrics_tracker import get_validation_tracker
+                from stillme_core.validation.validation_metrics_tracker import get_validation_tracker
                 tracker = get_validation_tracker()
                 tracker.record_validation(
                     question=question,
@@ -117,6 +117,25 @@ class ValidationMetrics:
                 )
             except Exception as e:
                 logger.warning(f"Failed to record validation to persistent tracker: {e}")
+        
+        # NEW: Also record to unified metrics collector
+        try:
+            from stillme_core.monitoring import get_metrics_collector
+            unified_metrics = get_metrics_collector()
+            unified_metrics.record_validation(
+                passed=passed,
+                reasons=reasons,
+                overlap_score=overlap_score if overlap_score > 0 else None,
+                confidence_score=confidence_score,
+                used_fallback=used_fallback,
+                question=question,
+                answer=answer,
+                context_docs_count=context_docs_count,
+                has_citations=has_citations,
+                category=category
+            )
+        except Exception as e:
+            logger.debug(f"Failed to record to unified metrics (may not be initialized): {e}")
     
     def get_metrics(self, days: int = None) -> Dict[str, Any]:
         """
