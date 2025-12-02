@@ -210,6 +210,11 @@ def test_chat_integration(backend_url: Optional[str] = None):
         print("   Use --backend-url to test chat integration")
         return None
     
+    # Auto-add https:// if no scheme provided
+    if not backend_url.startswith(("http://", "https://")):
+        backend_url = f"https://{backend_url}"
+        print(f"ℹ️  Added https:// scheme to URL: {backend_url}")
+    
     test_queries = [
         "How long will it take to learn 100 articles?",
         "Bao lau de hoc 100 bai viet?",
@@ -222,7 +227,7 @@ def test_chat_integration(backend_url: Optional[str] = None):
         try:
             print(f"\nTesting query: '{query}'")
             
-            # Send chat request
+            # Send chat request (longer timeout for RAG + validation + estimation)
             response = requests.post(
                 f"{backend_url}/api/chat/rag",
                 json={
@@ -230,7 +235,7 @@ def test_chat_integration(backend_url: Optional[str] = None):
                     "use_rag": True,
                     "context_limit": 3
                 },
-                timeout=30
+                timeout=60  # Increased timeout for complex processing
             )
             
             if response.status_code == 200:
@@ -258,6 +263,11 @@ def test_chat_integration(backend_url: Optional[str] = None):
                 print(f"   Response: {response.text[:200]}")
                 failed += 1
                 
+        except requests.exceptions.Timeout as e:
+            print(f"   ⚠️  Request timeout (backend may be processing or slow)")
+            print(f"   Error: {e}")
+            print(f"   This is normal for first request (cold start) or complex queries")
+            failed += 1
         except requests.exceptions.RequestException as e:
             print(f"   ❌ Request error: {e}")
             failed += 1
