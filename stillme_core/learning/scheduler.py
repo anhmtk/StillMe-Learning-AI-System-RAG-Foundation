@@ -141,70 +141,84 @@ class LearningScheduler:
             logger.info(f"🔄 Starting learning cycle #{cycle_number}...")
             
             try:
-            # Step 1: Fetch from all sources
-            all_entries = self.source_integration.fetch_all_sources(
-                max_items_per_source=5,
-                use_pre_filter=True,  # Apply pre-filter to reduce costs
-                content_curator=self.content_curator,
-                min_importance_score=0.3
-            )
-            
-            entries_fetched = len(all_entries)
-            logger.info(f"📥 Fetched {entries_fetched} entries from all sources")
-            
-            # Step 2: Create fetch cycle for tracking
-            cycle_id = None
-            if self.rss_fetch_history:
-                cycle_id = self.rss_fetch_history.create_fetch_cycle(cycle_number=cycle_number)
-            
-            # Step 3: Pre-filter content (if not already filtered)
-            entries_to_add = []
-            entries_filtered = 0
-            
-            if self.content_curator and all_entries:
-                filtered_entries, rejected_entries = self.content_curator.pre_filter_content(all_entries)
-                entries_to_add = filtered_entries
-                entries_filtered = len(rejected_entries)
+                # Step 1: Fetch from all sources
+                all_entries = self.source_integration.fetch_all_sources(
+                    max_items_per_source=5,
+                    use_pre_filter=True,  # Apply pre-filter to reduce costs
+                    content_curator=self.content_curator,
+                    min_importance_score=0.3
+                )
                 
-                # Track rejected entries
-                for rejected in rejected_entries:
-                    if self.rss_fetch_history and cycle_id:
-                        self.rss_fetch_history.add_fetch_item(
-                            cycle_id=cycle_id,
-                            title=rejected.get("title", ""),
-                            source_url=rejected.get("source", ""),
-                            link=rejected.get("link", ""),
-                            summary=rejected.get("summary", ""),
-                            status="Filtered: Low Score",
-                            status_reason=rejected.get("rejection_reason", "Low quality/Short content")
-                        )
-            else:
-                entries_to_add = all_entries
-            
-            # Step 4: Add to RAG (if enabled)
-            entries_added_to_rag = 0
-            if self.auto_add_to_rag and self.rag_retrieval and entries_to_add:
-                logger.info(f"📚 Adding {len(entries_to_add)} entries to RAG...")
+                entries_fetched = len(all_entries)
+                logger.info(f"📥 Fetched {entries_fetched} entries from all sources")
                 
-                for entry in entries_to_add:
-                    try:
-                        # Add to RAG
-                        success = self.rag_retrieval.add_learning_content(
-                            content=entry.get("summary", ""),
-                            source=entry.get("source", "unknown"),
-                            content_type="knowledge",
-                            metadata={
-                                "title": entry.get("title", ""),
-                                "link": entry.get("link", ""),
-                                "published": entry.get("published", ""),
-                                "source_type": entry.get("source_type", "rss")
-                            }
-                        )
-                        
-                        if success:
-                            entries_added_to_rag += 1
+                # Step 2: Create fetch cycle for tracking
+                cycle_id = None
+                if self.rss_fetch_history:
+                    cycle_id = self.rss_fetch_history.create_fetch_cycle(cycle_number=cycle_number)
+                
+                # Step 3: Pre-filter content (if not already filtered)
+                entries_to_add = []
+                entries_filtered = 0
+                
+                if self.content_curator and all_entries:
+                    filtered_entries, rejected_entries = self.content_curator.pre_filter_content(all_entries)
+                    entries_to_add = filtered_entries
+                    entries_filtered = len(rejected_entries)
+                    
+                    # Track rejected entries
+                    for rejected in rejected_entries:
+                        if self.rss_fetch_history and cycle_id:
+                            self.rss_fetch_history.add_fetch_item(
+                                cycle_id=cycle_id,
+                                title=rejected.get("title", ""),
+                                source_url=rejected.get("source", ""),
+                                link=rejected.get("link", ""),
+                                summary=rejected.get("summary", ""),
+                                status="Filtered: Low Score",
+                                status_reason=rejected.get("rejection_reason", "Low quality/Short content")
+                            )
+                else:
+                    entries_to_add = all_entries
+                
+                # Step 4: Add to RAG (if enabled)
+                entries_added_to_rag = 0
+                if self.auto_add_to_rag and self.rag_retrieval and entries_to_add:
+                    logger.info(f"📚 Adding {len(entries_to_add)} entries to RAG...")
+                    
+                    for entry in entries_to_add:
+                        try:
+                            # Add to RAG
+                            success = self.rag_retrieval.add_learning_content(
+                                content=entry.get("summary", ""),
+                                source=entry.get("source", "unknown"),
+                                content_type="knowledge",
+                                metadata={
+                                    "title": entry.get("title", ""),
+                                    "link": entry.get("link", ""),
+                                    "published": entry.get("published", ""),
+                                    "source_type": entry.get("source_type", "rss")
+                                }
+                            )
                             
-                            # Track in history
+                            if success:
+                                entries_added_to_rag += 1
+                                
+                                # Track in history
+                                if self.rss_fetch_history and cycle_id:
+                                    self.rss_fetch_history.add_fetch_item(
+                                        cycle_id=cycle_id,
+                                        title=entry.get("title", ""),
+                                        source_url=entry.get("source", ""),
+                                        link=entry.get("link", ""),
+                                        summary=entry.get("summary", ""),
+                                        status="Added to RAG",
+                                        vector_id=f"knowledge_{entry.get('link', '')[:8]}",
+                                        added_to_rag_at=datetime.now().isoformat()
+                                    )
+                        except Exception as add_error:
+                            logger.error(f"Error adding entry to RAG: {add_error}")
+                            # Track error in history
                             if self.rss_fetch_history and cycle_id:
                                 self.rss_fetch_history.add_fetch_item(
                                     cycle_id=cycle_id,
@@ -212,79 +226,65 @@ class LearningScheduler:
                                     source_url=entry.get("source", ""),
                                     link=entry.get("link", ""),
                                     summary=entry.get("summary", ""),
-                                    status="Added to RAG",
-                                    vector_id=f"knowledge_{entry.get('link', '')[:8]}",
-                                    added_to_rag_at=datetime.now().isoformat()
+                                    status="Error: Failed to add",
+                                    status_reason=str(add_error)
                                 )
-                    except Exception as add_error:
-                        logger.error(f"Error adding entry to RAG: {add_error}")
-                        # Track error in history
-                        if self.rss_fetch_history and cycle_id:
-                            self.rss_fetch_history.add_fetch_item(
-                                cycle_id=cycle_id,
-                                title=entry.get("title", ""),
-                                source_url=entry.get("source", ""),
-                                link=entry.get("link", ""),
-                                summary=entry.get("summary", ""),
-                                status="Error: Failed to add",
-                                status_reason=str(add_error)
-                            )
+                    
+                    logger.info(f"✅ Added {entries_added_to_rag} entries to RAG")
                 
-                logger.info(f"✅ Added {entries_added_to_rag} entries to RAG")
-            
-            # Update cycle count and timestamps
-            self.cycle_count = cycle_number
-            self.last_run_time = datetime.now()
-            self.next_run_time = self.last_run_time + timedelta(hours=self.interval_hours)
-            
-            processing_time = (datetime.now() - start_time).total_seconds()
-            
-            result = {
-                "cycle_number": cycle_number,
-                "entries_fetched": entries_fetched,
-                "entries_filtered": entries_filtered,
-                "entries_added_to_rag": entries_added_to_rag,
-                "processing_time_seconds": processing_time,
-                "timestamp": self.last_run_time.isoformat(),
-                "next_run": self.next_run_time.isoformat() if self.next_run_time else None,
-                "status": "success"
-            }
-            
+                # Update cycle count and timestamps
+                self.cycle_count = cycle_number
+                self.last_run_time = datetime.now()
+                self.next_run_time = self.last_run_time + timedelta(hours=self.interval_hours)
+                
+                processing_time = (datetime.now() - start_time).total_seconds()
+                
+                result = {
+                    "cycle_number": cycle_number,
+                    "entries_fetched": entries_fetched,
+                    "entries_filtered": entries_filtered,
+                    "entries_added_to_rag": entries_added_to_rag,
+                    "processing_time_seconds": processing_time,
+                    "timestamp": self.last_run_time.isoformat(),
+                    "next_run": self.next_run_time.isoformat() if self.next_run_time else None,
+                    "status": "success"
+                }
+                
                 logger.info(f"✅ Learning cycle #{cycle_number} completed: {entries_added_to_rag} entries added to RAG in {processing_time:.2f}s")
                 
                 return result
                 
             except Exception as e:
-            logger.error(f"❌ Error in learning cycle #{cycle_number}: {e}", exc_info=True)
-            
-            # Record error in unified metrics
-            try:
-                from stillme_core.monitoring import get_metrics_collector, MetricCategory
-                unified_metrics = get_metrics_collector()
-                unified_metrics.record_learning_cycle(
-                    cycle_number=cycle_number,
-                    entries_fetched=0,
-                    entries_added=0,
-                    entries_filtered=0,
-                    sources={},
-                    duration_seconds=(datetime.now() - start_time).total_seconds(),
-                    error=str(e)
-                )
-            except Exception as metrics_error:
-                logger.debug(f"Failed to record learning error metrics: {metrics_error}")
-            
-            # Don't increment cycle count on error
-            return {
-                "cycle_number": 0,  # 0 indicates error
-                "entries_fetched": 0,
-                "entries_filtered": 0,
-                "entries_added_to_rag": 0,
-                "processing_time_seconds": (datetime.now() - start_time).total_seconds(),
-                "timestamp": datetime.now().isoformat(),
-                "next_run": None,
-                "status": "error",
-                "error": str(e)
-            }
+                logger.error(f"❌ Error in learning cycle #{cycle_number}: {e}", exc_info=True)
+                
+                # Record error in unified metrics
+                try:
+                    from stillme_core.monitoring import get_metrics_collector, MetricCategory
+                    unified_metrics = get_metrics_collector()
+                    unified_metrics.record_learning_cycle(
+                        cycle_number=cycle_number,
+                        entries_fetched=0,
+                        entries_added=0,
+                        entries_filtered=0,
+                        sources={},
+                        duration_seconds=(datetime.now() - start_time).total_seconds(),
+                        error=str(e)
+                    )
+                except Exception as metrics_error:
+                    logger.debug(f"Failed to record learning error metrics: {metrics_error}")
+                
+                # Don't increment cycle count on error
+                return {
+                    "cycle_number": 0,  # 0 indicates error
+                    "entries_fetched": 0,
+                    "entries_filtered": 0,
+                    "entries_added_to_rag": 0,
+                    "processing_time_seconds": (datetime.now() - start_time).total_seconds(),
+                    "timestamp": datetime.now().isoformat(),
+                    "next_run": None,
+                    "status": "error",
+                    "error": str(e)
+                }
     
     async def _scheduler_loop(self):
         """
