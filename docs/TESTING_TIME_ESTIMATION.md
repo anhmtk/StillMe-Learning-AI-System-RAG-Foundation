@@ -9,10 +9,12 @@ Run the comprehensive test suite:
 python scripts/test_time_estimation_features.py
 
 # Test with backend (chat integration)
-python scripts/test_time_estimation_features.py --backend-url http://localhost:8000
-# Or for Railway deployment:
-python scripts/test_time_estimation_features.py --backend-url https://your-backend.railway.app
+python scripts/test_time_estimation_features.py --backend-url stillme-backend-production.up.railway.app
+# Or with full URL:
+python scripts/test_time_estimation_features.py --backend-url https://stillme-backend-production.up.railway.app
 ```
+
+**Note**: The script automatically adds `https://` if no scheme is provided.
 
 ## Test Coverage
 
@@ -35,6 +37,7 @@ python scripts/test_time_estimation_features.py --backend-url https://your-backe
 - Requires backend URL
 - Tests time estimation in chat responses
 - Verifies formatted output with AI identity
+- **Note**: First request may timeout due to cold start (normal)
 
 ### 5. Self-Tracking Integration
 - ✅ Context manager tracking
@@ -44,9 +47,9 @@ python scripts/test_time_estimation_features.py --backend-url https://your-backe
 ## Expected Results
 
 **Current Status:**
-- ✅ 3/5 tests passing (core functionality works)
+- ✅ 4/5 tests passing (core functionality works)
+- ⚠️ Chat integration may timeout on first request (cold start)
 - ⚠️ Vietnamese pattern detection needs improvement
-- ⚠️ Chat integration requires backend URL
 
 **All core features are functional:**
 - Time estimation engine works correctly
@@ -57,15 +60,9 @@ python scripts/test_time_estimation_features.py --backend-url https://your-backe
 
 ### Test Chat Integration
 
-1. Start backend:
+1. **Using curl:**
 ```bash
-cd backend
-python -m uvicorn api.main:app --reload
-```
-
-2. Send test request:
-```bash
-curl -X POST http://localhost:8000/api/chat/rag \
+curl -X POST https://stillme-backend-production.up.railway.app/api/chat/rag \
   -H "Content-Type: application/json" \
   -d '{
     "message": "How long will it take to learn 100 articles?",
@@ -74,15 +71,22 @@ curl -X POST http://localhost:8000/api/chat/rag \
   }'
 ```
 
-3. Check response for time estimate section:
+2. **Check response for time estimate section:**
+Look for:
 ```
 ⏱️ **Time Estimate:**
 Based on my historical performance, I estimate this will take...
 ```
 
+3. **Expected behavior:**
+- StillMe detects time estimation intent
+- Generates estimate based on historical performance
+- Appends formatted estimate to response
+- Includes AI identity statement
+
 ### Test Learning Cycle Tracking
 
-Learning cycles are automatically tracked when they run. Check logs for:
+Learning cycles are automatically tracked when they run. Check backend logs for:
 ```
 📊 StillMe self-estimate: ...
 ✅ Task completed: X min (estimate was accurate)
@@ -90,7 +94,37 @@ Learning cycles are automatically tracked when they run. Check logs for:
 
 ### Test Validation Tracking
 
-Validation is automatically tracked. Check logs for tracking information when validation runs.
+Validation is automatically tracked. Check backend logs for tracking information when validation runs.
+
+## Troubleshooting
+
+### Chat Integration Timeout
+
+**Symptom**: Request times out after 60 seconds
+
+**Possible causes:**
+1. **Cold start**: First request after deployment takes longer (normal)
+2. **Complex query**: RAG + validation + estimation takes time
+3. **Backend overload**: Server is processing other requests
+
+**Solutions:**
+- Wait a few seconds and retry
+- Check backend logs for errors
+- Verify backend is running and accessible
+
+### No Time Estimate in Response
+
+**Symptom**: Chat response doesn't include time estimate
+
+**Possible causes:**
+1. Intent detection didn't match the query
+2. Query format doesn't match expected patterns
+3. Backend error (check logs)
+
+**Solutions:**
+- Use exact patterns: "How long will it take to..."
+- Check backend logs for errors
+- Verify time estimation integration is enabled
 
 ## Known Limitations
 
@@ -98,7 +132,12 @@ Validation is automatically tracked. Check logs for tracking information when va
 
 2. **Historical Data**: Estimates improve as more historical data is collected. Initial estimates may have low confidence.
 
-3. **Chat Integration**: Requires backend to be running and accessible.
+3. **Chat Integration**: 
+   - Requires backend to be running and accessible
+   - First request may timeout (cold start)
+   - Complex queries take longer to process
+
+4. **Timeout**: Default timeout is 60 seconds. Very complex queries may need more time.
 
 ## Future Improvements
 
@@ -106,4 +145,5 @@ Validation is automatically tracked. Check logs for tracking information when va
 - [ ] Add more test cases
 - [ ] Add performance benchmarks
 - [ ] Add integration tests with real backend
-
+- [ ] Add retry logic for timeout cases
+- [ ] Add health check before testing
