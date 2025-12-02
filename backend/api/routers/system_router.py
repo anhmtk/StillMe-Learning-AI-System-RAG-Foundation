@@ -902,3 +902,64 @@ async def clear_cache(pattern: Optional[str] = None):
         logger.error(f"Clear cache error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to clear cache: {str(e)}")
 
+@router.post("/api/admin/foundational-knowledge/add")
+async def add_foundational_knowledge_endpoint():
+    """
+    Add or update foundational knowledge in RAG.
+    
+    This endpoint triggers the foundational knowledge update process,
+    ensuring StillMe can answer questions about itself using RAG knowledge.
+    
+    Note: This is an admin endpoint and should be protected in production.
+    """
+    try:
+        logger.info("🔧 Admin endpoint: Adding foundational knowledge to RAG...")
+        
+        # Import RAG components
+        rag_retrieval = get_rag_retrieval()
+        if not rag_retrieval:
+            raise HTTPException(status_code=503, detail="RAG retrieval not available")
+        
+        chroma_client = get_chroma_client()
+        if not chroma_client:
+            raise HTTPException(status_code=503, detail="ChromaDB client not available")
+        
+        # Import foundational knowledge content
+        from scripts.add_foundational_knowledge import FOUNDATIONAL_KNOWLEDGE
+        
+        # Prepare metadata
+        tags_list = ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db", "self-tracking", "time-estimation"]
+        tags_string = ",".join(tags_list)
+        
+        # Add foundational knowledge
+        success = rag_retrieval.add_learning_content(
+            content=FOUNDATIONAL_KNOWLEDGE,
+            source="CRITICAL_FOUNDATION",
+            content_type="knowledge",
+            metadata={
+                "title": "StillMe Core Mechanism - Continuous RAG Learning",
+                "foundational": "stillme",
+                "type": "foundational",
+                "source": "CRITICAL_FOUNDATION",
+                "tags": tags_string,
+                "importance_score": 1.0,
+                "description": "CRITICAL: Core knowledge about StillMe's RAG-based continuous learning mechanism - MUST be retrieved when answering about StillMe"
+            }
+        )
+        
+        if success:
+            logger.info("✅ Foundational knowledge added successfully via admin endpoint")
+            return {
+                "status": "success",
+                "message": "Foundational knowledge added successfully",
+                "timestamp": datetime.now().isoformat()
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to add foundational knowledge")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Add foundational knowledge error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to add foundational knowledge: {str(e)}")
+
