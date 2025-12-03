@@ -981,3 +981,207 @@ async def add_foundational_knowledge_endpoint(
         logger.error(f"Add foundational knowledge error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to add foundational knowledge: {str(e)}")
 
+@router.post("/api/admin/foundational-knowledge/re-embed")
+async def re_embed_foundational_knowledge_endpoint(
+    api_key: Optional[str] = Depends(require_api_key) if require_api_key else Depends(lambda: None)
+):
+    """
+    Re-embed all CRITICAL_FOUNDATION documents with the current embedding model.
+    
+    This fixes high distance/similarity issues by ensuring all foundational knowledge
+    uses the same embedding model as queries.
+    
+    **Authentication Required**: This is an admin endpoint protected by API key.
+    Provide API key in `X-API-Key` header.
+    
+    **Example:**
+    ```bash
+    curl -X POST https://stillme-backend-production.up.railway.app/api/admin/foundational-knowledge/re-embed \
+      -H "X-API-Key: your-api-key-here"
+    ```
+    
+    **Returns:**
+    - `status`: "success" or "error"
+    - `message`: Human-readable message
+    - `documents_found`: Number of CRITICAL_FOUNDATION documents found
+    - `documents_re_embedded`: Number of documents successfully re-embedded
+    - `test_results`: Distance metrics after re-embedding (for verification)
+    - `timestamp`: ISO timestamp
+    """
+    if require_api_key:
+        logger.debug(f"API key verified for foundational knowledge re-embedding")
+    try:
+        logger.info("🔧 Admin endpoint: Re-embedding foundational knowledge...")
+        
+        # Import RAG components
+        chroma_client = get_chroma_client()
+        if not chroma_client:
+            raise HTTPException(status_code=503, detail="ChromaDB client not available")
+        
+        from stillme_core.rag.embeddings import EmbeddingService
+        embedding_service = EmbeddingService()
+        
+        # Get collection
+        collection = chroma_client.knowledge_collection
+        
+        # Get all CRITICAL_FOUNDATION documents
+        logger.info("📋 Finding all CRITICAL_FOUNDATION documents...")
+        results = collection.get(
+            where={"source": "CRITICAL_FOUNDATION"},
+            include=["documents", "metadatas", "embeddings"]
+        )
+        
+        foundational_docs = []
+        if results and results.get("ids"):
+            for i, doc_id in enumerate(results["ids"]):
+                foundational_docs.append({
+                    "id": doc_id,
+                    "content": results["documents"][i] if results["documents"] else "",
+                    "metadata": results["metadatas"][i] if results["metadatas"] else {},
+                    "old_embedding": results["embeddings"][i] if results["embeddings"] else None
+                })
+        
+        if not foundational_docs:
+            logger.warning("⚠️  No CRITICAL_FOUNDATION documents found!")
+            return {
+                "status": "error",
+                "message": "No CRITICAL_FOUNDATION documents found. Please add foundational knowledge first.",
+                "documents_found": 0,
+                "documents_re_embedded": 0,
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        logger.info(f"✅ Found {len(foundational_docs)} CRITICAL_FOUNDATION documents")
+        logger.info(f"🔄 Re-embedding with model: {embedding_service.model_name} ({embedding_service.embedding_dimensions} dimensions)")
+        
+        # Re-embed each document
+        re_embedded_count = 0
+        errors = []
+        
+        for i, doc in enumerate(foundational_docs, 1):
+            doc_title = doc['metadata'].get('title', doc['id'])
+            logger.info(f"   [{i}/{len(foundational_docs)}] Re-embedding: {doc_title}")
+            
+            try:
+                # Generate new embedding
+                new_embedding = embedding_service.encode_text(doc["content"])
+                logger.debug(f"      ✅ Generated new embedding: {len(new_embedding)} dimensions")
+                
+                # Delete old document
+                collection.delete(ids=[doc["id"]])
+                logger.debug(f"      ✅ Deleted old document")
+                
+                # Add new document with new embedding
+                collection.add(
+                    ids=[doc["id"]],
+                    documents=[doc["content"]],
+                    metadatas=[doc["metadata"]],
+                    embeddings=[new_embedding]
+                )
+                logger.debug(f"      ✅ Added document with new embedding")
+                re_embedded_count += 1
+                
+            except Exception as e:
+                error_msg = f"Failed to re-embed document {doc['id']}: {str(e)}"
+                logger.error(f"      ❌ {error_msg}")
+                errors.append(error_msg)
+                
+                # Try to restore old document if possible
+                if doc.get("old_embedding"):
+                    try:
+                        collection.add(
+                            ids=[doc["id"]],
+                            documents=[doc["content"]],
+                            metadatas=[doc["metadata"]],
+                            embeddings=[doc["old_embedding"]]
+                        )
+                        logger.info(f"      ✅ Restored old document")
+                    except Exception as restore_error:
+                        logger.error(f"      ❌ Failed to restore old document: {restore_error}")
+        
+        logger.info(f"✅ Re-embedding complete: {re_embedded_count}/{len(foundational_docs)} documents")
+        
+        # Test retrieval
+        test_results = None
+        try:
+            logger.info("🧪 Testing retrieval with re-embedded documents...")
+            test_query = "Do you track your own execution time?"
+            test_embedding = embedding_service.encode_text(test_query)
+            
+            test_query_results = collection.query(
+                query_embeddings=[test_embedding],
+                n_results=5,
+                where={"source": "CRITICAL_FOUNDATION"}
+            )
+            
+            if test_query_results and test_query_results.get("distances") and test_query_results["distances"][0]:
+                distances = test_query_results["distances"][0]
+                min_distance = min(distances)
+                max_distance = max(distances)
+                avg_distance = sum(distances) / len(distances)
+                
+                # Estimate similarity (approximate for L2 distance)
+                # For normalized vectors: cosine_sim ≈ 1 - (L2^2 / 2)
+                min_similarity = 1.0 - (min_distance ** 2 / 2) if min_distance < 2.0 else -1.0
+                
+                test_results = {
+                    "test_query": test_query,
+                    "distance_range": {
+                        "min": round(min_distance, 3),
+                        "max": round(max_distance, 3),
+                        "average": round(avg_distance, 3)
+                    },
+                    "estimated_similarity": round(min_similarity, 3),
+                    "documents_retrieved": len(distances),
+                    "status": "good" if min_distance < 1.0 else "moderate" if min_distance < 2.0 else "high"
+                }
+                
+                logger.info(f"   ✅ Test query: '{test_query}'")
+                logger.info(f"   Distance range: {min_distance:.3f} - {max_distance:.3f}")
+                logger.info(f"   Average distance: {avg_distance:.3f}")
+                logger.info(f"   Estimated similarity: {min_similarity:.3f}")
+                
+                if min_distance < 1.0:
+                    logger.info("   ✅ Distance looks good! Documents should be retrievable")
+                elif min_distance < 2.0:
+                    logger.warning("   ⚠️  Distance is moderate - may need lower threshold")
+                else:
+                    logger.warning("   ⚠️  Distance is still high - may need to check embedding model or normalization")
+            else:
+                logger.warning("   ⚠️  No test results returned")
+                test_results = {
+                    "test_query": test_query,
+                    "status": "no_results",
+                    "message": "No documents retrieved in test query"
+                }
+        except Exception as test_error:
+            logger.error(f"   ❌ Test retrieval failed: {test_error}")
+            test_results = {
+                "status": "error",
+                "message": f"Test retrieval failed: {str(test_error)}"
+            }
+        
+        # Prepare response
+        response = {
+            "status": "success" if re_embedded_count == len(foundational_docs) else "partial",
+            "message": f"Re-embedded {re_embedded_count}/{len(foundational_docs)} documents successfully" + (f" ({len(errors)} errors)" if errors else ""),
+            "documents_found": len(foundational_docs),
+            "documents_re_embedded": re_embedded_count,
+            "model_used": embedding_service.model_name,
+            "embedding_dimensions": embedding_service.embedding_dimensions,
+            "test_results": test_results,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        if errors:
+            response["errors"] = errors
+        
+        logger.info("✅ Foundational knowledge re-embedding complete via admin endpoint")
+        return response
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Re-embed foundational knowledge error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to re-embed foundational knowledge: {str(e)}")
+
