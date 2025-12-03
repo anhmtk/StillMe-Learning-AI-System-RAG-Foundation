@@ -1056,7 +1056,8 @@ async def re_embed_foundational_knowledge_endpoint(
             }
         
         logger.info(f"✅ Found {len(foundational_docs)} CRITICAL_FOUNDATION documents")
-        logger.info(f"🔄 Re-embedding with model: {embedding_service.model_name} ({embedding_service.embedding_dimensions} dimensions)")
+        embedding_dim = embedding_service.get_embedding_dimension()
+        logger.info(f"🔄 Re-embedding with model: {embedding_service.model_name} ({embedding_dim} dimensions)")
         
         # Re-embed each document
         re_embedded_count = 0
@@ -1172,7 +1173,7 @@ async def re_embed_foundational_knowledge_endpoint(
             "documents_found": len(foundational_docs),
             "documents_re_embedded": re_embedded_count,
             "model_used": embedding_service.model_name,
-            "embedding_dimensions": embedding_service.embedding_dimensions,
+            "embedding_dimensions": embedding_service.get_embedding_dimension(),
             "test_results": test_results,
             "timestamp": datetime.now().isoformat()
         }
