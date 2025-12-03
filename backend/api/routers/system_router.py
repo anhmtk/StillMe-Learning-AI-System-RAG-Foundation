@@ -950,6 +950,17 @@ async def add_foundational_knowledge_endpoint(
         tags_string = ",".join(tags_list)
         
         # Add foundational knowledge
+        logger.info(f"📝 Adding foundational knowledge (length: {len(FOUNDATIONAL_KNOWLEDGE)} characters)...")
+        
+        # Get collection stats before add
+        try:
+            stats_before = chroma_client.get_collection_stats()
+            knowledge_count_before = stats_before.get("knowledge_documents", 0)
+            logger.info(f"📊 Knowledge documents before add: {knowledge_count_before}")
+        except Exception as e:
+            logger.warning(f"⚠️  Could not get stats before add: {e}")
+            knowledge_count_before = None
+        
         success = rag_retrieval.add_learning_content(
             content=FOUNDATIONAL_KNOWLEDGE,
             source="CRITICAL_FOUNDATION",
@@ -966,13 +977,36 @@ async def add_foundational_knowledge_endpoint(
         )
         
         if success:
-            logger.info("✅ Foundational knowledge added successfully via admin endpoint")
+            # Verify document was actually added
+            try:
+                stats_after = chroma_client.get_collection_stats()
+                knowledge_count_after = stats_after.get("knowledge_documents", 0)
+                logger.info(f"📊 Knowledge documents after add: {knowledge_count_after}")
+                
+                if knowledge_count_before is not None:
+                    if knowledge_count_after > knowledge_count_before:
+                        logger.info(f"✅ Verified: Document count increased from {knowledge_count_before} to {knowledge_count_after}")
+                    elif knowledge_count_after == knowledge_count_before:
+                        logger.warning(f"⚠️  WARNING: Document count unchanged ({knowledge_count_after}) - document may not have been added!")
+                    else:
+                        logger.warning(f"⚠️  WARNING: Document count decreased from {knowledge_count_before} to {knowledge_count_after} - possible collection recreation!")
+                
+                if knowledge_count_after == 0:
+                    logger.error("❌ CRITICAL: add_learning_content returned success but collection is still empty!")
+                    logger.error("❌ This indicates collection was recreated or add operation failed silently")
+            except Exception as verify_error:
+                logger.warning(f"⚠️  Could not verify document count: {verify_error}")
+            
+            logger.info("✅ Foundational knowledge add operation completed")
             return {
                 "status": "success",
                 "message": "Foundational knowledge added successfully",
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
+                "knowledge_documents_before": knowledge_count_before,
+                "knowledge_documents_after": knowledge_count_after if 'knowledge_count_after' in locals() else None
             }
         else:
+            logger.error("❌ add_learning_content returned False - foundational knowledge add failed")
             raise HTTPException(status_code=500, detail="Failed to add foundational knowledge")
             
     except HTTPException:
