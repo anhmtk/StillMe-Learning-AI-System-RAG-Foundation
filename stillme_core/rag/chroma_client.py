@@ -241,10 +241,10 @@ class ChromaClient:
                 try:
                     self.knowledge_collection = self.client.create_collection(
                         name="stillme_knowledge",
-                        metadata={"description": "Knowledge base for StillMe learning"},
-                        # CRITICAL: Use cosine distance for normalized embeddings
-                        # Normalized embeddings work best with cosine similarity
-                        distance_metric="cosine"
+                        metadata={
+                            "description": "Knowledge base for StillMe learning",
+                            "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                        }
                     )
                     logger.info("✅ Created stillme_knowledge collection with cosine distance metric")
                 except Exception as create_error:
@@ -268,9 +268,10 @@ class ChromaClient:
                 try:
                     self.conversation_collection = self.client.create_collection(
                         name="stillme_conversations",
-                        metadata={"description": "Conversation history for context"},
-                        # CRITICAL: Use cosine distance for normalized embeddings
-                        distance_metric="cosine"
+                        metadata={
+                            "description": "Conversation history for context",
+                            "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                        }
                     )
                     logger.info("✅ Created stillme_conversations collection with cosine distance metric")
                 except Exception as create_error:
@@ -530,15 +531,17 @@ class ChromaClient:
                         # Create fresh collections
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
-                            metadata={"description": "Knowledge base for StillMe learning"},
-                            # CRITICAL: Use cosine distance for normalized embeddings
-                            distance_metric="cosine"
+                            metadata={
+                                "description": "Knowledge base for StillMe learning",
+                                "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                            }
                         )
                         self.conversation_collection = self.client.create_collection(
                             name="stillme_conversations",
-                            metadata={"description": "Conversation history for context"},
-                            # CRITICAL: Use cosine distance for normalized embeddings
-                            distance_metric="cosine"
+                            metadata={
+                                "description": "Conversation history for context",
+                                "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                            }
                         )
                         logger.info("✅ ChromaDB database reset successfully - fresh collections created")
                     except Exception as reset_error:
@@ -577,8 +580,10 @@ class ChromaClient:
             # CRITICAL: Use cosine distance for normalized embeddings
             return self.client.create_collection(
                 name=name,
-                metadata={"description": description},
-                distance_metric="cosine"
+                metadata={
+                    "description": description,
+                    "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                }
             )
     
     def add_knowledge(self, 

@@ -139,8 +139,10 @@ def migrate_collection_to_cosine(
             
             new_collection = chroma_client.client.create_collection(
                 name=collection_name,
-                metadata={"description": description},
-                distance_metric="cosine"  # CRITICAL: Use cosine for normalized embeddings
+                metadata={
+                    "description": description,
+                    "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                }
             )
             logger.info(f"   ✅ Created new collection with cosine distance metric")
         except Exception as e:
