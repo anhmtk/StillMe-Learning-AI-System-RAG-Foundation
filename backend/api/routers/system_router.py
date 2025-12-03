@@ -978,6 +978,7 @@ async def add_foundational_knowledge_endpoint(
         
         if success:
             # Verify document was actually added
+            knowledge_count_after = None
             try:
                 stats_after = chroma_client.get_collection_stats()
                 knowledge_count_after = stats_after.get("knowledge_documents", 0)
@@ -1003,7 +1004,7 @@ async def add_foundational_knowledge_endpoint(
                 "message": "Foundational knowledge added successfully",
                 "timestamp": datetime.now().isoformat(),
                 "knowledge_documents_before": knowledge_count_before,
-                "knowledge_documents_after": knowledge_count_after if 'knowledge_count_after' in locals() else None
+                "knowledge_documents_after": knowledge_count_after
             }
         else:
             logger.error("❌ add_learning_content returned False - foundational knowledge add failed")
