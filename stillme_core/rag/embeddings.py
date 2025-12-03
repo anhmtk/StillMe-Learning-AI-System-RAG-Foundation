@@ -409,9 +409,24 @@ class EmbeddingService:
             # Generate embeddings
             embeddings = self.model.encode(text, convert_to_tensor=False)
             
+            # CRITICAL: Normalize embeddings to unit vectors for better cosine similarity
+            # This improves retrieval accuracy, especially for ChromaDB
+            import numpy as np
+            embeddings_array = np.array(embeddings)
+            if len(embeddings_array.shape) == 1:
+                # Single embedding vector
+                norm = np.linalg.norm(embeddings_array)
+                if norm > 0:
+                    embeddings_array = embeddings_array / norm
+            else:
+                # Batch of embeddings
+                norms = np.linalg.norm(embeddings_array, axis=1, keepdims=True)
+                norms = np.where(norms > 0, norms, 1.0)  # Avoid division by zero
+                embeddings_array = embeddings_array / norms
+            
             # OPTIMIZATION: Cache single text embeddings (both in-memory and Redis)
             if isinstance(text, str):
-                embedding_list = embeddings.tolist() if hasattr(embeddings, 'tolist') else list(embeddings)
+                embedding_list = embeddings_array.tolist() if hasattr(embeddings_array, 'tolist') else list(embeddings_array)
                 cache_key = self._get_cache_key(text)
                 
                 # Update in-memory cache
