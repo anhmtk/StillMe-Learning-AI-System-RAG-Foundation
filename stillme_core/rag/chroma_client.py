@@ -258,7 +258,9 @@ class ChromaClient:
                             pass
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
-                            metadata={"description": "Knowledge base for StillMe learning"}
+                            metadata={"description": "Knowledge base for StillMe learning"},
+                            # CRITICAL: Use cosine distance for normalized embeddings
+                            distance_metric="cosine"
                         )
                     else:
                         raise
@@ -282,7 +284,9 @@ class ChromaClient:
                             pass
                         self.conversation_collection = self.client.create_collection(
                             name="stillme_conversations",
-                            metadata={"description": "Conversation history for context"}
+                            metadata={"description": "Conversation history for context"},
+                            # CRITICAL: Use cosine distance for normalized embeddings
+                            distance_metric="cosine"
                         )
                     else:
                         raise
@@ -526,11 +530,15 @@ class ChromaClient:
                         # Create fresh collections
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
-                            metadata={"description": "Knowledge base for StillMe learning"}
+                            metadata={"description": "Knowledge base for StillMe learning"},
+                            # CRITICAL: Use cosine distance for normalized embeddings
+                            distance_metric="cosine"
                         )
                         self.conversation_collection = self.client.create_collection(
                             name="stillme_conversations",
-                            metadata={"description": "Conversation history for context"}
+                            metadata={"description": "Conversation history for context"},
+                            # CRITICAL: Use cosine distance for normalized embeddings
+                            distance_metric="cosine"
                         )
                         logger.info("✅ ChromaDB database reset successfully - fresh collections created")
                     except Exception as reset_error:
