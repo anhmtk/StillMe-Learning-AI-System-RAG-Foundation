@@ -350,13 +350,22 @@ class LearningScheduler:
         def task_done_callback(task):
             if task.cancelled():
                 logger.warning("⚠️ Scheduler task was cancelled")
+                # CRITICAL: Reset is_running when task is cancelled (e.g., during shutdown)
+                if self.is_running:
+                    logger.info("🔄 Resetting is_running=False due to task cancellation (allows watchdog to restart)")
+                    self.is_running = False
             elif task.exception():
                 logger.error(f"❌ Scheduler task died with exception: {task.exception()}", exc_info=task.exception())
+                # Reset is_running on exception so watchdog can restart
+                if self.is_running:
+                    logger.info("🔄 Resetting is_running=False due to task exception (allows watchdog to restart)")
+                    self.is_running = False
             else:
                 logger.warning("⚠️ Scheduler task completed unexpectedly (should run forever)")
-            # If task died but is_running is still True, that's a bug
-            if self.is_running:
-                logger.error("❌ CRITICAL: Scheduler task died but is_running=True - scheduler will not continue!")
+                # Reset is_running on unexpected completion
+                if self.is_running:
+                    logger.info("🔄 Resetting is_running=False due to unexpected completion (allows watchdog to restart)")
+                    self.is_running = False
         
         self._task.add_done_callback(task_done_callback)
         
