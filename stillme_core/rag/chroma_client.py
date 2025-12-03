@@ -258,9 +258,10 @@ class ChromaClient:
                             pass
                         self.knowledge_collection = self.client.create_collection(
                             name="stillme_knowledge",
-                            metadata={"description": "Knowledge base for StillMe learning"},
-                            # CRITICAL: Use cosine distance for normalized embeddings
-                            distance_metric="cosine"
+                            metadata={
+                                "description": "Knowledge base for StillMe learning",
+                                "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                            }
                         )
                     else:
                         raise
@@ -285,9 +286,10 @@ class ChromaClient:
                             pass
                         self.conversation_collection = self.client.create_collection(
                             name="stillme_conversations",
-                            metadata={"description": "Conversation history for context"},
-                            # CRITICAL: Use cosine distance for normalized embeddings
-                            distance_metric="cosine"
+                            metadata={
+                                "description": "Conversation history for context",
+                                "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                            }
                         )
                     else:
                         raise
