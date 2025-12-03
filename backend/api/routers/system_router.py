@@ -1033,12 +1033,16 @@ async def re_embed_foundational_knowledge_endpoint(
         
         foundational_docs = []
         if results and results.get("ids"):
+            embeddings_list = results.get("embeddings")
+            documents_list = results.get("documents")
+            metadatas_list = results.get("metadatas")
+            
             for i, doc_id in enumerate(results["ids"]):
                 foundational_docs.append({
                     "id": doc_id,
-                    "content": results["documents"][i] if (results.get("documents") and i < len(results["documents"])) else "",
-                    "metadata": results["metadatas"][i] if (results.get("metadatas") and i < len(results["metadatas"])) else {},
-                    "old_embedding": results["embeddings"][i] if (results.get("embeddings") and i < len(results["embeddings"])) else None
+                    "content": documents_list[i] if (documents_list is not None and i < len(documents_list)) else "",
+                    "metadata": metadatas_list[i] if (metadatas_list is not None and i < len(metadatas_list)) else {},
+                    "old_embedding": embeddings_list[i] if (embeddings_list is not None and i < len(embeddings_list)) else None
                 })
         
         if not foundational_docs:
