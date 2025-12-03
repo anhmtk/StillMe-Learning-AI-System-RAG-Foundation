@@ -2586,7 +2586,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         logger.info("Technical question about 'your system' detected - treating as StillMe query")
                 
                 if is_stillme_query:
-                    logger.debug(f"StillMe query detected! Matched keywords: {matched_keywords}")
+                    logger.info(f"✅ StillMe query detected! Matched keywords: {matched_keywords}")
+                    processing_steps.append(f"✅ StillMe query detected (keywords: {', '.join(matched_keywords)})")
             except ImportError:
                 logger.warning("StillMe detector not available, skipping special retrieval rule")
             except Exception as detector_error:
