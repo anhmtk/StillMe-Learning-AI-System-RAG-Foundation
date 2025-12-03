@@ -114,6 +114,23 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         ]
     )
     
+    # CRITICAL: Check if question is about "your own" + technical terms (self-tracking, execution time, etc.)
+    # "Do you track your own execution time?" should be detected as StillMe query
+    has_your_own = any(
+        phrase in query_lower 
+        for phrase in [
+            "your own", "yourself", "chính mình", "bản thân", "của chính bạn"
+        ]
+    )
+    has_self_tracking_keyword = any(
+        keyword in query_lower 
+        for keyword in [
+            "track", "tracking", "execution time", "self-tracking", "self tracking",
+            "theo dõi", "theo dõi thời gian", "theo dõi thực thi",
+            "monitor", "monitoring", "time estimation", "estimate time"
+        ]
+    )
+    
     # CRITICAL: If question has "your own" + self-tracking keywords, it's about StillMe
     if has_your_own and has_self_tracking_keyword:
         matched_keywords.append("self_tracking")
