@@ -241,9 +241,12 @@ class ChromaClient:
                 try:
                     self.knowledge_collection = self.client.create_collection(
                         name="stillme_knowledge",
-                        metadata={"description": "Knowledge base for StillMe learning"}
+                        metadata={"description": "Knowledge base for StillMe learning"},
+                        # CRITICAL: Use cosine distance for normalized embeddings
+                        # Normalized embeddings work best with cosine similarity
+                        distance_metric="cosine"
                     )
-                    logger.info("✅ Created stillme_knowledge collection")
+                    logger.info("✅ Created stillme_knowledge collection with cosine distance metric")
                 except Exception as create_error:
                     # If collection already exists somehow, delete and recreate
                     error_str = str(create_error).lower()
@@ -263,9 +266,11 @@ class ChromaClient:
                 try:
                     self.conversation_collection = self.client.create_collection(
                         name="stillme_conversations",
-                        metadata={"description": "Conversation history for context"}
+                        metadata={"description": "Conversation history for context"},
+                        # CRITICAL: Use cosine distance for normalized embeddings
+                        distance_metric="cosine"
                     )
-                    logger.info("✅ Created stillme_conversations collection")
+                    logger.info("✅ Created stillme_conversations collection with cosine distance metric")
                 except Exception as create_error:
                     # If collection already exists somehow, delete and recreate
                     error_str = str(create_error).lower()
@@ -561,9 +566,11 @@ class ChromaClient:
                     logger.warning(f"Could not delete collection {name}: {delete_error}")
             
             # Collection doesn't exist or was deleted, create it
+            # CRITICAL: Use cosine distance for normalized embeddings
             return self.client.create_collection(
                 name=name,
-                metadata={"description": description}
+                metadata={"description": description},
+                distance_metric="cosine"
             )
     
     def add_knowledge(self, 
