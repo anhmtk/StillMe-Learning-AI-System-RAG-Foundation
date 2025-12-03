@@ -3,7 +3,7 @@ System Router - Core endpoints for API health, status, and metrics
 Handles root, health check, system status, and validation metrics
 """
 
-from fastapi import APIRouter, Request, HTTPException, Response
+from fastapi import APIRouter, Request, HTTPException, Response, Depends, Security
 import logging
 import os
 import sqlite3
@@ -903,15 +903,25 @@ async def clear_cache(pattern: Optional[str] = None):
         raise HTTPException(status_code=500, detail=f"Failed to clear cache: {str(e)}")
 
 @router.post("/api/admin/foundational-knowledge/add")
-async def add_foundational_knowledge_endpoint():
+async def add_foundational_knowledge_endpoint(
+    api_key: Optional[str] = Depends(require_api_key)
+):
     """
     Add or update foundational knowledge in RAG.
     
     This endpoint triggers the foundational knowledge update process,
     ensuring StillMe can answer questions about itself using RAG knowledge.
     
-    Note: This is an admin endpoint and should be protected in production.
+    **Authentication Required**: This is an admin endpoint protected by API key.
+    Provide API key in `X-API-Key` header.
+    
+    **Example:**
+    ```bash
+    curl -X POST https://stillme-backend-production.up.railway.app/api/admin/foundational-knowledge/add \
+      -H "X-API-Key: your-api-key-here"
+    ```
     """
+    logger.debug(f"API key verified for foundational knowledge update")
     try:
         logger.info("🔧 Admin endpoint: Adding foundational knowledge to RAG...")
         

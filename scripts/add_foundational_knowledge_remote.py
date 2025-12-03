@@ -8,6 +8,7 @@ This script calls the admin endpoint to trigger foundational knowledge update re
 import requests
 import argparse
 import sys
+import os
 
 # Ensure UTF-8 output for Windows
 if sys.platform == "win32":
@@ -52,12 +53,28 @@ def add_foundational_knowledge_remote(backend_url: str):
             print(f"   ⚠️  Health check failed: {e}")
             print("   (This is OK, continuing with request...)")
         
-        # 2. Call admin endpoint to add foundational knowledge
+        # 2. Get API key from environment or prompt
+        api_key = os.getenv("STILLME_API_KEY")
+        if not api_key:
+            print("\n   ⚠️  STILLME_API_KEY not found in environment variables")
+            print("   This endpoint requires API key authentication.")
+            print("   Please set STILLME_API_KEY environment variable or provide it via --api-key")
+            api_key = input("   Enter API key (or press Enter to skip authentication): ").strip()
+            if not api_key:
+                print("   ⚠️  No API key provided - request may fail if authentication is required")
+        
+        # 3. Call admin endpoint to add foundational knowledge
         print(f"\n2. Calling admin endpoint to add foundational knowledge...")
         print(f"   This may take 30-60 seconds (embedding generation)...")
         
+        headers = {}
+        if api_key:
+            headers["X-API-Key"] = api_key
+            print(f"   Using API key authentication")
+        
         response = requests.post(
             endpoint,
+            headers=headers,
             timeout=120  # Longer timeout for embedding generation
         )
         
@@ -117,7 +134,15 @@ if __name__ == "__main__":
         required=True,
         help="Base URL of the StillMe backend (e.g., stillme-backend-production.up.railway.app)"
     )
+    parser.add_argument(
+        "--api-key",
+        help="API key for authentication (or set STILLME_API_KEY environment variable)"
+    )
     args = parser.parse_args()
+    
+    # Use provided API key or environment variable
+    if args.api_key:
+        os.environ["STILLME_API_KEY"] = args.api_key
     
     add_foundational_knowledge_remote(args.backend_url)
 
