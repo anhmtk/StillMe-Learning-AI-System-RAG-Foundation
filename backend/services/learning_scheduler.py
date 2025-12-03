@@ -4,7 +4,7 @@ Automatically runs learning cycles every N hours to fetch content and add to RAG
 CRITICAL: This is a core feature - must always be enabled and running
 
 ⚠️ MIGRATION NOTE: This module is being migrated to stillme_core.learning.scheduler.
-During migration, this file serves as fallback. New code should use stillme_core.learning.scheduler.
+This file now serves as an adapter that forwards to stillme_core.learning.scheduler.
 """
 
 import asyncio
