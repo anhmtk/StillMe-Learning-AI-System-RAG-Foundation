@@ -12,6 +12,14 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
+
+# Import authentication dependency
+try:
+    from backend.api.auth import require_api_key
+except ImportError:
+    require_api_key = None
+    logger.warning("⚠️ Authentication module not available. Admin endpoints will be unprotected.")
+
 router = APIRouter()
 
 # Feature flag for health/ready endpoints
@@ -904,7 +912,7 @@ async def clear_cache(pattern: Optional[str] = None):
 
 @router.post("/api/admin/foundational-knowledge/add")
 async def add_foundational_knowledge_endpoint(
-    api_key: Optional[str] = Depends(require_api_key)
+    api_key: Optional[str] = Depends(require_api_key) if require_api_key else Depends(lambda: None)
 ):
     """
     Add or update foundational knowledge in RAG.
