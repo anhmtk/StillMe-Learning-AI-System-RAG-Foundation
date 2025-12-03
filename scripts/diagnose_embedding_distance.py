@@ -72,9 +72,9 @@ def diagnose_embedding_distance():
         
         # Check document embeddings
         logger.info(f"\n3. Analyzing document embeddings...")
-        embeddings_list = results.get("embeddings", [])
+        embeddings_list = results.get("embeddings")
         
-        if embeddings_list:
+        if embeddings_list is not None and len(embeddings_list) > 0:
             doc_embedding = np.array(embeddings_list[0])
             doc_norm = np.linalg.norm(doc_embedding)
             logger.info(f"   Document embedding norm: {doc_norm:.6f}")
