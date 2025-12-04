@@ -125,8 +125,7 @@ class ValidatorChain:
                     # user_question is needed to detect real factual questions (even with philosophical elements)
                     # context is needed to detect foundational knowledge for specific citations
                     # Note: context may not be available in all call paths, so it's optional
-                    context_for_citation = getattr(self, '_context_for_citation', None)
-                    result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical, user_question=user_question, context=context_for_citation)
+                    result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical, user_question=user_question, context=context)
                 elif validator_name == "FactualHallucinationValidator":
                     # Pass user_question to FactualHallucinationValidator
                     result = validator.run(patched, ctx_docs, user_question=user_question)

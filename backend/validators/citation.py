@@ -3,7 +3,7 @@ CitationRequired validator - Ensures answers include citations
 """
 
 import re
-from typing import List, Any
+from typing import List, Any, Optional, Dict
 from .base import ValidationResult
 import logging
 
