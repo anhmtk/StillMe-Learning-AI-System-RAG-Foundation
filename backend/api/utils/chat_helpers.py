@@ -11,13 +11,18 @@ from typing import Optional, AsyncIterator
 logger = logging.getLogger(__name__)
 
 
-def detect_language(text: str) -> str:
+def detect_language(text: str, is_user_query: bool = True) -> str:
     """
     Enhanced language detection using langdetect library with fallback to rule-based detection.
     Supports: vi, zh, de, fr, es, ja, ko, ar, ru, pt, it, hi, th, en
     
     CRITICAL: Also checks for explicit language requests (e.g., "nói bằng tiếng Nga", "speak in Russian")
     If user explicitly requests a different language, that takes priority.
+    
+    Args:
+        text: Text to detect language for
+        is_user_query: If True, apply Vietnamese keyword override (for user queries).
+                      If False, skip Vietnamese keyword override (for responses/context) to avoid false positives.
     
     Returns: Language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'ko', 'ar', 'ru', 'pt', 'it', 'hi', 'th', 'en') or 'en' as default
     If language is not detected or not supported, returns 'en' (English) as fallback.
@@ -27,8 +32,8 @@ def detect_language(text: str) -> str:
     
     text_lower = text.lower()
     
-    # CRITICAL: Check Vietnamese keywords FIRST (before langdetect)
-    # This prevents false French detection for Vietnamese queries without tone marks
+    # CRITICAL: Check Vietnamese keywords ONLY for user queries (not responses)
+    # This prevents false Vietnamese detection when response contains Vietnamese keywords from context
     # Vietnamese keywords (even without tone marks)
     vietnamese_keywords = [
         'bao lau', 'bao lâu', 'mat bao lau', 'mất bao lâu',
@@ -38,7 +43,8 @@ def detect_language(text: str) -> str:
         'co the', 'có thể', 'khong', 'không', 'khong biet', 'không biết',
         'ban', 'bạn', 'minh', 'mình', 'toi', 'tôi'
     ]
-    has_vietnamese_keywords = any(keyword in text_lower for keyword in vietnamese_keywords)
+    # Only check Vietnamese keywords for user queries, not responses
+    has_vietnamese_keywords = is_user_query and any(keyword in text_lower for keyword in vietnamese_keywords)
     
     # OPTIMIZATION: Try langdetect FIRST for better accuracy, especially for mixed-language text
     # Then check for explicit language requests (which override detection)
@@ -74,10 +80,11 @@ def detect_language(text: str) -> str:
             detected_lang = lang_map[detected]
             logger.info(f"🌐 langdetect detected: {detected} -> {detected_lang}")
             
-        # CRITICAL: Override langdetect if Vietnamese keywords found
+        # CRITICAL: Override langdetect if Vietnamese keywords found (only for user queries)
         # This fixes false French detection for Vietnamese queries without tone marks
+        # But we skip this for responses to avoid false positives when response contains Vietnamese keywords from context
         if has_vietnamese_keywords and detected_lang != 'vi':
-            logger.info(f"🌐 Vietnamese keywords detected, overriding langdetect result: {detected_lang} -> vi")
+            logger.info(f"🌐 Vietnamese keywords detected in user query, overriding langdetect result: {detected_lang} -> vi")
             detected_lang = 'vi'
             
     except ImportError:
@@ -117,11 +124,11 @@ def detect_language(text: str) -> str:
             return lang_code
     
     # If explicit request found, return it; otherwise use detected language
-    # CRITICAL: Also check Vietnamese keywords here (in case langdetect wasn't used)
+    # CRITICAL: Also check Vietnamese keywords here (in case langdetect wasn't used, only for user queries)
     if detected_lang:
-        # Override if Vietnamese keywords found (double-check)
+        # Override if Vietnamese keywords found (double-check, only for user queries)
         if has_vietnamese_keywords and detected_lang != 'vi':
-            logger.info(f"🌐 Vietnamese keywords detected, overriding detected_lang: {detected_lang} -> vi")
+            logger.info(f"🌐 Vietnamese keywords detected in user query, overriding detected_lang: {detected_lang} -> vi")
             return 'vi'
         return detected_lang
     

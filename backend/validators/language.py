@@ -39,7 +39,8 @@ class LanguageValidator:
             return ValidationResult(passed=True)  # Empty answer, skip validation
         
         # Detect language of the answer
-        detected_output_lang = detect_language(answer)
+        # CRITICAL: Set is_user_query=False to avoid false Vietnamese detection when response contains Vietnamese keywords from context
+        detected_output_lang = detect_language(answer, is_user_query=False)
         
         # Check if output language matches input language
         if detected_output_lang == self.input_language:
