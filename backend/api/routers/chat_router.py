@@ -5118,32 +5118,19 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             rewrite_count = 0
                             quality_before = quality_result.get("overall_score", 1.0)
                             
-                            # CRITICAL: Skip rewrite for StillMe queries with foundational knowledge if response is already correct
-                            # This prevents rewrite from corrupting correct LLM responses about StillMe's capabilities
+                            # CRITICAL: Skip rewrite for StillMe queries with foundational knowledge
+                            # This prevents rewrite from corrupting responses about StillMe's capabilities
+                            # Even if response is initially wrong, rewrite often makes it worse
                             skip_rewrite_for_stillme = False
                             if is_stillme_query and has_foundational_context:
-                                # Check if response already correctly states StillMe tracks execution time
-                                response_lower = sanitized_response.lower()
-                                correct_indicators = [
-                                    "stillme tracks", "stillme does track", "stillme monitors",
-                                    "tasktracker", "timeestimationengine", "self-tracking",
-                                    "tracks its own", "tracks execution time", "tracks.*execution"
-                                ]
-                                incorrect_indicators = [
-                                    "does not track", "do not track", "cannot track",
-                                    "don't track", "no.*track", "not track"
-                                ]
-                                
-                                has_correct = any(indicator in response_lower for indicator in correct_indicators)
-                                has_incorrect = any(indicator in response_lower for indicator in incorrect_indicators)
-                                
-                                if has_correct and not has_incorrect:
-                                    skip_rewrite_for_stillme = True
-                                    logger.info(
-                                        "⏭️ Skipping rewrite for StillMe query: "
-                                        "Response already correct with foundational knowledge, "
-                                        "rewrite may corrupt accurate information"
-                                    )
+                                # For StillMe queries with foundational knowledge, skip rewrite entirely
+                                # Rewrite often introduces errors or contradicts foundational knowledge
+                                skip_rewrite_for_stillme = True
+                                logger.info(
+                                    "⏭️ Skipping rewrite for StillMe query with foundational knowledge: "
+                                    "Rewrite may corrupt or contradict foundational knowledge. "
+                                    "Using original LLM response (even if imperfect, it's better than corrupted rewrite)."
+                                )
                             
                             if skip_rewrite_for_stillme:
                                 should_rewrite = False

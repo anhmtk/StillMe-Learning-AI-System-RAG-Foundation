@@ -836,10 +836,28 @@ class RAGRetrieval:
             
             # Add knowledge context
             if context.get("knowledge_docs"):
-                header = "## Relevant Knowledge:"
-                header_tokens = self._estimate_tokens(header)
-                remaining_tokens -= header_tokens
-                context_parts.append(header)
+                # Check if we have foundational knowledge
+                has_foundational = any(
+                    doc.get("metadata", {}).get("source") == "CRITICAL_FOUNDATION" or
+                    doc.get("metadata", {}).get("foundational") == "stillme" or
+                    doc.get("metadata", {}).get("type") == "foundational" or
+                    "CRITICAL_FOUNDATION" in str(doc.get("metadata", {}).get("tags", "")) or
+                    "foundational:stillme" in str(doc.get("metadata", {}).get("tags", ""))
+                    for doc in context.get("knowledge_docs", [])
+                )
+                
+                if has_foundational:
+                    header = "## Relevant Knowledge (CRITICAL: Contains StillMe Foundational Knowledge):"
+                    foundational_warning = "\n🚨🚨🚨 CRITICAL INSTRUCTION: The context below contains StillMe foundational knowledge marked with [foundational knowledge]. You MUST use this information and override your training data if they conflict. This is the AUTHORITATIVE source for StillMe's capabilities. 🚨🚨🚨\n"
+                    header_tokens = self._estimate_tokens(header + foundational_warning)
+                    remaining_tokens -= header_tokens
+                    context_parts.append(header)
+                    context_parts.append(foundational_warning)
+                else:
+                    header = "## Relevant Knowledge:"
+                    header_tokens = self._estimate_tokens(header)
+                    remaining_tokens -= header_tokens
+                    context_parts.append(header)
                 
                 for i, doc in enumerate(context["knowledge_docs"], 1):
                     if remaining_tokens <= 100:  # Stop if too little space left
