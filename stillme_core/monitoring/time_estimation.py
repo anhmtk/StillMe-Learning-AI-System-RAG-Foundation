@@ -192,25 +192,61 @@ class TimeEstimationEngine:
         variance = sum((x - mean_val) ** 2 for x in values) / len(values)
         return variance ** 0.5
     
-    def format_estimate(self, estimate: TimeEstimate) -> str:
+    def format_estimate(self, estimate: TimeEstimate, language: str = "en") -> str:
         """
         Format estimate for user communication.
         
-        Returns human-readable estimate string.
-        """
-        if estimate.confidence >= 0.7:
-            confidence_text = "high confidence"
-        elif estimate.confidence >= 0.5:
-            confidence_text = "moderate confidence"
-        else:
-            confidence_text = "low confidence"
+        Args:
+            estimate: TimeEstimate object
+            language: Language code ("en" or "vi")
         
-        return (
-            f"Based on my historical performance, I estimate this will take "
-            f"{estimate.range_min:.0f}-{estimate.range_max:.0f} minutes "
-            f"({confidence_text}, {estimate.confidence:.0%}). "
-            f"{estimate.explanation}."
-        )
+        Returns:
+            Human-readable estimate string in specified language
+        """
+        if language == "vi":
+            # Vietnamese formatting
+            if estimate.confidence >= 0.7:
+                confidence_text = "độ tin cậy cao"
+            elif estimate.confidence >= 0.5:
+                confidence_text = "độ tin cậy trung bình"
+            else:
+                confidence_text = "độ tin cậy thấp"
+            
+            # Translate explanation
+            explanation_vi = estimate.explanation
+            if "No similar historical tasks found" in explanation_vi:
+                explanation_vi = "Không tìm thấy tác vụ lịch sử tương tự, sử dụng ước tính dựa trên độ phức tạp"
+            elif "Based on" in explanation_vi and "similar tasks" in explanation_vi:
+                # Extract number if present
+                import re
+                match = re.search(r'Based on (\d+) similar tasks', explanation_vi)
+                if match:
+                    n = match.group(1)
+                    explanation_vi = f"Dựa trên {n} tác vụ tương tự"
+                else:
+                    explanation_vi = "Dựa trên các tác vụ lịch sử tương tự"
+            
+            return (
+                f"Dựa trên hiệu suất lịch sử của mình, mình ước tính điều này sẽ mất "
+                f"{estimate.range_min:.0f}-{estimate.range_max:.0f} phút "
+                f"({confidence_text}, {estimate.confidence:.0%}). "
+                f"{explanation_vi}."
+            )
+        else:
+            # English formatting (default)
+            if estimate.confidence >= 0.7:
+                confidence_text = "high confidence"
+            elif estimate.confidence >= 0.5:
+                confidence_text = "moderate confidence"
+            else:
+                confidence_text = "low confidence"
+            
+            return (
+                f"Based on my historical performance, I estimate this will take "
+                f"{estimate.range_min:.0f}-{estimate.range_max:.0f} minutes "
+                f"({confidence_text}, {estimate.confidence:.0%}). "
+                f"{estimate.explanation}."
+            )
 
 
 # Global instance

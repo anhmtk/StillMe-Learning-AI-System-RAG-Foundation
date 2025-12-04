@@ -142,7 +142,7 @@ def estimate_and_track(
     return decorator
 
 
-def format_self_aware_response(estimate: TimeEstimate, include_identity: bool = True) -> str:
+def format_self_aware_response(estimate: TimeEstimate, include_identity: bool = True, language: str = "en") -> str:
     """
     Format time estimate response with clear AI identity.
     
@@ -153,19 +153,27 @@ def format_self_aware_response(estimate: TimeEstimate, include_identity: bool = 
     Args:
         estimate: TimeEstimate object
         include_identity: Whether to include AI identity statement
+        language: Language code ("en" or "vi")
     
     Returns:
-        Formatted response string
+        Formatted response string in specified language
     """
     estimator = get_estimation_engine()
-    base_response = estimator.format_estimate(estimate)
+    base_response = estimator.format_estimate(estimate, language=language)
     
     if include_identity:
-        identity_statement = (
-            " I'm an AI system that tracks my own execution time to improve estimates over time. "
-            "I estimate based on my historical performance data, similar to how humans estimate "
-            "based on experience, but I'm a statistical model that learns from patterns."
-        )
+        if language == "vi":
+            identity_statement = (
+                " Mình là một hệ thống AI theo dõi thời gian thực thi của chính mình để cải thiện ước tính theo thời gian. "
+                "Mình ước tính dựa trên dữ liệu hiệu suất lịch sử, tương tự như cách con người ước tính "
+                "dựa trên kinh nghiệm, nhưng mình là một mô hình thống kê học từ các mẫu."
+            )
+        else:
+            identity_statement = (
+                " I'm an AI system that tracks my own execution time to improve estimates over time. "
+                "I estimate based on my historical performance data, similar to how humans estimate "
+                "based on experience, but I'm a statistical model that learns from patterns."
+            )
         return base_response + identity_statement
     
     return base_response

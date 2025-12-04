@@ -6454,17 +6454,19 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                     )
                     
                     if should_add_estimate:
-                        # Format with AI identity
-                        estimate_text = format_self_aware_response(estimate, include_identity=True)
-                        
+                        # Determine language for time estimate
                         # Check if response is in Vietnamese (even if detected_lang was wrong)
                         is_vietnamese_response = (
                             "tiếng việt" in response_lower or
                             "vietnamese" in response_lower or
                             any(char in "àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ" for char in response)
                         )
+                        estimate_language = "vi" if (detected_lang == "vi" or is_vietnamese_response) else "en"
                         
-                        if detected_lang == "vi" or is_vietnamese_response:
+                        # Format with AI identity in correct language
+                        estimate_text = format_self_aware_response(estimate, include_identity=True, language=estimate_language)
+                        
+                        if estimate_language == "vi":
                             response = f"{response}\n\n---\n\n⏱️ **Ước tính thời gian:**\n{estimate_text}"
                         else:
                             response = f"{response}\n\n---\n\n⏱️ **Time Estimate:**\n{estimate_text}"
