@@ -494,6 +494,32 @@ class CitationRequired:
         # If no sentence end found, add at the end
         return answer.rstrip() + citation_text
     
+    def _add_citation_text(self, answer: str, citation_text: str) -> str:
+        """
+        Add citation text to answer at appropriate position
+        
+        Args:
+            answer: Original answer
+            citation_text: Citation text to add (e.g., "[foundational knowledge]")
+            
+        Returns:
+            Answer with citation added
+        """
+        if not answer or len(answer.strip()) == 0:
+            return answer + citation_text if answer else citation_text.strip()
+        
+        if len(answer.strip()) < 5:
+            return answer.rstrip() + citation_text
+        
+        # Find the best place to add citation (prefer end of first sentence or end of answer)
+        sentence_end = re.search(r'[.!?]\s+', answer)
+        if sentence_end:
+            insert_pos = sentence_end.end()
+            return answer[:insert_pos] + citation_text + " " + answer[insert_pos:]
+        
+        # If no sentence end found, add at the end
+        return answer.rstrip() + citation_text
+    
     def _add_citation(self, answer: str, ctx_docs: List[Any], user_question: str = "") -> str:
         """
         Automatically add human-readable citation to answer when missing
@@ -506,11 +532,48 @@ class CitationRequired:
         Returns:
             Answer with human-readable citation added
         """
-        # Use citation formatter if available
-        if self.citation_formatter:
+        # CRITICAL: Check if context contains foundational knowledge
+        # If yes, use specific "[foundational knowledge]" citation instead of generic "[general knowledge]"
+        has_foundational_knowledge = False
+        if ctx_docs:
+            for doc in ctx_docs:
+                # Check if document is foundational knowledge
+                if isinstance(doc, dict):
+                    metadata = doc.get("metadata", {})
+                    source = metadata.get("source", "")
+                    foundational = metadata.get("foundational", "")
+                    doc_type = metadata.get("type", "")
+                    tags = str(metadata.get("tags", ""))
+                else:
+                    # If doc is an object, try to get attributes
+                    metadata = getattr(doc, "metadata", {}) if hasattr(doc, "metadata") else {}
+                    source = getattr(doc, "source", "") if hasattr(doc, "source") else (metadata.get("source", "") if isinstance(metadata, dict) else "")
+                    foundational = metadata.get("foundational", "") if isinstance(metadata, dict) else ""
+                    doc_type = metadata.get("type", "") if isinstance(metadata, dict) else ""
+                    tags = str(metadata.get("tags", "")) if isinstance(metadata, dict) else ""
+                
+                # Check for foundational knowledge markers
+                if (source == "CRITICAL_FOUNDATION" or 
+                    foundational == "stillme" or 
+                    doc_type == "foundational" or
+                    "CRITICAL_FOUNDATION" in tags or
+                    "foundational:stillme" in tags):
+                    has_foundational_knowledge = True
+                    logger.info(f"✅ Detected foundational knowledge in context - will use specific citation")
+                    break
+        
+        # Use citation formatter if available (but override with foundational knowledge citation if detected)
+        if self.citation_formatter and not has_foundational_knowledge:
             citation = self.citation_formatter.get_citation_strategy(user_question, ctx_docs)
             patched = self.citation_formatter.add_citation_to_response(answer, citation)
             logger.info(f"Auto-added human-readable citation '{citation}' to response (context docs: {len(ctx_docs)})")
+            return patched
+        elif has_foundational_knowledge:
+            # Use specific foundational knowledge citation
+            citation = "[foundational knowledge]"
+            # Add citation using same strategy as citation formatter
+            patched = self._add_citation_text(answer, citation)
+            logger.info(f"Auto-added foundational knowledge citation '{citation}' to response (context docs: {len(ctx_docs)})")
             return patched
         
         # Fallback to legacy [1] format

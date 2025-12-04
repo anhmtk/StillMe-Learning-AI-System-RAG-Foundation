@@ -129,7 +129,8 @@ class QualityEvaluator:
         self, 
         text: str, 
         is_philosophical: bool = False,
-        original_question: Optional[str] = None
+        original_question: Optional[str] = None,
+        is_stillme_query: bool = False
     ) -> Dict[str, any]:
         """
         Evaluate output quality
@@ -225,11 +226,16 @@ class QualityEvaluator:
             reasons.append("Contains anthropomorphic language - claims experience or feelings")
         
         # Check 6.5: Topic drift detection (CRITICAL - A. KHÔNG BAO GIỜ ĐƯỢC DRIFT CHỦ ĐỀ)
-        if original_question:
+        # CRITICAL: Skip topic drift check for StillMe queries - these are legitimate questions about StillMe's capabilities
+        if original_question and not is_stillme_query:
             drift_score = self._check_topic_drift(text_lower, original_question)
             scores["drift"] = drift_score
             if drift_score < 0.5:  # Drift detected
                 reasons.append("Topic drift detected - StillMe talks about consciousness/LLM when not asked")
+        elif is_stillme_query:
+            # StillMe queries are about StillMe's capabilities - no drift check needed
+            scores["drift"] = 1.0  # Perfect score - no drift for StillMe queries
+            logger.debug("Skipping topic drift check for StillMe query")
         
         # Check 7: Structure completeness (INTEGRATED: Use Style Engine domain template check)
         if is_philosophical or detected_domain != DomainType.GENERIC:

@@ -27,6 +27,7 @@ from backend.services.cache_service import (
 import logging
 import os
 import re
+import asyncio
 from datetime import datetime, timezone
 from typing import Optional, List
 import json
@@ -2298,10 +2299,19 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     
                     # Evaluate quality of philosophical answer
                     evaluator = get_quality_evaluator()
+                    # Detect if this is a StillMe query for quality evaluation
+                    is_stillme_query_for_quality = False
+                    try:
+                        from backend.core.stillme_detector import detect_stillme_query
+                        is_stillme_query_for_quality, _ = detect_stillme_query(chat_request.message)
+                    except Exception:
+                        pass
+                    
                     quality_result = evaluator.evaluate(
                         text=philosophical_answer,
                         is_philosophical=True,
-                        original_question=chat_request.message
+                        original_question=chat_request.message,
+                        is_stillme_query=is_stillme_query_for_quality
                     )
                     
                     # CRITICAL: Always rewrite philosophical answers to adapt to specific question
@@ -5091,10 +5101,19 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 quality_result = cached_quality
                                 logger.debug("✅ Using cached quality evaluation")
                             else:
+                                # Detect if this is a StillMe query for quality evaluation
+                                is_stillme_query_for_quality = False
+                                try:
+                                    from backend.core.stillme_detector import detect_stillme_query
+                                    is_stillme_query_for_quality, _ = detect_stillme_query(chat_request.message)
+                                except Exception:
+                                    pass
+                                
                                 quality_result = evaluator.evaluate(
                                     text=sanitized_response,
                                     is_philosophical=is_philosophical,
-                                    original_question=chat_request.message
+                                    original_question=chat_request.message,
+                                    is_stillme_query=is_stillme_query_for_quality
                                 )
                                 # Cache the result
                                 optimizer.cache_quality_result(
@@ -5171,10 +5190,19 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     )
                                     
                                     # Get current quality issues for this rewrite
+                                    # Detect if this is a StillMe query for quality evaluation
+                                    is_stillme_query_for_quality = False
+                                    try:
+                                        from backend.core.stillme_detector import detect_stillme_query
+                                        is_stillme_query_for_quality, _ = detect_stillme_query(chat_request.message)
+                                    except Exception:
+                                        pass
+                                    
                                     current_quality_result = evaluator.evaluate(
                                         text=current_response,
                                         is_philosophical=is_philosophical,
-                                        original_question=chat_request.message
+                                        original_question=chat_request.message,
+                                        is_stillme_query=is_stillme_query_for_quality
                                     )
                                     
                                     # CRITICAL: Pass RAG context status to rewrite to enable base knowledge usage
@@ -5205,10 +5233,19 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     rewritten_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical)
                                     
                                     # Evaluate quality after rewrite
+                                    # Detect if this is a StillMe query for quality evaluation
+                                    is_stillme_query_for_quality_after = False
+                                    try:
+                                        from backend.core.stillme_detector import detect_stillme_query
+                                        is_stillme_query_for_quality_after, _ = detect_stillme_query(chat_request.message)
+                                    except Exception:
+                                        pass
+                                    
                                     quality_after_result = evaluator.evaluate(
                                         text=rewritten_response,
                                         is_philosophical=is_philosophical,
-                                        original_question=chat_request.message
+                                        original_question=chat_request.message,
+                                        is_stillme_query=is_stillme_query_for_quality_after
                                     )
                                     quality_after = quality_after_result.get("overall_score", 0.0)
                                     
@@ -5945,10 +5982,19 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             quality_result = cached_quality
                             logger.debug("✅ Using cached quality evaluation (non-RAG)")
                         else:
+                            # Detect if this is a StillMe query for quality evaluation
+                            is_stillme_query_for_quality = False
+                            try:
+                                from backend.core.stillme_detector import detect_stillme_query
+                                is_stillme_query_for_quality, _ = detect_stillme_query(chat_request.message)
+                            except Exception:
+                                pass
+                            
                             quality_result = evaluator.evaluate(
                                 text=sanitized_response,
                                 is_philosophical=is_philosophical_non_rag,
-                                original_question=chat_request.message
+                                original_question=chat_request.message,
+                                is_stillme_query=is_stillme_query_for_quality
                             )
                         # Cache the result
                         optimizer.cache_quality_result(
@@ -6206,16 +6252,27 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         
         # Store conversation in vector DB
         if rag_retrieval:
-            rag_retrieval.add_learning_content(
-                content=f"Q: {chat_request.message}\nA: {response}",
-                source="user_chat",
-                content_type="conversation",
-                metadata={
-                    "user_id": chat_request.user_id,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
-                    "accuracy_score": accuracy_score
-                }
-            )
+            # OPTIMIZATION: Store conversation in background task to avoid blocking response
+            # This reduces response latency by ~3-4 seconds
+            async def store_conversation_background():
+                try:
+                    rag_retrieval.add_learning_content(
+                        content=f"Q: {chat_request.message}\nA: {response}",
+                        source="user_chat",
+                        content_type="conversation",
+                        metadata={
+                            "user_id": chat_request.user_id,
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "accuracy_score": accuracy_score
+                        }
+                    )
+                    logger.debug("✅ Conversation stored in background (non-blocking)")
+                except Exception as store_error:
+                    logger.error(f"❌ Failed to store conversation in background: {store_error}", exc_info=True)
+            
+            # Create background task (fire and forget - don't await)
+            asyncio.create_task(store_conversation_background())
+            logger.debug("🚀 Conversation storage queued in background task")
         
         # Knowledge Alert: Retrieve important knowledge related to query
         knowledge_alert = None
