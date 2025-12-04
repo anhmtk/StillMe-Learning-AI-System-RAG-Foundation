@@ -35,7 +35,7 @@ class CitationRequired:
             logger.warning("CitationFormatter not available - using legacy numeric citations")
             self.citation_formatter = None
     
-    def run(self, answer: str, ctx_docs: List[Any], is_philosophical: bool = False, user_question: str = "") -> ValidationResult:
+    def run(self, answer: str, ctx_docs: List[Any], is_philosophical: bool = False, user_question: str = "", context: Optional[Dict[str, Any]] = None) -> ValidationResult:
         """
         Check if answer contains citations and auto-enforce if missing
         
@@ -44,6 +44,7 @@ class CitationRequired:
             ctx_docs: List of context documents (can be dicts or objects with metadata) - if empty, citations are not required
             is_philosophical: If True, relax citation requirements for pure philosophical questions (but still require for factual claims)
             user_question: User's original question (to detect if it's a factual question with philosophical elements)
+            context: Optional context dict with knowledge_docs (for foundational knowledge detection)
             
         Returns:
             ValidationResult with passed status and patched answer if citation was added
@@ -436,7 +437,7 @@ class CitationRequired:
                 else:
                     # Context available but no citation - MUST add citation for factual questions
                     logger.warning(f"Factual question detected with context but missing citation - adding citation. Question: {user_question[:100] if user_question else 'unknown'}")
-                    patched_answer = self._add_citation(answer, ctx_docs, user_question)
+                    patched_answer = self._add_citation(answer, ctx_docs, user_question, context=context)
                     return ValidationResult(
                         passed=False,  # Still mark as failed to track the issue
                         reasons=["missing_citation_factual_question", "added_citation"],
@@ -450,7 +451,7 @@ class CitationRequired:
             # So if we reach here, it means it's not a factual question OR it was already handled
             if ctx_docs and len(ctx_docs) > 0:
                 logger.info(f"Context available ({len(ctx_docs)} docs) but no citation - auto-adding citation for transparency")
-                patched_answer = self._add_citation(answer, ctx_docs, user_question)
+                patched_answer = self._add_citation(answer, ctx_docs, user_question, context=context)
                 return ValidationResult(
                     passed=False,  # Still mark as failed to track the issue
                     reasons=["missing_citation"],
@@ -520,22 +521,47 @@ class CitationRequired:
         # If no sentence end found, add at the end
         return answer.rstrip() + citation_text
     
-    def _add_citation(self, answer: str, ctx_docs: List[Any], user_question: str = "") -> str:
+    def _add_citation(self, answer: str, ctx_docs: List[Any], user_question: str = "", context: Optional[Dict[str, Any]] = None) -> str:
         """
         Automatically add human-readable citation to answer when missing
         
         Args:
             answer: Original answer without citation
-            ctx_docs: List of context documents (can be dicts or objects with metadata)
+            ctx_docs: List of context documents (can be dicts or objects with metadata, or just strings)
             user_question: User's original question (for citation strategy)
+            context: Optional context dict with knowledge_docs (for foundational knowledge detection)
             
         Returns:
             Answer with human-readable citation added
         """
         # CRITICAL: Check if context contains foundational knowledge
         # If yes, use specific "[foundational knowledge]" citation instead of generic "[general knowledge]"
+        # Priority: Check context dict first (has full metadata), then check ctx_docs
         has_foundational_knowledge = False
-        if ctx_docs:
+        
+        # Method 1: Check context dict (has knowledge_docs with full metadata)
+        if context and isinstance(context, dict):
+            knowledge_docs = context.get("knowledge_docs", [])
+            for doc in knowledge_docs:
+                if isinstance(doc, dict):
+                    metadata = doc.get("metadata", {})
+                    source = metadata.get("source", "")
+                    foundational = metadata.get("foundational", "")
+                    doc_type = metadata.get("type", "")
+                    tags = str(metadata.get("tags", ""))
+                    
+                    # Check for foundational knowledge markers
+                    if (source == "CRITICAL_FOUNDATION" or 
+                        foundational == "stillme" or 
+                        doc_type == "foundational" or
+                        "CRITICAL_FOUNDATION" in tags or
+                        "foundational:stillme" in tags):
+                        has_foundational_knowledge = True
+                        logger.info(f"✅ Detected foundational knowledge in context dict - will use specific citation")
+                        break
+        
+        # Method 2: Check ctx_docs (may have metadata if passed as dicts)
+        if not has_foundational_knowledge and ctx_docs:
             for doc in ctx_docs:
                 # Check if document is foundational knowledge
                 if isinstance(doc, dict):
@@ -559,7 +585,7 @@ class CitationRequired:
                     "CRITICAL_FOUNDATION" in tags or
                     "foundational:stillme" in tags):
                     has_foundational_knowledge = True
-                    logger.info(f"✅ Detected foundational knowledge in context - will use specific citation")
+                    logger.info(f"✅ Detected foundational knowledge in ctx_docs - will use specific citation")
                     break
         
         # Use citation formatter if available (but override with foundational knowledge citation if detected)

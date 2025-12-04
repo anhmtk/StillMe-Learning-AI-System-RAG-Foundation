@@ -1131,6 +1131,7 @@ async def _handle_validation_with_fallback(
     
     # Run validation with context quality info
     # Tier 3.5: Pass context quality, is_philosophical, and is_religion_roleplay to ValidatorChain
+    # CRITICAL: Pass context dict to enable foundational knowledge detection in CitationRequired
     validation_result = chain.run(
         raw_response, 
         ctx_docs,
@@ -1138,7 +1139,8 @@ async def _handle_validation_with_fallback(
         avg_similarity=avg_similarity,
         is_philosophical=is_philosophical,
         is_religion_roleplay=is_religion_roleplay,
-        user_question=chat_request.message  # Pass user question for FactualHallucinationValidator
+        user_question=chat_request.message,  # Pass user question for FactualHallucinationValidator
+        context=context  # Pass context dict for foundational knowledge detection
     )
     
     # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
@@ -1341,7 +1343,8 @@ async def _handle_validation_with_fallback(
             openai_validation_result = chain.run(
                 openai_response, 
                 ctx_docs,
-                user_question=chat_request.message
+                user_question=chat_request.message,
+                context=context  # Pass context for foundational knowledge detection
             )
             openai_confidence = _calculate_confidence_score(
                 context_docs_count=len(ctx_docs),
@@ -1624,7 +1627,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     )
                     
                     # Validate retry response
-                    retry_validation = chain.run(retry_response, ctx_docs)
+                    retry_validation = chain.run(retry_response, ctx_docs, context=context)
                     
                     # Check if retry fixed the language issue
                     retry_has_lang_mismatch = any("language_mismatch" in r for r in retry_validation.reasons)

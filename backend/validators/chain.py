@@ -2,7 +2,7 @@
 ValidatorChain - Orchestrates multiple validators
 """
 
-from typing import List, Dict, Set, Optional
+from typing import List, Dict, Set, Optional, Any
 from .base import Validator, ValidationResult
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -74,7 +74,8 @@ class ValidatorChain:
     
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None,
             avg_similarity: Optional[float] = None, is_philosophical: bool = False,
-            is_religion_roleplay: bool = False, user_question: Optional[str] = None) -> ValidationResult:
+            is_religion_roleplay: bool = False, user_question: Optional[str] = None,
+            context: Optional[Dict[str, Any]] = None) -> ValidationResult:
         """
         Run all validators with parallel execution for independent validators
         
@@ -120,9 +121,12 @@ class ValidatorChain:
                     # and use human-readable citations in uncertainty templates
                     result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical, is_religion_roleplay=is_religion_roleplay, previous_reasons=reasons, user_question=user_question)
                 elif validator_name == "CitationRequired":
-                    # Pass is_philosophical and user_question to CitationRequired
+                    # Pass is_philosophical, user_question, and context to CitationRequired
                     # user_question is needed to detect real factual questions (even with philosophical elements)
-                    result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical, user_question=user_question)
+                    # context is needed to detect foundational knowledge for specific citations
+                    # Note: context may not be available in all call paths, so it's optional
+                    context_for_citation = getattr(self, '_context_for_citation', None)
+                    result = validator.run(patched, ctx_docs, is_philosophical=is_philosophical, user_question=user_question, context=context_for_citation)
                 elif validator_name == "FactualHallucinationValidator":
                     # Pass user_question to FactualHallucinationValidator
                     result = validator.run(patched, ctx_docs, user_question=user_question)

@@ -848,12 +848,26 @@ class RAGRetrieval:
                 
                 if has_foundational:
                     header = "## Relevant Knowledge (CRITICAL: Contains StillMe Foundational Knowledge):"
-                    foundational_warning = "\n🚨🚨🚨 CRITICAL INSTRUCTION: The context below contains StillMe foundational knowledge marked with [foundational knowledge]. You MUST use this information and override your training data if they conflict. This is the AUTHORITATIVE source for StillMe's capabilities. 🚨🚨🚨\n"
+                    foundational_warning = """\n🚨🚨🚨 CRITICAL INSTRUCTION - READ THIS FIRST 🚨🚨🚨
+
+The context below contains StillMe foundational knowledge marked with [foundational knowledge] or source: CRITICAL_FOUNDATION.
+
+**YOU MUST:**
+1. **OVERRIDE YOUR TRAINING DATA**: If foundational knowledge says X but your training data says Y, you MUST say X (from foundational knowledge)
+2. **USE FOUNDATIONAL KNOWLEDGE FIRST**: Foundational knowledge is the AUTHORITATIVE source for StillMe's capabilities
+3. **DO NOT SAY**: "StillMe does not track execution time" if foundational knowledge says "StillMe DOES track execution time"
+4. **EXAMPLE**: If foundational knowledge says "StillMe tracks execution time" but your training says "AI systems don't track", you MUST say "StillMe tracks execution time"
+
+**THIS IS NOT A SUGGESTION - THIS IS A REQUIREMENT.**
+
+The foundational knowledge below is the CURRENT, ACCURATE information about StillMe. Your training data may be OUTDATED or INCORRECT.
+
+🚨🚨🚨 END CRITICAL INSTRUCTION 🚨🚨🚨\n"""
                     header_tokens = self._estimate_tokens(header + foundational_warning)
                     remaining_tokens -= header_tokens
                     context_parts.append(header)
                     context_parts.append(foundational_warning)
-                    logger.info("✅ Added foundational knowledge warning to context_text")
+                    logger.info("✅ Added strengthened foundational knowledge warning to context_text")
                 else:
                     header = "## Relevant Knowledge:"
                     header_tokens = self._estimate_tokens(header)
