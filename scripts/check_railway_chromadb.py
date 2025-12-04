@@ -60,13 +60,14 @@ def check_railway_chromadb(backend_url: str):
             )
             
             if stats_response.status_code == 200:
-                stats = stats_response.json()
+                stats_data = stats_response.json()
                 print("   ✅ RAG stats retrieved")
                 
-                vector_db = stats.get("vector_db", {})
-                knowledge_docs = vector_db.get("knowledge_documents", 0)
-                conversation_docs = vector_db.get("conversation_documents", 0)
-                total_docs = vector_db.get("total_documents", 0)
+                # API returns {"stats": {"knowledge_documents": X, ...}}
+                stats = stats_data.get("stats", {})
+                knowledge_docs = stats.get("knowledge_documents", 0)
+                conversation_docs = stats.get("conversation_documents", 0)
+                total_docs = stats.get("total_documents", 0)
                 
                 print(f"\n   Collection Status:")
                 print(f"   - stillme_knowledge: {knowledge_docs} documents")
