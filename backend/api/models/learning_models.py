@@ -65,7 +65,7 @@ class LearningRequest(BaseModel):
         v = sanitize_string(v, max_length=50)
         
         # Allowed content types
-        allowed_types = ['knowledge', 'conversation', 'article', 'document', 'other']
+        allowed_types = ['knowledge', 'conversation', 'article', 'document', 'foundational', 'other']
         if v not in allowed_types:
             raise ValueError(f"Content type must be one of: {', '.join(allowed_types)}")
         
