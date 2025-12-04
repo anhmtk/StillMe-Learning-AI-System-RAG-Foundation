@@ -4396,6 +4396,22 @@ Context: {context_text}
                 cache_enabled = False
                 logger.info("⚠️ Cache disabled for origin query - ensuring fresh response with provenance context")
             
+            # CRITICAL: Disable cache for StillMe queries with foundational knowledge
+            # Foundational knowledge may be updated, and we need fresh responses to reflect changes
+            # Also, cache key only uses first 500 chars of prompt, which may not capture foundational knowledge changes
+            if is_stillme_query and context and context.get("knowledge_docs"):
+                has_foundational = any(
+                    doc.get("metadata", {}).get("source") == "CRITICAL_FOUNDATION" or
+                    doc.get("metadata", {}).get("foundational") == "stillme" or
+                    doc.get("metadata", {}).get("type") == "foundational" or
+                    "CRITICAL_FOUNDATION" in str(doc.get("metadata", {}).get("tags", "")) or
+                    "foundational:stillme" in str(doc.get("metadata", {}).get("tags", ""))
+                    for doc in context.get("knowledge_docs", [])
+                )
+                if has_foundational:
+                    cache_enabled = False
+                    logger.info("⚠️ Cache disabled for StillMe query with foundational knowledge - ensuring fresh response with updated context")
+            
             raw_response = None
             cache_hit = False
             
