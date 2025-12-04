@@ -4466,13 +4466,78 @@ Context: {context_text}
                 
                 # Try to generate response with retry on context overflow
                 from backend.api.utils.llm_providers import ContextOverflowError
-                try:
-                    # CRITICAL: Log RAG context info before LLM call to help debug Q1, Q2, Q7, Q9
-                    logger.info(
-                        f"🔍 DEBUG Q1/Q2/Q7/Q9: About to call LLM with RAG context. "
-                        f"num_knowledge={num_knowledge}, context_text_length={len(context_text) if context_text else 0}, "
-                        f"enhanced_prompt_length={len(enhanced_prompt) if enhanced_prompt else 0}"
+                
+                # CRITICAL: Pre-check token count before calling LLM to prevent context overflow
+                def estimate_tokens_safe(text: str) -> int:
+                    """Estimate token count more accurately (~3.5 chars per token for mixed content)"""
+                    if not text:
+                        return 0
+                    # More accurate estimation: Vietnamese/English mixed content ~3.5 chars/token
+                    # Pure English ~4 chars/token, Vietnamese ~3 chars/token
+                    return int(len(text) / 3.5)
+                
+                # Estimate total tokens: system prompt + enhanced_prompt + output buffer
+                # System prompt is built separately in generate_ai_response() (~3300-3600 tokens)
+                system_prompt_buffer = 3600  # Conservative estimate for system prompt
+                enhanced_prompt_tokens = estimate_tokens_safe(enhanced_prompt) if enhanced_prompt else 0
+                output_buffer_tokens = 1500  # Reserve for output
+                total_estimated_tokens = system_prompt_buffer + enhanced_prompt_tokens + output_buffer_tokens
+                
+                # OpenRouter limit: 16385 tokens
+                # Use safe margin: 15000 tokens max (leave 1385 tokens buffer)
+                MAX_SAFE_TOKENS = 15000
+                
+                # CRITICAL: Log RAG context info before LLM call to help debug Q1, Q2, Q7, Q9
+                logger.info(
+                    f"🔍 DEBUG Q1/Q2/Q7/Q9: About to call LLM with RAG context. "
+                    f"num_knowledge={num_knowledge}, context_text_length={len(context_text) if context_text else 0}, "
+                    f"enhanced_prompt_length={len(enhanced_prompt) if enhanced_prompt else 0}, "
+                    f"estimated_tokens: system_buffer={system_prompt_buffer}, prompt={enhanced_prompt_tokens}, "
+                    f"total={total_estimated_tokens}, limit={MAX_SAFE_TOKENS}"
+                )
+                
+                # Pre-check: If estimated tokens exceed safe limit, use minimal prompt
+                if total_estimated_tokens > MAX_SAFE_TOKENS:
+                    logger.warning(
+                        f"⚠️ Pre-check: Estimated tokens ({total_estimated_tokens}) exceed safe limit ({MAX_SAFE_TOKENS}). "
+                        f"Using minimal prompt to prevent context overflow. "
+                        f"is_philosophical={is_philosophical}"
                     )
+                    
+                    if is_philosophical:
+                        # Use minimal philosophical prompt
+                        minimal_prompt = build_minimal_philosophical_prompt(
+                            user_question=chat_request.message,
+                            language=detected_lang,
+                            detected_lang_name=detected_lang_name
+                        )
+                        logger.info(f"🔄 Using minimal philosophical prompt (pre-check prevention)")
+                        enhanced_prompt = minimal_prompt
+                        processing_steps.append("⚠️ Pre-check: Using minimal prompt (token limit)")
+                    else:
+                        # For non-philosophical, truncate context_text aggressively
+                        if context_text:
+                            original_context_length = len(context_text)
+                            # Truncate to ~2000 tokens max
+                            max_context_chars = int(2000 * 3.5)  # ~7000 chars
+                            if original_context_length > max_context_chars:
+                                truncated_context = context_text[:max_context_chars].rsplit('\n', 1)[0] + "\n\n[Context truncated to prevent overflow]"
+                                logger.warning(f"⚠️ Pre-check: Truncated context_text from {original_context_length} to {len(truncated_context)} chars")
+                                # Rebuild enhanced_prompt with truncated context
+                                # This is a simplified rebuild - just update context in special_instructions
+                                if "Context: " in enhanced_prompt:
+                                    # Find and replace context section
+                                    import re
+                                    enhanced_prompt = re.sub(
+                                        r'Context:.*?(?=\n\n|$)',
+                                        f'Context: {truncated_context}',
+                                        enhanced_prompt,
+                                        flags=re.DOTALL
+                                    )
+                                    context_text = truncated_context  # Update context_text for later use
+                                processing_steps.append("⚠️ Pre-check: Truncated context (token limit)")
+                
+                try:
                     
                     # OPTION B PIPELINE: Check if enabled
                     if use_option_b:
