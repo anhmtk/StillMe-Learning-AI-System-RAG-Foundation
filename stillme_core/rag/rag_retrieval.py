@@ -846,8 +846,19 @@ class RAGRetrieval:
                         logger.warning(f"Stopped adding knowledge docs at {i}/{len(context['knowledge_docs'])} due to token limit")
                         break
                     
-                    source = doc.get("metadata", {}).get("source", "Unknown")
+                    metadata = doc.get("metadata", {})
+                    source = metadata.get("source", "Unknown")
                     content = doc.get("content", "")
+                    
+                    # CRITICAL: Mark foundational knowledge clearly for LLM to recognize
+                    # Prompt builder expects [foundational knowledge] or source: CRITICAL_FOUNDATION
+                    is_foundational = (
+                        source == "CRITICAL_FOUNDATION" or
+                        metadata.get("foundational") == "stillme" or
+                        metadata.get("type") == "foundational" or
+                        "CRITICAL_FOUNDATION" in str(metadata.get("tags", "")) or
+                        "foundational:stillme" in str(metadata.get("tags", ""))
+                    )
                     
                     # Allocate tokens per document (distribute remaining tokens)
                     # Reserve some tokens for formatting
@@ -855,7 +866,12 @@ class RAGRetrieval:
                     doc_max_tokens = min(doc_max_tokens, 2000)  # Cap each doc at 2000 tokens
                     
                     truncated_content = self._truncate_text_by_tokens(content, doc_max_tokens)
-                    doc_text = f"{i}. {truncated_content} (Source: {source})"
+                    
+                    # Format with clear foundational knowledge marker
+                    if is_foundational:
+                        doc_text = f"{i}. [foundational knowledge] {truncated_content} (source: CRITICAL_FOUNDATION)"
+                    else:
+                        doc_text = f"{i}. {truncated_content} (Source: {source})"
                     
                     doc_tokens = self._estimate_tokens(doc_text)
                     remaining_tokens -= doc_tokens
