@@ -1395,17 +1395,42 @@ def page_rag():
             placeholder="Enter the knowledge content here. For example:\n\nStillMe is a self-evolving AI system that learns continuously from user interactions and external sources. It uses RAG (Retrieval-Augmented Generation) to provide accurate, context-aware responses.",
             help="The actual text content you want StillMe to learn"
         )
-        source = st.text_input(
-            "Source", 
-            value="manual",
-            help="Source identifier (e.g., 'manual', 'website', 'documentation', 'user_feedback')"
-        )
-        content_type = st.selectbox(
-            "Type", 
-            ["knowledge", "conversation"], 
-            index=0,
-            help="'knowledge' for general information, 'conversation' for chat examples"
-        )
+        
+        col_source, col_type = st.columns(2)
+        with col_source:
+            source = st.text_input(
+                "Source", 
+                value="manual",
+                help="Source identifier (e.g., 'manual', 'CRITICAL_FOUNDATION', 'website', 'documentation')"
+            )
+        with col_type:
+            content_type = st.selectbox(
+                "Type", 
+                ["knowledge", "conversation", "foundational"], 
+                index=0,
+                help="'knowledge' for general information, 'conversation' for chat examples, 'foundational' for StillMe core knowledge"
+            )
+        
+        # Advanced metadata fields (collapsible)
+        with st.expander("Advanced Metadata (Optional)", expanded=False):
+            tags_input = st.text_input(
+                "Tags",
+                value="",
+                help="Comma-separated tags (e.g., 'foundational:stillme,CRITICAL_FOUNDATION,self-tracking')"
+            )
+            importance_score = st.slider(
+                "Importance Score",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.5,
+                step=0.1,
+                help="Importance score (0.0-1.0). Higher = more important for knowledge alerts. Use 1.0 for foundational knowledge."
+            )
+            title_input = st.text_input(
+                "Title (Optional)",
+                value="",
+                help="Optional title for this knowledge (auto-extracted from first line if not provided)"
+            )
         
         col_add, col_info = st.columns([1, 2])
         with col_add:
@@ -1422,14 +1447,42 @@ def page_rag():
                         progress_msg = st.empty()
                         progress_msg.info("⏳ Adding knowledge... This may take 30-90 seconds (creating embeddings and saving to vector DB)")
                         
+                        # Build metadata from advanced fields
+                        metadata = {}
+                        if tags_input.strip():
+                            # Convert tags string to list, then back to comma-separated string (ChromaDB format)
+                            tags_list = [tag.strip() for tag in tags_input.split(",") if tag.strip()]
+                            if tags_list:
+                                metadata["tags"] = ",".join(tags_list)  # ChromaDB uses comma-separated string
+                        if importance_score != 0.5:  # Only include if different from default
+                            metadata["importance_score"] = importance_score
+                        if title_input.strip():
+                            metadata["title"] = title_input.strip()
+                        
+                        # Auto-set foundational metadata if type is "foundational"
+                        if content_type == "foundational":
+                            metadata["foundational"] = "stillme"
+                            metadata["type"] = "foundational"
+                            if source != "CRITICAL_FOUNDATION":
+                                # Auto-update source if not already set
+                                source = "CRITICAL_FOUNDATION"
+                            if "tags" not in metadata:
+                                metadata["tags"] = "foundational:stillme,CRITICAL_FOUNDATION"
+                            if "importance_score" not in metadata:
+                                metadata["importance_score"] = 1.0
+                        
+                        request_json = {
+                            "content": content,
+                            "source": source,
+                            "content_type": content_type,
+                        }
+                        if metadata:
+                            request_json["metadata"] = metadata
+                        
                         r = requests.post(
                             f"{API_BASE}/api/rag/add_knowledge",
                             headers=get_api_headers(),
-                            json={
-                                "content": content,
-                                "source": source,
-                                "content_type": content_type,
-                            },
+                            json=request_json,
                             timeout=180,  # Increased to 180s to handle embedding generation
                         )
                         r.raise_for_status()  # Raise exception for 4xx/5xx errors
