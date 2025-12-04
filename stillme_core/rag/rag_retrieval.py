@@ -621,7 +621,15 @@ class RAGRetrieval:
                         "latency": 0.0,  # Could track actual latency if needed
                         "timestamp": time.time()
                     }
-                    cache_service.set(cache_key, cache_value, ttl_seconds=TTL_RAG_RETRIEVAL)
+                    # Handle different cache service interfaces
+                    # CacheService uses ttl_seconds, RedisCacheService uses ttl
+                    if hasattr(cache_service, 'set'):
+                        # Try ttl_seconds first (CacheService)
+                        try:
+                            cache_service.set(cache_key, cache_value, ttl_seconds=TTL_RAG_RETRIEVAL)
+                        except TypeError:
+                            # Fallback to ttl (RedisCacheService)
+                            cache_service.set(cache_key, cache_value, ttl=TTL_RAG_RETRIEVAL)
                     logger.debug(f"💾 RAG retrieval cached (key: {cache_key[:50]}...)")
                 except Exception as cache_error:
                     logger.warning(f"Failed to cache RAG retrieval: {cache_error}")

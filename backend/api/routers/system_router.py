@@ -1218,10 +1218,219 @@ async def re_embed_foundational_knowledge_endpoint(
         
         logger.info("✅ Foundational knowledge re-embedding complete via admin endpoint")
         return response
-            
+        
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Re-embed foundational knowledge error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to re-embed foundational knowledge: {str(e)}")
+
+@router.post("/api/admin/collections/migrate-to-cosine")
+async def migrate_collection_to_cosine_endpoint(
+    collection_name: str = "stillme_knowledge",
+    api_key: Optional[str] = Depends(require_api_key) if require_api_key else Depends(lambda: None)
+):
+    """
+    Migrate a ChromaDB collection from L2 distance to cosine distance.
+    
+    This fixes high distance issues by:
+    1. Backing up all documents from existing collection
+    2. Deleting old collection (with L2 distance)
+    3. Creating new collection with cosine distance
+    4. Re-adding all documents with normalized embeddings
+    
+    **CRITICAL**: This operation preserves all data but requires re-embedding.
+    For large collections (6000+ documents), this may take 10-30 minutes.
+    
+    **Authentication Required**: This is an admin endpoint protected by API key.
+    Provide API key in `X-API-Key` header.
+    
+    **Example:**
+    ```bash
+    curl -X POST "https://stillme-backend-production.up.railway.app/api/admin/collections/migrate-to-cosine?collection_name=stillme_knowledge" \
+      -H "X-API-Key: your-api-key-here"
+    ```
+    
+    **Returns:**
+    - `status`: "success", "error", or "partial"
+    - `message`: Human-readable message
+    - `collection_name`: Name of migrated collection
+    - `documents_backed_up`: Number of documents backed up
+    - `documents_migrated`: Number of documents successfully migrated
+    - `time_elapsed_seconds`: Time taken for migration
+    - `timestamp`: ISO timestamp
+    """
+    if require_api_key:
+        logger.debug(f"API key verified for collection migration")
+    try:
+        logger.info(f"🔧 Admin endpoint: Migrating collection '{collection_name}' to cosine distance...")
+        
+        # Import RAG components
+        chroma_client = get_chroma_client()
+        if not chroma_client:
+            raise HTTPException(status_code=503, detail="ChromaDB client not available")
+        
+        from stillme_core.rag.embeddings import EmbeddingService
+        embedding_service = EmbeddingService()
+        
+        # Check if collection exists
+        try:
+            collection = chroma_client.client.get_collection(name=collection_name)
+            logger.info(f"✅ Found collection: {collection_name}")
+        except Exception as e:
+            logger.error(f"❌ Collection '{collection_name}' not found: {e}")
+            raise HTTPException(status_code=404, detail=f"Collection '{collection_name}' not found: {e}")
+        
+        # Check collection metadata to see current distance metric
+        metadata = collection.metadata or {}
+        current_metric = metadata.get("hnsw:space", "unknown")
+        logger.info(f"📊 Current distance metric: {current_metric}")
+        
+        if current_metric == "cosine":
+            logger.info("✅ Collection already uses cosine distance - no migration needed")
+            return {
+                "status": "success",
+                "message": f"Collection '{collection_name}' already uses cosine distance - no migration needed",
+                "collection_name": collection_name,
+                "documents_backed_up": collection.count(),
+                "documents_migrated": collection.count(),
+                "time_elapsed_seconds": 0,
+                "timestamp": datetime.now().isoformat()
+            }
+        
+        # Step 1: Backup all documents
+        logger.info(f"📦 Step 1: Backing up all documents from '{collection_name}'...")
+        import time
+        start_time = time.time()
+        
+        try:
+            all_data = collection.get(include=["documents", "metadatas", "embeddings"])
+            
+            if not all_data or not all_data.get("ids"):
+                logger.warning(f"⚠️ Collection '{collection_name}' is empty")
+                return {
+                    "status": "success",
+                    "message": "Collection is empty - no migration needed",
+                    "collection_name": collection_name,
+                    "documents_backed_up": 0,
+                    "documents_migrated": 0,
+                    "time_elapsed_seconds": 0,
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            ids = all_data["ids"]
+            documents = all_data.get("documents", [])
+            metadatas = all_data.get("metadatas", [])
+            
+            num_docs = len(ids)
+            logger.info(f"   ✅ Backed up {num_docs} documents")
+            
+        except Exception as e:
+            logger.error(f"❌ Failed to backup documents: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Failed to backup documents: {str(e)}")
+        
+        # Step 2: Delete old collection
+        logger.info(f"🗑️ Step 2: Deleting old collection '{collection_name}' (with {current_metric} distance)...")
+        try:
+            chroma_client.client.delete_collection(name=collection_name)
+            logger.info(f"   ✅ Deleted old collection")
+        except Exception as e:
+            logger.error(f"❌ Failed to delete collection: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Failed to delete collection: {str(e)}")
+        
+        # Step 3: Create new collection with cosine distance
+        logger.info(f"🆕 Step 3: Creating new collection '{collection_name}' with cosine distance...")
+        try:
+            description = "Knowledge base for StillMe learning" if "knowledge" in collection_name.lower() else "Conversation history for context"
+            
+            new_collection = chroma_client.client.create_collection(
+                name=collection_name,
+                metadata={
+                    "description": description,
+                    "hnsw:space": "cosine"  # CRITICAL: Use cosine distance for normalized embeddings
+                }
+            )
+            logger.info(f"   ✅ Created new collection with cosine distance metric")
+        except Exception as e:
+            logger.error(f"❌ Failed to create new collection: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Failed to create new collection: {str(e)}")
+        
+        # Step 4: Re-embed and re-add documents in batches
+        logger.info(f"🔄 Step 4: Re-embedding and re-adding {num_docs} documents...")
+        logger.info(f"   Model: {embedding_service.model_name}")
+        logger.info(f"   This may take 10-30 minutes for large collections...")
+        
+        batch_size = 50
+        re_embedded_count = 0
+        errors = []
+        
+        for i in range(0, num_docs, batch_size):
+            batch_end = min(i + batch_size, num_docs)
+            batch_ids = ids[i:batch_end]
+            batch_documents = documents[i:batch_end]
+            batch_metadatas = metadatas[i:batch_end] if metadatas else [{}] * (batch_end - i)
+            
+            logger.info(f"   Processing batch {i//batch_size + 1}/{(num_docs + batch_size - 1)//batch_size} ({i+1}-{batch_end}/{num_docs})...")
+            
+            try:
+                # Re-embed documents with normalized embeddings
+                batch_embeddings = []
+                for doc in batch_documents:
+                    embedding = embedding_service.encode_text(doc)
+                    batch_embeddings.append(embedding)
+                
+                # Add to new collection
+                new_collection.add(
+                    ids=batch_ids,
+                    documents=batch_documents,
+                    metadatas=batch_metadatas,
+                    embeddings=batch_embeddings
+                )
+                
+                re_embedded_count += len(batch_ids)
+                logger.info(f"      ✅ Added {len(batch_ids)} documents to new collection")
+                
+            except Exception as e:
+                error_msg = f"Failed to process batch {i//batch_size + 1}: {str(e)}"
+                logger.error(f"      ❌ {error_msg}", exc_info=True)
+                errors.append(error_msg)
+        
+        elapsed = time.time() - start_time
+        logger.info(f"✅ Migration complete: {re_embedded_count}/{num_docs} documents")
+        logger.info(f"   Time elapsed: {elapsed:.2f} seconds ({elapsed/60:.2f} minutes)")
+        
+        # Step 5: Verify migration
+        logger.info(f"✅ Step 5: Verifying migration...")
+        try:
+            verify_count = new_collection.count()
+            if verify_count == num_docs:
+                logger.info(f"   ✅ Verification passed: {verify_count} documents in new collection")
+            else:
+                logger.warning(f"   ⚠️ Verification warning: Expected {num_docs}, found {verify_count}")
+        except Exception as e:
+            logger.warning(f"   ⚠️ Verification failed: {e}")
+        
+        # Prepare response
+        response = {
+            "status": "success" if re_embedded_count == num_docs else "partial",
+            "message": f"Migrated {re_embedded_count}/{num_docs} documents successfully" + (f" ({len(errors)} errors)" if errors else ""),
+            "collection_name": collection_name,
+            "documents_backed_up": num_docs,
+            "documents_migrated": re_embedded_count,
+            "time_elapsed_seconds": round(elapsed, 2),
+            "time_elapsed_minutes": round(elapsed / 60, 2),
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        if errors:
+            response["errors"] = errors
+        
+        logger.info("✅ Collection migration complete via admin endpoint")
+        return response
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Migrate collection error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to migrate collection: {str(e)}")
 
