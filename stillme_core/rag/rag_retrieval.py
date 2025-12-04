@@ -939,11 +939,58 @@ The foundational knowledge below is the CURRENT, ACCURATE information about Stil
             
             result = "\n".join(context_parts) if context_parts else "No relevant context found."
             
-            # Final check: if result is still too long, truncate the entire result
+            # Final check: if result is still too long, truncate intelligently
+            # CRITICAL: Prioritize keeping foundational warning and foundational knowledge
             result_tokens = self._estimate_tokens(result)
             if result_tokens > max_context_tokens:
-                logger.warning(f"Context still too long ({result_tokens} tokens), truncating entire result")
-                result = self._truncate_text_by_tokens(result, max_context_tokens)
+                logger.warning(f"Context still too long ({result_tokens} tokens), truncating intelligently to preserve foundational knowledge")
+                
+                # Strategy: Truncate from the END (conversation docs first, then non-foundational knowledge)
+                # But ALWAYS keep foundational warning and foundational knowledge documents
+                
+                # Find foundational warning position
+                foundational_warning_start = result.find("🚨🚨🚨 CRITICAL INSTRUCTION")
+                foundational_warning_end = result.find("🚨🚨🚨 END CRITICAL INSTRUCTION")
+                
+                if foundational_warning_start != -1 and foundational_warning_end != -1:
+                    # Found foundational warning - preserve header, warning, and foundational knowledge
+                    # Get everything before foundational warning (header)
+                    header_and_before = result[:foundational_warning_start]
+                    foundational_warning = result[foundational_warning_start:foundational_warning_end + len("🚨🚨🚨 END CRITICAL INSTRUCTION")]
+                    remaining_text = result[foundational_warning_end + len("🚨🚨🚨 END CRITICAL INSTRUCTION"):]
+                    
+                    # Extract foundational knowledge documents (lines with [foundational knowledge] or CRITICAL_FOUNDATION)
+                    lines = remaining_text.split('\n')
+                    foundational_lines = []
+                    other_lines = []
+                    
+                    for line in lines:
+                        if "[foundational knowledge]" in line or "CRITICAL_FOUNDATION" in line:
+                            foundational_lines.append(line)
+                        else:
+                            other_lines.append(line)
+                    
+                    # Rebuild: header + foundational warning + foundational knowledge + truncate others
+                    foundational_text = '\n'.join(foundational_lines)
+                    other_text = '\n'.join(other_lines)
+                    
+                    # Calculate tokens for foundational parts (header + warning + foundational docs)
+                    foundational_content = header_and_before + foundational_warning + '\n' + foundational_text
+                    foundational_tokens = self._estimate_tokens(foundational_content)
+                    remaining_for_others = max_context_tokens - foundational_tokens - 500  # Reserve 500 tokens buffer
+                    
+                    if remaining_for_others > 0:
+                        # Truncate other text (conversation docs, non-foundational knowledge) from the END
+                        truncated_other = self._truncate_text_by_tokens(other_text, remaining_for_others)
+                        result = foundational_content + '\n' + truncated_other
+                    else:
+                        # Not enough space - keep only foundational parts
+                        logger.warning("⚠️ Context too long - keeping only foundational warning and foundational knowledge, truncating all other content")
+                        result = foundational_content
+                else:
+                    # No foundational warning found - use simple truncation (shouldn't happen, but fallback)
+                    logger.warning("⚠️ No foundational warning found in context - using simple truncation")
+                    result = self._truncate_text_by_tokens(result, max_context_tokens)
             
             # Log if foundational knowledge is present in final result
             if "[foundational knowledge]" in result or "CRITICAL INSTRUCTION" in result:
