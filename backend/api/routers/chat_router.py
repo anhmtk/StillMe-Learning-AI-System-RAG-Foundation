@@ -5960,11 +5960,37 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                         # Phase 3: Only rewrite when CRITICAL issues are present
                         # Critical issues: missing citation, anthropomorphic language, language mismatch, topic drift, template-like
                         # Non-critical issues (depth, unpacking, style) do NOT trigger rewrite
-                        should_rewrite, rewrite_reason, max_attempts = optimizer.should_rewrite(
-                            quality_result=quality_result,
-                            is_philosophical=is_philosophical_non_rag,
-                            response_length=len(sanitized_response)
-                        )
+                        
+                        # CRITICAL: Check if this is a StillMe query with foundational knowledge
+                        # Even in non-RAG path, we may have had context earlier (e.g., from RAG path that failed validation)
+                        # Detect StillMe query and check if we should skip rewrite
+                        skip_rewrite_for_stillme_non_rag = False
+                        try:
+                            from backend.core.stillme_detector import detect_stillme_query
+                            is_stillme_query_non_rag, _ = detect_stillme_query(chat_request.message)
+                            
+                            # Check if response mentions foundational knowledge or StillMe capabilities
+                            # If it's a StillMe query, skip rewrite to preserve accuracy
+                            if is_stillme_query_non_rag:
+                                skip_rewrite_for_stillme_non_rag = True
+                                logger.info(
+                                    "⏭️ Skipping rewrite for StillMe query (non-RAG path): "
+                                    "Rewrite may corrupt StillMe capability information. "
+                                    "Using original response to preserve accuracy."
+                                )
+                        except Exception as stillme_detect_error:
+                            logger.debug(f"Could not detect StillMe query in non-RAG path: {stillme_detect_error}")
+                        
+                        if skip_rewrite_for_stillme_non_rag:
+                            should_rewrite = False
+                            rewrite_reason = "StillMe query - preserving accuracy"
+                            max_attempts = 0
+                        else:
+                            should_rewrite, rewrite_reason, max_attempts = optimizer.should_rewrite(
+                                quality_result=quality_result,
+                                is_philosophical=is_philosophical_non_rag,
+                                response_length=len(sanitized_response)
+                            )
                         
                         # Stage 4: ALWAYS rewrite (100% policy) - Mục tiêu: minh bạch, trung thực, giảm ảo giác
                         if should_rewrite:

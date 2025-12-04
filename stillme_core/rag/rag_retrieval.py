@@ -853,6 +853,7 @@ class RAGRetrieval:
                     remaining_tokens -= header_tokens
                     context_parts.append(header)
                     context_parts.append(foundational_warning)
+                    logger.info("✅ Added foundational knowledge warning to context_text")
                 else:
                     header = "## Relevant Knowledge:"
                     header_tokens = self._estimate_tokens(header)
@@ -888,6 +889,7 @@ class RAGRetrieval:
                     # Format with clear foundational knowledge marker
                     if is_foundational:
                         doc_text = f"{i}. [foundational knowledge] {truncated_content} (source: CRITICAL_FOUNDATION)"
+                        logger.debug(f"✅ Formatted foundational knowledge document {i} with [foundational knowledge] marker")
                     else:
                         doc_text = f"{i}. {truncated_content} (Source: {source})"
                     
@@ -928,6 +930,14 @@ class RAGRetrieval:
             if result_tokens > max_context_tokens:
                 logger.warning(f"Context still too long ({result_tokens} tokens), truncating entire result")
                 result = self._truncate_text_by_tokens(result, max_context_tokens)
+            
+            # Log if foundational knowledge is present in final result
+            if "[foundational knowledge]" in result or "CRITICAL INSTRUCTION" in result:
+                logger.info("✅ Final context_text contains foundational knowledge markers")
+                # Log first 500 chars for debugging
+                logger.debug(f"Context preview (first 500 chars): {result[:500]}")
+            else:
+                logger.warning("⚠️ Final context_text does NOT contain foundational knowledge markers - may not be formatted correctly")
             
             return result
             
