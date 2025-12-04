@@ -1434,3 +1434,92 @@ async def migrate_collection_to_cosine_endpoint(
         logger.error(f"Migrate collection error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to migrate collection: {str(e)}")
 
+@router.get("/api/admin/collections/status")
+async def get_collection_status_endpoint(
+    collection_name: str = "stillme_knowledge",
+    api_key: Optional[str] = Depends(require_api_key) if require_api_key else Depends(lambda: None)
+):
+    """
+    Get ChromaDB collection status including distance metric and document count.
+    
+    Useful for checking if migration completed successfully.
+    
+    **Authentication Required**: This is an admin endpoint protected by API key.
+    Provide API key in `X-API-Key` header.
+    
+    **Example:**
+    ```bash
+    curl -X GET "https://stillme-backend-production.up.railway.app/api/admin/collections/status?collection_name=stillme_knowledge" \
+      -H "X-API-Key: your-api-key-here"
+    ```
+    
+    **Returns:**
+    - `collection_name`: Name of collection
+    - `exists`: Whether collection exists
+    - `distance_metric`: Current distance metric ("cosine", "l2", or "unknown")
+    - `document_count`: Number of documents in collection
+    - `metadata`: Full collection metadata
+    - `timestamp`: ISO timestamp
+    """
+    if require_api_key:
+        logger.debug(f"API key verified for collection status check")
+    try:
+        logger.info(f"🔍 Admin endpoint: Checking collection '{collection_name}' status...")
+        
+        # Import RAG components
+        chroma_client = get_chroma_client()
+        if not chroma_client:
+            raise HTTPException(status_code=503, detail="ChromaDB client not available")
+        
+        # Check if collection exists
+        try:
+            collection = chroma_client.client.get_collection(name=collection_name)
+            logger.info(f"✅ Found collection: {collection_name}")
+            
+            # Get collection info
+            metadata = collection.metadata or {}
+            distance_metric = metadata.get("hnsw:space", "unknown")
+            document_count = collection.count()
+            
+            response = {
+                "collection_name": collection_name,
+                "exists": True,
+                "distance_metric": distance_metric,
+                "document_count": document_count,
+                "metadata": metadata,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            # Add helpful status message
+            if distance_metric == "cosine":
+                response["status"] = "✅ Collection uses cosine distance (correct)"
+            elif distance_metric == "l2":
+                response["status"] = "⚠️ Collection uses L2 distance (should migrate to cosine)"
+            else:
+                response["status"] = f"⚠️ Unknown distance metric: {distance_metric}"
+            
+            logger.info(f"   Distance metric: {distance_metric}, Documents: {document_count}")
+            return response
+            
+        except Exception as e:
+            error_msg = str(e).lower()
+            if "not found" in error_msg or "does not exist" in error_msg:
+                logger.warning(f"⚠️ Collection '{collection_name}' not found")
+                return {
+                    "collection_name": collection_name,
+                    "exists": False,
+                    "distance_metric": None,
+                    "document_count": 0,
+                    "status": "❌ Collection does not exist",
+                    "timestamp": datetime.now().isoformat()
+                }
+            else:
+                logger.error(f"❌ Error checking collection: {e}", exc_info=True)
+                raise HTTPException(status_code=500, detail=f"Failed to check collection status: {str(e)}")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Get collection status error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to get collection status: {str(e)}")
+
