@@ -16,6 +16,19 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    env_path = project_root / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+    else:
+        load_dotenv()  # Try to load from current directory
+except ImportError:
+    pass  # python-dotenv not installed, use environment variables only
+except Exception:
+    pass  # Error loading .env, continue with environment variables
+
 import logging
 import asyncio
 import json
@@ -231,8 +244,7 @@ async def test_generation_comprehensive():
             logger.info(f"   Description: {test_case['description']}")
             
             try:
-                # Check if LLM API key available
-                import os
+                # Check if LLM API key available (from .env or environment)
                 has_api_key = bool(os.getenv("DEEPSEEK_API_KEY") or os.getenv("OPENROUTER_API_KEY"))
                 
                 if not has_api_key:

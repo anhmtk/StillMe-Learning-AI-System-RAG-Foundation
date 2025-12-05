@@ -15,6 +15,21 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    env_path = project_root / ".env"
+    if env_path.exists():
+        load_dotenv(env_path)
+        logger = logging.getLogger(__name__)
+        logger.info(f"✅ Loaded .env file from: {env_path}")
+    else:
+        load_dotenv()  # Try to load from current directory
+except ImportError:
+    pass  # python-dotenv not installed, use environment variables only
+except Exception as e:
+    pass  # Error loading .env, continue with environment variables
+
 import logging
 import asyncio
 logging.basicConfig(
