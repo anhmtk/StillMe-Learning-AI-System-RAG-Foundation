@@ -1,0 +1,132 @@
+{
+  "report_metadata": {
+    "version": "1.0",
+    "report_type": "Self-Comprehension Report",
+    "timestamp": "2025-12-05T16:47:14.630664+00:00",
+    "timezone": "UTC",
+    "generated_by": "StillMe Codebase Assistant",
+    "git_commit_hash": "42575928e7cc"
+  },
+  "codebase_snapshot": {
+    "timestamp": "2025-12-05T16:47:14.630664+00:00",
+    "git_hash": "42575928e7cc",
+    "total_files": 259,
+    "total_lines": 67456,
+    "files_by_type": {
+      ".py": 259
+    },
+    "files_by_directory": {
+      "backend": {
+        "files": 179,
+        "lines": 49187
+      },
+      "stillme_core": {
+        "files": 77,
+        "lines": 15536
+      },
+      "frontend": {
+        "files": 3,
+        "lines": 2733
+      }
+    },
+    "architecture_layers": [
+      "API Layer (FastAPI)",
+      "Core Logic (RAG, Validation)",
+      "Frontend (Streamlit)",
+      "Vector Database (ChromaDB)"
+    ]
+  },
+  "indexing_status": {
+    "indexed_chunks": 377,
+    "indexed_files": 316,
+    "collection_status": "ready",
+    "total_files": 259
+  },
+  "comprehension_metrics": {
+    "overall_score": 100.0,
+    "qa_accuracy": 100.0,
+    "indexing_coverage": 100,
+    "files_indexed": 316,
+    "chunks_indexed": 377,
+    "test_questions": 8,
+    "correct_answers": 8
+  },
+  "first_insights": [
+    {
+      "type": "architecture_understanding",
+      "title": "Architecture Comprehension",
+      "description": "StillMe understands its 5-layer architecture",
+      "details": "Retrieved 5 relevant code chunks about architecture"
+    },
+    {
+      "type": "component_awareness",
+      "title": "Core Component Awareness",
+      "description": "StillMe identified 5 core components",
+      "details": "Can locate and explain main services, validators, and modules"
+    },
+    {
+      "type": "organization_understanding",
+      "title": "Code Organization Understanding",
+      "description": "StillMe understands its directory structure and code organization",
+      "details": "Can explain the purpose of backend/, stillme_core/, and frontend/ directories"
+    }
+  ],
+  "test_results": {
+    "qa_accuracy_details": [
+      {
+        "question": "How does the validation chain work?",
+        "relevant_results": 3,
+        "has_answer": true
+      },
+      {
+        "question": "What is the RAG retrieval process?",
+        "relevant_results": 3,
+        "has_answer": true
+      },
+      {
+        "question": "How does StillMe track task execution time?",
+        "relevant_results": 3,
+        "has_answer": true
+      },
+      {
+        "question": "What embedding model does StillMe use?",
+        "relevant_results": 3,
+        "has_answer": true
+      },
+      {
+        "question": "How many validators are in the validation chain?",
+        "relevant_results": 3,
+        "has_answer": true
+      },
+      {
+        "question": "What is the main API endpoint for chat?",
+        "relevant_results": 3,
+        "has_answer": true
+      },
+      {
+        "question": "How does StillMe handle context overflow?",
+        "relevant_results": 3,
+        "has_answer": true
+      },
+      {
+        "question": "What is the structure of the codebase?",
+        "relevant_results": 3,
+        "has_answer": true
+      }
+    ],
+    "summary": "StillMe correctly answered 8/8 questions about its own codebase"
+  },
+  "limitations_acknowledged": {
+    "understanding_nature": "Semantic understanding through pattern recognition, not consciousness",
+    "capabilities": "Can understand and explain code, but cannot autonomously modify code",
+    "human_role": "Human developers remain creators and maintainers of StillMe",
+    "deterministic": "StillMe operates through deterministic code, not autonomous decision-making",
+    "scope": "Understanding is limited to indexed codebase, may not cover all edge cases"
+  },
+  "technical_notes": {
+    "methodology": "Self-comprehension measured through RAG-based code retrieval and Q&A accuracy",
+    "indexing_method": "Codebase indexed using AST parsing, chunked by file/class/function",
+    "qa_method": "Questions answered using semantic search over indexed code chunks",
+    "score_calculation": "Weighted combination of Q&A accuracy (60%) and indexing coverage (40%)"
+  }
+}
