@@ -293,6 +293,185 @@ async def generate_tests(
         )
 
 
+@router.post("/onboarding")
+async def generate_onboarding_guide(
+    request: Dict[str, Any],
+    indexer = Depends(get_codebase_indexer)
+):
+    """
+    Generate personalized onboarding guide for new contributors.
+    
+    Request body:
+    {
+        "contributor_profile": "backend developer",  # Optional: "backend", "frontend", "fullstack", "devops"
+        "experience_level": "intermediate",  # Optional: "beginner", "intermediate", "advanced"
+        "interests": ["validation", "RAG", "testing"],  # Optional: list of topics of interest
+        "questions": ["How do I get started?", "What are the most important files?"]  # Optional: specific questions
+    }
+    
+    Returns:
+    {
+        "guide": {
+            "welcome_message": "...",
+            "starting_points": [
+                {
+                    "file_path": "backend/api/routers/chat_router.py",
+                    "description": "Main chat endpoint - good starting point",
+                    "why_important": "Handles all chat requests"
+                }
+            ],
+            "important_files": [...],
+            "first_issues": [
+                {
+                    "title": "Add unit tests for validator",
+                    "description": "...",
+                    "difficulty": "beginner",
+                    "files_to_read": ["backend/validators/citation_validator.py"]
+                }
+            ],
+            "code_examples": [
+                {
+                    "file_path": "backend/validators/citation_validator.py",
+                    "snippet": "...",
+                    "explanation": "This shows how validators work"
+                }
+            ],
+            "next_steps": ["Read README.md", "Set up local environment", "..."]
+        }
+    }
+    """
+    try:
+        from backend.services.git_history_retriever import get_git_history_retriever
+        from backend.identity.prompt_builder import build_code_explanation_prompt
+        from backend.api.utils.chat_helpers import generate_ai_response
+        from backend.api.utils.chat_helpers import detect_language
+        import os
+        
+        # Get parameters
+        contributor_profile = request.get("contributor_profile", "developer")
+        experience_level = request.get("experience_level", "intermediate")
+        interests = request.get("interests", [])
+        questions = request.get("questions", [])
+        
+        logger.info(f"📚 Generating onboarding guide for {contributor_profile} ({experience_level})")
+        
+        # Get Git history retriever
+        git_retriever = get_git_history_retriever()
+        
+        # Query codebase for important files based on profile
+        profile_queries = {
+            "backend": "What are the most important backend files? Main API endpoints, core services",
+            "frontend": "What are the main frontend components? UI, chat interface",
+            "fullstack": "What are the core components connecting frontend and backend?",
+            "devops": "What are the deployment and infrastructure files? Docker, Railway config",
+            "developer": "What are the most important files to understand the codebase structure?"
+        }
+        
+        base_query = profile_queries.get(contributor_profile.lower(), profile_queries["developer"])
+        
+        # Query codebase for important files
+        important_files_results = indexer.query_codebase(base_query, n_results=10)
+        
+        # Query Git history for beginner-friendly commits/issues
+        beginner_commits = git_retriever.query_history(
+            "beginner friendly tasks, good first issues, easy contributions",
+            n_results=5
+        )
+        
+        # Build onboarding guide using LLM
+        detected_lang = detect_language(str(questions) if questions else "en")
+        
+        # Prepare context
+        important_files_context = []
+        for result in important_files_results[:5]:
+            metadata = result.get("metadata", {})
+            important_files_context.append({
+                "file_path": metadata.get("file_path", ""),
+                "description": result.get("document", "")[:200],
+                "line_range": f"{metadata.get('line_start', 0)}-{metadata.get('line_end', 0)}"
+            })
+        
+        # Build prompt for onboarding guide
+        onboarding_prompt = f"""You are StillMe's Onboarding Mentor. Generate a personalized onboarding guide for a new contributor.
+
+Contributor Profile:
+- Role: {contributor_profile}
+- Experience Level: {experience_level}
+- Interests: {', '.join(interests) if interests else 'General'}
+- Questions: {', '.join(questions) if questions else 'None specified'}
+
+Important Files Found:
+{chr(10).join([f"- {f['file_path']} ({f['line_range']}): {f['description']}" for f in important_files_context])}
+
+Git History (Recent Beginner-Friendly Commits):
+{chr(10).join([f"- {c['subject']} ({c['date']})" for c in beginner_commits[:3]])}
+
+Generate a comprehensive onboarding guide with:
+1. Welcome message (personalized)
+2. Starting points (3-5 files to read first, with explanations)
+3. Important files (5-10 files, organized by category)
+4. First issues (suggest 2-3 beginner-friendly tasks based on Git history)
+5. Code examples (2-3 code snippets with explanations)
+6. Next steps (actionable checklist)
+
+Format the response as a structured guide that helps the contributor understand the codebase and get started quickly.
+Be specific, practical, and encouraging.
+"""
+        
+        # Generate guide using LLM
+        guide_text = await generate_ai_response(
+            prompt=onboarding_prompt,
+            detected_lang=detected_lang,
+            use_cache=False
+        )
+        
+        # Parse guide into structured format (simple parsing, can be improved)
+        guide = {
+            "welcome_message": guide_text.split("##")[0].strip() if "##" in guide_text else guide_text[:500],
+            "starting_points": important_files_context[:5],
+            "important_files": important_files_context,
+            "first_issues": [
+                {
+                    "title": commit.get("subject", ""),
+                    "description": commit.get("document", "")[:200],
+                    "difficulty": "beginner",
+                    "commit_hash": commit.get("commit_hash", ""),
+                    "date": commit.get("date", "")
+                }
+                for commit in beginner_commits[:3]
+            ],
+            "code_examples": [
+                {
+                    "file_path": result.get("metadata", {}).get("file_path", ""),
+                    "snippet": result.get("document", "")[:300],
+                    "explanation": f"Example from {result.get('metadata', {}).get('file_path', '')}"
+                }
+                for result in important_files_results[:3]
+            ],
+            "next_steps": [
+                "Read README.md for project overview",
+                "Set up local development environment",
+                "Review starting point files",
+                "Pick a first issue from the suggestions",
+                "Join the community discussions"
+            ],
+            "full_guide": guide_text  # Include full LLM-generated guide
+        }
+        
+        return {
+            "guide": guide,
+            "contributor_profile": contributor_profile,
+            "experience_level": experience_level
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error generating onboarding guide: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate onboarding guide: {str(e)}"
+        )
+
+
 @router.post("/review")
 async def review_code(
     request: Dict[str, Any],
