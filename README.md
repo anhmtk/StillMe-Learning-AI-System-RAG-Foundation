@@ -308,12 +308,14 @@ See `env.example` for full list.
 
 ### ✅ Implemented & Working
 
-#### 🧠 Codebase Assistant
+#### 🧠 Codebase Assistant (Phase 3 Complete)
 - **Code Q&A**: Query StillMe's codebase via API (`POST /api/codebase/query`)
 - **Test Generation**: Generate unit tests for code (`POST /api/codebase/generate-tests`)
 - **Code Review**: Review code for issues (`POST /api/codebase/review`)
+- **Git History**: Query commit history for design decisions (`POST /api/codebase/query` with Git context)
+- **Onboarding Mentor**: Generate personalized onboarding guides (`POST /api/codebase/onboarding`)
 - **RAG-based Retrieval**: Semantic search with file:line citations
-- **Status**: Phase 2 complete (255 files indexed, 377 chunks)
+- **Status**: Phase 3 complete (255 files indexed, 377 chunks, 50+ commits indexed)
 - 📚 See [`docs/CODEBASE_ASSISTANT.md`](docs/CODEBASE_ASSISTANT.md) for details
 
 **Core RAG System:**

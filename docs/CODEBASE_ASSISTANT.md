@@ -4,13 +4,16 @@ StillMe can now understand and explain its own codebase using RAG-based code ret
 
 ## Overview
 
-**Status:** ✅ Phase 2 Complete | 📋 Phase 3 Planned
+**Status:** ✅ Phase 3 Complete
 
 - **Indexed:** 255 files, 377 chunks (backend, stillme_core, frontend)
+- **Git History:** 50+ commits indexed (design decisions, implementation history)
 - **Capabilities:** 
   - Code Q&A with file:line citations
   - Test generation (pytest format)
   - Code review (static + LLM analysis)
+  - Git history queries ("Why did we choose X?")
+  - Onboarding mentor (personalized guides for new contributors)
 - **Safety:** Read-only explanations, review-only suggestions, no auto-fix
 
 ## Usage
