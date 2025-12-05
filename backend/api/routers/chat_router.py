@@ -4680,13 +4680,15 @@ Context: {context_text}
                     # Instead, let the retry logic handle it (it will retry with stronger prompt)
                     if raw_response and isinstance(raw_response, str):
                         from backend.api.utils.error_detector import is_technical_error
+                        # CRITICAL: Log full response for debugging error detection
+                        logger.debug(f"🔍 Full LLM response (length={len(raw_response)}): {raw_response[:500]}...")
                         is_error, error_type = is_technical_error(raw_response)
                         # CRITICAL: For technical questions about system, don't replace with fallback immediately
                         # The retry logic below will handle it with a stronger prompt
                         if is_error and not is_technical_about_system_rag:
                             logger.error(
                                 f"❌ LLM returned technical error as response (type: {error_type}): {raw_response[:200]}. "
-                                f"Question: {chat_request.message[:100]}"
+                                f"Full response length: {len(raw_response)}, Question: {chat_request.message[:100]}"
                             )
                             from backend.api.utils.error_detector import get_fallback_message_for_error
                             raw_response = get_fallback_message_for_error(error_type, detected_lang)

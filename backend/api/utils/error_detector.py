@@ -28,15 +28,20 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
     text_lower = text.lower()
     
     # Context overflow patterns
+    # CRITICAL: Make patterns more specific to avoid false positives
+    # Don't match "context" in normal content (e.g., "algorithm that handles context")
+    # Only match when "context" appears with error keywords
     context_overflow_patterns = [
         r"i encountered an error.*context overflow",
-        r"context overflow",
-        r"maximum context length",
-        r"context length is",
-        r"messages resulted in.*tokens",
-        r"requested about.*tokens",
-        r"exceeds.*context length",
-        r"context.*exceeded",
+        r"context overflow",  # Specific error phrase
+        r"maximum context length",  # Specific error phrase
+        r"context length is.*\d+.*tokens",  # Must have token count
+        r"messages resulted in.*tokens.*exceed",  # Must have "exceed"
+        r"requested about.*tokens.*exceed",  # Must have "exceed"
+        r"exceeds.*context length",  # Must have "exceeds"
+        r"context.*exceeded.*limit",  # Must have "exceeded" + "limit"
+        r"context.*limit.*exceed",  # Must have "limit" + "exceed"
+        r"prompt.*exceed.*context",  # Must have "prompt" + "exceed"
     ]
     
     # API error patterns
@@ -97,10 +102,24 @@ def is_technical_error(text: str) -> Tuple[bool, str]:
                 return False, ""
     
     # Check context overflow first (most specific)
+    # CRITICAL: Only match if pattern is found AND response is suspiciously short or contains error indicators
+    # This prevents false positives when "context" appears in normal content
     for pattern in context_overflow_patterns:
         if re.search(pattern, text_lower):
-            logger.debug(f"Detected context overflow error: {text[:100]}...")
-            return True, "context_overflow"
+            # Additional check: If response is long (>500 chars) and doesn't start with error indicators,
+            # it's likely a false positive (e.g., "algorithm that handles context" in normal content)
+            is_likely_error = (
+                len(text) < 500 or  # Short response = likely error
+                text_lower.startswith(("i encountered", "error", "context overflow", "maximum context")) or  # Starts with error
+                "exceed" in text_lower or  # Has "exceed" keyword
+                "limit" in text_lower  # Has "limit" keyword
+            )
+            if is_likely_error:
+                logger.debug(f"Detected context overflow error: {text[:100]}...")
+                return True, "context_overflow"
+            else:
+                # Long response with "context" but no error indicators = likely false positive
+                logger.debug(f"Skipping context overflow pattern match (likely false positive): {text[:100]}...")
     
     # Check API errors
     for pattern in api_error_patterns:
