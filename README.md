@@ -308,6 +308,15 @@ See `env.example` for full list.
 
 ### ✅ Implemented & Working
 
+#### 🧠 Codebase Assistant (Phase 1)
+- **Code Q&A**: Ask questions about StillMe's codebase and get explanations with file:line citations
+- **RAG-based Retrieval**: Uses semantic search to find relevant code chunks from indexed codebase
+- **Multilingual Support**: Works in both English and Vietnamese
+- **Safety First**: Only explains code, never suggests modifications or improvements
+- **Comprehensive Coverage**: Indexed 254 files (backend, stillme_core, frontend) with 376 code chunks
+- **API Endpoint**: `POST /api/codebase/query` for codebase questions
+- **Example Questions**: "How does the validation chain work?", "What is the RAG retrieval process?", "StillMe sử dụng mô hình embedding nào cho RAG?"
+
 **Core RAG System:**
 - ✅ Vector Database (ChromaDB) - Semantic search and knowledge retrieval
 - ✅ RAG (Retrieval-Augmented Generation) - Context-aware responses
@@ -392,6 +401,63 @@ See `env.example` for full list.
 - 🔬 **Nested Learning** - Tiered update frequency (experimental branch)
 
 ## 📡 API Reference
+
+### Codebase Assistant Endpoints (Phase 1)
+
+StillMe can now understand and explain its own codebase! Ask questions about how StillMe works internally.
+
+**Endpoint:** `POST /api/codebase/query`
+
+Query the StillMe codebase using RAG. StillMe will retrieve relevant code chunks and generate explanations with file:line citations.
+
+**Request:**
+```json
+{
+  "question": "How does the validation chain work?",
+  "n_results": 5,
+  "include_code": true
+}
+```
+
+**Response:**
+```json
+{
+  "question": "How does the validation chain work?",
+  "explanation": "The validation chain orchestrates multiple validators...",
+  "code_chunks": [
+    {
+      "file_path": "stillme_core/validation/chain.py",
+      "line_start": 45,
+      "line_end": 78,
+      "code_type": "class",
+      "class_name": "ValidationChain",
+      "docstring": "ValidationEngine - Orchestrates multiple validators",
+      "code_snippet": "..."
+    }
+  ],
+  "citations": ["chain.py:45-78", "validation.py:10-20"]
+}
+```
+
+**Example Questions:**
+- "How does the validation chain work?"
+- "What is the RAG retrieval process?"
+- "How does StillMe track task execution time?"
+- "StillMe sử dụng mô hình embedding nào cho RAG?" (Vietnamese supported)
+- "Chuỗi xác thực (validation chain) hoạt động như thế nào?" (Vietnamese)
+
+**Stats Endpoint:** `GET /api/codebase/stats`
+- Returns collection statistics (total chunks indexed)
+
+**Safety:** StillMe only explains code, never suggests modifications or improvements. This is a read-only codebase assistant.
+
+**Current Status:**
+- ✅ **Phase 1 Complete**: Code Q&A with RAG-based retrieval
+- ✅ **Indexed**: 254 files, 376 chunks (backend, stillme_core, frontend)
+- 🚧 **Phase 2 Planned**: Test generation and code review
+- 🚧 **Phase 3 Planned**: Git history integration and onboarding mentor
+
+📚 **Full Documentation**: See [`docs/CODEBASE_ASSISTANT_IMPLEMENTATION.md`](docs/CODEBASE_ASSISTANT_IMPLEMENTATION.md)
 
 ### Chat Endpoints
 
