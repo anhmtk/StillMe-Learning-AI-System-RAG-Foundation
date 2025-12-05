@@ -93,16 +93,65 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
     query_lower = query.lower()
     matched_keywords = []
     
-    # CRITICAL: Check for technical architecture questions FIRST (RAG, DeepSeek, black box)
+    # CRITICAL: Check for META-VALIDATION questions FIRST (before technical detection)
+    # These are philosophical/epistemic questions about validation of validation itself
+    # Examples: "Who validates the validation chain?", "Does validation create echo chamber?"
+    meta_validation_patterns = [
+        # Who validates the validator?
+        r"ai\s+validate\s+chính\s+validation",  # "ai validate chính validation"
+        r"who\s+validates?\s+.*validation",  # "who validates the validation"
+        r"validate\s+chính\s+nó",  # "validate chính nó"
+        r"validate\s+itself",  # "validate itself"
+        r"validate\s+chính\s+.*chain",  # "validate chính validation chain"
+        r"validate\s+.*validation\s+chain",  # "validate the validation chain"
+        
+        # Echo chamber / circular reasoning
+        r"echo\s+chamber",  # "echo chamber"
+        r"vòng\s+lặp",  # "vòng lặp"
+        r"circular",  # "circular"
+        r"tự\s+quy\s+chiếu",  # "tự quy chiếu"
+        r"self.?reference",  # "self-reference"
+        
+        # Bootstrapping / epistemic circularity
+        r"bootstrap",  # "bootstrap"
+        r"bootstrapping",  # "bootstrapping"
+        r"epistemic\s+circularity",  # "epistemic circularity"
+        r"infinite\s+regress",  # "infinite regress"
+        r"vòng\s+lặp\s+vô\s+hạn",  # "vòng lặp vô hạn"
+        
+        # Paradox / self-reference
+        r"paradox.*validation",  # "paradox ... validation"
+        r"nghịch\s+lý.*validation",  # "nghịch lý ... validation"
+        r"gödel.*validation",  # "gödel ... validation"
+        r"tarski.*validation",  # "tarski ... validation"
+    ]
+    
+    # Check if this is a meta-validation question
+    is_meta_validation = any(re.search(pattern, query_lower) for pattern in meta_validation_patterns)
+    
+    # If meta-validation question detected, mark as special case
+    # This should be routed to philosophical processor, NOT technical StillMe query
+    if is_meta_validation:
+        matched_keywords.append("meta_validation")
+        # Return False to prevent StillMe query detection (will be handled by philosophical processor)
+        # But we log it for debugging
+        logger.info(f"🚨 Meta-validation question detected: '{query[:80]}...' - Should route to philosophical processor")
+        return (False, matched_keywords)  # False = not StillMe technical query, but special case
+    
+    # CRITICAL: Check for technical architecture questions (RAG, DeepSeek, black box)
     # These should trigger foundational knowledge retrieval even without explicit StillMe name
     technical_keywords = [
         "rag", "retrieval-augmented generation", "chromadb", "vector database",
         "deepseek", "openai", "llm api", "black box", "blackbox",
         "embedding", "multi-qa-minilm", "sentence-transformers",
-        "pipeline", "validation", "hallucination", "transparency",
+        "pipeline", "hallucination", "transparency",
         "kiến trúc", "hệ thống", "cơ chế", "quy trình",
         "cơ chế hoạt động", "cách hoạt động", "how does", "how it works"
     ]
+    
+    # CRITICAL: "validation" is now excluded from technical_keywords if it's part of meta-validation
+    # Only include "validation" as technical keyword if NOT meta-validation
+    # (meta-validation already handled above)
     
     # CRITICAL: Check if question is about "your system" or "in your system"
     # These are definitely about StillMe even without explicit StillMe name

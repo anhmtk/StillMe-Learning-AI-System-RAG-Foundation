@@ -276,6 +276,43 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\bvalence\b",
     ]
     
+    # CRITICAL: Check for META-VALIDATION questions FIRST (before other classifications)
+    # These are epistemic/paradox questions about validation of validation itself
+    # Examples: "Who validates the validation chain?", "Does validation create echo chamber?"
+    meta_validation_patterns = [
+        # Who validates the validator?
+        r"ai\s+validate\s+chính\s+validation",  # "ai validate chính validation"
+        r"who\s+validates?\s+.*validation",  # "who validates the validation"
+        r"validate\s+chính\s+nó",  # "validate chính nó"
+        r"validate\s+itself",  # "validate itself"
+        r"validate\s+chính\s+.*chain",  # "validate chính validation chain"
+        r"validate\s+.*validation\s+chain",  # "validate the validation chain"
+        
+        # Echo chamber / circular reasoning
+        r"echo\s+chamber",  # "echo chamber"
+        r"vòng\s+lặp.*validation",  # "vòng lặp ... validation"
+        r"circular.*validation",  # "circular ... validation"
+        r"tự\s+quy\s+chiếu.*validation",  # "tự quy chiếu ... validation"
+        r"self.?reference.*validation",  # "self-reference ... validation"
+        
+        # Bootstrapping / epistemic circularity
+        r"bootstrap.*validation",  # "bootstrap ... validation"
+        r"epistemic\s+circularity",  # "epistemic circularity"
+        r"infinite\s+regress.*validation",  # "infinite regress ... validation"
+        
+        # Paradox / self-reference about validation
+        r"paradox.*validation",  # "paradox ... validation"
+        r"nghịch\s+lý.*validation",  # "nghịch lý ... validation"
+    ]
+    
+    # Check if this is a meta-validation question
+    is_meta_validation = any(re.search(pattern, text_lower) for pattern in meta_validation_patterns)
+    
+    if is_meta_validation:
+        # Meta-validation questions are UNDERSTANDING type (epistemic/paradox questions)
+        logger.info(f"🚨 Meta-validation question detected: '{text[:80]}...' - Classifying as UNDERSTANDING (epistemic)")
+        return QuestionType.UNDERSTANDING
+    
     # Type C - Understanding keywords (prioritize "hiểu" when it appears)
     # CRITICAL: Exclude technical "understanding" questions (e.g., "how does RAG work?")
     # Only match "hiểu" when it's about StillMe's own understanding, not technical concepts
