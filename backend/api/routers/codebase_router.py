@@ -149,9 +149,6 @@ async def _generate_code_explanation(
         import os
         
         # Detect language from question
-        from backend.api.utils.chat_helpers import detect_language
-        from backend.identity.prompt_builder import build_code_explanation_prompt
-        
         detected_lang = detect_language(question)
         
         # Build prompt using prompt_builder (Phase 1.4: Code Explanation Prompt Engineering)
