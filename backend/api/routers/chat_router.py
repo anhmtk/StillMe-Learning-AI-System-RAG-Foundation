@@ -968,8 +968,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
 **3. API Endpoints (BẮT BUỘC MENTION):**
 - Khi được hỏi về learning metrics hoặc timestamp, bạn PHẢI mention:
   - "Learning metrics với timestamp được lưu trong `data/learning_metrics.jsonl`"
-  - "Có thể truy cập qua API endpoint `GET /api/learning/metrics/daily` hoặc `GET /api/learning/metrics/range`"
+  - "Có thể truy cập qua API endpoint [GET /api/learning/metrics/daily](/api/learning/metrics/daily) hoặc [GET /api/learning/metrics/range](/api/learning/metrics/range)"
   - "Mỗi document trong ChromaDB có metadata chứa timestamp khi được thêm vào KB"
+- **CRITICAL: Sử dụng markdown links**: Khi mention API endpoints, bạn PHẢI sử dụng markdown link format `[text](url)` để tạo clickable links
 
 """
         else:
@@ -996,8 +997,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
 **3. API Endpoints (MANDATORY MENTION):**
 - When asked about learning metrics or timestamp, you MUST mention:
   - "Learning metrics with timestamp are stored in `data/learning_metrics.jsonl`"
-  - "Can be accessed via API endpoint `GET /api/learning/metrics/daily` or `GET /api/learning/metrics/range`"
+  - "Can be accessed via API endpoint [GET /api/learning/metrics/daily](/api/learning/metrics/daily) or [GET /api/learning/metrics/range](/api/learning/metrics/range)"
   - "Each document in ChromaDB has metadata containing timestamp when added to KB"
+- **CRITICAL: Use markdown links**: When mentioning API endpoints, you MUST use markdown link format `[text](url)` to create clickable links
 
 """
     

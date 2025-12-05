@@ -851,6 +851,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 var boldPattern = new RegExp('\\\\*\\\\*([^*]+?)\\\\*\\\\*', 'g');
                 html = html.replace(boldPattern, '<strong>$1</strong>');
                 
+                // Links: [text](url) -> <a href="url">text</a>
+                // CRITICAL: In Python f-string, \\\\[ becomes \\[ in JavaScript string, which becomes \[ in regex
+                // Need to escape brackets and parentheses properly
+                var linkPattern = new RegExp('\\\\[([^\\\\]]+)\\\\\\]\\\\\\(([^)]+)\\\\\\)', 'g');
+                html = html.replace(linkPattern, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
+                
                 // Bullet points: - item -> <li>item</li>
                 var bulletPattern = new RegExp('<p>- (.+?)</p>', 'g');
                 html = html.replace(bulletPattern, '<li>$1</li>');
