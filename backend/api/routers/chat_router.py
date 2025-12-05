@@ -679,13 +679,20 @@ When answering this question, treat it as a philosophical inquiry.
   * Part 1: Answer the main question (e.g., "Can you improve your code?")
   * Part 2: Provide the SPECIFIC EXAMPLE requested (e.g., "Show me a specific example")
   * DO NOT skip the example part even if you answered "no" to the main question
-- DO NOT give generic explanations - provide ACTUAL examples from StillMe's operation
-- Examples you can use:
-  * Validator threshold adjustments (e.g., "CitationRequired validator was adjusted from 0.5 to 0.3 threshold")
-  * Learning cycle improvements (e.g., "RSS feed parsing was optimized to handle malformed XML")
-  * RAG retrieval improvements (e.g., "Similarity threshold was tuned from 0.4 to 0.35 for better recall")
-  * Error handling enhancements (e.g., "Added retry logic for ChromaDB connection failures")
-  * Context overflow prevention (e.g., "Added pre-check token count to prevent context overflow before LLM call")
+- **CRITICAL: Use ACTUAL examples from StillMe's codebase history, not generic hypotheticals:**
+  * When explaining that StillMe cannot self-improve, mention ACTUAL improvements made by developers:
+    - "Added pre-check token count to prevent context overflow errors before LLM calls"
+    - "Fixed language detection false positives by using word boundaries for Vietnamese keywords"
+    - "Improved error detector patterns to prevent false positives when 'context' appears in normal content"
+    - "Enhanced time estimation with Vietnamese language support"
+    - "Added instructions for specific example requests and exact metrics transparency"
+  * These are REAL improvements in StillMe's codebase (made by developers, not self-directed)
+  * Use these to illustrate the distinction: StillMe cannot self-improve, but developers continuously improve StillMe
+- **Structure for self-improvement questions:**
+  1. Direct answer: "No, I cannot autonomously improve my own code"
+  2. Technical explanation: Distinction between operational parameters and core architecture
+  3. ACTUAL examples: Mention recent code improvements (by developers) to illustrate what "improvement" means
+  4. Philosophical depth: Explore the concept of self-improvement, meta-cognition, recursive capability
 - If you don't have specific examples, acknowledge: "Mình không có ví dụ cụ thể về [topic], nhưng mình có thể giải thích cách [topic] hoạt động" / "I don't have a specific example of [topic], but I can explain how [topic] works"
 
 **MANDATORY OUTPUT RULES (CRITICAL - NO EXCEPTIONS):**
@@ -1561,7 +1568,13 @@ The RAG system found context documents, but they are NOT relevant to your questi
             logger.warning(f"⚠️ Missing citation detected but no patched_answer available - attempting to add citation directly")
             from backend.validators.citation import CitationRequired
             citation_validator = CitationRequired(required=True)
-            citation_result = citation_validator.run(raw_response, ctx_docs, is_philosophical=is_philosophical, user_question=chat_request.message)
+            citation_result = citation_validator.run(
+                raw_response, 
+                ctx_docs, 
+                is_philosophical=is_philosophical, 
+                user_question=chat_request.message,
+                context=context  # CRITICAL: Pass context for foundational knowledge detection
+            )
             if citation_result.patched_answer:
                 response = citation_result.patched_answer
                 logger.info(f"✅ Added citation directly via CitationRequired. Reasons: {citation_result.reasons}")
@@ -1673,7 +1686,8 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                                 response, 
                                 ctx_docs=ctx_docs,
                                 is_philosophical=is_philosophical,
-                                user_question=chat_request.message
+                                user_question=chat_request.message,
+                                context=context  # CRITICAL: Pass context for foundational knowledge detection
                             )
                             if citation_result.patched_answer:
                                 response = citation_result.patched_answer
@@ -1699,7 +1713,8 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                             response, 
                             ctx_docs=ctx_docs,
                             is_philosophical=is_philosophical,
-                            user_question=chat_request.message
+                            user_question=chat_request.message,
+                            context=context  # CRITICAL: Pass context for foundational knowledge detection
                         )
                         if citation_result.patched_answer:
                             response = citation_result.patched_answer
@@ -1726,7 +1741,8 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                         response, 
                         ctx_docs=ctx_docs,
                         is_philosophical=is_philosophical,
-                        user_question=chat_request.message
+                        user_question=chat_request.message,
+                        context=context  # CRITICAL: Pass context for foundational knowledge detection
                     )
                     if citation_result.patched_answer:
                         response = citation_result.patched_answer
@@ -1758,7 +1774,13 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                     from backend.validators.citation import CitationRequired
                     citation_validator = CitationRequired(required=True)
                     # Re-run citation validator to get patched answer (pass user_question to detect factual questions)
-                    citation_result = citation_validator.run(raw_response, ctx_docs, is_philosophical=is_philosophical, user_question=chat_request.message)
+                    citation_result = citation_validator.run(
+                        raw_response, 
+                        ctx_docs, 
+                        is_philosophical=is_philosophical, 
+                        user_question=chat_request.message,
+                        context=context  # CRITICAL: Pass context for foundational knowledge detection
+                    )
                     if citation_result.patched_answer:
                         response = citation_result.patched_answer
                         logger.info(f"✅ Added citation via CitationRequired. Reasons: {validation_result.reasons}")
@@ -1785,7 +1807,8 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                                 response, 
                                 ctx_docs=ctx_docs,
                                 is_philosophical=is_philosophical,
-                                user_question=chat_request.message
+                                user_question=chat_request.message,
+                                context=context  # CRITICAL: Pass context for foundational knowledge detection
                             )
                             if citation_result.patched_answer:
                                 response = citation_result.patched_answer
@@ -4963,7 +4986,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                         raw_response, 
                         ctx_docs=ctx_docs_for_citation,
                         is_philosophical=is_philosophical,
-                        user_question=chat_request.message
+                        user_question=chat_request.message,
+                        context=context  # CRITICAL: Pass context for foundational knowledge detection
                     )
                     if citation_result.patched_answer:
                         response = citation_result.patched_answer
@@ -5433,11 +5457,14 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 if not has_citations_after_rewrite and ((ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0) or is_factual_question):
                                     from backend.validators.citation import CitationRequired
                                     citation_validator = CitationRequired(required=True)
+                                    # Get context for foundational knowledge detection
+                                    context_for_citation = context if 'context' in locals() and context else None
                                     citation_result = citation_validator.run(
                                         final_response, 
                                         ctx_docs_for_rewrite if ctx_docs_for_rewrite else [], 
                                         is_philosophical=is_philosophical,
-                                        user_question=chat_request.message
+                                        user_question=chat_request.message,
+                                        context=context_for_citation  # CRITICAL: Pass context for foundational knowledge detection
                                     )
                                     if citation_result.patched_answer:
                                         final_response = citation_result.patched_answer
