@@ -147,55 +147,17 @@ async def _generate_code_explanation(
         from backend.api.utils.chat_helpers import generate_ai_response
         import os
         
-        # Build context from code chunks
-        context_parts = []
-        for i, chunk in enumerate(code_chunks, 1):
-            metadata = chunk.get("metadata", {})
-            file_path = metadata.get("file_path", "")
-            line_range = f"{metadata.get('line_start', '?')}-{metadata.get('line_end', '?')}"
-            code_content = chunk.get("document", "")
-            
-            context_part = f"""
---- Code Chunk {i} ---
-File: {file_path}
-Lines: {line_range}
-Type: {metadata.get('code_type', 'unknown')}
-"""
-            if metadata.get("class_name"):
-                context_part += f"Class: {metadata.get('class_name')}\n"
-            if metadata.get("function_name"):
-                context_part += f"Function: {metadata.get('function_name')}\n"
-            if metadata.get("docstring"):
-                context_part += f"Docstring: {metadata.get('docstring')}\n"
-            
-            context_part += f"\nCode:\n{code_content}\n"
-            context_parts.append(context_part)
+        # Detect language from question
+        from backend.api.utils.chat_helpers import detect_language
+        detected_lang = detect_language(question)
         
-        context = "\n".join(context_parts)
-        
-        # Build prompt
-        prompt = f"""You are StillMe's Codebase Assistant. Answer the user's question about the StillMe codebase based on the provided code chunks.
-
-IMPORTANT SAFETY RULES:
-- ONLY explain the code, do NOT suggest modifications
-- ONLY describe what the code does, do NOT propose changes
-- Cite specific file:line references when mentioning code
-- Be accurate and technical
-
-User Question: {question}
-
-Code Context:
-{context}
-
-Instructions:
-1. Answer the question based on the provided code chunks
-2. Cite specific files and line numbers (e.g., "In file.py:10-20, the function does...")
-3. Explain the code's purpose and how it works
-4. If multiple chunks are relevant, explain how they relate
-5. Be concise but thorough
-6. Use technical language appropriate for developers
-
-Your explanation:"""
+        # Build prompt using prompt_builder (Phase 1.4)
+        from backend.identity.prompt_builder import build_code_explanation_prompt
+        prompt = build_code_explanation_prompt(
+            question=question,
+            code_chunks=code_chunks,
+            detected_lang=detected_lang
+        )
         
         # Call LLM using server keys (internal use for codebase assistant)
         # Use DeepSeek as default provider if available
