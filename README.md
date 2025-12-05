@@ -308,14 +308,11 @@ See `env.example` for full list.
 
 ### ✅ Implemented & Working
 
-#### 🧠 Codebase Assistant (Phase 1)
-- **Code Q&A**: Ask questions about StillMe's codebase and get explanations with file:line citations
-- **RAG-based Retrieval**: Uses semantic search to find relevant code chunks from indexed codebase
-- **Multilingual Support**: Works in both English and Vietnamese
-- **Safety First**: Only explains code, never suggests modifications or improvements
-- **Comprehensive Coverage**: Indexed 254 files (backend, stillme_core, frontend) with 376 code chunks
-- **API Endpoint**: `POST /api/codebase/query` for codebase questions
-- **Example Questions**: "How does the validation chain work?", "What is the RAG retrieval process?", "StillMe sử dụng mô hình embedding nào cho RAG?"
+#### 🧠 Codebase Assistant
+- **Code Q&A**: Query StillMe's codebase via API (`POST /api/codebase/query`)
+- **RAG-based Retrieval**: Semantic search with file:line citations
+- **Status**: Phase 1 complete (255 files indexed, 377 chunks)
+- 📚 See [`docs/CODEBASE_ASSISTANT.md`](docs/CODEBASE_ASSISTANT.md) for details
 
 **Core RAG System:**
 - ✅ Vector Database (ChromaDB) - Semantic search and knowledge retrieval
