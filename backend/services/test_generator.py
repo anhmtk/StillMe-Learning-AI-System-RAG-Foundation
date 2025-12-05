@@ -184,6 +184,9 @@ Use proper {test_framework} syntax.
         try:
             from backend.api.utils.chat_helpers import generate_ai_response
             
+            if not self.llm_api_key:
+                raise ValueError("LLM API key not provided. Set DEEPSEEK_API_KEY or OPENROUTER_API_KEY environment variable.")
+            
             response = await generate_ai_response(
                 prompt=prompt,
                 detected_lang="en",
@@ -193,6 +196,9 @@ Use proper {test_framework} syntax.
                 question="Generate unit tests",
                 task_type="code_generation"
             )
+            
+            if not response or len(response.strip()) < 50:
+                raise ValueError("LLM returned empty or too short response. Check API key and LLM service.")
             
             return response.strip()
             
