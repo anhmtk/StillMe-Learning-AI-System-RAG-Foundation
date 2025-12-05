@@ -882,6 +882,8 @@ The foundational knowledge below is the CURRENT, ACCURATE information about Stil
                     metadata = doc.get("metadata", {})
                     source = metadata.get("source", "Unknown")
                     content = doc.get("content", "")
+                    timestamp = metadata.get("timestamp", None)  # Get timestamp when added to KB
+                    source_type = metadata.get("source_type", metadata.get("type", "unknown"))
                     
                     # CRITICAL: Mark foundational knowledge clearly for LLM to recognize
                     # Prompt builder expects [foundational knowledge] or source: CRITICAL_FOUNDATION
@@ -900,12 +902,31 @@ The foundational knowledge below is the CURRENT, ACCURATE information about Stil
                     
                     truncated_content = self._truncate_text_by_tokens(content, doc_max_tokens)
                     
-                    # Format with clear foundational knowledge marker
+                    # Format with clear foundational knowledge marker and timestamp
                     if is_foundational:
                         doc_text = f"{i}. [foundational knowledge] {truncated_content} (source: CRITICAL_FOUNDATION)"
                         logger.debug(f"✅ Formatted foundational knowledge document {i} with [foundational knowledge] marker")
                     else:
-                        doc_text = f"{i}. {truncated_content} (Source: {source})"
+                        # Format with source, source_type, and timestamp (if available)
+                        source_info = f"Source: {source}"
+                        if source_type and source_type != "unknown" and source_type != content_type:
+                            source_info += f", Type: {source_type}"
+                        if timestamp:
+                            # Format timestamp for readability
+                            try:
+                                from datetime import datetime
+                                # Try to parse ISO format timestamp
+                                if isinstance(timestamp, str):
+                                    dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                                    # Format as readable date-time
+                                    timestamp_display = dt.strftime("%Y-%m-%d %H:%M:%S UTC")
+                                    source_info += f", Added to KB: {timestamp_display} (ISO: {timestamp})"
+                                else:
+                                    source_info += f", Added to KB: {timestamp}"
+                            except Exception as e:
+                                logger.debug(f"Could not format timestamp {timestamp}: {e}")
+                                source_info += f", Added to KB: {timestamp}"
+                        doc_text = f"{i}. {truncated_content} ({source_info})"
                     
                     doc_tokens = self._estimate_tokens(doc_text)
                     remaining_tokens -= doc_tokens
