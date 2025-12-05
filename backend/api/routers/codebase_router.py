@@ -217,6 +217,170 @@ async def get_codebase_stats(
         )
 
 
+@router.post("/generate-tests")
+async def generate_tests(
+    request: Dict[str, Any],
+    indexer = Depends(get_codebase_indexer)
+):
+    """
+    Generate unit tests for a code file.
+    
+    Request body:
+    {
+        "file_path": "backend/services/validator.py",  # Optional
+        "code_content": "...",  # Required if file_path not provided
+        "test_framework": "pytest",  # Optional, default: pytest
+        "include_edge_cases": true,  # Optional, default: true
+        "include_error_handling": true  # Optional, default: true
+    }
+    
+    Returns:
+    {
+        "test_code": "...",
+        "test_file_path": "tests/backend/services/test_validator.py",
+        "coverage_estimate": 85,
+        "test_cases": ["test_validator_basic", "test_validator_edge_case"],
+        "framework": "pytest"
+    }
+    """
+    import os
+    from backend.config.security import validate_api_key_config
+    from backend.services.test_generator import get_test_generator
+    
+    # Security: Require API key for this endpoint
+    security_status = validate_api_key_config()
+    if not security_status["configured"]:
+        raise HTTPException(
+            status_code=403,
+            detail="API key authentication required for test generation endpoint"
+        )
+    
+    try:
+        # Get parameters
+        file_path = request.get("file_path")
+        code_content = request.get("code_content")
+        test_framework = request.get("test_framework", "pytest")
+        include_edge_cases = request.get("include_edge_cases", True)
+        include_error_handling = request.get("include_error_handling", True)
+        
+        if not file_path and not code_content:
+            raise HTTPException(
+                status_code=400,
+                detail="Either file_path or code_content must be provided"
+            )
+        
+        # Get test generator
+        test_generator = get_test_generator(codebase_indexer=indexer)
+        
+        # Generate tests
+        result = await test_generator.generate_tests(
+            file_path=file_path,
+            code_content=code_content,
+            test_framework=test_framework,
+            include_edge_cases=include_edge_cases,
+            include_error_handling=include_error_handling
+        )
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error generating tests: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate tests: {str(e)}"
+        )
+
+
+@router.post("/review")
+async def review_code(
+    request: Dict[str, Any],
+    indexer = Depends(get_codebase_indexer)
+):
+    """
+    Review code and return suggestions.
+    
+    Request body:
+    {
+        "code_content": "...",  # Required
+        "file_path": "backend/services/validator.py",  # Optional
+        "check_style": true,  # Optional, default: true
+        "check_security": true,  # Optional, default: true
+        "check_performance": true  # Optional, default: true
+    }
+    
+    Returns:
+    {
+        "issues": [
+            {
+                "severity": "warning",
+                "line": 45,
+                "type": "missing_error_handling",
+                "message": "Missing error handling for open()",
+                "suggestion": "Wrap open() in try-except block"
+            }
+        ],
+        "summary": {
+            "total": 5,
+            "errors": 0,
+            "warnings": 3,
+            "info": 2
+        },
+        "score": 85,
+        "file_path": "backend/services/validator.py"
+    }
+    """
+    import os
+    from backend.config.security import validate_api_key_config
+    from backend.services.code_reviewer import get_code_reviewer
+    
+    # Security: Require API key for this endpoint
+    security_status = validate_api_key_config()
+    if not security_status["configured"]:
+        raise HTTPException(
+            status_code=403,
+            detail="API key authentication required for code review endpoint"
+        )
+    
+    try:
+        # Get parameters
+        code_content = request.get("code_content")
+        if not code_content:
+            raise HTTPException(
+                status_code=400,
+                detail="code_content is required"
+            )
+        
+        file_path = request.get("file_path")
+        check_style = request.get("check_style", True)
+        check_security = request.get("check_security", True)
+        check_performance = request.get("check_performance", True)
+        
+        # Get code reviewer
+        reviewer = get_code_reviewer(codebase_indexer=indexer)
+        
+        # Review code
+        result = await reviewer.review_code(
+            code_content=code_content,
+            file_path=file_path,
+            check_style=check_style,
+            check_security=check_security,
+            check_performance=check_performance
+        )
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error reviewing code: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to review code: {str(e)}"
+        )
+
+
 @router.post("/index")
 async def trigger_indexing(
     indexer = Depends(get_codebase_indexer),
