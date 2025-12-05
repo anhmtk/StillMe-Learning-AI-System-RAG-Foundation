@@ -204,6 +204,17 @@ StillMe was initiated by **Anh Nguyễn**, a Vietnamese founder passionate about
 
 **📄 For detailed evaluation results and performance metrics, see [`docs/SUMMARY.md`](docs/SUMMARY.md)**
 
+### 🎯 Technical Milestones
+
+- **Self-Comprehension Achievement (2025-12-05)**: StillMe achieved 100% accuracy in answering questions about its own source code implementation. This represents a **technical milestone** in AI self-understanding - the ability to semantically analyze and explain its own implementation through RAG-based code retrieval.
+  - **Comprehension Score**: 100.0% (Q&A accuracy: 100%, Indexing coverage: 100%)
+  - **Codebase Analyzed**: 259 files, 67,456 lines
+  - **Indexed**: 316 files, 377 code chunks
+  - **Insights Generated**: Architecture comprehension, component awareness, code organization understanding
+  - 📄 **Full Report**: [`docs/reports/stillme_self_comprehension_report_20251205_164714.md`](docs/reports/stillme_self_comprehension_report_20251205_164714.md)
+  
+  **⚠️ Important**: This is a **technical achievement** in code understanding through semantic analysis, not a claim of consciousness. StillMe demonstrates advanced pattern recognition about its own implementation, operating through deterministic code.
+
 ## 💼 Use Cases
 
 ### Research & Academia
