@@ -111,47 +111,56 @@ stillme_core/
 
 ## 🔧 StillMe Through the Git Mental Model
 
-For developers familiar with Git, here's how StillMe's architecture maps to Git concepts:
+> **Note:** This section provides a mental model for developers familiar with Git. These are **conceptual analogies**, not exact technical mappings. StillMe's architecture is more complex than Git (semantic search vs. linear history, confidence scores vs. deterministic hashes, etc.). For non-developers, see the [Architecture](#-architecture) section for a technical overview.
 
-- **Validation Chain = `git blame` of reasoning**
+For developers familiar with Git, here's how StillMe's architecture conceptually maps to Git concepts:
+
+- **Validation Chain ≈ `git blame` of reasoning**
   - Trace every claim back to its evidence source
   - Know exactly which validator checked which part of the response
   - Full audit trail of validation decisions
+  - *Note: Unlike `git blame` (deterministic SHA-based), validation includes uncertainty quantification and confidence scores*
 
-- **RAG + Citations = commit history of knowledge**
+- **RAG + Citations ≈ commit history of knowledge**
   - Every piece of knowledge has an origin you can inspect
   - Citations act like commit hashes — immutable references to sources
   - Complete lineage from source to response
+  - *Note: RAG uses semantic similarity (vector search), not linear history. Citations don't have parent-child relationships like commits*
 
-- **Epistemic State = branch status**
+- **Epistemic State ≈ branch status**
   - `KNOWN` = clean (clear evidence, validators pass, high confidence)
   - `UNCERTAIN` = dirty (warnings present, medium confidence, needs review)
   - `UNKNOWN` = conflicted (fallback triggered, no context, critical failures)
+  - *Note: Epistemic states are more nuanced than Git branch status — they include confidence scores (0.0-1.0) and partial knowledge states*
 
 - **Continuous Learning = `git pull` of knowledge**
   - Fetching + integrating new sources every 4 hours
   - Automated updates from RSS feeds, arXiv, CrossRef, Wikipedia
   - Knowledge base grows incrementally, never frozen
 
-- **ChromaDB = repository of embeddings**
+- **ChromaDB ≈ repository of embeddings**
   - Vector storage = code repository
   - Semantic search = `git grep` but for meaning
   - Embeddings = compressed representations of knowledge
+  - *Note: Unlike Git's hash-based storage, ChromaDB uses vector similarity for semantic search*
 
-- **Validator Chain = CI/CD pipeline of truth**
+- **Validator Chain ≈ CI/CD pipeline of truth**
   - Automated checks that prevent hallucination from being merged
   - Each validator = a CI check (citation, evidence overlap, confidence)
   - Failures trigger fallback, not deployment
+  - *Note: Validators include probabilistic confidence scoring, not just pass/fail like CI checks*
 
-- **Self-Correction = `git rebase` / `fixup`**
+- **Self-Correction ≈ `git rebase` / `fixup`**
   - Rewrite reasoning when validation fails
   - Post-processing improves quality without changing core facts
   - Maintains response history while fixing issues
+  - *Note: Self-correction uses LLM-based rewriting, not deterministic code transformations*
 
-- **Fallback Handler = merge conflict resolution**
+- **Fallback Handler ≈ merge conflict resolution**
   - If evidence is missing → produce an explicit uncertainty response
   - Never fabricate information, always admit limitations
   - Transparent about what StillMe doesn't know
+  - *Note: Fallback produces epistemic uncertainty responses, not code conflict markers*
 
 - **Audit Logs = `git log --decorate --graph`**
   - Chronological trace of all decisions
@@ -159,7 +168,13 @@ For developers familiar with Git, here's how StillMe's architecture maps to Git 
   - Learning metrics stored in `data/learning_metrics.jsonl`
   - Accessible via API endpoints (`GET /api/validators/metrics`, `GET /api/learning/metrics/daily`)
 
-This mental model makes StillMe's transparency immediately understandable to developers: **StillMe gives reasoning the same version control and auditability that Git gives to code.**
+**Key Differences from Git:**
+- StillMe uses **semantic similarity** (vector search), not linear history
+- StillMe includes **confidence scores** and **uncertainty quantification**, not just deterministic pass/fail
+- StillMe's knowledge graph is **non-linear** (multiple sources can contribute to one answer)
+- StillMe's validation includes **probabilistic checks** (evidence overlap, confidence thresholds), not just binary validations
+
+This mental model helps developers understand StillMe's transparency conceptually: **StillMe gives reasoning similar version control and auditability that Git gives to code, but with semantic search and uncertainty quantification.**
 
 ## 👤 About the Founder
 
