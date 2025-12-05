@@ -174,8 +174,17 @@ def test_api_endpoint():
     logger.info("="*80)
     
     import requests
+    import os
     
-    base_url = "http://localhost:8000"
+    # Try to detect Railway URL or use localhost
+    if os.getenv("RAILWAY_PUBLIC_DOMAIN"):
+        base_url = f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN')}"
+    elif os.getenv("RAILWAY_STATIC_URL"):
+        base_url = os.getenv("RAILWAY_STATIC_URL")
+    else:
+        base_url = "http://localhost:8000"
+    
+    logger.info(f"🌐 Testing API at: {base_url}")
     
     # Test stats endpoint
     try:
