@@ -100,7 +100,7 @@ stillme_core/
 - ✅ **Open Source** — You can inspect, modify, and improve everything
 - ✅ **Intellectual Humility** — StillMe knows when it doesn't know and has the courage to admit it
 
-> **StillMe is to reasoning what `git blame` is to code — every claim has a lineage.**
+> **If Git is the mechanism that ensures code integrity through history and commit hashes, then StillMe is the mechanism that ensures knowledge integrity through Validation Chain and source traceability history.**
 
 **Perfect for:**
 - 🔬 **Researchers** who need verifiable sources and audit trails
@@ -112,6 +112,8 @@ stillme_core/
 ## 🔧 StillMe Through the Git Mental Model
 
 > **Note:** This section provides a mental model for developers familiar with Git. These are **conceptual analogies**, not exact technical mappings. StillMe's architecture is more complex than Git (semantic search vs. linear history, confidence scores vs. deterministic hashes, etc.). For non-developers, see the [Architecture](#-architecture) section for a technical overview.
+
+> **Important:** StillMe uses the **core principles** of Git (auditability, history, traceability) to manage knowledge, but it is **not** "Git for AI" or "Git for Knowledge Base" without qualification. The key difference: **Git requires human decisions for commits, while StillMe uses an automated Validation Chain to accept/reject new knowledge.**
 
 For developers familiar with Git, here's how StillMe's architecture conceptually maps to Git concepts:
 
@@ -169,12 +171,14 @@ For developers familiar with Git, here's how StillMe's architecture conceptually
   - Accessible via API endpoints (`GET /api/validators/metrics`, `GET /api/learning/metrics/daily`)
 
 **Key Differences from Git:**
+- **Core Difference:** Git requires **human decisions** for commits, while StillMe uses an **automated Validation Chain** to accept/reject new knowledge
 - StillMe uses **semantic similarity** (vector search), not linear history
 - StillMe includes **confidence scores** and **uncertainty quantification**, not just deterministic pass/fail
 - StillMe's knowledge graph is **non-linear** (multiple sources can contribute to one answer)
 - StillMe's validation includes **probabilistic checks** (evidence overlap, confidence thresholds), not just binary validations
+- Git handles **code differences** (text diff), while StillMe handles **knowledge differences** and **validation**
 
-This mental model helps developers understand StillMe's transparency conceptually: **StillMe gives reasoning similar version control and auditability that Git gives to code, but with semantic search and uncertainty quantification.**
+This mental model helps developers understand StillMe's transparency conceptually: **StillMe applies Git's core principles (auditability, history, traceability) to knowledge management, but with automated validation, semantic search, and uncertainty quantification.**
 
 ## 👤 About the Founder
 
