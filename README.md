@@ -100,12 +100,66 @@ stillme_core/
 - ✅ **Open Source** — You can inspect, modify, and improve everything
 - ✅ **Intellectual Humility** — StillMe knows when it doesn't know and has the courage to admit it
 
+> **StillMe is to reasoning what `git blame` is to code — every claim has a lineage.**
+
 **Perfect for:**
 - 🔬 **Researchers** who need verifiable sources and audit trails
 - 💼 **Developers** building transparent AI applications
 - 🏢 **Organizations** requiring accountability and compliance
 - 🎓 **Educators** teaching students about AI transparency
 - 🌍 **Anyone** who values honesty over false confidence
+
+## 🔧 StillMe Through the Git Mental Model
+
+For developers familiar with Git, here's how StillMe's architecture maps to Git concepts:
+
+- **Validation Chain = `git blame` of reasoning**
+  - Trace every claim back to its evidence source
+  - Know exactly which validator checked which part of the response
+  - Full audit trail of validation decisions
+
+- **RAG + Citations = commit history of knowledge**
+  - Every piece of knowledge has an origin you can inspect
+  - Citations act like commit hashes — immutable references to sources
+  - Complete lineage from source to response
+
+- **Epistemic State = branch status**
+  - `KNOWN` = clean (clear evidence, validators pass, high confidence)
+  - `UNCERTAIN` = dirty (warnings present, medium confidence, needs review)
+  - `UNKNOWN` = conflicted (fallback triggered, no context, critical failures)
+
+- **Continuous Learning = `git pull` of knowledge**
+  - Fetching + integrating new sources every 4 hours
+  - Automated updates from RSS feeds, arXiv, CrossRef, Wikipedia
+  - Knowledge base grows incrementally, never frozen
+
+- **ChromaDB = repository of embeddings**
+  - Vector storage = code repository
+  - Semantic search = `git grep` but for meaning
+  - Embeddings = compressed representations of knowledge
+
+- **Validator Chain = CI/CD pipeline of truth**
+  - Automated checks that prevent hallucination from being merged
+  - Each validator = a CI check (citation, evidence overlap, confidence)
+  - Failures trigger fallback, not deployment
+
+- **Self-Correction = `git rebase` / `fixup`**
+  - Rewrite reasoning when validation fails
+  - Post-processing improves quality without changing core facts
+  - Maintains response history while fixing issues
+
+- **Fallback Handler = merge conflict resolution**
+  - If evidence is missing → produce an explicit uncertainty response
+  - Never fabricate information, always admit limitations
+  - Transparent about what StillMe doesn't know
+
+- **Audit Logs = `git log --decorate --graph`**
+  - Chronological trace of all decisions
+  - Validation metrics stored in `data/validation_metrics.jsonl`
+  - Learning metrics stored in `data/learning_metrics.jsonl`
+  - Accessible via API endpoints (`GET /api/validators/metrics`, `GET /api/learning/metrics/daily`)
+
+This mental model makes StillMe's transparency immediately understandable to developers: **StillMe gives reasoning the same version control and auditability that Git gives to code.**
 
 ## 👤 About the Founder
 
