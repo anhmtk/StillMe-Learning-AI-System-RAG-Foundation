@@ -129,6 +129,186 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en") -> str:
     # Append timestamp attribution to response
     return response.rstrip() + timestamp_attr
 
+
+def _append_validation_warnings_to_response(
+    response: str,
+    validation_result,
+    confidence_score: float,
+    context: dict,
+    detected_lang: str = "en"
+) -> str:
+    """
+    Append validation warnings to response text for transparency.
+    
+    When StillMe has non-critical validation warnings (e.g., low_overlap, citation_relevance_warning),
+    this function formats them into user-facing messages with technical details.
+    
+    Args:
+        response: Original response text
+        validation_result: ValidationResult with warnings
+        confidence_score: Calculated confidence score
+        context: Full context dict with knowledge_docs and conversation_docs
+        detected_lang: Detected language code
+        
+    Returns:
+        Response with validation warnings appended
+    """
+    if not validation_result or not validation_result.reasons:
+        return response
+    
+    warnings = []
+    overlap_score = None
+    threshold = None
+    
+    # Parse warnings from reasons
+    for reason in validation_result.reasons:
+        if "low_overlap" in reason:
+            # Extract overlap score from reason (format: "low_overlap:0.023")
+            try:
+                overlap_score = float(reason.split(":")[1]) if ":" in reason else None
+                # Get threshold from EvidenceOverlap validator (default: 0.01)
+                threshold = float(os.getenv("VALIDATOR_EVIDENCE_THRESHOLD", "0.01"))
+            except (ValueError, IndexError):
+                pass
+            warnings.append("low_overlap")
+        elif "citation_relevance_warning" in reason:
+            warnings.append("citation_relevance")
+    
+    if not warnings:
+        return response
+    
+    # Extract knowledge docs from context for source information
+    knowledge_docs = context.get("knowledge_docs", []) if context else []
+    
+    # Format warning message
+    if detected_lang == "vi":
+        warning_header = "\n\n---\n\n⚠️ **Cảnh báo về chất lượng phản hồi:**\n\n"
+        warning_parts = []
+        
+        if "low_overlap" in warnings:
+            if overlap_score is not None and threshold is not None:
+                warning_parts.append(
+                    f"- **Trùng lặp thấp với trích dẫn (Low overlap)**: "
+                    f"Điểm trùng lặp: {overlap_score:.3f} (ngưỡng tối thiểu: {threshold:.3f}). "
+                    f"Điều này có nghĩa là nội dung phản hồi có ít từ ngữ trùng lặp với nguồn đã trích dẫn. "
+                    f"Vẫn có thể đáng tin cậy nếu nội dung được tóm tắt hoặc diễn giải từ nguồn."
+                )
+            else:
+                warning_parts.append(
+                    "- **Trùng lặp thấp với trích dẫn (Low overlap)**: "
+                    "Nội dung phản hồi có ít từ ngữ trùng lặp với nguồn đã trích dẫn. "
+                    "Vẫn có thể đáng tin cậy nếu nội dung được tóm tắt hoặc diễn giải từ nguồn."
+                )
+        
+        if "citation_relevance" in warnings:
+            warning_parts.append(
+                "- **Cảnh báo về mức độ liên quan của trích dẫn**: "
+                "Một số trích dẫn có thể có mức độ liên quan thấp với câu hỏi. "
+                "Vui lòng kiểm tra lại các nguồn để đảm bảo tính chính xác."
+            )
+        
+        # Add confidence score
+        confidence_percent = confidence_score * 100
+        if confidence_score < 0.5:
+            confidence_level = "thấp"
+        elif confidence_score < 0.7:
+            confidence_level = "vừa phải"
+        else:
+            confidence_level = "cao"
+        
+        warning_parts.append(
+            f"- **Điểm tin cậy (Confidence Score)**: {confidence_percent:.1f}% ({confidence_level})"
+        )
+        
+        # Add source information if available
+        if knowledge_docs:
+            source_info = []
+            for i, doc in enumerate(knowledge_docs[:3], 1):  # Show up to 3 sources
+                if isinstance(doc, dict):
+                    metadata = doc.get("metadata", {})
+                    source = metadata.get("source", "Unknown")
+                    link = metadata.get("link", "")
+                    if link:
+                        source_info.append(f"  {i}. {source}: {link}")
+                    else:
+                        source_info.append(f"  {i}. {source}")
+            
+            if source_info:
+                warning_parts.append(f"- **Nguồn tham khảo**:\n" + "\n".join(source_info))
+        
+        warning_footer = (
+            "\n\n**Lưu ý**: Các cảnh báo này không có nghĩa là phản hồi không chính xác, "
+            "nhưng bạn nên xem xét kỹ trước khi quyết định tin tưởng vào thông tin. "
+            "StillMe luôn ưu tiên tính minh bạch và trung thực."
+        )
+        
+        warning_message = warning_header + "\n".join(warning_parts) + warning_footer
+    else:
+        warning_header = "\n\n---\n\n⚠️ **Response Quality Warning:**\n\n"
+        warning_parts = []
+        
+        if "low_overlap" in warnings:
+            if overlap_score is not None and threshold is not None:
+                warning_parts.append(
+                    f"- **Low overlap with citation**: "
+                    f"Overlap score: {overlap_score:.3f} (minimum threshold: {threshold:.3f}). "
+                    f"This means the response content has low word overlap with the cited source. "
+                    f"May still be reliable if content is summarized or paraphrased from the source."
+                )
+            else:
+                warning_parts.append(
+                    "- **Low overlap with citation**: "
+                    "Response content has low word overlap with the cited source. "
+                    "May still be reliable if content is summarized or paraphrased from the source."
+                )
+        
+        if "citation_relevance" in warnings:
+            warning_parts.append(
+                "- **Citation relevance warning**: "
+                "Some citations may have low relevance to the question. "
+                "Please verify the sources to ensure accuracy."
+            )
+        
+        # Add confidence score
+        confidence_percent = confidence_score * 100
+        if confidence_score < 0.5:
+            confidence_level = "low"
+        elif confidence_score < 0.7:
+            confidence_level = "moderate"
+        else:
+            confidence_level = "high"
+        
+        warning_parts.append(
+            f"- **Confidence Score**: {confidence_percent:.1f}% ({confidence_level})"
+        )
+        
+        # Add source information if available
+        if knowledge_docs:
+            source_info = []
+            for i, doc in enumerate(knowledge_docs[:3], 1):  # Show up to 3 sources
+                if isinstance(doc, dict):
+                    metadata = doc.get("metadata", {})
+                    source = metadata.get("source", "Unknown")
+                    link = metadata.get("link", "")
+                    if link:
+                        source_info.append(f"  {i}. {source}: {link}")
+                    else:
+                        source_info.append(f"  {i}. {source}")
+            
+            if source_info:
+                warning_parts.append(f"- **Reference Sources**:\n" + "\n".join(source_info))
+        
+        warning_footer = (
+            "\n\n**Note**: These warnings do not mean the response is inaccurate, "
+            "but you should review carefully before deciding to trust the information. "
+            "StillMe always prioritizes transparency and honesty."
+        )
+        
+        warning_message = warning_header + "\n".join(warning_parts) + warning_footer
+    
+    return response.rstrip() + warning_message
+
+
 # Helper functions for AI_SELF_MODEL responses
 def _build_ai_self_model_answer(question: str, detected_lang: str, opening_statement: str) -> str:
     """
@@ -1845,10 +2025,18 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
                 for r in validation_result.reasons
             )
             
-            # If only warnings (not violations), use response as-is
+            # If only warnings (not violations), use response as-is BUT append warning message for transparency
             if has_only_warnings:
                 logger.info(f"✅ Validation has only warnings (not violations), accepting response. Reasons: {validation_result.reasons}")
                 response = raw_response
+                # CRITICAL: Format validation warnings into response text for user transparency
+                response = _append_validation_warnings_to_response(
+                    response=response,
+                    validation_result=validation_result,
+                    confidence_score=confidence_score,
+                    context=context,
+                    detected_lang=detected_lang
+                )
             else:
                 # For other non-critical validation failures, still return the response but log warning
                 # This prevents 422 errors for minor validation issues
