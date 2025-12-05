@@ -35,16 +35,31 @@ def detect_language(text: str, is_user_query: bool = True) -> str:
     # CRITICAL: Check Vietnamese keywords ONLY for user queries (not responses)
     # This prevents false Vietnamese detection when response contains Vietnamese keywords from context
     # Vietnamese keywords (even without tone marks)
+    # IMPORTANT: Use word boundaries or longer phrases to avoid false positives
+    # Short keywords like 'de', 'cho', 'cua' can match English words (e.g., 'code' contains 'de')
     vietnamese_keywords = [
         'bao lau', 'bao lâu', 'mat bao lau', 'mất bao lâu',
         'hoc', 'học', 'bai viet', 'bài viết', 'bai', 'bài',
-        'de', 'để', 'cho', 'cua', 'của', 'voi', 'với',
         'la gi', 'là gì', 'the nao', 'thế nào', 'nhu the nao', 'như thế nào',
         'co the', 'có thể', 'khong', 'không', 'khong biet', 'không biết',
         'ban', 'bạn', 'minh', 'mình', 'toi', 'tôi'
     ]
+    # Short keywords that need word boundary checking to avoid false positives
+    vietnamese_short_keywords = ['de', 'để', 'cho', 'cua', 'của', 'voi', 'với']
+    
     # Only check Vietnamese keywords for user queries, not responses
-    has_vietnamese_keywords = is_user_query and any(keyword in text_lower for keyword in vietnamese_keywords)
+    # For short keywords, use word boundary to avoid false positives (e.g., 'code' contains 'de')
+    import re
+    has_vietnamese_keywords = False
+    if is_user_query:
+        # Check longer phrases first (more reliable)
+        has_long_keywords = any(keyword in text_lower for keyword in vietnamese_keywords)
+        # Check short keywords with word boundaries
+        has_short_keywords = any(
+            re.search(r'\b' + re.escape(keyword) + r'\b', text_lower)
+            for keyword in vietnamese_short_keywords
+        )
+        has_vietnamese_keywords = has_long_keywords or has_short_keywords
     
     # OPTIMIZATION: Try langdetect FIRST for better accuracy, especially for mixed-language text
     # Then check for explicit language requests (which override detection)
