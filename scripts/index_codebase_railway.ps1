@@ -99,7 +99,8 @@ try {
     Write-Host ("=" * 59) -ForegroundColor Green
     Write-Host ""
     
-    if ($response.status -eq "success") {
+    $status = $response.status
+    if ($status -eq "success") {
         Write-Host "📊 Indexing Statistics:" -ForegroundColor Cyan
         Write-Host "   Total files indexed: $($response.stats.files_indexed)" -ForegroundColor White
         Write-Host "   Total chunks created: $($response.stats.chunks_created)" -ForegroundColor White
@@ -116,11 +117,14 @@ try {
         Write-Host ""
         Write-Host "🎉 StillMe Codebase Assistant is now ready!" -ForegroundColor Green
         Write-Host "   You can now query the codebase via /api/codebase/query" -ForegroundColor Green
-    } elseif ($response.status -eq "skipped") {
+    }
+    elseif ($status -eq "skipped") {
         Write-Host "ℹ️  Indexing skipped: $($response.message)" -ForegroundColor Yellow
         Write-Host "   Current count: $($response.current_count)" -ForegroundColor Yellow
-    } else {
-        Write-Host "⚠️  Unexpected response: $($response | ConvertTo-Json -Depth 3)" -ForegroundColor Yellow
+    }
+    else {
+        $responseJson = $response | ConvertTo-Json -Depth 3
+        Write-Host "⚠️  Unexpected response: $responseJson" -ForegroundColor Yellow
     }
     
     exit 0
