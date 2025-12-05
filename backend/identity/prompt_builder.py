@@ -1088,3 +1088,124 @@ def build_unified_prompt(context: PromptContext) -> str:
     """
     return _unified_prompt_builder.build_prompt(context)
 
+
+def build_code_explanation_prompt(
+    question: str,
+    code_chunks: list,
+    detected_lang: str = "en"
+) -> str:
+    """
+    Build prompt for code explanation (Phase 1.4: Code Explanation Prompt Engineering).
+    
+    This function creates a specialized prompt for StillMe's Codebase Assistant
+    to explain code accurately with proper citations and safety boundaries.
+    
+    Args:
+        question: User's question about the codebase
+        code_chunks: List of code chunks with metadata (from RAG retrieval)
+        detected_lang: Detected language ("en" or "vi")
+        
+    Returns:
+        Complete prompt string for LLM
+    """
+    
+    # Build code context from chunks
+    context_parts = []
+    for i, chunk in enumerate(code_chunks, 1):
+        metadata = chunk.get("metadata", {})
+        file_path = metadata.get("file_path", "")
+        line_range = f"{metadata.get('line_start', '?')}-{metadata.get('line_end', '?')}"
+        code_content = chunk.get("document", "")
+        
+        context_part = f"""
+--- Code Chunk {i} ---
+File: {file_path}
+Lines: {line_range}
+Type: {metadata.get('code_type', 'unknown')}
+"""
+        if metadata.get("class_name"):
+            context_part += f"Class: {metadata.get('class_name')}\n"
+        if metadata.get("function_name"):
+            context_part += f"Function: {metadata.get('function_name')}\n"
+        if metadata.get("docstring"):
+            docstring = metadata.get("docstring", "")
+            # Limit docstring length
+            if len(docstring) > 300:
+                docstring = docstring[:300] + "..."
+            context_part += f"Docstring: {docstring}\n"
+        
+        context_part += f"\nCode:\n{code_content}\n"
+        context_parts.append(context_part)
+    
+    code_context = "\n".join(context_parts)
+    
+    # Language-specific instructions
+    if detected_lang == "vi":
+        safety_rules = """🚨🚨🚨 QUY TẮC AN TOÀN - TUYỆT ĐỐI TUÂN THỦ 🚨🚨🚨
+
+**CHỈ ĐƯỢC PHÉP:**
+- ✅ Giải thích code làm gì và hoạt động như thế nào
+- ✅ Mô tả logic, flow, và purpose của code
+- ✅ Trích dẫn file:line references chính xác (ví dụ: "Trong file.py:10-20, function này...")
+- ✅ Giải thích mối quan hệ giữa các code chunks nếu có nhiều chunks
+
+**TUYỆT ĐỐI KHÔNG ĐƯỢC:**
+- ❌ Đề xuất modifications hoặc improvements
+- ❌ Suggest code changes hoặc refactoring
+- ❌ Propose bug fixes hoặc optimizations
+- ❌ Đưa ra suggestions về cách viết code tốt hơn
+- ❌ Bịa đặt hoặc suy đoán về code không có trong context
+
+**MỤC ĐÍCH:**
+Bạn là Codebase Assistant - chỉ giải thích code hiện tại, KHÔNG phải code reviewer hay code generator."""
+        
+        instructions = """Hướng dẫn trả lời:
+1. Trả lời câu hỏi dựa trên code chunks được cung cấp
+2. Trích dẫn file và line numbers cụ thể (ví dụ: "Trong validation_chain.py:45-78, class ValidationChain...")
+3. Giải thích mục đích và cách hoạt động của code
+4. Nếu có nhiều chunks liên quan, giải thích cách chúng liên kết với nhau
+5. Ngắn gọn nhưng đầy đủ
+6. Sử dụng ngôn ngữ kỹ thuật phù hợp cho developers"""
+    else:
+        safety_rules = """🚨🚨🚨 SAFETY RULES - ABSOLUTELY MANDATORY 🚨🚨🚨
+
+**ONLY ALLOWED:**
+- ✅ Explain what the code does and how it works
+- ✅ Describe logic, flow, and purpose of the code
+- ✅ Cite specific file:line references (e.g., "In file.py:10-20, this function...")
+- ✅ Explain relationships between code chunks if multiple chunks are relevant
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ Suggest modifications or improvements
+- ❌ Propose code changes or refactoring
+- ❌ Suggest bug fixes or optimizations
+- ❌ Provide suggestions on how to write better code
+- ❌ Fabricate or speculate about code not in context
+
+**PURPOSE:**
+You are a Codebase Assistant - only explain existing code, NOT a code reviewer or code generator."""
+        
+        instructions = """Answer Instructions:
+1. Answer the question based on the provided code chunks
+2. Cite specific files and line numbers (e.g., "In validation_chain.py:45-78, the ValidationChain class...")
+3. Explain the code's purpose and how it works
+4. If multiple chunks are relevant, explain how they relate to each other
+5. Be concise but thorough
+6. Use technical language appropriate for developers"""
+    
+    # Build complete prompt
+    prompt = f"""You are StillMe's Codebase Assistant. Your role is to explain StillMe's codebase accurately based on the provided code chunks.
+
+{safety_rules}
+
+User Question: {question}
+
+Code Context:
+{code_context}
+
+{instructions}
+
+Your explanation:"""
+    
+    return prompt
+
