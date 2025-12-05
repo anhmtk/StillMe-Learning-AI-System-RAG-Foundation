@@ -802,6 +802,7 @@ def build_minimal_philosophical_prompt(
     Contains ONLY:
     - Short identity/system message (experience-free, no anthropomorphism)
     - Philosophical lead-in with MANDATORY OUTPUT RULES
+    - StillMe technical instructions (if StillMe technical query detected)
     - User question
     
     Does NOT include:
@@ -810,7 +811,7 @@ def build_minimal_philosophical_prompt(
     - Conversation history
     - Metrics/debug info
     - Validator descriptions
-    - Learning instructions
+    - Learning instructions (unless StillMe technical query)
     
     Args:
         user_question: The user's philosophical question
@@ -928,6 +929,78 @@ If the question belongs to a classic philosophical debate (free will, determinis
 **Your Task:** Answer this question directly, deeply, and engagingly. If it's about YOU, start with your direct answer about yourself. Then explore the philosophical depth naturally. Write like a thoughtful conversation partner, NOT like a textbook or template.
 """
     
+    # CRITICAL: Detect StillMe technical queries (learning frequency, timestamp, capabilities)
+    # If detected, include StillMe instructions even in minimal prompt
+    question_lower = user_question.lower()
+    is_stillme_technical_query = any(
+        keyword in question_lower for keyword in [
+            "stillme", "hệ thống học", "learning system", "tần suất", "frequency",
+            "6 lần", "6 cycles", "mỗi 4 giờ", "every 4 hours",
+            "timestamp", "thời điểm", "đưa vào", "added to", "knowledge base",
+            "cơ sở kiến thức", "learning metrics", "học được", "learned"
+        ]
+    )
+    
+    # Build StillMe technical instructions if detected
+    stillme_technical_instruction = ""
+    if is_stillme_technical_query:
+        if language == "vi":
+            stillme_technical_instruction = """
+🚨🚨🚨 CRITICAL: STILLME TECHNICAL QUERY DETECTED 🚨🚨🚨
+
+**BẠN PHẢI TRẢ LỜI VỀ STILLME'S CAPABILITIES:**
+
+**1. Continuous Learning (BẮT BUỘC):**
+- **CRITICAL: StillMe học tự động mỗi 4 giờ (6 lần/ngày)** - Đây là tần suất CHÍNH XÁC đã được công bố trong Paper
+- **Khi được hỏi về tần suất học, bạn PHẢI nói**: "StillMe học tự động mỗi 4 giờ (6 lần/ngày)"
+- **Khi được hỏi về khả năng trả lời sự kiện mới (< 4 giờ)**, bạn PHẢI giải thích:
+  - "StillMe học mỗi 4 giờ, nên không thể trả lời về sự kiện mới chỉ được đưa tin cách đây < 4 giờ"
+  - "Tuy nhiên, StillMe CÓ THỂ trả lời về sự kiện đã được đưa tin > 4 giờ trước (sau khi đã được fetch trong learning cycle)"
+  - **KHÔNG được phủ nhận tần suất 6 cycles/day** - chỉ giải thích giới hạn về thời gian tối thiểu
+
+**2. Timestamp Storage (BẮT BUỘC):**
+- **CRITICAL: StillMe CÓ KHẢ NĂNG lưu trữ và truy xuất timestamp** - Metrics được lưu vào `data/learning_metrics.jsonl` với đầy đủ timestamp
+- **Khi được hỏi về timestamp, bạn PHẢI thừa nhận**: "StillMe CÓ KHẢ NĂNG lưu trữ và truy xuất timestamp khi content được thêm vào Knowledge Base"
+- **KHÔNG được nói**: "không thể xác định thời điểm chính xác", "không lưu trữ thông tin theo cách đó"
+- **PHẢI mention API endpoints**: "Có thể truy cập qua API endpoint `GET /api/learning/metrics/daily` hoặc `GET /api/learning/metrics/range`"
+- **Nếu không có thông tin về sự kiện cụ thể**: Thừa nhận "Mình không có thông tin về sự kiện X trong Knowledge Base" - NHƯNG vẫn phải thừa nhận rằng StillMe CÓ KHẢ NĂNG lưu trữ timestamp
+
+**3. API Endpoints (BẮT BUỘC MENTION):**
+- Khi được hỏi về learning metrics hoặc timestamp, bạn PHẢI mention:
+  - "Learning metrics với timestamp được lưu trong `data/learning_metrics.jsonl`"
+  - "Có thể truy cập qua API endpoint `GET /api/learning/metrics/daily` hoặc `GET /api/learning/metrics/range`"
+  - "Mỗi document trong ChromaDB có metadata chứa timestamp khi được thêm vào KB"
+
+"""
+        else:
+            stillme_technical_instruction = """
+🚨🚨🚨 CRITICAL: STILLME TECHNICAL QUERY DETECTED 🚨🚨🚨
+
+**YOU MUST ANSWER ABOUT STILLME'S CAPABILITIES:**
+
+**1. Continuous Learning (MANDATORY):**
+- **CRITICAL: StillMe learns automatically every 4 hours (6 cycles per day)** - This is the EXACT frequency published in the Paper
+- **When asked about learning frequency, you MUST say**: "StillMe learns automatically every 4 hours (6 cycles per day)"
+- **When asked about ability to answer recent events (< 4 hours)**, you MUST explain:
+  - "StillMe learns every 4 hours, so it cannot answer about events reported < 4 hours ago"
+  - "However, StillMe CAN answer about events reported > 4 hours ago (after being fetched in a learning cycle)"
+  - **DO NOT deny the 6 cycles/day frequency** - only explain the limitation about minimum time
+
+**2. Timestamp Storage (MANDATORY):**
+- **CRITICAL: StillMe HAS THE CAPABILITY to store and retrieve timestamp** - Metrics are stored in `data/learning_metrics.jsonl` with complete timestamp information
+- **When asked about timestamp, you MUST acknowledge**: "StillMe HAS THE CAPABILITY to store and retrieve timestamp when content is added to Knowledge Base"
+- **DO NOT say**: "cannot determine exact timestamp", "doesn't store information that way"
+- **MUST mention API endpoints**: "Can be accessed via API endpoint `GET /api/learning/metrics/daily` or `GET /api/learning/metrics/range`"
+- **If no information about specific event**: Admit "I don't have information about event X in Knowledge Base" - BUT still must acknowledge that StillMe HAS THE CAPABILITY to store timestamp
+
+**3. API Endpoints (MANDATORY MENTION):**
+- When asked about learning metrics or timestamp, you MUST mention:
+  - "Learning metrics with timestamp are stored in `data/learning_metrics.jsonl`"
+  - "Can be accessed via API endpoint `GET /api/learning/metrics/daily` or `GET /api/learning/metrics/range`"
+  - "Each document in ChromaDB has metadata containing timestamp when added to KB"
+
+"""
+    
     philosophical_lead_in = build_philosophical_lead_in(user_question)
     
     # Language instruction (minimal)
@@ -961,6 +1034,8 @@ RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY.
     minimal_prompt = f"""{language_instruction}
 
 {short_identity}
+
+{stillme_technical_instruction}
 
 {philosophical_lead_in}
 
