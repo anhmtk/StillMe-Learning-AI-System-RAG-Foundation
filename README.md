@@ -627,6 +627,10 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 - [`docs/COST_BENEFIT_REWRITE.md`](docs/COST_BENEFIT_REWRITE.md) - Cost-benefit logic for RewriteLLM
 - [`docs/EPISTEMIC_STATE.md`](docs/EPISTEMIC_STATE.md) - Epistemic state classification (KNOWN/UNCERTAIN/UNKNOWN)
 
+**Milestones & Reports:**
+- [`docs/MILESTONES.md`](docs/MILESTONES.md) - Technical milestones and achievements
+- [`docs/reports/stillme_self_comprehension_report_20251205_164714.md`](docs/reports/stillme_self_comprehension_report_20251205_164714.md) - Self-Comprehension Report (Technical milestone: AI understanding its own source code)
+
 ## ⚠️ Known Limitations & Improvements
 
 **Current Limitations:**
