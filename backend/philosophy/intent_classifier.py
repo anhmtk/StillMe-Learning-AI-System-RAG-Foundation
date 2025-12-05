@@ -53,7 +53,7 @@ def classify_philosophical_intent(text: str) -> QuestionType:
     
     # CRITICAL: Exclude questions about consciousness/emotions as SCIENTIFIC CONCEPTS or THEORIES
     # These are NOT questions about StillMe's own consciousness/emotions
-    # Also exclude TECHNICAL TERMS that should never trigger philosophy processor
+    # Also exclude TECHNICAL TERMS and CAPABILITY/TRANSPARENCY questions that should never trigger philosophy processor
     technical_term_exclusions = [
         # AI/ML Technical Terms
         r"\brag\b",  # "RAG" (Retrieval-Augmented Generation)
@@ -93,12 +93,32 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\bhow\s+do\s+you\s+generate\b",  # "how do you generate"
         r"\bhow\s+do\s+you\s+create\b",  # "how do you create"
         r"\bhow\s+do\s+you\s+process\b",  # "how do you process"
+        # CRITICAL: Capability/Transparency Questions - These are NOT philosophical
+        r"\bcó\s+thể\s+trả\s+lời\b",  # "có thể trả lời" (can answer)
+        r"\bcan\s+.*\s+answer\b",  # "can ... answer"
+        r"\bchứng\s+minh\b",  # "chứng minh" (prove/demonstrate)
+        r"\bprove\b",  # "prove"
+        r"\bdemonstrate\b",  # "demonstrate"
+        r"\bminh\s+bạch\b",  # "minh bạch" (transparency)
+        r"\btransparency\b",  # "transparency"
+        r"\bnguồn\b.*\b(rss|arxiv|crossref|wikipedia)\b",  # "nguồn ... RSS/arXiv" (source ... RSS/arXiv)
+        r"\bsource\b.*\b(rss|arxiv|crossref|wikipedia)\b",  # "source ... RSS/arXiv"
+        r"\bthời\s+điểm\b.*\bđưa\s+vào\b",  # "thời điểm ... đưa vào" (timestamp ... added to)
+        r"\btimestamp\b.*\badded\s+to\b",  # "timestamp ... added to"
+        r"\bknowledge\s+base\b",  # "knowledge base"
+        r"\bcơ\s+sở\s+kiến\s+thức\b",  # "cơ sở kiến thức" (knowledge base)
+        r"\btần\s+suất\s+cập\s+nhật\b",  # "tần suất cập nhật" (update frequency)
+        r"\bupdate\s+frequency\b",  # "update frequency"
+        r"\bhệ\s+thống\s+học\s+liên\s+tục\b",  # "hệ thống học liên tục" (continuous learning system)
+        r"\bcontinuous\s+learning\s+system\b",  # "continuous learning system"
+        r"\bsự\s+kiện\b.*\bcách\s+đây\b",  # "sự kiện ... cách đây" (event ... ago)
+        r"\bevent\b.*\bago\b",  # "event ... ago"
     ]
     
-    # If question contains technical terms, it's NOT about StillMe's consciousness - return UNKNOWN immediately
+    # If question contains technical terms or capability/transparency keywords, it's NOT about StillMe's consciousness - return UNKNOWN immediately
     has_technical_term = any(re.search(pattern, text_lower) for pattern in technical_term_exclusions)
     if has_technical_term:
-        logger.debug(f"Question contains technical terms, not about StillMe's consciousness: {text[:100]}")
+        logger.debug(f"Question contains technical/capability/transparency terms, not about StillMe's consciousness: {text[:100]}")
         return QuestionType.UNKNOWN
     
     scientific_concept_indicators = [
