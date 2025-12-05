@@ -310,8 +310,10 @@ See `env.example` for full list.
 
 #### 🧠 Codebase Assistant
 - **Code Q&A**: Query StillMe's codebase via API (`POST /api/codebase/query`)
+- **Test Generation**: Generate unit tests for code (`POST /api/codebase/generate-tests`)
+- **Code Review**: Review code for issues (`POST /api/codebase/review`)
 - **RAG-based Retrieval**: Semantic search with file:line citations
-- **Status**: Phase 1 complete (255 files indexed, 377 chunks)
+- **Status**: Phase 2 complete (255 files indexed, 377 chunks)
 - 📚 See [`docs/CODEBASE_ASSISTANT.md`](docs/CODEBASE_ASSISTANT.md) for details
 
 **Core RAG System:**
