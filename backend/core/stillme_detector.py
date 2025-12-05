@@ -482,8 +482,26 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
     query_lower = query.lower()
     matched_keywords = []
     
+    # CRITICAL: EXCLUDE capability/transparency/learning questions from origin detection
+    # These questions are about StillMe's functionality, NOT about origin/founder
+    capability_exclusion_patterns = [
+        r'\b(có thể|can|could|able to|khả năng)\b',  # Capability questions
+        r'\b(chứng minh|prove|demonstrate|minh bạch|transparency)\b',  # Transparency questions
+        r'\b(hệ thống học|learning system|học liên tục|continuous learning)\b',  # Learning system questions
+        r'\b(tần suất cập nhật|update frequency|frequency|cập nhật)\b',  # Update frequency questions
+        r'\b(nguồn|source|rss|arxiv)\b.*\b(thời điểm|timestamp|time|đưa vào|added to)\b',  # Source transparency questions
+        r'\b(sự kiện|event).*\b(cách đây|ago|vừa|just)\b',  # Recent event questions
+        r'\b(knowledge base|cơ sở kiến thức)\b',  # Knowledge base questions
+        r'\b(trả lời|answer|respond).*\b(sự kiện|event)\b',  # Can answer about event questions
+    ]
+    for pattern in capability_exclusion_patterns:
+        if re.search(pattern, query_lower):
+            # This is a capability/transparency question, NOT an origin query
+            return (False, [])
+    
     # CRITICAL: Check for StillMe-specific patterns FIRST (most specific)
     # These patterns are ALWAYS origin queries
+    # BUT: Exclude if combined with capability/transparency keywords
     stillme_specific_patterns = [
         r'\bstillme\s+(history|story|background|lịch sử|câu chuyện|nền tảng)\b',
         r'\b(about|về|giới thiệu)\s+stillme\b',
@@ -492,8 +510,14 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
     ]
     for pattern in stillme_specific_patterns:
         if re.search(pattern, query_lower):
-            matched_keywords.append(f"stillme_specific_{pattern}")
-            return (True, matched_keywords)
+            # Double-check: If combined with capability keywords, it's NOT an origin query
+            has_capability_keyword = any(
+                re.search(excl_pattern, query_lower) 
+                for excl_pattern in capability_exclusion_patterns
+            )
+            if not has_capability_keyword:
+                matched_keywords.append(f"stillme_specific_{pattern}")
+                return (True, matched_keywords)
     
     # Check for explicit origin/founder keywords (excluding generic "about", "history", etc.)
     # These keywords are ONLY origin queries when they appear alone or with "you"/"bạn"
