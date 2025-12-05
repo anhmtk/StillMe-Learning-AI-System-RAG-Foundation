@@ -392,9 +392,31 @@ def test_codebase_qa(base_url: str = "http://localhost:8000") -> Dict[str, Any]:
 
 if __name__ == "__main__":
     import sys
+    import os
     
-    # Get base URL from command line or use default
-    base_url = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8000"
+    # Get base URL from:
+    # 1. Command line argument
+    # 2. RAILWAY_PUBLIC_DOMAIN environment variable (Railway provides this)
+    # 3. RAILWAY_STATIC_URL environment variable
+    # 4. Default to localhost
+    if len(sys.argv) > 1:
+        base_url = sys.argv[1]
+        # Auto-add https:// if not present
+        if not base_url.startswith("http://") and not base_url.startswith("https://"):
+            base_url = f"https://{base_url}"
+    elif os.getenv("RAILWAY_PUBLIC_DOMAIN"):
+        # Railway provides RAILWAY_PUBLIC_DOMAIN env var
+        base_url = f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN')}"
+    elif os.getenv("RAILWAY_STATIC_URL"):
+        base_url = os.getenv("RAILWAY_STATIC_URL")
+    else:
+        # Default to localhost for local testing
+        base_url = "http://localhost:8000"
+        logger.warning("⚠️ No Railway URL detected. Using localhost:8000")
+        logger.warning("   To test Railway deployment, provide URL as argument:")
+        logger.warning("   python scripts/test_codebase_qa_comprehensive.py https://your-railway-url.railway.app")
+    
+    logger.info(f"🌐 Testing against: {base_url}")
     
     # Run tests
     test_results = test_codebase_qa(base_url)
