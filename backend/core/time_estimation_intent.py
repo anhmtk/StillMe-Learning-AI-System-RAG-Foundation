@@ -86,6 +86,18 @@ def detect_time_estimation_intent(query: str) -> Tuple[bool, Optional[str]]:
         r'what (features|capabilities|functions)',
         r'tính năng (nào|gì)',
         r'khả năng (nào|gì)',
+        # CRITICAL: Exclude validation/capability questions
+        r'validation.*warning|cảnh báo.*validation',
+        r'non-critical.*failure|lỗi.*không.*nghiêm.*trọng',
+        r'low overlap.*citation|trùng lặp.*thấp.*trích dẫn',
+        r'stillme.*hiển thị|stillme.*cung cấp|stillme.*sẽ',
+        r'stillme.*tuyên bố|stillme.*duy trì',
+        r'learning.*frequency|tần suất.*cập nhật|tần suất.*học',
+        r'6 lần.*ngày|6 cycles.*day',
+        r'timestamp.*added|thời điểm.*đưa vào',
+        r'source.*knowledge base|nguồn.*cơ sở.*kiến thức',
+        r'how.*stillme.*display|stillme.*hiển thị.*như thế nào',
+        r'what.*information.*stillme|thông tin.*stillme.*cung cấp',
     ]
     
     # If query matches negative patterns, it's NOT a time estimation question

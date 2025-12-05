@@ -6728,32 +6728,42 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         indicator in response_lower for indicator in human_learning_indicators
                     )
                     
-                    # Check if response is about StillMe's task execution or capabilities
-                    stillme_task_indicators = [
-                        "stillme", "my execution", "my task", "my performance",
+                    # Check if response is about StillMe's task execution (not capabilities)
+                    stillme_task_execution_indicators = [
+                        "my execution", "my task", "my performance",
                         "i track", "i estimate", "my historical",
-                        "hệ thống stillme", "stillme thực thi", "stillme ước lượng"
+                        "stillme thực thi", "stillme ước lượng", "execution time",
+                        "task completion", "hoàn thành tác vụ"
                     ]
                     
-                    is_about_stillme_task = any(
-                        indicator in response_lower for indicator in stillme_task_indicators
+                    is_about_stillme_task_execution = any(
+                        indicator in response_lower for indicator in stillme_task_execution_indicators
                     )
                     
-                    # Only add time estimate if:
-                    # 1. Response is about StillMe's task execution/capabilities, OR
-                    # 2. Question explicitly asks about StillMe (not human learning)
-                    question_lower = chat_request.message.lower()
-                    question_about_stillme = any(
-                        phrase in question_lower for phrase in [
-                            "stillme", "you ", "do you", "can you", "does stillme",
-                            "bạn ", "stillme ", "hệ thống"
-                        ]
+                    # CRITICAL: Exclude capability questions (validation warnings, learning frequency, etc.)
+                    # These are about StillMe's features, NOT about task execution time
+                    capability_question_indicators = [
+                        "validation", "warning", "cảnh báo", "xác thực",
+                        "learning frequency", "tần suất", "cập nhật",
+                        "timestamp", "thời điểm", "source", "nguồn",
+                        "confidence score", "điểm tin cậy", "threshold", "ngưỡng",
+                        "capability", "tính năng", "khả năng", "hệ thống học",
+                        "how does stillme", "stillme hiển thị", "stillme cung cấp",
+                        "stillme sẽ", "stillme tuyên bố"
+                    ]
+                    
+                    is_capability_question = any(
+                        indicator in chat_request.message.lower() for indicator in capability_question_indicators
                     )
                     
-                    # Decision: Add estimate only if contextually relevant
+                    # Decision: Add estimate only if:
+                    # 1. User explicitly asked about time estimation (is_time_estimation is True), AND
+                    # 2. Response is about StillMe's task execution (not capabilities), AND
+                    # 3. Question is NOT about StillMe's capabilities/features
                     should_add_estimate = (
-                        is_about_stillme_task or  # Response is about StillMe
-                        (question_about_stillme and not is_about_human_learning)  # Question is about StillMe, response not about human learning
+                        is_time_estimation and  # User asked about time estimation
+                        is_about_stillme_task_execution and  # Response is about task execution
+                        not is_capability_question  # Question is NOT about capabilities
                     )
                     
                     if should_add_estimate:
