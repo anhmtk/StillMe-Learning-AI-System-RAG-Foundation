@@ -216,3 +216,65 @@ async def get_codebase_stats(
             detail=f"Failed to get codebase stats: {str(e)}"
         )
 
+
+@router.post("/index")
+async def trigger_indexing(
+    indexer = Depends(get_codebase_indexer),
+    force: bool = False
+):
+    """
+    Trigger codebase indexing (admin endpoint).
+    
+    This endpoint indexes the entire StillMe codebase into ChromaDB.
+    Use with caution - indexing can take several minutes.
+    
+    Args:
+        force: If True, re-index even if collection already has chunks
+    
+    Returns:
+        Dictionary with indexing statistics
+    """
+    import os
+    from backend.config.security import validate_api_key_config
+    
+    # Security: Require API key for this endpoint
+    security_status = validate_api_key_config()
+    if not security_status["configured"]:
+        raise HTTPException(
+            status_code=403,
+            detail="API key authentication required for indexing endpoint"
+        )
+    
+    try:
+        # Check current status
+        current_count = indexer.codebase_collection.count()
+        
+        if current_count > 0 and not force:
+            return {
+                "status": "skipped",
+                "message": f"Collection already has {current_count} chunks. Use force=true to re-index.",
+                "current_count": current_count
+            }
+        
+        logger.info("🚀 Starting codebase indexing via API endpoint...")
+        
+        # Index entire codebase
+        stats = indexer.index_codebase()
+        
+        # Verify final count
+        final_count = indexer.codebase_collection.count()
+        
+        return {
+            "status": "success",
+            "message": "Codebase indexing completed successfully",
+            "stats": stats,
+            "final_count": final_count
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Error indexing codebase: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to index codebase: {str(e)}"
+        )
+
