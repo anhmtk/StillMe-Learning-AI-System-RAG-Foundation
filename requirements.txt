@@ -35,7 +35,7 @@ loguru==0.7.3
 
 # Date & Time
 python-dateutil==2.8.2
-pytz==2024.1
+pytz==2025.2
 
 # Language Detection
 langdetect==1.0.9
