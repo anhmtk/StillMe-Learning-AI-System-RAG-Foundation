@@ -41,7 +41,7 @@ pytz==2024.1
 langdetect==1.0.9
 
 # JSON & Data Serialization
-orjson==3.11.4
+orjson==3.11.5
 
 # Vector Database & Embeddings
 # Note: Install torch CPU version separately to reduce build time
