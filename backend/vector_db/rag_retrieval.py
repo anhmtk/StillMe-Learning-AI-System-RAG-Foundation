@@ -892,7 +892,12 @@ class RAGRetrieval:
         
         try:
             # Generate embedding for content
-            content_embedding = self.embedding_service.encode(content)
+            # Use batch_encode for single item (returns list of embeddings)
+            content_embeddings = self.embedding_service.batch_encode([content])
+            content_embedding = content_embeddings[0] if content_embeddings else None
+            
+            if content_embedding is None:
+                return False, None
             
             # Search for similar content in knowledge collection
             # Use high limit to find most similar, then filter by threshold

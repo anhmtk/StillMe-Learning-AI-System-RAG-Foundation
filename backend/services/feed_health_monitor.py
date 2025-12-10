@@ -272,7 +272,16 @@ class FeedHealthMonitor:
             "circuit_breaker_state": record.circuit_breaker_state,
             "last_success": record.last_success.isoformat() if record.last_success else None,
             "last_failure": record.last_failure.isoformat() if record.last_failure else None,
-            "last_error": record.last_error
+            "last_error": record.last_error,
+            "avg_response_time": round(record.avg_response_time, 3),
+            "quality_metrics": {
+                "avg_importance_score": round(record.quality_metrics.avg_importance_score, 3),
+                "high_quality_items": record.quality_metrics.high_quality_items,
+                "low_quality_items": record.quality_metrics.low_quality_items,
+                "total_items_processed": record.quality_metrics.total_items_processed,
+                "duplicate_rate": round(record.quality_metrics.duplicate_rate, 3),
+                "freshness_score": round(record.quality_metrics.freshness_score, 3)
+            } if record.quality_metrics else None
         }
     
     def get_all_health_stats(self) -> Dict[str, Any]:
