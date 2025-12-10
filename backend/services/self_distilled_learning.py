@@ -528,18 +528,130 @@ class SelfDistilledLearning:
         
         return optimized_values
     
-    def get_adaptive_threshold(self, threshold_name: str, default_value: float) -> float:
+    def get_adaptive_threshold(
+        self, 
+        threshold_name: str, 
+        default_value: float,
+        context: Optional[Dict[str, Any]] = None
+    ) -> float:
         """
         Get adaptive threshold value (optimized by PAPO).
+        
+        Phase 2.3: Context-aware thresholds - thresholds adapt based on question context.
         
         Args:
             threshold_name: Name of threshold parameter
             default_value: Default value if optimization not available
+            context: Optional context dict with:
+                - is_philosophical: bool (philosophical questions may need different thresholds)
+                - is_technical: bool (technical questions may need stricter thresholds)
+                - has_context: bool (questions with context may need different thresholds)
+                - question_category: str (e.g., "factual", "philosophical", "technical")
+                - context_quality: str (e.g., "high", "medium", "low")
+                - avg_similarity: float (RAG similarity score)
             
         Returns:
-            Adaptive threshold value
+            Adaptive threshold value (context-aware)
         """
-        return self.papo_optimizer.get_optimized_threshold(threshold_name, default_value)
+        # Get base optimized threshold
+        base_threshold = self.papo_optimizer.get_optimized_threshold(threshold_name, default_value)
+        
+        # Phase 2.3: Apply context-aware adjustments
+        if context:
+            adjusted_threshold = self._apply_context_adjustments(
+                threshold_name,
+                base_threshold,
+                context
+            )
+            return adjusted_threshold
+        
+        return base_threshold
+    
+    def _apply_context_adjustments(
+        self,
+        threshold_name: str,
+        base_threshold: float,
+        context: Dict[str, Any]
+    ) -> float:
+        """
+        Apply context-aware adjustments to threshold.
+        
+        Phase 2.3: Progressive training - thresholds adapt based on context.
+        
+        Strategy:
+        - Philosophical questions: More lenient thresholds (allow more uncertainty)
+        - Technical questions: Stricter thresholds (require more evidence)
+        - High context quality: Can be stricter (good RAG results)
+        - Low context quality: More lenient (poor RAG results)
+        
+        Args:
+            threshold_name: Name of threshold parameter
+            base_threshold: Base threshold value from PAPO optimization
+            context: Context dict with question/context information
+            
+        Returns:
+            Context-adjusted threshold value
+        """
+        adjusted = base_threshold
+        
+        is_philosophical = context.get("is_philosophical", False)
+        is_technical = context.get("is_technical", False)
+        has_context = context.get("has_context", False)
+        context_quality = context.get("context_quality", "medium")
+        avg_similarity = context.get("avg_similarity", 0.5)
+        
+        # Adjustment factors (how much to adjust based on context)
+        adjustment_factor = 0.1  # 10% adjustment
+        
+        # Apply adjustments based on threshold type
+        if threshold_name == "citation_relevance_min_overlap":
+            # Citation relevance: Philosophical questions may have less strict citation requirements
+            if is_philosophical:
+                adjusted = base_threshold * (1.0 - adjustment_factor * 0.5)  # 5% more lenient
+            elif is_technical:
+                adjusted = base_threshold * (1.0 + adjustment_factor)  # 10% stricter
+            # High context quality: Can require more relevance
+            if context_quality == "high" and has_context:
+                adjusted = base_threshold * (1.0 + adjustment_factor * 0.5)  # 5% stricter
+            # Low context quality: More lenient
+            elif context_quality == "low" and has_context:
+                adjusted = base_threshold * (1.0 - adjustment_factor)  # 10% more lenient
+        
+        elif threshold_name == "evidence_overlap_threshold":
+            # Evidence overlap: Philosophical questions may have lower overlap requirements
+            if is_philosophical:
+                adjusted = base_threshold * (1.0 - adjustment_factor)  # 10% more lenient
+            elif is_technical:
+                adjusted = base_threshold * (1.0 + adjustment_factor * 1.5)  # 15% stricter
+            # Adjust based on context quality
+            if context_quality == "high" and avg_similarity > 0.6:
+                adjusted = base_threshold * (1.0 + adjustment_factor)  # 10% stricter
+            elif context_quality == "low" or avg_similarity < 0.3:
+                adjusted = base_threshold * (1.0 - adjustment_factor * 0.5)  # 5% more lenient
+        
+        elif threshold_name == "confidence_threshold":
+            # Confidence: Philosophical questions may express more uncertainty
+            if is_philosophical:
+                adjusted = base_threshold * (1.0 - adjustment_factor * 0.5)  # 5% more lenient
+            elif is_technical:
+                adjusted = base_threshold * (1.0 + adjustment_factor)  # 10% stricter
+            # High context quality: Can require higher confidence
+            if context_quality == "high" and has_context:
+                adjusted = base_threshold * (1.0 + adjustment_factor * 0.5)  # 5% stricter
+        
+        # Ensure adjusted threshold stays within reasonable bounds
+        # Get threshold config to know bounds
+        threshold_configs = {
+            "citation_relevance_min_overlap": (0.0, 0.5),
+            "evidence_overlap_threshold": (0.0, 0.2),
+            "confidence_threshold": (0.3, 0.8),
+        }
+        
+        if threshold_name in threshold_configs:
+            min_val, max_val = threshold_configs[threshold_name]
+            adjusted = max(min_val, min(max_val, adjusted))
+        
+        return adjusted
     
     def get_learning_summary(self) -> Dict[str, Any]:
         """

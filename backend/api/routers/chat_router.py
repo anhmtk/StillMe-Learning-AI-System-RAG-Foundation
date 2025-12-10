@@ -1345,13 +1345,37 @@ async def _handle_validation_with_fallback(
     # 1. CitationRequired
     # 2. ConfidenceValidator
     # 3. FactualHallucinationValidator
-    # NPR Phase 2.2: Get adaptive thresholds from Self-Distilled Learning
+    # NPR Phase 2.2 & 2.3: Get context-aware adaptive thresholds from Self-Distilled Learning
     try:
         from backend.services.self_distilled_learning import get_self_distilled_learning
         sdl = get_self_distilled_learning()
-        adaptive_citation_overlap = sdl.get_adaptive_threshold("citation_relevance_min_overlap", 0.1)
-        adaptive_evidence_threshold = sdl.get_adaptive_threshold("evidence_overlap_threshold", 0.01)
-        logger.debug(f"🎯 [Self-Distilled] Using adaptive thresholds: citation_overlap={adaptive_citation_overlap:.3f}, evidence={adaptive_evidence_threshold:.3f}")
+        
+        # Phase 2.3: Build context for context-aware thresholds
+        threshold_context = {
+            "is_philosophical": is_philosophical,
+            "is_technical": False,  # Can be detected from question keywords
+            "has_context": len(ctx_docs) > 0,
+            "context_quality": context.get("context_quality", "medium"),
+            "avg_similarity": context.get("avg_similarity_score", 0.5)
+        }
+        
+        # Detect technical questions (simple heuristic)
+        question_lower = chat_request.message.lower()
+        technical_keywords = ["code", "function", "api", "implementation", "algorithm", "bug", "error", "debug"]
+        if any(keyword in question_lower for keyword in technical_keywords):
+            threshold_context["is_technical"] = True
+        
+        adaptive_citation_overlap = sdl.get_adaptive_threshold(
+            "citation_relevance_min_overlap", 
+            0.1,
+            context=threshold_context
+        )
+        adaptive_evidence_threshold = sdl.get_adaptive_threshold(
+            "evidence_overlap_threshold", 
+            0.01,
+            context=threshold_context
+        )
+        logger.debug(f"🎯 [Self-Distilled] Using context-aware thresholds: citation_overlap={adaptive_citation_overlap:.3f}, evidence={adaptive_evidence_threshold:.3f} (philosophical={is_philosophical}, context_quality={threshold_context['context_quality']})")
     except Exception as e:
         logger.warning(f"⚠️ [Self-Distilled] Failed to get adaptive thresholds, using defaults: {e}")
         adaptive_citation_overlap = 0.1
