@@ -1112,6 +1112,30 @@ async def get_feed_replacement_suggestions():
         raise HTTPException(status_code=500, detail=f"Failed to get replacement suggestions: {str(e)}")
 
 
+@router.get("/feeds/performance-analytics")
+async def get_feed_performance_analytics(feed_url: Optional[str] = Query(None, description="Specific feed URL (optional, returns aggregate if not provided)")):
+    """
+    Get feed performance analytics (Phase 3.3)
+    
+    Returns:
+        Dictionary with performance metrics:
+        - items_fetched: Total items fetched from feed(s)
+        - items_passed_filter: Items that passed importance threshold
+        - items_added_to_rag: Items successfully added to RAG
+        - avg_importance_score: Average importance score
+        - success_rate: Success rate for feed fetches
+        - avg_response_time: Average response time
+    """
+    try:
+        from backend.services.feed_health_monitor import get_feed_health_monitor
+        health_monitor = get_feed_health_monitor()
+        analytics = health_monitor.get_feed_performance_analytics(feed_url=feed_url)
+        return analytics
+    except Exception as e:
+        logger.error(f"Error getting feed performance analytics: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to get performance analytics: {str(e)}")
+
+
 @router.post("/scheduler/run-now")
 async def run_scheduler_now(request: Request, sync: bool = Query(False, description="Run synchronously (for tests)")):
     """

@@ -93,6 +93,7 @@ class LearningScheduler:
         self.cycle_count = 0
         self.is_running = False
         self._task: Optional[asyncio.Task] = None
+        self._proactive_health_task: Optional[asyncio.Task] = None  # Phase 3.2
         self.last_run_time: Optional[datetime] = None
         self.next_run_time: Optional[datetime] = None
         self._stop_event = asyncio.Event()
@@ -248,8 +249,21 @@ class LearningScheduler:
                                     link=entry_link,
                                     summary=entry.get("summary", ""),
                                     status="Filtered: Duplicate",
-                                    status_reason="Content already exists in RAG"
+                                    status_reason=f"Content already exists in RAG ({duplicate_reason})"
                                 )
+                            # Track duplicate for quality metrics
+                            if feed_url:
+                                try:
+                                    from backend.services.feed_health_monitor import get_feed_health_monitor
+                                    health_monitor = get_feed_health_monitor()
+                                    health_monitor.track_feed_quality(
+                                        feed_url=feed_url,
+                                        importance_score=importance_score,
+                                        is_duplicate=True,
+                                        freshness=freshness_score
+                                    )
+                                except Exception:
+                                    pass
                             continue
                         
                         # Add to RAG
@@ -404,6 +418,78 @@ class LearningScheduler:
         
         logger.warning(f"⚠️ Scheduler loop exited. is_running={self.is_running}")
     
+    async def _proactive_health_check_loop(self):
+        """
+        Proactive health check loop (Phase 3.2)
+        Tests 1-2 feeds every 30 minutes between learning cycles
+        """
+        logger.info("🔍 Proactive health check loop started - will test feeds every 30 minutes")
+        
+        while self.is_running:
+            try:
+                # Wait 30 minutes between checks
+                await asyncio.sleep(30 * 60)  # 30 minutes
+                
+                if not self.is_running:
+                    break
+                
+                # Get list of feeds to test (1-2 random feeds)
+                if not self.rss_fetcher or not self.rss_fetcher.feeds:
+                    logger.debug("No feeds available for proactive health check")
+                    continue
+                
+                import random
+                feeds_to_test = random.sample(
+                    self.rss_fetcher.feeds,
+                    min(2, len(self.rss_fetcher.feeds))
+                )
+                
+                logger.info(f"🔍 Proactive health check: Testing {len(feeds_to_test)} feed(s)")
+                
+                # Test each feed
+                for feed_url in feeds_to_test:
+                    try:
+                        # Use RSSFetcher's fetch method directly (simpler approach)
+                        from backend.services.feed_health_monitor import get_feed_health_monitor
+                        import feedparser
+                        import time
+                        
+                        health_monitor = get_feed_health_monitor()
+                        
+                        # Simple fetch test (without full circuit breaker complexity)
+                        start_time = time.time()
+                        try:
+                            feed_result = feedparser.parse(feed_url)
+                            response_time = time.time() - start_time
+                            
+                            # Check if fetch was successful
+                            if feed_result and not feed_result.bozo:
+                                health_monitor.record_success(feed_url, response_time=response_time)
+                                logger.debug(f"✅ Proactive check: {feed_url[:50]}... is healthy (response: {response_time:.2f}s)")
+                            else:
+                                error_msg = feed_result.bozo_exception if feed_result and feed_result.bozo else "Parse error"
+                                health_monitor.record_failure(feed_url, f"Proactive check: {error_msg}")
+                                logger.debug(f"⚠️ Proactive check: {feed_url[:50]}... failed: {error_msg}")
+                        except Exception as fetch_error:
+                            response_time = time.time() - start_time
+                            health_monitor.record_failure(feed_url, f"Proactive check error: {str(fetch_error)}")
+                            logger.debug(f"⚠️ Proactive check: {feed_url[:50]}... error: {fetch_error}")
+                    except Exception as e:
+                        logger.debug(f"Proactive health check error for {feed_url[:50]}: {e}")
+                        from backend.services.feed_health_monitor import get_feed_health_monitor
+                        health_monitor = get_feed_health_monitor()
+                        health_monitor.record_failure(feed_url, f"Proactive check error: {str(e)}")
+                
+            except asyncio.CancelledError:
+                logger.info("🛑 Proactive health check task cancelled")
+                break
+            except Exception as e:
+                logger.warning(f"Error in proactive health check loop: {e}")
+                # Wait a bit before retrying
+                await asyncio.sleep(60)
+        
+        logger.info("🔍 Proactive health check loop exited")
+    
     async def start(self):
         """
         Start the learning scheduler.
@@ -454,7 +540,11 @@ class LearningScheduler:
         
         self._task.add_done_callback(task_done_callback)
         
+        # Start proactive health check task (Phase 3.2)
+        self._proactive_health_task = asyncio.create_task(self._proactive_health_check_loop())
+        
         logger.info(f"✅ Learning scheduler started - will run every {self.interval_hours} hours")
+        logger.info("✅ Proactive health check started - will test feeds every 30 minutes")
     
     async def stop(self):
         """Stop the learning scheduler"""
@@ -472,7 +562,16 @@ class LearningScheduler:
             except asyncio.CancelledError:
                 pass
         
+        # Stop proactive health check task (Phase 3.2)
+        if self._proactive_health_task:
+            self._proactive_health_task.cancel()
+            try:
+                await self._proactive_health_task
+            except asyncio.CancelledError:
+                pass
+        
         self._task = None
+        self._proactive_health_task = None
         logger.info("🛑 Learning scheduler stopped")
     
     def get_status(self) -> Dict[str, Any]:

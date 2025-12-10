@@ -450,6 +450,86 @@ class FeedHealthMonitor:
     def get_replacement_history(self, limit: int = 50) -> List[Dict[str, Any]]:
         """Get feed replacement history"""
         return self.replacement_history[-limit:]
+    
+    def get_feed_performance_analytics(self, feed_url: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get feed performance analytics (Phase 3.3)
+        
+        Args:
+            feed_url: Specific feed URL (if None, returns aggregate for all feeds)
+            
+        Returns:
+            Dictionary with performance metrics:
+            - items_fetched: Total items fetched from feed
+            - items_passed_filter: Items that passed importance threshold
+            - items_added_to_rag: Items successfully added to RAG
+            - avg_importance_score: Average importance score
+            - cost_per_feed: Estimated cost (if available)
+        """
+        if feed_url:
+            # Single feed analytics
+            record = self.health_records.get(feed_url)
+            if not record:
+                return {
+                    "feed_url": feed_url,
+                    "error": "Feed not found in health records"
+                }
+            
+            quality_metrics = record.quality_metrics
+            return {
+                "feed_url": feed_url,
+                "items_processed": quality_metrics.total_items_processed if quality_metrics else 0,
+                "items_passed_filter": quality_metrics.high_quality_items if quality_metrics else 0,
+                "items_added_to_rag": quality_metrics.total_items_processed - quality_metrics.low_quality_items if quality_metrics else 0,
+                "avg_importance_score": round(quality_metrics.avg_importance_score, 3) if quality_metrics else 0.0,
+                "high_quality_items": quality_metrics.high_quality_items if quality_metrics else 0,
+                "low_quality_items": quality_metrics.low_quality_items if quality_metrics else 0,
+                "duplicate_rate": round(quality_metrics.duplicate_rate, 3) if quality_metrics else 0.0,
+                "freshness_score": round(quality_metrics.freshness_score, 3) if quality_metrics else 0.0,
+                "success_count": record.success_count,
+                "failure_count": record.failure_count,
+                "avg_response_time": round(record.avg_response_time, 3),
+                "health_score": round(record.get_health_score(), 3)
+            }
+        else:
+            # Aggregate analytics for all feeds
+            total_items_processed = 0
+            total_high_quality = 0
+            total_low_quality = 0
+            total_importance_scores = []
+            total_success = 0
+            total_failures = 0
+            total_response_times = []
+            
+            for record in self.health_records.values():
+                if record.quality_metrics:
+                    total_items_processed += record.quality_metrics.total_items_processed
+                    total_high_quality += record.quality_metrics.high_quality_items
+                    total_low_quality += record.quality_metrics.low_quality_items
+                    if record.quality_metrics.avg_importance_score > 0:
+                        total_importance_scores.append(record.quality_metrics.avg_importance_score)
+                
+                total_success += record.success_count
+                total_failures += record.failure_count
+                if record.avg_response_time > 0:
+                    total_response_times.append(record.avg_response_time)
+            
+            avg_importance = sum(total_importance_scores) / len(total_importance_scores) if total_importance_scores else 0.0
+            avg_response_time = sum(total_response_times) / len(total_response_times) if total_response_times else 0.0
+            
+            return {
+                "total_feeds": len(self.health_records),
+                "total_items_processed": total_items_processed,
+                "total_items_passed_filter": total_high_quality,
+                "total_items_added_to_rag": total_items_processed - total_low_quality,
+                "avg_importance_score": round(avg_importance, 3),
+                "total_high_quality_items": total_high_quality,
+                "total_low_quality_items": total_low_quality,
+                "total_success_count": total_success,
+                "total_failure_count": total_failures,
+                "avg_response_time": round(avg_response_time, 3),
+                "success_rate": round((total_success / (total_success + total_failures) * 100) if (total_success + total_failures) > 0 else 0.0, 2)
+            }
 
 
 # Global feed health monitor instance

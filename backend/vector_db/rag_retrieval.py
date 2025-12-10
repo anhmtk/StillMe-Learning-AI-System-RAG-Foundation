@@ -876,6 +876,50 @@ class RAGRetrieval:
             logger.error(f"Failed to build prompt context: {e}")
             return "Error building context."
     
+    def check_semantic_duplicate(self, content: str, similarity_threshold: float = 0.95) -> tuple[bool, Optional[Dict[str, Any]]]:
+        """
+        Check for semantic duplicates using embedding similarity (Phase 3.1)
+        
+        Args:
+            content: Content text to check for duplicates
+            similarity_threshold: Similarity threshold (0.0-1.0, default 0.95 for very similar)
+            
+        Returns:
+            Tuple of (is_duplicate: bool, most_similar_doc: Optional[Dict])
+        """
+        if not content or len(content.strip()) < 10:
+            return False, None
+        
+        try:
+            # Generate embedding for content
+            content_embedding = self.embedding_service.encode(content)
+            
+            # Search for similar content in knowledge collection
+            # Use high limit to find most similar, then filter by threshold
+            similar_docs = self.chroma_client.search_knowledge(
+                query_embedding=content_embedding,
+                limit=5  # Check top 5 most similar
+            )
+            
+            if not similar_docs:
+                return False, None
+            
+            # Check if any document exceeds similarity threshold
+            for doc in similar_docs:
+                distance = doc.get("distance", 1.0)
+                # Convert distance to similarity (cosine distance: 0 = identical, 1 = completely different)
+                # For cosine similarity: similarity = 1 - distance
+                similarity = 1.0 - distance
+                
+                if similarity >= similarity_threshold:
+                    logger.debug(f"Semantic duplicate detected: similarity={similarity:.3f} >= {similarity_threshold:.3f}")
+                    return True, doc
+            
+            return False, None
+        except Exception as e:
+            logger.warning(f"Semantic duplicate check failed: {e}")
+            return False, None  # Fail open - allow content if check fails
+    
     def add_learning_content(self, 
                            content: str, 
                            source: str, 
