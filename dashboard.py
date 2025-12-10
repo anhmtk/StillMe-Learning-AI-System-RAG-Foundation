@@ -528,24 +528,34 @@ def page_overview():
             
             # RSS Statistics
             if "rss" in source_stats:
-                rss_stats = source_stats["rss"]
+                rss_data = source_stats["rss"]
+                rss_stats = rss_data.get("stats", {})  # Get stats from nested structure
+                
+                # Get feeds_count from rss_data (top level) or from stats (fallback)
+                feeds_count = rss_data.get("feeds_count", rss_stats.get("feeds_count", 0))
+                successful_feeds = rss_stats.get("successful_feeds", 0)
+                failed_feeds = rss_stats.get("failed_feeds", 0)
+                status = rss_stats.get("status", "unknown")
+                last_error = rss_stats.get("last_error")
+                
                 col_rss1, col_rss2, col_rss3, col_rss4 = st.columns(4)
                 with col_rss1:
-                    st.metric("📡 RSS Feeds", rss_stats.get("feeds_count", 0))
+                    st.metric("📡 RSS Feeds", feeds_count)
                 with col_rss2:
-                    st.metric("✅ Successful", rss_stats.get("successful_feeds", 0))
+                    st.metric("✅ Successful", successful_feeds)
                 with col_rss3:
-                    st.metric("❌ Failed", rss_stats.get("failed_feeds", 0))
+                    st.metric("❌ Failed", failed_feeds)
                 with col_rss4:
-                    status_icon = "🟢" if rss_stats.get("status") == "ok" else "🔴"
-                    st.metric("Status", f"{status_icon} {rss_stats.get('status', 'unknown').upper()}")
+                    status_icon = "🟢" if status == "ok" else "🔴"
+                    st.metric("Status", f"{status_icon} {status.upper()}")
                 
                 # Show errors if any
-                if rss_stats.get("failed_feeds", 0) > 0:
+                if failed_feeds > 0:
                     with st.expander("⚠️ RSS Feed Errors", expanded=False):
-                        if rss_stats.get("last_error"):
-                            st.error(f"**Last Error:** {rss_stats['last_error']}")
-                        st.caption(f"💡 {rss_stats.get('failed_feeds', 0)} feed(s) failed. Check backend logs for details.")
+                        if last_error:
+                            st.error(f"**Last Error:** {last_error}")
+                        failure_rate = rss_stats.get("failure_rate", 0)
+                        st.caption(f"💡 {failed_feeds} feed(s) failed (failure rate: {failure_rate}%). Check backend logs for details.")
             
             # Other sources (arXiv, CrossRef, Wikipedia, etc.)
             other_sources = {k: v for k, v in source_stats.items() if k != "rss"}
