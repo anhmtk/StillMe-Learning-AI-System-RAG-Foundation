@@ -208,8 +208,31 @@ class RSSFetcher:
                 health_monitor.update_circuit_breaker_state(feed_url, breaker.state.value)
                 raise
         
-        tasks = [fetch_with_circuit_breaker(feed_url) for feed_url in self.feeds]
-        feeds = await asyncio.gather(*tasks, return_exceptions=True)
+        # NPR Phase 3.1: Parallel Learning Cycles - Batch processing for better performance
+        # Process feeds in batches to avoid overwhelming the system
+        import time
+        batch_start = time.time()
+        
+        # Calculate optimal batch size (max 10 concurrent, or CPU count * 2)
+        import os
+        max_workers = min(10, (os.cpu_count() or 4) * 2)
+        batch_size = max_workers
+        
+        # Split feeds into batches
+        feed_batches = [self.feeds[i:i + batch_size] for i in range(0, len(self.feeds), batch_size)]
+        logger.info(f"🚀 [NPR] Processing {len(self.feeds)} feeds in {len(feed_batches)} batches (batch_size={batch_size})")
+        
+        all_feeds = []
+        for batch_idx, feed_batch in enumerate(feed_batches):
+            batch_tasks = [fetch_with_circuit_breaker(feed_url) for feed_url in feed_batch]
+            batch_feeds = await asyncio.gather(*batch_tasks, return_exceptions=True)
+            all_feeds.extend(batch_feeds)
+            logger.debug(f"✅ [NPR] Batch {batch_idx + 1}/{len(feed_batches)} completed ({len(feed_batch)} feeds)")
+        
+        batch_time = time.time() - batch_start
+        logger.info(f"✅ [NPR] Parallel feed fetching completed in {batch_time:.3f}s ({len(self.feeds)} feeds)")
+        
+        feeds = all_feeds
         
         for feed_url, feed_result in zip(self.feeds, feeds):
             try:
