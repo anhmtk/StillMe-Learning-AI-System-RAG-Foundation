@@ -531,12 +531,34 @@ def page_overview():
                 rss_data = source_stats["rss"]
                 rss_stats = rss_data.get("stats") or {}  # Get stats from nested structure, handle None case
                 
+                # Debug: Log what we're getting (only in debug mode)
+                import logging
+                logger = logging.getLogger(__name__)
+                if rss_stats:
+                    logger.debug(f"RSS stats from API: {rss_stats}")
+                else:
+                    logger.warning(f"RSS stats is None or empty! rss_data: {rss_data}")
+                
                 # Get feeds_count from rss_data (top level) or from stats (fallback)
-                feeds_count = rss_data.get("feeds_count", rss_stats.get("feeds_count", 0))
-                successful_feeds = rss_stats.get("successful_feeds", 0)
-                failed_feeds = rss_stats.get("failed_feeds", 0)
-                status = rss_stats.get("status", "unknown")
-                last_error = rss_stats.get("last_error")
+                feeds_count = rss_data.get("feeds_count", rss_stats.get("feeds_count", 0)) if rss_stats else rss_data.get("feeds_count", 0)
+                successful_feeds = rss_stats.get("successful_feeds", 0) if rss_stats else 0
+                failed_feeds = rss_stats.get("failed_feeds", 0) if rss_stats else 0
+                status = rss_stats.get("status", "unknown") if rss_stats else "unknown"
+                last_error = rss_stats.get("last_error") if rss_stats else None
+                failure_rate = rss_stats.get("failure_rate", 0) if rss_stats else 0
+                
+                # Debug: Show raw data if there's a mismatch (0/0 when we expect failures)
+                if feeds_count > 0 and successful_feeds == 0 and failed_feeds == 0 and rss_stats:
+                    with st.expander("🔍 Debug: RSS Stats Data", expanded=False):
+                        st.json({
+                            "rss_data": rss_data,
+                            "rss_stats": rss_stats,
+                            "feeds_count": feeds_count,
+                            "successful_feeds": successful_feeds,
+                            "failed_feeds": failed_feeds,
+                            "status": status
+                        })
+                        st.caption("⚠️ If backend logs show failures but this shows 0/0, there may be a timing issue or stats not being updated correctly.")
                 
                 col_rss1, col_rss2, col_rss3, col_rss4 = st.columns(4)
                 with col_rss1:
@@ -554,7 +576,6 @@ def page_overview():
                     with st.expander("⚠️ RSS Feed Errors", expanded=False):
                         if last_error:
                             st.error(f"**Last Error:** {last_error}")
-                        failure_rate = rss_stats.get("failure_rate", 0)
                         st.caption(f"💡 {failed_feeds} feed(s) failed (failure rate: {failure_rate}%). Check backend logs for details.")
             
             # Other sources (arXiv, CrossRef, Wikipedia, etc.)
