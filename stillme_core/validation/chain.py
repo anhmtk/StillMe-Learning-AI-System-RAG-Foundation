@@ -40,16 +40,9 @@ class ValidationEngine:
         """
         Check if a validator can run in parallel with others.
         
-        Validators that can run in parallel:
-        - CitationRelevance: Only reads answer and ctx_docs, doesn't modify
-        - EvidenceOverlap: Only reads answer and ctx_docs, doesn't modify
-        - NumericUnitsBasic: Only reads answer, doesn't modify
-        - EthicsAdapter: Only reads answer, doesn't modify
-        
-        Validators that MUST run sequentially:
-        - LanguageValidator: Must run first (highest priority)
-        - CitationRequired: Must run before CitationRelevance (provides citations)
-        - ConfidenceValidator: May depend on other validators' results
+        NPR-Inspired Optimization:
+        - Validators that can run in parallel: Read-only, no dependencies on other validators' results
+        - Validators that must run sequentially: Have dependencies or modify shared state
         
         Args:
             validator: Validator instance
@@ -58,31 +51,39 @@ class ValidationEngine:
         Returns:
             True if validator can run in parallel, False otherwise
         """
-        # Validators that can run in parallel (read-only, no dependencies)
-        parallel_safe = {
-            "CitationRelevance",
-            "EvidenceOverlap", 
-            "NumericUnitsBasic",
-            "SchemaFormat",
-            "EthicsAdapter",
-            "EgoNeutralityValidator",  # Read-only detection, can run in parallel
-            "SourceConsensusValidator"  # NEW: Can run in parallel (reads ctx_docs only)
-        }
-        
-        # Validators that must run sequentially (have dependencies or modify state)
+        # Validators that MUST run sequentially (have dependencies or modify state)
         sequential_only = {
-            "LanguageValidator",  # Must run first
-            "CitationRequired",   # Must run before CitationRelevance
-            "SourceConsensusValidator",  # NEW: Must run after EvidenceOverlap, before ConfidenceValidator
-            "ConfidenceValidator" # May depend on other results (including SourceConsensusValidator)
+            "LanguageValidator",      # Must run FIRST (highest priority)
+            "CitationRequired",        # Must run before CitationRelevance (provides citations)
+            "CitationRelevance",       # DEPENDS on CitationRequired (needs citations to validate)
+            "SourceConsensusValidator", # Must run after EvidenceOverlap, before ConfidenceValidator
+            "ConfidenceValidator",     # May depend on other validators' results (SourceConsensusValidator, EvidenceOverlap)
+            "FactualHallucinationValidator",  # Critical validator, run sequentially for safety
+            "ReligiousChoiceValidator", # Critical validator, run sequentially for safety
         }
         
+        # Validators that can run in parallel (read-only, no dependencies)
+        # These validators only read answer and ctx_docs, don't depend on other validators' results
+        parallel_safe = {
+            "EvidenceOverlap",         # Reads answer and ctx_docs only
+            "NumericUnitsBasic",       # Reads answer only
+            "SchemaFormat",            # Reads answer only
+            "EgoNeutralityValidator",  # Reads answer and ctx_docs only
+            "IdentityCheckValidator",   # Reads answer only
+            "PhilosophicalDepthValidator",  # Reads answer only
+            "EthicsAdapter",            # Reads answer only (but should run last for safety)
+        }
+        
+        # Check sequential first (higher priority)
         if validator_name in sequential_only:
             return False
+        
+        # Check parallel safe
         if validator_name in parallel_safe:
             return True
         
-        # Default: sequential for safety
+        # Default: sequential for safety (unknown validators)
+        logger.warning(f"Unknown validator {validator_name}, running sequentially for safety")
         return False
     
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None,

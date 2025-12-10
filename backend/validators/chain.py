@@ -27,16 +27,9 @@ class ValidatorChain:
         """
         Check if a validator can run in parallel with others.
         
-        Validators that can run in parallel:
-        - CitationRelevance: Only reads answer and ctx_docs, doesn't modify
-        - EvidenceOverlap: Only reads answer and ctx_docs, doesn't modify
-        - NumericUnitsBasic: Only reads answer, doesn't modify
-        - EthicsAdapter: Only reads answer, doesn't modify
-        
-        Validators that MUST run sequentially:
-        - LanguageValidator: Must run first (highest priority)
-        - CitationRequired: Must run before CitationRelevance (provides citations)
-        - ConfidenceValidator: May depend on other validators' results
+        NPR-Inspired Optimization:
+        - Validators that can run in parallel: Read-only, no dependencies on other validators' results
+        - Validators that must run sequentially: Have dependencies or modify shared state
         
         Args:
             validator: Validator instance
@@ -45,31 +38,39 @@ class ValidatorChain:
         Returns:
             True if validator can run in parallel, False otherwise
         """
-        # Validators that can run in parallel (read-only, no dependencies)
-        parallel_safe = {
-            "CitationRelevance",
-            "EvidenceOverlap", 
-            "NumericUnitsBasic",
-            "SchemaFormat",
-            "EthicsAdapter",
-            "EgoNeutralityValidator",  # Read-only detection, can run in parallel
-            "SourceConsensusValidator"  # NEW: Can run in parallel (reads ctx_docs only)
-        }
-        
-        # Validators that must run sequentially (have dependencies or modify state)
+        # Validators that MUST run sequentially (have dependencies or modify state)
         sequential_only = {
-            "LanguageValidator",  # Must run first
-            "CitationRequired",   # Must run before CitationRelevance
-            "SourceConsensusValidator",  # NEW: Must run after EvidenceOverlap, before ConfidenceValidator
-            "ConfidenceValidator" # May depend on other results (including SourceConsensusValidator)
+            "LanguageValidator",      # Must run FIRST (highest priority)
+            "CitationRequired",        # Must run before CitationRelevance (provides citations)
+            "CitationRelevance",       # DEPENDS on CitationRequired (needs citations to validate)
+            "SourceConsensusValidator", # Must run after EvidenceOverlap, before ConfidenceValidator
+            "ConfidenceValidator",     # May depend on other validators' results (SourceConsensusValidator, EvidenceOverlap)
+            "FactualHallucinationValidator",  # Critical validator, run sequentially for safety
+            "ReligiousChoiceValidator", # Critical validator, run sequentially for safety
         }
         
+        # Validators that can run in parallel (read-only, no dependencies)
+        # These validators only read answer and ctx_docs, don't depend on other validators' results
+        parallel_safe = {
+            "EvidenceOverlap",         # Reads answer and ctx_docs only
+            "NumericUnitsBasic",       # Reads answer only
+            "SchemaFormat",            # Reads answer only
+            "EgoNeutralityValidator",  # Reads answer and ctx_docs only
+            "IdentityCheckValidator",   # Reads answer only
+            "PhilosophicalDepthValidator",  # Reads answer only
+            "EthicsAdapter",            # Reads answer only (but should run last for safety)
+        }
+        
+        # Check sequential first (higher priority)
         if validator_name in sequential_only:
             return False
+        
+        # Check parallel safe
         if validator_name in parallel_safe:
             return True
         
-        # Default: sequential for safety
+        # Default: sequential for safety (unknown validators)
+        logger.warning(f"Unknown validator {validator_name}, running sequentially for safety")
         return False
     
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None,
@@ -95,6 +96,9 @@ class ValidatorChain:
         Returns:
             ValidationResult with overall status
         """
+        import time
+        validation_start = time.time()
+        
         reasons: List[str] = []
         patched = answer
         has_citation = False
@@ -112,7 +116,10 @@ class ValidatorChain:
             else:
                 sequential_validators.append((i, validator, validator_name))
         
+        logger.debug(f"🔍 [NPR] Validator grouping: {len(sequential_validators)} sequential, {len(parallel_validators)} parallel")
+        
         # Run sequential validators first (LanguageValidator, CitationRequired, etc.)
+        sequential_start = time.time()
         for i, validator, validator_name in sequential_validators:
             try:
                 # Tier 3.5: Pass context quality to ConfidenceValidator
@@ -250,21 +257,31 @@ class ValidatorChain:
                 reasons.append(f"validator_error:{type(validator).__name__}:{str(e)}")
                 # Continue with next validator on error
         
-        # OPTIMIZATION: Run parallel validators concurrently (if any)
+        sequential_time = time.time() - sequential_start
+        if sequential_validators:
+            logger.debug(f"⏱️ [NPR] Sequential validators completed in {sequential_time:.3f}s ({len(sequential_validators)} validators)")
+        
+        # NPR-INSPIRED OPTIMIZATION: Run parallel validators concurrently (if any)
         if parallel_validators:
-            logger.debug(f"Running {len(parallel_validators)} validators in parallel...")
+            import time
+            parallel_start = time.time()
+            logger.debug(f"🚀 [NPR] Running {len(parallel_validators)} validators in parallel...")
             parallel_results: Dict[int, ValidationResult] = {}
             
             def _run_parallel_validator(validator, validator_name, patched_answer, ctx_docs_list, user_q=None):
                 """Helper function to run validator with correct parameters"""
+                validator_start = time.time()
                 try:
                     # Pass user_question to validators that need it
                     if validator_name == "FactualHallucinationValidator":
-                        return validator.run(patched_answer, ctx_docs_list, user_question=user_q)
+                        result = validator.run(patched_answer, ctx_docs_list, user_question=user_q)
                     elif validator_name == "SourceConsensusValidator":
-                        return validator.run(patched_answer, ctx_docs_list, user_question=user_q)
+                        result = validator.run(patched_answer, ctx_docs_list, user_question=user_q)
                     else:
-                        return validator.run(patched_answer, ctx_docs_list)
+                        result = validator.run(patched_answer, ctx_docs_list)
+                    validator_time = time.time() - validator_start
+                    logger.debug(f"⏱️ [NPR] {validator_name} completed in {validator_time:.3f}s")
+                    return result
                 except Exception as e:
                     logger.error(f"Parallel validator {validator_name} error: {e}")
                     return ValidationResult(
@@ -273,7 +290,12 @@ class ValidatorChain:
                     )
             
             try:
-                with ThreadPoolExecutor(max_workers=min(len(parallel_validators), 5)) as executor:
+                # NPR: Optimize max_workers based on validator count and CPU cores
+                import os
+                cpu_count = os.cpu_count() or 4
+                optimal_workers = min(len(parallel_validators), cpu_count, 8)  # Cap at 8 for safety
+                
+                with ThreadPoolExecutor(max_workers=optimal_workers) as executor:
                     # Submit all parallel validators with correct parameters
                     future_to_validator = {
                         executor.submit(
@@ -300,6 +322,9 @@ class ValidatorChain:
                                 reasons=[f"validator_error:{validator_name}:{str(e)}"]
                             )
                 
+                parallel_time = time.time() - parallel_start
+                logger.info(f"✅ [NPR] Parallel validation completed in {parallel_time:.3f}s ({len(parallel_validators)} validators, {optimal_workers} workers)")
+                
                 # Process parallel results
                 for i, validator, validator_name in parallel_validators:
                     if i in parallel_results:
@@ -317,7 +342,8 @@ class ValidatorChain:
                                 logger.debug(f"Applied patch from parallel validator {i}")
             except Exception as parallel_error:
                 # Fallback to sequential if parallel execution fails
-                logger.warning(f"Parallel validation failed, falling back to sequential: {parallel_error}")
+                logger.warning(f"⚠️ [NPR] Parallel validation failed, falling back to sequential: {parallel_error}")
+                fallback_start = time.time()
                 for i, validator, validator_name in parallel_validators:
                     try:
                         # Pass user_question if available
@@ -332,6 +358,8 @@ class ValidatorChain:
                     except Exception as e:
                         logger.error(f"Fallback validator {i} ({validator_name}) error: {e}")
                         reasons.append(f"validator_error:{validator_name}:{str(e)}")
+                fallback_time = time.time() - fallback_start
+                logger.warning(f"⚠️ [NPR] Sequential fallback completed in {fallback_time:.3f}s")
         
         # Determine final validation status
         # If we have critical failures without patches, validation failed
@@ -355,6 +383,10 @@ class ValidatorChain:
             logger.warning(f"⚠️ [FIX] patched == answer but has_missing_citation_with_patch=True, using patched anyway")
         else:
             final_patched_answer = None
+        
+        # NPR: Log overall validation performance
+        total_validation_time = time.time() - validation_start
+        logger.info(f"✅ [NPR] Validation completed in {total_validation_time:.3f}s (sequential: {len(sequential_validators)}, parallel: {len(parallel_validators)})")
         
         # CRITICAL FIX: Log patched_answer status to help debug
         logger.info(f"🔍 [TRACE] ValidatorChain final: patched={patched[:100] if patched else 'None'}..., answer={answer[:100] if answer else 'None'}..., patched_answer={final_patched_answer[:100] if final_patched_answer else 'None'}..., patched != answer={patched != answer}")

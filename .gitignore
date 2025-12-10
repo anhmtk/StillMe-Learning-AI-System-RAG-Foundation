@@ -127,3 +127,6 @@ tatus*
 docs/MARKETING_STRATEGY.md
 docs/CAPTURE_STRATEGY.md
 scripts/capture_screenshots.py
+
+# Internal paper analysis (not for public repo)
+docs/ANALYSIS_NPR_PAPER.md
