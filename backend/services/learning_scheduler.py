@@ -62,8 +62,8 @@ class LearningScheduler:
         """
         # Import here to avoid circular imports
         if rss_fetcher is None:
-            from backend.services.rss_fetcher import RSSFetcher
-            rss_fetcher = RSSFetcher()
+            from backend.services.rss_fetcher import get_rss_fetcher
+            rss_fetcher = get_rss_fetcher()  # Use singleton to ensure stats are shared
         
         if source_integration is None:
             from backend.services.source_integration import SourceIntegration

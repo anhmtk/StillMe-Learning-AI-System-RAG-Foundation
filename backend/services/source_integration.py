@@ -39,7 +39,9 @@ class SourceIntegration:
         Args:
             content_curator: ContentCurator instance for pre-filtering
         """
-        self.rss_fetcher = RSSFetcher()
+        # Use singleton RSSFetcher to ensure stats are shared with learning_scheduler
+        from backend.services.rss_fetcher import get_rss_fetcher
+        self.rss_fetcher = get_rss_fetcher()
         self.arxiv_fetcher = ArxivFetcher() if ENABLE_ARXIV else None
         self.crossref_fetcher = CrossrefFetcher() if ENABLE_CROSSREF else None
         self.wikipedia_fetcher = WikipediaFetcher() if ENABLE_WIKIPEDIA else None
