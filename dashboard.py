@@ -529,7 +529,7 @@ def page_overview():
             # RSS Statistics
             if "rss" in source_stats:
                 rss_data = source_stats["rss"]
-                rss_stats = rss_data.get("stats", {})  # Get stats from nested structure
+                rss_stats = rss_data.get("stats") or {}  # Get stats from nested structure, handle None case
                 
                 # Get feeds_count from rss_data (top level) or from stats (fallback)
                 feeds_count = rss_data.get("feeds_count", rss_stats.get("feeds_count", 0))
