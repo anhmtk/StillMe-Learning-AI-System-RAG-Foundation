@@ -57,21 +57,10 @@ FALLBACK_FEEDS = {
     # These feeds have been removed from the main list and replaced with reliable alternatives
     
     # Feeds with XML validation issues - add fallbacks
-    "https://www.pnas.org/action/showFeed?type=etoc&feed=rss&jc=PNAS": [
-        "https://www.pnas.org/feed/",
-        "https://www.pnas.org/rss/",
-        "https://www.pnas.org/action/showFeed?type=etoc&feed=rss"
-    ],
-    "https://www.historytoday.com/rss.xml": [
-        "https://www.historytoday.com/feed/",
-        "https://www.historytoday.com/rss/",
-        "https://www.historytoday.com/feed/rss"
-    ],
-    "https://www.firstthings.com/rss": [
-        "https://www.firstthings.com/feed/",
-        "https://www.firstthings.com/rss.xml",
-        "https://www.firstthings.com/feed/rss"
-    ],
+    # Removed fallbacks for feeds that have been removed from main list:
+    # - https://www.pnas.org/action/showFeed?type=etoc&feed=rss&jc=PNAS (all fallbacks exhausted)
+    # - https://www.historytoday.com/rss.xml (all fallbacks 404)
+    # - https://www.firstthings.com/rss (all fallbacks exhausted)
 }
 
 # Retry configuration

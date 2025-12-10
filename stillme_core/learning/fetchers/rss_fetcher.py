@@ -52,7 +52,8 @@ class RSSFetcher:
             # Biology & Science
             "https://www.nature.com/nature.rss",
             "https://www.nature.com/natmachintell.rss",  # Nature Machine Intelligence - AI research & ethics
-            "https://www.pnas.org/action/showFeed?type=etoc&feed=rss&jc=PNAS",  # PNAS - Working feed (alternative to /rss/current.xml)
+            "https://www.science.org/rss/news.xml",  # Science Magazine - Replaced PNAS (PNAS feed has persistent XML issues)
+            # Removed: "https://www.pnas.org/action/showFeed?type=etoc&feed=rss&jc=PNAS" - XML validation failed (all fallbacks exhausted)
             # Removed: "https://www.scientificamerican.com/rss/" - 404 Not Found
             # Removed: "https://www.science.org/rss/news_current.xml" - XML validation errors
             # Removed: "https://www.pnas.org/rss/current.xml" - XML validation errors (using action/showFeed instead)
@@ -70,7 +71,8 @@ class RSSFetcher:
             # History & Historical Events
             "https://feeds.bbci.co.uk/news/world/rss.xml",  # BBC World News - Fixed URL (redirects from bbc.com)
             "https://www.theguardian.com/world/rss",  # The Guardian World - Historical context & analysis
-            "https://www.historytoday.com/rss.xml",  # History Today - Academic history magazine
+            "https://www.smithsonianmag.com/rss/history/",  # Smithsonian History - Replaced History Today (XML validation failed, all fallbacks exhausted)
+            # Removed: "https://www.historytoday.com/rss.xml" - XML validation failed (syntax error, all fallbacks 404)
             # Removed: "https://www.history.com/.rss/topics/news" - 404 Not Found
             # Note: Historical sources help StillMe answer questions about events like Geneva 1954, Bretton Woods 1944
             
@@ -81,17 +83,20 @@ class RSSFetcher:
             # Note: Ethics sources complement philosophy sources for practical ethical reasoning
             
             # Social Sciences
-            "https://www.apa.org/rss/topics/psychology",  # American Psychological Association - Psychology news
+            "https://www.psychologicalscience.org/feed",  # Association for Psychological Science - Replaced APA (404 Not Found)
+            # Removed: "https://www.apa.org/rss/topics/psychology" - 404 Not Found (URL no longer exists)
             # Removed: "https://www.psychologytoday.com/us/rss" - 404 Not Found
             # Removed: "https://www.scientificamerican.com/psychology/feed/" - 404 Not Found
             # Note: Social sciences provide context for understanding human behavior, religion, philosophy
             
             # Religious Studies & Philosophy
-            "https://www.philosophynow.org/rss",  # Philosophy Now - Philosophy magazine (reliable)
+            "https://www.3ammagazine.com/feed/",  # 3:AM Magazine - Philosophy - Replaced Philosophy Now (SSL certificate verify failed)
             "https://www.theguardian.com/world/religion/rss",  # The Guardian - Religion
             "https://tricycle.org/feed/",  # Tricycle - Buddhist Magazine (reliable)
             "https://iep.utm.edu/feed/",  # Internet Encyclopedia of Philosophy - Academic philosophy reference
-            "https://www.firstthings.com/rss",  # First Things - Religion, culture, philosophy
+            "https://www.christianitytoday.com/ct/rss.xml",  # Christianity Today - Replaced First Things (XML validation failed, all fallbacks exhausted)
+            # Removed: "https://www.philosophynow.org/rss" - SSL certificate verify failed (unable to get local issuer certificate)
+            # Removed: "https://www.firstthings.com/rss" - XML validation failed (not well-formed, all fallbacks exhausted)
             # Removed: "https://philpapers.org/rss/recent.xml" - 403 Forbidden (bot protection)
             # Removed: "https://www.patheos.com/feed/" - 403 Forbidden (bot protection)
             # Removed: "https://www.religionnews.com/feed/" - 403 Forbidden (bot protection)
