@@ -1345,10 +1345,22 @@ async def _handle_validation_with_fallback(
     # 1. CitationRequired
     # 2. ConfidenceValidator
     # 3. FactualHallucinationValidator
+    # NPR Phase 2.2: Get adaptive thresholds from Self-Distilled Learning
+    try:
+        from backend.services.self_distilled_learning import get_self_distilled_learning
+        sdl = get_self_distilled_learning()
+        adaptive_citation_overlap = sdl.get_adaptive_threshold("citation_relevance_min_overlap", 0.1)
+        adaptive_evidence_threshold = sdl.get_adaptive_threshold("evidence_overlap_threshold", 0.01)
+        logger.debug(f"🎯 [Self-Distilled] Using adaptive thresholds: citation_overlap={adaptive_citation_overlap:.3f}, evidence={adaptive_evidence_threshold:.3f}")
+    except Exception as e:
+        logger.warning(f"⚠️ [Self-Distilled] Failed to get adaptive thresholds, using defaults: {e}")
+        adaptive_citation_overlap = 0.1
+        adaptive_evidence_threshold = 0.01
+    
     validators = [
         LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
         CitationRequired(),  # CRITICAL: Always run
-        CitationRelevance(min_keyword_overlap=0.1),  # Check citation relevance (warns but doesn't fail)
+        CitationRelevance(min_keyword_overlap=adaptive_citation_overlap),  # NPR Phase 2.2: Adaptive threshold
         NumericUnitsBasic(),
         # Fix: Disable require_uncertainty_when_no_context for philosophical questions
         ConfidenceValidator(require_uncertainty_when_no_context=not is_philosophical),  # CRITICAL: Always run
@@ -1359,8 +1371,8 @@ async def _handle_validation_with_fallback(
     # Phase 2: Optional validators (run conditionally)
     # EvidenceOverlap: Only when has context
     if len(ctx_docs) > 0:
-        validators.insert(3, EvidenceOverlap(threshold=0.01))  # Insert after CitationRelevance
-        logger.debug("Phase 2: Added EvidenceOverlap validator (has context)")
+        validators.insert(3, EvidenceOverlap(threshold=adaptive_evidence_threshold))  # NPR Phase 2.2: Adaptive threshold
+        logger.debug(f"Phase 2: Added EvidenceOverlap validator (has context, threshold={adaptive_evidence_threshold:.3f})")
     
     # SourceConsensusValidator: Only when has multiple sources (≥2)
     if len(ctx_docs) >= 2:
@@ -1759,6 +1771,21 @@ The RAG system found context documents, but they are NOT relevant to your questi
             has_citations=has_citations,
             category=category
         )
+        
+        # NPR Phase 2.2: Periodic threshold optimization (every 50 validations)
+        # This runs in background to optimize thresholds based on validation history
+        try:
+            from backend.services.self_distilled_learning import get_self_distilled_learning
+            sdl = get_self_distilled_learning()
+            
+            # Only optimize periodically to avoid overhead
+            if metrics.total_validations % 50 == 0:
+                logger.info(f"🎯 [Self-Distilled] Running periodic threshold optimization (validation #{metrics.total_validations})")
+                optimized_thresholds = sdl.optimize_thresholds(days=7)
+                logger.info(f"✅ [Self-Distilled] Threshold optimization completed: {optimized_thresholds}")
+        except Exception as sdl_error:
+            logger.debug(f"Self-Distilled Learning optimization skipped: {sdl_error}")
+            
     except Exception as metrics_error:
         logger.warning(f"Failed to record metrics: {metrics_error}")
     

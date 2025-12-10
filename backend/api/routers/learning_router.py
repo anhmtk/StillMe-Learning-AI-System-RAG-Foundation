@@ -17,6 +17,54 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# NPR Phase 2.2: Self-Distilled Learning endpoints
+@router.get("/self-distilled-learning/summary")
+async def get_self_distilled_learning_summary():
+    """
+    Get summary of Self-Distilled Learning progress (NPR Phase 2.2).
+    
+    Returns:
+        Dictionary with current reward, optimization state, and threshold values
+    """
+    try:
+        from backend.services.self_distilled_learning import get_self_distilled_learning
+        sdl = get_self_distilled_learning()
+        summary = sdl.get_learning_summary()
+        return summary
+    except Exception as e:
+        logger.error(f"Failed to get Self-Distilled Learning summary: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get Self-Distilled Learning summary: {str(e)}"
+        )
+
+@router.post("/self-distilled-learning/optimize")
+async def trigger_threshold_optimization(days: int = Query(7, ge=1, le=30)):
+    """
+    Manually trigger threshold optimization (NPR Phase 2.2).
+    
+    Args:
+        days: Number of days of validation history to analyze (default: 7, max: 30)
+        
+    Returns:
+        Dictionary with optimized threshold values
+    """
+    try:
+        from backend.services.self_distilled_learning import get_self_distilled_learning
+        sdl = get_self_distilled_learning()
+        optimized_thresholds = sdl.optimize_thresholds(days=days)
+        return {
+            "optimized_thresholds": optimized_thresholds,
+            "analysis_days": days,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Failed to optimize thresholds: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to optimize thresholds: {str(e)}"
+        )
+
 # Import global services from main (temporary - will refactor to dependency injection later)
 # These are initialized in main.py before routers are included
 def get_knowledge_retention():
