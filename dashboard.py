@@ -547,18 +547,24 @@ def page_overview():
                 last_error = rss_stats.get("last_error") if rss_stats else None
                 failure_rate = rss_stats.get("failure_rate", 0) if rss_stats else 0
                 
-                # Debug: Show raw data if there's a mismatch (0/0 when we expect failures)
-                if feeds_count > 0 and successful_feeds == 0 and failed_feeds == 0 and rss_stats:
-                    with st.expander("🔍 Debug: RSS Stats Data", expanded=False):
-                        st.json({
-                            "rss_data": rss_data,
-                            "rss_stats": rss_stats,
-                            "feeds_count": feeds_count,
-                            "successful_feeds": successful_feeds,
-                            "failed_feeds": failed_feeds,
-                            "status": status
-                        })
-                        st.caption("⚠️ If backend logs show failures but this shows 0/0, there may be a timing issue or stats not being updated correctly.")
+                # Show warning if stats show 0/0 but feeds_count > 0 (likely no fetch cycle has run yet)
+                last_fetch_timestamp = rss_stats.get("last_fetch_timestamp") if rss_stats else None
+                if feeds_count > 0 and successful_feeds == 0 and failed_feeds == 0:
+                    if not last_fetch_timestamp:
+                        st.info("ℹ️ **No fetch cycle has run yet.** RSS stats will appear after the first learning cycle completes.")
+                    else:
+                        # Debug: Show raw data if there's a mismatch (0/0 when we expect failures)
+                        with st.expander("🔍 Debug: RSS Stats Data", expanded=False):
+                            st.json({
+                                "rss_data": rss_data,
+                                "rss_stats": rss_stats,
+                                "feeds_count": feeds_count,
+                                "successful_feeds": successful_feeds,
+                                "failed_feeds": failed_feeds,
+                                "status": status,
+                                "last_fetch_timestamp": last_fetch_timestamp
+                            })
+                            st.caption("⚠️ If backend logs show failures but this shows 0/0, there may be a timing issue or stats not being updated correctly.")
                 
                 col_rss1, col_rss2, col_rss3, col_rss4 = st.columns(4)
                 with col_rss1:
