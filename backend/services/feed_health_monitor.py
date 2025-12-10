@@ -300,25 +300,141 @@ class FeedHealthMonitor:
             "replacement_count": len(self.replacement_history)
         }
     
-    def suggest_replacements(self, unhealthy_feeds: List[str], alternative_feeds: Dict[str, List[str]]) -> Dict[str, str]:
-        """Suggest replacement feeds for unhealthy feeds
+    def _detect_feed_domain(self, feed_url: str) -> Optional[str]:
+        """
+        Detect domain/category of a feed based on URL and historical quality metrics
+        
+        Args:
+            feed_url: Feed URL
+            
+        Returns:
+            Domain name (ethics, transparency, science, philosophy, etc.) or None
+        """
+        url_lower = feed_url.lower()
+        
+        # Domain detection based on URL patterns and known feeds
+        domain_patterns = {
+            "ethics": ["bioethics", "ethics", "ethical"],
+            "transparency": ["eff.org", "transparency", "open"],
+            "ai_governance": ["governance", "policy", "regulation"],
+            "philosophy": ["philosophy", "3ammagazine", "iep.utm.edu"],
+            "religion": ["religion", "tricycle", "ncronline", "americamagazine", "commonweal"],
+            "science": ["nature.com", "science.org", "phys.org"],
+            "history": ["history", "historynet", "bbc.com/history"],
+            "psychology": ["psychologicalscience", "apa.org", "psychology"]
+        }
+        
+        for domain, patterns in domain_patterns.items():
+            if any(pattern in url_lower for pattern in patterns):
+                return domain
+        
+        return None
+    
+    def suggest_replacements(self, unhealthy_feeds: List[str], alternative_feeds: Optional[Dict[str, List[str]]] = None) -> Dict[str, Dict[str, Any]]:
+        """
+        Suggest replacement feeds for unhealthy feeds based on domain similarity and quality metrics
         
         Args:
             unhealthy_feeds: List of unhealthy feed URLs
-            alternative_feeds: Dictionary mapping feed URLs to alternative URLs
+            alternative_feeds: Optional dictionary mapping feed URLs to alternative URLs
             
         Returns:
-            Dictionary mapping unhealthy feed URL to suggested replacement
+            Dictionary mapping unhealthy feed URL to replacement suggestion with:
+            - suggested_feed: URL of suggested replacement
+            - reason: Why this feed was suggested
+            - domain_match: Whether domain matches
+            - quality_score: Quality score of suggested feed
         """
         suggestions = {}
+        
         for feed_url in unhealthy_feeds:
-            if feed_url in alternative_feeds:
-                alternatives = alternative_feeds[feed_url]
-                # Choose first alternative that's not also unhealthy
-                for alt_url in alternatives:
-                    if alt_url not in unhealthy_feeds:
-                        suggestions[feed_url] = alt_url
+            unhealthy_record = self.health_records.get(feed_url)
+            if not unhealthy_record:
+                continue
+            
+            # Detect domain of unhealthy feed
+            unhealthy_domain = self._detect_feed_domain(feed_url)
+            
+            # Find best replacement from healthy feeds
+            best_replacement = None
+            best_score = 0.0
+            best_reason = ""
+            
+            for candidate_url, candidate_record in self.health_records.items():
+                # Skip if candidate is also unhealthy
+                if candidate_record.is_unhealthy(
+                    threshold_failure_rate=self.unhealthy_threshold_failure_rate,
+                    threshold_consecutive=self.unhealthy_threshold_consecutive
+                ):
+                    continue
+                
+                # Skip if same feed
+                if candidate_url == feed_url:
+                    continue
+                
+                # Calculate replacement score
+                score = 0.0
+                reasons = []
+                
+                # Domain match bonus (+0.5)
+                candidate_domain = self._detect_feed_domain(candidate_url)
+                if unhealthy_domain and candidate_domain == unhealthy_domain:
+                    score += 0.5
+                    reasons.append("domain_match")
+                
+                # Quality metrics bonus (+0.3 for high quality)
+                if candidate_record.quality_metrics:
+                    quality_score = candidate_record.quality_metrics.avg_importance_score
+                    if quality_score > 0.6:
+                        score += 0.3
+                        reasons.append("high_quality")
+                    elif quality_score > 0.4:
+                        score += 0.2
+                        reasons.append("medium_quality")
+                
+                # Health score bonus (+0.2 for healthy)
+                health_score = candidate_record.get_health_score()
+                if health_score > 0.8:
+                    score += 0.2
+                    reasons.append("very_healthy")
+                elif health_score > 0.6:
+                    score += 0.1
+                    reasons.append("healthy")
+                
+                # Low duplicate rate bonus (+0.1)
+                if candidate_record.quality_metrics and candidate_record.quality_metrics.duplicate_rate < 0.1:
+                    score += 0.1
+                    reasons.append("low_duplicate_rate")
+                
+                if score > best_score:
+                    best_score = score
+                    best_replacement = candidate_url
+                    best_reason = ", ".join(reasons) if reasons else "general_replacement"
+            
+            # Check alternative_feeds if provided
+            if alternative_feeds and feed_url in alternative_feeds:
+                for alt_url in alternative_feeds[feed_url]:
+                    # Check if alternative is healthy
+                    alt_record = self.health_records.get(alt_url)
+                    if alt_record and not alt_record.is_unhealthy(
+                        threshold_failure_rate=self.unhealthy_threshold_failure_rate,
+                        threshold_consecutive=self.unhealthy_threshold_consecutive
+                    ):
+                        # Prefer alternative if it exists and is healthy
+                        best_replacement = alt_url
+                        best_reason = "configured_alternative"
                         break
+            
+            if best_replacement:
+                replacement_record = self.health_records.get(best_replacement)
+                suggestions[feed_url] = {
+                    "suggested_feed": best_replacement,
+                    "reason": best_reason,
+                    "domain_match": unhealthy_domain and self._detect_feed_domain(best_replacement) == unhealthy_domain,
+                    "quality_score": replacement_record.quality_metrics.avg_importance_score if replacement_record and replacement_record.quality_metrics else 0.0,
+                    "health_score": replacement_record.get_health_score() if replacement_record else 0.0
+                }
+        
         return suggestions
     
     def record_replacement(self, old_feed: str, new_feed: str, reason: str):

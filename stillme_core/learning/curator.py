@@ -43,6 +43,27 @@ IMPORTANT_KEYWORDS = {
     "method": 0.5, "approach": 0.5, "framework": 0.5
 }
 
+# Domain-specific scoring boosts (Phase 2.1)
+# These domains are critical for StillMe's mission and get priority boost
+DOMAIN_BOOSTS = {
+    "ethics": 0.2,  # Ethics content gets +0.2 boost
+    "transparency": 0.2,  # Transparency content gets +0.2 boost
+    "ai_governance": 0.15,  # AI governance gets +0.15 boost
+    "philosophy": 0.1,  # Philosophy gets +0.1 boost
+    "religion": 0.1,  # Religious studies gets +0.1 boost
+    "history": 0.05,  # History gets +0.05 boost (for context)
+}
+
+# Domain detection keywords
+DOMAIN_KEYWORDS = {
+    "ethics": ["ethics", "ethical", "đạo đức", "moral", "morality", "bioethics", "bioethical"],
+    "transparency": ["transparency", "transparent", "minh bạch", "open", "audit", "verifiable", "accountability"],
+    "ai_governance": ["ai governance", "governance", "quản trị ai", "regulation", "policy", "ai policy", "ai regulation"],
+    "philosophy": ["philosophy", "philosophical", "triết học", "epistemology", "ontology", "metaphysics", "ethics"],
+    "religion": ["religion", "religious", "tôn giáo", "buddhism", "buddhist", "christianity", "islam", "hinduism"],
+    "history": ["history", "historical", "lịch sử", "event", "conference", "treaty", "war", "peace"]
+}
+
 class ContentCurator:
     """Curates and prioritizes learning content with Pre-Filter for cost optimization"""
     
@@ -236,6 +257,78 @@ class ContentCurator:
         logger.info(f"Prioritized {len(scored_content)} content items")
         return scored_content
     
+    def _detect_domain(self, text: str) -> Optional[str]:
+        """
+        Detect domain from content text
+        
+        Args:
+            text: Content text (title + summary)
+            
+        Returns:
+            Domain name (ethics, transparency, ai_governance, etc.) or None
+        """
+        text_lower = text.lower()
+        
+        # Check each domain (order matters - more specific first)
+        for domain, keywords in DOMAIN_KEYWORDS.items():
+            if any(keyword in text_lower for keyword in keywords):
+                return domain
+        
+        return None
+    
+    def _calculate_freshness_score(self, published: Optional[str] = None) -> float:
+        """
+        Calculate freshness score based on publication date
+        
+        Args:
+            published: Publication date string (ISO format or similar)
+            
+        Returns:
+            Freshness score (0.0-1.0, higher = newer)
+        """
+        if not published:
+            return 0.0
+        
+        try:
+            # Try parsing with dateutil if available
+            try:
+                from dateutil.parser import parse as parse_date
+                pub_date = parse_date(published)
+                # Handle timezone-aware dates
+                if pub_date.tzinfo:
+                    from datetime import timezone
+                    now = datetime.now(timezone.utc)
+                    pub_date_naive = pub_date.astimezone(timezone.utc).replace(tzinfo=None)
+                    now_naive = now.replace(tzinfo=None)
+                    age_days = (now_naive - pub_date_naive).days
+                else:
+                    age_days = (datetime.now() - pub_date).days
+            except ImportError:
+                # Fallback: simple ISO format parsing
+                from datetime import datetime as dt
+                try:
+                    pub_date = dt.fromisoformat(published.replace('Z', '+00:00'))
+                    if pub_date.tzinfo:
+                        now = datetime.now(pub_date.tzinfo)
+                        age_days = (now.replace(tzinfo=None) - pub_date.replace(tzinfo=None)).days
+                    else:
+                        age_days = (datetime.now() - pub_date).days
+                except (ValueError, AttributeError):
+                    return 0.0  # Unknown age, use 0.0
+            
+            # Calculate freshness score (Phase 2.2)
+            if age_days < 1:
+                return 1.0  # < 24h: highest freshness
+            elif age_days < 7:
+                return 0.7  # < 7 days: high freshness
+            elif age_days < 30:
+                return 0.3  # < 30 days: moderate freshness
+            else:
+                return 0.1  # > 30 days: low freshness
+        except Exception as e:
+            logger.debug(f"Failed to calculate freshness score for '{published}': {e}")
+            return 0.0
+    
     def calculate_importance_score(self, content: Dict[str, Any]) -> float:
         """
         Calculate importance score for knowledge entry
@@ -244,6 +337,8 @@ class ContentCurator:
         1. Keyword relevance (AI, ethics, StillMe, SPICE, RAG)
         2. Content length (longer = more detailed = higher importance)
         3. Source quality
+        4. Domain-specific boost (Phase 2.1): ethics, transparency, AI governance get priority
+        5. Freshness score (Phase 2.2): newer content gets boost
         
         Returns:
             Importance score from 0.0 to 1.0
@@ -263,12 +358,35 @@ class ContentCurator:
         source = content.get("source", "")
         source_score = self.source_quality_scores.get(source, 0.5)
         
-        # Weighted combination
-        importance = (
+        # Factor 4: Domain-specific boost (Phase 2.1)
+        domain = self._detect_domain(full_text)
+        domain_boost = 0.0
+        if domain and domain in DOMAIN_BOOSTS:
+            domain_boost = DOMAIN_BOOSTS[domain]
+            logger.debug(f"Domain '{domain}' detected: applying +{domain_boost:.2f} boost")
+        
+        # Factor 5: Freshness score (Phase 2.2)
+        published = content.get("published", "")
+        freshness_score = self._calculate_freshness_score(published)
+        freshness_boost = 0.0
+        if freshness_score > 0:
+            # Convert freshness score to boost: < 24h = +0.2, < 7d = +0.1, < 30d = +0.05
+            if freshness_score >= 1.0:  # < 24h
+                freshness_boost = 0.2
+            elif freshness_score >= 0.7:  # < 7 days
+                freshness_boost = 0.1
+            elif freshness_score >= 0.3:  # < 30 days
+                freshness_boost = 0.05
+        
+        # Weighted combination (base score) + boosts
+        base_importance = (
             keyword_score * 0.5 +  # Keyword relevance is most important
             length_score * 0.3 +   # Length indicates detail
             source_score * 0.2     # Source quality matters
         )
+        
+        # Apply boosts (capped at 1.0)
+        importance = min(1.0, base_importance + domain_boost + freshness_boost)
         
         # Track statistics for dynamic threshold
         self.content_stats["total_items_processed"] += 1

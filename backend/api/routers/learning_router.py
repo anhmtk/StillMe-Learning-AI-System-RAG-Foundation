@@ -1074,6 +1074,44 @@ async def get_feed_health_report():
         raise HTTPException(status_code=500, detail=f"Failed to get feed health report: {str(e)}")
 
 
+@router.get("/feeds/replacement-suggestions")
+async def get_feed_replacement_suggestions():
+    """
+    Get automated replacement suggestions for unhealthy feeds (Phase 2.3)
+    
+    Returns:
+        Dictionary mapping unhealthy feed URLs to replacement suggestions with:
+        - suggested_feed: URL of suggested replacement
+        - reason: Why this feed was suggested
+        - domain_match: Whether domain matches
+        - quality_score: Quality score of suggested feed
+    """
+    try:
+        from backend.services.feed_health_monitor import get_feed_health_monitor
+        health_monitor = get_feed_health_monitor()
+        unhealthy_feeds = health_monitor.get_unhealthy_feeds()
+        
+        if not unhealthy_feeds:
+            return {
+                "unhealthy_feeds": [],
+                "suggestions": {},
+                "message": "All feeds are healthy - no replacements needed"
+            }
+        
+        # Get replacement suggestions
+        suggestions = health_monitor.suggest_replacements(unhealthy_feeds)
+        
+        return {
+            "unhealthy_feeds": unhealthy_feeds,
+            "suggestions": suggestions,
+            "total_unhealthy": len(unhealthy_feeds),
+            "total_suggestions": len(suggestions)
+        }
+    except Exception as e:
+        logger.error(f"Error getting feed replacement suggestions: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to get replacement suggestions: {str(e)}")
+
+
 @router.post("/scheduler/run-now")
 async def run_scheduler_now(request: Request, sync: bool = Query(False, description="Run synchronously (for tests)")):
     """
