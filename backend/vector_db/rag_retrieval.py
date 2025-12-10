@@ -118,7 +118,12 @@ class RAGRetrieval:
                         mmr_lambda: float = 0.7,
                         exclude_content_types: Optional[List[str]] = None,
                         prioritize_style_guide: bool = False,
-                        is_philosophical: bool = False) -> Dict[str, Any]:
+                        is_philosophical: bool = False,
+                        # NPR Phase 2.1: Parallel RAG Retrieval
+                        include_codebase: bool = False,  # Query stillme_codebase collection
+                        include_git_history: bool = False,  # Query stillme_git_history collection
+                        codebase_limit: int = 2,  # Number of code chunks to retrieve
+                        git_history_limit: int = 2) -> Dict[str, Any]:  # Number of git history items to retrieve
         """Retrieve relevant context for a query
         
         Args:
@@ -341,31 +346,119 @@ class RAGRetrieval:
                         )
                     return []
                 
-                # OPTIMIZATION: Run both searches in parallel using ThreadPoolExecutor
+                # NPR Phase 2.1: Helper functions for parallel codebase and git history retrieval
+                def _search_codebase():
+                    """Query stillme_codebase collection"""
+                    if not include_codebase:
+                        return []
+                    try:
+                        from backend.services.codebase_indexer import get_codebase_indexer
+                        indexer = get_codebase_indexer()
+                        results = indexer.query_codebase(query, n_results=codebase_limit)
+                        # Format results to match knowledge_results structure
+                        formatted = []
+                        for result in results:
+                            formatted.append({
+                                "content": result.get("document", ""),
+                                "metadata": result.get("metadata", {}),
+                                "distance": result.get("distance", 1.0),
+                                "source": "codebase",
+                                "collection": "stillme_codebase"
+                            })
+                        return formatted
+                    except Exception as e:
+                        logger.warning(f"Codebase search failed: {e}")
+                        return []
+                
+                def _search_git_history():
+                    """Query stillme_git_history collection"""
+                    if not include_git_history:
+                        return []
+                    try:
+                        from backend.services.git_history_retriever import get_git_history_retriever
+                        git_retriever = get_git_history_retriever()
+                        results = git_retriever.query_history(query, n_results=git_history_limit)
+                        # Format results to match knowledge_results structure
+                        formatted = []
+                        for result in results:
+                            formatted.append({
+                                "content": result.get("message", ""),
+                                "metadata": result.get("metadata", {}),
+                                "distance": result.get("distance", 1.0),
+                                "source": "git_history",
+                                "collection": "stillme_git_history"
+                            })
+                        return formatted
+                    except Exception as e:
+                        logger.warning(f"Git history search failed: {e}")
+                        return []
+                
+                # NPR Phase 2.1: Run all searches in parallel using ThreadPoolExecutor
                 # This works in both sync and async contexts without breaking backward compatibility
+                import time
+                parallel_start = time.time()
+                
+                # Determine which searches to run
+                searches_to_run = []
+                if True:  # Always run knowledge search
+                    searches_to_run.append(("knowledge", _search_knowledge))
+                if conversation_limit > 0:
+                    searches_to_run.append(("conversation", _search_conversations))
+                if include_codebase:
+                    searches_to_run.append(("codebase", _search_codebase))
+                if include_git_history:
+                    searches_to_run.append(("git_history", _search_git_history))
+                
                 try:
-                    if conversation_limit > 0:
-                        # Run both searches in parallel
-                        with ThreadPoolExecutor(max_workers=2) as executor:
-                            knowledge_future = executor.submit(_search_knowledge)
-                            conversation_future = executor.submit(_search_conversations)
+                    if len(searches_to_run) > 1:
+                        # Run all searches in parallel
+                        logger.debug(f"🚀 [NPR] Running {len(searches_to_run)} RAG searches in parallel...")
+                        with ThreadPoolExecutor(max_workers=min(len(searches_to_run), 4)) as executor:
+                            futures = {
+                                executor.submit(search_func): name
+                                for name, search_func in searches_to_run
+                            }
                             
-                            # Wait for both to complete
-                            knowledge_results = knowledge_future.result()
-                            conversation_results = conversation_future.result()
+                            # Collect results as they complete
+                            results_dict = {}
+                            for future in futures:
+                                name = futures[future]
+                                try:
+                                    results_dict[name] = future.result()
+                                except Exception as e:
+                                    logger.error(f"Parallel search '{name}' failed: {e}")
+                                    results_dict[name] = []
+                        
+                        # Extract results
+                        knowledge_results = results_dict.get("knowledge", [])
+                        conversation_results = results_dict.get("conversation", [])
+                        codebase_results = results_dict.get("codebase", [])
+                        git_history_results = results_dict.get("git_history", [])
+                        
+                        parallel_time = time.time() - parallel_start
+                        logger.info(f"✅ [NPR] Parallel RAG retrieval completed in {parallel_time:.3f}s ({len(searches_to_run)} collections)")
                     else:
-                        # Only knowledge search needed
+                        # Only one search needed (knowledge)
                         knowledge_results = _search_knowledge()
                         conversation_results = []
+                        codebase_results = []
+                        git_history_results = []
+                        
                 except Exception as parallel_error:
                     # Fallback to sequential if parallel fails
-                    logger.debug(f"Parallel search failed, using sequential: {parallel_error}")
+                    logger.warning(f"⚠️ [NPR] Parallel RAG retrieval failed, using sequential: {parallel_error}")
                     knowledge_results = _search_knowledge()
-                    conversation_results = _search_conversations()
+                    conversation_results = _search_conversations() if conversation_limit > 0 else []
+                    codebase_results = _search_codebase() if include_codebase else []
+                    git_history_results = _search_git_history() if include_git_history else []
                 
                 logger.info(f"Knowledge search returned {len(knowledge_results)} results")
                 if conversation_results:
                     logger.info(f"Conversation search returned {len(conversation_results)} results")
+                if codebase_results:
+                    logger.info(f"Codebase search returned {len(codebase_results)} results")
+                if git_history_results:
+                    logger.info(f"Git history search returned {len(git_history_results)} results")
             
             # Tier 3.5: Apply similarity threshold and MMR
             def _distance_to_similarity(distance: float) -> float:
@@ -449,6 +542,8 @@ class RAGRetrieval:
             # Apply similarity threshold filtering
             original_knowledge_count = len(knowledge_results)
             original_conversation_count = len(conversation_results)
+            original_codebase_count = len(codebase_results) if include_codebase else 0
+            original_git_history_count = len(git_history_results) if include_git_history else 0
             
             # Filter knowledge results by similarity threshold
             filtered_knowledge = []
@@ -544,10 +639,35 @@ class RAGRetrieval:
                 else:
                     filtered_conversation_count += 1
             
+            # NPR Phase 2.1: Filter codebase and git_history results by similarity threshold
+            filtered_codebase = []
+            filtered_codebase_count = 0
+            for doc in codebase_results:
+                similarity = _distance_to_similarity(doc.get("distance", 1.0))
+                if similarity >= similarity_threshold:
+                    doc["similarity"] = similarity
+                    filtered_codebase.append(doc)
+                else:
+                    filtered_codebase_count += 1
+            
+            filtered_git_history = []
+            filtered_git_history_count = 0
+            for doc in git_history_results:
+                similarity = _distance_to_similarity(doc.get("distance", 1.0))
+                if similarity >= similarity_threshold:
+                    doc["similarity"] = similarity
+                    filtered_git_history.append(doc)
+                else:
+                    filtered_git_history_count += 1
+            
             if filtered_knowledge_count > 0:
                 logger.debug(f"📊 Filtered {filtered_knowledge_count} knowledge docs below similarity threshold {similarity_threshold}")
             if filtered_conversation_count > 0:
                 logger.debug(f"📊 Filtered {filtered_conversation_count} conversation docs below similarity threshold {similarity_threshold}")
+            if filtered_codebase_count > 0:
+                logger.debug(f"📊 Filtered {filtered_codebase_count} codebase docs below similarity threshold {similarity_threshold}")
+            if filtered_git_history_count > 0:
+                logger.debug(f"📊 Filtered {filtered_git_history_count} git_history docs below similarity threshold {similarity_threshold}")
             
             # Apply MMR if enabled and we have enough documents
             if use_mmr and len(filtered_knowledge) > knowledge_limit:
@@ -575,6 +695,8 @@ class RAGRetrieval:
                 return {
                     "knowledge_docs": [],
                     "conversation_docs": [],
+                    "codebase_docs": [],
+                    "git_history_docs": [],
                     "total_context_docs": 0,
                     "avg_similarity_score": avg_similarity,
                     "context_quality": "low",
@@ -595,18 +717,38 @@ class RAGRetrieval:
             # Check if we have reliable context
             has_reliable_context = len(filtered_knowledge) > 0 and avg_similarity >= similarity_threshold
             
+            # NPR Phase 2.1: Merge codebase and git_history into knowledge_docs for backward compatibility
+            # Or keep them separate for transparency
+            all_knowledge_docs = filtered_knowledge[:knowledge_limit].copy()
+            if include_codebase:
+                # Add codebase results with source tag
+                for doc in filtered_codebase[:codebase_limit]:
+                    doc["source"] = "codebase"
+                    all_knowledge_docs.append(doc)
+            if include_git_history:
+                # Add git history results with source tag
+                for doc in filtered_git_history[:git_history_limit]:
+                    doc["source"] = "git_history"
+                    all_knowledge_docs.append(doc)
+            
             # Build context result with metrics
             context_result = {
-                "knowledge_docs": filtered_knowledge[:knowledge_limit],
+                "knowledge_docs": all_knowledge_docs,  # Includes codebase and git_history if enabled
                 "conversation_docs": filtered_conversation[:conversation_limit] if conversation_limit > 0 else [],
-                "total_context_docs": len(filtered_knowledge[:knowledge_limit]) + len(filtered_conversation[:conversation_limit] if conversation_limit > 0 else []),
+                # NPR Phase 2.1: Separate fields for codebase and git_history (for transparency)
+                "codebase_docs": filtered_codebase[:codebase_limit] if include_codebase else [],
+                "git_history_docs": filtered_git_history[:git_history_limit] if include_git_history else [],
+                "total_context_docs": len(all_knowledge_docs) + len(filtered_conversation[:conversation_limit] if conversation_limit > 0 else []),
                 # Tier 3.5: Context quality metrics
                 "avg_similarity_score": avg_similarity,
                 "context_quality": context_quality,
                 "has_reliable_context": has_reliable_context,
-                "filtered_docs_count": filtered_knowledge_count + filtered_conversation_count,
+                "filtered_docs_count": filtered_knowledge_count + filtered_conversation_count + filtered_codebase_count + filtered_git_history_count,
                 "original_knowledge_count": original_knowledge_count,
-                "original_conversation_count": original_conversation_count
+                "original_conversation_count": original_conversation_count,
+                # NPR Phase 2.1: Track codebase and git_history counts
+                "original_codebase_count": original_codebase_count,
+                "original_git_history_count": original_git_history_count
             }
             
             if not has_reliable_context:
