@@ -78,7 +78,9 @@ def get_rate_limit_key_func(request: Request) -> str:
     Rate limit key function that uses API key if available, otherwise IP address.
     This allows API key users to have higher rate limits.
     
-    Bypasses rate limit for evaluation requests (user_id="evaluation_bot").
+    Bypasses rate limit for:
+    - Evaluation requests (user_id="evaluation_bot")
+    - Admin requests (valid admin API key or admin password)
     
     CRITICAL: Check request.state.bypass_rate_limit flag set by EvaluationBypassMiddleware.
     If flag is True, return special key that will bypass rate limiting.
@@ -93,6 +95,56 @@ def get_rate_limit_key_func(request: Request) -> str:
     if hasattr(request.state, 'bypass_rate_limit') and request.state.bypass_rate_limit:
         logger.info(f"✅ Evaluation request detected in key_func, using bypass key")
         return "evaluation:bypass"
+    
+    # Check for admin bypass (admin API key or admin password)
+    api_key = get_api_key_for_limiting(request)
+    if api_key:
+        # Check if this is admin API key (STILLME_API_KEY)
+        try:
+            from backend.config.security import get_api_key as get_secure_api_key
+            expected_admin_key = get_secure_api_key(require_auth=False)
+            if expected_admin_key:
+                import hmac
+                # Constant-time comparison to prevent timing attacks
+                if hmac.compare_digest(api_key.encode(), expected_admin_key.encode()):
+                    # This is admin API key - bypass rate limit
+                    logger.info(f"✅ Admin API key detected, bypassing rate limit")
+                    return "admin:bypass"
+        except Exception:
+            pass
+    
+    # Check for admin password in request body (for dashboard/admin panel)
+    try:
+        import json
+        if hasattr(request, '_body'):
+            body = request._body
+        elif hasattr(request, 'body'):
+            body = request.body
+        else:
+            body = None
+        
+        if body:
+            try:
+                if isinstance(body, bytes):
+                    body_str = body.decode('utf-8')
+                else:
+                    body_str = str(body)
+                body_data = json.loads(body_str)
+                
+                # Check for admin password in request
+                admin_password = body_data.get("admin_password", "")
+                dashboard_password = os.getenv("DASHBOARD_PASSWORD", "")
+                
+                if admin_password and dashboard_password:
+                    import hmac
+                    # Constant-time comparison to prevent timing attacks
+                    if hmac.compare_digest(admin_password.encode(), dashboard_password.encode()):
+                        logger.info(f"✅ Admin password verified, bypassing rate limit")
+                        return "admin:bypass"
+            except (json.JSONDecodeError, AttributeError, UnicodeDecodeError):
+                pass
+    except Exception:
+        pass
     
     # Fallback: Check request body manually (if middleware didn't run or flag not set)
     try:
@@ -144,9 +196,10 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
     Get chat endpoint rate limit based on environment and user type.
     For local development/testing, can be disabled or increased via env vars.
     
-    CRITICAL: API key users get higher rate limits than IP-based users.
+    CRITICAL: Rate limits by user type:
     - IP-based users (no API key): 15/day (strict limit to prevent abuse)
     - API key users: 1000/day (higher limit for authenticated users)
+    - Admin (API key or password): Unlimited (bypass rate limit)
     - Evaluation requests: 10000/day (unlimited for evaluation)
     
     IMPORTANT: This function is called by slowapi's limiter decorator.
@@ -193,6 +246,11 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
         try:
             rate_limit_key = get_rate_limit_key_func(request)
             
+            # Admin bypass: unlimited (key starts with "admin:")
+            if rate_limit_key.startswith("admin:"):
+                logger.info(f"✅ Rate limit for admin request: unlimited (bypass)")
+                return "10000/day"  # Effectively unlimited for admin
+            
             # Evaluation requests: unlimited (key starts with "evaluation:")
             if rate_limit_key.startswith("evaluation:"):
                 logger.info(f"✅ Rate limit for evaluation request: 10000/day (key: {rate_limit_key})")
@@ -237,11 +295,8 @@ def get_chat_rate_limit(request: Optional[Request] = None) -> str:
             logger.debug(f"Rate limit for API key user (from header): {limit}")
             return limit
     
-    # IP-based users (no API key): 
-    # TEMPORARY: Increased to 10000/day to allow evaluation requests
-    # TODO: Implement proper per-key rate limiting or switch rate limiting library
-    # This is a workaround because slowapi doesn't call get_chat_rate_limit() as callable
-    default_limit = os.getenv("RATE_LIMIT_CHAT_IP", "10000/day")  # Changed from "15/day" to "10000/day"
+    # IP-based users (no API key): 15/day (strict limit to prevent abuse)
+    default_limit = os.getenv("RATE_LIMIT_CHAT_IP", "15/day")
     logger.debug(f"Rate limit for IP-based user: {default_limit}")
     return default_limit
 
