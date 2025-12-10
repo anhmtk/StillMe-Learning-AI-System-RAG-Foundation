@@ -47,6 +47,12 @@ class ContentCurator:
     """Curates and prioritizes learning content with Pre-Filter for cost optimization"""
     
     def __init__(self, enable_review_adapter: Optional[bool] = None):
+        # Track content statistics for dynamic threshold adjustment
+        self.content_stats = {
+            "total_items_processed": 0,
+            "total_importance_scores": [],
+            "avg_importance": 0.0
+        }
         """
         Initialize Content Curator
         
@@ -264,7 +270,58 @@ class ContentCurator:
             source_score * 0.2     # Source quality matters
         )
         
+        # Track statistics for dynamic threshold
+        self.content_stats["total_items_processed"] += 1
+        self.content_stats["total_importance_scores"].append(importance)
+        # Keep only last 100 scores to avoid memory bloat
+        if len(self.content_stats["total_importance_scores"]) > 100:
+            self.content_stats["total_importance_scores"] = self.content_stats["total_importance_scores"][-100:]
+        # Update average
+        if self.content_stats["total_importance_scores"]:
+            self.content_stats["avg_importance"] = sum(self.content_stats["total_importance_scores"]) / len(self.content_stats["total_importance_scores"])
+        
         return min(1.0, importance)
+    
+    def calculate_dynamic_threshold(self, total_items: int, avg_importance: Optional[float] = None) -> float:
+        """
+        Calculate dynamic threshold based on content volume and quality
+        
+        Args:
+            total_items: Total number of items to filter
+            avg_importance: Average importance score (if None, uses tracked average)
+            
+        Returns:
+            Dynamic threshold (0.0-1.0)
+        """
+        base_threshold = 0.3
+        
+        # Use tracked average if not provided
+        if avg_importance is None:
+            avg_importance = self.content_stats.get("avg_importance", 0.5)
+        
+        # Adjust based on volume
+        if total_items < 20:
+            # Too few items: lower threshold to get more content
+            threshold = max(0.2, base_threshold - 0.1)
+            logger.debug(f"Low volume ({total_items} items): lowering threshold to {threshold:.2f}")
+        elif total_items > 50:
+            # Too many items: raise threshold to filter better
+            threshold = min(0.5, base_threshold + 0.1)
+            logger.debug(f"High volume ({total_items} items): raising threshold to {threshold:.2f}")
+        else:
+            threshold = base_threshold
+        
+        # Adjust based on quality
+        if avg_importance > 0.6:
+            # High quality content: can afford higher threshold
+            threshold = min(0.5, threshold + 0.05)
+            logger.debug(f"High quality (avg {avg_importance:.2f}): raising threshold to {threshold:.2f}")
+        elif avg_importance < 0.4:
+            # Low quality content: lower threshold to get more
+            threshold = max(0.2, threshold - 0.05)
+            logger.debug(f"Low quality (avg {avg_importance:.2f}): lowering threshold to {threshold:.2f}")
+        
+        return round(threshold, 2)
     
     def _calculate_priority_score(self, content: Dict[str, Any], knowledge_gaps: set) -> float:
         """Calculate priority score for content"""

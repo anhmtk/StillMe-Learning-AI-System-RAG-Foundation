@@ -1054,6 +1054,26 @@ async def get_scheduler_status():
             "feeds_configured": 0
         }
 
+@router.get("/feeds/health")
+async def get_feed_health_report():
+    """
+    Get comprehensive health report for all RSS feeds
+    
+    Returns:
+        Dictionary with health metrics including:
+        - total_feeds, healthy_feeds, unhealthy_feeds
+        - Per-feed metrics: health_score, success/failure counts, response time, quality metrics
+    """
+    try:
+        from backend.services.feed_health_monitor import get_feed_health_monitor
+        health_monitor = get_feed_health_monitor()
+        report = health_monitor.get_health_report()
+        return report
+    except Exception as e:
+        logger.error(f"Error getting feed health report: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to get feed health report: {str(e)}")
+
+
 @router.post("/scheduler/run-now")
 async def run_scheduler_now(request: Request, sync: bool = Query(False, description="Run synchronously (for tests)")):
     """

@@ -149,17 +149,25 @@ class RSSFetcher:
     
     async def fetch_feeds_async(self, max_items_per_feed: Optional[int] = None, 
                                 content_curator=None, 
-                                min_importance_score: float = 0.3) -> List[Dict[str, Any]]:
+                                min_importance_score: Optional[float] = None) -> List[Dict[str, Any]]:
         """Fetch entries from all RSS feeds with value-based prioritization
         
         Args:
             max_items_per_feed: Maximum items to fetch per feed (None = fetch all, then filter by value)
             content_curator: ContentCurator instance for importance scoring (optional)
-            min_importance_score: Minimum importance score to include (0.0-1.0)
+            min_importance_score: Minimum importance score to include (0.0-1.0). If None, uses dynamic threshold.
             
         Returns:
             List of feed entries, prioritized by value/importance
         """
+        # Use dynamic threshold if curator available and threshold not specified
+        if min_importance_score is None:
+            if content_curator:
+                # Will calculate after first batch, use base threshold for now
+                min_importance_score = 0.3
+            else:
+                min_importance_score = 0.3
+        
         all_entries = []
         # Reset counters for this fetch cycle
         current_successful = 0
@@ -181,12 +189,15 @@ class RSSFetcher:
                 return None
             
             try:
+                import time
+                start_time = time.time()
                 # Execute fetch with circuit breaker
                 result = await fetch_feed_with_fallback(feed_url)
+                response_time = time.time() - start_time
                 breaker._on_success()
-                # Record success in health monitor
+                # Record success in health monitor with response time
                 health_monitor = get_feed_health_monitor()
-                health_monitor.record_success(feed_url)
+                health_monitor.record_success(feed_url, response_time=response_time)
                 health_monitor.update_circuit_breaker_state(feed_url, breaker.state.value)
                 return result
             except Exception as e:
@@ -274,6 +285,17 @@ class RSSFetcher:
                 # Sort by importance score (highest first) if curator available
                 if content_curator and scored_entries:
                     scored_entries.sort(key=lambda x: x.get("importance_score", 0.0), reverse=True)
+                    
+                    # Calculate dynamic threshold based on current batch
+                    # This allows threshold to adjust per feed if needed
+                    if len(scored_entries) > 0:
+                        avg_importance = sum(e.get("importance_score", 0.0) for e in scored_entries) / len(scored_entries)
+                        dynamic_threshold = content_curator.calculate_dynamic_threshold(
+                            total_items=len(scored_entries),
+                            avg_importance=avg_importance
+                        )
+                        # Apply dynamic threshold (but don't change min_importance_score parameter, just log)
+                        logger.debug(f"Feed {feed_url[:50]}: {len(scored_entries)} items, avg importance {avg_importance:.2f}, suggested threshold {dynamic_threshold:.2f}")
                 
                 all_entries.extend(scored_entries)
                 current_successful += 1
@@ -290,6 +312,21 @@ class RSSFetcher:
                 self.error_count += 1
                 logger.error(error_msg)
         
+        # Calculate final dynamic threshold if curator available
+        final_threshold = min_importance_score
+        if content_curator and len(all_entries) > 0:
+            # Re-calculate threshold based on all fetched entries
+            avg_importance = sum(e.get("importance_score", 0.0) for e in all_entries) / len(all_entries) if all_entries else 0.5
+            final_threshold = content_curator.calculate_dynamic_threshold(
+                total_items=len(all_entries),
+                avg_importance=avg_importance
+            )
+            # Re-filter with final threshold if different
+            if final_threshold != min_importance_score:
+                original_count = len(all_entries)
+                all_entries = [e for e in all_entries if e.get("importance_score", 0.0) >= final_threshold]
+                logger.info(f"Dynamic threshold adjustment: {original_count} → {len(all_entries)} items (threshold: {min_importance_score:.2f} → {final_threshold:.2f})")
+        
         # Update persistent counters and last fetch stats
         self.successful_feeds = current_successful
         self.failed_feeds = current_failed
@@ -302,7 +339,8 @@ class RSSFetcher:
             "failed_feeds": current_failed,
             "total_feeds": total_feeds,
             "failure_rate": failure_rate,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "dynamic_threshold_used": final_threshold if content_curator else None
         }
         
         # Update error state
@@ -322,13 +360,13 @@ class RSSFetcher:
     
     def fetch_feeds(self, max_items_per_feed: Optional[int] = None, 
                     content_curator=None,
-                    min_importance_score: float = 0.3) -> List[Dict[str, Any]]:
+                    min_importance_score: Optional[float] = None) -> List[Dict[str, Any]]:
         """Fetch entries from all RSS feeds with value-based prioritization (synchronous wrapper)
         
         Args:
             max_items_per_feed: Maximum items to fetch per feed (None = fetch all, filter by value)
             content_curator: ContentCurator instance for importance scoring (optional)
-            min_importance_score: Minimum importance score to include (0.0-1.0)
+            min_importance_score: Minimum importance score to include (0.0-1.0). If None, uses dynamic threshold.
             
         Returns:
             List of feed entries, prioritized by value/importance

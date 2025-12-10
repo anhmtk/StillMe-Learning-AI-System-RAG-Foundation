@@ -13,6 +13,47 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+class FeedQualityMetrics:
+    """Quality metrics for a feed"""
+    feed_url: str
+    avg_importance_score: float = 0.0
+    high_quality_items: int = 0  # importance > 0.7
+    low_quality_items: int = 0   # importance < 0.3
+    total_items_processed: int = 0
+    duplicate_rate: float = 0.0
+    freshness_score: float = 0.0  # Average freshness of items
+    
+    def update_quality(self, importance_score: float, is_duplicate: bool = False, freshness: float = 0.0):
+        """Update quality metrics"""
+        self.total_items_processed += 1
+        # Update average importance (moving average)
+        if self.total_items_processed == 1:
+            self.avg_importance_score = importance_score
+        else:
+            # Exponential moving average (weight new items more)
+            self.avg_importance_score = (self.avg_importance_score * 0.9) + (importance_score * 0.1)
+        
+        # Track quality buckets
+        if importance_score > 0.7:
+            self.high_quality_items += 1
+        elif importance_score < 0.3:
+            self.low_quality_items += 1
+        
+        # Update duplicate rate
+        if is_duplicate:
+            self.duplicate_rate = (self.duplicate_rate * 0.9) + (1.0 * 0.1)
+        else:
+            self.duplicate_rate = (self.duplicate_rate * 0.9) + (0.0 * 0.1)
+        
+        # Update freshness (moving average)
+        if freshness > 0:
+            if self.freshness_score == 0.0:
+                self.freshness_score = freshness
+            else:
+                self.freshness_score = (self.freshness_score * 0.9) + (freshness * 0.1)
+
+
+@dataclass
 class FeedHealthRecord:
     """Health record for a single feed"""
     feed_url: str
@@ -25,14 +66,28 @@ class FeedHealthRecord:
     total_requests: int = 0
     failure_rate: float = 0.0
     last_error: Optional[str] = None
+    avg_response_time: float = 0.0  # Average response time in seconds
+    quality_metrics: FeedQualityMetrics = None
     
-    def update_success(self):
+    def __post_init__(self):
+        """Initialize quality metrics"""
+        if self.quality_metrics is None:
+            self.quality_metrics = FeedQualityMetrics(feed_url=self.feed_url)
+    
+    def update_success(self, response_time: Optional[float] = None):
         """Update record on successful fetch"""
         self.success_count += 1
         self.total_requests += 1
         self.last_success = datetime.now()
         self.consecutive_failures = 0
         self.failure_rate = (self.failure_count / self.total_requests * 100) if self.total_requests > 0 else 0.0
+        
+        # Update response time (moving average)
+        if response_time is not None:
+            if self.avg_response_time == 0.0:
+                self.avg_response_time = response_time
+            else:
+                self.avg_response_time = (self.avg_response_time * 0.9) + (response_time * 0.1)
     
     def update_failure(self, error: Optional[str] = None):
         """Update record on failed fetch"""
@@ -105,11 +160,21 @@ class FeedHealthMonitor:
         self.replacement_history: List[Dict[str, Any]] = []
         logger.info("Feed Health Monitor initialized")
     
-    def record_success(self, feed_url: str):
+    def record_success(self, feed_url: str, response_time: Optional[float] = None):
         """Record successful feed fetch"""
         if feed_url not in self.health_records:
             self.health_records[feed_url] = FeedHealthRecord(feed_url=feed_url)
-        self.health_records[feed_url].update_success()
+        self.health_records[feed_url].update_success(response_time=response_time)
+    
+    def track_feed_quality(self, feed_url: str, importance_score: float, is_duplicate: bool = False, freshness: float = 0.0):
+        """Track quality metrics for a feed entry"""
+        if feed_url not in self.health_records:
+            self.health_records[feed_url] = FeedHealthRecord(feed_url=feed_url)
+        self.health_records[feed_url].quality_metrics.update_quality(
+            importance_score=importance_score,
+            is_duplicate=is_duplicate,
+            freshness=freshness
+        )
     
     def record_failure(self, feed_url: str, error: Optional[str] = None):
         """Record failed feed fetch"""
@@ -133,6 +198,58 @@ class FeedHealthMonitor:
             ):
                 unhealthy.append(feed_url)
         return unhealthy
+    
+    def get_health_report(self) -> Dict[str, Any]:
+        """
+        Get comprehensive health report for all feeds
+        
+        Returns:
+            Dictionary with health metrics for all feeds
+        """
+        report = {
+            "total_feeds": len(self.health_records),
+            "healthy_feeds": 0,
+            "unhealthy_feeds": 0,
+            "feeds": []
+        }
+        
+        for feed_url, record in self.health_records.items():
+            is_unhealthy = record.is_unhealthy(
+                threshold_failure_rate=self.unhealthy_threshold_failure_rate,
+                threshold_consecutive=self.unhealthy_threshold_consecutive
+            )
+            
+            if is_unhealthy:
+                report["unhealthy_feeds"] += 1
+            else:
+                report["healthy_feeds"] += 1
+            
+            feed_info = {
+                "feed_url": feed_url,
+                "health_score": record.get_health_score(),
+                "is_unhealthy": is_unhealthy,
+                "success_count": record.success_count,
+                "failure_count": record.failure_count,
+                "total_requests": record.total_requests,
+                "failure_rate": round(record.failure_rate, 2),
+                "consecutive_failures": record.consecutive_failures,
+                "circuit_breaker_state": record.circuit_breaker_state,
+                "last_success": record.last_success.isoformat() if record.last_success else None,
+                "last_failure": record.last_failure.isoformat() if record.last_failure else None,
+                "last_error": record.last_error,
+                "avg_response_time": round(record.avg_response_time, 3),
+                "quality_metrics": {
+                    "avg_importance_score": round(record.quality_metrics.avg_importance_score, 3),
+                    "high_quality_items": record.quality_metrics.high_quality_items,
+                    "low_quality_items": record.quality_metrics.low_quality_items,
+                    "total_items_processed": record.quality_metrics.total_items_processed,
+                    "duplicate_rate": round(record.quality_metrics.duplicate_rate, 3),
+                    "freshness_score": round(record.quality_metrics.freshness_score, 3)
+                } if record.quality_metrics else None
+            }
+            report["feeds"].append(feed_info)
+        
+        return report
     
     def get_feed_health(self, feed_url: str) -> Optional[Dict[str, Any]]:
         """Get health information for a specific feed"""

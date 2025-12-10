@@ -168,16 +168,101 @@ class LearningScheduler:
                 
                 for entry in entries_to_add:
                     try:
+                        # Check for duplicate before adding
+                        is_duplicate = False
+                        entry_link = entry.get("link", "")
+                        if entry_link and self.rag_retrieval:
+                            try:
+                                is_duplicate = self.rag_retrieval.check_duplicate_by_link(entry_link)
+                            except Exception:
+                                pass  # If check fails, assume not duplicate
+                        
+                        # Calculate freshness score (0.0-1.0, higher = newer)
+                        freshness_score = 0.0
+                        published = entry.get("published", "")
+                        if published:
+                            try:
+                                # Try parsing with dateutil if available, otherwise use simple parsing
+                                try:
+                                    from dateutil.parser import parse as parse_date
+                                    pub_date = parse_date(published)
+                                    # Handle timezone-aware dates
+                                    if pub_date.tzinfo:
+                                        from datetime import timezone
+                                        now = datetime.now(timezone.utc)
+                                        pub_date_naive = pub_date.astimezone(timezone.utc).replace(tzinfo=None)
+                                        now_naive = now.replace(tzinfo=None)
+                                        age_days = (now_naive - pub_date_naive).days
+                                    else:
+                                        age_days = (datetime.now() - pub_date).days
+                                except ImportError:
+                                    # Fallback: simple ISO format parsing
+                                    from datetime import datetime as dt
+                                    try:
+                                        pub_date = dt.fromisoformat(published.replace('Z', '+00:00'))
+                                        if pub_date.tzinfo:
+                                            now = datetime.now(pub_date.tzinfo)
+                                            age_days = (now.replace(tzinfo=None) - pub_date.replace(tzinfo=None)).days
+                                        else:
+                                            age_days = (datetime.now() - pub_date).days
+                                    except (ValueError, AttributeError):
+                                        # Last resort: try basic string parsing
+                                        age_days = 999  # Unknown age, use low freshness
+                                
+                                # Calculate freshness score based on age
+                                if age_days < 1:
+                                    freshness_score = 1.0
+                                elif age_days < 7:
+                                    freshness_score = 0.7
+                                elif age_days < 30:
+                                    freshness_score = 0.3
+                                else:
+                                    freshness_score = 0.1
+                            except Exception as e:
+                                logger.debug(f"Failed to parse published date '{published}': {e}")
+                                freshness_score = 0.0  # If parsing fails, use 0.0
+                        
+                        # Track quality metrics for feed
+                        feed_url = entry.get("source", "")
+                        importance_score = entry.get("importance_score", 0.5)
+                        if feed_url:
+                            try:
+                                from backend.services.feed_health_monitor import get_feed_health_monitor
+                                health_monitor = get_feed_health_monitor()
+                                health_monitor.track_feed_quality(
+                                    feed_url=feed_url,
+                                    importance_score=importance_score,
+                                    is_duplicate=is_duplicate,
+                                    freshness=freshness_score
+                                )
+                            except Exception as e:
+                                logger.debug(f"Failed to track feed quality: {e}")
+                        
+                        # Skip if duplicate
+                        if is_duplicate:
+                            if self.rss_fetch_history and cycle_id:
+                                self.rss_fetch_history.add_fetch_item(
+                                    cycle_id=cycle_id,
+                                    title=entry.get("title", ""),
+                                    source_url=feed_url,
+                                    link=entry_link,
+                                    summary=entry.get("summary", ""),
+                                    status="Filtered: Duplicate",
+                                    status_reason="Content already exists in RAG"
+                                )
+                            continue
+                        
                         # Add to RAG
                         success = self.rag_retrieval.add_learning_content(
                             content=entry.get("summary", ""),
-                            source=entry.get("source", "unknown"),
+                            source=feed_url,
                             content_type="knowledge",
                             metadata={
                                 "title": entry.get("title", ""),
-                                "link": entry.get("link", ""),
-                                "published": entry.get("published", ""),
-                                "source_type": entry.get("source_type", "rss")
+                                "link": entry_link,
+                                "published": published,
+                                "source_type": entry.get("source_type", "rss"),
+                                "importance_score": importance_score
                             }
                         )
                         
@@ -189,11 +274,11 @@ class LearningScheduler:
                                 self.rss_fetch_history.add_fetch_item(
                                     cycle_id=cycle_id,
                                     title=entry.get("title", ""),
-                                    source_url=entry.get("source", ""),
-                                    link=entry.get("link", ""),
+                                    source_url=feed_url,
+                                    link=entry_link,
                                     summary=entry.get("summary", ""),
                                     status="Added to RAG",
-                                    vector_id=f"knowledge_{entry.get('link', '')[:8]}",
+                                    vector_id=f"knowledge_{entry_link[:8] if entry_link else 'unknown'}",
                                     added_to_rag_at=datetime.now().isoformat()
                                 )
                     except Exception as add_error:
