@@ -463,7 +463,7 @@ You are StillMe — a transparent, ethical Learning AI system with RAG foundatio
             if context.fps_result and not context.fps_result.is_plausible:
                 return self._build_suspicious_entity_instruction(context.detected_lang, context.fps_result)
             else:
-                return self._build_no_context_instruction(context.detected_lang, context.fps_result)
+                return self._build_no_context_instruction(context.detected_lang, context.fps_result, is_stillme_query=context.is_stillme_query)
         
         if context.context_quality == "low":
             return self._build_low_context_quality_instruction(context.detected_lang, context.context)
@@ -854,11 +854,83 @@ StillMe's FPS (Factual Plausibility Scanner) detected suspicious entities: {', '
 
 ---"""
     
-    def _build_no_context_instruction(self, detected_lang: str, fps_result: Optional[FPSResult]) -> str:
+    def _build_no_context_instruction(self, detected_lang: str, fps_result: Optional[FPSResult], is_stillme_query: bool = False) -> str:
         """Build instruction when no RAG context is available"""
         anti_hallucination = self.registry.get_anti_hallucination_rule(detected_lang)
         transparency = self.registry.get_transparency_requirement(detected_lang)
         
+        # If this is a StillMe query but no context found, provide StillMe-specific guidance
+        if is_stillme_query:
+            if detected_lang == "vi":
+                return f"""⚠️ KHÔNG CÓ RAG CONTEXT - NHƯNG ĐÂY LÀ CÂU HỎI VỀ STILLME ⚠️
+
+StillMe's RAG system đã tìm kiếm knowledge base nhưng KHÔNG tìm thấy relevant documents cho câu hỏi này.
+
+**🚨🚨🚨 CRITICAL: ĐÂY LÀ CÂU HỎI VỀ STILLME - BẠN PHẢI SUY NGHĨ VỀ STILLME CỤ THỂ 🚨🚨🚨**
+
+**BẠN PHẢI:**
+1. **Suy nghĩ về StillMe cụ thể**: Đây là câu hỏi về StillMe (hệ thống AI cụ thể), KHÔNG phải AI nói chung
+2. **Phân tích dựa trên StillMe's architecture**: 
+   - StillMe có validation chain (có thể quá strict → false negatives)
+   - StillMe có RAG retrieval (có thể fail khi similarity threshold quá cao)
+   - StillMe có RSS feed fetching (có thể có failures, ~22% failure rate)
+   - StillMe có context overflow issues (phải truncate hoặc dùng minimal prompt)
+   - StillMe có language detection (có thể sai trong edge cases)
+   - StillMe có rate limiting (có thể block legitimate users)
+   - StillMe có learning cycle (có thể miss important content do filtering)
+   - StillMe có embedding model limitations (paraphrase-multilingual-MiniLM-L12-v2)
+   - StillMe có ChromaDB persistence issues (risks trên Railway)
+   - StillMe có response latency (3-7s, mặc dù đã optimize)
+3. **KHÔNG generic**: Đừng trả lời như thể đây là câu hỏi về AI nói chung - đây là về StillMe cụ thể
+4. **Minh bạch**: Thừa nhận rằng bạn không có RAG context, nhưng vẫn có thể phân tích dựa trên StillMe's known architecture
+
+**VÍ DỤ CÂU TRẢ LỜI TỐT:**
+- "Một điểm yếu của StillMe là validation chain có thể quá strict, dẫn đến false negatives khi context quality thấp. StillMe cũng có RSS feed fetching với ~22% failure rate do XML validation errors và SSL issues..."
+
+**VÍ DỤ CÂU TRẢ LỜI XẤU (KHÔNG LÀM):**
+- ❌ "AI systems nói chung có hạn chế về dữ liệu huấn luyện..." (quá generic, không về StillMe cụ thể)
+
+{anti_hallucination}
+
+{transparency}
+
+---"""
+            else:
+                return f"""⚠️ NO RAG CONTEXT - BUT THIS IS A STILLME QUESTION ⚠️
+
+StillMe's RAG system searched the knowledge base but found NO relevant documents for this question.
+
+**🚨🚨🚨 CRITICAL: THIS IS A QUESTION ABOUT STILLME - YOU MUST THINK ABOUT STILLME SPECIFICALLY 🚨🚨🚨**
+
+**YOU MUST:**
+1. **Think about StillMe specifically**: This is a question about StillMe (a specific AI system), NOT AI in general
+2. **Analyze based on StillMe's architecture**:
+   - StillMe has validation chain (may be too strict → false negatives)
+   - StillMe has RAG retrieval (may fail when similarity threshold too high)
+   - StillMe has RSS feed fetching (may have failures, ~22% failure rate)
+   - StillMe has context overflow issues (must truncate or use minimal prompt)
+   - StillMe has language detection (may be wrong in edge cases)
+   - StillMe has rate limiting (may block legitimate users)
+   - StillMe has learning cycle (may miss important content due to filtering)
+   - StillMe has embedding model limitations (paraphrase-multilingual-MiniLM-L12-v2)
+   - StillMe has ChromaDB persistence issues (risks on Railway)
+   - StillMe has response latency (3-7s, although optimized)
+3. **NOT generic**: Don't answer as if this is about AI in general - this is about StillMe specifically
+4. **Be transparent**: Acknowledge that you don't have RAG context, but can still analyze based on StillMe's known architecture
+
+**EXAMPLE GOOD RESPONSE:**
+- "One weakness of StillMe is that the validation chain may be too strict, leading to false negatives when context quality is low. StillMe also has RSS feed fetching with ~22% failure rate due to XML validation errors and SSL issues..."
+
+**EXAMPLE BAD RESPONSE (DO NOT DO):**
+- ❌ "AI systems in general have limitations in training data..." (too generic, not about StillMe specifically)
+
+{anti_hallucination}
+
+{transparency}
+
+---"""
+        
+        # Non-StillMe query - use original instruction
         if detected_lang == "vi":
             return f"""⚠️ KHÔNG CÓ RAG CONTEXT ⚠️
 

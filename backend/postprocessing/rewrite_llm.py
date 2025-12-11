@@ -102,9 +102,10 @@ class RewriteLLM:
         
         for attempt in range(max_retries):
             try:
-                # Optimized timeout: 45s for complex rewrites (100% rewrite policy requires reliability)
-                # Increased from 30s to handle complex philosophical/technical questions without timeout
-                timeout_duration = 45.0
+                # Optimized timeout: Reduce from 45s to 20s for faster fallback
+                # If rewrite takes too long, it's better to return original response quickly
+                # User experience: 3 minutes wait is unacceptable for a simple question
+                timeout_duration = 20.0
                 logger.info(
                     f"🔄 Rewrite attempt {attempt + 1}/{max_retries}: "
                     f"timeout={timeout_duration}s, length={len(text)}, issues={len(quality_issues)}"

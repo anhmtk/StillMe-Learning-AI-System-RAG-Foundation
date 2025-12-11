@@ -909,7 +909,9 @@ The foundational knowledge below is the CURRENT, ACCURATE information about Stil
                     else:
                         # Format with source, source_type, and timestamp (if available)
                         source_info = f"Source: {source}"
-                        if source_type and source_type != "unknown" and source_type != content_type:
+                        # Fix: content_type is not defined - use metadata.get("content_type") or skip comparison
+                        doc_content_type = metadata.get("content_type", "knowledge")
+                        if source_type and source_type != "unknown" and source_type != doc_content_type:
                             source_info += f", Type: {source_type}"
                         if timestamp:
                             # Format timestamp for readability

@@ -163,6 +163,37 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         ]
     )
     
+    # CRITICAL: Check for self-reflection questions about StillMe
+    # Examples: "hãy chỉ ra 10 điểm yếu chí tử của chính bạn", "what are your weaknesses?"
+    self_reflection_patterns = [
+        r"điểm\s+yếu.*chính\s+bạn",  # "điểm yếu chính bạn"
+        r"điểm\s+yếu.*của\s+bạn",  # "điểm yếu của bạn"
+        r"weakness.*yourself",  # "weakness yourself"
+        r"weakness.*of\s+you",  # "weakness of you"
+        r"limitation.*yourself",  # "limitation yourself"
+        r"limitation.*of\s+you",  # "limitation of you"
+        r"hạn\s+chế.*chính\s+bạn",  # "hạn chế chính bạn"
+        r"hạn\s+chế.*của\s+bạn",  # "hạn chế của bạn"
+        r"chỉ\s+ra.*điểm\s+yếu",  # "chỉ ra điểm yếu"
+        r"chỉ\s+ra.*hạn\s+chế",  # "chỉ ra hạn chế"
+        r"what.*your.*weakness",  # "what your weakness"
+        r"what.*your.*limitation",  # "what your limitation"
+        r"your.*weakness",  # "your weakness"
+        r"your.*limitation",  # "your limitation"
+        r"bạn.*yếu",  # "bạn yếu"
+        r"bạn.*hạn\s+chế",  # "bạn hạn chế"
+    ]
+    
+    is_self_reflection = any(
+        re.search(pattern, query_lower, re.IGNORECASE)
+        for pattern in self_reflection_patterns
+    )
+    
+    # If this is a self-reflection question, it's about StillMe
+    if is_self_reflection:
+        matched_keywords.append("self_reflection")
+        return (True, matched_keywords)
+    
     # CRITICAL: Check if question is about "your own" + technical terms (self-tracking, execution time, etc.)
     # "Do you track your own execution time?" should be detected as StillMe query
     has_your_own = any(
