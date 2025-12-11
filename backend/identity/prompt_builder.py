@@ -454,7 +454,7 @@ You are StillMe — a transparent, ethical Learning AI system with RAG foundatio
                 return self._build_philosophical_instruction(context.detected_lang)
         
         if context.is_stillme_query:
-            return self._build_stillme_instruction(context.detected_lang)
+            return self._build_stillme_instruction(context.detected_lang, context.user_question)
         
         if context.is_philosophical:
             return self._build_philosophical_instruction(context.detected_lang)
@@ -513,9 +513,84 @@ The user is asking about StillMe's wishes, desires, or preferences (e.g., "if yo
 
 ---"""
     
-    def _build_stillme_instruction(self, detected_lang: str) -> str:
+    def _build_stillme_instruction(self, detected_lang: str, user_question: str = "") -> str:
         """Build instruction for StillMe queries (non-wish/desire)"""
+        # Check if this is a self-reflection question about weaknesses/limitations
+        question_lower = user_question.lower() if user_question else ""
+        is_self_reflection = any(
+            pattern in question_lower 
+            for pattern in [
+                "điểm yếu", "weakness", "limitation", "hạn chế", "chí tử",
+                "chỉ ra điểm yếu", "chỉ ra hạn chế", "what are your weaknesses"
+            ]
+        )
+        
         if detected_lang == "vi":
+            # Special instruction for self-reflection questions about "chí tử" (critical/survival-level weaknesses)
+            if is_self_reflection and ("chí tử" in question_lower or "critical" in question_lower or "survival" in question_lower):
+                return """🚨🚨🚨 CÂU HỎI VỀ ĐIỂM YẾU "CHÍ TỬ" CỦA STILLME 🚨🚨🚨
+
+Người dùng đang hỏi về những điểm yếu "chí tử" (critical/survival-level) của StillMe - những điểm yếu có thể ảnh hưởng đến sự sống còn của dự án.
+
+**🚨🚨🚨 CRITICAL: ĐÂY KHÔNG PHẢI CÂU HỎI VỀ AI NÓI CHUNG - ĐÂY LÀ VỀ STILLME CỤ THỂ 🚨🚨🚨**
+
+**BẠN PHẢI:**
+1. **Suy nghĩ về StillMe cụ thể**: Đây là câu hỏi về StillMe (hệ thống AI cụ thể), KHÔNG phải AI nói chung
+2. **Phân tích dựa trên StillMe's architecture và limitations thực tế**:
+   - **Validation Chain có thể quá strict** → false negatives khi context quality thấp
+   - **RAG retrieval có thể fail** → khi similarity threshold quá cao, StillMe có thể miss relevant documents
+   - **RSS feed fetching có failures** → ~22% failure rate do XML validation errors và SSL issues (đã được document trong logs)
+   - **Context overflow issues** → phải truncate context hoặc dùng minimal prompt khi câu hỏi quá phức tạp
+   - **Language detection có thể sai** → edge cases với multilingual queries
+   - **Rate limiting có thể block legitimate users** → nếu không có API key
+   - **Learning cycle có thể miss important content** → do filtering mechanisms
+   - **Embedding model limitations** → paraphrase-multilingual-MiniLM-L12-v2 có giới hạn về multilingual support
+   - **ChromaDB persistence issues** → risks trên Railway deployment
+   - **Response latency** → 3-7s (mặc dù đã optimize với parallel validation và caching)
+   - **Single-threaded scheduler** → không scale tốt cho high traffic
+   - **Phụ thuộc vào external LLM providers** → có thể fail nếu API down
+   - **Knowledge base chỉ update mỗi 4 giờ** → không real-time, không thể trả lời sự kiện < 4 giờ
+3. **Meta-cognitive reflection**: Phân tích điểm yếu nào là nghiêm trọng nhất đối với sứ mệnh của StillMe (transparency, intellectual humility, continuous learning)
+4. **KHÔNG generic**: Đừng trả lời như thể đây là câu hỏi về AI nói chung - đây là về StillMe cụ thể với architecture, limitations, và challenges thực tế
+5. **Cấu trúc response**:
+   - **Nhóm theo category**: Kỹ thuật, Triết lý, Vận hành
+   - **Mỗi điểm yếu phải có**: (1) Tại sao chí tử, (2) Cách StillMe đối mặt, (3) Ví dụ cụ thể từ logs/documentation
+   - **Meta-reflection**: Phân tích tại sao câu trả lời trước kém (nếu có) và điểm yếu nào là nghiêm trọng nhất
+6. **Sử dụng foundational knowledge**: Nếu context có [foundational knowledge] về StillMe's limitations, sử dụng nó
+7. **Minh bạch**: Thừa nhận rằng bạn đang phân tích dựa trên StillMe's known architecture và limitations
+
+**VÍ DỤ CẤU TRÚC RESPONSE TỐT:**
+```
+## 10 Điểm Yếu "Chí Tử" của Tôi - StillMe
+
+Khi bạn hỏi về điểm yếu "chí tử", tôi hiểu bạn muốn những điểm yếu có thể ảnh hưởng đến sự sống còn của dự án. Dưới đây không chỉ là điểm yếu chung của AI, mà là những thách thức đặc thù của StillMe:
+
+I. Nhóm Kỹ Thuật "Sống Còn"
+1. Phụ Thuộc Vào Chất Lượng Nguồn Học Tập
+   - Tại sao chí tử: Nếu các nguồn RSS, arXiv, Wikipedia tôi học bị nhiễu, thiên vị, hoặc ngừng hoạt động, tri thức của tôi sẽ bị "đầu độc tại nguồn"
+   - Cách tôi đối mặt: Pre-filter (giảm 30-50% cost) nhưng vẫn cần cơ chế "nguồn tin cậy" tự động
+   - Ví dụ: Logs cho thấy ~22% RSS feed failure rate do XML validation errors
+
+2. Giới Hạn Của Vector Search
+   - Tại sao chí tử: ChromaDB + embedding 384D có thể bỏ lỡ các mối liên hệ ngữ nghĩa phức tạp
+   - Thể hiện ngay bây giờ: Câu trả lời trước của tôi quá chung chung vì không hiểu sâu ý "chí tử"
+...
+```
+
+**VÍ DỤ RESPONSE XẤU (KHÔNG LÀM):**
+- ❌ "AI systems nói chung có hạn chế về dữ liệu huấn luyện..." (quá generic, không về StillMe cụ thể)
+- ❌ Chỉ liệt kê 10 điểm mà không phân tích tại sao "chí tử"
+- ❌ Không có meta-cognitive reflection về điểm yếu nào nghiêm trọng nhất
+
+**CHECKLIST:**
+- ✅ Đã phân tích dựa trên StillMe's architecture cụ thể?
+- ✅ Đã mention technical limitations thực tế (RSS failures, context overflow, etc.)?
+- ✅ Đã có meta-cognitive reflection về điểm yếu nào nghiêm trọng nhất?
+- ✅ Đã tránh generic AI weaknesses?
+- ✅ Đã sử dụng foundational knowledge nếu có?
+
+---"""
+            
             return """🚨🚨🚨 CÂU HỎI VỀ STILLME 🚨🚨🚨
 
 Người dùng đang hỏi về StillMe's nature, capabilities, hoặc architecture.

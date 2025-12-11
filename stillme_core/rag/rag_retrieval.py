@@ -881,7 +881,8 @@ The foundational knowledge below is the CURRENT, ACCURATE information about Stil
                     
                     metadata = doc.get("metadata", {})
                     source = metadata.get("source", "Unknown")
-                    content = doc.get("content", "")
+                    # CRITICAL: ChromaDB may return "document" or "content" field
+                    content = doc.get("content", doc.get("document", ""))
                     timestamp = metadata.get("timestamp", None)  # Get timestamp when added to KB
                     source_type = metadata.get("source_type", metadata.get("type", "unknown"))
                     

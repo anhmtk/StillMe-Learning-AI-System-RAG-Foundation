@@ -4756,21 +4756,36 @@ Context: {context_text}
                 cache_enabled = False
                 logger.info("⚠️ Cache disabled for origin query - ensuring fresh response with provenance context")
             
-            # CRITICAL: Disable cache for StillMe queries with foundational knowledge
-            # Foundational knowledge may be updated, and we need fresh responses to reflect changes
-            # Also, cache key only uses first 500 chars of prompt, which may not capture foundational knowledge changes
-            if is_stillme_query and context and context.get("knowledge_docs"):
-                has_foundational = any(
-                    doc.get("metadata", {}).get("source") == "CRITICAL_FOUNDATION" or
-                    doc.get("metadata", {}).get("foundational") == "stillme" or
-                    doc.get("metadata", {}).get("type") == "foundational" or
-                    "CRITICAL_FOUNDATION" in str(doc.get("metadata", {}).get("tags", "")) or
-                    "foundational:stillme" in str(doc.get("metadata", {}).get("tags", ""))
-                    for doc in context.get("knowledge_docs", [])
+            # CRITICAL: Disable cache for StillMe queries, especially self-reflection questions
+            # 1. Foundational knowledge may be updated, and we need fresh responses to reflect changes
+            # 2. Self-reflection questions need fresh analysis, not cached generic answers
+            # 3. Cache key only uses first 500 chars of prompt, which may not capture foundational knowledge changes
+            if is_stillme_query:
+                # Check if this is a self-reflection question about weaknesses/limitations
+                question_lower = chat_request.message.lower()
+                is_self_reflection = any(
+                    pattern in question_lower 
+                    for pattern in [
+                        "điểm yếu", "weakness", "limitation", "hạn chế", "chí tử",
+                        "chỉ ra điểm yếu", "chỉ ra hạn chế", "what are your weaknesses"
+                    ]
                 )
-                if has_foundational:
+                
+                if is_self_reflection:
                     cache_enabled = False
-                    logger.info("⚠️ Cache disabled for StillMe query with foundational knowledge - ensuring fresh response with updated context")
+                    logger.info("⚠️ Cache disabled for StillMe self-reflection question - ensuring fresh analysis")
+                elif context and context.get("knowledge_docs"):
+                    has_foundational = any(
+                        doc.get("metadata", {}).get("source") == "CRITICAL_FOUNDATION" or
+                        doc.get("metadata", {}).get("foundational") == "stillme" or
+                        doc.get("metadata", {}).get("type") == "foundational" or
+                        "CRITICAL_FOUNDATION" in str(doc.get("metadata", {}).get("tags", "")) or
+                        "foundational:stillme" in str(doc.get("metadata", {}).get("tags", ""))
+                        for doc in context.get("knowledge_docs", [])
+                    )
+                    if has_foundational:
+                        cache_enabled = False
+                        logger.info("⚠️ Cache disabled for StillMe query with foundational knowledge - ensuring fresh response with updated context")
             
             raw_response = None
             cache_hit = False
@@ -5588,19 +5603,27 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             # This prevents rewrite from corrupting responses about StillMe's capabilities
                             # Even if response is initially wrong, rewrite often makes it worse
                             skip_rewrite_for_stillme = False
+                            # CRITICAL: Allow rewrite for StillMe queries if quality is very low (e.g., generic AI answer)
+                            # But preserve foundational knowledge in rewrite prompt
                             if is_stillme_query and has_foundational_context:
-                                # For StillMe queries with foundational knowledge, skip rewrite entirely
-                                # Rewrite often introduces errors or contradicts foundational knowledge
-                                skip_rewrite_for_stillme = True
-                                logger.info(
-                                    "⏭️ Skipping rewrite for StillMe query with foundational knowledge: "
-                                    "Rewrite may corrupt or contradict foundational knowledge. "
-                                    "Using original LLM response (even if imperfect, it's better than corrupted rewrite)."
-                                )
+                                # Only skip rewrite if quality is acceptable (>= 0.5)
+                                # If quality is low (< 0.5), allow rewrite but preserve foundational knowledge
+                                quality_score = quality_result.score if quality_result else 1.0
+                                if quality_score >= 0.5:
+                                    skip_rewrite_for_stillme = True
+                                    logger.info(
+                                        f"⏭️ Skipping rewrite for StillMe query (quality={quality_score:.2f} >= 0.5): "
+                                        "Response quality is acceptable, preserving foundational knowledge."
+                                    )
+                                else:
+                                    logger.info(
+                                        f"✅ Allowing rewrite for StillMe query (quality={quality_score:.2f} < 0.5): "
+                                        "Quality is too low (generic answer), will rewrite but preserve foundational knowledge."
+                                    )
                             
                             if skip_rewrite_for_stillme:
                                 should_rewrite = False
-                                rewrite_reason = "StillMe query with correct foundational knowledge response - preserving accuracy"
+                                rewrite_reason = "StillMe query with acceptable quality - preserving accuracy"
                                 max_attempts = 0
                             else:
                                 should_rewrite, rewrite_reason, max_attempts = optimizer.should_rewrite(
