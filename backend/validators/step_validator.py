@@ -187,7 +187,8 @@ Return ONLY valid JSON, no markdown code blocks."""
 
             # Call LLM API
             start_time = time.time()
-            with httpx.Client(timeout=10.0) as client:
+            # P1: Reduce timeout from 10s to 3s for faster fallback
+            with httpx.Client(timeout=3.0) as client:
                 response = client.post(
                     f"{api_base}/v1/chat/completions",
                     headers={
