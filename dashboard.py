@@ -482,6 +482,21 @@ def page_overview():
                     - Backend ran out of memory (check Railway resource limits)
                     - Database connection issues
                     """)
+                elif test_r.status_code == 503:
+                    st.error(f"❌ **503 Service Unavailable** - Backend returned status code 503 for `/api/status`")
+                    st.markdown("""
+                    **503 Service Unavailable means the backend is temporarily unavailable.**
+                    
+                    **Possible Causes:**
+                    - Backend is restarting or cold starting
+                    - Backend is under heavy load
+                    - Backend is initializing services (database, ChromaDB, etc.)
+                    
+                    **Actions:**
+                    1. Wait 30-60 seconds and refresh the page
+                    2. Check Railway Dashboard → Service "stillme-backend" → Logs
+                    3. If persists, restart the backend service
+                    """)
                 else:
                     st.error(f"❌ Backend returned status code {test_r.status_code} for `/api/status`")
             except requests.exceptions.ConnectionError:
