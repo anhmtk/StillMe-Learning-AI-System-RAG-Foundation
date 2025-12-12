@@ -291,10 +291,18 @@
                 html = html.replace(boldPattern, '<strong>$1</strong>');
                 
                 // Links: [text](url) -> <a href="url">text</a>
-                // CRITICAL: In Python f-string, \\\\[ becomes \\[ in JavaScript string, which becomes \[ in regex
-                // Need to escape brackets and parentheses properly
+                // CRITICAL: In JavaScript string, \\[ becomes \[ in regex (escaped bracket)
+                // In character class [^\\]], the ] needs to be escaped or at end
+                // Fixed: Use [^\\]] to match "not backslash or closing bracket", or use [^\\]\\] to be explicit
                 var linkPattern = new RegExp('\\\\[([^\\\\]]+)\\\\\\]\\\\\\(([^)]+)\\\\\\)', 'g');
-                html = html.replace(linkPattern, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
+                try {
+                    html = html.replace(linkPattern, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
+                } catch (e) {
+                    console.error('StillMe Chat: Error in linkPattern regex:', e);
+                    // Fallback: simpler pattern without character class
+                    var linkPatternSimple = new RegExp('\\\\[([^\\\\[\\\\]]+)\\\\\\]\\\\\\(([^)]+)\\\\\\)', 'g');
+                    html = html.replace(linkPatternSimple, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
+                }
                 
                 // Bullet points: - item -> <li>item</li>
                 var bulletPattern = new RegExp('<p>- (.+?)</p>', 'g');
