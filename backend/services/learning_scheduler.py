@@ -331,6 +331,15 @@ class LearningScheduler:
             
             logger.info(f"✅ Learning cycle #{cycle_number} completed: {entries_added_to_rag} entries added to RAG in {processing_time:.2f}s")
             
+            # P3: Increment knowledge version after learning cycle (for cache invalidation)
+            if entries_added_to_rag > 0:
+                try:
+                    from backend.services.knowledge_version import increment_knowledge_version
+                    new_version = increment_knowledge_version()
+                    logger.info(f"📦 P3: Knowledge version incremented to {new_version} after learning cycle (cache will auto-invalidate)")
+                except Exception as e:
+                    logger.warning(f"Failed to increment knowledge version: {e}")
+            
             return result
             
         except Exception as e:

@@ -4769,10 +4769,11 @@ Context: {context_text}
                 cache_enabled = False
                 logger.info("⚠️ Cache disabled for origin query - ensuring fresh response with provenance context")
             
-            # CRITICAL: Disable cache for StillMe queries, especially self-reflection questions
-            # 1. Foundational knowledge may be updated, and we need fresh responses to reflect changes
-            # 2. Self-reflection questions need fresh analysis, not cached generic answers
-            # 3. Cache key only uses first 500 chars of prompt, which may not capture foundational knowledge changes
+            # P3: Conditional cache for StillMe queries with knowledge versioning
+            # 1. Self-reflection questions: Cache with 1h TTL (shorter than default)
+            # 2. Foundational knowledge queries: Cache with knowledge version (auto-invalidate on update)
+            # 3. Other StillMe queries: Normal cache behavior
+            cache_ttl_override = None  # P3: Custom TTL for specific query types
             if is_stillme_query:
                 # Check if this is a self-reflection question about weaknesses/limitations
                 question_lower = chat_request.message.lower()
@@ -4785,8 +4786,9 @@ Context: {context_text}
                 )
                 
                 if is_self_reflection:
-                    cache_enabled = False
-                    logger.info("⚠️ Cache disabled for StillMe self-reflection question - ensuring fresh analysis")
+                    # P3: Cache self-reflection with 1h TTL (instead of disabling)
+                    cache_ttl_override = 3600  # 1 hour
+                    logger.info("💾 P3: Caching StillMe self-reflection question with 1h TTL (knowledge version included in cache key)")
                 elif context and context.get("knowledge_docs"):
                     has_foundational = any(
                         doc.get("metadata", {}).get("source") == "CRITICAL_FOUNDATION" or
@@ -4797,14 +4799,18 @@ Context: {context_text}
                         for doc in context.get("knowledge_docs", [])
                     )
                     if has_foundational:
-                        cache_enabled = False
-                        logger.info("⚠️ Cache disabled for StillMe query with foundational knowledge - ensuring fresh response with updated context")
+                        # P3: Cache with knowledge version (will auto-invalidate when knowledge updates)
+                        logger.info("💾 P3: Caching StillMe query with foundational knowledge (knowledge version included in cache key)")
             
             raw_response = None
             cache_hit = False
             
             if cache_enabled:
-                # Generate cache key from query + context + settings
+                # P3: Include knowledge version in cache key for intelligent cache invalidation
+                from backend.services.knowledge_version import get_knowledge_version
+                knowledge_version = get_knowledge_version()
+                
+                # Generate cache key from query + context + settings + knowledge version
                 cache_key = cache_service._generate_key(
                     CACHE_PREFIX_LLM,
                     chat_request.message,
@@ -4812,7 +4818,8 @@ Context: {context_text}
                     detected_lang,
                     chat_request.llm_provider,
                     chat_request.llm_model_name,
-                    enable_validators
+                    enable_validators,
+                    knowledge_version=knowledge_version  # P3: Include knowledge version
                 )
                 
                 # Try to get from cache
@@ -5364,8 +5371,10 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             "latency": llm_inference_latency,
                             "timestamp": time.time()
                         }
-                        cache_service.set(cache_key, cache_value, ttl_seconds=TTL_LLM_RESPONSE)
-                        logger.debug(f"💾 LLM response cached (key: {cache_key[:50]}...)")
+                        # P3: Use custom TTL if specified (e.g., 1h for self-reflection), otherwise use default
+                        ttl_to_use = cache_ttl_override if cache_ttl_override is not None else TTL_LLM_RESPONSE
+                        cache_service.set(cache_key, cache_value, ttl_seconds=ttl_to_use)
+                        logger.debug(f"💾 LLM response cached (key: {cache_key[:50]}..., TTL: {ttl_to_use}s)")
                     except Exception as cache_error:
                         logger.warning(f"Failed to cache LLM response: {cache_error}")
             

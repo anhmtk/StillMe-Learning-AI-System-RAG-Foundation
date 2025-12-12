@@ -662,6 +662,14 @@ def _initialize_rag_components():
                     )
                     if success_technical:
                         logger.info("✅ Technical foundational knowledge added successfully!")
+                        
+                        # P3: Increment knowledge version after foundational knowledge update
+                        try:
+                            from backend.services.knowledge_version import increment_knowledge_version
+                            new_version = increment_knowledge_version()
+                            logger.info(f"📦 P3: Knowledge version incremented to {new_version} after foundational knowledge update (cache will auto-invalidate)")
+                        except Exception as e:
+                            logger.warning(f"Failed to increment knowledge version: {e}")
                     else:
                         logger.warning("⚠️ Failed to add technical foundational knowledge")
                 else:
