@@ -52,9 +52,12 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
     with open(js_file, 'r', encoding='utf-8') as f:
         js_content = f.read()
     # Replace placeholders with actual values
-    js_content = js_content.replace('API_BASE', api_base)
+    # CRITICAL: Use replace with quotes to avoid partial matches and ensure proper string replacement
+    js_content = js_content.replace("'API_BASE'", f"'{api_base}'")
     js_content = js_content.replace('CHAT_HISTORY_JSON', chat_history_json)
-    js_content = js_content.replace('IS_OPEN', str(is_open).lower())
+    # CRITICAL: IS_OPEN must be a boolean string, not just the value
+    is_open_str = 'true' if is_open else 'false'
+    js_content = js_content.replace('IS_OPEN', is_open_str)
     
     # HTML template with injected CSS and JS
     html_content = f"""
