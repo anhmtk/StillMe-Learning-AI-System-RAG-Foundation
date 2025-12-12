@@ -199,6 +199,43 @@ class FeedHealthMonitor:
                 unhealthy.append(feed_url)
         return unhealthy
     
+    def get_feeds_to_disable(self, days_threshold: int = 3) -> List[str]:
+        """
+        P4: Get feeds that should be auto-disabled (failed for N consecutive days)
+        
+        Args:
+            days_threshold: Number of consecutive days of failure before disabling (default: 3)
+            
+        Returns:
+            List of feed URLs that should be disabled
+        """
+        feeds_to_disable = []
+        now = datetime.now()
+        
+        for feed_url, record in self.health_records.items():
+            # Check if feed has been failing for N consecutive days
+            if record.last_failure and not record.last_success:
+                # Never succeeded, check if failing for N days
+                days_failing = (now - record.last_failure).days
+                if days_failing >= days_threshold and record.total_requests >= days_threshold:
+                    feeds_to_disable.append(feed_url)
+                    logger.warning(
+                        f"P4: Feed {feed_url[:50]}... has been failing for {days_failing} days "
+                        f"(threshold: {days_threshold}) - should be disabled"
+                    )
+            elif record.last_failure and record.last_success:
+                # Has succeeded before, check if last success was before last failure
+                if record.last_failure > record.last_success:
+                    days_failing = (now - record.last_failure).days
+                    if days_failing >= days_threshold:
+                        feeds_to_disable.append(feed_url)
+                        logger.warning(
+                            f"P4: Feed {feed_url[:50]}... has been failing for {days_failing} days "
+                            f"since last success - should be disabled"
+                        )
+        
+        return feeds_to_disable
+    
     def get_health_report(self) -> Dict[str, Any]:
         """
         Get comprehensive health report for all feeds

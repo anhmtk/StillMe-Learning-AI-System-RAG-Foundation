@@ -146,6 +146,12 @@ class RSSFetcher:
         self.failed_feeds = 0
         # Store last fetch statistics to persist across resets
         self.last_fetch_stats: Optional[Dict[str, Any]] = None
+        
+        # P4: Track disabled feeds (auto-disabled after 3 days of failures)
+        self.disabled_feeds: set = set()
+        
+        # P4: Track last fetch timestamp per feed (for incremental learning)
+        self.last_fetch_timestamps: Dict[str, datetime] = {}
     
     async def fetch_feeds_async(self, max_items_per_feed: Optional[int] = None, 
                                 content_curator=None, 
@@ -218,9 +224,9 @@ class RSSFetcher:
         max_workers = min(10, (os.cpu_count() or 4) * 2)
         batch_size = max_workers
         
-        # Split feeds into batches
-        feed_batches = [self.feeds[i:i + batch_size] for i in range(0, len(self.feeds), batch_size)]
-        logger.info(f"🚀 [NPR] Processing {len(self.feeds)} feeds in {len(feed_batches)} batches (batch_size={batch_size})")
+        # Split feeds into batches (use active feeds, not all feeds)
+        feed_batches = [feeds_to_fetch[i:i + batch_size] for i in range(0, len(feeds_to_fetch), batch_size)]
+        logger.info(f"🚀 [NPR] Processing {len(feeds_to_fetch)} feeds in {len(feed_batches)} batches (batch_size={batch_size})")
         
         all_feeds = []
         for batch_idx, feed_batch in enumerate(feed_batches):
@@ -230,11 +236,11 @@ class RSSFetcher:
             logger.debug(f"✅ [NPR] Batch {batch_idx + 1}/{len(feed_batches)} completed ({len(feed_batch)} feeds)")
         
         batch_time = time.time() - batch_start
-        logger.info(f"✅ [NPR] Parallel feed fetching completed in {batch_time:.3f}s ({len(self.feeds)} feeds)")
+        logger.info(f"✅ [NPR] Parallel feed fetching completed in {batch_time:.3f}s ({len(feeds_to_fetch)} feeds)")
         
         feeds = all_feeds
         
-        for feed_url, feed_result in zip(self.feeds, feeds):
+        for feed_url, feed_result in zip(feeds_to_fetch, feeds):
             try:
                 if isinstance(feed_result, Exception):
                     error_msg = f"Failed to fetch {feed_url}: {feed_result}"
