@@ -2695,7 +2695,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         is_philosophical=True,
                         response_length=len(philosophical_answer),
                         validation_result=None,  # Validation happens after rewrite for philosophical questions
-                        rewrite_count=0
+                        rewrite_count=0,
+                        user_question=chat_request.message  # P2: Template detection
                     )
                     
                     # FORCE rewrite for philosophical questions to ensure variation and depth
@@ -5653,7 +5654,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     is_philosophical=is_philosophical,
                                     response_length=len(sanitized_response),
                                     validation_result=validation_result_dict,
-                                    rewrite_count=rewrite_count
+                                    rewrite_count=rewrite_count,
+                                    user_question=chat_request.message  # P2: Template detection
                                 )
                             
                             # Rewrite loop: can rewrite multiple times if quality improves but still below threshold
@@ -6530,7 +6532,8 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             should_rewrite, rewrite_reason, max_attempts = optimizer.should_rewrite(
                                 quality_result=quality_result,
                                 is_philosophical=is_philosophical_non_rag,
-                                response_length=len(sanitized_response)
+                                response_length=len(sanitized_response),
+                                user_question=chat_request.message  # P2: Template detection
                             )
                         
                         # Stage 4: ALWAYS rewrite (100% policy) - Mục tiêu: minh bạch, trung thực, giảm ảo giác

@@ -10,6 +10,7 @@ Optimizes post-processing pipeline by:
 
 import logging
 import hashlib
+import re
 from typing import Dict, Optional, Tuple
 from backend.services.cache_service import get_cache_service
 
@@ -43,6 +44,34 @@ class PostProcessingOptimizer:
         # Response length thresholds
         self.min_response_length_simple = 50   # Simple questions
         self.min_response_length_complex = 200  # Complex questions
+    
+    def is_user_requesting_template(self, question: str) -> bool:
+        """
+        P2: Detect if user explicitly requests numbered list/template
+        
+        Args:
+            question: User question
+            
+        Returns:
+            True if user is requesting a template/structured list
+        """
+        question_lower = question.lower().strip()
+        
+        # Patterns for template requests
+        template_patterns = [
+            r"\d+\s*(điểm|point|bước|step|item|mục|lý do|reason)",  # "10 điểm", "5 steps", "3 lý do"
+            r"(liệt kê|list|danh sách|enumerate)\s+\d+",          # "liệt kê 10 điểm"
+            r"(chỉ ra|point out|show|nêu)\s+\d+",                  # "chỉ ra 10 điểm"
+            r"(kể|tell|name)\s+\d+",                               # "kể 5 điểm"
+            r"\d+\s*(điều|thing|vấn đề|issue|vấn đề)",              # "10 điều", "5 vấn đề"
+        ]
+        
+        for pattern in template_patterns:
+            if re.search(pattern, question_lower):
+                logger.debug(f"P2: Template intent detected: '{question[:50]}...' matches pattern '{pattern}'")
+                return True
+        
+        return False
     
     def should_skip_postprocessing(
         self,
@@ -147,7 +176,8 @@ class PostProcessingOptimizer:
         is_philosophical: bool,
         response_length: int,
         validation_result: Optional[Dict] = None,
-        rewrite_count: int = 0
+        rewrite_count: int = 0,
+        user_question: Optional[str] = None  # P2: Add user question for template detection
     ) -> Tuple[bool, str, int]:
         """
         Determine if rewrite should be performed using cost-benefit policy
@@ -158,20 +188,33 @@ class PostProcessingOptimizer:
         - Tracks rewrite count to prevent excessive rewrites
         - Considers quality score thresholds
         
+        P2: Added template intent detection and early exit at quality_score >= 0.4
+        
         Args:
             quality_result: Quality evaluation result
             is_philosophical: Whether question is philosophical
             response_length: Length of response
             validation_result: Optional validation result from validator chain
             rewrite_count: Number of rewrites already performed (default: 0)
+            user_question: Optional user question for template detection (P2)
             
         Returns:
             Tuple of (should_rewrite, reason, max_attempts)
         """
+        # P2: Early exit if quality_score >= 0.4 (stricter threshold)
+        overall_score = quality_result.get("overall_score", 1.0)
+        if overall_score >= 0.4:
+            logger.info(f"⏭️ P2: Early exit - quality_score {overall_score:.2f} >= 0.4 (acceptable quality)")
+            return False, "quality_acceptable", 0
+        
+        # P2: Template intent detection - skip rewrite if user requesting template
+        if user_question and self.is_user_requesting_template(user_question):
+            logger.info(f"⏭️ P2: Skipping rewrite - user requesting template/list")
+            return False, "user_requested_template", 0
+        
         from backend.postprocessing.rewrite_decision_policy import get_rewrite_decision_policy
         
         policy = get_rewrite_decision_policy()
-        overall_score = quality_result.get("overall_score", 1.0)
         
         # Use policy to make decision
         decision = policy.should_rewrite(

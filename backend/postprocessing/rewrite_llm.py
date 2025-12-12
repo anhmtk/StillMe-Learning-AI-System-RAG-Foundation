@@ -96,16 +96,16 @@ class RewriteLLM:
             is_stillme_query, has_foundational_context, is_ai_self_model
         )
         
-        # Retry logic: try up to 2 times (initial + 1 retry)
-        max_retries = 2
+        # P2: Single attempt with shorter timeout (5s instead of 2×20s)
+        # Rationale: If rewrite doesn't complete in 5s, better to return original quickly
+        max_retries = 1  # P2: Single attempt
         last_error = None
         
         for attempt in range(max_retries):
             try:
-                # Optimized timeout: Reduce from 45s to 20s for faster fallback
+                # P2: Shorter timeout (5s instead of 20s)
                 # If rewrite takes too long, it's better to return original response quickly
-                # User experience: 3 minutes wait is unacceptable for a simple question
-                timeout_duration = 20.0
+                timeout_duration = 5.0
                 logger.info(
                     f"🔄 Rewrite attempt {attempt + 1}/{max_retries}: "
                     f"timeout={timeout_duration}s, length={len(text)}, issues={len(quality_issues)}"
@@ -203,12 +203,8 @@ class RewriteLLM:
                     error_msg = f"HTTP {response.status_code}: {error_text}"
                     logger.warning(f"⚠️ DeepSeek rewrite failed (attempt {attempt + 1}/{max_retries}): {error_msg}")
                     last_error = error_msg
-                    # Retry on HTTP errors (except 4xx client errors)
-                    if response.status_code >= 500 or response.status_code == 429:
-                        if attempt < max_retries - 1:
-                            logger.info(f"🔄 Retrying rewrite due to server error (attempt {attempt + 1}/{max_retries})")
-                            continue
-                    # Don't retry on client errors (4xx)
+                    # P2: Single attempt - no retry, return original immediately
+                    logger.warning(f"⚠️ P2: DeepSeek rewrite failed (single attempt): {error_msg}")
                     return RewriteResult(
                         text=text,
                         was_rewritten=False,
@@ -217,13 +213,9 @@ class RewriteLLM:
             except httpx.TimeoutException as timeout_error:
                 last_error = f"Timeout after {timeout_duration}s"
                 logger.warning(
-                    f"⚠️ DeepSeek rewrite timeout (attempt {attempt + 1}/{max_retries}): {timeout_error}"
+                    f"⚠️ P2: DeepSeek rewrite timeout (single attempt, 5s): {timeout_error}"
                 )
-                # Retry on timeout
-                if attempt < max_retries - 1:
-                    logger.info(f"🔄 Retrying rewrite after timeout (attempt {attempt + 1}/{max_retries})")
-                    continue
-                # Last attempt failed
+                # P2: Single attempt - no retry, return original immediately
                 return RewriteResult(
                     text=text,
                     was_rewritten=False,
@@ -234,11 +226,7 @@ class RewriteLLM:
                 logger.error(
                     f"❌ DeepSeek rewrite request error (attempt {attempt + 1}/{max_retries}): {request_error}"
                 )
-                # Retry on request errors
-                if attempt < max_retries - 1:
-                    logger.info(f"🔄 Retrying rewrite after request error (attempt {attempt + 1}/{max_retries})")
-                    continue
-                # Last attempt failed
+                # P2: Single attempt - no retry, return original immediately
                 return RewriteResult(
                     text=text,
                     was_rewritten=False,
@@ -247,14 +235,10 @@ class RewriteLLM:
             except Exception as e:
                 last_error = f"Unexpected error: {str(e)}"
                 logger.error(
-                    f"❌ DeepSeek rewrite error (attempt {attempt + 1}/{max_retries}): {e}",
+                    f"❌ P2: DeepSeek rewrite error (single attempt): {e}",
                     exc_info=True
                 )
-                # Retry on unexpected errors
-                if attempt < max_retries - 1:
-                    logger.info(f"🔄 Retrying rewrite after error (attempt {attempt + 1}/{max_retries})")
-                    continue
-                # Last attempt failed
+                # P2: Single attempt - no retry, return original immediately
                 return RewriteResult(
                     text=text,
                     was_rewritten=False,
