@@ -17,8 +17,14 @@ from typing import List, Optional, Dict, Any
 from .base import ValidationResult
 import os
 import time
+import httpx
 
 logger = logging.getLogger(__name__)
+
+# Circuit Breaker State (module-level, shared across all instances)
+_circuit_breaker_failure_count = 0
+_circuit_breaker_disabled_until = None
+_circuit_breaker_last_reset = time.time()
 
 
 class SourceConsensusValidator:
@@ -31,17 +37,79 @@ class SourceConsensusValidator:
     - Forces uncertainty expression when contradictions found
     """
     
-    def __init__(self, enabled: bool = True, timeout: float = 3.0):
+    def __init__(self, enabled: bool = True, timeout: float = 3.0, circuit_breaker_threshold: int = 2, circuit_breaker_disable_duration: int = 3600):
         """
         Initialize source consensus validator
         
         Args:
             enabled: Whether validator is enabled (default: True)
             timeout: Timeout per comparison in seconds (default: 3.0)
+            circuit_breaker_threshold: Number of failures before disabling (default: 2)
+            circuit_breaker_disable_duration: Duration to disable in seconds (default: 3600 = 1h)
         """
         self.enabled = enabled
         self.timeout = timeout
-        logger.info(f"SourceConsensusValidator initialized (enabled={enabled}, timeout={timeout}s)")
+        self.circuit_breaker_threshold = circuit_breaker_threshold
+        self.circuit_breaker_disable_duration = circuit_breaker_disable_duration
+        logger.info(f"SourceConsensusValidator initialized (enabled={enabled}, timeout={timeout}s, circuit_breaker_threshold={circuit_breaker_threshold})")
+    
+    def _check_circuit_breaker(self) -> bool:
+        """
+        Check if circuit breaker is open (validator should be disabled)
+        
+        Returns:
+            True if circuit breaker is open (should skip), False if closed (should run)
+        """
+        global _circuit_breaker_failure_count, _circuit_breaker_disabled_until
+        
+        current_time = time.time()
+        
+        # Check if we're in disabled period
+        if _circuit_breaker_disabled_until is not None:
+            if current_time < _circuit_breaker_disabled_until:
+                # Still disabled
+                remaining = int(_circuit_breaker_disabled_until - current_time)
+                logger.debug(f"🔌 SourceConsensusValidator: Circuit breaker OPEN (disabled for {remaining}s more)")
+                return True  # Circuit breaker is open, skip validation
+            else:
+                # Disable period expired, reset
+                logger.info(f"✅ SourceConsensusValidator: Circuit breaker CLOSED (auto-reenabled after {self.circuit_breaker_disable_duration}s)")
+                _circuit_breaker_disabled_until = None
+                _circuit_breaker_failure_count = 0
+                return False  # Circuit breaker is closed, can run
+        
+        return False  # Circuit breaker is closed, can run
+    
+    def _record_success(self):
+        """Record successful validation, reset failure count"""
+        global _circuit_breaker_failure_count
+        if _circuit_breaker_failure_count > 0:
+            logger.debug(f"✅ SourceConsensusValidator: Success recorded, resetting failure count (was {_circuit_breaker_failure_count})")
+            _circuit_breaker_failure_count = 0
+    
+    def _record_failure(self, error_type: str = "timeout"):
+        """
+        Record validation failure, check if circuit breaker should open
+        
+        Args:
+            error_type: Type of error ("timeout", "api_error", etc.)
+        """
+        global _circuit_breaker_failure_count, _circuit_breaker_disabled_until
+        
+        _circuit_breaker_failure_count += 1
+        logger.warning(
+            f"⚠️ SourceConsensusValidator: Failure #{_circuit_breaker_failure_count} "
+            f"(type={error_type}, threshold={self.circuit_breaker_threshold})"
+        )
+        
+        if _circuit_breaker_failure_count >= self.circuit_breaker_threshold:
+            _circuit_breaker_disabled_until = time.time() + self.circuit_breaker_disable_duration
+            logger.warning(
+                f"🔌 SourceConsensusValidator: Circuit breaker OPEN - "
+                f"disabled for {self.circuit_breaker_disable_duration}s "
+                f"({self.circuit_breaker_disable_duration // 60} minutes) "
+                f"due to {_circuit_breaker_failure_count} consecutive failures"
+            )
     
     def _compare_documents(self, doc1: str, doc2: str, question: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -125,39 +193,54 @@ Compare these two documents and detect if they contradict each other on:
 Return ONLY valid JSON, no other text."""
 
             # Call LLM API using httpx (consistent with codebase)
-            import httpx
-            
             start_time = time.time()
-            with httpx.Client(timeout=self.timeout) as client:
-                response = client.post(
-                    f"{api_base}/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {api_key}",
-                        "Content-Type": "application/json"
-                    },
-                    json={
-                        "model": model,
-                        "messages": [
-                            {"role": "system", "content": "You are a fact-checking assistant. Analyze documents for contradictions and return JSON only."},
-                            {"role": "user", "content": comparison_prompt}
-                        ],
-                        "temperature": 0.0,  # Deterministic
-                        "max_tokens": 200
-                    }
-                )
+            try:
+                with httpx.Client(timeout=self.timeout) as client:
+                    response = client.post(
+                        f"{api_base}/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": model,
+                            "messages": [
+                                {"role": "system", "content": "You are a fact-checking assistant. Analyze documents for contradictions and return JSON only."},
+                                {"role": "user", "content": comparison_prompt}
+                            ],
+                            "temperature": 0.0,  # Deterministic
+                            "max_tokens": 200
+                        }
+                    )
+                    
+                    if response.status_code != 200:
+                        logger.warning(f"LLM API error: {response.status_code} - {response.text[:200]}")
+                        self._record_failure("api_error")
+                        return {"has_contradiction": False, "confidence": 0.0}
+                    
+                    data = response.json()
+                    if "choices" not in data or len(data["choices"]) == 0:
+                        logger.warning("LLM API returned unexpected response format")
+                        self._record_failure("api_error")
+                        return {"has_contradiction": False, "confidence": 0.0}
+                    
+                    result_text = data["choices"][0]["message"]["content"].strip()
+                    # Success - reset failure count
+                    self._record_success()
                 
-                if response.status_code != 200:
-                    logger.warning(f"LLM API error: {response.status_code} - {response.text[:200]}")
-                    return {"has_contradiction": False, "confidence": 0.0}
-                
-                data = response.json()
-                if "choices" not in data or len(data["choices"]) == 0:
-                    logger.warning("LLM API returned unexpected response format")
-                    return {"has_contradiction": False, "confidence": 0.0}
-                
-                result_text = data["choices"][0]["message"]["content"].strip()
-            
-            elapsed = time.time() - start_time
+                elapsed = time.time() - start_time
+            except (httpx.TimeoutException, httpx.ConnectTimeout, httpx.ReadTimeout) as e:
+                # Timeout - record failure and trigger circuit breaker if needed
+                elapsed = time.time() - start_time
+                logger.warning(f"Source consensus check timed out after {elapsed:.2f}s: {e}")
+                self._record_failure("timeout")
+                return {"has_contradiction": False, "confidence": 0.0}
+            except Exception as e:
+                # Other errors - record failure
+                elapsed = time.time() - start_time
+                logger.warning(f"Source consensus check failed: {e}")
+                self._record_failure("error")
+                return {"has_contradiction": False, "confidence": 0.0}
             
             # Parse JSON response
             import json
@@ -178,7 +261,9 @@ Return ONLY valid JSON, no other text."""
                 return {"has_contradiction": False, "confidence": 0.0}
         
         except Exception as e:
-            logger.warning(f"Source consensus check failed: {e}, continuing without check")
+            # This catch-all should rarely be hit (most exceptions caught above)
+            logger.warning(f"Source consensus check failed (unexpected error): {e}, continuing without check")
+            self._record_failure("unexpected_error")
             return {"has_contradiction": False, "confidence": 0.0}
     
     def run(self, answer: str, ctx_docs: List[str], user_question: Optional[str] = None) -> ValidationResult:
@@ -186,6 +271,8 @@ Return ONLY valid JSON, no other text."""
         Check for contradictions between context documents
         
         MVP: Only compares top-2 documents
+        
+        Circuit Breaker: Auto-disables after 2 consecutive timeouts for 1 hour
         
         Args:
             answer: The answer to validate (not used in MVP, but kept for interface consistency)
@@ -197,6 +284,14 @@ Return ONLY valid JSON, no other text."""
         """
         if not self.enabled:
             return ValidationResult(passed=True)
+        
+        # Check circuit breaker first
+        if self._check_circuit_breaker():
+            # Circuit breaker is open - skip validation
+            return ValidationResult(
+                passed=True,
+                reasons=["circuit_breaker:disabled"]
+            )
         
         # MVP: Only check if we have ≥2 documents
         if len(ctx_docs) < 2:
