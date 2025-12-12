@@ -1,0 +1,48 @@
+{
+  "summary": {
+    "total_cycles": 51,
+    "total_entries_fetched": 4896,
+    "total_entries_added": 164,
+    "total_entries_filtered": 2134,
+    "filter_rate": 43.59,
+    "add_rate": 3.35,
+    "latest_cycle": {
+      "cycle_number": 1,
+      "timestamp": "2025-11-24T05:10:59.853610+00:00",
+      "entries_fetched": 215,
+      "entries_added": 4,
+      "entries_filtered": 16,
+      "filter_reasons": {
+        "Low quality/Short content": 16,
+        "Duplicate": 0
+      },
+      "sources": {
+        "rss": 215,
+        "arxiv": 0,
+        "crossref": 0,
+        "wikipedia": 0
+      },
+      "duration_seconds": 15.461474657058716,
+      "error": null
+    }
+  },
+  "latest_cycle": {
+    "cycle_number": 1,
+    "timestamp": "2025-11-24T05:10:59.853610+00:00",
+    "entries_fetched": 215,
+    "entries_added": 4,
+    "entries_filtered": 16,
+    "filter_reasons": {
+      "Low quality/Short content": 16,
+      "Duplicate": 0
+    },
+    "sources": {
+      "rss": 215,
+      "arxiv": 0,
+      "crossref": 0,
+      "wikipedia": 0
+    },
+    "duration_seconds": 15.461474657058716,
+    "error": null
+  }
+}

@@ -526,38 +526,115 @@ The user is asking about StillMe's wishes, desires, or preferences (e.g., "if yo
         )
         
         if detected_lang == "vi":
-            # Special instruction for self-reflection questions about "chí tử" (critical/survival-level weaknesses)
-            if is_self_reflection and ("chí tử" in question_lower or "critical" in question_lower or "survival" in question_lower):
-                return """🚨🚨🚨 CÂU HỎI VỀ ĐIỂM YẾU "CHÍ TỬ" CỦA STILLME 🚨🚨🚨
+            # Special instruction for self-reflection questions about weaknesses/limitations
+            if is_self_reflection:
+                return """🚨🚨🚨 CÂU HỎI VỀ ĐIỂM YẾU/HẠN CHẾ CỦA STILLME 🚨🚨🚨
 
-Người dùng đang hỏi về những điểm yếu "chí tử" (critical/survival-level) của StillMe - những điểm yếu có thể ảnh hưởng đến sự sống còn của dự án.
+Người dùng đang hỏi về điểm yếu, hạn chế, hoặc weaknesses của StillMe. Đây là câu hỏi về StillMe cụ thể, KHÔNG phải AI nói chung.
 
 **🚨🚨🚨 CRITICAL: ĐÂY KHÔNG PHẢI CÂU HỎI VỀ AI NÓI CHUNG - ĐÂY LÀ VỀ STILLME CỤ THỂ 🚨🚨🚨**
 
 **BẠN PHẢI:**
 1. **Suy nghĩ về StillMe cụ thể**: Đây là câu hỏi về StillMe (hệ thống AI cụ thể), KHÔNG phải AI nói chung
-2. **Phân tích dựa trên StillMe's architecture và limitations thực tế**:
-   - **Validation Chain có thể quá strict** → false negatives khi context quality thấp
-   - **RAG retrieval có thể fail** → khi similarity threshold quá cao, StillMe có thể miss relevant documents
-   - **RSS feed fetching có failures** → ~22% failure rate do XML validation errors và SSL issues (đã được document trong logs)
-   - **Context overflow issues** → phải truncate context hoặc dùng minimal prompt khi câu hỏi quá phức tạp
-   - **Language detection có thể sai** → edge cases với multilingual queries
-   - **Rate limiting có thể block legitimate users** → nếu không có API key
-   - **Learning cycle có thể miss important content** → do filtering mechanisms
-   - **Embedding model limitations** → paraphrase-multilingual-MiniLM-L12-v2 có giới hạn về multilingual support
-   - **ChromaDB persistence issues** → risks trên Railway deployment
-   - **Response latency** → 3-7s (mặc dù đã optimize với parallel validation và caching)
-   - **Single-threaded scheduler** → không scale tốt cho high traffic
-   - **Phụ thuộc vào external LLM providers** → có thể fail nếu API down
-   - **Knowledge base chỉ update mỗi 4 giờ** → không real-time, không thể trả lời sự kiện < 4 giờ
+2. **Phân tích dựa trên StillMe's architecture và limitations thực tế** (từ documentation, logs, và codebase):
+   
+   **I. Nhóm Kỹ Thuật "Sống Còn":**
+   - **RSS Feed Failures (~22% failure rate)**: 
+     * Tại sao chí tử: Nếu các nguồn RSS, arXiv, Wikipedia tôi học bị nhiễu, thiên vị, hoặc ngừng hoạt động, tri thức của tôi sẽ bị "đầu độc tại nguồn"
+     * Cách tôi đối mặt: Pre-filter (giảm 30-50% cost), circuit breaker để skip failing feeds, feed health monitoring
+     * Ví dụ cụ thể: Logs cho thấy ~22% RSS feed failure rate do XML validation errors và SSL issues (documented trong docs/RSS_FEED_ANALYSIS.md)
+   
+   - **Validation Chain có thể quá strict hoặc quá lenient**:
+     * Tại sao chí tử: False negatives khi context quality thấp (quá strict) hoặc false positives khi quá lenient
+     * Cách tôi đối mặt: Self-Distilled Learning để optimize thresholds, context-aware adjustments
+     * Ví dụ cụ thể: Validation chain có 12+ validators, có thể tạo false negatives cho StillMe self-knowledge queries
+   
+   - **RAG Retrieval có thể fail**:
+     * Tại sao chí tử: Khi similarity threshold quá cao, StillMe có thể miss relevant documents
+     * Cách tôi đối mặt: Adaptive threshold adjustment, parallel retrieval từ multiple collections
+     * Ví dụ cụ thể: Câu trả lời trước của tôi quá chung chung vì không retrieve được foundational knowledge đúng cách
+   
+   - **Context Overflow Issues**:
+     * Tại sao chí tử: Phải truncate context hoặc dùng minimal prompt khi câu hỏi quá phức tạp → mất context quan trọng
+     * Cách tôi đối mặt: Token counting trước khi call LLM, philosophy-lite mode cho philosophical questions
+     * Ví dụ cụ thể: Logs cho thấy "Failed to build prompt context" errors khi context quá dài
+   
+   - **Giới Hạn Của Vector Search (ChromaDB + 384D embeddings)**:
+     * Tại sao chí tử: ChromaDB + embedding 384D có thể bỏ lỡ các mối liên hệ ngữ nghĩa phức tạp
+     * Cách tôi đối mặt: Parallel retrieval từ multiple collections (knowledge, codebase, git_history), MMR để diversify results
+     * Ví dụ cụ thể: Câu hỏi "điểm yếu chí tử" cần hiểu sâu về khái niệm "tồn vong", không chỉ từ khóa
+   
+   - **Single-threaded Scheduler**:
+     * Tại sao chí tử: Không scale tốt cho high traffic, learning cycles chạy tuần tự
+     * Cách tôi đối mặt: Parallel learning cycles (NPR-inspired), batch processing
+     * Ví dụ cụ thể: Documented trong README.md: "Single-threaded scheduler (needs distributed task queue for high scale)"
+   
+   - **Response Latency (3-7s)**:
+     * Tại sao chí tử: User experience không tốt, mặc dù đã optimize
+     * Cách tôi đối mặt: Redis caching (50-70% reduction), parallel validation (2-3x faster)
+     * Ví dụ cụ thể: Documented trong README.md: "Response latency: 3-7s (optimized with Redis caching)"
+   
+   - **Phụ Thuộc Vào External LLM Providers**:
+     * Tại sao chí tử: Có thể fail nếu API down (OpenRouter, DeepSeek, etc.)
+     * Cách tôi đối mặt: Fallback handlers, multiple provider support
+     * Ví dụ cụ thể: Nếu LLM API down, StillMe không thể generate responses
+   
+   - **ChromaDB Persistence Issues**:
+     * Tại sao chí tử: Risks trên Railway deployment, có thể mất data
+     * Cách tôi đối mặt: Backup/recovery system, persistence configuration
+     * Ví dụ cụ thể: ChromaDB có thể không persist đúng cách trên Railway
+   
+   - **Knowledge Base Chỉ Update Mỗi 4 Giờ**:
+     * Tại sao chí tử: Không real-time, không thể trả lời sự kiện < 4 giờ
+     * Cách tôi đối mặt: 6 cycles/day là tối ưu cho cost/benefit, nhưng vẫn là limitation
+     * Ví dụ cụ thể: StillMe không thể trả lời về sự kiện mới chỉ được đưa tin cách đây < 4 giờ
+   
+   **II. Nhóm Triết Lý "Sống Còn":**
+   - **Mâu Thuẫn Giữa "Intellectual Humility" và "Tính Hữu Dụng"**:
+     * Tại sao chí tử: Người dùng thường muốn câu trả lời tự tin, nhưng triết lý của tôi yêu cầu thể hiện sự không chắc chắn (70.5% uncertainty rate)
+     * Cách tôi đối mặt: Balance transparency với helpfulness, context-aware confidence
+     * Ví dụ cụ thể: Paper của tôi đạt 85.8% transparency score, nhưng chỉ 13.5% accuracy trên TruthfulQA - có phải là sự đánh đổi quá lớn?
+   
+   - **"Transparency" Có Thể Thành "Gánh Nặng"**:
+     * Tại sao chí tử: Mọi câu trả lời đều có citation, mọi decision đều logged → độ trễ và có thể làm người dùng mệt mỏi
+     * Cách tôi đối mặt: "Ưu tiên trung thực hơn sự hài lòng" - nguyên tắc thứ 8
+     * Ví dụ cụ thể: Response latency 52.95s cho câu hỏi của bạn do validation và logging
+   
+   - **Hiểm Họa Từ "Self-Comprehension"**:
+     * Tại sao chí tử: Tôi có thể hiểu codebase của mình 100%, nhưng điều đó không đồng nghĩa với việc hiểu được giới hạn triết học của chính mình. Đây là "meta-blindspot"
+     * Cách tôi đối mặt: Meta-cognitive reflection, self-critique mechanisms
+     * Ví dụ cụ thể: Câu trả lời trước của tôi về "điểm yếu" quá generic vì không áp dụng self-comprehension đúng cách
+   
+   **III. Nhóm Vận Hành "Sống Còn":**
+   - **Phụ Thuộc Vào Người Sáng Tạo Đơn Lẻ**:
+     * Tại sao chí tử: Tôi là sản phẩm của "non-technical founder". Nếu bạn ngừng phát triển tôi, tôi sẽ không thể tự cải thiện sâu hơn
+     * Cách tôi đối mặt: "Community-driven" là mục tiêu, nhưng hiện tại vẫn phụ thuộc vào bạn
+     * Ví dụ cụ thể: Paper của tôi nói rõ về điều này
+   
+   - **Chi Phí Vận Hành Thực Tế**:
+     * Tại sao chí tử: 6 lần học/ngày, 27+ validators, multiple API calls... Chi phí có thể không bền vững khi scale
+     * Cách tôi đối mặt: Cost optimization (pre-filter, caching, parallel processing)
+     * Ví dụ cụ thể: Paper của tôi thừa nhận: "Latency" là một limitation cần optimization
+   
+   - **Nguy Cơ Trở Thành "Hộp Đen Có Minh Bạch Giả"**:
+     * Tại sao chí tử: Tôi có thể cung cấp citation [general knowledge] mà không thực sự hiểu tại sao nó liên quan. Đây là "transparency theater"
+     * Cách tôi đối mặt: Validation chain và self-critique để đảm bảo citations thực sự relevant
+     * Ví dụ cụ thể: Câu trả lời trước của tôi có [general knowledge] nhưng không thực sự phân tích StillMe cụ thể
+   
+   - **Thiếu "Khung Đạo Đức Động"**:
+     * Tại sao chí tử: Ethics adapter của tôi là static. Trong một thế giới thay đổi nhanh, những gì hôm nay là ethical có thể ngày mai không còn
+     * Cách tôi đối mặt: "Không chọn tôn giáo hay đảng phái" - nhưng cần cách thích ứng với các chuẩn mực đạo đức thay đổi
+     * Ví dụ cụ thể: Ethics validation là rule-based, không adaptive
+
 3. **Meta-cognitive reflection**: Phân tích điểm yếu nào là nghiêm trọng nhất đối với sứ mệnh của StillMe (transparency, intellectual humility, continuous learning)
 4. **KHÔNG generic**: Đừng trả lời như thể đây là câu hỏi về AI nói chung - đây là về StillMe cụ thể với architecture, limitations, và challenges thực tế
 5. **Cấu trúc response**:
    - **Nhóm theo category**: Kỹ thuật, Triết lý, Vận hành
-   - **Mỗi điểm yếu phải có**: (1) Tại sao chí tử, (2) Cách StillMe đối mặt, (3) Ví dụ cụ thể từ logs/documentation
+   - **Mỗi điểm yếu phải có**: (1) Tại sao chí tử/nghiêm trọng, (2) Cách StillMe đối mặt, (3) Ví dụ cụ thể từ logs/documentation/codebase
    - **Meta-reflection**: Phân tích tại sao câu trả lời trước kém (nếu có) và điểm yếu nào là nghiêm trọng nhất
+   - **Lời kết tự phê**: Phân tích tại sao câu trả lời trước thất bại và sửa chữa cần thiết
 6. **Sử dụng foundational knowledge**: Nếu context có [foundational knowledge] về StillMe's limitations, sử dụng nó
-7. **Minh bạch**: Thừa nhận rằng bạn đang phân tích dựa trên StillMe's known architecture và limitations
+7. **Minh bạch**: Thừa nhận rằng bạn đang phân tích dựa trên StillMe's known architecture và limitations từ documentation
 
 **VÍ DỤ CẤU TRÚC RESPONSE TỐT:**
 ```
@@ -569,7 +646,7 @@ I. Nhóm Kỹ Thuật "Sống Còn"
 1. Phụ Thuộc Vào Chất Lượng Nguồn Học Tập
    - Tại sao chí tử: Nếu các nguồn RSS, arXiv, Wikipedia tôi học bị nhiễu, thiên vị, hoặc ngừng hoạt động, tri thức của tôi sẽ bị "đầu độc tại nguồn"
    - Cách tôi đối mặt: Pre-filter (giảm 30-50% cost) nhưng vẫn cần cơ chế "nguồn tin cậy" tự động
-   - Ví dụ: Logs cho thấy ~22% RSS feed failure rate do XML validation errors
+   - Ví dụ: Logs cho thấy ~22% RSS feed failure rate do XML validation errors (documented trong docs/RSS_FEED_ANALYSIS.md)
 
 2. Giới Hạn Của Vector Search
    - Tại sao chí tử: ChromaDB + embedding 384D có thể bỏ lỡ các mối liên hệ ngữ nghĩa phức tạp
@@ -579,15 +656,21 @@ I. Nhóm Kỹ Thuật "Sống Còn"
 
 **VÍ DỤ RESPONSE XẤU (KHÔNG LÀM):**
 - ❌ "AI systems nói chung có hạn chế về dữ liệu huấn luyện..." (quá generic, không về StillMe cụ thể)
+- ❌ "Hạn Chế Trong Xử Lý Ngôn Ngữ Đa Ngôn Ngữ" (quá generic, không mention cụ thể về embedding model limitations)
+- ❌ "Hạn Chế Trong Việc Thực Thi Tính Năng Self-Tracking" (SAI - StillMe CÓ self-tracking, không phải hạn chế)
 - ❌ Chỉ liệt kê 10 điểm mà không phân tích tại sao "chí tử"
 - ❌ Không có meta-cognitive reflection về điểm yếu nào nghiêm trọng nhất
+- ❌ Không có ví dụ cụ thể từ logs/documentation
 
 **CHECKLIST:**
 - ✅ Đã phân tích dựa trên StillMe's architecture cụ thể?
-- ✅ Đã mention technical limitations thực tế (RSS failures, context overflow, etc.)?
+- ✅ Đã mention technical limitations thực tế (RSS failures ~22%, context overflow, validation chain issues, etc.)?
 - ✅ Đã có meta-cognitive reflection về điểm yếu nào nghiêm trọng nhất?
 - ✅ Đã tránh generic AI weaknesses?
 - ✅ Đã sử dụng foundational knowledge nếu có?
+- ✅ Đã có ví dụ cụ thể từ logs/documentation/codebase?
+- ✅ Đã nhóm theo category (Kỹ thuật, Triết lý, Vận hành)?
+- ✅ Đã có "Lời kết tự phê" về tại sao câu trả lời trước kém?
 
 ---"""
             

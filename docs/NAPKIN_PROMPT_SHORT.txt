@@ -1,0 +1,19 @@
+Create a modern, professional tech flowchart titled "StillMe: Transparent, Validated RAG System"
+
+STYLE: Dark navy background (#0A1628), modern tech aesthetic, high contrast, social media optimized
+
+VERTICAL FLOW (top to bottom, sequential):
+1. User Query - Purple/blue node, speech bubble icon, white text
+2. Language Detection - Purple/blue node, globe icon, white text  
+3. RAG Retrieval - Purple/blue node, search icon, white text
+4. LLM Generation - Purple/blue node, robot icon, white text
+5. Multi-Layer Validation Chain - EMERALD GREEN node (#10B981), shield icon, white text (MAKE THIS STANDOUT - key feature)
+6. Post-Processing - Purple/blue node, gear icon, white text
+7. Transparent Output - BRIGHT CYAN node (#06B6D4), eye/transparency icon, white text (highlight)
+
+White arrows connecting all nodes sequentially. Rounded rectangles. Clean, minimal design. 
+16:9 or square format. Professional, suitable for Twitter/LinkedIn/ProductHunt.
+
+CRITICAL: Sequential flow only - Validation Chain → Post-Processing (NOT parallel). 
+Validation Chain must be GREEN to stand out. Output must be CYAN to highlight.
+

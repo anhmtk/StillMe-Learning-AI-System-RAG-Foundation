@@ -167,7 +167,7 @@ def test_prompt_engineering():
         return False
 
 
-def test_api_endpoint():
+def test_api_endpoint(base_url=None):
     """Test 4: API Endpoint (if backend running)"""
     logger.info("\n" + "="*80)
     logger.info("TEST 4: API Endpoint")
@@ -176,8 +176,16 @@ def test_api_endpoint():
     import requests
     import os
     
-    # Try to detect Railway URL or use localhost
-    if os.getenv("RAILWAY_PUBLIC_DOMAIN"):
+    # Get base URL from:
+    # 1. Function parameter (from command line)
+    # 2. RAILWAY_PUBLIC_DOMAIN environment variable
+    # 3. RAILWAY_STATIC_URL environment variable
+    # 4. Default to localhost
+    if base_url:
+        # Auto-add https:// if not present
+        if not base_url.startswith("http://") and not base_url.startswith("https://"):
+            base_url = f"https://{base_url}"
+    elif os.getenv("RAILWAY_PUBLIC_DOMAIN"):
         base_url = f"https://{os.getenv('RAILWAY_PUBLIC_DOMAIN')}"
     elif os.getenv("RAILWAY_STATIC_URL"):
         base_url = os.getenv("RAILWAY_STATIC_URL")
@@ -243,7 +251,7 @@ def test_api_endpoint():
         return False
 
 
-def main():
+def main(base_url=None):
     """Run all Phase 1 tests"""
     logger.info("🧪 Phase 1 Complete Testing")
     logger.info("="*80)
@@ -260,7 +268,7 @@ def main():
     results["prompt"] = test_prompt_engineering()
     
     # Test 4: API Endpoint (optional)
-    results["api"] = test_api_endpoint()
+    results["api"] = test_api_endpoint(base_url)
     
     # Summary
     logger.info("\n" + "="*80)
@@ -297,6 +305,14 @@ def main():
 
 
 if __name__ == "__main__":
-    success = main()
+    import sys
+    
+    # Get base URL from command line argument (for Railway testing)
+    base_url = None
+    if len(sys.argv) > 1:
+        base_url = sys.argv[1]
+        logger.info(f"🌐 Using Railway URL from command line: {base_url}")
+    
+    success = main(base_url)
     sys.exit(0 if success else 1)
 

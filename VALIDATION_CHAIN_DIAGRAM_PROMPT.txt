@@ -1,0 +1,117 @@
+Create a professional flowchart diagram titled "StillMe Validation Chain: Multi-Layer Hallucination Reduction"
+
+Subtitle: "12+ Validators | Validation Pass Rate 93.9% | Zero Hallucination in Custom Tests"
+
+=== START POINT ===
+Top: Grey rectangular box labeled "Start: RAG Response"
+Arrow pointing down to main validation block
+
+=== MAIN VALIDATION BLOCK ===
+Large rectangular container labeled "StillMe Validation Chain (12+ Validators)" - GREY background
+
+Inside, show validators in 2 columns (GREEN boxes):
+
+LEFT COLUMN (Core Validators - Always Run):
+1. "LanguageValidator" 
+   Description: "Check language match"
+
+2. "CitationRequired"
+   Description: "Ensure citations are present"
+
+3. "CitationRelevance"
+   Description: "Validate citation quality"
+
+4. "NumericUnitsBasic"
+   Description: "Validate numeric/units claims"
+
+5. "ConfidenceValidator"
+   Description: "Detect when to express uncertainty"
+
+6. "FactualHallucinationValidator"
+   Description: "Detect factual errors"
+
+7. "ReligiousChoiceValidator"
+   Description: "Reject religion choice in responses"
+
+RIGHT COLUMN (Conditional Validators - Run When Conditions Met):
+8. "EvidenceOverlap"
+   Description: "Check content matches context"
+   Note: (Only when has context)
+
+9. "SourceConsensusValidator"
+   Description: "Detect contradictions between sources"
+   Note: (Only when has 2+ sources)
+
+10. "EgoNeutralityValidator"
+    Description: "Catch 'Hallucination of Experience'"
+    Note: (Only when has context)
+
+11. "IdentityCheckValidator"
+    Description: "Prevent anthropomorphism"
+    Note: (If enabled)
+
+12. "PhilosophicalDepthValidator"
+    Description: "Validate philosophical depth"
+    Note: (Only for philosophical questions)
+
+13. "EthicsAdapter"
+    Description: "Ethical content filtering"
+
+=== ARROWS BETWEEN VALIDATORS ===
+- LanguageValidator → IdentityCheckValidator
+- CitationRequired → EgoNeutralityValidator
+- CitationRelevance → SourceConsensusValidator
+- EvidenceOverlap → FactualHallucinationValidator
+- NumericUnitsBasic → PhilosophicalDepthValidator
+- ConfidenceValidator → EthicsAdapter
+
+=== DECISION POINTS ===
+Arrow down from Validation Chain to YELLOW diamond: "All Validations Passed?"
+
+IF YES (arrow pointing RIGHT):
+→ GREEN rectangular box: "Final Response with Citations + Transparency Metadata"
+   - Label: "93.9% Validation Pass Rate"
+   - Label: "Zero Hallucination in Custom Tests"
+   - Label: "91.1% Citation Rate (full) / 100% (subset)"
+
+IF NO (arrow pointing DOWN):
+→ YELLOW diamond: "Critical Failure?"
+
+   IF YES (arrow pointing RIGHT):
+   → RED rectangular box: "Fallback Handler"
+      - Label: "Epistemic Fallback Response"
+      - Label: "Honest 'I don't know' answer"
+
+   IF NO (arrow pointing DOWN):
+   → ORANGE rectangular box: "Response with Warning"
+      - Label: "Uncertainty + Validator Flags"
+      - Label: "Non-critical warnings"
+
+=== COLOR SCHEME ===
+- GREY: Start point, main container
+- GREEN: Validators, final success response
+- YELLOW: Decision points, warnings
+- RED: Critical failures, fallback
+- ORANGE: Non-critical warnings
+
+=== TEXT REQUIREMENTS ===
+- NO typos: Use "consistency" (not "consistancy"), "hallucination" (not "hailucination" or "Halluccination"), "anthropomorphism" (not "anthropophism"), "failure" (not "fallure")
+- NO missing words: "Do all required validations pass?" (not "Do all required")
+- NO merged words: "are present" (not "arepresent")
+- All validator names must match exactly: LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, ConfidenceValidator, FactualHallucinationValidator, ReligiousChoiceValidator, SourceConsensusValidator, EgoNeutralityValidator, IdentityCheckValidator, PhilosophicalDepthValidator, EthicsAdapter
+
+=== METRICS TO INCLUDE ===
+- "12+ Validators" (not "11")
+- "93.9% Validation Pass Rate"
+- "91.1% Citation Rate (full) / 100% (subset)"
+- "Zero Hallucination in Custom Tests"
+
+=== DESIGN NOTES ===
+- Professional, clean design
+- Clear flow from top to bottom
+- Validators arranged in logical order
+- Decision points clearly labeled
+- Final states clearly distinguished by color
+- Use arrows to show flow direction
+- Include conditional notes for validators that run conditionally
+

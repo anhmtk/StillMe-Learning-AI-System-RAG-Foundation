@@ -1,79 +1,14 @@
-"""
-Floating Chat Widget Component for Streamlit
-Creates a resizable, draggable, fullscreen-capable chat panel that overlays the dashboard.
-Similar to Notepad overlay on desktop - can be resized, dragged, and fullscreened.
-
-CSS and JS are loaded from frontend/static/ for Visual Editor support.
-"""
-import streamlit.components.v1 as components
-import json
-import os
-
-def render_floating_chat(chat_history: list, api_base: str, is_open: bool = False):
-    """
-    Render a floating chat widget using HTML/CSS/JS.
-    
-    Features:
-    - Resizable (drag corners/edges)
-    - Draggable (drag header)
-    - Fullscreen mode
-    - Overlay mode (covers dashboard)
-    - Auto-scroll messages
-    - Enter to send
-    
-    Args:
-        chat_history: List of chat messages in format [{"role": "user|assistant", "content": "..."}]
-        api_base: Base URL for the API
-        is_open: Whether the chat panel should be open by default
-    
-    Returns:
-        Component instance
-    """
-    
-    # Prepare chat history for JavaScript
-    chat_history_json = json.dumps(chat_history)
-    
-    # Load CSS and JS from external files (for Visual Editor support)
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    static_dir = os.path.join(os.path.dirname(script_dir), 'static')
-    css_file = os.path.join(static_dir, 'chat_widget.css')
-    js_file = os.path.join(static_dir, 'chat_widget.js')
-    
-    # Load CSS
-    with open(css_file, 'r', encoding='utf-8') as f:
-        css_content = f.read()
-    # Replace placeholders with actual values
-    overlay_display = 'block' if is_open else 'none'
-    panel_display = 'flex' if is_open else 'none'
-    css_content = css_content.replace('{OVERLAY_DISPLAY}', overlay_display)
-    css_content = css_content.replace('{PANEL_DISPLAY}', panel_display)
-    
-    # Load JS
-    with open(js_file, 'r', encoding='utf-8') as f:
-        js_content = f.read()
-    # Replace placeholders with actual values
-    js_content = js_content.replace('API_BASE', api_base)
-    js_content = js_content.replace('CHAT_HISTORY_JSON', chat_history_json)
-    js_content = js_content.replace('IS_OPEN', str(is_open).lower())
-    
-    # HTML template with injected CSS and JS
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            {css_content}
-            /* CRITICAL: Ensure body/html take full viewport */
-            html, body {{
+/* CRITICAL: Ensure body/html take full viewport */
+            html, body {
                 margin: 0;
                 padding: 0;
                 width: 100%;
                 height: 100%;
                 overflow: hidden;
-            }}
+            }
             
             /* Overlay backdrop - covers dashboard when chat is open */
-            #stillme-chat-overlay {{
+            #stillme-chat-overlay {
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
@@ -81,22 +16,22 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 height: 100vh !important;
                 background: rgba(0, 0, 0, 0.3) !important;
                 z-index: 999999 !important;
-                display: {'block' if is_open else 'none'} !important;
+                display: {OVERLAY_DISPLAY} !important;
                 pointer-events: auto !important;
-            }}
+            }
             
-            #stillme-chat-widget {{
+            #stillme-chat-widget {
                 position: fixed !important;
                 z-index: 1000000 !important;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                 pointer-events: none !important;
-            }}
+            }
             
-            #stillme-chat-widget * {{
+            #stillme-chat-widget * {
                 pointer-events: auto !important;
-            }}
+            }
             
-            #stillme-chat-button {{
+            #stillme-chat-button {
                 position: fixed !important;
                 bottom: 20px !important;
                 right: 20px !important;
@@ -119,21 +54,21 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 pointer-events: auto !important;
                 margin: 0 !important;
                 padding: 0 !important;
-            }}
+            }
             
-            #stillme-chat-button:hover {{
+            #stillme-chat-button:hover {
                 transform: scale(1.15) !important;
                 box-shadow: 0 6px 24px rgba(70, 179, 255, 0.8), 0 0 0 6px rgba(70, 179, 255, 0.3) !important;
-            }}
+            }
             
             /* Ensure button is always visible - even if panel is open */
-            #stillme-chat-button:not(:disabled) {{
+            #stillme-chat-button:not(:disabled) {
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-            }}
+            }
             
-            #stillme-chat-panel {{
+            #stillme-chat-panel {
                 position: fixed !important;
                 top: 50% !important;
                 left: 50% !important;
@@ -147,7 +82,7 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 background: #1e1e1e !important; /* Cursor-like dark background */
                 border-radius: 8px !important; /* Smaller radius like Cursor */
                 box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1) !important; /* Subtle shadow like Cursor */
-                display: {'flex' if is_open else 'none'} !important;
+                display: {PANEL_DISPLAY} !important;
                 flex-direction: column !important;
                 border: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border like Cursor */
                 overflow: hidden !important;
@@ -157,16 +92,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 align-items: stretch !important;
                 /* CRITICAL: Enable dragging */
                 cursor: default !important;
-            }}
+            }
             
             /* Dragging state */
-            #stillme-chat-panel.dragging {{
+            #stillme-chat-panel.dragging {
                 cursor: move !important;
                 user-select: none !important;
-            }}
+            }
             
             /* Fullscreen mode */
-            #stillme-chat-panel.fullscreen {{
+            #stillme-chat-panel.fullscreen {
                 top: 0 !important;
                 left: 0 !important;
                 transform: none !important;
@@ -176,57 +111,57 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 max-height: 100vh !important;
                 border-radius: 0 !important;
                 resize: none !important;
-            }}
+            }
             
             /* Minimized mode - chỉ hiển thị header */
-            #stillme-chat-panel.minimized {{
+            #stillme-chat-panel.minimized {
                 height: auto !important;
                 min-height: auto !important;
                 max-height: 60px !important;
-            }}
+            }
             
             #stillme-chat-panel.minimized .stillme-chat-messages,
-            #stillme-chat-panel.minimized .stillme-chat-input-container {{
+            #stillme-chat-panel.minimized .stillme-chat-input-container {
                 display: none !important;
-            }}
+            }
             
             /* Force visible class (fallback if inline style doesn't work) */
-            #stillme-chat-panel.force-visible {{
+            #stillme-chat-panel.force-visible {
                 display: flex !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-            }}
+            }
             
-            #stillme-chat-overlay.force-visible {{
+            #stillme-chat-overlay.force-visible {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-            }}
+            }
             
             /* Resize handles - 8 handles (4 corners + 4 edges) - Cursor style */
-            .resize-handle {{
+            .resize-handle {
                 position: absolute;
                 background: transparent;
                 z-index: 1000001 !important; /* CRITICAL: Higher than panel z-index (1000000) to ensure it's always on top */
                 pointer-events: auto !important; /* Ensure handles are clickable */
                 user-select: none !important; /* Prevent text selection when resizing */
-            }}
+            }
             
             /* Corner handles - larger for easier grabbing (increased for better UX) */
-            .resize-handle.nw {{ top: 0; left: 0; width: 24px; height: 24px; cursor: nw-resize; }}
-            .resize-handle.ne {{ top: 0; right: 0; width: 24px; height: 24px; cursor: ne-resize; }}
-            .resize-handle.sw {{ bottom: 0; left: 0; width: 24px; height: 24px; cursor: sw-resize; }}
-            .resize-handle.se {{ bottom: 0; right: 0; width: 24px; height: 24px; cursor: se-resize; }}
+            .resize-handle.nw { top: 0; left: 0; width: 24px; height: 24px; cursor: nw-resize; }
+            .resize-handle.ne { top: 0; right: 0; width: 24px; height: 24px; cursor: ne-resize; }
+            .resize-handle.sw { bottom: 0; left: 0; width: 24px; height: 24px; cursor: sw-resize; }
+            .resize-handle.se { bottom: 0; right: 0; width: 24px; height: 24px; cursor: se-resize; }
             
             /* Edge handles - wider for easier grabbing (increased for better UX) */
-            .resize-handle.n {{ top: 0; left: 24px; right: 24px; height: 16px; cursor: n-resize; }}
-            .resize-handle.s {{ bottom: 0; left: 24px; right: 24px; height: 16px; cursor: s-resize; }}
+            .resize-handle.n { top: 0; left: 24px; right: 24px; height: 16px; cursor: n-resize; }
+            .resize-handle.s { bottom: 0; left: 24px; right: 24px; height: 16px; cursor: s-resize; }
             /* CRITICAL: Reduce right edge handle width to avoid overlap with scrollbar */
             /* Scrollbar is 6px wide, so we only use 8px for resize handle (leaving 6px for scrollbar) */
-            .resize-handle.e {{ top: 24px; bottom: 24px; right: 0; width: 8px; cursor: e-resize; }}
+            .resize-handle.e { top: 24px; bottom: 24px; right: 0; width: 8px; cursor: e-resize; }
             /* CRITICAL: Exclude scrollbar area (rightmost 6px) from resize handle */
             /* Use clip-path to exclude the scrollbar area */
-            .resize-handle.e::before {{
+            .resize-handle.e::before {
                 content: '';
                 position: absolute;
                 top: 0;
@@ -234,8 +169,8 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 width: 6px;
                 height: 100%;
                 pointer-events: none;
-            }}
-            .resize-handle.w {{ top: 24px; bottom: 24px; left: 0; width: 16px; cursor: w-resize; }}
+            }
+            .resize-handle.w { top: 24px; bottom: 24px; left: 0; width: 16px; cursor: w-resize; }
             
             /* CRITICAL: Fix scrollbar vs resize handle conflict */
             /* Problem: Resize handle .e (right edge) overlaps with scrollbar (6px wide) */
@@ -244,28 +179,28 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                2. Scrollbar has higher z-index in its area
                3. JavaScript detects scrollbar area and disables resize
             */
-            .stillme-chat-messages {{
+            .stillme-chat-messages {
                 position: relative;
-            }}
-            .stillme-chat-messages::-webkit-scrollbar {{
+            }
+            .stillme-chat-messages::-webkit-scrollbar {
                 width: 6px;
                 pointer-events: auto !important; /* Ensure scrollbar captures events */
                 z-index: 1000002 !important; /* Higher than resize handle (1000001) */
-            }}
-            .stillme-chat-messages::-webkit-scrollbar-track {{
+            }
+            .stillme-chat-messages::-webkit-scrollbar-track {
                 pointer-events: auto !important;
-            }}
-            .stillme-chat-messages::-webkit-scrollbar-thumb {{
+            }
+            .stillme-chat-messages::-webkit-scrollbar-thumb {
                 pointer-events: auto !important;
-            }}
+            }
             
             /* Visual resize indicator - more visible like Cursor */
-            .resize-handle:hover {{
+            .resize-handle:hover {
                 background: rgba(70, 179, 255, 0.5) !important; /* More visible on hover */
-            }}
+            }
             
             /* Show resize handles more clearly - add subtle border on hover */
-            .resize-handle:hover::after {{
+            .resize-handle:hover::after {
                 content: '';
                 position: absolute;
                 top: 50%;
@@ -275,11 +210,11 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 height: 4px;
                 background: rgba(70, 179, 255, 0.8);
                 border-radius: 50%;
-            }}
+            }
             
             /* Edge handles show double arrow on hover */
             .resize-handle.n:hover::after,
-            .resize-handle.s:hover::after {{
+            .resize-handle.s:hover::after {
                 content: '⇅';
                 position: absolute;
                 top: 50%;
@@ -289,10 +224,10 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 font-size: 14px;
                 width: auto;
                 height: auto;
-            }}
+            }
             
             .resize-handle.e:hover::after,
-            .resize-handle.w:hover::after {{
+            .resize-handle.w:hover::after {
                 content: '⇄';
                 position: absolute;
                 top: 50%;
@@ -302,15 +237,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 font-size: 14px;
                 width: auto;
                 height: auto;
-            }}
+            }
             
             /* Disable resize when minimized or fullscreen */
             #stillme-chat-panel.minimized .resize-handle,
-            #stillme-chat-panel.fullscreen .resize-handle {{
+            #stillme-chat-panel.fullscreen .resize-handle {
                 display: none !important;
-            }}
+            }
             
-            .stillme-chat-header {{
+            .stillme-chat-header {
                 background: #252526 !important; /* Cursor-like header background */
                 padding: 12px 16px !important; /* Tighter padding like Cursor */
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; /* Subtle border */
@@ -321,16 +256,16 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 user-select: none !important; /* Prevent text selection when dragging */
                 flex-shrink: 0 !important; /* Don't shrink header */
                 order: 1 !important; /* Header first */
-            }}
+            }
             
-            .stillme-chat-header h3 {{
+            .stillme-chat-header h3 {
                 margin: 0;
                 color: #cccccc !important; /* Cursor-like text color */
                 font-size: 14px !important; /* Smaller font like Cursor */
                 font-weight: 500 !important; /* Medium weight like Cursor */
-            }}
+            }
             
-            #stillme-chat-status {{
+            #stillme-chat-status {
                 color: #858585 !important;
                 font-size: 11px !important;
                 font-style: italic !important;
@@ -338,15 +273,15 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 white-space: nowrap !important;
                 overflow: hidden !important;
                 text-overflow: ellipsis !important;
-            }}
+            }
             
-            .stillme-chat-header-buttons {{
+            .stillme-chat-header-buttons {
                 display: flex;
                 gap: 8px;
                 align-items: center;
-            }}
+            }
             
-            .stillme-chat-header-btn {{
+            .stillme-chat-header-btn {
                 background: none;
                 border: none;
                 color: #ffffff;
@@ -360,13 +295,13 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 justify-content: center;
                 border-radius: 4px;
                 transition: background 0.2s;
-            }}
+            }
             
-            .stillme-chat-header-btn:hover {{
+            .stillme-chat-header-btn:hover {
                 background: #3a3d47;
-            }}
+            }
             
-            .stillme-chat-close {{
+            .stillme-chat-close {
                 background: none;
                 border: none;
                 color: #ffffff;
@@ -380,13 +315,13 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 justify-content: center;
                 border-radius: 4px;
                 transition: background 0.2s;
-            }}
+            }
             
-            .stillme-chat-close:hover {{
+            .stillme-chat-close:hover {
                 background: #3a3d47;
-            }}
+            }
             
-            .stillme-chat-messages {{
+            .stillme-chat-messages {
                 flex: 1 1 auto !important; /* Take available space */
                 overflow-y: auto !important;
                 padding: 16px !important; /* Tighter padding like Cursor */
@@ -396,67 +331,67 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 background: #1e1e1e !important; /* Match panel background */
                 min-height: 0 !important; /* CRITICAL: Allow flex item to shrink */
                 order: 2 !important; /* Messages second */
-            }}
+            }
             
-            .stillme-chat-message {{
+            .stillme-chat-message {
                 padding: 10px 14px !important; /* Tighter padding like Cursor */
                 border-radius: 6px !important; /* Smaller radius like Cursor */
                 max-width: 80%;
                 word-wrap: break-word;
                 line-height: 1.6 !important; /* Better line height for readability */
-            }}
+            }
             
-            .stillme-chat-message.assistant {{
+            .stillme-chat-message.assistant {
                 /* Markdown support for assistant messages */
                 /* HTML rendering with <p>, <br>, <strong>, <ul>, <h2>, <h3>, <table> */
-            }}
+            }
             
-            .stillme-chat-message.assistant p {{
+            .stillme-chat-message.assistant p {
                 margin: 8px 0 !important; /* Spacing for p tags */
-            }}
+            }
             
-            .stillme-chat-message.assistant h2 {{
+            .stillme-chat-message.assistant h2 {
                 margin: 16px 0 8px 0 !important;
                 font-size: 1.2em !important;
                 font-weight: 600 !important;
                 color: #cccccc !important;
-            }}
+            }
             
-            .stillme-chat-message.assistant h3 {{
+            .stillme-chat-message.assistant h3 {
                 margin: 12px 0 6px 0 !important;
                 font-size: 1.1em !important;
                 font-weight: 600 !important;
                 color: #cccccc !important;
-            }}
+            }
             
-            .stillme-chat-message.assistant ul {{
+            .stillme-chat-message.assistant ul {
                 margin: 8px 0 !important;
                 padding-left: 20px !important;
-            }}
+            }
             
-            .stillme-chat-message.assistant li {{
+            .stillme-chat-message.assistant li {
                 margin: 4px 0 !important;
-            }}
+            }
             
-            .stillme-chat-message.assistant strong {{
+            .stillme-chat-message.assistant strong {
                 font-weight: 600 !important;
                 color: #ffffff !important;
-            }}
+            }
             
-            .stillme-chat-message.user {{
+            .stillme-chat-message.user {
                 background: #0e639c !important; /* Cursor-like blue */
                 color: #ffffff !important;
                 align-self: flex-end;
                 margin-left: auto;
-            }}
+            }
             
-            .stillme-chat-message.assistant {{
+            .stillme-chat-message.assistant {
                 background: #2d2d30 !important; /* Cursor-like dark gray */
                 color: #cccccc !important; /* Cursor-like text color */
                 align-self: flex-start;
-            }}
+            }
             
-            .stillme-chat-input-container {{
+            .stillme-chat-input-container {
                 padding: 12px 16px !important; /* Tighter padding like Cursor */
                 border-top: 1px solid rgba(255, 255, 255, 0.15) !important; /* More visible border to separate from messages */
                 background: #252526 !important; /* Slightly different background like Cursor */
@@ -464,14 +399,14 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 flex-grow: 0 !important; /* Don't grow */
                 order: 3 !important; /* Input last (at bottom) */
                 margin-top: auto !important; /* Push to bottom - CRITICAL */
-            }}
+            }
             
-            .stillme-chat-input-wrapper {{
+            .stillme-chat-input-wrapper {
                 display: flex;
                 gap: 8px;
-            }}
+            }
             
-            #stillme-chat-input {{
+            #stillme-chat-input {
                 flex: 1;
                 padding: 10px 14px !important; /* Tighter padding like Cursor */
                 background: #2d2d30 !important; /* Cursor-like input background */
@@ -481,18 +416,18 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 font-size: 14px !important;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
                 resize: none;
-            }}
+            }
             
-            #stillme-chat-input:focus {{
+            #stillme-chat-input:focus {
                 outline: none !important;
                 border-color: #0e639c !important; /* Cursor-like focus color */
-            }}
+            }
             
-            #stillme-chat-input::placeholder {{
+            #stillme-chat-input::placeholder {
                 color: #858585 !important; /* Cursor-like placeholder color */
-            }}
+            }
             
-            #stillme-chat-send {{
+            #stillme-chat-send {
                 padding: 12px 24px;
                 background: #46b3ff;
                 border: none;
@@ -501,99 +436,31 @@ def render_floating_chat(chat_history: list, api_base: str, is_open: bool = Fals
                 font-weight: 600;
                 cursor: pointer;
                 transition: background 0.2s;
-            }}
+            }
             
-            #stillme-chat-send:hover {{
+            #stillme-chat-send:hover {
                 background: #1e90ff;
-            }}
+            }
             
-            #stillme-chat-send:disabled {{
+            #stillme-chat-send:disabled {
                 background: #3a3d47;
                 cursor: not-allowed;
-            }}
+            }
             
             /* Scrollbar styling */
-            .stillme-chat-messages::-webkit-scrollbar {{
+            .stillme-chat-messages::-webkit-scrollbar {
                 width: 6px;
-            }}
+            }
             
-            .stillme-chat-messages::-webkit-scrollbar-track {{
+            .stillme-chat-messages::-webkit-scrollbar-track {
                 background: #0e1117;
-            }}
+            }
             
-            .stillme-chat-messages::-webkit-scrollbar-thumb {{
+            .stillme-chat-messages::-webkit-scrollbar-thumb {
                 background: #262730;
                 border-radius: 3px;
-            }}
+            }
             
-            .stillme-chat-messages::-webkit-scrollbar-thumb:hover {{
+            .stillme-chat-messages::-webkit-scrollbar-thumb:hover {
                 background: #3a3d47;
-            }}
-        </style>
-    </head>
-    <body>
-        <script>
-            // Debug: Log when body loads
-            console.log('StillMe Chat: HTML body loaded');
-            console.log('StillMe Chat: Window dimensions:', window.innerWidth, 'x', window.innerHeight);
-        </script>
-        
-        <script>
-            {js_content}
-        </script>
-        
-        <!-- Overlay backdrop - covers dashboard when chat is open -->
-        <div id="stillme-chat-overlay" onclick="toggleChat()"></div>
-        
-        <div id="stillme-chat-widget">
-            <div id="stillme-chat-panel">
-                <!-- Resize handles (8 handles: 4 corners + 4 edges) -->
-                <div class="resize-handle nw"></div>
-                <div class="resize-handle ne"></div>
-                <div class="resize-handle sw"></div>
-                <div class="resize-handle se"></div>
-                <div class="resize-handle n"></div>
-                <div class="resize-handle s"></div>
-                <div class="resize-handle e"></div>
-                <div class="resize-handle w"></div>
-                
-                <!-- Header (draggable) -->
-                <div class="stillme-chat-header" id="stillme-chat-header">
-                    <div style="flex: 1; min-width: 0;">
-                        <h3>💬 Chat with StillMe</h3>
-                        <div id="stillme-chat-status" style="font-size: 11px; color: #858585; margin-top: 4px; display: none; font-style: italic;"></div>
-                    </div>
-                    <div class="stillme-chat-header-buttons">
-                        <button class="stillme-chat-header-btn" id="minimize-btn" onclick="toggleMinimize()" title="Minimize">−</button>
-                        <button class="stillme-chat-header-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
-                        <button class="stillme-chat-close" onclick="toggleChat()" title="Close">×</button>
-                </div>
-                </div>
-                
-                <!-- Messages container (auto-scroll) -->
-                <div class="stillme-chat-messages" id="stillme-chat-messages">
-                    <!-- Messages will be rendered here -->
-                </div>
-                
-                <!-- Input container -->
-                <div class="stillme-chat-input-container">
-                    <div class="stillme-chat-input-wrapper">
-                        <textarea 
-                            id="stillme-chat-input" 
-                            placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-                            rows="2"
-                        ></textarea>
-                        <button id="stillme-chat-send" onclick="sendMessage()">Send</button>
-                    </div>
-                </div>
-            </div>
-            <button id="stillme-chat-button" onclick="toggleChat()">💬</button>
-        </div>
-    </body>
-    </html>
-    """
-    
-    # CRITICAL: Use height=0 to allow full viewport control
-    # Note: components.html() doesn't support 'key' parameter
-    return components.html(html_content, height=0)
-
+            }
