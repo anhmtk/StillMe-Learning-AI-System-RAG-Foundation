@@ -291,18 +291,11 @@
                 html = html.replace(boldPattern, '<strong>$1</strong>');
                 
                 // Links: [text](url) -> <a href="url">text</a>
-                // CRITICAL: In JavaScript string, \\[ becomes \[ in regex (escaped bracket)
-                // In character class [^\\]], the ] needs to be escaped or at end
-                // Fixed: Use [^\\]] to match "not backslash or closing bracket", or use [^\\]\\] to be explicit
-                var linkPattern = new RegExp('\\\\[([^\\\\]]+)\\\\\\]\\\\\\(([^)]+)\\\\\\)', 'g');
-                try {
-                    html = html.replace(linkPattern, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
-                } catch (e) {
-                    console.error('StillMe Chat: Error in linkPattern regex:', e);
-                    // Fallback: simpler pattern without character class
-                    var linkPatternSimple = new RegExp('\\\\[([^\\\\[\\\\]]+)\\\\\\]\\\\\\(([^)]+)\\\\\\)', 'g');
-                    html = html.replace(linkPatternSimple, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
-                }
+                // CRITICAL FIX: Use regex literal instead of RegExp constructor with escaped string
+                // The escaped string pattern was causing "Unmatched )" syntax error
+                // Regex literal is cleaner and avoids double-escaping issues
+                var linkPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+                html = html.replace(linkPattern, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
                 
                 // Bullet points: - item -> <li>item</li>
                 var bulletPattern = new RegExp('<p>- (.+?)</p>', 'g');
