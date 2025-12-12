@@ -1884,24 +1884,12 @@ The RAG system found context documents, but they are NOT relevant to your questi
                 validation_result.passed = True
                 validation_result.reasons = [r for r in validation_result.reasons if r != "missing_citation"]
         elif has_missing_citation and not has_critical_failure:
-            # CRITICAL: If missing citation but no patched_answer, try to add it directly
-            # This is a fallback in case CitationRequired didn't create patched_answer
-            logger.warning(f"⚠️ Missing citation detected but no patched_answer available - attempting to add citation directly")
-            from backend.validators.citation import CitationRequired
-            citation_validator = CitationRequired(required=True)
-            citation_result = citation_validator.run(
-                raw_response, 
-                ctx_docs, 
-                is_philosophical=is_philosophical, 
-                user_question=chat_request.message,
-                context=context  # CRITICAL: Pass context for foundational knowledge detection
-            )
-            if citation_result.patched_answer:
-                response = citation_result.patched_answer
-                logger.info(f"✅ Added citation directly via CitationRequired. Reasons: {citation_result.reasons}")
-                validation_result.patched_answer = citation_result.patched_answer
-                validation_result.passed = True
-                validation_result.reasons = [r for r in validation_result.reasons if r != "missing_citation"]
+            # P2: Fix CitationRequired lặp - CitationRequired đã chạy trong validator chain
+            # Nếu không có patched_answer, có nghĩa là CitationRequired không thể auto-fix
+            # Trong trường hợp này, chỉ log warning, không gọi lại CitationRequired
+            logger.warning(f"⚠️ Missing citation detected but CitationRequired validator (already in chain) did not create patched_answer. This may indicate citation cannot be auto-added (e.g., no relevant context). Skipping duplicate CitationRequired call.")
+            # P2: Don't call CitationRequired again - it already ran in the validator chain
+            # If it couldn't auto-fix, we should respect that decision
         elif has_critical_failure:
             # For language mismatch, try retry with stronger prompt first
             if has_language_mismatch:
@@ -6751,11 +6739,14 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         
         # Store conversation in vector DB
         if rag_retrieval:
-            # OPTIMIZATION: Store conversation in background task to avoid blocking response
-            # This reduces response latency by ~3-4 seconds
+            # P2: Fix conversation embedding blocking - use asyncio.to_thread to truly non-block
+            # This ensures embedding generation runs in thread pool, not blocking event loop
             async def store_conversation_background():
                 try:
-                    rag_retrieval.add_learning_content(
+                    # P2: Run blocking I/O in thread pool to avoid blocking event loop
+                    import asyncio
+                    await asyncio.to_thread(
+                        rag_retrieval.add_learning_content,
                         content=f"Q: {chat_request.message}\nA: {response}",
                         source="user_chat",
                         content_type="conversation",
@@ -6771,7 +6762,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             
             # Create background task (fire and forget - don't await)
             asyncio.create_task(store_conversation_background())
-            logger.debug("🚀 Conversation storage queued in background task")
+            logger.debug("🚀 Conversation storage queued in background task (P2: truly non-blocking)")
         
         # Knowledge Alert: Retrieve important knowledge related to query
         knowledge_alert = None

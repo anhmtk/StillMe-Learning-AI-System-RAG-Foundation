@@ -958,25 +958,80 @@ class RAGRetrieval:
                 remaining_tokens -= header_tokens
                 context_parts.append(header)
                 
-                for i, doc in enumerate(context["knowledge_docs"], 1):
-                    if remaining_tokens <= 100:  # Stop if too little space left
-                        logger.warning(f"Stopped adding knowledge docs at {i}/{len(context['knowledge_docs'])} due to token limit")
-                        break
+                # P1.3: Separate foundational knowledge from regular knowledge
+                foundational_docs = []
+                regular_docs = []
+                
+                for doc in context["knowledge_docs"]:
+                    metadata = doc.get("metadata", {})
+                    source = metadata.get("source", "")
+                    foundational = metadata.get("foundational", "")
+                    doc_type = metadata.get("type", "")
+                    tags = str(metadata.get("tags", ""))
                     
-                    source = doc.get("metadata", {}).get("source", "Unknown")
-                    content = doc.get("content", "")
+                    # Check if this is foundational knowledge
+                    is_foundational = (
+                        source == "CRITICAL_FOUNDATION" or
+                        foundational == "stillme" or
+                        doc_type == "foundational" or
+                        "CRITICAL_FOUNDATION" in tags or
+                        "foundational:stillme" in tags
+                    )
                     
-                    # Allocate tokens per document (distribute remaining tokens)
-                    # Reserve some tokens for formatting
-                    doc_max_tokens = remaining_tokens // max(1, len(context["knowledge_docs"]) - i + 1)
-                    doc_max_tokens = min(doc_max_tokens, 2000)  # Cap each doc at 2000 tokens
+                    if is_foundational:
+                        foundational_docs.append(doc)
+                    else:
+                        regular_docs.append(doc)
+                
+                # P1.3: Add foundational knowledge with marker FIRST (priority)
+                if foundational_docs:
+                    foundational_header = "\n### [FOUNDATIONAL KNOWLEDGE - CRITICAL INSTRUCTION]"
+                    foundational_header_tokens = self._estimate_tokens(foundational_header)
+                    remaining_tokens -= foundational_header_tokens
+                    context_parts.append(foundational_header)
                     
-                    truncated_content = self._truncate_text_by_tokens(content, doc_max_tokens)
-                    doc_text = f"{i}. {truncated_content} (Source: {source})"
+                    for i, doc in enumerate(foundational_docs, 1):
+                        if remaining_tokens <= 100:
+                            logger.warning(f"Stopped adding foundational docs at {i}/{len(foundational_docs)} due to token limit")
+                            break
+                        
+                        source = doc.get("metadata", {}).get("source", "Unknown")
+                        content = doc.get("content", "")
+                        
+                        doc_max_tokens = remaining_tokens // max(1, len(foundational_docs) - i + 1)
+                        doc_max_tokens = min(doc_max_tokens, 2000)
+                        
+                        truncated_content = self._truncate_text_by_tokens(content, doc_max_tokens)
+                        doc_text = f"{i}. [FOUNDATIONAL] {truncated_content} (Source: {source})"
+                        
+                        doc_tokens = self._estimate_tokens(doc_text)
+                        remaining_tokens -= doc_tokens
+                        context_parts.append(doc_text)
+                
+                # Add regular knowledge
+                if regular_docs:
+                    if foundational_docs:
+                        regular_header = "\n### Regular Knowledge:"
+                    else:
+                        regular_header = ""
                     
-                    doc_tokens = self._estimate_tokens(doc_text)
-                    remaining_tokens -= doc_tokens
-                    context_parts.append(doc_text)
+                    for i, doc in enumerate(regular_docs, 1):
+                        if remaining_tokens <= 100:
+                            logger.warning(f"Stopped adding regular docs at {i}/{len(regular_docs)} due to token limit")
+                            break
+                        
+                        source = doc.get("metadata", {}).get("source", "Unknown")
+                        content = doc.get("content", "")
+                        
+                        doc_max_tokens = remaining_tokens // max(1, len(regular_docs) - i + 1)
+                        doc_max_tokens = min(doc_max_tokens, 2000)
+                        
+                        truncated_content = self._truncate_text_by_tokens(content, doc_max_tokens)
+                        doc_text = f"{i}. {truncated_content} (Source: {source})"
+                        
+                        doc_tokens = self._estimate_tokens(doc_text)
+                        remaining_tokens -= doc_tokens
+                        context_parts.append(doc_text)
             
             # Add conversation context
             if context.get("conversation_docs") and remaining_tokens > 500:
@@ -1011,6 +1066,28 @@ class RAGRetrieval:
             if result_tokens > max_context_tokens:
                 logger.warning(f"Context still too long ({result_tokens} tokens), truncating entire result")
                 result = self._truncate_text_by_tokens(result, max_context_tokens)
+            
+            # P1.3: Verify foundational knowledge markers are present (if foundational docs exist)
+            has_foundational_docs = any(
+                doc.get("metadata", {}).get("source") == "CRITICAL_FOUNDATION" or
+                doc.get("metadata", {}).get("foundational") == "stillme" or
+                doc.get("metadata", {}).get("type") == "foundational" or
+                "CRITICAL_FOUNDATION" in str(doc.get("metadata", {}).get("tags", ""))
+                for doc in (context.get("knowledge_docs", []))
+            ) if context else False
+            
+            if has_foundational_docs:
+                has_foundational_markers = (
+                    "[FOUNDATIONAL KNOWLEDGE" in result or 
+                    "[FOUNDATIONAL]" in result or
+                    "CRITICAL_FOUNDATION" in result
+                )
+                if has_foundational_markers:
+                    logger.info("✅ Final context_text contains foundational knowledge markers")
+                else:
+                    logger.warning("⚠️ Final context_text does NOT contain foundational knowledge markers - may not be formatted correctly (foundational docs present but markers missing)")
+            else:
+                logger.debug("ℹ️ Final context_text does NOT contain foundational knowledge markers (no foundational docs in context)")
             
             return result
             

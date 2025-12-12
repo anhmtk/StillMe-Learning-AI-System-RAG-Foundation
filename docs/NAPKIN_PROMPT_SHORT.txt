@@ -17,3 +17,5 @@ White arrows connecting all nodes sequentially. Rounded rectangles. Clean, minim
 CRITICAL: Sequential flow only - Validation Chain → Post-Processing (NOT parallel). 
 Validation Chain must be GREEN to stand out. Output must be CYAN to highlight.
 
+
+

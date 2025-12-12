@@ -841,6 +841,11 @@ app.include_router(debug_router.router)  # Debug endpoints for cache/model monit
 
 # System endpoints moved to backend/api/routers/system_router.py
 
+# P3: Disable tqdm progress bar in production (set before any imports that use tqdm)
+import os
+if os.getenv("TQDM_DISABLE") is None:
+    os.environ["TQDM_DISABLE"] = "1"  # P3: Disable tqdm by default in production
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize RAG components and log when FastAPI/uvicorn server is ready"""
@@ -942,6 +947,20 @@ async def startup_event():
                     logger.error(f"❌ Failed to auto-start learning scheduler: {e}")
         else:
             logger.error("❌ CRITICAL: Learning scheduler not available - automatic learning is DISABLED!")
+    
+    # P1.1: Pre-initialize StyleLearner and ValidationMetricsTracker to avoid init in request
+    logger.info("🔧 Pre-initializing services to avoid init in request...")
+    try:
+        from backend.services.style_learner import StyleLearner
+        from backend.validators.validation_metrics_tracker import get_validation_tracker
+        # Pre-initialize StyleLearner (singleton)
+        _ = StyleLearner()
+        logger.info("✅ StyleLearner pre-initialized")
+        # Pre-initialize ValidationMetricsTracker (singleton)
+        _ = get_validation_tracker()
+        logger.info("✅ ValidationMetricsTracker pre-initialized")
+    except Exception as pre_init_error:
+        logger.warning(f"⚠️ Failed to pre-initialize services: {pre_init_error}")
     
     # Start auto-start task in background
     asyncio.create_task(auto_start_scheduler_after_init())

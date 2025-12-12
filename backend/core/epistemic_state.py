@@ -154,11 +154,22 @@ def calculate_epistemic_state(
         logger.debug(f"EpistemicState: UNKNOWN (critical validation failure: {validation_reasons})")
         return EpistemicState.UNKNOWN
     
-    # KNOWN: High confidence, good citations, validation passed
+    # P2: Fix epistemic state logic - KNOWN requires overlap > threshold, not just ctx_docs > 0
+    # Check if we have evidence overlap (not just context docs count)
+    has_evidence_overlap = False
+    if validation_info:
+        # Check if EvidenceOverlap validator passed (indicates actual overlap, not just presence)
+        overlap_score = validation_info.get("overlap_score", 0.0)
+        # P2: KNOWN requires actual overlap > threshold (0.01), not just ctx_docs > 0
+        has_evidence_overlap = overlap_score > 0.01
+        logger.debug(f"EpistemicState: overlap_score={overlap_score:.3f}, has_evidence_overlap={has_evidence_overlap}")
+    
+    # KNOWN: High confidence, good citations, validation passed, AND actual evidence overlap
     if (
         validation_passed and
         has_citations and
         ctx_docs_count > 0 and
+        has_evidence_overlap and  # P2: Require actual overlap, not just ctx_docs > 0
         (conf_score is None or conf_score >= 0.7) and
         not has_warnings
     ):
@@ -166,20 +177,21 @@ def calculate_epistemic_state(
         logger.debug(
             f"EpistemicState: KNOWN "
             f"(passed={validation_passed}, citations={has_citations}, "
-            f"ctx_docs={ctx_docs_count}, confidence={conf_display})"
+            f"ctx_docs={ctx_docs_count}, overlap={has_evidence_overlap}, confidence={conf_display})"
         )
         return EpistemicState.KNOWN
     
-    # KNOWN: Even with warnings, if confidence is high and has citations
+    # KNOWN: Even with warnings, if confidence is high and has citations AND evidence overlap
     if (
         validation_passed and
         has_citations and
         ctx_docs_count > 0 and
+        has_evidence_overlap and  # P2: Require actual overlap
         conf_score is not None and conf_score >= 0.8
     ):
         logger.debug(
             f"EpistemicState: KNOWN "
-            f"(high confidence={conf_score:.2f} with citations, despite warnings)"
+            f"(high confidence={conf_score:.2f} with citations and overlap, despite warnings)"
         )
         return EpistemicState.KNOWN
     
