@@ -12,6 +12,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from .base import ValidationResult
 from .chain import ValidatorChain
 from .step_detector import Step
+from .citation import CitationRequired
+from .evidence_overlap import EvidenceOverlap
+from .confidence import ConfidenceValidator
 
 logger = logging.getLogger(__name__)
 
@@ -30,17 +33,67 @@ class StepValidationResult(BaseModel):
 
 
 class StepValidator:
-    """Validates individual steps using existing ValidatorChain"""
+    """
+    Validates individual steps using lightweight ValidatorChain
     
-    def __init__(self, confidence_threshold: float = 0.5):
+    P1.1 Optimization: Uses lightweight chain (only CitationRequired, EvidenceOverlap, ConfidenceValidator)
+    instead of full chain (12 validators) to reduce API calls from 120+ to ~30.
+    """
+    
+    def __init__(self, confidence_threshold: float = 0.5, use_lightweight: bool = True):
         """
         Initialize step validator
         
         Args:
             confidence_threshold: Minimum confidence to consider step reliable (default: 0.5)
+            use_lightweight: If True, use lightweight validation chain (default: True)
         """
         self.confidence_threshold = confidence_threshold
-        logger.info(f"StepValidator initialized (confidence_threshold={confidence_threshold})")
+        self.use_lightweight = use_lightweight
+        logger.info(f"StepValidator initialized (confidence_threshold={confidence_threshold}, use_lightweight={use_lightweight})")
+    
+    def _create_lightweight_chain(self, ctx_docs: List[str], adaptive_citation_overlap: float = 0.1, adaptive_evidence_threshold: float = 0.01) -> ValidatorChain:
+        """
+        Create lightweight validation chain for step validation
+        
+        P1.1 Optimization: Only includes essential validators:
+        - CitationRequired: Check if step has citation (critical)
+        - EvidenceOverlap: Check if step content overlaps with context (if context available)
+        - ConfidenceValidator: Check confidence level (critical)
+        
+        Skips expensive validators:
+        - SourceConsensusValidator (LLM call, timeout-prone)
+        - FactualHallucinationValidator (LLM call)
+        - PhilosophicalDepthValidator (LLM call)
+        - IdentityCheckValidator (LLM call)
+        - EgoNeutralityValidator (LLM call)
+        - etc.
+        
+        Args:
+            ctx_docs: Context documents from RAG
+            adaptive_citation_overlap: Adaptive citation overlap threshold (from main validation)
+            adaptive_evidence_threshold: Adaptive evidence threshold (from main validation)
+            
+        Returns:
+            Lightweight ValidatorChain with only essential validators
+        """
+        validators = [
+            CitationRequired(),  # CRITICAL: Always check for citation
+        ]
+        
+        # EvidenceOverlap: Only when has context
+        if len(ctx_docs) > 0:
+            validators.append(EvidenceOverlap(threshold=adaptive_evidence_threshold))
+            logger.debug(f"Lightweight chain: Added EvidenceOverlap (has context, threshold={adaptive_evidence_threshold:.3f})")
+        
+        # ConfidenceValidator: Always check confidence
+        validators.append(
+            ConfidenceValidator(require_uncertainty_when_no_context=False)  # Relaxed for steps
+        )
+        
+        chain = ValidatorChain(validators)
+        logger.debug(f"Lightweight chain created: {len(validators)} validators (vs 12 in full chain)")
+        return chain
     
     def _calculate_step_confidence(
         self,
@@ -115,19 +168,33 @@ class StepValidator:
         self,
         step: Step,
         ctx_docs: List[str],
-        chain: ValidatorChain
+        chain: Optional[ValidatorChain] = None,
+        adaptive_citation_overlap: float = 0.1,
+        adaptive_evidence_threshold: float = 0.01
     ) -> StepValidationResult:
         """
         Validate a single step
         
+        P1.1 Optimization: Uses lightweight chain by default to reduce API calls.
+        If `chain` is provided, uses it (for backward compatibility).
+        If `use_lightweight=True` and `chain=None`, creates lightweight chain.
+        
         Args:
             step: The step to validate
             ctx_docs: Context documents from RAG
-            chain: ValidatorChain to use for validation
+            chain: Optional ValidatorChain to use (if None and use_lightweight=True, creates lightweight chain)
+            adaptive_citation_overlap: Adaptive citation overlap threshold (for lightweight chain)
+            adaptive_evidence_threshold: Adaptive evidence threshold (for lightweight chain)
             
         Returns:
             StepValidationResult with validation outcome and confidence
         """
+        # P1.1: Use lightweight chain if enabled and no chain provided
+        if self.use_lightweight and chain is None:
+            chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
+        elif chain is None:
+            raise ValueError("chain must be provided if use_lightweight=False")
+        
         # Run validation on step content
         validation_result = chain.run(step.content, ctx_docs)
         
@@ -153,17 +220,23 @@ class StepValidator:
         self,
         steps: List[Step],
         ctx_docs: List[str],
-        chain: ValidatorChain,
-        parallel: bool = True
+        chain: Optional[ValidatorChain] = None,
+        parallel: bool = True,
+        adaptive_citation_overlap: float = 0.1,
+        adaptive_evidence_threshold: float = 0.01
     ) -> List[StepValidationResult]:
         """
         Validate all steps (can run in parallel for speed)
         
+        P1.1 Optimization: Uses lightweight chain by default to reduce API calls from 120+ to ~30.
+        
         Args:
             steps: List of steps to validate
             ctx_docs: Context documents from RAG
-            chain: ValidatorChain to use for validation
+            chain: Optional ValidatorChain to use (if None and use_lightweight=True, creates lightweight chain)
             parallel: If True, run validations in parallel (default: True)
+            adaptive_citation_overlap: Adaptive citation overlap threshold (for lightweight chain)
+            adaptive_evidence_threshold: Adaptive evidence threshold (for lightweight chain)
             
         Returns:
             List of StepValidationResult, sorted by step number
@@ -171,14 +244,21 @@ class StepValidator:
         if not steps:
             return []
         
+        # P1.1: Create lightweight chain once if needed (shared across all steps)
+        if self.use_lightweight and chain is None:
+            chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
+            logger.info(f"P1.1: Using lightweight chain ({len(chain.validators)} validators) for {len(steps)} steps")
+        elif chain is None:
+            raise ValueError("chain must be provided if use_lightweight=False")
+        
         results = []
         
         if parallel and len(steps) > 1:
             # Run validations in parallel for speed
-            logger.debug(f"Running {len(steps)} step validations in parallel...")
+            logger.debug(f"Running {len(steps)} step validations in parallel (lightweight chain)...")
             with ThreadPoolExecutor(max_workers=min(len(steps), 5)) as executor:
                 futures = {
-                    executor.submit(self.validate_step, step, ctx_docs, chain): step
+                    executor.submit(self.validate_step, step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold): step
                     for step in steps
                 }
                 
@@ -204,7 +284,7 @@ class StepValidator:
             # Sequential validation
             for step in steps:
                 try:
-                    result = self.validate_step(step, ctx_docs, chain)
+                    result = self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold)
                     results.append(result)
                 except Exception as e:
                     logger.error(f"Error validating step {step.step_number}: {e}")

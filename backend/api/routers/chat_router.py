@@ -1501,9 +1501,18 @@ async def _handle_validation_with_fallback(
                     logger.debug(f"🔍 Detected {len(steps)} steps - running step-level validation")
                     processing_steps.append(f"🔍 Step-level validation ({len(steps)} steps)")
                     
-                    step_validator = StepValidator(confidence_threshold=step_confidence_threshold)
-                    logger.debug(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold}")
-                    step_results = step_validator.validate_all_steps(steps, ctx_docs, chain, parallel=True)
+                    # P1.1: Use lightweight validation chain for steps (reduces API calls from 120+ to ~30)
+                    step_validator = StepValidator(confidence_threshold=step_confidence_threshold, use_lightweight=True)
+                    logger.debug(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold} (P1.1: lightweight chain)")
+                    # Pass None for chain to use lightweight chain, and pass adaptive thresholds
+                    step_results = step_validator.validate_all_steps(
+                        steps, 
+                        ctx_docs, 
+                        chain=None,  # Use lightweight chain instead of full chain
+                        parallel=True,
+                        adaptive_citation_overlap=adaptive_citation_overlap,
+                        adaptive_evidence_threshold=adaptive_evidence_threshold
+                    )
                     logger.debug(f"🔍 Step validation completed: {len(step_results)} results")
                     
                     low_confidence_steps = [
