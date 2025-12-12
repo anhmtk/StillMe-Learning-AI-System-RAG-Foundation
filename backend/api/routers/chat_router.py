@@ -2699,8 +2699,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         user_question=chat_request.message  # P2: Template detection
                     )
                     
-                    # FORCE rewrite for philosophical questions to ensure variation and depth
-                    force_rewrite = True
+                    # P2: Respect template detection - don't force rewrite if P2 skipped
+                    # Only force rewrite if P2 didn't skip (should_rewrite=True or reason != "user_requested_template")
+                    force_rewrite = rewrite_reason != "user_requested_template" and rewrite_reason != "quality_acceptable"
                     if should_rewrite or force_rewrite:
                         rewrite_llm = get_rewrite_llm()
                         

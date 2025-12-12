@@ -28,6 +28,18 @@ def is_philosophical_question(text: str) -> bool:
     
     lower = text.lower()
     
+    # PRIORITY CHECK 0: List/enumeration questions are NOT philosophical (factual)
+    list_patterns = [
+        r'\b(liệt kê|list|enumerate|kể|nêu|chỉ ra|point out|show)\s+\d+',
+        r'\d+\s*(ưu điểm|nhược điểm|điểm|point|bước|step|item|mục|lý do|reason)',
+        r'\b(so sánh|compare|đối chiếu)\b',
+    ]
+    import re
+    for pattern in list_patterns:
+        if re.search(pattern, lower):
+            logger.info(f"Philosophical question detected: False (list/enumeration question: text='{text[:80]}...')")
+            return False
+    
     # PRIORITY CHECK 1: AI + experience/free will - always philosophical
     if "ai" in lower and ("trải nghiệm" in lower or "experience" in lower):
         logger.info(f"Philosophical question detected: True (AI + experience: text='{text[:80]}...')")

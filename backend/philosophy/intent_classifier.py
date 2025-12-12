@@ -115,6 +115,17 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\bevent\b.*\bago\b",  # "event ... ago"
     ]
     
+    # P2: Exclude list/enumeration questions (factual, not philosophical)
+    list_patterns = [
+        r'\b(liệt kê|list|enumerate|kể|nêu|chỉ ra|point out|show)\s+\d+',
+        r'\d+\s*(ưu điểm|nhược điểm|điểm|point|bước|step|item|mục|lý do|reason)',
+        r'\b(so sánh|compare|đối chiếu)\b',
+    ]
+    for pattern in list_patterns:
+        if re.search(pattern, text_lower):
+            logger.debug(f"Question is list/enumeration (factual), not philosophical: {text[:100]}")
+            return QuestionType.UNKNOWN
+    
     # If question contains technical terms or capability/transparency keywords, it's NOT about StillMe's consciousness - return UNKNOWN immediately
     has_technical_term = any(re.search(pattern, text_lower) for pattern in technical_term_exclusions)
     if has_technical_term:
