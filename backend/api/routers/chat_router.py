@@ -1501,9 +1501,13 @@ async def _handle_validation_with_fallback(
                     logger.debug(f"🔍 Detected {len(steps)} steps - running step-level validation")
                     processing_steps.append(f"🔍 Step-level validation ({len(steps)} steps)")
                     
-                    # P1.1: Use lightweight validation chain for steps (reduces API calls from 120+ to ~30)
-                    step_validator = StepValidator(confidence_threshold=step_confidence_threshold, use_lightweight=True)
-                    logger.debug(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold} (P1.1: lightweight chain)")
+                    # P1.1.b: Use batch validation for steps (reduces API calls from 120+ to 1)
+                    step_validator = StepValidator(
+                        confidence_threshold=step_confidence_threshold, 
+                        use_lightweight=True, 
+                        use_batch=True  # P1.1.b: Batch validation (1 LLM call for all steps)
+                    )
+                    logger.debug(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold} (P1.1.b: batch validation)")
                     # Pass None for chain to use lightweight chain, and pass adaptive thresholds
                     step_results = step_validator.validate_all_steps(
                         steps, 
