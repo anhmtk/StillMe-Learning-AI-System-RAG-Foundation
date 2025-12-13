@@ -271,6 +271,7 @@
                 if (!text) return '';
                 
                 let html = String(text);
+                console.log('StillMe Chat: markdownToHtml called, input length:', html.length, 'preview:', html.substring(0, 100).replace(/\n/g, '\\n'));
                 
                 // CRITICAL: Check if text already contains HTML tags (from backend)
                 // If it does, don't process markdown - just return as-is
@@ -287,13 +288,16 @@
                 
                 // Check if text has newlines (plain text with line breaks)
                 const hasNewlines = html.includes('\n');
-                console.log('StillMe Chat: markdownToHtml - processing markdown, hasNewlines:', hasNewlines, 'length:', html.length);
+                const newlineCount = (html.match(/\n/g) || []).length;
+                console.log('StillMe Chat: markdownToHtml - processing markdown, hasNewlines:', hasNewlines, 'newlineCount:', newlineCount, 'length:', html.length);
                 
                 // Convert double newlines to p tags, single newlines to br tags
                 html = html.replace(/\n\n+/g, '</p><p>');
                 html = '<p>' + html + '</p>';
                 // Convert remaining single newlines to br tags
                 html = html.replace(/\n/g, '<br>');
+                
+                console.log('StillMe Chat: markdownToHtml - output length:', html.length, 'preview:', html.substring(0, 150));
                 
                 // Headers: ## Header -> <h2>Header</h2>
                 var h3Pattern = new RegExp('<p>### (.+?)</p>', 'g');
