@@ -654,10 +654,21 @@
                                                 align-self: flex-start;
                                             }
                                             
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant {
+                                                white-space: normal !important; /* CRITICAL: Allow line breaks */
+                                            }
+                                            
                                             #stillme-chat-panel-parent .stillme-chat-message.assistant p {
                                                 margin: 8px 0 !important;
                                                 display: block !important; /* CRITICAL: Ensure p tags are block elements for line breaks */
                                                 line-height: 1.6 !important; /* Better line height for readability */
+                                                white-space: normal !important; /* CRITICAL: Allow line breaks inside p tags */
+                                            }
+                                            
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant br {
+                                                display: block !important; /* CRITICAL: Ensure br tags create line breaks */
+                                                content: "" !important;
+                                                margin-bottom: 0.5em !important;
                                             }
                                             
                                             /* CRITICAL: Ensure first and last p tags have proper spacing */
