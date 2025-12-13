@@ -272,11 +272,23 @@
                 
                 let html = String(text);
                 
+                // CRITICAL: Check if text already contains HTML tags (from backend)
+                // If it does, don't process markdown - just return as-is
+                if (html.includes('<p>') || html.includes('<br>') || html.includes('<div>')) {
+                    // Already HTML formatted, return as-is (but ensure proper spacing)
+                    return html;
+                }
+                
                 // CRITICAL: Preserve line breaks first
+                // Normalize line endings (handle Windows \r\n and old Mac \r)
+                html = html.replace(/\r\n/g, '\n');
+                html = html.replace(/\r/g, '\n');
+                
                 // Convert double newlines to p tags, single newlines to br tags
-                html = html.replace(new RegExp('\\n\\n+', 'g'), '</p><p>');
+                html = html.replace(/\n\n+/g, '</p><p>');
                 html = '<p>' + html + '</p>';
-                html = html.replace(new RegExp('\\n', 'g'), '<br>');
+                // Convert remaining single newlines to br tags
+                html = html.replace(/\n/g, '<br>');
                 
                 // Headers: ## Header -> <h2>Header</h2>
                 var h3Pattern = new RegExp('<p>### (.+?)</p>', 'g');
