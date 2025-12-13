@@ -1585,6 +1585,13 @@
                         
                         const message = messageText.trim();
                         
+                        // CRITICAL: Check if message is duplicate (avoid duplicate user messages)
+                        const lastMessage = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1] : null;
+                        if (lastMessage && lastMessage.role === 'user' && lastMessage.content === message) {
+                            console.log('StillMe Chat: Duplicate user message from parent detected, skipping push');
+                            return; // Don't process duplicate
+                        }
+                        
                         // Show processing status immediately (both iframe and parent)
                         const statusDiv = document.getElementById('stillme-chat-status');
                         if (statusDiv) {
@@ -1860,12 +1867,19 @@
                     }
                 }
                 
-                // Add user message to history
-                chatHistory.push({ role: 'user', content: message });
-                renderMessages();
+                // CRITICAL: Check if message is duplicate (avoid duplicate user messages)
+                const lastMessage = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1] : null;
+                if (lastMessage && lastMessage.role === 'user' && lastMessage.content === message) {
+                    console.log('StillMe Chat: Duplicate user message detected, skipping push');
+                } else {
+                    // Add user message to history
+                    chatHistory.push({ role: 'user', content: message });
+                    renderMessages();
+                }
                 
                 // Clear input
                 input.value = '';
+                input.dataset.sending = 'false'; // Reset sending flag
                 
                     // Send to backend
                     try {
@@ -2024,6 +2038,12 @@
                     
                 } catch (error) {
                     console.error('StillMe Chat Error:', error);
+                    
+                    // CRITICAL: Reset sending flag on error
+                    const input = document.getElementById('stillme-chat-input');
+                    if (input) {
+                        input.dataset.sending = 'false';
+                    }
                     
                     // Show error in status
                     const statusDiv = document.getElementById('stillme-chat-status');
