@@ -352,6 +352,8 @@
                 display: block !important; /* CRITICAL: Ensure p tags are block elements for line breaks */
                 line-height: 1.6 !important; /* Better line height for readability */
                 white-space: normal !important; /* CRITICAL: Allow line breaks inside p tags */
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
             }
             
             .stillme-chat-message.assistant br {
