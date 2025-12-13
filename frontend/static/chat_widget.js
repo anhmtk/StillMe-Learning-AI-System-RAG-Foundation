@@ -276,6 +276,7 @@
                 // If it does, don't process markdown - just return as-is
                 if (html.includes('<p>') || html.includes('<br>') || html.includes('<div>')) {
                     // Already HTML formatted, return as-is (but ensure proper spacing)
+                    console.log('StillMe Chat: markdownToHtml - response already has HTML tags, returning as-is');
                     return html;
                 }
                 
@@ -283,6 +284,10 @@
                 // Normalize line endings (handle Windows \r\n and old Mac \r)
                 html = html.replace(/\r\n/g, '\n');
                 html = html.replace(/\r/g, '\n');
+                
+                // Check if text has newlines (plain text with line breaks)
+                const hasNewlines = html.includes('\n');
+                console.log('StillMe Chat: markdownToHtml - processing markdown, hasNewlines:', hasNewlines, 'length:', html.length);
                 
                 // Convert double newlines to p tags, single newlines to br tags
                 html = html.replace(/\n\n+/g, '</p><p>');
@@ -373,7 +378,9 @@
                     // CRITICAL: Use innerHTML with markdown conversion for assistant messages
                     // This preserves line breaks and renders markdown (**, ##, -, tables)
                     if (msg.role === 'assistant') {
-                        messageDiv.innerHTML = markdownToHtml(msg.content);
+                        const convertedHtml = markdownToHtml(msg.content);
+                        console.log('StillMe Chat: Rendering assistant message', index, 'original length:', msg.content ? msg.content.length : 0, 'converted length:', convertedHtml ? convertedHtml.length : 0);
+                        messageDiv.innerHTML = convertedHtml;
                     } else {
                         // User messages: plain text (escape HTML for security)
                         messageDiv.textContent = msg.content;
@@ -1620,7 +1627,15 @@
                             }
                         }
                         
+                        // CRITICAL: Check if message is duplicate (avoid duplicate user messages)
+                        const lastMessage = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1] : null;
+                        if (lastMessage && lastMessage.role === 'user' && lastMessage.content === message) {
+                            console.log('StillMe Chat: Duplicate user message from parent detected, skipping push');
+                            return; // Don't process duplicate
+                        }
+                        
                         // Add user message to history
+                        console.log('StillMe Chat: sendMessageFromParent - pushing user message to chatHistory');
                         chatHistory.push({ role: 'user', content: message });
                         renderMessages();
                         
@@ -1882,9 +1897,11 @@
                 // CRITICAL: Check if message is duplicate (avoid duplicate user messages)
                 const lastMessage = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1] : null;
                 if (lastMessage && lastMessage.role === 'user' && lastMessage.content === message) {
-                    console.log('StillMe Chat: Duplicate user message detected, skipping push');
+                    console.log('StillMe Chat: Duplicate user message detected in sendMessage(), skipping push');
+                    console.log('StillMe Chat: Last message:', lastMessage);
                 } else {
                     // Add user message to history
+                    console.log('StillMe Chat: sendMessage() - pushing user message to chatHistory');
                     chatHistory.push({ role: 'user', content: message });
                     renderMessages();
                 }
