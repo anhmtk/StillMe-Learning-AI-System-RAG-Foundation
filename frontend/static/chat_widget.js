@@ -292,9 +292,10 @@
                 console.log('StillMe Chat: markdownToHtml - processing markdown, hasNewlines:', hasNewlines, 'newlineCount:', newlineCount, 'length:', html.length);
                 
                 // Convert double newlines to p tags, single newlines to br tags
+                // CRITICAL: First convert double newlines to paragraph breaks
                 html = html.replace(/\n\n+/g, '</p><p>');
                 html = '<p>' + html + '</p>';
-                // Convert remaining single newlines to br tags
+                // Convert remaining single newlines to br tags (but preserve them inside p tags)
                 html = html.replace(/\n/g, '<br>');
                 
                 console.log('StillMe Chat: markdownToHtml - output length:', html.length, 'preview:', html.substring(0, 150));
