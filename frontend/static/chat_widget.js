@@ -655,6 +655,17 @@
                                             
                                             #stillme-chat-panel-parent .stillme-chat-message.assistant p {
                                                 margin: 8px 0 !important;
+                                                display: block !important; /* CRITICAL: Ensure p tags are block elements for line breaks */
+                                                line-height: 1.6 !important; /* Better line height for readability */
+                                            }
+                                            
+                                            /* CRITICAL: Ensure first and last p tags have proper spacing */
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant p:first-child {
+                                                margin-top: 0 !important;
+                                            }
+                                            
+                                            #stillme-chat-panel-parent .stillme-chat-message.assistant p:last-child {
+                                                margin-bottom: 0 !important;
                                             }
                                             
                                             #stillme-chat-panel-parent .stillme-chat-message.assistant h2 {
