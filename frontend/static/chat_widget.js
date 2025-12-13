@@ -1631,13 +1631,6 @@
                             }
                         }
                         
-                        // CRITICAL: Check if message is duplicate (avoid duplicate user messages)
-                        const lastMessage = chatHistory.length > 0 ? chatHistory[chatHistory.length - 1] : null;
-                        if (lastMessage && lastMessage.role === 'user' && lastMessage.content === message) {
-                            console.log('StillMe Chat: Duplicate user message from parent detected, skipping push');
-                            return; // Don't process duplicate
-                        }
-                        
                         // Add user message to history
                         console.log('StillMe Chat: sendMessageFromParent - pushing user message to chatHistory, message:', message.substring(0, 50));
                         chatHistory.push({ role: 'user', content: message });
