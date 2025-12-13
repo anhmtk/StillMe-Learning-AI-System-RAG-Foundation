@@ -1832,6 +1832,13 @@
                 
                 if (!message) return;
                 
+                // CRITICAL: Prevent duplicate sends - check if message is already being processed
+                if (input.dataset.sending === 'true') {
+                    console.log('StillMe Chat: Message already being sent, ignoring duplicate');
+                    return;
+                }
+                input.dataset.sending = 'true';
+                
                 // Disable send button
                 const sendBtn = document.getElementById('stillme-chat-send');
                 sendBtn.disabled = true;
