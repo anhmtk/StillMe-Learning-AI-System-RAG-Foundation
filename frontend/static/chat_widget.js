@@ -1635,25 +1635,12 @@
                         }
                         
                         // Add user message to history
-                        console.log('StillMe Chat: sendMessageFromParent - pushing user message to chatHistory');
+                        console.log('StillMe Chat: sendMessageFromParent - pushing user message to chatHistory, message:', message.substring(0, 50));
                         chatHistory.push({ role: 'user', content: message });
                         renderMessages();
                         
-                        // Update parent panel with user message
-                        if (window.parent && window.parent !== window) {
-                            const parentDoc = window.parent.document;
-                            const parentPanel = parentDoc.getElementById('stillme-chat-panel-parent');
-                            if (parentPanel) {
-                                const parentMessages = parentPanel.querySelector('#stillme-chat-messages');
-                                if (parentMessages) {
-                                    const userMsg = parentDoc.createElement('div');
-                                    userMsg.className = 'stillme-chat-message user';
-                                    userMsg.textContent = message;
-                                    parentMessages.appendChild(userMsg);
-                                    parentMessages.scrollTop = parentMessages.scrollHeight;
-                                }
-                            }
-                        }
+                        // CRITICAL: Don't update parent panel here - renderMessages() will handle it
+                        // This prevents duplicate messages in parent panel
                         
                         // Disable send button in iframe
                         const sendBtn = document.getElementById('stillme-chat-send');
