@@ -1,11 +1,16 @@
 """
 Citation Formatter for StillMe
 Provides human-readable citation formats instead of [1], [2]
+
+MANIFESTO ALIGNMENT: Uses Knowledge Taxonomy for meaningful citations
+Based on StillMe Manifesto Principle 3: "NO ILLUSIONS" PRINCIPLE
 """
 
 import re
 import logging
 from typing import List, Dict, Any, Optional
+
+from backend.utils.knowledge_taxonomy import get_knowledge_taxonomy, KnowledgeType
 
 logger = logging.getLogger(__name__)
 
@@ -177,14 +182,18 @@ class CitationFormatter:
         """
         Get citation strategy based on question, context, and similarity scores
         
+        MANIFESTO ALIGNMENT: Uses Knowledge Taxonomy for meaningful citations
+        Based on StillMe Manifesto Principle 3: "NO ILLUSIONS" PRINCIPLE
+        
         PHASE 1 FIX: Implement citation hierarchy with 4 levels based on similarity and metadata
-        This ensures citations trace to actual sources, not default to [general knowledge]
+        KNOWLEDGE TAXONOMY: Now uses taxonomy to classify knowledge types for better transparency
         
         Hierarchy:
-        1. High similarity (>0.8) + metadata → [Document Title, Source, Date]
-        2. Medium similarity (>0.5) + metadata → [Information from {Source} documents]
-        3. Low similarity (>0.3) + metadata → [Background knowledge informed by retrieved context]
-        4. No similarity or no metadata → [General knowledge] + "I don't have specific sources"
+        1. High similarity (>=0.8) + metadata → [Document Title, Source, Date]
+        2. Medium similarity (>=0.5) → [Information from {Source} documents]
+        3. Low similarity (>=0.3) → [Background knowledge informed by retrieved context]
+        4. Very low similarity (<0.3) → [general knowledge] with transparency disclaimer
+        5. No context → [general knowledge] (No relevant sources found)
         
         Args:
             question: User question
@@ -194,9 +203,17 @@ class CitationFormatter:
         Returns:
             Human-readable citation string
         """
+        # MANIFESTO ALIGNMENT: Use Knowledge Taxonomy for meaningful classification
+        taxonomy = get_knowledge_taxonomy()
+        
         if not context_docs:
             # No context - use base knowledge citation with transparency
-            return "[general knowledge] (I don't have specific sources for this information)"
+            knowledge_type, _ = taxonomy.classify_knowledge(
+                context_quality=0.0,
+                source_specificity=0.0,
+                has_context=False
+            )
+            return taxonomy.get_citation_for_knowledge_type(knowledge_type)
         
         # Analyze source types from context
         source_types = self.analyze_source_types(context_docs)
@@ -222,6 +239,46 @@ class CitationFormatter:
                 if doc_similarity > max_similarity:
                     max_similarity = doc_similarity
                     best_doc = doc
+        
+        # Extract metadata for taxonomy classification
+        has_metadata = False
+        document_title = None
+        source_name = None
+        document_date = None
+        
+        if best_doc:
+            if isinstance(best_doc, dict):
+                metadata = best_doc.get('metadata', {})
+                if not metadata and 'metadata' not in best_doc:
+                    metadata = best_doc  # Doc itself might be metadata dict
+            elif hasattr(best_doc, 'metadata'):
+                metadata = best_doc.metadata if isinstance(best_doc.metadata, dict) else {}
+            else:
+                metadata = {}
+            
+            document_title = metadata.get('title', '') or metadata.get('document_title', '')
+            source_name = metadata.get('source', '') or metadata.get('source_name', '')
+            document_date = metadata.get('date', '') or metadata.get('published_date', '') or metadata.get('timestamp', '')
+            
+            # Clean up values
+            document_title = str(document_title).strip() if document_title else None
+            source_name = str(source_name).strip() if source_name else None
+            document_date = str(document_date).strip() if document_date else None
+            
+            has_metadata = bool(document_title and source_name)
+        
+        # Classify knowledge type using taxonomy
+        source_specificity = 0.8 if has_metadata else 0.0
+        knowledge_type, _ = taxonomy.classify_knowledge(
+            context_quality=max_similarity,
+            source_specificity=source_specificity,
+            has_context=True,
+            max_similarity=max_similarity,
+            has_metadata=has_metadata
+        )
+        
+        # Get citation from taxonomy (but keep backward compatibility with existing logic)
+        # Use taxonomy for classification, but use existing logic for formatting to maintain consistency
         
         # Hierarchy 1: High similarity (>=0.8) + specific source metadata
         if max_similarity >= 0.8 and best_doc:
