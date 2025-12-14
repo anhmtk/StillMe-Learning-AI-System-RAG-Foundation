@@ -74,12 +74,38 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\bindex\b",  # "index"
         r"\bquery\b",  # "query"
         r"\bsearch\b",  # "search"
+        # Computer Science / Computing Terms
+        r"\bquantum\b",  # "quantum" (quantum computing, quantum physics)
+        r"\bcomputing\b",  # "computing"
+        r"\bcomputer\b",  # "computer"
+        r"\bprogramming\b",  # "programming"
+        r"\balgorithm\b",  # "algorithm"
+        r"\bsoftware\b",  # "software"
+        r"\bhardware\b",  # "hardware"
+        r"\bnetwork\b",  # "network"
+        r"\bprotocol\b",  # "protocol"
+        r"\bencryption\b",  # "encryption"
+        r"\bcryptography\b",  # "cryptography"
+        r"\bblockchain\b",  # "blockchain"
+        r"\bmachine\s+learning\b",  # "machine learning"
+        r"\bdeep\s+learning\b",  # "deep learning"
+        r"\bneural\s+network\b",  # "neural network"
         # Vietnamese technical terms
         r"\bvectơ\b",  # "vectơ"
         r"\bnhúng\b",  # "nhúng" (embedding)
         r"\btruy\s+vấn\b",  # "truy vấn" (query)
         r"\btìm\s+kiếm\b",  # "tìm kiếm" (search)
         r"\bcơ\s+sở\s+dữ\s+liệu\b",  # "cơ sở dữ liệu" (database)
+        r"\bđiện\s+toán\b",  # "điện toán" (computing)
+        r"\bthuật\s+toán\b",  # "thuật toán" (algorithm)
+        r"\blập\s+trình\b",  # "lập trình" (programming)
+        r"\bphần\s+mềm\b",  # "phần mềm" (software)
+        r"\bphần\s+cứng\b",  # "phần cứng" (hardware)
+        r"\bmạng\b",  # "mạng" (network)
+        r"\bmã\s+hóa\b",  # "mã hóa" (encryption)
+        r"\bmáy\s+học\b",  # "máy học" (machine learning)
+        r"\bhọc\s+sâu\b",  # "học sâu" (deep learning)
+        r"\bmạng\s+neural\b",  # "mạng neural" (neural network)
         # Pipeline/Process Terms - CRITICAL: Prevent technical pipeline questions from being routed to philosophy
         r"\bquy\s+trình\b",  # "quy trình" (process/pipeline)
         r"\bcơ\s+chế\s+hoạt\s+động\b",  # "cơ chế hoạt động" (mechanism/how it works)
@@ -150,6 +176,18 @@ def classify_philosophical_intent(text: str) -> QuestionType:
         r"\bframework\b",  # "framework"
         r"\bhypothesis\b",  # "hypothesis"
         r"\bgiả\s+thuyết\b",  # "giả thuyết"
+        # Science/Technology patterns - CRITICAL: Exclude scientific/technical questions
+        r"\bkhoa\s+học\b",  # "khoa học" (science)
+        r"\bscience\b",  # "science"
+        r"\bscientific\b",  # "scientific"
+        r"\btechnology\b",  # "technology"
+        r"\bcông\s+nghệ\b",  # "công nghệ" (technology)
+        r"\bgiải\s+thích\b",  # "giải thích" (explain) - often used for scientific/technical questions
+        r"\bexplain\b",  # "explain"
+        r"\bdescribe\b",  # "describe"
+        r"\bdefine\b",  # "define"
+        r"\bđịnh\s+nghĩa\b",  # "định nghĩa" (define)
+        r"\bmô\s+tả\b",  # "mô tả" (describe)
         # Author/researcher patterns
         r"\bdr\.\b",  # "Dr."
         r"\bdoctor\b",  # "doctor"
