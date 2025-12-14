@@ -307,10 +307,24 @@
                 html = html.replace(h2Pattern, '<h2>$1</h2>');
                 
                 // Bold: **text** -> <strong>text</strong>
-                // CRITICAL: In Python f-string, \\\\* becomes \\* in JavaScript string, which becomes \* in regex
-                // Need 4 backslashes in Python f-string to get 2 backslashes in JS string, which becomes 1 backslash in regex
-                var boldPattern = new RegExp('\\\\*\\\\*([^*]+?)\\\\*\\\\*', 'g');
-                html = html.replace(boldPattern, '<strong>$1</strong>');
+                // CRITICAL FIX: Use regex literal to avoid escaping issues
+                // CRITICAL: Only match **text** that is NOT inside HTML tags
+                // Use negative lookahead/lookbehind to avoid matching inside tags
+                var boldPattern = /\*\*([^*]+?)\*\*/g;
+                // CRITICAL: Only replace if not inside HTML tags (check context)
+                html = html.replace(boldPattern, function(match, text, offset) {
+                    // Check if we're inside an HTML tag (between < and >)
+                    const beforeMatch = html.substring(Math.max(0, offset - 50), offset);
+                    const afterMatch = html.substring(offset + match.length, Math.min(html.length, offset + match.length + 50));
+                    // If we're inside a tag, don't replace
+                    if (beforeMatch.includes('<') && !beforeMatch.includes('>')) {
+                        return match; // Don't replace, return original
+                    }
+                    if (afterMatch.includes('>') && !afterMatch.includes('<')) {
+                        return match; // Don't replace, return original
+                    }
+                    return '<strong>' + text + '</strong>';
+                });
                 
                 // Links: [text](url) -> <a href="url">text</a>
                 // CRITICAL FIX: Use regex literal instead of RegExp constructor with escaped string
