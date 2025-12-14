@@ -639,8 +639,10 @@
                                                 padding: 10px 14px !important;
                                                 border-radius: 6px !important;
                                                 max-width: 80%;
-                                                word-wrap: break-word;
+                                                word-wrap: break-word !important;
+                                                overflow-wrap: break-word !important;
                                                 line-height: 1.5 !important;
+                                                white-space: normal !important; /* CRITICAL: Allow line breaks */
                                             }
                                             #stillme-chat-panel-parent .stillme-chat-message.user {
                                                 background: #0e639c !important;
