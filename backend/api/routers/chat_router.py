@@ -2757,6 +2757,41 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     # Build empty context docs for validation
                     ctx_docs = []
                     
+                    # Build minimal prompt for OpenAI fallback (if needed)
+                    # CRITICAL: OpenAI fallback needs a prompt to answer, not empty string
+                    from backend.identity.philosophy_lite import PHILOSOPHY_LITE_SYSTEM_PROMPT
+                    from backend.api.utils.chat_helpers import build_system_prompt_with_language
+                    from backend.core.language_detector import get_language_name
+                    
+                    # Build system prompt with language
+                    system_prompt = build_system_prompt_with_language(
+                        detected_lang=detected_lang,
+                        is_philosophical=True,
+                        is_stillme_query=is_stillme_query
+                    )
+                    
+                    # Build minimal prompt for OpenAI fallback
+                    lang_name = get_language_name(detected_lang)
+                    fallback_prompt = f"""⚠️⚠️⚠️ LANGUAGE REQUIREMENT ⚠️⚠️⚠️
+
+The user's question is in {lang_name.upper()}. 
+
+YOU MUST respond in {lang_name.upper()} ONLY.
+
+{system_prompt}
+
+🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
+
+User Question: {chat_request.message}
+
+**YOUR PRIMARY TASK IS TO ANSWER THE USER QUESTION ABOVE DIRECTLY AND ACCURATELY.**
+- Focus on what the user is actually asking
+- Provide a helpful, accurate answer
+- Use your base knowledge if needed
+- Be transparent about sources
+
+Remember: RESPOND IN {lang_name.upper()} ONLY."""
+                    
                     # Call validation chain with is_philosophical=True
                     # This will relax citation requirements but still check ethics, language, identity, confidence
                     validation_response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, validated_ctx_docs = await _handle_validation_with_fallback(
@@ -2766,7 +2801,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         is_philosophical=True,  # Relax citation requirements for philosophical questions
                         is_religion_roleplay=False,
                         chat_request=chat_request,
-                        enhanced_prompt="",  # Not used for philosophical questions
+                        enhanced_prompt=fallback_prompt,  # CRITICAL: Provide prompt for OpenAI fallback
                         context_text="",  # Not used for philosophical questions
                         citation_instruction="",  # Not used for philosophical questions
                         num_knowledge=0,
