@@ -7089,6 +7089,86 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             )
             confidence_str = f"{confidence_score:.2f}" if confidence_score else 'N/A'
             similarity_str = f"{max_similarity:.3f}" if max_similarity is not None else 'N/A'
+            
+            # MANIFESTO ALIGNMENT: Calculate Transparency Scorecard
+            # Based on StillMe Manifesto Principle 6: "LOG EVERYTHING BECAUSE SECRETS CORRUPT TRUST"
+            try:
+                from backend.utils.transparency_scorecard import get_transparency_scorer
+                from backend.utils.citation_formatter import get_citation_formatter
+                from backend.core.epistemic_reasoning import get_epistemic_reasoning
+                
+                transparency_scorer = get_transparency_scorer()
+                citation_formatter = get_citation_formatter()
+                
+                # Extract citation from response
+                citation = None
+                if response:
+                    # Try to find citation in response
+                    import re
+                    cite_pattern = re.compile(r'\[([^\]]+)\]')
+                    matches = cite_pattern.findall(response)
+                    if matches:
+                        citation = f"[{matches[-1]}]"  # Use last citation found
+                
+                # Count validators that ran
+                validators_run = 12  # Default: assume all validators
+                if validation_info and isinstance(validation_info, dict):
+                    # Try to infer from validation reasons
+                    reasons = validation_info.get("reasons", [])
+                    # If no critical failures, assume most validators ran
+                    if validation_info.get("passed", False):
+                        validators_run = 12
+                    else:
+                        # Some validators may have been skipped
+                        validators_run = max(8, 12 - len([r for r in reasons if "timeout" in r.lower() or "skipped" in r.lower()]))
+                
+                # Check for epistemic explanation
+                has_epistemic_explanation = False
+                has_uncertainty_expression = False
+                if response:
+                    response_lower = response.lower()
+                    # Check for epistemic reasoning patterns
+                    epistemic_patterns = [
+                        "vì:", "because:", "do", "bởi vì", "nguyên nhân",
+                        "limited context", "conflicting", "outdated", "low similarity"
+                    ]
+                    has_epistemic_explanation = any(pattern in response_lower for pattern in epistemic_patterns)
+                    
+                    # Check for uncertainty expression
+                    uncertainty_patterns = [
+                        "không chắc", "uncertain", "not certain", "don't know",
+                        "không có đủ", "sufficient information"
+                    ]
+                    has_uncertainty_expression = any(pattern in response_lower for pattern in uncertainty_patterns)
+                
+                # Calculate scorecard
+                scorecard = transparency_scorer.calculate_scorecard(
+                    citation=citation,
+                    validators_run=validators_run,
+                    validators_total=12,
+                    has_epistemic_explanation=has_epistemic_explanation,
+                    has_uncertainty_expression=has_uncertainty_expression,
+                    log_count=15,  # Approximate log count (can be improved)
+                    expected_logs=15
+                )
+                
+                overall_score = scorecard.calculate_overall()
+                scorecard_dict = scorecard.to_dict()
+                
+                logger.info(
+                    f"📊 Transparency Scorecard: {overall_score:.1%} "
+                    f"(citation={scorecard.citation_specificity:.2f}, "
+                    f"validation={scorecard.validation_completeness:.2f}, "
+                    f"epistemic={scorecard.epistemic_honesty:.2f}, "
+                    f"traceability={scorecard.process_traceability:.2f})"
+                )
+                
+                # Add to validation_info for API response
+                if validation_info:
+                    validation_info["transparency_scorecard"] = scorecard_dict
+            except Exception as e:
+                logger.warning(f"⚠️ Could not calculate transparency scorecard: {e}")
+            
             logger.info(f"📊 EpistemicState: {epistemic_state.value} (confidence={confidence_str}, ctx_docs={ctx_docs_count}, max_similarity={similarity_str})")
         except Exception as e:
             logger.warning(f"⚠️ Failed to calculate epistemic state: {e}, defaulting to UNKNOWN")

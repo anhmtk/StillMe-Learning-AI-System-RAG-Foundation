@@ -125,7 +125,7 @@ class ConfidenceValidator:
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None, 
             avg_similarity: Optional[float] = None, is_philosophical: bool = False,
             is_religion_roleplay: bool = False, previous_reasons: Optional[List[str]] = None,
-            user_question: Optional[str] = None) -> ValidationResult:
+            user_question: Optional[str] = None, context: Optional[Dict[str, Any]] = None) -> ValidationResult:
         """
         Check if answer appropriately expresses uncertainty
         
@@ -281,24 +281,61 @@ class ConfidenceValidator:
                         logger.warning(f"Could not get citation formatter for uncertainty template: {e}, using [1]")
                         citation_text = " [1]"  # Fallback to numeric if formatter fails
                 
-                uncertainty_templates = {
-                    'vi': "Mình không có đủ thông tin để trả lời chính xác câu hỏi này. Ngữ cảnh được tìm thấy có độ liên quan thấp với câu hỏi của bạn." + citation_text,
-                    'fr': "Je n'ai pas suffisamment d'informations pour répondre avec précision à cette question. Le contexte récupéré a une faible pertinence par rapport à votre question." + citation_text,
-                    'de': "Ich habe nicht genügend Informationen, um diese Frage genau zu beantworten. Der abgerufene Kontext hat eine geringe Relevanz für Ihre Frage." + citation_text,
-                    'es': "No tengo suficiente información para responder con precisión a esta pregunta. El contexto recuperado tiene poca relevancia para su pregunta." + citation_text,
-                    'ar': "ليس لدي معلومات كافية للإجابة على هذا السؤال بدقة. السياق المسترجع له صلة منخفضة بسؤالك." + citation_text,
-                    'ru': "У меня недостаточно информации, чтобы точно ответить на этот вопрос. Извлеченный контекст имеет низкую релевантность к вашему вопросу." + citation_text,
-                    'zh': "我没有足够的信息来准确回答这个问题。检索到的上下文与您的问题相关性较低。" + citation_text,
-                    'ja': "この質問に正確に答えるための十分な情報がありません。取得されたコンテキストは、あなたの質問との関連性が低いです。" + citation_text,
-                    'ko': "이 질문에 정확하게 답하기에 충분한 정보가 없습니다. 검색된 컨텍스트는 귀하의 질문과 관련성이 낮습니다." + citation_text,
-                    'pt': "Não tenho informações suficientes para responder com precisão a esta pergunta. O contexto recuperado tem baixa relevância para sua pergunta." + citation_text,
-                    'it': "Non ho informazioni sufficienti per rispondere con precisione a questa domanda. Il contesto recuperato ha una bassa rilevanza per la tua domanda." + citation_text,
-                    'hi': "मेरे पास इस प्रश्न का सटीक उत्तर देने के लिए पर्याप्त जानकारी नहीं है। पुनर्प्राप्त संदर्भ का आपके प्रश्न से कम प्रासंगिकता है।" + citation_text,
-                    'th': "ฉันไม่มีข้อมูลเพียงพอที่จะตอบคำถามนี้อย่างแม่นยำ บริบทที่ดึงมามีความเกี่ยวข้องต่ำกับคำถามของคุณ" + citation_text,
-                }
-                
-                uncertainty_template = uncertainty_templates.get(detected_lang_from_answer, 
-                    "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question." + citation_text)
+                # MANIFESTO ALIGNMENT: Use Epistemic Reasoning to explain WHY uncertain
+                # Based on StillMe Manifesto Principle 5: "EMBRACE 'I DON'T KNOW' AS INTELLECTUAL HONESTY"
+                # Not just "I don't know" but "I don't know BECAUSE..."
+                try:
+                    from backend.core.epistemic_reasoning import get_epistemic_reasoning
+                    epistemic_reasoning = get_epistemic_reasoning()
+                    
+                    # Extract max_similarity from context if available
+                    max_similarity = None
+                    if context and isinstance(context, dict):
+                        knowledge_docs = context.get("knowledge_docs", [])
+                        if knowledge_docs:
+                            similarities = []
+                            for doc in knowledge_docs:
+                                if isinstance(doc, dict):
+                                    sim = doc.get('similarity', 0.0)
+                                    if isinstance(sim, (int, float)):
+                                        similarities.append(sim)
+                            if similarities:
+                                max_similarity = max(similarities)
+                    
+                    # Get epistemic explanation
+                    epistemic_explanation = epistemic_reasoning.get_epistemic_explanation(
+                        context_quality=avg_similarity,
+                        max_similarity=max_similarity,
+                        confidence_score=None,  # Not available in this context
+                        has_context=has_context,
+                        has_validation_warnings=False,  # Not available in this context
+                        conflicting_sources=False,  # Not available in this context
+                        detected_lang=detected_lang_from_answer
+                    )
+                    
+                    # Use epistemic explanation as uncertainty template
+                    uncertainty_template = epistemic_explanation + citation_text
+                    logger.debug(f"Using epistemic reasoning for uncertainty: {epistemic_explanation}")
+                except Exception as e:
+                    logger.warning(f"Could not use epistemic reasoning, falling back to template: {e}")
+                    # Fallback to original templates
+                    uncertainty_templates = {
+                        'vi': "Mình không có đủ thông tin để trả lời chính xác câu hỏi này. Ngữ cảnh được tìm thấy có độ liên quan thấp với câu hỏi của bạn." + citation_text,
+                        'fr': "Je n'ai pas suffisamment d'informations pour répondre avec précision à cette question. Le contexte récupéré a une faible pertinence par rapport à votre question." + citation_text,
+                        'de': "Ich habe nicht genügend Informationen, um diese Frage genau zu beantworten. Der abgerufene Kontext hat eine geringe Relevanz für Ihre Frage." + citation_text,
+                        'es': "No tengo suficiente información para responder con precisión a esta pregunta. El contexto recuperado tiene poca relevancia para su pregunta." + citation_text,
+                        'ar': "ليس لدي معلومات كافية للإجابة على هذا السؤال بدقة. السياق المسترجع له صلة منخفضة بسؤالك." + citation_text,
+                        'ru': "У меня недостаточно информации, чтобы точно ответить на этот вопрос. Извлеченный контекст имеет низкую релевантность к вашему вопросу." + citation_text,
+                        'zh': "我没有足够的信息来准确回答这个问题。检索到的上下文与您的问题相关性较低。" + citation_text,
+                        'ja': "この質問に正確に答えるための十分な情報がありません。取得されたコンテキストは、あなたの質問との関連性が低いです。" + citation_text,
+                        'ko': "이 질문에 정확하게 답하기에 충분한 정보가 없습니다. 검색된 컨텍스트는 귀하의 질문과 관련성이 낮습니다." + citation_text,
+                        'pt': "Não tenho informações suficientes para responder com precisão a esta pergunta. O contexto recuperado tem baixa relevância para sua pergunta." + citation_text,
+                        'it': "Non ho informazioni sufficienti per rispondere con precisione a questa domanda. Il contesto recuperato ha una bassa rilevanza per la tua domanda." + citation_text,
+                        'hi': "मेरे पास इस प्रश्न का सटीक उत्तर देने के लिए पर्याप्त जानकारी नहीं है। पुनर्प्राप्त संदर्भ का आपके प्रश्न से कम प्रासंगिकता है।" + citation_text,
+                        'th': "ฉันไม่มีข้อมูลเพียงพอที่จะตอบคำถามนี้อย่างแม่นยำ บริบทที่ดึงมามีความเกี่ยวข้องต่ำกับคำถามของคุณ" + citation_text,
+                    }
+                    uncertainty_template = uncertainty_templates.get(detected_lang_from_answer, 
+                        "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question." + citation_text)
                 # Prepend uncertainty to answer
                 patched_answer = f"{uncertainty_template}\n\n{answer}"
                 logger.warning("⚠️ Forced uncertainty expression due to low context quality")
