@@ -143,52 +143,40 @@ class StepValidator:
                 chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
                 return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold) for step in steps]
             
-            # Build batch validation prompt
-            context_summary = " ".join(ctx_docs[:3])[:500] if ctx_docs else "No context available"
+            # PHASE 2 FIX: Optimize batch validation prompt to reduce complexity and latency
+            # Strategy: Simplify prompt, reduce context, use concise format
+            # This reduces LLM processing time and prevents timeout
             
-            steps_text = "\n\n".join([
-                f"**Step {step.step_number}:**\n{step.content}"
+            # Truncate context more aggressively (was 500, now 300 chars)
+            context_summary = " ".join(ctx_docs[:2])[:300] if ctx_docs else "No context"
+            
+            # Simplify steps text - remove markdown formatting for faster processing
+            steps_text = "\n".join([
+                f"Step {step.step_number}: {step.content[:200]}"  # Truncate each step to 200 chars
                 for step in steps
             ])
             
-            batch_prompt = f"""You are validating {len(steps)} steps from a multi-step response. Validate each step for:
+            # PHASE 2 FIX: Simplified, more efficient prompt
+            batch_prompt = f"""Validate {len(steps)} steps. For each step, return JSON with:
+- has_citation: true/false (required if context exists)
+- evidence_overlap: 0.0-1.0 (threshold: {adaptive_evidence_threshold:.3f})
+- confidence: 0.0-1.0
+- passed: true if has_citation AND confidence>=0.5
+- issues: [] (add "missing_citation" if no citation with context, "low_overlap" if overlap<{adaptive_evidence_threshold:.3f}, "low_confidence" if confidence<0.5)
 
-1. **Citation**: Does the step have citations (e.g., [1], [2])? (Required if context is available)
-2. **Evidence Overlap**: Does the step content overlap with the provided context? (Threshold: {adaptive_evidence_threshold:.3f})
-3. **Confidence**: How confident is the step? (0.0-1.0)
+Context: {context_summary}
 
-**Context (for reference):**
-{context_summary}
-
-**Steps to Validate:**
+Steps:
 {steps_text}
 
-**Output Format (JSON only, no other text):**
-{{
-    "step_1": {{
-        "has_citation": true/false,
-        "citation_count": 0,
-        "evidence_overlap": 0.0-1.0,
-        "confidence": 0.0-1.0,
-        "passed": true/false,
-        "issues": ["issue1", "issue2"]
-    }},
-    "step_2": {{...}},
-    ...
-}}
-
-**Validation Rules:**
-- If context is available and step has no citation → "missing_citation" issue, passed=false
-- If evidence_overlap < {adaptive_evidence_threshold:.3f} → "low_overlap" issue (warning, not failure)
-- If confidence < 0.5 → "low_confidence" issue
-- passed=true only if: has_citation (when context available) AND confidence >= 0.5
-
-Return ONLY valid JSON, no markdown code blocks."""
+Return JSON only:
+{{"step_1": {{"has_citation": bool, "evidence_overlap": float, "confidence": float, "passed": bool, "issues": []}}, "step_2": {{...}}}}"""
 
             # Call LLM API
             start_time = time.time()
-            # P1: Reduce timeout from 10s to 3s for faster fallback
-            with httpx.Client(timeout=3.0) as client:
+            # PHASE 2 FIX: Increase timeout to 5s (optimized prompt should be faster, but give more buffer)
+            # If still timeout, we'll fallback to lightweight chain
+            with httpx.Client(timeout=5.0) as client:
                 response = client.post(
                     f"{api_base}/v1/chat/completions",
                     headers={
@@ -202,7 +190,7 @@ Return ONLY valid JSON, no markdown code blocks."""
                             {"role": "user", "content": batch_prompt}
                         ],
                         "temperature": 0.0,  # Deterministic
-                        "max_tokens": 2000
+                        "max_tokens": 1500  # PHASE 2 FIX: Reduce max_tokens (simplified prompt needs less)
                     }
                 )
                 
