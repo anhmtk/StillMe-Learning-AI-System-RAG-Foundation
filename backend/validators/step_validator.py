@@ -60,7 +60,7 @@ class StepValidator:
         self.use_batch = use_batch
         logger.info(f"StepValidator initialized (confidence_threshold={confidence_threshold}, use_lightweight={use_lightweight}, use_batch={use_batch})")
     
-    def _create_lightweight_chain(self, ctx_docs: List[str], adaptive_citation_overlap: float = 0.1, adaptive_evidence_threshold: float = 0.01) -> ValidatorChain:
+    def _create_lightweight_chain(self, ctx_docs: List[str], adaptive_citation_overlap: float = 0.1, adaptive_evidence_threshold: float = 0.01, context: Optional[Dict[str, Any]] = None) -> ValidatorChain:
         """
         Create lightweight validation chain for step validation
         
@@ -108,7 +108,8 @@ class StepValidator:
         steps: List[Step],
         ctx_docs: List[str],
         adaptive_citation_overlap: float = 0.1,
-        adaptive_evidence_threshold: float = 0.01
+        adaptive_evidence_threshold: float = 0.01,
+        context: Optional[Dict[str, Any]] = None  # TRUST-EFFICIENT: Pass context for similarity scores
     ) -> List[StepValidationResult]:
         """
         P1.1.b: Validate all steps in a single LLM call (batch validation)
@@ -202,14 +203,14 @@ Return JSON only:
                 
                 if response.status_code != 200:
                     logger.warning(f"Batch validation LLM API error: {response.status_code}, falling back to lightweight chain")
-                    chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
-                    return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold) for step in steps]
+                    chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
+                    return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold, context=context) for step in steps]
                 
                 data = response.json()
                 if "choices" not in data or len(data["choices"]) == 0:
                     logger.warning("Batch validation LLM API returned unexpected format, falling back to lightweight chain")
-                    chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
-                    return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold) for step in steps]
+                    chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
+                    return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold, context=context) for step in steps]
                 
                 result_text = data["choices"][0]["message"]["content"].strip()
                 elapsed = time.time() - start_time
@@ -282,13 +283,13 @@ Return JSON only:
                     
                 except json.JSONDecodeError as e:
                     logger.warning(f"Failed to parse batch validation JSON: {result_text[:200]}, error: {e}, falling back to lightweight chain")
-                    chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
-                    return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold) for step in steps]
+                    chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
+                    return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold, context=context) for step in steps]
         
         except Exception as e:
             logger.warning(f"Batch validation failed: {e}, falling back to lightweight chain")
-            chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
-            return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold) for step in steps]
+            chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
+            return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold, context=context) for step in steps]
     
     def _calculate_step_confidence(
         self,
@@ -365,7 +366,8 @@ Return JSON only:
         ctx_docs: List[str],
         chain: Optional[ValidatorChain] = None,
         adaptive_citation_overlap: float = 0.1,
-        adaptive_evidence_threshold: float = 0.01
+        adaptive_evidence_threshold: float = 0.01,
+        context: Optional[Dict[str, Any]] = None  # TRUST-EFFICIENT: Pass context for similarity scores
     ) -> StepValidationResult:
         """
         Validate a single step
@@ -386,12 +388,13 @@ Return JSON only:
         """
         # P1.1: Use lightweight chain if enabled and no chain provided
         if self.use_lightweight and chain is None:
-            chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
+            chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
         elif chain is None:
             raise ValueError("chain must be provided if use_lightweight=False")
         
         # Run validation on step content
-        validation_result = chain.run(step.content, ctx_docs)
+        # TRUST-EFFICIENT: Pass context to chain.run() so CitationRequired can extract similarity scores
+        validation_result = chain.run(step.content, ctx_docs, context=context)
         
         # Calculate confidence
         confidence = self._calculate_step_confidence(step, validation_result, ctx_docs)
@@ -418,7 +421,8 @@ Return JSON only:
         chain: Optional[ValidatorChain] = None,
         parallel: bool = True,
         adaptive_citation_overlap: float = 0.1,
-        adaptive_evidence_threshold: float = 0.01
+        adaptive_evidence_threshold: float = 0.01,
+        context: Optional[Dict[str, Any]] = None  # TRUST-EFFICIENT: Pass context for similarity scores
     ) -> List[StepValidationResult]:
         """
         Validate all steps (can run in parallel for speed or use batch validation)
@@ -443,11 +447,11 @@ Return JSON only:
         # P1.1.b: Use batch validation if enabled (1 LLM call for all steps)
         if self.use_batch:
             logger.info(f"P1.1.b: Using batch validation (1 LLM call) for {len(steps)} steps")
-            return self._validate_steps_batch(steps, ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
+            return self._validate_steps_batch(steps, ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
         
         # P1.1: Create lightweight chain once if needed (shared across all steps)
         if self.use_lightweight and chain is None:
-            chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
+            chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
             logger.info(f"P1.1: Using lightweight chain ({len(chain.validators)} validators) for {len(steps)} steps")
         elif chain is None:
             raise ValueError("chain must be provided if use_lightweight=False")
@@ -459,7 +463,7 @@ Return JSON only:
             logger.debug(f"Running {len(steps)} step validations in parallel (lightweight chain)...")
             with ThreadPoolExecutor(max_workers=min(len(steps), 5)) as executor:
                 futures = {
-                    executor.submit(self.validate_step, step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold): step
+                    executor.submit(self.validate_step, step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold, context=context): step
                     for step in steps
                 }
                 

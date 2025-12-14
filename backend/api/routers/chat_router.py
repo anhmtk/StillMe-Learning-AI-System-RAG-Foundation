@@ -1508,14 +1508,16 @@ async def _handle_validation_with_fallback(
                         use_batch=True  # P1.1.b: Batch validation (1 LLM call for all steps)
                     )
                     logger.debug(f"🔍 Validating {len(steps)} steps with threshold {step_confidence_threshold} (P1.1.b: batch validation)")
-                    # Pass None for chain to use lightweight chain, and pass adaptive thresholds
+                    # TRUST-EFFICIENT: Pass context dict to step validation for similarity scores
+                    # This ensures citation hierarchy works correctly in step validation
                     step_results = step_validator.validate_all_steps(
                         steps, 
                         ctx_docs, 
                         chain=None,  # Use lightweight chain instead of full chain
                         parallel=True,
                         adaptive_citation_overlap=adaptive_citation_overlap,
-                        adaptive_evidence_threshold=adaptive_evidence_threshold
+                        adaptive_evidence_threshold=adaptive_evidence_threshold,
+                        context=context  # TRUST-EFFICIENT: Pass context for similarity scores
                     )
                     logger.debug(f"🔍 Step validation completed: {len(step_results)} results")
                     
