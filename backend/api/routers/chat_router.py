@@ -3256,10 +3256,37 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
         enable_validators = os.getenv("ENABLE_VALIDATORS", "true").lower() == "true"
         enable_tone_align = os.getenv("ENABLE_TONE_ALIGN", "true").lower() == "true"
         
-        # CRITICAL: Log context status to trace why RAG path might not be entered
-        logger.info(f"🔍 [TRACE] Context check: context={context is not None}, total_context_docs={context.get('total_context_docs', 0) if context else 0}, knowledge_docs={len(context.get('knowledge_docs', [])) if context else 0}, conversation_docs={len(context.get('conversation_docs', [])) if context else 0}")
+        # TRUST-EFFICIENT: Check context relevance (max_similarity) before entering RAG path
+        max_similarity = None
+        if context and isinstance(context, dict):
+            knowledge_docs = context.get("knowledge_docs", [])
+            if knowledge_docs:
+                similarity_scores = []
+                for doc in knowledge_docs:
+                    if isinstance(doc, dict):
+                        similarity_scores.append(doc.get('similarity', 0.0))
+                    elif hasattr(doc, 'similarity'):
+                        similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                    else:
+                        similarity_scores.append(0.0)
+                if similarity_scores:
+                    max_similarity = max(similarity_scores)
         
+        # CRITICAL: Log context status to trace why RAG path might not be entered
+        similarity_str = f", max_similarity={max_similarity:.3f}" if max_similarity is not None else ""
+        logger.info(f"🔍 [TRACE] Context check: context={context is not None}, total_context_docs={context.get('total_context_docs', 0) if context else 0}, knowledge_docs={len(context.get('knowledge_docs', [])) if context else 0}, conversation_docs={len(context.get('conversation_docs', [])) if context else 0}{similarity_str}")
+        
+        # TRUST-EFFICIENT: Only enter RAG path if context is relevant (max_similarity >= 0.1)
+        # If max_similarity < 0.1, context is not relevant → treat as no context
+        has_relevant_context = False
         if context and context["total_context_docs"] > 0:
+            if max_similarity is not None and max_similarity < 0.1:
+                logger.warning(f"⚠️ Context available but max_similarity={max_similarity:.3f} < 0.1 - treating as no relevant context")
+                has_relevant_context = False
+            else:
+                has_relevant_context = True
+        
+        if has_relevant_context:
             # Use context to enhance response
             logger.info(f"🔍 [TRACE] Entering RAG path: total_context_docs={context['total_context_docs']}, knowledge_docs={len(context.get('knowledge_docs', []))}, conversation_docs={len(context.get('conversation_docs', []))}")
             # Build context with token limits (3000 tokens max to leave room for system prompt and user message)
@@ -7032,8 +7059,22 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         try:
             # Extract context_docs_count from context or validation_info
             ctx_docs_count = 0
+            max_similarity = None  # TRUST-EFFICIENT: Extract max_similarity for accurate epistemic state
             if context and isinstance(context, dict):
                 ctx_docs_count = context.get("total_context_docs", 0)
+                # Extract max_similarity from knowledge_docs
+                knowledge_docs = context.get("knowledge_docs", [])
+                if knowledge_docs:
+                    similarity_scores = []
+                    for doc in knowledge_docs:
+                        if isinstance(doc, dict):
+                            similarity_scores.append(doc.get('similarity', 0.0))
+                        elif hasattr(doc, 'similarity'):
+                            similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                        else:
+                            similarity_scores.append(0.0)
+                    if similarity_scores:
+                        max_similarity = max(similarity_scores)
             elif validation_info and isinstance(validation_info, dict):
                 ctx_docs_count = validation_info.get("context_docs_count", 0)
             
@@ -7041,10 +7082,12 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 validation_info=validation_info,
                 confidence_score=confidence_score,
                 response_text=response,
-                context_docs_count=ctx_docs_count
+                context_docs_count=ctx_docs_count,
+                max_similarity=max_similarity  # TRUST-EFFICIENT: Pass similarity for accurate state
             )
             confidence_str = f"{confidence_score:.2f}" if confidence_score else 'N/A'
-            logger.info(f"📊 EpistemicState: {epistemic_state.value} (confidence={confidence_str}, ctx_docs={ctx_docs_count})")
+            similarity_str = f"{max_similarity:.3f}" if max_similarity is not None else 'N/A'
+            logger.info(f"📊 EpistemicState: {epistemic_state.value} (confidence={confidence_str}, ctx_docs={ctx_docs_count}, max_similarity={similarity_str})")
         except Exception as e:
             logger.warning(f"⚠️ Failed to calculate epistemic state: {e}, defaulting to UNKNOWN")
             epistemic_state = EpistemicState.UNKNOWN

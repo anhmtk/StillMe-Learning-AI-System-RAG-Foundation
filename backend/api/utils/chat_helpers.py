@@ -6,9 +6,14 @@ Shared utilities for chat endpoints (language detection, AI response generation)
 import os
 import logging
 import httpx
+import hashlib
 from typing import Optional, AsyncIterator
+from functools import lru_cache
 
 logger = logging.getLogger(__name__)
+
+# TRUST-EFFICIENT: Cache for language detection (max 128 entries)
+_lang_cache = {}
 
 
 def detect_language(text: str, is_user_query: bool = True) -> str:
@@ -61,7 +66,20 @@ def detect_language(text: str, is_user_query: bool = True) -> str:
         )
         has_vietnamese_keywords = has_long_keywords or has_short_keywords
     
-    # OPTIMIZATION: Try langdetect FIRST for better accuracy, especially for mixed-language text
+    # TRUST-EFFICIENT: Check Vietnamese keywords FIRST (fast, no API call)
+    # If Vietnamese keywords found, skip langdetect (saves 0.8s+)
+    if is_user_query and has_vietnamese_keywords:
+        logger.debug("🌐 Vietnamese keywords detected - skipping langdetect (fast path)")
+        return 'vi'
+    
+    # TRUST-EFFICIENT: Cache language detection results (hash-based)
+    text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+    if text_hash in _lang_cache:
+        cached_lang = _lang_cache[text_hash]
+        logger.debug(f"🌐 Language cache HIT: {cached_lang}")
+        return cached_lang
+    
+    # OPTIMIZATION: Try langdetect for better accuracy, especially for mixed-language text
     # Then check for explicit language requests (which override detection)
     detected_lang = None
     
@@ -101,6 +119,15 @@ def detect_language(text: str, is_user_query: bool = True) -> str:
         if has_vietnamese_keywords and detected_lang != 'vi':
             logger.info(f"🌐 Vietnamese keywords detected in user query, overriding langdetect result: {detected_lang} -> vi")
             detected_lang = 'vi'
+        
+        # TRUST-EFFICIENT: Cache result before explicit language check
+        if detected_lang:
+            _lang_cache[text_hash] = detected_lang
+            # Limit cache size to 128 entries (LRU eviction)
+            if len(_lang_cache) > 128:
+                # Remove oldest entry (simple FIFO, could use OrderedDict for true LRU)
+                oldest_key = next(iter(_lang_cache))
+                del _lang_cache[oldest_key]
             
     except ImportError:
         # langdetect not available - will use rule-based detection
@@ -136,6 +163,11 @@ def detect_language(text: str, is_user_query: bool = True) -> str:
     for lang_code, patterns in explicit_language_patterns.items():
         if any(pattern in text_lower for pattern in patterns):
             logger.info(f"🌐 Explicit language request detected: {lang_code} (overriding detection: {detected_lang})")
+            # TRUST-EFFICIENT: Cache explicit language request
+            _lang_cache[text_hash] = lang_code
+            if len(_lang_cache) > 128:
+                oldest_key = next(iter(_lang_cache))
+                del _lang_cache[oldest_key]
             return lang_code
     
     # If explicit request found, return it; otherwise use detected language
@@ -144,8 +176,15 @@ def detect_language(text: str, is_user_query: bool = True) -> str:
         # Override if Vietnamese keywords found (double-check, only for user queries)
         if has_vietnamese_keywords and detected_lang != 'vi':
             logger.info(f"🌐 Vietnamese keywords detected in user query, overriding detected_lang: {detected_lang} -> vi")
-            return 'vi'
-        return detected_lang
+            final_lang = 'vi'
+        else:
+            final_lang = detected_lang
+        # TRUST-EFFICIENT: Cache result
+        _lang_cache[text_hash] = final_lang
+        if len(_lang_cache) > 128:
+            oldest_key = next(iter(_lang_cache))
+            del _lang_cache[oldest_key]
+        return final_lang
     
     # Fallback to rule-based detection if langdetect failed
     text_lower = text.lower()

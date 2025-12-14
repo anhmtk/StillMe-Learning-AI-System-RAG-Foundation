@@ -27,7 +27,8 @@ def calculate_epistemic_state(
     validation_info: Optional[Dict[str, Any]] = None,
     confidence_score: Optional[float] = None,
     response_text: Optional[str] = None,
-    context_docs_count: int = 0
+    context_docs_count: int = 0,
+    max_similarity: Optional[float] = None  # TRUST-EFFICIENT: Add similarity for accurate state
 ) -> EpistemicState:
     """
     Calculate epistemic state based on validation results, confidence, and context
@@ -95,6 +96,11 @@ def calculate_epistemic_state(
     # UNKNOWN: Fallback triggered or no context
     if used_fallback or is_fallback_message:
         logger.debug(f"EpistemicState: UNKNOWN (used_fallback={used_fallback}, is_fallback_message={is_fallback_message})")
+        return EpistemicState.UNKNOWN
+    
+    # TRUST-EFFICIENT FIX: If max_similarity < 0.1, context is not relevant → UNKNOWN
+    if max_similarity is not None and max_similarity < 0.1 and ctx_docs_count > 0:
+        logger.debug(f"EpistemicState: UNKNOWN (ctx_docs={ctx_docs_count} but max_similarity={max_similarity:.3f} < 0.1 - context not relevant)")
         return EpistemicState.UNKNOWN
     
     if ctx_docs_count == 0:
