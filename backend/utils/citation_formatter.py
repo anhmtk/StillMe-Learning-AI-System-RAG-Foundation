@@ -172,30 +172,139 @@ class CitationFormatter:
         
         return False
     
-    def get_citation_strategy(self, question: str, context_docs: List[Any]) -> str:
+    def get_citation_strategy(self, question: str, context_docs: List[Any], 
+                             similarity_scores: Optional[List[float]] = None) -> str:
         """
-        Get citation strategy based on question and context
+        Get citation strategy based on question, context, and similarity scores
+        
+        PHASE 1 FIX: Implement citation hierarchy with 4 levels based on similarity and metadata
+        This ensures citations trace to actual sources, not default to [general knowledge]
+        
+        Hierarchy:
+        1. High similarity (>0.8) + metadata → [Document Title, Source, Date]
+        2. Medium similarity (>0.5) + metadata → [Information from {Source} documents]
+        3. Low similarity (>0.3) + metadata → [Background knowledge informed by retrieved context]
+        4. No similarity or no metadata → [General knowledge] + "I don't have specific sources"
         
         Args:
             question: User question
             context_docs: List of context documents
+            similarity_scores: Optional list of similarity scores for each context doc
             
         Returns:
             Human-readable citation string
         """
-        # 1. Analyze source types from context
+        if not context_docs:
+            # No context - use base knowledge citation with transparency
+            return "[general knowledge] (I don't have specific sources for this information)"
+        
+        # Analyze source types from context
         source_types = self.analyze_source_types(context_docs)
         
-        # 2. If we have context, use research citation
-        if source_types:
-            return self.format_citation(source_types, question)
+        # Extract similarity scores if available
+        if similarity_scores and len(similarity_scores) == len(context_docs):
+            max_similarity = max(similarity_scores)
+            max_similarity_idx = similarity_scores.index(max_similarity)
+            best_doc = context_docs[max_similarity_idx]
+        else:
+            # If no similarity scores, try to extract from doc metadata
+            max_similarity = 0.0
+            best_doc = context_docs[0] if context_docs else None
+            # Try to get similarity from doc metadata
+            for i, doc in enumerate(context_docs):
+                if isinstance(doc, dict):
+                    doc_similarity = doc.get('similarity', 0.0)
+                elif hasattr(doc, 'similarity'):
+                    doc_similarity = doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0
+                else:
+                    doc_similarity = 0.0
+                
+                if doc_similarity > max_similarity:
+                    max_similarity = doc_similarity
+                    best_doc = doc
         
-        # 3. If no context but base knowledge question, use general knowledge citation
-        if self.is_base_knowledge_question(question):
-            return CITATION_FORMATS["base_knowledge"]
+        # Hierarchy 1: High similarity (>0.8) + specific source metadata
+        if max_similarity > 0.8 and best_doc:
+            # Extract document metadata
+            if isinstance(best_doc, dict):
+                metadata = best_doc.get('metadata', {})
+                if not metadata and 'metadata' not in best_doc:
+                    metadata = best_doc  # Doc itself might be metadata dict
+            elif hasattr(best_doc, 'metadata'):
+                metadata = best_doc.metadata if isinstance(best_doc.metadata, dict) else {}
+            else:
+                metadata = {}
+            
+            title = metadata.get('title', '') or metadata.get('document_title', '')
+            source = metadata.get('source', '') or metadata.get('source_name', '')
+            date = metadata.get('date', '') or metadata.get('published_date', '') or metadata.get('timestamp', '')
+            
+            # Clean up values
+            title = str(title).strip() if title else ''
+            source = str(source).strip() if source else ''
+            date = str(date).strip() if date else ''
+            
+            # If we have title and source, use specific citation
+            if title and source:
+                if date:
+                    return f"[{title}, {source}, {date}]"
+                else:
+                    return f"[{title}, {source}]"
+            # If we have source type but not specific metadata, use source type
+            elif source_types:
+                primary_source = self._get_primary_source_name(source_types)
+                return f"[Information from {primary_source}]"
         
-        # 4. Default to general knowledge
-        return CITATION_FORMATS["base_knowledge"]
+        # Hierarchy 2: Medium similarity (>0.5) + source type
+        elif max_similarity > 0.5 and source_types:
+            primary_source = self._get_primary_source_name(source_types)
+            return f"[Information from {primary_source} documents]"
+        
+        # Hierarchy 3: Low similarity (>0.3) but has context
+        elif max_similarity > 0.3:
+            if source_types:
+                primary_source = self._get_primary_source_name(source_types)
+                return f"[Background knowledge informed by {primary_source} context]"
+            else:
+                return "[Background knowledge informed by retrieved context]"
+        
+        # Hierarchy 4: No meaningful context or very low similarity
+        else:
+            # If we have source types but low similarity, still acknowledge context
+            if source_types:
+                primary_source = self._get_primary_source_name(source_types)
+                return f"[general knowledge] (Context from {primary_source} was reviewed but had low relevance)"
+            else:
+                return "[general knowledge] (I don't have specific sources for this information)"
+    
+    def _get_primary_source_name(self, source_types: List[str]) -> str:
+        """
+        Get primary source name from source types list
+        
+        Args:
+            source_types: List of source types (e.g., ['wikipedia', 'arxiv', 'rss:CNN'])
+            
+        Returns:
+            Primary source name (human-readable)
+        """
+        if not source_types:
+            return "retrieved"
+        
+        # Priority order: Wikipedia > arXiv > RSS > others
+        if 'wikipedia' in source_types:
+            return "Wikipedia"
+        elif 'arxiv' in source_types:
+            return "arXiv"
+        elif any(st.startswith('rss:') for st in source_types):
+            rss_source = next((st.split(':', 1)[1] for st in source_types if st.startswith('rss:')), 'RSS feed')
+            return rss_source
+        elif 'foundational' in source_types:
+            return "foundational knowledge"
+        elif 'verified' in source_types:
+            return "verified sources"
+        else:
+            # Return first source type, capitalized
+            return source_types[0].replace('_', ' ').title()
     
     def replace_numeric_citations(self, text: str, citation: str) -> str:
         """

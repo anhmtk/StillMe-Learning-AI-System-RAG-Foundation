@@ -406,11 +406,35 @@ class CitationRequired:
             has_numeric_only = bool(CITE_RE.search(answer)) and not bool(HUMAN_READABLE_CITE_RE.search(answer))
             
             if has_numeric_only and self.citation_formatter:
-                # Replace numeric citations with human-readable format
-                citation = self.citation_formatter.get_citation_strategy(user_question, ctx_docs)
+                # PHASE 1 FIX: Extract similarity scores from context for citation hierarchy
+                similarity_scores = None
+                if context and isinstance(context, dict):
+                    knowledge_docs = context.get("knowledge_docs", [])
+                    if knowledge_docs:
+                        similarity_scores = []
+                        for doc in knowledge_docs:
+                            if isinstance(doc, dict):
+                                similarity_scores.append(doc.get('similarity', 0.0))
+                            elif hasattr(doc, 'similarity'):
+                                similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                            else:
+                                similarity_scores.append(0.0)
+                
+                if not similarity_scores and ctx_docs:
+                    similarity_scores = []
+                    for doc in ctx_docs:
+                        if isinstance(doc, dict):
+                            similarity_scores.append(doc.get('similarity', 0.0))
+                        elif hasattr(doc, 'similarity'):
+                            similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                        else:
+                            similarity_scores.append(0.0)
+                
+                # Replace numeric citations with human-readable format using citation hierarchy
+                citation = self.citation_formatter.get_citation_strategy(user_question, ctx_docs, similarity_scores=similarity_scores)
                 # Replace all numeric citations [1], [2], [3] with human-readable citation
                 patched_answer = self.citation_formatter.replace_numeric_citations(answer, citation)
-                logger.info(f"Converted numeric citations to human-readable format: '{citation}'")
+                logger.info(f"Converted numeric citations to human-readable format: '{citation}' (max_similarity={max(similarity_scores) if similarity_scores else 0.0:.3f})")
                 return ValidationResult(
                     passed=True,  # Still passed, but we improved the citation format
                     reasons=["converted_numeric_to_human_readable"],
@@ -590,9 +614,36 @@ class CitationRequired:
         
         # Use citation formatter if available (but override with foundational knowledge citation if detected)
         if self.citation_formatter and not has_foundational_knowledge:
-            citation = self.citation_formatter.get_citation_strategy(user_question, ctx_docs)
+            # PHASE 1 FIX: Extract similarity scores from context or ctx_docs
+            similarity_scores = None
+            if context and isinstance(context, dict):
+                # Try to get similarity scores from context dict
+                knowledge_docs = context.get("knowledge_docs", [])
+                if knowledge_docs:
+                    similarity_scores = []
+                    for doc in knowledge_docs:
+                        if isinstance(doc, dict):
+                            similarity_scores.append(doc.get('similarity', 0.0))
+                        elif hasattr(doc, 'similarity'):
+                            similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                        else:
+                            similarity_scores.append(0.0)
+            
+            # If no similarity scores from context, try to extract from ctx_docs
+            if not similarity_scores and ctx_docs:
+                similarity_scores = []
+                for doc in ctx_docs:
+                    if isinstance(doc, dict):
+                        similarity_scores.append(doc.get('similarity', 0.0))
+                    elif hasattr(doc, 'similarity'):
+                        similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                    else:
+                        similarity_scores.append(0.0)
+            
+            # PHASE 1 FIX: Pass similarity scores to get_citation_strategy for citation hierarchy
+            citation = self.citation_formatter.get_citation_strategy(user_question, ctx_docs, similarity_scores=similarity_scores)
             patched = self.citation_formatter.add_citation_to_response(answer, citation)
-            logger.info(f"Auto-added human-readable citation '{citation}' to response (context docs: {len(ctx_docs)})")
+            logger.info(f"Auto-added human-readable citation '{citation}' to response (context docs: {len(ctx_docs)}, max_similarity={max(similarity_scores) if similarity_scores else 0.0:.3f})")
             return patched
         elif has_foundational_knowledge:
             # Use specific foundational knowledge citation
