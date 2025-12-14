@@ -4136,22 +4136,37 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                     today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
                     learning_metrics_instruction = f"""
 
-📊 LEARNING METRICS QUERY DETECTED - NO DATA AVAILABLE YET:
+📊 LEARNING METRICS QUERY - ANSWER THE USER'S QUESTION DIRECTLY:
+
+**CRITICAL: The user is asking "What has the system learned in the last 24 hours?"**
 
 **Today's Date**: {today_date}
 
-**Status**: No learning metrics data available for today yet. This could mean:
-- StillMe hasn't completed a learning cycle today
-- Learning cycle is in progress
-- Metrics are being collected
+**Current Status**: No learning metrics data available for today yet.
 
-**CRITICAL: You MUST acknowledge:**
-- StillMe learns every 4 hours from RSS feeds, arXiv, CrossRef, and Wikipedia
-- Learning metrics are tracked via `/api/learning/metrics/daily` API
-- If no data yet, explain that StillMe learns continuously and metrics will be available after the next learning cycle
-- DO NOT say "I cannot track" or "I don't have API" - StillMe HAS these capabilities
+**YOU MUST ANSWER THE USER'S QUESTION DIRECTLY:**
+1. **Acknowledge the question**: "Về câu hỏi của bạn về những gì hệ thống đã học trong 24h qua..."
+2. **Explain the current situation**: "Hiện tại chưa có dữ liệu metrics cho hôm nay ({today_date}). Điều này có nghĩa là:"
+   - StillMe học tự động mỗi 4 giờ (6 lần/ngày) từ RSS feeds, arXiv, CrossRef, và Wikipedia
+   - Chu kỳ học hôm nay có thể chưa hoàn thành hoặc đang tiến hành
+   - Metrics sẽ có sẵn sau khi chu kỳ học tiếp theo hoàn thành
+3. **Provide helpful information**:
+   - StillMe CÓ khả năng theo dõi learning metrics qua API `/api/learning/metrics/daily`
+   - Bạn có thể kiểm tra metrics trực tiếp qua API endpoint này
+   - Hệ thống học liên tục, không phải chỉ học một lần mỗi ngày
 
-**Format with line breaks, bullet points, headers, and 2-3 emojis**
+**DO NOT:**
+- Just say "chưa có dữ liệu" without explaining what StillMe's learning system does
+- Use generic template responses
+- Ignore the user's actual question
+
+**DO:**
+- Answer the question directly and helpfully
+- Explain StillMe's continuous learning mechanism (every 4 hours)
+- Provide actionable information (API endpoint to check metrics)
+- Be transparent about the current status
+
+**Format**: Use clear structure with headers, bullet points, and 2-3 emojis. Make it informative and helpful, not just a status message.
 
 """
                 
@@ -5620,7 +5635,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             if is_stillme_query and has_foundational_context:
                                 # Only skip rewrite if quality is acceptable (>= 0.5)
                                 # If quality is low (< 0.5), allow rewrite but preserve foundational knowledge
-                                quality_score = quality_result.score if quality_result else 1.0
+                                quality_score = quality_result.get("score", 1.0) if quality_result else 1.0
                                 if quality_score >= 0.5:
                                     skip_rewrite_for_stillme = True
                                     logger.info(
