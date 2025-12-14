@@ -223,8 +223,8 @@ class CitationFormatter:
                     max_similarity = doc_similarity
                     best_doc = doc
         
-        # Hierarchy 1: High similarity (>0.8) + specific source metadata
-        if max_similarity > 0.8 and best_doc:
+        # Hierarchy 1: High similarity (>=0.8) + specific source metadata
+        if max_similarity >= 0.8 and best_doc:
             # Extract document metadata
             if isinstance(best_doc, dict):
                 metadata = best_doc.get('metadata', {})
@@ -253,15 +253,19 @@ class CitationFormatter:
             # If we have source type but not specific metadata, use source type
             elif source_types:
                 primary_source = self._get_primary_source_name(source_types)
-                return f"[Information from {primary_source}]"
+                return f"[Information from {primary_source} documents]"
+            # If no metadata at all, fallback to Level 2 or 3
+            else:
+                # No metadata, but high similarity - use generic high similarity citation
+                return "[Information from retrieved documents]"
         
-        # Hierarchy 2: Medium similarity (>0.5) + source type
-        elif max_similarity > 0.5 and source_types:
+        # Hierarchy 2: Medium similarity (>=0.5) + source type
+        elif max_similarity >= 0.5 and source_types:
             primary_source = self._get_primary_source_name(source_types)
             return f"[Information from {primary_source} documents]"
         
-        # Hierarchy 3: Low similarity (>0.3) but has context
-        elif max_similarity > 0.3:
+        # Hierarchy 3: Low similarity (>=0.3) but has context
+        elif max_similarity >= 0.3:
             if source_types:
                 primary_source = self._get_primary_source_name(source_types)
                 return f"[Background knowledge informed by {primary_source} context]"
