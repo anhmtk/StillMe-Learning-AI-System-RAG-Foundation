@@ -489,7 +489,7 @@ Return JSON only:
             # Sequential validation
             for step in steps:
                 try:
-                    result = self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold)
+                    result = self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
                     results.append(result)
                 except Exception as e:
                     logger.error(f"Error validating step {step.step_number}: {e}")
