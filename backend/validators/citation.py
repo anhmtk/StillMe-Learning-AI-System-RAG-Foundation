@@ -620,18 +620,24 @@ class CitationRequired:
         
         # Use citation formatter if available (but override with foundational knowledge citation if detected)
         if self.citation_formatter and not has_foundational_knowledge:
-            # PHASE 1 FIX: Extract similarity scores from context or ctx_docs
+            # TRUST-EFFICIENT FIX: Extract similarity scores from context or ctx_docs
+            # CRITICAL: In step validation, ctx_docs is List[str] (text), but context["knowledge_docs"] has similarity
             similarity_scores = None
+            max_similarity = 0.0
             if context and isinstance(context, dict):
-                # Try to get similarity scores from context dict
+                # Try to get similarity scores from context dict (preferred - has actual similarity)
                 knowledge_docs = context.get("knowledge_docs", [])
                 if knowledge_docs:
                     similarity_scores = []
                     for doc in knowledge_docs:
                         if isinstance(doc, dict):
-                            similarity_scores.append(doc.get('similarity', 0.0))
+                            sim = doc.get('similarity', 0.0)
+                            similarity_scores.append(sim)
+                            max_similarity = max(max_similarity, sim)
                         elif hasattr(doc, 'similarity'):
-                            similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                            sim = doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0
+                            similarity_scores.append(sim)
+                            max_similarity = max(max_similarity, sim)
                         else:
                             similarity_scores.append(0.0)
             
@@ -640,16 +646,22 @@ class CitationRequired:
                 similarity_scores = []
                 for doc in ctx_docs:
                     if isinstance(doc, dict):
-                        similarity_scores.append(doc.get('similarity', 0.0))
+                        sim = doc.get('similarity', 0.0)
+                        similarity_scores.append(sim)
+                        max_similarity = max(max_similarity, sim)
                     elif hasattr(doc, 'similarity'):
-                        similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                        sim = doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0
+                        similarity_scores.append(sim)
+                        max_similarity = max(max_similarity, sim)
                     else:
                         similarity_scores.append(0.0)
             
-            # PHASE 1 FIX: Pass similarity scores to get_citation_strategy for citation hierarchy
+            # TRUST-EFFICIENT FIX: Pass similarity scores to get_citation_strategy for citation hierarchy
+            # Note: ctx_docs might be List[str] (text) in step validation, but similarity_scores from context["knowledge_docs"]
+            # This is OK - get_citation_strategy only needs similarity_scores for hierarchy, not ctx_docs content
             citation = self.citation_formatter.get_citation_strategy(user_question, ctx_docs, similarity_scores=similarity_scores)
             patched = self.citation_formatter.add_citation_to_response(answer, citation)
-            logger.info(f"Auto-added human-readable citation '{citation}' to response (context docs: {len(ctx_docs)}, max_similarity={max(similarity_scores) if similarity_scores else 0.0:.3f})")
+            logger.info(f"Auto-added human-readable citation '{citation}' to response (context docs: {len(ctx_docs)}, max_similarity={max_similarity:.3f})")
             return patched
         elif has_foundational_knowledge:
             # Use specific foundational knowledge citation

@@ -231,6 +231,11 @@ def calculate_epistemic_state(
             logger.debug(f"EpistemicState: UNCERTAIN (high similarity={max_similarity:.3f} but confidence={conf_score:.2f if conf_score else 'N/A'})")
             return EpistemicState.UNCERTAIN
     
+    # TRUST-EFFICIENT FIX: If max_similarity >= 0.3 (medium similarity), we have some context → should be UNCERTAIN, not UNKNOWN
+    if max_similarity is not None and 0.3 <= max_similarity < 0.5 and ctx_docs_count > 0:
+        logger.debug(f"EpistemicState: UNCERTAIN (medium similarity={max_similarity:.3f}, has context but not highly relevant)")
+        return EpistemicState.UNCERTAIN
+    
     # Default: UNKNOWN if we can't determine
     logger.debug(f"EpistemicState: UNKNOWN (default - couldn't determine from available info)")
     return EpistemicState.UNKNOWN
