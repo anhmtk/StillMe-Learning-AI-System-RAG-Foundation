@@ -270,9 +270,10 @@ class CitationFormatter:
                 primary_source = self._get_primary_source_name(source_types)
                 return f"[Background knowledge informed by {primary_source} context]"
             else:
+                # CRITICAL FIX: Even without source_types, if similarity >= 0.3, acknowledge context
                 return "[Background knowledge informed by retrieved context]"
         
-        # Hierarchy 4: No meaningful context or very low similarity
+        # Hierarchy 4: No meaningful context or very low similarity (<0.3)
         else:
             # If we have source types but low similarity, still acknowledge context
             if source_types:

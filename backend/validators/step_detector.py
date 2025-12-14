@@ -42,10 +42,13 @@ class StepDetector:
             return False
         
         # Quick pattern matching for common step indicators
+        # PHASE 2 FIX: Add more patterns to detect numbered lists with dashes/bullets
         step_indicators = [
             r"Bước\s+\d+",      # Vietnamese: "Bước 1", "Bước 2"
             r"Step\s+\d+",      # English: "Step 1", "Step 2"
             r"(?:^|\n)\s*\d+\.\s+",  # Numbered: "1.", "2." (at start of line or after newline)
+            r"(?:^|\n)\s*-\s+.*?:\s*",  # Bullet with colon: "- Tính Chính Xác:", "- Tính Tốc Độ:"
+            r"(?:^|\n)\s*\*\*.*?\*\*:\s*",  # Bold header with colon: "**Tính Chính Xác:**"
         ]
         
         for pattern in step_indicators:
