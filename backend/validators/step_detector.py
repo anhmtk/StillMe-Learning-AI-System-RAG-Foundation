@@ -129,6 +129,29 @@ class StepDetector:
             if len(numbered_steps) >= 2:
                 steps.extend(numbered_steps)
         
+        # Pattern 4: Bullet points with bold headers "- **Header:**" or "- Header:"
+        # PHASE 2 FIX: Add support for bullet + bold format
+        if len(steps) == 0:
+            # Pattern: "- **Header:**" or "- Header:" followed by content
+            pattern_bullet = r"(?:^|\n)\s*-\s+(?:\*\*)?([^:]+?)(?:\*\*)?:\s*(.+?)(?=\n\s*-|$)"
+            matches_bullet = re.finditer(pattern_bullet, response, re.MULTILINE | re.DOTALL)
+            bullet_steps = []
+            step_num = 1
+            for match in matches_bullet:
+                header = match.group(1).strip()
+                content = match.group(2).strip()
+                bullet_steps.append(Step(
+                    step_number=step_num,
+                    content=f"{header}: {content}",
+                    original_text=match.group(0).strip(),
+                    start_pos=match.start(),
+                    end_pos=match.end()
+                ))
+                step_num += 1
+            # Use bullet steps if we found at least 2
+            if len(bullet_steps) >= 2:
+                steps.extend(bullet_steps)
+        
         # Remove duplicates (same step number) - keep first occurrence
         seen_numbers = set()
         unique_steps = []

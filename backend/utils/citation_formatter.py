@@ -260,9 +260,13 @@ class CitationFormatter:
                 return "[Information from retrieved documents]"
         
         # Hierarchy 2: Medium similarity (>=0.5) + source type
-        elif max_similarity >= 0.5 and source_types:
-            primary_source = self._get_primary_source_name(source_types)
-            return f"[Information from {primary_source} documents]"
+        elif max_similarity >= 0.5:
+            if source_types:
+                primary_source = self._get_primary_source_name(source_types)
+                return f"[Information from {primary_source} documents]"
+            else:
+                # CRITICAL FIX: Even without source_types, if similarity >= 0.5, use Level 2 format
+                return "[Information from retrieved documents]"
         
         # Hierarchy 3: Low similarity (>=0.3) but has context
         elif max_similarity >= 0.3:

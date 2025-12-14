@@ -2777,11 +2777,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         return mapping.get(lang_code, lang_code)
                     
                     # Build system prompt with language
-                    system_prompt = build_system_prompt_with_language(
-                        detected_lang=detected_lang,
-                        is_philosophical=True,
-                        is_stillme_query=is_stillme_query
-                    )
+                    # FIX: build_system_prompt_with_language only accepts detected_lang
+                    system_prompt = build_system_prompt_with_language(detected_lang=detected_lang)
                     
                     # Build minimal prompt for OpenAI fallback
                     lang_name = get_language_name(detected_lang)
