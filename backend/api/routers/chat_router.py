@@ -4839,8 +4839,9 @@ Context: {context_text}
                         for doc in context.get("knowledge_docs", [])
                     )
                     if has_foundational:
-                        # P3: Cache with knowledge version (will auto-invalidate when knowledge updates)
-                        logger.info("💾 P3: Caching StillMe query with foundational knowledge (knowledge version included in cache key)")
+                        # PHASE 3: Cache with knowledge version (will auto-invalidate when knowledge updates)
+                        # Use default TTL (1h) for foundational knowledge queries
+                        logger.info("💾 PHASE 3: Caching StillMe query with foundational knowledge (knowledge version included in cache key)")
             
             raw_response = None
             cache_hit = False
@@ -4877,11 +4878,15 @@ Context: {context_text}
                         else:
                             raw_response = cached_raw_response
                             cache_hit = True
-                            logger.info(f"✅ LLM cache HIT (saved {cached_response.get('latency', 0):.2f}s)")
+                            # PHASE 3: Transparent caching - log clearly about cache hit
+                            saved_time = cached_response.get('latency', 0)
+                            logger.info(f"✅ Cache hit for similar query, skipped LLM call (saved {saved_time:.2f}s)")
                             logger.info(f"🔍 [TRACE] Cached response: length={len(raw_response)}, preview={raw_response[:200]}")
                             processing_steps.append("⚡ Response from cache (fast!)")
                             llm_inference_latency = cached_response.get("latency", 0.01)
                             timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s (cached)"
+                            # PHASE 3: Note that validation will still run (transparency)
+                            logger.debug("💡 PHASE 3: Validation chain will still run on cached response for quality assurance")
                     else:
                         # Cache contains invalid response (None/empty) - ignore cache and call LLM
                         logger.warning(f"⚠️ Cache contains invalid response (None/empty), ignoring cache and calling LLM")
