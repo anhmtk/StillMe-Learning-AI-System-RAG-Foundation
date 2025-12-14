@@ -386,6 +386,16 @@
                         const convertedHtml = markdownToHtml(msg.content);
                         console.log('StillMe Chat: Rendering assistant message', index, 'original length:', msg.content ? msg.content.length : 0, 'converted length:', convertedHtml ? convertedHtml.length : 0);
                         messageDiv.innerHTML = convertedHtml;
+                        // CRITICAL: Verify HTML was set correctly and check computed styles
+                        console.log('StillMe Chat: After innerHTML set - messageDiv.innerHTML length:', messageDiv.innerHTML ? messageDiv.innerHTML.length : 0);
+                        console.log('StillMe Chat: After innerHTML set - messageDiv.innerHTML preview:', messageDiv.innerHTML ? messageDiv.innerHTML.substring(0, 150) : 'empty');
+                        const computedStyle = window.getComputedStyle(messageDiv);
+                        console.log('StillMe Chat: Computed style - white-space:', computedStyle.whiteSpace, 'display:', computedStyle.display);
+                        const firstP = messageDiv.querySelector('p');
+                        if (firstP) {
+                            const pStyle = window.getComputedStyle(firstP);
+                            console.log('StillMe Chat: First p tag - white-space:', pStyle.whiteSpace, 'display:', pStyle.display, 'margin:', pStyle.margin);
+                        }
                     } else {
                         // User messages: plain text (escape HTML for security)
                         messageDiv.textContent = msg.content;
