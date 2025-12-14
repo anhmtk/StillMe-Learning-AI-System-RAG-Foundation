@@ -549,6 +549,8 @@ class CitationRequired:
         """
         Automatically add human-readable citation to answer when missing
         
+        TRUST-EFFICIENT FIX: Check if citation already exists before adding (prevent loops)
+        
         Args:
             answer: Original answer without citation
             ctx_docs: List of context documents (can be dicts or objects with metadata, or just strings)
@@ -558,6 +560,10 @@ class CitationRequired:
         Returns:
             Answer with human-readable citation added
         """
+        # TRUST-EFFICIENT FIX: Check if citation already exists (prevent duplicate citations)
+        if HUMAN_READABLE_CITE_RE.search(answer) or CITE_RE.search(answer):
+            logger.debug("Citation already exists in answer, skipping auto-add")
+            return answer
         # CRITICAL: Check if context contains foundational knowledge
         # If yes, use specific "[foundational knowledge]" citation instead of generic "[general knowledge]"
         # Priority: Check context dict first (has full metadata), then check ctx_docs

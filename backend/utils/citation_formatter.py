@@ -279,8 +279,16 @@ class CitationFormatter:
         
         # Hierarchy 4: No meaningful context or very low similarity (<0.3)
         else:
-            # If we have source types but low similarity, still acknowledge context
-            if source_types:
+            # TRUST-EFFICIENT FIX: If similarity is effectively 0, don't add fake citation
+            # Instead, be honest about lack of specific sources
+            if max_similarity < 0.1:  # Effectively no similarity
+                if source_types:
+                    primary_source = self._get_primary_source_name(source_types)
+                    return f"[general knowledge] (Retrieved {primary_source} documents were reviewed but had no relevant information)"
+                else:
+                    return "[general knowledge] (No relevant sources found in knowledge base)"
+            # Low similarity (0.1-0.3) but has context - acknowledge but be transparent
+            elif source_types:
                 primary_source = self._get_primary_source_name(source_types)
                 return f"[general knowledge] (Context from {primary_source} was reviewed but had low relevance)"
             else:

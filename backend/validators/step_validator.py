@@ -174,9 +174,15 @@ Return JSON only:
 
             # Call LLM API
             start_time = time.time()
-            # PHASE 2 FIX: Increase timeout to 5s (optimized prompt should be faster, but give more buffer)
-            # If still timeout, we'll fallback to lightweight chain
-            with httpx.Client(timeout=5.0) as client:
+            # TRUST-EFFICIENT FIX: Reduce timeout to 2s for faster fallback
+            # If timeout, immediately use lightweight chain (no waste)
+            # For large batches (>10 steps), skip batch validation entirely
+            if len(steps) > 10:
+                logger.info(f"P1.1.b: Skipping batch validation for {len(steps)} steps (too many, using lightweight chain directly)")
+                chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
+                return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold) for step in steps]
+            
+            with httpx.Client(timeout=2.0) as client:  # TRUST-EFFICIENT: 2s timeout instead of 5s
                 response = client.post(
                     f"{api_base}/v1/chat/completions",
                     headers={
