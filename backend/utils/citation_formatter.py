@@ -277,9 +277,25 @@ class CitationFormatter:
             has_metadata=has_metadata
         )
         
-        # Get citation from taxonomy (but keep backward compatibility with existing logic)
-        # Use taxonomy for classification, but use existing logic for formatting to maintain consistency
+        # MANIFESTO ALIGNMENT: Use taxonomy to get citation, ensuring meaningful classification
+        # This ensures citations are not just present, but MEANINGFUL (Manifesto Principle 3)
+        citation = taxonomy.get_citation_for_knowledge_type(
+            knowledge_type=knowledge_type,
+            source_name=source_name,
+            document_title=document_title,
+            document_date=document_date,
+            source_types=source_types
+        )
         
+        # Log knowledge type for transparency
+        logger.debug(
+            f"Knowledge Taxonomy: {knowledge_type.value} "
+            f"(similarity={max_similarity:.3f}, has_metadata={has_metadata}) → {citation}"
+        )
+        
+        return citation
+        
+        # OLD LOGIC (kept for reference, but now using taxonomy above):
         # Hierarchy 1: High similarity (>=0.8) + specific source metadata
         if max_similarity >= 0.8 and best_doc:
             # Extract document metadata
