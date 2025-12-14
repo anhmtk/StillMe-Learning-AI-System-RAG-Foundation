@@ -13,6 +13,9 @@ This module contains the immutable core principles of StillMe's identity:
 
 CRITICAL: These are the foundational principles that NEVER change.
 They are the philosophical core, NOT formatting, NOT structure, NOT emoji rules.
+
+REFERENCE: See docs/STILLME_MANIFESTO.md and backend/identity/manifesto.py
+for the complete StillMe Manifesto - the new standard for AI.
 """
 
 
