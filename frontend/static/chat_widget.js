@@ -307,21 +307,25 @@
                 html = html.replace(h2Pattern, '<h2>$1</h2>');
                 
                 // Bold: **text** -> <strong>text</strong>
-                // CRITICAL FIX: Use regex literal to avoid escaping issues
-                // CRITICAL: Only match **text** that is NOT inside HTML tags
-                // Use negative lookahead/lookbehind to avoid matching inside tags
+                // CRITICAL FIX: Process bold BEFORE creating HTML structure to avoid matching HTML tags
+                // Save the HTML structure, process bold on text content only, then restore structure
+                // Actually, better approach: Only match **text** that is NOT part of HTML tags
                 var boldPattern = /\*\*([^*]+?)\*\*/g;
-                // CRITICAL: Only replace if not inside HTML tags (check context)
                 html = html.replace(boldPattern, function(match, text, offset) {
-                    // Check if we're inside an HTML tag (between < and >)
-                    const beforeMatch = html.substring(Math.max(0, offset - 50), offset);
-                    const afterMatch = html.substring(offset + match.length, Math.min(html.length, offset + match.length + 50));
-                    // If we're inside a tag, don't replace
-                    if (beforeMatch.includes('<') && !beforeMatch.includes('>')) {
-                        return match; // Don't replace, return original
+                    // Check if this match is inside an HTML tag by looking for < and > around it
+                    // Find the last < before this position
+                    let lastOpen = html.lastIndexOf('<', offset);
+                    let lastClose = html.lastIndexOf('>', offset);
+                    // If last < is after last >, we're inside a tag - don't replace
+                    if (lastOpen > lastClose) {
+                        return match; // Inside HTML tag, don't replace
                     }
-                    if (afterMatch.includes('>') && !afterMatch.includes('<')) {
-                        return match; // Don't replace, return original
+                    // Also check if match extends into a tag
+                    let matchEnd = offset + match.length;
+                    let nextOpen = html.indexOf('<', offset);
+                    let nextClose = html.indexOf('>', offset);
+                    if (nextOpen !== -1 && nextOpen < matchEnd && (nextClose === -1 || nextClose > nextOpen)) {
+                        return match; // Match extends into HTML tag, don't replace
                     }
                     return '<strong>' + text + '</strong>';
                 });
