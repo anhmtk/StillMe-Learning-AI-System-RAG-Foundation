@@ -6991,6 +6991,36 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         if style_learning_response:
             response = f"{style_learning_response}\n\n---\n\n{response}"
         
+        # CONVERSATIONAL INTELLIGENCE: Add disclaimer for MEDIUM ambiguity
+        # Philosophy: Answer with assumptions acknowledged, not just answer blindly
+        # Based on StillMe Manifesto Principle 5: "EMBRACE 'I DON'T KNOW' AS INTELLECTUAL HONESTY"
+        if 'ambiguity_level' in locals() and ambiguity_level == "MEDIUM" and ambiguity_score >= 0.4:
+            try:
+                detected_lang_for_disclaimer = detected_lang if 'detected_lang' in locals() else detect_language(response or chat_request.message)
+                if detected_lang_for_disclaimer == "vi":
+                    disclaimer = f"\n\n💡 *Lưu ý: Mình đã suy luận ý định của bạn dựa trên ngữ cảnh. Nếu mình hiểu sai, bạn có thể làm rõ để mình trả lời chính xác hơn.*"
+                else:
+                    disclaimer = f"\n\n💡 *Note: I've inferred your intent based on context. If I misunderstood, please clarify so I can answer more accurately.*"
+                
+                # Add disclaimer at the end, but before citation
+                if response and "[general knowledge]" not in response[-100:]:  # Don't add if citation already at end
+                    response = response + disclaimer
+                elif response:
+                    # Citation is at end, add before citation
+                    citation_pos = response.rfind("[")
+                    if citation_pos > 0:
+                        response = response[:citation_pos] + disclaimer + " " + response[citation_pos:]
+                    else:
+                        response = response + disclaimer
+                
+                logger.info(f"✅ Added MEDIUM ambiguity disclaimer to response")
+                if validation_info:
+                    validation_info["ambiguity_disclaimer_added"] = True
+                    validation_info["ambiguity_score"] = ambiguity_score
+                    validation_info["ambiguity_level"] = ambiguity_level
+            except Exception as disclaimer_error:
+                logger.warning(f"⚠️ Failed to add ambiguity disclaimer: {disclaimer_error}")
+        
         # CRITICAL: Final safety check - ensure response is never None or empty before returning
         logger.info(f"🔍 [TRACE] Final check before return: response={response[:200] if response else 'None'}, response_type={type(response)}, response_length={len(response) if response else 0}")
         if not response or not isinstance(response, str) or not response.strip():
