@@ -201,8 +201,14 @@ class AmbiguityDetector:
                 any(word[0].isupper() for word in query.split() if len(word) > 2)
             )
             if not has_explicit_topic:
-                score += 0.25
-                reasons.append("Ambiguous reference (could be StillMe or topic)")
+                # CRITICAL FIX: If query is very short (≤2 words) AND has ambiguous reference,
+                # this is HIGH ambiguity - boost score to ensure it's classified as HIGH
+                if word_count <= 2:
+                    score += 0.4  # Boost from 0.25 to 0.4 to push it over HIGH threshold
+                    reasons.append("Ambiguous reference (could be StillMe or topic) + very short query → HIGH ambiguity")
+                else:
+                    score += 0.25
+                    reasons.append("Ambiguous reference (could be StillMe or topic)")
             else:
                 score += 0.05
                 reasons.append("Ambiguous pattern with explicit topic (minimal ambiguity)")
