@@ -79,7 +79,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v5   # << v3 → v4 để không bị chặn
+        uses: actions/upload-artifact@v6   # << v3 → v4 để không bị chặn
         with:
           name: cleanup-audit-artifacts
           path: artifacts/
