@@ -268,119 +268,150 @@
                     
                     // Simple markdown to HTML converter (preserves line breaks and renders basic markdown)
             function markdownToHtml(text) {
-                if (!text) return '';
-                
-                let html = String(text);
-                console.log('StillMe Chat: markdownToHtml called, input length:', html.length, 'preview:', html.substring(0, 100).replace(/\n/g, '\\n'));
-                
-                // CRITICAL: Check if text already contains HTML tags (from backend)
-                // If it does, don't process markdown - just return as-is
-                if (html.includes('<p>') || html.includes('<br>') || html.includes('<div>')) {
-                    // Already HTML formatted, return as-is (but ensure proper spacing)
-                    console.log('StillMe Chat: markdownToHtml - response already has HTML tags, returning as-is');
-                    return html;
-                }
-                
-                // CRITICAL: Preserve line breaks first
-                // Normalize line endings (handle Windows \r\n and old Mac \r)
-                html = html.replace(/\r\n/g, '\n');
-                html = html.replace(/\r/g, '\n');
-                
-                // Check if text has newlines (plain text with line breaks)
-                const hasNewlines = html.includes('\n');
-                const newlineCount = (html.match(/\n/g) || []).length;
-                console.log('StillMe Chat: markdownToHtml - processing markdown, hasNewlines:', hasNewlines, 'newlineCount:', newlineCount, 'length:', html.length);
-                
-                // Convert double newlines to p tags, single newlines to br tags
-                // CRITICAL: First convert double newlines to paragraph breaks
-                html = html.replace(/\n\n+/g, '</p><p>');
-                html = '<p>' + html + '</p>';
-                // Convert remaining single newlines to br tags (but preserve them inside p tags)
-                html = html.replace(/\n/g, '<br>');
-                
-                console.log('StillMe Chat: markdownToHtml - output length:', html.length, 'preview:', html.substring(0, 150));
-                
-                // Headers: ## Header -> <h2>Header</h2>
-                var h3Pattern = new RegExp('<p>### (.+?)</p>', 'g');
-                html = html.replace(h3Pattern, '<h3>$1</h3>');
-                var h2Pattern = new RegExp('<p>## (.+?)</p>', 'g');
-                html = html.replace(h2Pattern, '<h2>$1</h2>');
-                
-                // Bold: **text** -> <strong>text</strong>
-                // CRITICAL FIX: Process bold BEFORE creating HTML structure to avoid matching HTML tags
-                // Save the HTML structure, process bold on text content only, then restore structure
-                // Actually, better approach: Only match **text** that is NOT part of HTML tags
-                var boldPattern = /\*\*([^*]+?)\*\*/g;
-                html = html.replace(boldPattern, function(match, text, offset) {
-                    // Check if this match is inside an HTML tag by looking for < and > around it
-                    // Find the last < before this position
-                    let lastOpen = html.lastIndexOf('<', offset);
-                    let lastClose = html.lastIndexOf('>', offset);
-                    // If last < is after last >, we're inside a tag - don't replace
-                    if (lastOpen > lastClose) {
-                        return match; // Inside HTML tag, don't replace
+                try {
+                    if (!text) return '';
+                    
+                    let html = String(text);
+                    console.log('StillMe Chat: markdownToHtml called, input length:', html.length, 'preview:', html.substring(0, 100).replace(/\n/g, '\\n'));
+                    
+                    // CRITICAL: Check if text already contains HTML tags (from backend)
+                    // If it does, don't process markdown - just return as-is
+                    if (html.includes('<p>') || html.includes('<br>') || html.includes('<div>')) {
+                        // Already HTML formatted, return as-is (but ensure proper spacing)
+                        console.log('StillMe Chat: markdownToHtml - response already has HTML tags, returning as-is');
+                        return html;
                     }
-                    // Also check if match extends into a tag
-                    let matchEnd = offset + match.length;
-                    let nextOpen = html.indexOf('<', offset);
-                    let nextClose = html.indexOf('>', offset);
-                    if (nextOpen !== -1 && nextOpen < matchEnd && (nextClose === -1 || nextClose > nextOpen)) {
-                        return match; // Match extends into HTML tag, don't replace
-                    }
-                    return '<strong>' + text + '</strong>';
-                });
-                
-                // Links: [text](url) -> <a href="url">text</a>
-                // CRITICAL FIX: Use regex literal instead of RegExp constructor with escaped string
-                // The escaped string pattern was causing "Unmatched )" syntax error
-                // Regex literal is cleaner and avoids double-escaping issues
-                var linkPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
-                html = html.replace(linkPattern, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
-                
-                // Bullet points: - item -> <li>item</li>
-                var bulletPattern = new RegExp('<p>- (.+?)</p>', 'g');
-                html = html.replace(bulletPattern, '<li>$1</li>');
-                // Wrap consecutive <li> in <ul>
-                // In Python f-string, \\\\s becomes \\s in JavaScript string, which becomes \s in regex
-                var listPattern = new RegExp('(<li>.*?</li>\\\\s*)+', 'g');
-                html = html.replace(listPattern, function(match) {
-                    return '<ul style="margin: 8px 0; padding-left: 20px;">' + match + '</ul>';
-                });
-                
-                // Tables: | col1 | col2 | -> <table>...
-                // In Python f-string, \\\\| becomes \\| in JavaScript string, which becomes \| in regex
-                // In Python f-string, \\\\s becomes \\s in JavaScript string, which becomes \s in regex
-                var tablePattern = new RegExp('<p>\\\\|(.+?)\\\\|</p>\\\\s*<p>\\\\|([-| ]+?)\\\\|</p>\\\\s*((?:<p>\\\\|.+?\\\\|</p>\\\\s*)+)', 'g');
-                html = html.replace(tablePattern, function(match, header, separator, rows) {
-                    var headers = header.split('|').map(function(h) { return h.trim(); }).filter(function(h) { return h; });
-                    var rowLines = rows.match(new RegExp('<p>\\\\|.+?\\\\|</p>', 'g')) || [];
-                    var rowData = rowLines.map(function(row) {
-                        return row.replace(new RegExp('</?p>', 'g'), '').split('|').map(function(c) { return c.trim(); }).filter(function(c) { return c; });
+                    
+                    // CRITICAL: Preserve line breaks first
+                    // Normalize line endings (handle Windows \r\n and old Mac \r)
+                    html = html.replace(/\r\n/g, '\n');
+                    html = html.replace(/\r/g, '\n');
+                    
+                    // Check if text has newlines (plain text with line breaks)
+                    const hasNewlines = html.includes('\n');
+                    const newlineCount = (html.match(/\n/g) || []).length;
+                    console.log('StillMe Chat: markdownToHtml - processing markdown, hasNewlines:', hasNewlines, 'newlineCount:', newlineCount, 'length:', html.length);
+                    
+                    // Convert double newlines to p tags, single newlines to br tags
+                    // CRITICAL: First convert double newlines to paragraph breaks
+                    html = html.replace(/\n\n+/g, '</p><p>');
+                    html = '<p>' + html + '</p>';
+                    // Convert remaining single newlines to br tags (but preserve them inside p tags)
+                    html = html.replace(/\n/g, '<br>');
+                    
+                    console.log('StillMe Chat: markdownToHtml - output length:', html.length, 'preview:', html.substring(0, 150));
+                    
+                    // Headers: ## Header -> <h2>Header</h2>
+                    var h3Pattern = new RegExp('<p>### (.+?)</p>', 'g');
+                    html = html.replace(h3Pattern, '<h3>$1</h3>');
+                    var h2Pattern = new RegExp('<p>## (.+?)</p>', 'g');
+                    html = html.replace(h2Pattern, '<h2>$1</h2>');
+                    
+                    // Bold: **text** -> <strong>text</strong>
+                    // CRITICAL FIX: Process bold BEFORE creating HTML structure to avoid matching HTML tags
+                    // Save the HTML structure, process bold on text content only, then restore structure
+                    // Actually, better approach: Only match **text** that is NOT part of HTML tags
+                    var boldPattern = /\*\*([^*]+?)\*\*/g;
+                    html = html.replace(boldPattern, function(match, text, offset) {
+                        // Check if this match is inside an HTML tag by looking for < and > around it
+                        // Find the last < before this position
+                        let lastOpen = html.lastIndexOf('<', offset);
+                        let lastClose = html.lastIndexOf('>', offset);
+                        // If last < is after last >, we're inside a tag - don't replace
+                        if (lastOpen > lastClose) {
+                            return match; // Inside HTML tag, don't replace
+                        }
+                        // Also check if match extends into a tag
+                        let matchEnd = offset + match.length;
+                        let nextOpen = html.indexOf('<', offset);
+                        let nextClose = html.indexOf('>', offset);
+                        if (nextOpen !== -1 && nextOpen < matchEnd && (nextClose === -1 || nextClose > nextOpen)) {
+                            return match; // Match extends into HTML tag, don't replace
+                        }
+                        return '<strong>' + text + '</strong>';
                     });
                     
-                    var tableHtml = '<table style="border-collapse: collapse; margin: 10px 0; width: 100%;"><thead><tr>';
-                    headers.forEach(function(h) {
-                        tableHtml += '<th style="border: 1px solid #555; padding: 8px; text-align: left; background: #2d2d30;">' + h + '</th>';
+                    // Links: [text](url) -> <a href="url">text</a>
+                    // CRITICAL FIX: Use regex literal instead of RegExp constructor with escaped string
+                    // The escaped string pattern was causing "Unmatched )" syntax error
+                    // Regex literal is cleaner and avoids double-escaping issues
+                    var linkPattern = /\[([^\]]+)\]\(([^)]+)\)/g;
+                    html = html.replace(linkPattern, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #4CAF50; text-decoration: underline;">$1</a>');
+                    
+                    // Bullet points: - item -> <li>item</li>
+                    var bulletPattern = new RegExp('<p>- (.+?)</p>', 'g');
+                    html = html.replace(bulletPattern, '<li>$1</li>');
+                    // Wrap consecutive <li> in <ul>
+                    // In Python f-string, \\\\s becomes \\s in JavaScript string, which becomes \s in regex
+                    var listPattern = new RegExp('(<li>.*?</li>\\\\s*)+', 'g');
+                    html = html.replace(listPattern, function(match) {
+                        if (!match) return match;
+                        return '<ul style="margin: 8px 0; padding-left: 20px;">' + match + '</ul>';
                     });
-                    tableHtml += '</tr></thead><tbody>';
-                    rowData.forEach(function(row) {
-                        tableHtml += '<tr>';
-                        row.forEach(function(cell) {
-                            tableHtml += '<td style="border: 1px solid #555; padding: 8px;">' + cell + '</td>';
-                        });
-                        tableHtml += '</tr>';
+                    
+                    // Tables: | col1 | col2 | -> <table>...
+                    // CRITICAL FIX: Add null checks for rows parameter to prevent "Cannot read properties of undefined"
+                    // In Python f-string, \\\\| becomes \\| in JavaScript string, which becomes \| in regex
+                    // In Python f-string, \\\\s becomes \\s in JavaScript string, which becomes \s in regex
+                    var tablePattern = new RegExp('<p>\\\\|(.+?)\\\\|</p>\\\\s*<p>\\\\|([-| ]+?)\\\\|</p>\\\\s*((?:<p>\\\\|.+?\\\\|</p>\\\\s*)+)', 'g');
+                    html = html.replace(tablePattern, function(match, header, separator, rows) {
+                        // CRITICAL: Check if all parameters are defined before processing
+                        if (!header || !separator || !rows) {
+                            console.warn('StillMe Chat: markdownToHtml - table pattern matched but parameters undefined, returning original match');
+                            return match; // Return original if parameters are undefined
+                        }
+                        
+                        try {
+                            var headers = header.split('|').map(function(h) { return h.trim(); }).filter(function(h) { return h; });
+                            // CRITICAL FIX: Check rows is defined and is a string before calling .match()
+                            var rowLines = (rows && typeof rows === 'string') ? (rows.match(new RegExp('<p>\\\\|.+?\\\\|</p>', 'g')) || []) : [];
+                            var rowData = rowLines.map(function(row) {
+                                if (!row || typeof row !== 'string') return [];
+                                return row.replace(new RegExp('</?p>', 'g'), '').split('|').map(function(c) { return c.trim(); }).filter(function(c) { return c; });
+                            });
+                            
+                            var tableHtml = '<table style="border-collapse: collapse; margin: 10px 0; width: 100%;"><thead><tr>';
+                            headers.forEach(function(h) {
+                                tableHtml += '<th style="border: 1px solid #555; padding: 8px; text-align: left; background: #2d2d30;">' + h + '</th>';
+                            });
+                            tableHtml += '</tr></thead><tbody>';
+                            rowData.forEach(function(row) {
+                                tableHtml += '<tr>';
+                                row.forEach(function(cell) {
+                                    tableHtml += '<td style="border: 1px solid #555; padding: 8px;">' + cell + '</td>';
+                                });
+                                tableHtml += '</tr>';
+                            });
+                            tableHtml += '</tbody></table>';
+                            return tableHtml;
+                        } catch (tableError) {
+                            console.error('StillMe Chat: markdownToHtml - error processing table:', tableError);
+                            return match; // Return original match on error
+                        }
                     });
-                    tableHtml += '</tbody></table>';
-                    return tableHtml;
-                });
-                
-                // Clean up empty p tags
-                var emptyP = new RegExp('<p></p>', 'g');
-                html = html.replace(emptyP, '');
-                var blockP = new RegExp('<p>(<[^>]+>)</p>', 'g');
-                html = html.replace(blockP, '$1'); // Remove p tags around block elements
-                
-                return html;
+                    
+                    // Clean up empty p tags
+                    var emptyP = new RegExp('<p></p>', 'g');
+                    html = html.replace(emptyP, '');
+                    var blockP = new RegExp('<p>(<[^>]+>)</p>', 'g');
+                    html = html.replace(blockP, '$1'); // Remove p tags around block elements
+                    
+                    return html;
+                } catch (error) {
+                    // CRITICAL: Fallback to plain text with line breaks preserved if markdown processing fails
+                    console.error('StillMe Chat: markdownToHtml error:', error);
+                    console.error('StillMe Chat: markdownToHtml error stack:', error.stack);
+                    console.error('StillMe Chat: markdownToHtml - falling back to plain text with line breaks');
+                    
+                    // Fallback: Convert to simple HTML with line breaks preserved
+                    if (!text) return '';
+                    let fallbackHtml = String(text)
+                        .replace(/\r\n/g, '\n')
+                        .replace(/\r/g, '\n')
+                        .replace(/\n\n+/g, '</p><p>')
+                        .replace(/\n/g, '<br>');
+                    return '<p>' + fallbackHtml + '</p>';
+                }
             }
             
                     // Render chat history with auto-scroll
@@ -401,18 +432,32 @@
                     // CRITICAL: Use innerHTML with markdown conversion for assistant messages
                     // This preserves line breaks and renders markdown (**, ##, -, tables)
                     if (msg.role === 'assistant') {
-                        const convertedHtml = markdownToHtml(msg.content);
-                        console.log('StillMe Chat: Rendering assistant message', index, 'original length:', msg.content ? msg.content.length : 0, 'converted length:', convertedHtml ? convertedHtml.length : 0);
-                        messageDiv.innerHTML = convertedHtml;
-                        // CRITICAL: Verify HTML was set correctly and check computed styles
-                        console.log('StillMe Chat: After innerHTML set - messageDiv.innerHTML length:', messageDiv.innerHTML ? messageDiv.innerHTML.length : 0);
-                        console.log('StillMe Chat: After innerHTML set - messageDiv.innerHTML preview:', messageDiv.innerHTML ? messageDiv.innerHTML.substring(0, 150) : 'empty');
-                        const computedStyle = window.getComputedStyle(messageDiv);
-                        console.log('StillMe Chat: Computed style - white-space:', computedStyle.whiteSpace, 'display:', computedStyle.display);
-                        const firstP = messageDiv.querySelector('p');
-                        if (firstP) {
-                            const pStyle = window.getComputedStyle(firstP);
-                            console.log('StillMe Chat: First p tag - white-space:', pStyle.whiteSpace, 'display:', pStyle.display, 'margin:', pStyle.margin);
+                        try {
+                            const convertedHtml = markdownToHtml(msg.content);
+                            console.log('StillMe Chat: Rendering assistant message', index, 'original length:', msg.content ? msg.content.length : 0, 'converted length:', convertedHtml ? convertedHtml.length : 0);
+                            messageDiv.innerHTML = convertedHtml;
+                            // CRITICAL: Verify HTML was set correctly and check computed styles
+                            console.log('StillMe Chat: After innerHTML set - messageDiv.innerHTML length:', messageDiv.innerHTML ? messageDiv.innerHTML.length : 0);
+                            console.log('StillMe Chat: After innerHTML set - messageDiv.innerHTML preview:', messageDiv.innerHTML ? messageDiv.innerHTML.substring(0, 150) : 'empty');
+                            const computedStyle = window.getComputedStyle(messageDiv);
+                            console.log('StillMe Chat: Computed style - white-space:', computedStyle.whiteSpace, 'display:', computedStyle.display);
+                            const firstP = messageDiv.querySelector('p');
+                            if (firstP) {
+                                const pStyle = window.getComputedStyle(firstP);
+                                console.log('StillMe Chat: First p tag - white-space:', pStyle.whiteSpace, 'display:', pStyle.display, 'margin:', pStyle.margin);
+                            }
+                        } catch (renderError) {
+                            // CRITICAL: Fallback to plain text if markdown conversion or rendering fails
+                            console.error('StillMe Chat: Error rendering assistant message:', renderError);
+                            console.error('StillMe Chat: Error stack:', renderError.stack);
+                            console.error('StillMe Chat: Falling back to plain text for message', index);
+                            // Fallback: Simple HTML with line breaks preserved
+                            const fallbackContent = (msg.content || '').toString()
+                                .replace(/\r\n/g, '\n')
+                                .replace(/\r/g, '\n')
+                                .replace(/\n\n+/g, '</p><p>')
+                                .replace(/\n/g, '<br>');
+                            messageDiv.innerHTML = '<p>' + fallbackContent + '</p>';
                         }
                     } else {
                         // User messages: plain text (escape HTML for security)
@@ -953,7 +998,18 @@
                                             messageDiv.className = `stillme-chat-message ${msg.role}`;
                                             // CRITICAL: Use markdown rendering for assistant messages
                                             if (msg.role === 'assistant') {
-                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                try {
+                                                    messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                } catch (renderError) {
+                                                    console.error('StillMe Chat: Error rendering assistant message in parent panel:', renderError);
+                                                    // Fallback to plain text with line breaks
+                                                    const fallbackContent = (msg.content || '').toString()
+                                                        .replace(/\r\n/g, '\n')
+                                                        .replace(/\r/g, '\n')
+                                                        .replace(/\n\n+/g, '</p><p>')
+                                                        .replace(/\n/g, '<br>');
+                                                    messageDiv.innerHTML = '<p>' + fallbackContent + '</p>';
+                                                }
                                             } else {
                                                 messageDiv.textContent = msg.content;
                                             }
@@ -1829,7 +1885,18 @@
                                             messageDiv.className = `stillme-chat-message ${msg.role}`;
                                             // CRITICAL: Use markdown rendering for assistant messages
                                             if (msg.role === 'assistant') {
-                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                try {
+                                                    messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                } catch (renderError) {
+                                                    console.error('StillMe Chat: Error rendering assistant message in parent panel:', renderError);
+                                                    // Fallback to plain text with line breaks
+                                                    const fallbackContent = (msg.content || '').toString()
+                                                        .replace(/\r\n/g, '\n')
+                                                        .replace(/\r/g, '\n')
+                                                        .replace(/\n\n+/g, '</p><p>')
+                                                        .replace(/\n/g, '<br>');
+                                                    messageDiv.innerHTML = '<p>' + fallbackContent + '</p>';
+                                                }
                                             } else {
                                                 messageDiv.textContent = msg.content;
                                             }
@@ -1880,7 +1947,18 @@
                                             messageDiv.className = `stillme-chat-message ${msg.role}`;
                                             // CRITICAL: Use markdown rendering for assistant messages
                                             if (msg.role === 'assistant') {
-                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                try {
+                                                    messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                } catch (renderError) {
+                                                    console.error('StillMe Chat: Error rendering assistant message in parent panel:', renderError);
+                                                    // Fallback to plain text with line breaks
+                                                    const fallbackContent = (msg.content || '').toString()
+                                                        .replace(/\r\n/g, '\n')
+                                                        .replace(/\r/g, '\n')
+                                                        .replace(/\n\n+/g, '</p><p>')
+                                                        .replace(/\n/g, '<br>');
+                                                    messageDiv.innerHTML = '<p>' + fallbackContent + '</p>';
+                                                }
                                             } else {
                                                 messageDiv.textContent = msg.content;
                                             }
@@ -2086,7 +2164,18 @@
                                             messageDiv.className = `stillme-chat-message ${msg.role}`;
                                             // CRITICAL: Use markdown rendering for assistant messages
                                             if (msg.role === 'assistant') {
-                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                try {
+                                                    messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                } catch (renderError) {
+                                                    console.error('StillMe Chat: Error rendering assistant message in parent panel:', renderError);
+                                                    // Fallback to plain text with line breaks
+                                                    const fallbackContent = (msg.content || '').toString()
+                                                        .replace(/\r\n/g, '\n')
+                                                        .replace(/\r/g, '\n')
+                                                        .replace(/\n\n+/g, '</p><p>')
+                                                        .replace(/\n/g, '<br>');
+                                                    messageDiv.innerHTML = '<p>' + fallbackContent + '</p>';
+                                                }
                                             } else {
                                                 messageDiv.textContent = msg.content;
                                             }
@@ -2143,7 +2232,18 @@
                                             messageDiv.className = `stillme-chat-message ${msg.role}`;
                                             // CRITICAL: Use markdown rendering for assistant messages
                                             if (msg.role === 'assistant') {
-                                                messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                try {
+                                                    messageDiv.innerHTML = markdownToHtml(msg.content);
+                                                } catch (renderError) {
+                                                    console.error('StillMe Chat: Error rendering assistant message in parent panel:', renderError);
+                                                    // Fallback to plain text with line breaks
+                                                    const fallbackContent = (msg.content || '').toString()
+                                                        .replace(/\r\n/g, '\n')
+                                                        .replace(/\r/g, '\n')
+                                                        .replace(/\n\n+/g, '</p><p>')
+                                                        .replace(/\n/g, '<br>');
+                                                    messageDiv.innerHTML = '<p>' + fallbackContent + '</p>';
+                                                }
                                             } else {
                                                 messageDiv.textContent = msg.content;
                                             }
