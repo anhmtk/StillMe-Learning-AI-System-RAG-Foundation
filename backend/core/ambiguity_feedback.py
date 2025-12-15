@@ -141,6 +141,9 @@ class AmbiguityFeedbackTracker:
         # If user often says "should have asked", lower threshold (ask more)
         # If user often says "should not have asked", raise threshold (ask less)
         threshold_adjustment = 0.0
+        should_ask_ratio = 0.0
+        should_not_ask_ratio = 0.0
+        
         if total_feedback >= 3:  # Need at least 3 feedbacks to adjust
             should_ask_ratio = should_have_asked_count / total_feedback
             should_not_ask_ratio = should_not_have_asked_count / total_feedback
