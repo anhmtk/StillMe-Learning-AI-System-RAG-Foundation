@@ -400,15 +400,6 @@ See `env.example` for full list.
 - ✅ Validation Panel - Monitor validator performance
 - ✅ Memory Health - Track tier statistics and forgetting metrics
 
-**Self-Awareness & Monitoring:**
-- ✅ **Unified Metrics System** - Centralized metrics collection from all components
-- ✅ **Self-Improvement** - Analyzes patterns and suggests improvements
-- ✅ **Time Estimation** - Estimates task completion based on historical performance
-  - Calibrated estimates with confidence intervals
-  - Conservative bias (slightly overestimate for reliability)
-  - Transparent uncertainty communication
-  - Learning from actual vs estimated time
-
 ### 🚧 Experimental
 
 - 🔬 **Nested Learning** - Tiered update frequency (experimental branch)
@@ -632,39 +623,33 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 - [`docs/MILESTONES.md`](docs/MILESTONES.md) - Technical milestones and achievements
 - [`docs/reports/stillme_self_comprehension_report_20251205_164714.md`](docs/reports/stillme_self_comprehension_report_20251205_164714.md) - Self-Comprehension Report (Technical milestone: AI understanding its own source code)
 
-## ⚠️ Known Limitations & Improvements
+## ⚠️ Known Limitations & Roadmap
 
 **Current Limitations:**
 - Single-threaded scheduler (needs distributed task queue for high scale)
 - Response latency: 3-7s (optimized with Redis caching - 50-70% reduction for cached queries)
 
-**Recent Improvements (v0.4.1+):**
-- ✅ **ChromaDB Backup/Recovery System**: Automated backup mechanism with restore capabilities
-- ✅ **Circuit Breaker for RSS Feeds**: Prevents cascading failures, automatically skips failing feeds
-- ✅ **Redis Caching**: 50-70% latency reduction for cached queries, reduced embedding costs
-- ✅ **Parallel Validation (NPR-inspired)**: 2-3x faster validation (from ~2-3s to ~0.5-1s) with optimized parallel execution of independent validators
-- ✅ **Structured Logging**: Correlation IDs for request tracing, structured logs with context
-- ✅ **Feed Health Monitoring**: Proactive monitoring, automatic identification of failing feeds
-- ✅ **Dependency Injection**: FastAPI Depends() pattern for better testability and code quality
-- ✅ **Security Hardening**: Enhanced input sanitization, API key rotation, XSS/SQL injection prevention
-- ✅ **PostgreSQL Migration Foundation**: SQLAlchemy models, Alembic migrations, data migration scripts
+**Platform Engineering Status:**
 
-**Completed Improvements:**
+**✅ Completed (v0.6+):**
+- **Routerization**: 95% complete - All endpoints organized into modular routers (chat, RAG, learning, system, etc.)
+- **Health & Readiness**: 90% complete - `/health`, `/ready`, `/status` endpoints implemented
+- **ChromaDB Backup/Recovery**: Automated backup mechanism with restore capabilities
+- **Circuit Breaker**: Prevents cascading failures for RSS feeds
+- **Redis Caching**: 50-70% latency reduction for cached queries
+- **Parallel Validation**: 2-3x faster validation with optimized parallel execution
+- **Structured Logging**: Correlation IDs for request tracing
+- **Feed Health Monitoring**: Proactive monitoring and automatic failure detection
+- **Security Hardening**: Enhanced input sanitization, API key rotation, XSS/SQL injection prevention
+- **PostgreSQL Migration Foundation**: SQLAlchemy models, Alembic setup, migration scripts
 
-**Priority 1 - CRITICAL (Production Scale):**
-- ✅ **PostgreSQL Migration Foundation**: SQLAlchemy models, Alembic setup, migration scripts
-- ✅ **ChromaDB Persistence**: Configured with backup/recovery system
-- ✅ **Error Handling & Circuit Breaker**: Complete implementation
+**⏳ In Progress:**
+- **Dependency Injection Refactoring**: Migrating from direct imports to FastAPI `Depends()` pattern (0% → Target: 100%)
+- **Metrics Endpoint**: Prometheus-compatible `/metrics` endpoint for observability
 
-**Priority 2 - HIGH (Performance):**
-- ✅ **Redis Caching**: Full implementation with embedding, query, and RAG result caching
-- ✅ **Parallel Validation**: Concurrent validator execution with proper parameter handling
-- ✅ **Structured Logging & Metrics**: Correlation IDs, Prometheus metrics endpoint
-
-**Priority 3 - MEDIUM (Code Quality):**
-- ✅ **Dependency Injection**: FastAPI Depends() pattern with backward compatibility
-- ✅ **Security Hardening**: Input sanitization, API key rotation, security utilities
-- ✅ **Feed Health Monitoring**: Health tracking, automatic replacement suggestions
+**📋 Planned:**
+- **P2: Adaptive User Communication**: AI learns to understand user intent and proactively clarifies when needed
+- **Distributed Task Queue**: Replace single-threaded scheduler for high-scale deployments
 
 **See:** [`docs/PLATFORM_ENGINEERING_ROADMAP.md`](docs/PLATFORM_ENGINEERING_ROADMAP.md) for detailed roadmap
 
