@@ -3,7 +3,7 @@ ConfidenceValidator - Detects when AI should express uncertainty
 """
 
 import re
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from .base import ValidationResult
 import logging
 
