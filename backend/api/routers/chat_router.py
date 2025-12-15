@@ -37,6 +37,106 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+
+def _is_codebase_meta_question(message: str) -> bool:
+    """
+    Detect meta-questions that explicitly ask about StillMe's implementation
+    in its own codebase (files, functions, where things are implemented).
+
+    Design intent:
+    - VERY NARROW scope to avoid hijacking normal RAG or philosophy flows
+    - Triggers only when BOTH:
+      1) The question mentions StillMe / \"your system\" / \"your codebase\"
+      2) The question references code-level concepts OR specific StillMe components
+    
+    Enhanced with StillMe-specific component keywords to catch queries like:
+    - "How is validation chain implemented in your codebase?"
+    - "Where is ai_self_model_detector in your source code?"
+    - "Show me the ValidatorChain class from your code"
+    """
+    if not message:
+        return False
+
+    q = message.lower()
+
+    # Self-reference: question is clearly about StillMe / its own implementation
+    has_self_reference = any(
+        term in q
+        for term in [
+            "stillme",
+            "your system",
+            "in your system",
+            "your architecture",
+            "your implementation",
+            "your codebase",
+            "in your codebase",
+            "in your source code",
+            "in your code",
+            "from your code",
+            "using your codebase",
+            "using your own codebase",
+        ]
+    )
+
+    if not has_self_reference:
+        return False
+
+    # Code-level intent: user is asking about concrete implementation details
+    # OR specific StillMe components (enhanced with codebase-specific keywords)
+    has_code_intent = any(
+        term in q
+        for term in [
+            # Generic code concepts
+            "codebase",
+            "source code",
+            "in the codebase",
+            "in the code",
+            "which file",
+            "what file",
+            "which function",
+            "what function",
+            "where is it implemented",
+            "where is this implemented",
+            "implemented in",
+            "implementation details",
+            "line number",
+            "lines",
+            "class",
+            "function",
+            "module",
+            # StillMe-specific components (from actual codebase)
+            "validator_chain",
+            "validation chain",
+            "validators",
+            "ai_self_model_detector",
+            "stillme_detector",
+            "codebase_indexer",
+            "codebase assistant",
+            "rag retrieval",
+            "chromadb",
+            "epistemic_state",
+            "epistemic reasoning",
+            "citation_formatter",
+            "prompt_builder",
+            "chat_router",
+            "codebase_router",
+            "external_data",
+            "philosophy processor",
+            "honesty handler",
+            "fallback_handler",
+            # Technical architecture keywords
+            "architecture",
+            "component",
+            "module",
+            "service",
+            "router",
+            "endpoint",
+        ]
+    )
+
+    return has_code_intent
+
+
 def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None) -> str:
     """
     Add timestamp attribution to normal RAG responses for transparency.
@@ -2345,6 +2445,61 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         # Get user_id from request (if available)
         user_id = chat_request.user_id or request.client.host if hasattr(request, 'client') else "anonymous"
+
+        # SPECIAL ROUTING: Meta-questions about StillMe's implementation in its own codebase
+        # Example: "Explain how StillMe's validation chain works, using your own codebase as the source."
+        # These should use the Codebase Assistant (code RAG), not foundational knowledge only.
+        try:
+            if _is_codebase_meta_question(chat_request.message):
+                from backend.services.codebase_indexer import get_codebase_indexer
+                from backend.api.routers.codebase_router import _generate_code_explanation
+
+                processing_steps.append("🧠 Detected StillMe codebase meta-question - using Codebase Assistant")
+                logger.info("🧠 Codebase meta-question detected - routing to Codebase Assistant")
+
+                indexer = get_codebase_indexer()
+                code_results = indexer.query_codebase(chat_request.message, n_results=5)
+
+                if code_results:
+                    # Build explanation using the same helper as /api/codebase/query
+                    explanation = await _generate_code_explanation(
+                        question=chat_request.message,
+                        code_chunks=code_results,
+                    )
+
+                    # Build lightweight context_used for transparency (no extra LLM work)
+                    knowledge_docs = []
+                    for result in code_results:
+                        metadata = result.get("metadata", {})
+                        knowledge_docs.append(
+                            {
+                                "metadata": metadata,
+                                "document": result.get("document", ""),
+                            }
+                        )
+
+                    from backend.core.epistemic_state import EpistemicState
+
+                    total_time = time.time() - start_time
+                    return ChatResponse(
+                        response=explanation.strip(),
+                        context_used={
+                            "knowledge_docs": knowledge_docs,
+                            "conversation_docs": [],
+                            "total_context_docs": len(knowledge_docs),
+                        },
+                        confidence_score=0.9,
+                        epistemic_state=EpistemicState.KNOWN.value,
+                        processing_steps=processing_steps
+                        + ["✅ Answered via StillMe Codebase Assistant (code-level RAG)"],
+                        timing={"total": f"{total_time:.2f}s"},
+                        latency_metrics=f"Total: {total_time:.2f}s (codebase assistant)",
+                    )
+                else:
+                    logger.warning("Codebase Assistant found no relevant code chunks - falling back to normal RAG flow")
+        except Exception as codebase_error:
+            # Fail safe: log and continue with normal pipeline
+            logger.warning(f"Codebase Assistant routing failed, continuing with normal flow: {codebase_error}")
         
         # CONVERSATIONAL INTELLIGENCE: Check for ambiguous questions BEFORE processing
         # Based on StillMe Manifesto Principle 5: "EMBRACE 'I DON'T KNOW' AS INTELLECTUAL HONESTY"

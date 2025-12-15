@@ -1458,11 +1458,14 @@ Bạn là Codebase Assistant - chỉ giải thích code hiện tại, KHÔNG ph�
         
         instructions = """Hướng dẫn trả lời:
 1. Trả lời câu hỏi dựa trên code chunks được cung cấp
-2. Trích dẫn file và line numbers cụ thể (ví dụ: "Trong validation_chain.py:45-78, class ValidationChain...")
-3. Giải thích mục đích và cách hoạt động của code
-4. Nếu có nhiều chunks liên quan, giải thích cách chúng liên kết với nhau
-5. Ngắn gọn nhưng đầy đủ
-6. Sử dụng ngôn ngữ kỹ thuật phù hợp cho developers"""
+2. **BẮT BUỘC**: Trích dẫn file và line numbers cụ thể cho MỌI claim (ví dụ: "Trong backend/validators/validator_chain.py:45-78, class ValidationChain...")
+3. Nếu bạn đề cập đến class, function, hoặc module, LUÔN LUÔN bao gồm file path và line range
+4. Giải thích mục đích và cách hoạt động của code
+5. Nếu có nhiều chunks liên quan, giải thích cách chúng liên kết với nhau
+6. Nếu câu hỏi hỏi "X được implement ở đâu", bạn PHẢI cung cấp file path và line numbers chính xác
+7. Ngắn gọn nhưng đầy đủ
+8. Sử dụng ngôn ngữ kỹ thuật phù hợp cho developers
+9. Format citations: `file_path:line_start-line_end` (ví dụ: `backend/api/routers/chat_router.py:2405-2448`)"""
     else:
         safety_rules = """🚨🚨🚨 SAFETY RULES - ABSOLUTELY MANDATORY 🚨🚨🚨
 
@@ -1484,11 +1487,14 @@ You are a Codebase Assistant - only explain existing code, NOT a code reviewer o
         
         instructions = """Answer Instructions:
 1. Answer the question based on the provided code chunks
-2. Cite specific files and line numbers (e.g., "In validation_chain.py:45-78, the ValidationChain class...")
-3. Explain the code's purpose and how it works
-4. If multiple chunks are relevant, explain how they relate to each other
-5. Be concise but thorough
-6. Use technical language appropriate for developers"""
+2. **MANDATORY**: Cite specific files and line numbers for EVERY claim (e.g., "In backend/validators/validator_chain.py:45-78, the ValidationChain class...")
+3. If you mention a class, function, or module, ALWAYS include its file path and approximate line range
+4. Explain the code's purpose and how it works
+5. If multiple chunks are relevant, explain how they relate to each other
+6. If the question asks "where is X implemented", you MUST provide the exact file path and line numbers
+7. Be concise but thorough
+8. Use technical language appropriate for developers
+9. Format citations as: `file_path:line_start-line_end` (e.g., `backend/api/routers/chat_router.py:2405-2448`)"""
     
     # Build complete prompt
     prompt = f"""You are StillMe's Codebase Assistant. Your role is to explain StillMe's codebase accurately based on the provided code chunks.
