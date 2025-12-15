@@ -126,29 +126,143 @@ class AmbiguityDetector:
             score += 0.1
             reasons.append("Ambiguous keyword present")
         
-        # Factor 4: Multiple possible interpretations
+        # Factor 4: Multiple possible interpretations - EXPANDED for multi-language support
         # Check for questions that could be about different things
-        multi_interpretation_patterns = [
-            r"ưu\s+điểm.*nhược\s+điểm",  # "ưu điểm và nhược điểm" - could be about anything
-            r"pros?\s+and\s+cons?",  # "pros and cons"
-            r"so\s+sánh",  # "so sánh" - compare what?
-            r"compare",  # "compare"
-            r"khác\s+biệt",  # "khác biệt" - difference between what?
-            r"difference",  # "difference"
+        # Vietnamese patterns
+        vi_multi_interpretation_patterns = [
+            r"ưu\s+điểm.*nhược\s+điểm",  # "ưu điểm và nhược điểm"
+            r"so\s+sánh",  # "so sánh"
+            r"khác\s+biệt",  # "khác biệt"
+            r"giống\s+nhau",  # "giống nhau"
+            r"tương\s+tự",  # "tương tự"
+            r"đặc\s+điểm",  # "đặc điểm"
+            r"tính\s+năng",  # "tính năng"
+            r"lợi\s+ích",  # "lợi ích"
+            r"hạn\s+chế",  # "hạn chế"
+            r"vấn\s+đề",  # "vấn đề"
+            r"giải\s+pháp",  # "giải pháp"
+            r"phương\s+pháp",  # "phương pháp"
+            r"quy\s+trình",  # "quy trình"
+            r"tốt\s+hơn",  # "tốt hơn"
+            r"tệ\s+hơn",  # "tệ hơn"
+            r"nhanh\s+hơn",  # "nhanh hơn"
+            r"chậm\s+hơn",  # "chậm hơn"
         ]
-        has_multi_interpretation = any(
-            re.search(pattern, query_lower) for pattern in multi_interpretation_patterns
+        
+        # English patterns
+        en_multi_interpretation_patterns = [
+            r"pros?\s+and\s+cons?",  # "pros and cons"
+            r"compare",  # "compare"
+            r"comparison",  # "comparison"
+            r"difference",  # "difference"
+            r"similar",  # "similar"
+            r"different",  # "different"
+            r"advantages?",  # "advantage(s)"
+            r"disadvantages?",  # "disadvantage(s)"
+            r"features?",  # "feature(s)"
+            r"characteristics?",  # "characteristic(s)"
+            r"benefits?",  # "benefit(s)"
+            r"limitations?",  # "limitation(s)"
+            r"problems?",  # "problem(s)"
+            r"solutions?",  # "solution(s)"
+            r"methods?",  # "method(s)"
+            r"steps?",  # "step(s)"
+            r"process",  # "process"
+            r"better",  # "better"
+            r"worse",  # "worse"
+            r"faster",  # "faster"
+            r"slower",  # "slower"
+        ]
+        
+        # Spanish patterns
+        es_multi_interpretation_patterns = [
+            r"ventajas?",  # "ventaja(s)"
+            r"desventajas?",  # "desventaja(s)"
+            r"características?",  # "característica(s)"
+            r"comparar",  # "comparar"
+            r"diferencia",  # "diferencia"
+            r"similar",  # "similar"
+            r"mejor",  # "mejor"
+            r"peor",  # "peor"
+        ]
+        
+        # French patterns
+        fr_multi_interpretation_patterns = [
+            r"avantages?",  # "avantage(s)"
+            r"inconvénients?",  # "inconvénient(s)"
+            r"caractéristiques?",  # "caractéristique(s)"
+            r"comparer",  # "comparer"
+            r"différence",  # "différence"
+            r"similaire",  # "similaire"
+            r"meilleur",  # "meilleur"
+            r"pire",  # "pire"
+        ]
+        
+        # German patterns
+        de_multi_interpretation_patterns = [
+            r"vorteile?",  # "vorteil(e)"
+            r"nachteile?",  # "nachteil(e)"
+            r"eigenschaften?",  # "eigenschaft(en)"
+            r"vergleichen",  # "vergleichen"
+            r"unterschied",  # "unterschied"
+            r"ähnlich",  # "ähnlich"
+            r"besser",  # "besser"
+            r"schlechter",  # "schlechter"
+        ]
+        
+        # Japanese patterns (romaji)
+        ja_multi_interpretation_patterns = [
+            r"hikaku",  # "比較" (comparison)
+            r"chigai",  # "違い" (difference)
+            r"tokuchou",  # "特徴" (characteristics)
+            r"yoi",  # "良い" (good/better)
+            r"warui",  # "悪い" (bad/worse)
+        ]
+        
+        # Chinese patterns (pinyin)
+        zh_multi_interpretation_patterns = [
+            r"bijiao",  # "比较" (comparison)
+            r"qubie",  # "区别" (difference)
+            r"tedian",  # "特点" (characteristics)
+            r"youdian",  # "优点" (advantages)
+            r"quedian",  # "缺点" (disadvantages)
+        ]
+        
+        # Combine all patterns
+        all_multi_interpretation_patterns = (
+            vi_multi_interpretation_patterns +
+            en_multi_interpretation_patterns +
+            es_multi_interpretation_patterns +
+            fr_multi_interpretation_patterns +
+            de_multi_interpretation_patterns +
+            ja_multi_interpretation_patterns +
+            zh_multi_interpretation_patterns
         )
+        
+        has_multi_interpretation = any(
+            re.search(pattern, query_lower) for pattern in all_multi_interpretation_patterns
+        )
+        
         if has_multi_interpretation:
-            # Check if topic is mentioned
-            has_topic = any(
-                word[0].isupper() for word in query.split() if len(word) > 2
-            ) or any(
-                keyword in query_lower for keyword in ["python", "java", "javascript", "c++", "c#"]
+            # Check if topic is mentioned (capitalized words, common tech terms, etc.)
+            has_topic = (
+                any(word[0].isupper() for word in query.split() if len(word) > 2) or
+                any(keyword in query_lower for keyword in [
+                    "python", "java", "javascript", "c++", "c#", "go", "rust", "ruby", "php",
+                    "react", "vue", "angular", "node", "django", "flask", "spring",
+                    "ai", "ml", "dl", "nlp", "cv", "blockchain", "crypto"
+                ])
             )
+            
             if not has_topic:
-                score += 0.3
-                reasons.append("Multi-interpretation pattern without clear topic")
+                # CRITICAL FIX: If query is very short (≤2 words) AND has multi-interpretation pattern,
+                # this is HIGH ambiguity - boost score to ensure it's classified as HIGH
+                if word_count <= 2:
+                    score += 0.4  # Boost from 0.3 to 0.4 to push it over HIGH threshold
+                    reasons.append("Multi-interpretation pattern without clear topic + very short query → HIGH ambiguity")
+                else:
+                    score += 0.3
+                    reasons.append("Multi-interpretation pattern without clear topic")
             else:
                 score += 0.1
                 reasons.append("Multi-interpretation pattern with topic (slight ambiguity)")
@@ -179,17 +293,121 @@ class AmbiguityDetector:
                 score += 0.3
                 reasons.append("Follow-up question without conversation history")
         
-        # Factor 6: Questions that could be about StillMe or something else
-        stillme_ambiguous_patterns = [
-            r"nhược\s+điểm",  # "nhược điểm" - of what?
-            r"weakness",  # "weakness"
-            r"ưu\s+điểm",  # "ưu điểm" - of what?
-            r"advantage",  # "advantage"
-            r"tính\s+năng",  # "tính năng" - features of what?
-            r"features?",  # "features"
+        # Factor 6: Questions that could be about StillMe or something else - EXPANDED for multi-language support
+        # These are short, ambiguous phrases that could refer to StillMe or any topic
+        
+        # Vietnamese patterns
+        vi_ambiguous_patterns = [
+            r"nhược\s+điểm",  # "nhược điểm"
+            r"ưu\s+điểm",  # "ưu điểm"
+            r"tính\s+năng",  # "tính năng"
+            r"đặc\s+điểm",  # "đặc điểm"
+            r"lợi\s+ích",  # "lợi ích"
+            r"hạn\s+chế",  # "hạn chế"
+            r"vấn\s+đề",  # "vấn đề"
+            r"giải\s+pháp",  # "giải pháp"
+            r"cách",  # "cách"
+            r"phương\s+pháp",  # "phương pháp"
+            r"bước",  # "bước"
+            r"quy\s+trình",  # "quy trình"
+            r"công\s+việc",  # "công việc"
+            r"nhiệm\s+vụ",  # "nhiệm vụ"
+            r"chức\s+năng",  # "chức năng"
         ]
+        
+        # English patterns
+        en_ambiguous_patterns = [
+            r"weakness",  # "weakness"
+            r"weaknesses",  # "weaknesses"
+            r"advantage",  # "advantage"
+            r"advantages",  # "advantages"
+            r"features?",  # "feature(s)"
+            r"characteristics?",  # "characteristic(s)"
+            r"benefits?",  # "benefit(s)"
+            r"limitations?",  # "limitation(s)"
+            r"problems?",  # "problem(s)"
+            r"solutions?",  # "solution(s)"
+            r"methods?",  # "method(s)"
+            r"steps?",  # "step(s)"
+            r"process",  # "process"
+            r"tasks?",  # "task(s)"
+            r"functions?",  # "function(s)"
+            r"capabilities?",  # "capability(ies)"
+        ]
+        
+        # Spanish patterns
+        es_ambiguous_patterns = [
+            r"ventajas?",  # "ventaja(s)"
+            r"desventajas?",  # "desventaja(s)"
+            r"características?",  # "característica(s)"
+            r"beneficios?",  # "beneficio(s)"
+            r"limitaciones?",  # "limitación(es)"
+            r"problemas?",  # "problema(s)"
+            r"soluciones?",  # "solución(es)"
+            r"métodos?",  # "método(s)"
+            r"pasos?",  # "paso(s)"
+            r"proceso",  # "proceso"
+        ]
+        
+        # French patterns
+        fr_ambiguous_patterns = [
+            r"avantages?",  # "avantage(s)"
+            r"inconvénients?",  # "inconvénient(s)"
+            r"caractéristiques?",  # "caractéristique(s)"
+            r"bénéfices?",  # "bénéfice(s)"
+            r"limitations?",  # "limitation(s)"
+            r"problèmes?",  # "problème(s)"
+            r"solutions?",  # "solution(s)"
+            r"méthodes?",  # "méthode(s)"
+            r"étapes?",  # "étape(s)"
+            r"processus",  # "processus"
+        ]
+        
+        # German patterns
+        de_ambiguous_patterns = [
+            r"vorteile?",  # "vorteil(e)"
+            r"nachteile?",  # "nachteil(e)"
+            r"eigenschaften?",  # "eigenschaft(en)"
+            r"vorteile?",  # "vorteil(e)"
+            r"nachteile?",  # "nachteil(e)"
+            r"probleme?",  # "problem(e)"
+            r"lösungen?",  # "lösung(en)"
+            r"methoden?",  # "methode(n)"
+            r"schritte?",  # "schritt(e)"
+            r"prozess",  # "prozess"
+        ]
+        
+        # Japanese patterns (romaji)
+        ja_ambiguous_patterns = [
+            r"tokuchou",  # "特徴" (characteristics)
+            r"yoi",  # "良い" (good)
+            r"warui",  # "悪い" (bad)
+            r"houhou",  # "方法" (method)
+            r"stepu",  # "ステップ" (step)
+        ]
+        
+        # Chinese patterns (pinyin)
+        zh_ambiguous_patterns = [
+            r"tedian",  # "特点" (characteristics)
+            r"youdian",  # "优点" (advantages)
+            r"quedian",  # "缺点" (disadvantages)
+            r"fangfa",  # "方法" (method)
+            r"buzhou",  # "步骤" (steps)
+        ]
+        
+        # Combine all patterns
+        all_ambiguous_patterns = (
+            vi_ambiguous_patterns +
+            en_ambiguous_patterns +
+            es_ambiguous_patterns +
+            fr_ambiguous_patterns +
+            de_ambiguous_patterns +
+            ja_ambiguous_patterns +
+            zh_ambiguous_patterns
+        )
+        
         has_stillme_ambiguous = any(
-            re.search(pattern, query_lower) for pattern in stillme_ambiguous_patterns
+            re.search(pattern, query_lower) for pattern in all_ambiguous_patterns
         )
         
         if has_stillme_ambiguous:
@@ -198,7 +416,12 @@ class AmbiguityDetector:
                 "stillme" in query_lower or
                 "bạn" in query_lower or
                 "you" in query_lower or
-                any(word[0].isupper() for word in query.split() if len(word) > 2)
+                any(word[0].isupper() for word in query.split() if len(word) > 2) or
+                any(keyword in query_lower for keyword in [
+                    "python", "java", "javascript", "c++", "c#", "go", "rust", "ruby", "php",
+                    "react", "vue", "angular", "node", "django", "flask", "spring",
+                    "ai", "ml", "dl", "nlp", "cv", "blockchain", "crypto"
+                ])
             )
             if not has_explicit_topic:
                 # CRITICAL FIX: If query is very short (≤2 words) AND has ambiguous reference,
@@ -282,12 +505,12 @@ class AmbiguityDetector:
             else:
                 return "Could you clarify what you're referring to? Are you asking about something from our previous conversation?"
         
-        # Pattern 2: Multi-interpretation without topic
-        if "Multi-interpretation pattern without clear topic" in str(reasons):
+        # Pattern 2: Multi-interpretation without topic (including "so sánh", "compare", etc.)
+        if "Multi-interpretation pattern without clear topic" in str(reasons) or "Multi-interpretation pattern without clear topic + very short query → HIGH ambiguity" in str(reasons):
             if is_vietnamese:
-                return "Bạn muốn so sánh hoặc phân tích về chủ đề nào cụ thể? Ví dụ: Python, Java, một công nghệ, hay một khái niệm nào đó?"
+                return "Bạn muốn so sánh, phân tích, hoặc tìm hiểu về chủ đề nào cụ thể? Ví dụ: Python, Java, một công nghệ, hay một khái niệm nào đó?"
             else:
-                return "What specific topic would you like me to compare or analyze? For example: Python, Java, a technology, or a concept?"
+                return "What specific topic would you like me to compare, analyze, or learn about? For example: Python, Java, a technology, or a concept?"
         
         # Pattern 3: Follow-up without context
         if "Follow-up question without clear context" in str(reasons):
