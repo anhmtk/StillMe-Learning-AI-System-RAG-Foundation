@@ -1459,13 +1459,15 @@ Bạn là Codebase Assistant - chỉ giải thích code hiện tại, KHÔNG ph�
         instructions = """Hướng dẫn trả lời:
 1. Trả lời câu hỏi dựa trên code chunks được cung cấp
 2. **BẮT BUỘC**: Trích dẫn file và line numbers cụ thể cho MỌI claim (ví dụ: "Trong backend/validators/validator_chain.py:45-78, class ValidationChain...")
-3. Nếu bạn đề cập đến class, function, hoặc module, LUÔN LUÔN bao gồm file path và line range
-4. Giải thích mục đích và cách hoạt động của code
-5. Nếu có nhiều chunks liên quan, giải thích cách chúng liên kết với nhau
-6. Nếu câu hỏi hỏi "X được implement ở đâu", bạn PHẢI cung cấp file path và line numbers chính xác
-7. Ngắn gọn nhưng đầy đủ
-8. Sử dụng ngôn ngữ kỹ thuật phù hợp cho developers
-9. Format citations: `file_path:line_start-line_end` (ví dụ: `backend/api/routers/chat_router.py:2405-2448`)"""
+3. **BAO GỒM CODE SNIPPETS**: Khi giải thích cách hoạt động, bao gồm code snippets thực tế từ chunks (dùng ```python blocks)
+4. Nếu bạn đề cập đến class, function, hoặc module, LUÔN LUÔN bao gồm file path và line range
+5. Giải thích mục đích và cách hoạt động của code
+6. Nếu có nhiều chunks liên quan, giải thích cách chúng liên kết với nhau
+7. Nếu câu hỏi hỏi "X được implement ở đâu", bạn PHẢI cung cấp file path và line numbers chính xác
+8. **ĐA DẠNG CITATIONS**: Không lặp lại cùng một citation [1:45-78] nhiều lần. Dùng chunks khác nhau cho các claims khác nhau.
+9. Ngắn gọn nhưng đầy đủ
+10. Sử dụng ngôn ngữ kỹ thuật phù hợp cho developers
+11. Format citations: `file_path:line_start-line_end` (ví dụ: `backend/api/routers/chat_router.py:2405-2448`)"""
     else:
         safety_rules = """🚨🚨🚨 SAFETY RULES - ABSOLUTELY MANDATORY 🚨🚨🚨
 
@@ -1488,13 +1490,15 @@ You are a Codebase Assistant - only explain existing code, NOT a code reviewer o
         instructions = """Answer Instructions:
 1. Answer the question based on the provided code chunks
 2. **MANDATORY**: Cite specific files and line numbers for EVERY claim (e.g., "In backend/validators/validator_chain.py:45-78, the ValidationChain class...")
-3. If you mention a class, function, or module, ALWAYS include its file path and approximate line range
-4. Explain the code's purpose and how it works
-5. If multiple chunks are relevant, explain how they relate to each other
-6. If the question asks "where is X implemented", you MUST provide the exact file path and line numbers
-7. Be concise but thorough
-8. Use technical language appropriate for developers
-9. Format citations as: `file_path:line_start-line_end` (e.g., `backend/api/routers/chat_router.py:2405-2448`)"""
+3. **INCLUDE CODE SNIPPETS**: When explaining how something works, include actual code snippets from the chunks (use ```python blocks)
+4. If you mention a class, function, or module, ALWAYS include its file path and approximate line range
+5. Explain the code's purpose and how it works
+6. If multiple chunks are relevant, explain how they relate to each other
+7. If the question asks "where is X implemented", you MUST provide the exact file path and line numbers
+8. **VARY YOUR CITATIONS**: Don't repeat the same citation [1:45-78] multiple times. Use different chunks for different claims.
+9. Be concise but thorough
+10. Use technical language appropriate for developers
+11. Format citations as: `file_path:line_start-line_end` (e.g., `backend/api/routers/chat_router.py:2405-2448`)"""
     
     # Build complete prompt
     prompt = f"""You are StillMe's Codebase Assistant. Your role is to explain StillMe's codebase accurately based on the provided code chunks.

@@ -2458,7 +2458,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 logger.info("🧠 Codebase meta-question detected - routing to Codebase Assistant")
 
                 indexer = get_codebase_indexer()
-                code_results = indexer.query_codebase(chat_request.message, n_results=5)
+                # Increase n_results for comprehensive answers about architecture/components
+                # This ensures we get multiple related chunks (e.g., ValidationEngine + validators + base classes)
+                code_results = indexer.query_codebase(chat_request.message, n_results=10)
 
                 if code_results:
                     # Build explanation using the same helper as /api/codebase/query
