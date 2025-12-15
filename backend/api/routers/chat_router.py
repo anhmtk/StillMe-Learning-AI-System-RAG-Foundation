@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-def _add_timestamp_to_response(response: str, detected_lang: str = "en") -> str:
+def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None) -> str:
     """
     Add timestamp attribution to normal RAG responses for transparency.
     This ensures consistency with external data responses which already include timestamps.
@@ -45,9 +45,10 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en") -> str:
     Args:
         response: Original response text
         detected_lang: Detected language code
+        context: Optional context dict with knowledge_docs for source links
         
     Returns:
-        Response with timestamp attribution appended
+        Response with timestamp attribution appended (duplicate citations removed)
     """
     if not response or not isinstance(response, str):
         return response
@@ -85,6 +86,17 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en") -> str:
         logger.warning(f"Could not convert timestamp to local timezone: {e}")
         timestamp_display = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
     
+    # Extract source links from context if available
+    source_links = []
+    if context and isinstance(context, dict):
+        knowledge_docs = context.get("knowledge_docs", [])
+        for doc in knowledge_docs[:3]:  # Limit to 3 sources to avoid clutter
+            if isinstance(doc, dict):
+                metadata = doc.get("metadata", {})
+                link = metadata.get("link", "") or metadata.get("source_url", "")
+                if link and link.startswith(("http://", "https://")):
+                    source_links.append(link)
+    
     # Try to extract existing citation from response
     # Look for patterns like [general knowledge], [research: Wikipedia], [source: 1], etc.
     citation_patterns = [
@@ -103,31 +115,51 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en") -> str:
     ]
     
     citation_match = None
+    citation_text_clean = None
     for pattern in citation_patterns:
         match = re.search(pattern, response, re.IGNORECASE)
         if match:
             citation_match = match.group(0)
+            # Extract clean citation text (remove brackets, handle duplicates)
+            citation_text_raw = citation_match.strip('[]')
+            # Normalize: "general knowledge" -> "general knowledge" (remove duplicates)
+            if "general knowledge" in citation_text_raw.lower() or "kiến thức tổng quát" in citation_text_raw.lower():
+                citation_text_clean = "general knowledge" if detected_lang != "vi" else "kiến thức tổng quát"
+            else:
+                citation_text_clean = citation_text_raw
+            # Remove the old citation from response to avoid duplication
+            response = re.sub(re.escape(citation_match), '', response, flags=re.IGNORECASE).strip()
             break
     
-    # Format timestamp attribution
-    if detected_lang == "vi":
-        if citation_match:
-            # Extract citation text without brackets for cleaner format
-            citation_text = citation_match.strip('[]')
-            timestamp_attr = f"\n\n[Nguồn: {citation_text} | Thời gian: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
-        else:
-            # No citation found, just add timestamp
-            timestamp_attr = f"\n\n[Thời gian: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
-    else:
-        if citation_match:
-            # Extract citation text without brackets for cleaner format
-            citation_text = citation_match.strip('[]')
-            timestamp_attr = f"\n\n[Source: {citation_text} | Time: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
-        else:
-            # No citation found, just add timestamp
-            timestamp_attr = f"\n\n[Time: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
+    # Build citation attribution parts
+    citation_parts = []
     
-    # Append timestamp attribution to response
+    if citation_text_clean:
+        if detected_lang == "vi":
+            citation_parts.append(f"Nguồn: {citation_text_clean}")
+        else:
+            citation_parts.append(f"Source: {citation_text_clean}")
+    
+    # Add source links if available
+    if source_links:
+        if detected_lang == "vi":
+            links_text = " | ".join([f"Liên kết {i+1}: {link}" for i, link in enumerate(source_links)])
+        else:
+            links_text = " | ".join([f"Link {i+1}: {link}" for i, link in enumerate(source_links)])
+        citation_parts.append(links_text)
+    
+    # Add timestamp
+    if detected_lang == "vi":
+        citation_parts.append(f"Thời gian: {timestamp_display}")
+        citation_parts.append(f"Timestamp: {timestamp_iso}Z")
+    else:
+        citation_parts.append(f"Time: {timestamp_display}")
+        citation_parts.append(f"Timestamp: {timestamp_iso}Z")
+    
+    # Format final attribution
+    timestamp_attr = f"\n\n[{' | '.join(citation_parts)}]"
+    
+    # Append timestamp attribution to response (response already has old citation removed)
     return response.rstrip() + timestamp_attr
 
 
@@ -7041,7 +7073,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         has_external_data_timestamp = "[Source:" in response or "[Nguồn:" in response
         if not is_fallback and not has_external_data_timestamp and response:
             try:
-                response = _add_timestamp_to_response(response, detected_lang or "en")
+                # Pass context to extract source links if available
+                response = _add_timestamp_to_response(response, detected_lang or "en", context)
                 logger.debug("✅ Added timestamp attribution to RAG response")
             except Exception as e:
                 logger.warning(f"⚠️ Failed to add timestamp to response: {e}")
