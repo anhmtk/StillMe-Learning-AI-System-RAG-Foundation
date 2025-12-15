@@ -2336,6 +2336,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 
                 # Return clarification question immediately (skip LLM call, save cost & latency)
                 from backend.core.epistemic_state import EpistemicState
+                # CRITICAL FIX: Import uuid in try block to avoid UnboundLocalError
+                # Python may think uuid is a local variable if exception occurs before this line
+                import uuid
                 message_id = f"msg_{uuid.uuid4().hex[:16]}"
                 
                 return ChatResponse(
