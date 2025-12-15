@@ -28,6 +28,7 @@ import logging
 import os
 import re
 import asyncio
+import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 import json
@@ -2312,6 +2313,76 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         # Get user_id from request (if available)
         user_id = chat_request.user_id or request.client.host if hasattr(request, 'client') else "anonymous"
+        
+        # CONVERSATIONAL INTELLIGENCE: Check for ambiguous questions BEFORE processing
+        # Based on StillMe Manifesto Principle 5: "EMBRACE 'I DON'T KNOW' AS INTELLECTUAL HONESTY"
+        # Philosophy: Ask for clarification when truly ambiguous, but not too often (balance UX)
+        # NO frequency limit - tư duy phi tuyến tính, không áp dụng giới hạn tuyến tính
+        try:
+            from backend.core.ambiguity_detector import get_ambiguity_detector
+            ambiguity_detector = get_ambiguity_detector()
+            should_ask, clarification_question = ambiguity_detector.should_ask_clarification(
+                chat_request.message,
+                conversation_history=chat_request.conversation_history
+            )
+            
+            if should_ask and clarification_question:
+                # HIGH ambiguity detected - ask for clarification instead of processing
+                logger.info(f"❓ HIGH ambiguity detected - asking for clarification instead of processing")
+                processing_steps.append("❓ Ambiguity detected - asking for clarification")
+                
+                # Detect language for clarification question
+                detected_lang = detect_language(chat_request.message)
+                
+                # Return clarification question immediately (skip LLM call, save cost & latency)
+                from backend.core.epistemic_state import EpistemicState
+                message_id = f"msg_{uuid.uuid4().hex[:16]}"
+                
+                return ChatResponse(
+                    response=clarification_question,
+                    message_id=message_id,
+                    context_used=None,
+                    accuracy_score=None,
+                    confidence_score=0.0,  # Low confidence because we're asking for clarification
+                    validation_info={
+                        "passed": True,
+                        "reasons": ["ambiguity_detected", "clarification_requested"],
+                        "ambiguity_score": 1.0,
+                        "ambiguity_level": "HIGH",
+                        "clarification_question": clarification_question
+                    },
+                    learning_suggestions=None,
+                    learning_session_id=None,
+                    knowledge_alert=None,
+                    learning_proposal=None,
+                    permission_request=None,
+                    timing=timing_logs,
+                    latency_metrics="Ambiguity detection: <0.1s (early return, no LLM call)",
+                    processing_steps=processing_steps,
+                    epistemic_state=EpistemicState.UNKNOWN.value,  # Unknown because we need clarification
+                    transparency_scorecard=None
+                )
+        except Exception as ambiguity_error:
+            # Non-critical - if ambiguity detection fails, continue with normal flow
+            logger.warning(f"⚠️ Ambiguity detection failed: {ambiguity_error}, continuing with normal flow")
+        
+        # Track if we detected MEDIUM ambiguity (will add disclaimer to response)
+        ambiguity_score = 0.0
+        ambiguity_level = "LOW"
+        ambiguity_reasons = []
+        try:
+            from backend.core.ambiguity_detector import get_ambiguity_detector
+            ambiguity_detector = get_ambiguity_detector()
+            ambiguity_score, ambiguity_level_enum, ambiguity_reasons = ambiguity_detector.detect_ambiguity(
+                chat_request.message,
+                conversation_history=chat_request.conversation_history
+            )
+            ambiguity_level = ambiguity_level_enum.value
+            if ambiguity_level == "MEDIUM":
+                logger.info(f"⚠️ MEDIUM ambiguity detected (score={ambiguity_score:.2f}) - will add disclaimer to response")
+                processing_steps.append(f"⚠️ Medium ambiguity detected (score={ambiguity_score:.2f})")
+        except Exception:
+            pass  # Non-critical
         
         # Detect learning metrics queries - auto-query API if user asks about learning today
         is_learning_metrics_query = False
