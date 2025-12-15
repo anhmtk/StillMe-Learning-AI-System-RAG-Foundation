@@ -5,7 +5,7 @@ Implements Special Retrieval Rule for StillMe-related questions
 
 import re
 import logging
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -80,18 +80,52 @@ STILLME_KEYWORDS = {
 }
 
 
-def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
+def detect_stillme_query(query: str, conversation_history: Optional[List[dict]] = None) -> Tuple[bool, List[str]]:
     """
     Detect if query is about StillMe itself.
     
     Args:
         query: User query string
+        conversation_history: Optional conversation history to check for context
         
     Returns:
         Tuple of (is_stillme_query, matched_keywords)
     """
     query_lower = query.lower()
     matched_keywords = []
+    
+    # CONTEXT FIX: If conversation history exists, check if this is a follow-up about a different topic
+    # Example: "Ưu điểm của Python là gì?" → "còn nhược điểm thì sao" should be about Python, not StillMe
+    has_previous_topic_context = False
+    if conversation_history and len(conversation_history) > 0:
+        # Get last few messages to check context
+        recent_messages = conversation_history[-3:]  # Last 3 messages
+        previous_topics = []
+        for msg in recent_messages:
+            content = msg.get("content", "")
+            role = msg.get("role", "")
+            if role == "user" and content:
+                # Extract potential topics (simple heuristic: capitalized words, quoted strings, "của X", "about X")
+                # Find capitalized words (likely proper nouns like "Python", "Java", etc.)
+                capitalized_words = re.findall(r'\b[A-Z][a-z]+\b', content)
+                previous_topics.extend(capitalized_words)
+                # Find "của X" or "about X" patterns
+                of_patterns = re.findall(r'(?:của|about|về)\s+([A-Z][a-z]+)', content, re.IGNORECASE)
+                previous_topics.extend(of_patterns)
+        
+        # If previous messages mention a topic (like "Python"), and current query is a follow-up,
+        # it's likely about that topic, not StillMe
+        if previous_topics:
+            # Check if current query is a follow-up pattern
+            follow_up_patterns = ["còn", "thì sao", "còn về", "what about", "how about", "and", "also"]
+            is_follow_up = any(pattern in query_lower for pattern in follow_up_patterns)
+            
+            # If it's a follow-up and previous messages mention a topic, it's likely about that topic
+            if is_follow_up:
+                has_previous_topic_context = True
+                logger.info(f"📊 Follow-up query detected with previous topics: {previous_topics} - likely about topic, not StillMe")
+                # Don't return False immediately - let other patterns check first
+                # But we'll be more conservative about StillMe detection
     
     # CRITICAL: Check for META-VALIDATION questions FIRST (before technical detection)
     # These are philosophical/epistemic questions about validation of validation itself

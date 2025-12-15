@@ -1110,7 +1110,12 @@ def _format_conversation_history(conversation_history, max_tokens: int = 1000,
             "câu trả lời trên", "answer above", "previous answer",
             "4 câu trên", "3 câu trên", "2 câu trên", "câu hỏi trên",
             "4 questions above", "3 questions above", "2 questions above",
-            "như đã nói", "như đã trả lời", "as answered", "as mentioned above"
+            "như đã nói", "như đã trả lời", "as answered", "as mentioned above",
+            # CONTEXT FIX: Detect common follow-up patterns
+            "còn", "còn về", "còn thì", "còn gì", "còn sao", "thì sao", "còn về",
+            "what about", "how about", "what else", "and", "also", "additionally",
+            "còn nhược điểm", "còn ưu điểm", "còn điểm", "còn tính năng",
+            "what about the", "how about the", "and the", "also the"
         ]
         return any(indicator in query_lower for indicator in follow_up_indicators)
     
@@ -2973,7 +2978,11 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                     detect_stillme_query, 
                     get_foundational_query_variants
                 )
-                is_stillme_query, matched_keywords = detect_stillme_query(chat_request.message)
+                # CONTEXT FIX: Pass conversation_history to detect_stillme_query for better context understanding
+                is_stillme_query, matched_keywords = detect_stillme_query(
+                    chat_request.message,
+                    conversation_history=chat_request.conversation_history
+                )
                 
                 # CRITICAL: Also detect technical questions about "your system" as StillMe queries
                 # This ensures questions like "What is RAG retrieval in your system?" are treated as StillMe queries
