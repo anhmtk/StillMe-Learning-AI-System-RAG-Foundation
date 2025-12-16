@@ -537,8 +537,11 @@ The user is asking about StillMe's wishes, desires, or preferences (e.g., "if yo
             for pattern in [
                 "how did you use", "how do you use", "how you used", "how you use",
                 "bạn đã dùng", "bạn sử dụng", "bạn dùng", "cách bạn dùng",
-                "explain step by step how", "distinguish between", "for each factual claim",
-                "if any validator raised warnings"
+                "explain step by step how", "explain, step by step", "step by step, how",
+                "distinguish between", "for each factual claim",
+                "if any validator raised warnings", "validator raised warnings",
+                "how you used rag", "how you used validation", "how did you use rag",
+                "how did you use validation", "how you used your", "how did you use your"
             ]
         )
         
@@ -1125,12 +1128,19 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 ---"""
         
         # Append specific RAG/validation details if question asks "how did you use X"
-        if is_how_question and (context or validation_info):
+        # CRITICAL: Always append if is_how_question is True, even if context is None (will show reminder)
+        if is_how_question:
             specific_details = self._build_specific_rag_validation_section(
                 detected_lang, context, validation_info
             )
             if specific_details:
                 stillme_instruction += "\n\n" + specific_details
+            # If no specific details but is_how_question, add a reminder to be specific
+            elif not specific_details:
+                if detected_lang == "vi":
+                    stillme_instruction += "\n\n⚠️ **LƯU Ý QUAN TRỌNG**: Câu hỏi này yêu cầu giải thích CỤ THỂ về cách StillMe dùng RAG/validation chain cho CÂU HỎI NÀY. Bạn PHẢI mention cụ thể về documents đã retrieve (nếu có) và phân biệt rõ: 'Phần X trong câu trả lời đến từ document [1] về [topic], phần Y từ document [2]..., phần Z từ general background knowledge'."
+                else:
+                    stillme_instruction += "\n\n⚠️ **CRITICAL NOTE**: This question asks for SPECIFIC explanation about how StillMe used RAG/validation chain for THIS question. You MUST mention specific details about retrieved documents (if any) and clearly distinguish: 'Part X in my answer comes from document [1] about [topic], part Y from document [2]..., part Z from general background knowledge'."
         
         return stillme_instruction
     
@@ -1144,6 +1154,12 @@ The user is asking about StillMe's nature, capabilities, or architecture.
         rag_section = ""
         validation_section = ""
         
+        # Debug: Log context structure
+        import logging
+        logger = logging.getLogger(__name__)
+        if context:
+            logger.debug(f"_build_specific_rag_validation_section: context type={type(context)}, keys={list(context.keys()) if isinstance(context, dict) else 'not dict'}")
+        
         if context and isinstance(context, dict):
             knowledge_docs = context.get("knowledge_docs", [])
             total_context_docs = context.get("total_context_docs", 0) or len(knowledge_docs)
@@ -1151,11 +1167,23 @@ The user is asking about StillMe's nature, capabilities, or architecture.
             if knowledge_docs or total_context_docs > 0:
                 doc_summaries = []
                 for i, doc in enumerate(knowledge_docs[:3], 1):
-                    metadata = doc.get("metadata", {})
-                    source = metadata.get("source", "unknown")
-                    doc_type = metadata.get("type", "unknown")
-                    title = metadata.get("title", "") or metadata.get("file_path", "")
-                    content_preview = doc.get("document", "")[:200] if isinstance(doc.get("document"), str) else ""
+                    # Handle both dict and object-like structures
+                    if isinstance(doc, dict):
+                        metadata = doc.get("metadata", {})
+                        source = metadata.get("source", "unknown") if isinstance(metadata, dict) else "unknown"
+                        doc_type = metadata.get("type", "unknown") if isinstance(metadata, dict) else "unknown"
+                        title = metadata.get("title", "") or metadata.get("file_path", "") if isinstance(metadata, dict) else ""
+                        # Try to get document content from various possible keys
+                        doc_content = doc.get("document", "") or doc.get("content", "") or doc.get("text", "")
+                        content_preview = doc_content[:200] if isinstance(doc_content, str) else ""
+                    else:
+                        # Fallback for non-dict structures
+                        metadata = getattr(doc, "metadata", {}) if hasattr(doc, "metadata") else {}
+                        source = getattr(metadata, "source", "unknown") if hasattr(metadata, "source") else (metadata.get("source", "unknown") if isinstance(metadata, dict) else "unknown")
+                        doc_type = getattr(metadata, "type", "unknown") if hasattr(metadata, "type") else (metadata.get("type", "unknown") if isinstance(metadata, dict) else "unknown")
+                        title = getattr(metadata, "title", "") or getattr(metadata, "file_path", "") if hasattr(metadata, "title") or hasattr(metadata, "file_path") else (metadata.get("title", "") or metadata.get("file_path", "") if isinstance(metadata, dict) else "")
+                        doc_content = getattr(doc, "document", "") or getattr(doc, "content", "") or getattr(doc, "text", "")
+                        content_preview = doc_content[:200] if isinstance(doc_content, str) else ""
                     
                     doc_summary = f"Document {i}: {title} (Source: {source}, Type: {doc_type})"
                     if content_preview:
