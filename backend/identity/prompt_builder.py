@@ -221,6 +221,32 @@ class UnifiedPromptBuilder:
 
 User Question: {context.user_question}
 """
+        
+        # CRITICAL: If this is a "how did you use X" question about StillMe, append specific details to user question
+        # This ensures LLM sees the specific details even if instruction section was truncated
+        if context.is_stillme_query and context.context:
+            question_lower = context.user_question.lower() if context.user_question else ""
+            is_how_question = any(
+                pattern in question_lower
+                for pattern in [
+                    "how did you use", "how do you use", "how you used", "how you use",
+                    "bạn đã dùng", "bạn sử dụng", "bạn dùng", "cách bạn dùng",
+                    "explain step by step how", "explain, step by step", "step by step, how",
+                    "distinguish between", "for each factual claim",
+                    "if any validator raised warnings", "validator raised warnings",
+                    "how you used rag", "how you used validation", "how did you use rag",
+                    "how did you use validation", "how you used your", "how did you use your"
+                ]
+            )
+            
+            if is_how_question:
+                specific_details = self._build_specific_rag_validation_section(
+                    context.detected_lang, context.context, None  # validation_info not available at prompt building time
+                )
+                if specific_details:
+                    # Append specific details directly to user question to ensure LLM sees it
+                    prompt = prompt.rstrip() + "\n\n" + specific_details
+        
         return prompt
     
     def _build_language_instruction(self, detected_lang: str) -> str:
