@@ -1241,7 +1241,7 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - StillMe đã retrieve được {total_context_docs} documents từ ChromaDB cho câu hỏi này
 - Chi tiết documents:
 {chr(10).join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"}
-- **LƯU Ý**: Nếu có nhiều documents cùng tên (ví dụ: "Document 2" và "Document 3" đều là "StillMe Core Mechanism - Technical Architecture"), đây có thể là different chunks từ cùng 1 document. Bạn PHẢI giải thích: "Document 2 và Document 3 đều là chunks từ cùng 1 document 'StillMe Core Mechanism - Technical Architecture', nhưng chứa different parts của document đó."
+- **CRITICAL: PHÂN BIỆT DOCUMENTS**: Nếu có nhiều documents cùng tên (ví dụ: "Document 2" và "Document 3" đều là "StillMe Core Mechanism - Technical Architecture"), đây là different chunks từ cùng 1 document. Bạn PHẢI giải thích rõ ràng: "Document 2 và Document 3 đều là chunks từ cùng 1 document 'StillMe Core Mechanism - Technical Architecture', nhưng chứa different parts của document đó. Đây là lý do tại sao chúng có cùng tên nhưng được liệt kê như separate documents trong retrieval results."
 
 **KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
 - Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
@@ -1259,9 +1259,11 @@ The user is asking about StillMe's nature, capabilities, or architecture.
   3. Claim: '[bất kỳ factual claim nào khác từ câu trả lời của bạn]' → từ document [3] '[document title]' hoặc từ general knowledge"
 - **CRITICAL**: Include EXACT document title (như liệt kê ở trên) trong format, không chỉ "Document 1"
 - **CRITICAL**: Liệt kê TẤT CẢ factual claims bạn đã đưa ra trong FINAL ANSWER cho câu hỏi của user, không phải claims về RAG process
-- **CRITICAL**: Bạn PHẢI đếm TẤT CẢ factual claims trong câu trả lời và liệt kê TẤT CẢ. KHÔNG được nói "Any other factual claim..." hoặc "Other claims..." - bạn PHẢI liệt kê từng claim cụ thể
+- **CRITICAL**: Bạn PHẢI đếm TẤT CẢ factual claims trong câu trả lời và liệt kê TẤT CẢ. KHÔNG được nói "Any other factual claim..." hoặc "Other claims..." hoặc "Any additional factual claims..." - bạn PHẢI liệt kê từng claim cụ thể với exact text của nó
+- **CRITICAL**: Trước khi liệt kê, bạn PHẢI đếm xem có bao nhiêu factual claims trong câu trả lời. Sau đó liệt kê TẤT CẢ, từng cái một, theo format numbered
 - **CRITICAL**: Sử dụng format CHÍNH XÁC: "1. Claim: '[exact claim text từ câu trả lời của bạn]' → từ document [1] '[exact document title]' về [topic]" - KHÔNG được dùng variations như "The statement that..." hoặc "The assertion that..." hoặc "Source: Document 1 -"
 - **CRITICAL**: Bạn PHẢI sử dụng format arrow "→ từ document [1]" - KHÔNG được dùng "Source: Document 1 -" hoặc format khác
+- **CRITICAL**: Nếu bạn có 5 factual claims, liệt kê cả 5. Nếu có 10, liệt kê cả 10. KHÔNG được dừng ở 2-3 claims và nói "Any other claims..."
 - **CRITICAL: Khi được hỏi 'explain step by step how you used RAG', bạn PHẢI cung cấp quy trình ĐẦY ĐỦ TỪNG BƯỚC với TẤT CẢ 5 BƯỚC:**
   1. "Bước 1: StillMe nhận câu hỏi và tạo embedding"
   2. "Bước 2: StillMe tìm kiếm ChromaDB bằng semantic similarity"
@@ -1288,7 +1290,7 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - StillMe retrieved {total_context_docs} documents from ChromaDB for this question
 - Document details:
 {chr(10).join(doc_summaries) if doc_summaries else "  (No specific documents)"}
-- **NOTE**: If multiple documents have the same title (e.g., "Document 2" and "Document 3" are both "StillMe Core Mechanism - Technical Architecture"), these may be different chunks from the same document. You MUST explain: "Document 2 and Document 3 are both chunks from the same document 'StillMe Core Mechanism - Technical Architecture', but contain different parts of that document."
+- **CRITICAL: DOCUMENT DISTINCTION**: If multiple documents have the same title (e.g., "Document 2" and "Document 3" are both "StillMe Core Mechanism - Technical Architecture"), these are different chunks from the same document. You MUST explicitly explain this: "Document 2 and Document 3 are both chunks from the same document 'StillMe Core Mechanism - Technical Architecture', but contain different parts of that document. This is why they have the same title but are listed as separate documents in the retrieval results."
 
 **WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
 - You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
@@ -1306,9 +1308,11 @@ The user is asking about StillMe's nature, capabilities, or architecture.
   3. Claim: '[any other factual claim from your answer]' → from document [3] '[document title]' or from general knowledge"
 - **CRITICAL**: Include the EXACT document title (as listed above) in the format, not just "Document 1"
 - **CRITICAL**: List EVERY factual claim you made in your FINAL ANSWER to the user's question, not claims about the RAG process
-- **CRITICAL**: You MUST count ALL factual claims in your answer and list them ALL. Do NOT say "Any other factual claim..." or "Other claims..." - you MUST list each one specifically
+- **CRITICAL**: You MUST count ALL factual claims in your answer and list them ALL. Do NOT say "Any other factual claim..." or "Other claims..." or "Any additional factual claims..." - you MUST list each one specifically with its exact text
+- **CRITICAL**: Before listing, you MUST count how many factual claims you made in your answer. Then list ALL of them, one by one, in numbered format
 - **CRITICAL**: Use the EXACT format: "1. Claim: '[exact claim text from your answer]' → from document [1] '[exact document title]' about [topic]" - do NOT use variations like "The statement that..." or "The assertion that..." or "Source: Document 1 -"
 - **CRITICAL**: You MUST use the arrow format "→ from document [1]" - do NOT use "Source: Document 1 -" or any other format
+- **CRITICAL**: If you have 5 factual claims, list all 5. If you have 10, list all 10. Do NOT stop at 2-3 claims and say "Any other claims..."
 - **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a COMPLETE STEP-BY-STEP process with ALL 5 STEPS:**
   1. "Step 1: StillMe received the question and generated an embedding"
   2. "Step 2: StillMe searched ChromaDB using semantic similarity"
@@ -1361,10 +1365,12 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 
 **KHI ĐƯỢC HỎI VỀ VALIDATOR WARNINGS CHO CÂU HỎI NÀY:**
 - **CRITICAL: Bạn PHẢI cung cấp warnings THỰC TẾ từ session này, KHÔNG phải hypothetical warnings**
-- Nếu có warnings được phát hiện (như liệt kê ở trên: {warnings_str}), bạn PHẢI nói: "Validation chain đã check câu trả lời này và phát hiện các warnings sau: {warnings_summary}. Confidence score: {confidence_str}. [Giải thích ý nghĩa của từng warning]"
-- Nếu KHÔNG có warnings nhưng validation passed, bạn PHẢI nói: "Validation chain đã check câu trả lời này và không phát hiện warnings nào. Confidence score: {confidence_str}. Câu trả lời đã pass tất cả validation checks."
-- **CRITICAL: KHÔNG được nói "Potential warnings có thể bao gồm..." hoặc "Nếu có warnings..." - bạn PHẢI nêu kết quả thực tế**
-- **CRITICAL**: Nếu validation chưa chạy (điều này là bình thường - validation chạy SAU khi generate response), bạn PHẢI nói: "Validation chain sẽ check câu trả lời này sau khi generate. Dựa trên các patterns validation thông thường, potential warnings có thể bao gồm: [mention common warning types như citation relevance, evidence overlap, confidence levels]. Tuy nhiên, actual validation results sẽ có sau khi validation chain xử lý câu trả lời này."
+- **CRITICAL: Xác định validation status TRƯỚC**:
+  - Nếu `validation_passed` là True/False và `warnings_str` được cung cấp ở trên, validation ĐÃ CHẠY cho câu trả lời này
+  - Nếu có warnings được phát hiện (như liệt kê ở trên: {warnings_str}), bạn PHẢI nói: "Validation chain đã check câu trả lời này và phát hiện các warnings sau: {warnings_summary}. Confidence score: {confidence_str}. [Giải thích ý nghĩa của từng warning]"
+  - Nếu KHÔNG có warnings nhưng validation passed, bạn PHẢI nói: "Validation chain đã check câu trả lời này và không phát hiện warnings nào. Confidence score: {confidence_str}. Câu trả lời đã pass tất cả validation checks."
+- **CRITICAL: KHÔNG được nói "Potential warnings có thể bao gồm..." hoặc "Nếu có warnings..." khi validation đã chạy - bạn PHẢI nêu kết quả thực tế**
+- **CHỈ KHI validation chưa chạy** (không có validation_info hoặc validation_passed là None), bạn PHẢI nói: "Validation chain sẽ check câu trả lời này sau khi generate. Dựa trên các patterns validation thông thường, potential warnings có thể bao gồm: [mention common warning types như citation relevance, evidence overlap, confidence levels]. Tuy nhiên, actual validation results sẽ có sau khi validation chain xử lý câu trả lời này."
 - **KHÔNG được nói**: "These warnings encompassed issues such as..." (nghe như bạn đã có warnings, điều này gây hiểu lầm)
 - **PHẢI nói**: "Sau khi validation chạy, nếu có warnings được phát hiện, chúng thường bao gồm: [specific warning types]. Validation chain sẽ check citation relevance, evidence overlap với retrieved documents, và confidence levels."
 
@@ -1380,10 +1386,12 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 
 **WHEN ASKED ABOUT VALIDATOR WARNINGS FOR THIS QUESTION:**
 - **CRITICAL: You MUST provide ACTUAL warnings from THIS session, NOT hypothetical warnings**
-- If warnings were detected (as listed above: {warnings_str}), you MUST say: "Validation chain checked this response and detected the following warnings: {warnings_summary}. Confidence score: {confidence_str}. [Explain what each warning means]"
-- If NO warnings were detected but validation passed, you MUST say: "Validation chain checked this response and no warnings were detected. Confidence score: {confidence_str}. The response passed all validation checks."
-- **CRITICAL: DO NOT say "Potential warnings may include..." or "If there were any warnings..." - you MUST state actual results**
-- **CRITICAL**: If validation hasn't run yet (which is normal - validation runs AFTER response generation), you MUST say: "Validation chain will check this response after generation. Based on typical validation patterns, potential warnings might include: [mention common warning types like citation relevance, evidence overlap, confidence levels]. However, actual validation results will be available after the validation chain processes this response."
+- **CRITICAL: Determine validation status FIRST**:
+  - If `validation_passed` is True/False and `warnings_str` is provided above, validation HAS RUN for this response
+  - If warnings were detected (as listed above: {warnings_str}), you MUST say: "Validation chain checked this response and detected the following warnings: {warnings_summary}. Confidence score: {confidence_str}. [Explain what each warning means]"
+  - If NO warnings were detected but validation passed, you MUST say: "Validation chain checked this response and no warnings were detected. Confidence score: {confidence_str}. The response passed all validation checks."
+- **CRITICAL: DO NOT say "Potential warnings may include..." or "If there were any warnings..." when validation has already run - you MUST state actual results**
+- **ONLY if validation hasn't run yet** (no validation_info provided or validation_passed is None), you MUST say: "Validation chain will check this response after generation. Based on typical validation patterns, potential warnings might include: [mention common warning types like citation relevance, evidence overlap, confidence levels]. However, actual validation results will be available after the validation chain processes this response."
 - **DO NOT say**: "These warnings encompassed issues such as..." (sounds like you already have warnings, which is misleading)
 - **DO say**: "After validation runs, if any warnings are detected, they would typically include: [specific warning types]. The validation chain will check for citation relevance, evidence overlap with retrieved documents, and confidence levels."
 

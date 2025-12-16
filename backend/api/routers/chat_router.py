@@ -199,7 +199,8 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
                 
                 # Extract document title
                 title = metadata.get("title", "") or metadata.get("file_path", "")
-                doc_type = metadata.get("type", "") or metadata.get("source_type", "")
+                # Extract document type from source (CRITICAL_FOUNDATION) or type field
+                doc_type = metadata.get("source", "") or metadata.get("type", "") or metadata.get("source_type", "")
                 
                 # Only add unique titles (to handle multiple chunks from same document)
                 if title and title not in seen_titles:
