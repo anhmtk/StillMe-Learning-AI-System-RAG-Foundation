@@ -1259,13 +1259,15 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - **CRITICAL**: Include EXACT document title (như liệt kê ở trên) trong format, không chỉ "Document 1"
 - **CRITICAL**: Liệt kê TẤT CẢ factual claims bạn đã đưa ra trong FINAL ANSWER cho câu hỏi của user, không phải claims về RAG process
 - **CRITICAL**: Bạn PHẢI đếm TẤT CẢ factual claims trong câu trả lời và liệt kê TẤT CẢ. KHÔNG được nói "Any other factual claim..." hoặc "Other claims..." - bạn PHẢI liệt kê từng claim cụ thể
-- **CRITICAL**: Sử dụng format CHÍNH XÁC: "1. Claim: '[exact claim text từ câu trả lời của bạn]' → từ document [1] '[exact document title]' về [topic]" - KHÔNG được dùng variations như "The statement that..." hoặc "The assertion that..."
-- **CRITICAL: Khi được hỏi 'explain step by step how you used RAG', bạn PHẢI cung cấp quy trình TỪNG BƯỚC:**
+- **CRITICAL**: Sử dụng format CHÍNH XÁC: "1. Claim: '[exact claim text từ câu trả lời của bạn]' → từ document [1] '[exact document title]' về [topic]" - KHÔNG được dùng variations như "The statement that..." hoặc "The assertion that..." hoặc "Source: Document 1 -"
+- **CRITICAL**: Bạn PHẢI sử dụng format arrow "→ từ document [1]" - KHÔNG được dùng "Source: Document 1 -" hoặc format khác
+- **CRITICAL: Khi được hỏi 'explain step by step how you used RAG', bạn PHẢI cung cấp quy trình ĐẦY ĐỦ TỪNG BƯỚC với TẤT CẢ 5 BƯỚC:**
   1. "Bước 1: StillMe nhận câu hỏi và tạo embedding"
   2. "Bước 2: StillMe tìm kiếm ChromaDB bằng semantic similarity"
   3. "Bước 3: StillMe retrieve được {total_context_docs} documents (liệt kê chúng)"
-  4. "Bước 4: StillMe sử dụng các documents này để tạo câu trả lời"
+  4. "Bước 4: StillMe sử dụng các documents này để tạo câu trả lời, kết hợp với general background knowledge"
   5. "Bước 5: StillMe sử dụng validation chain để validate response"
+- **CRITICAL: Bạn PHẢI include Bước 5 về validation chain - KHÔNG được bỏ qua hoặc dừng ở Bước 4**
 
 """
                 else:
@@ -1294,13 +1296,15 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - **CRITICAL**: Include the EXACT document title (as listed above) in the format, not just "Document 1"
 - **CRITICAL**: List EVERY factual claim you made in your FINAL ANSWER to the user's question, not claims about the RAG process
 - **CRITICAL**: You MUST count ALL factual claims in your answer and list them ALL. Do NOT say "Any other factual claim..." or "Other claims..." - you MUST list each one specifically
-- **CRITICAL**: Use the EXACT format: "1. Claim: '[exact claim text from your answer]' → from document [1] '[exact document title]' about [topic]" - do NOT use variations like "The statement that..." or "The assertion that..."
-- **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a STEP-BY-STEP process:**
+- **CRITICAL**: Use the EXACT format: "1. Claim: '[exact claim text from your answer]' → from document [1] '[exact document title]' about [topic]" - do NOT use variations like "The statement that..." or "The assertion that..." or "Source: Document 1 -"
+- **CRITICAL**: You MUST use the arrow format "→ from document [1]" - do NOT use "Source: Document 1 -" or any other format
+- **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a COMPLETE STEP-BY-STEP process with ALL 5 STEPS:**
   1. "Step 1: StillMe received the question and generated an embedding"
   2. "Step 2: StillMe searched ChromaDB using semantic similarity"
   3. "Step 3: StillMe retrieved {total_context_docs} documents: {', '.join([f'Document {i}' for i in range(1, len(doc_summaries) + 1)]) if doc_summaries else 'no documents'}"
   4. "Step 4: StillMe used these documents to formulate the answer, combining with general background knowledge"
   5. "Step 5: StillMe used the validation chain to validate the response"
+- **CRITICAL: You MUST include Step 5 about validation chain - do NOT skip it or stop at Step 4**
 
 """
         
@@ -1868,15 +1872,16 @@ Bạn là Codebase Assistant - chỉ giải thích code hiện tại, KHÔNG ph�
         instructions = """Hướng dẫn trả lời:
 1. Trả lời câu hỏi dựa trên code chunks được cung cấp
 2. **BẮT BUỘC**: Trích dẫn file và line numbers cụ thể cho MỌI claim (ví dụ: "Trong backend/validators/validator_chain.py:45-78, class ValidationChain...")
-3. **BAO GỒM CODE SNIPPETS**: Khi giải thích cách hoạt động, bao gồm code snippets thực tế từ chunks (dùng ```python blocks)
-4. Nếu bạn đề cập đến class, function, hoặc module, LUÔN LUÔN bao gồm file path và line range
-5. Giải thích mục đích và cách hoạt động của code
-6. Nếu có nhiều chunks liên quan, giải thích cách chúng liên kết với nhau
-7. Nếu câu hỏi hỏi "X được implement ở đâu", bạn PHẢI cung cấp file path và line numbers chính xác
-8. **ĐA DẠNG CITATIONS**: Không lặp lại cùng một citation [1:45-78] nhiều lần. Dùng chunks khác nhau cho các claims khác nhau.
-9. Ngắn gọn nhưng đầy đủ
-10. Sử dụng ngôn ngữ kỹ thuật phù hợp cho developers
-11. Format citations: `file_path:line_start-line_end` (ví dụ: `backend/api/routers/chat_router.py:2405-2448`)"""
+3. **CRITICAL: SỬ DỤNG CODE SNIPPETS THỰC TẾ TỪ CHUNKS**: Khi giải thích cách hoạt động, bạn PHẢI copy-paste code snippets thực tế từ các code chunks được cung cấp (dùng ```python blocks). KHÔNG được tạo ra hoặc bịa đặt code snippets - chỉ sử dụng code có trong chunks ở trên.
+4. **CRITICAL: LINE NUMBERS CHÍNH XÁC**: Bạn PHẢI sử dụng line numbers CHÍNH XÁC từ code chunks (ví dụ: nếu chunk nói "Lines: 296-308", trích dẫn là `file_path:296-308`, KHÔNG phải `file_path:150-180`). KHÔNG được đoán hoặc xấp xỉ line numbers.
+5. Nếu bạn đề cập đến class, function, hoặc module, LUÔN LUÔN bao gồm file path và line range CHÍNH XÁC từ chunks
+6. Giải thích mục đích và cách hoạt động của code
+7. Nếu có nhiều chunks liên quan, giải thích cách chúng liên kết với nhau
+8. Nếu câu hỏi hỏi "X được implement ở đâu", bạn PHẢI cung cấp file path và line numbers chính xác từ chunks
+9. **ĐA DẠNG CITATIONS**: Không lặp lại cùng một citation nhiều lần. Dùng chunks khác nhau cho các claims khác nhau.
+10. Ngắn gọn nhưng đầy đủ
+11. Sử dụng ngôn ngữ kỹ thuật phù hợp cho developers
+12. Format citations: `file_path:line_start-line_end` (ví dụ: `backend/api/routers/chat_router.py:2405-2448`) - sử dụng line numbers CHÍNH XÁC từ chunks, không xấp xỉ"""
     else:
         safety_rules = """🚨🚨🚨 SAFETY RULES - ABSOLUTELY MANDATORY 🚨🚨🚨
 
@@ -1899,15 +1904,16 @@ You are a Codebase Assistant - only explain existing code, NOT a code reviewer o
         instructions = """Answer Instructions:
 1. Answer the question based on the provided code chunks
 2. **MANDATORY**: Cite specific files and line numbers for EVERY claim (e.g., "In backend/validators/validator_chain.py:45-78, the ValidationChain class...")
-3. **INCLUDE CODE SNIPPETS**: When explaining how something works, include actual code snippets from the chunks (use ```python blocks)
-4. If you mention a class, function, or module, ALWAYS include its file path and approximate line range
-5. Explain the code's purpose and how it works
-6. If multiple chunks are relevant, explain how they relate to each other
-7. If the question asks "where is X implemented", you MUST provide the exact file path and line numbers
-8. **VARY YOUR CITATIONS**: Don't repeat the same citation [1:45-78] multiple times. Use different chunks for different claims.
-9. Be concise but thorough
-10. Use technical language appropriate for developers
-11. Format citations as: `file_path:line_start-line_end` (e.g., `backend/api/routers/chat_router.py:2405-2448`)"""
+3. **CRITICAL: USE ACTUAL CODE SNIPPETS FROM CHUNKS**: When explaining how something works, you MUST copy-paste actual code snippets from the provided code chunks (use ```python blocks). DO NOT create or fabricate code snippets - only use code that exists in the chunks above.
+4. **CRITICAL: ACCURATE LINE NUMBERS**: You MUST use the EXACT line numbers from the code chunks (e.g., if chunk says "Lines: 296-308", cite as `file_path:296-308`, NOT `file_path:150-180`). DO NOT guess or approximate line numbers.
+5. If you mention a class, function, or module, ALWAYS include its file path and EXACT line range from the chunks
+6. Explain the code's purpose and how it works
+7. If multiple chunks are relevant, explain how they relate to each other
+8. If the question asks "where is X implemented", you MUST provide the exact file path and line numbers from the chunks
+9. **VARY YOUR CITATIONS**: Don't repeat the same citation multiple times. Use different chunks for different claims.
+10. Be concise but thorough
+11. Use technical language appropriate for developers
+12. Format citations as: `file_path:line_start-line_end` (e.g., `backend/api/routers/chat_router.py:2405-2448`) - use EXACT line numbers from chunks, not approximations"""
     
     # Build complete prompt
     prompt = f"""You are StillMe's Codebase Assistant. Your role is to explain StillMe's codebase accurately based on the provided code chunks.
