@@ -1061,6 +1061,20 @@ If the question belongs to a classic philosophical debate (free will, determinis
 
 **User's Question:** {question}
 
+**🚨🚨🚨 CRITICAL: READ THIS BEFORE ANSWERING 🚨🚨🚨**
+
+**IF THE QUESTION ASKS "explain step by step how you used RAG" or "for each factual claim":**
+- You MUST provide a STEP-BY-STEP process (Step 1, Step 2, Step 3, etc.)
+- You MUST list EACH factual claim separately with its source
+- You MUST mention ALL retrieved documents (do NOT skip any)
+- You MUST distinguish SPECIFICALLY which parts come from which documents
+
+**IF THE QUESTION ASKS "if any validator raised warnings":**
+- You MUST summarize ACTUAL warnings (not hypothetical "if there were any")
+- You MUST mention confidence score and specific warning types
+
+**DO NOT give generic descriptions - be SPECIFIC about THIS question's process and sources.**
+
 **Your Task:** Answer this question directly, deeply, and engagingly. If it's about YOU, start with your direct answer about yourself. Then explore the philosophical depth naturally. Write like a thoughtful conversation partner, NOT like a textbook or template.
 """
     
@@ -1344,6 +1358,44 @@ RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY.
     # Truncate user question if too long (max 2000 tokens)
     truncated_question = _truncate_user_message(user_question, max_tokens=2000)
     
+    # Build critical reminder section if we have RAG/validation details
+    critical_reminder = ""
+    if rag_context_section or validation_warnings_section:
+        if language == "vi":
+            critical_reminder = """
+🚨🚨🚨 CRITICAL: ĐỌC KỸ TRƯỚC KHI TRẢ LỜI 🚨🚨🚨
+
+**NẾU CÂU HỎI YÊU CẦU "explain step by step how you used RAG" hoặc "for each factual claim":**
+- Bạn PHẢI cung cấp quy trình TỪNG BƯỚC (Bước 1, Bước 2, Bước 3, etc.)
+- Bạn PHẢI liệt kê TỪNG factual claim riêng biệt với nguồn của nó
+- Bạn PHẢI mention TẤT CẢ documents đã retrieve (KHÔNG được bỏ sót)
+- Bạn PHẢI phân biệt CỤ THỂ phần nào đến từ document nào
+
+**NẾU CÂU HỎI YÊU CẦU "if any validator raised warnings":**
+- Bạn PHẢI summarize warnings THỰC TẾ (không phải "if there were any")
+- Bạn PHẢI mention confidence score và loại warnings cụ thể
+
+**KHÔNG được đưa ra mô tả chung chung - phải CỤ THỂ về quy trình và nguồn của CÂU HỎI NÀY.**
+
+"""
+        else:
+            critical_reminder = """
+🚨🚨🚨 CRITICAL: READ THIS BEFORE ANSWERING 🚨🚨🚨
+
+**IF THE QUESTION ASKS "explain step by step how you used RAG" or "for each factual claim":**
+- You MUST provide a STEP-BY-STEP process (Step 1, Step 2, Step 3, etc.)
+- You MUST list EACH factual claim separately with its source
+- You MUST mention ALL retrieved documents (do NOT skip any)
+- You MUST distinguish SPECIFICALLY which parts come from which documents
+
+**IF THE QUESTION ASKS "if any validator raised warnings":**
+- You MUST summarize ACTUAL warnings (not hypothetical "if there were any")
+- You MUST mention confidence score and specific warning types
+
+**DO NOT give generic descriptions - be SPECIFIC about THIS question's process and sources.**
+
+"""
+    
     # Build minimal prompt
     minimal_prompt = f"""{language_instruction}
 
@@ -1356,6 +1408,8 @@ RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY.
 {validation_warnings_section}
 
 {philosophical_lead_in}
+
+{critical_reminder}
 
 ⚠️⚠️⚠️ FINAL REMINDER ⚠️⚠️⚠️
 
