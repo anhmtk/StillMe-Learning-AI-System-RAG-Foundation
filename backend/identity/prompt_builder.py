@@ -240,12 +240,19 @@ User Question: {context.user_question}
             )
             
             if is_how_question:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"🔍 build_prompt: is_how_question=True, building specific_details section")
                 specific_details = self._build_specific_rag_validation_section(
                     context.detected_lang, context.context, None  # validation_info not available at prompt building time
                 )
                 if specific_details:
                     # Append specific details directly to user question to ensure LLM sees it
+                    logger.info(f"🔍 build_prompt: Appending specific_details (length={len(specific_details)}) to user question")
                     prompt = prompt.rstrip() + "\n\n" + specific_details
+                    logger.info(f"🔍 build_prompt: Final prompt length after appending specific_details: {len(prompt)}")
+                else:
+                    logger.warning(f"🔍 build_prompt: is_how_question=True but specific_details is empty!")
         
         return prompt
     
@@ -1156,13 +1163,19 @@ The user is asking about StillMe's nature, capabilities, or architecture.
         # Append specific RAG/validation details if question asks "how did you use X"
         # CRITICAL: Always append if is_how_question is True, even if context is None (will show reminder)
         if is_how_question:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info(f"🔍 _build_stillme_instruction: is_how_question=True, building specific_details section")
             specific_details = self._build_specific_rag_validation_section(
                 detected_lang, context, validation_info
             )
             if specific_details:
+                logger.info(f"🔍 _build_stillme_instruction: Appending specific_details (length={len(specific_details)}) to stillme_instruction")
                 stillme_instruction += "\n\n" + specific_details
+                logger.info(f"🔍 _build_stillme_instruction: stillme_instruction length after appending: {len(stillme_instruction)}")
             # If no specific details but is_how_question, add a reminder to be specific
             elif not specific_details:
+                logger.warning(f"🔍 _build_stillme_instruction: is_how_question=True but specific_details is empty, adding reminder")
                 if detected_lang == "vi":
                     stillme_instruction += "\n\n⚠️ **LƯU Ý QUAN TRỌNG**: Câu hỏi này yêu cầu giải thích CỤ THỂ về cách StillMe dùng RAG/validation chain cho CÂU HỎI NÀY. Bạn PHẢI mention cụ thể về documents đã retrieve (nếu có) và phân biệt rõ: 'Phần X trong câu trả lời đến từ document [1] về [topic], phần Y từ document [2]..., phần Z từ general background knowledge'."
                 else:
@@ -1183,16 +1196,20 @@ The user is asking about StillMe's nature, capabilities, or architecture.
         # Debug: Log context structure
         import logging
         logger = logging.getLogger(__name__)
+        logger.info(f"🔍 _build_specific_rag_validation_section: called with context={context is not None}, validation_info={validation_info is not None}")
+        
         if context:
-            logger.debug(f"_build_specific_rag_validation_section: context type={type(context)}, keys={list(context.keys()) if isinstance(context, dict) else 'not dict'}")
+            logger.info(f"🔍 _build_specific_rag_validation_section: context type={type(context)}, keys={list(context.keys()) if isinstance(context, dict) else 'not dict'}")
         
         if context and isinstance(context, dict):
             knowledge_docs = context.get("knowledge_docs", [])
             total_context_docs = context.get("total_context_docs", 0) or len(knowledge_docs)
+            logger.info(f"🔍 _build_specific_rag_validation_section: found {len(knowledge_docs)} knowledge_docs, total_context_docs={total_context_docs}")
             
             if knowledge_docs or total_context_docs > 0:
                 doc_summaries = []
-                for i, doc in enumerate(knowledge_docs[:3], 1):
+                # CRITICAL: Iterate over ALL documents, not just first 3
+                for i, doc in enumerate(knowledge_docs, 1):
                     # Handle both dict and object-like structures
                     if isinstance(doc, dict):
                         metadata = doc.get("metadata", {})
@@ -1254,6 +1271,12 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - You MUST distinguish SPECIFICALLY: "Claim X in my answer comes from document [1] about [topic], claim Y from document [2] about [topic], claim Z from general background knowledge"
 - **CRITICAL: When asked 'for each factual claim', you MUST list EACH claim separately with its source**
 - Example format: "1. Claim about learning frequency (6 cycles/day) → from document [1] about StillMe's learning mechanism. 2. Claim about timestamp storage → from document [2] about StillMe's technical architecture. 3. Claim about RAG process → from general knowledge about RAG systems."
+- **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a STEP-BY-STEP process:**
+  1. "Step 1: StillMe received the question and generated an embedding"
+  2. "Step 2: StillMe searched ChromaDB using semantic similarity"
+  3. "Step 3: StillMe retrieved {total_context_docs} documents: {', '.join([f'Document {i}' for i in range(1, len(doc_summaries) + 1)]) if doc_summaries else 'no documents'}"
+  4. "Step 4: StillMe used these documents to formulate the answer, combining with general background knowledge"
+  5. "Step 5: StillMe used the validation chain to validate the response"
 
 """
         
@@ -1308,10 +1331,15 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - You MUST summarize: "Validation chain checked this response and has warnings about: {warnings_summary}"
 - You MUST mention confidence score: {confidence_str}
 - You MUST explain what these warnings mean
+- **CRITICAL: When asked 'if any validator raised warnings, summarize them', you MUST provide actual warnings as listed above, DO NOT say 'if there were any warnings'**
 
 """
         
-        return rag_section + validation_section if (rag_section or validation_section) else ""
+        result = rag_section + validation_section if (rag_section or validation_section) else ""
+        logger.info(f"🔍 _build_specific_rag_validation_section: returning result length={len(result)}, has_rag_section={bool(rag_section)}, has_validation_section={bool(validation_section)}")
+        if result:
+            logger.info(f"🔍 _build_specific_rag_validation_section: result preview (first 200 chars): {result[:200]}...")
+        return result
     
     def _build_philosophical_instruction(self, detected_lang: str) -> str:
         """Build instruction for philosophical questions"""

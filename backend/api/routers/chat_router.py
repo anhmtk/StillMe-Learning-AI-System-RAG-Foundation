@@ -1200,7 +1200,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
         if knowledge_docs or total_context_docs > 0:
             # Build specific RAG context for THIS question
             doc_summaries = []
-            for i, doc in enumerate(knowledge_docs[:3], 1):  # Limit to 3 for token safety
+            # CRITICAL: Iterate over ALL documents, not just first 3
+            for i, doc in enumerate(knowledge_docs, 1):
                 metadata = doc.get("metadata", {})
                 source = metadata.get("source", "unknown")
                 doc_type = metadata.get("type", "unknown")
@@ -1224,8 +1225,16 @@ If the question belongs to a classic philosophical debate (free will, determinis
 
 **KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
 - Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
-- Bạn PHẢI mention cụ thể về documents đã retrieve (như liệt kê ở trên)
-- Bạn PHẢI phân biệt: "Phần X trong câu trả lời đến từ document [1] về [topic], phần Y từ document [2]..."
+- Bạn PHẢI mention TẤT CẢ documents đã retrieve (như liệt kê ở trên) - KHÔNG được bỏ sót document nào
+- Bạn PHẢI phân biệt CỤ THỂ: "Claim X trong câu trả lời đến từ document [1] về [topic], claim Y từ document [2] về [topic], claim Z từ general background knowledge"
+- **CRITICAL: Khi được hỏi 'for each factual claim', bạn PHẢI liệt kê TỪNG claim riêng biệt với nguồn của nó**
+- Ví dụ format: "1. Claim về learning frequency (6 cycles/day) → từ document [1] về StillMe's learning mechanism. 2. Claim về timestamp storage → từ document [2] về StillMe's technical architecture. 3. Claim về RAG process → từ general knowledge về RAG systems."
+- **CRITICAL: Khi được hỏi 'explain step by step how you used RAG', bạn PHẢI cung cấp quy trình TỪNG BƯỚC:**
+  1. "Bước 1: StillMe nhận câu hỏi và tạo embedding"
+  2. "Bước 2: StillMe tìm kiếm ChromaDB bằng semantic similarity"
+  3. "Bước 3: StillMe retrieve được {total_context_docs} documents (liệt kê chúng: {', '.join([f'Document {i}' for i in range(1, len(doc_summaries) + 1)]) if doc_summaries else 'no documents'})"
+  4. "Bước 4: StillMe sử dụng các documents này để tạo câu trả lời, kết hợp với general background knowledge"
+  5. "Bước 5: StillMe sử dụng validation chain để validate response"
 
 """
             else:
@@ -1239,8 +1248,16 @@ If the question belongs to a classic philosophical debate (free will, determinis
 
 **WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
 - You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
-- You MUST mention specific details about retrieved documents (as listed above)
-- You MUST distinguish: "Part X in my answer comes from document [1] about [topic], part Y from document [2]..."
+- You MUST mention ALL retrieved documents (as listed above) - do NOT skip any documents
+- You MUST distinguish SPECIFICALLY: "Claim X in my answer comes from document [1] about [topic], claim Y from document [2] about [topic], claim Z from general background knowledge"
+- **CRITICAL: When asked 'for each factual claim', you MUST list EACH claim separately with its source**
+- Example format: "1. Claim about learning frequency (6 cycles/day) → from document [1] about StillMe's learning mechanism. 2. Claim about timestamp storage → from document [2] about StillMe's technical architecture. 3. Claim about RAG process → from general knowledge about RAG systems."
+- **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a STEP-BY-STEP process:**
+  1. "Step 1: StillMe received the question and generated an embedding"
+  2. "Step 2: StillMe searched ChromaDB using semantic similarity"
+  3. "Step 3: StillMe retrieved {total_context_docs} documents (list them: {', '.join([f'Document {i}' for i in range(1, len(doc_summaries) + 1)]) if doc_summaries else 'no documents'})"
+  4. "Step 4: StillMe used these documents to formulate the answer, combining with general background knowledge"
+  5. "Step 5: StillMe used the validation chain to validate the response"
 
 """
     
@@ -1296,6 +1313,7 @@ If the question belongs to a classic philosophical debate (free will, determinis
 - You MUST summarize: "Validation chain checked this response and has warnings about: {warnings_summary}"
 - You MUST mention confidence score: {confidence_str}
 - You MUST explain what these warnings mean
+- **CRITICAL: When asked 'if any validator raised warnings, summarize them', you MUST provide actual warnings as listed above, DO NOT say 'if there were any warnings'**
 
 """
     
@@ -1345,6 +1363,16 @@ RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
 
 Answer the question above following the philosophical framing, using continuous prose without emojis, headings, or citations.
 """
+    
+    # Logging for debugging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"🔍 build_minimal_philosophical_prompt: built prompt with rag_context_section length={len(rag_context_section)}, validation_warnings_section length={len(validation_warnings_section)}")
+    logger.info(f"🔍 build_minimal_philosophical_prompt: total prompt length={len(minimal_prompt)}")
+    if rag_context_section:
+        logger.info(f"🔍 build_minimal_philosophical_prompt: rag_context_section preview (first 300 chars): {rag_context_section[:300]}...")
+    if validation_warnings_section:
+        logger.info(f"🔍 build_minimal_philosophical_prompt: validation_warnings_section preview (first 300 chars): {validation_warnings_section[:300]}...")
     
     return minimal_prompt
 
