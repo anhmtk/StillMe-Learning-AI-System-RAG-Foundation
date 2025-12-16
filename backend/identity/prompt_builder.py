@@ -454,7 +454,12 @@ You are StillMe — a transparent, ethical Learning AI system with RAG foundatio
                 return self._build_philosophical_instruction(context.detected_lang)
         
         if context.is_stillme_query:
-            return self._build_stillme_instruction(context.detected_lang, context.user_question)
+            return self._build_stillme_instruction(
+                context.detected_lang, 
+                context.user_question,
+                context=context.context,  # Pass context dict for RAG details
+                validation_info=None  # Validation info not available at prompt building time
+            )
         
         if context.is_philosophical:
             return self._build_philosophical_instruction(context.detected_lang)
@@ -513,7 +518,7 @@ The user is asking about StillMe's wishes, desires, or preferences (e.g., "if yo
 
 ---"""
     
-    def _build_stillme_instruction(self, detected_lang: str, user_question: str = "") -> str:
+    def _build_stillme_instruction(self, detected_lang: str, user_question: str = "", context: Optional[Dict[str, Any]] = None, validation_info: Optional[Dict[str, Any]] = None) -> str:
         """Build instruction for StillMe queries (non-wish/desire)"""
         # Check if this is a self-reflection question about weaknesses/limitations
         question_lower = user_question.lower() if user_question else ""
@@ -525,10 +530,22 @@ The user is asking about StillMe's wishes, desires, or preferences (e.g., "if yo
             ]
         )
         
+        # Extract specific RAG/validation details if question asks "how did you use X"
+        question_lower = user_question.lower() if user_question else ""
+        is_how_question = any(
+            pattern in question_lower
+            for pattern in [
+                "how did you use", "how do you use", "how you used", "how you use",
+                "bạn đã dùng", "bạn sử dụng", "bạn dùng", "cách bạn dùng",
+                "explain step by step how", "distinguish between", "for each factual claim",
+                "if any validator raised warnings"
+            ]
+        )
+        
         if detected_lang == "vi":
             # Special instruction for self-reflection questions about weaknesses/limitations
             if is_self_reflection:
-                return """🚨🚨🚨 CÂU HỎI VỀ ĐIỂM YẾU/HẠN CHẾ CỦA STILLME 🚨🚨🚨
+                stillme_instruction = """🚨🚨🚨 CÂU HỎI VỀ ĐIỂM YẾU/HẠN CHẾ CỦA STILLME 🚨🚨🚨
 
 Người dùng đang hỏi về điểm yếu, hạn chế, hoặc weaknesses của StillMe. Đây là câu hỏi về StillMe cụ thể, KHÔNG phải AI nói chung.
 
@@ -673,8 +690,8 @@ I. Nhóm Kỹ Thuật "Sống Còn"
 - ✅ Đã có "Lời kết tự phê" về tại sao câu trả lời trước kém?
 
 ---"""
-            
-            return """🚨🚨🚨 CÂU HỎI VỀ STILLME 🚨🚨🚨
+            else:
+                stillme_instruction = """🚨🚨🚨 CÂU HỎI VỀ STILLME 🚨🚨🚨
 
 Người dùng đang hỏi về StillMe's nature, capabilities, hoặc architecture.
 
@@ -818,7 +835,8 @@ Người dùng đang hỏi về StillMe's nature, capabilities, hoặc architect
 
 ---"""
         else:
-            return """🚨🚨🚨 QUESTION ABOUT STILLME 🚨🚨🚨
+            if is_self_reflection:
+                stillme_instruction = """🚨🚨🚨 QUESTION ABOUT STILLME - WEAKNESSES/LIMITATIONS 🚨🚨🚨
 
 The user is asking about StillMe's nature, capabilities, or architecture.
 
@@ -961,6 +979,130 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - ✅ Did I avoid mechanical disclaimer if I have foundational knowledge?
 
 ---"""
+        
+        # Append specific RAG/validation details if question asks "how did you use X"
+        if is_how_question and (context or validation_info):
+            specific_details = self._build_specific_rag_validation_section(
+                detected_lang, context, validation_info
+            )
+            if specific_details:
+                stillme_instruction += "\n\n" + specific_details
+        
+        return stillme_instruction
+    
+    def _build_specific_rag_validation_section(
+        self, 
+        detected_lang: str, 
+        context: Optional[Dict[str, Any]], 
+        validation_info: Optional[Dict[str, Any]]
+    ) -> str:
+        """Build specific RAG/validation details section for THIS question"""
+        rag_section = ""
+        validation_section = ""
+        
+        if context and isinstance(context, dict):
+            knowledge_docs = context.get("knowledge_docs", [])
+            total_context_docs = context.get("total_context_docs", 0) or len(knowledge_docs)
+            
+            if knowledge_docs or total_context_docs > 0:
+                doc_summaries = []
+                for i, doc in enumerate(knowledge_docs[:3], 1):
+                    metadata = doc.get("metadata", {})
+                    source = metadata.get("source", "unknown")
+                    doc_type = metadata.get("type", "unknown")
+                    title = metadata.get("title", "") or metadata.get("file_path", "")
+                    content_preview = doc.get("document", "")[:200] if isinstance(doc.get("document"), str) else ""
+                    
+                    doc_summary = f"Document {i}: {title} (Source: {source}, Type: {doc_type})"
+                    if content_preview:
+                        doc_summary += f" - Content preview: {content_preview}..."
+                    doc_summaries.append(doc_summary)
+                
+                if detected_lang == "vi":
+                    rag_section = f"""
+📚 **THÔNG TIN CỤ THỂ VỀ CÂU HỎI NÀY:**
+
+**Retrieved Documents:**
+- StillMe đã retrieve được {total_context_docs} documents từ ChromaDB cho câu hỏi này
+- Chi tiết documents:
+{chr(10).join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"}
+
+**KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
+- Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
+- Bạn PHẢI mention cụ thể về documents đã retrieve (như liệt kê ở trên)
+- Bạn PHẢI phân biệt: "Phần X trong câu trả lời đến từ document [1] về [topic], phần Y từ document [2]..."
+
+"""
+                else:
+                    rag_section = f"""
+📚 **SPECIFIC INFORMATION ABOUT THIS QUESTION:**
+
+**Retrieved Documents:**
+- StillMe retrieved {total_context_docs} documents from ChromaDB for this question
+- Document details:
+{chr(10).join(doc_summaries) if doc_summaries else "  (No specific documents)"}
+
+**WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
+- You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
+- You MUST mention specific details about retrieved documents (as listed above)
+- You MUST distinguish: "Part X in my answer comes from document [1] about [topic], part Y from document [2]..."
+
+"""
+        
+        if validation_info and isinstance(validation_info, dict):
+            warnings = []
+            confidence_score = validation_info.get("confidence_score")
+            validation_passed = validation_info.get("passed")
+            reasons = validation_info.get("reasons", [])
+            
+            for reason in reasons:
+                if isinstance(reason, str):
+                    if "low_overlap" in reason.lower() or "overlap" in reason.lower():
+                        warnings.append("low_overlap")
+                    if "citation" in reason.lower() and ("relevance" in reason.lower() or "warning" in reason.lower()):
+                        warnings.append("citation_relevance")
+                    if "confidence" in reason.lower():
+                        warnings.append("confidence")
+                    if "hallucination" in reason.lower():
+                        warnings.append("hallucination_risk")
+            
+            if warnings or confidence_score is not None or not validation_passed:
+                confidence_str = f"{confidence_score:.2f} ({confidence_score*100:.1f}%)" if confidence_score is not None else ("Không có" if detected_lang == "vi" else "Not available")
+                warnings_str = ', '.join(warnings) if warnings else ("Không có warnings" if detected_lang == "vi" else "No warnings")
+                warnings_summary = ', '.join(warnings) if warnings else ("không có warnings cụ thể" if detected_lang == "vi" else "no specific warnings")
+                
+                if detected_lang == "vi":
+                    validation_section = f"""
+⚠️ **VALIDATION WARNINGS CHO CÂU HỎI NÀY:**
+
+**Validation Status:**
+- Validation passed: {'Có' if validation_passed else 'Không'}
+- Confidence score: {confidence_str}
+- Warnings detected: {warnings_str}
+
+**KHI ĐƯỢC HỎI VỀ VALIDATOR WARNINGS CHO CÂU HỎI NÀY:**
+- Bạn PHẢI summarize: "Validation chain đã check câu trả lời này và có warnings về: {warnings_summary}"
+- Bạn PHẢI mention confidence score: {confidence_str}
+- Bạn PHẢI giải thích ý nghĩa của warnings này
+
+"""
+                else:
+                    validation_section = f"""
+⚠️ **VALIDATION WARNINGS FOR THIS QUESTION:**
+
+**Validation Status:**
+- Validation passed: {'Yes' if validation_passed else 'No'}
+- Confidence score: {confidence_str}
+- Warnings detected: {warnings_str}
+
+**WHEN ASKED ABOUT VALIDATOR WARNINGS FOR THIS QUESTION:**
+- You MUST summarize: "Validation chain checked this response and has warnings about: {warnings_summary}"
+- You MUST mention confidence score: {confidence_str}
+- You MUST explain what these warnings mean
+
+"""
+        
+        return rag_section + validation_section if (rag_section or validation_section) else ""
     
     def _build_philosophical_instruction(self, detected_lang: str) -> str:
         """Build instruction for philosophical questions"""
