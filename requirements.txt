@@ -3,7 +3,7 @@
 # Core Framework
 fastapi==0.124.4
 uvicorn[standard]==0.24.0
-streamlit==1.51.0
+streamlit==1.52.1
 
 # Database
 sqlalchemy==2.0.44
@@ -20,28 +20,28 @@ pandas==2.3.3
 # Note: Using Python 3.11 for onnxruntime compatibility
 
 # Visualization
-plotly==5.18.0
+plotly==6.5.0
 
 # RSS & XML Processing
 feedparser==6.0.12
-beautifulsoup4==4.14.2
+beautifulsoup4==4.14.3
 
 # Environment & Configuration
 python-dotenv==1.2.1
-pydantic==2.12.4
+pydantic==2.12.5
 
 # Logging & Monitoring
 loguru==0.7.3
 
 # Date & Time
 python-dateutil==2.8.2
-pytz==2024.1
+pytz==2025.2
 
 # Language Detection
 langdetect==1.0.9
 
 # JSON & Data Serialization
-orjson==3.11.4
+orjson==3.11.5
 
 # Vector Database & Embeddings
 # Note: Install torch CPU version separately to reduce build time
