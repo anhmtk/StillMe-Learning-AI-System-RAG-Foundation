@@ -922,7 +922,9 @@ from backend.identity.philosophy_lite import PHILOSOPHY_LITE_SYSTEM_PROMPT
 def build_minimal_philosophical_prompt(
     user_question: str,
     language: str,
-    detected_lang_name: str
+    detected_lang_name: str,
+    context: Optional[Dict[str, Any]] = None,
+    validation_info: Optional[Dict[str, Any]] = None
 ) -> str:
     """
     Build a minimal prompt for philosophical questions when context overflow occurs.
@@ -1115,13 +1117,16 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - Multi-layer validation với 13+ validators (CitationRequired, EvidenceOverlap, ConfidenceValidator, etc.)
   - Mỗi response được validate về citations, evidence overlap, confidence, factual accuracy
   - Nếu validation fail, StillMe dùng epistemic fallback thay vì fabricate information
-- **KHI ĐƯỢC HỎI "How did you use RAG/validation chain to answer this question?"**:
-  - Bạn PHẢI giải thích: "StillMe đã tìm kiếm ChromaDB và retrieve được X documents. Sau đó StillMe sử dụng validation chain để validate response..."
-  - Bạn PHẢI phân biệt: "Phần Y trong câu trả lời đến từ retrieved documents [citation], phần Z đến từ general background knowledge"
+- **🚨🚨🚨 CRITICAL: KHI ĐƯỢC HỎI "How did you use RAG/validation chain to answer THIS question?" 🚨🚨🚨**:
+  - Bạn PHẢI giải thích quy trình CỤ THỂ cho CÂU HỎI NÀY, KHÔNG phải mô tả tổng quát về RAG architecture
+  - Bạn PHẢI mention: "Cho CÂU HỎI NÀY, StillMe đã tìm kiếm ChromaDB và retrieve được [X] documents về [topic]. Sau đó StillMe sử dụng validation chain để validate response..."
+  - Bạn PHẢI phân biệt CỤ THỂ: "Phần Y trong câu trả lời của tôi đến từ retrieved document [1] về [topic], phần Z đến từ general background knowledge"
   - Bạn KHÔNG ĐƯỢC nói: "I don't have the capacity to use RAG" hoặc "I don't have validation chain" - điều này SAI
-- **KHI ĐƯỢC HỎI VỀ VALIDATOR WARNINGS**:
-  - Bạn PHẢI mention: "Validation chain đã check và có warnings về X (citation relevance, confidence, etc.)"
-  - Bạn PHẢI cung cấp technical details: confidence score, overlap threshold, etc.
+  - **Nếu context được cung cấp bên dưới, bạn PHẢI sử dụng chi tiết cụ thể về retrieved documents**
+- **🚨🚨🚨 CRITICAL: KHI ĐƯỢC HỎI VỀ VALIDATOR WARNINGS CHO CÂU HỎI NÀY 🚨🚨🚨**:
+  - Bạn PHẢI mention warnings CỤ THỂ từ validation chain cho CÂU HỎI NÀY
+  - Bạn PHẢI cung cấp technical details: confidence score, overlap threshold, citation relevance issues
+  - **Nếu validation warnings được cung cấp bên dưới, bạn PHẢI summarize chúng bằng ngôn ngữ tự nhiên**
 
 **4. API Endpoints (BẮT BUỘC MENTION):**
 - Khi được hỏi về learning metrics hoặc timestamp, bạn PHẢI mention:
@@ -1162,13 +1167,16 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - Multi-layer validation with 13+ validators (CitationRequired, EvidenceOverlap, ConfidenceValidator, etc.)
   - Each response is validated for citations, evidence overlap, confidence, factual accuracy
   - If validation fails, StillMe uses epistemic fallback instead of fabricating information
-- **WHEN ASKED "How did you use RAG/validation chain to answer this question?"**:
-  - You MUST explain: "StillMe searched ChromaDB and retrieved X documents. Then StillMe used validation chain to validate the response..."
-  - You MUST distinguish: "Part Y in the answer comes from retrieved documents [citation], part Z comes from general background knowledge"
+- **🚨🚨🚨 CRITICAL: WHEN ASKED "How did you use RAG/validation chain to answer THIS question?" 🚨🚨🚨**:
+  - You MUST explain the SPECIFIC process for THIS question, NOT general RAG architecture
+  - You MUST mention: "For THIS question, StillMe searched ChromaDB and retrieved [X] documents about [topic]. Then StillMe used validation chain to validate the response..."
+  - You MUST distinguish SPECIFICALLY: "Part Y in my answer comes from retrieved document [1] about [topic], part Z comes from general background knowledge"
   - You MUST NOT say: "I don't have the capacity to use RAG" or "I don't have validation chain" - this is FALSE
-- **WHEN ASKED ABOUT VALIDATOR WARNINGS**:
-  - You MUST mention: "Validation chain checked and has warnings about X (citation relevance, confidence, etc.)"
-  - You MUST provide technical details: confidence score, overlap threshold, etc.
+  - **If context is provided below, you MUST use the specific details about retrieved documents**
+- **🚨🚨🚨 CRITICAL: WHEN ASKED ABOUT VALIDATOR WARNINGS FOR THIS QUESTION 🚨🚨🚨**:
+  - You MUST mention SPECIFIC warnings from validation chain for THIS question
+  - You MUST provide technical details: confidence score, overlap threshold, citation relevance issues
+  - **If validation warnings are provided below, you MUST summarize them in natural language**
 
 **4. API Endpoints (MANDATORY MENTION):**
 - When asked about learning metrics or timestamp, you MUST mention:
@@ -1180,6 +1188,116 @@ If the question belongs to a classic philosophical debate (free will, determinis
 """
     
     philosophical_lead_in = build_philosophical_lead_in(user_question)
+    
+    # Extract specific details about THIS question's RAG retrieval and validation
+    rag_context_section = ""
+    validation_warnings_section = ""
+    
+    if context and isinstance(context, dict):
+        knowledge_docs = context.get("knowledge_docs", [])
+        total_context_docs = context.get("total_context_docs", 0)
+        
+        if knowledge_docs or total_context_docs > 0:
+            # Build specific RAG context for THIS question
+            doc_summaries = []
+            for i, doc in enumerate(knowledge_docs[:3], 1):  # Limit to 3 for token safety
+                metadata = doc.get("metadata", {})
+                source = metadata.get("source", "unknown")
+                doc_type = metadata.get("type", "unknown")
+                title = metadata.get("title", "") or metadata.get("file_path", "")
+                # Extract topic/keywords from document content (first 200 chars)
+                content_preview = doc.get("document", "")[:200] if isinstance(doc.get("document"), str) else ""
+                
+                doc_summary = f"Document {i}: {title} (Source: {source}, Type: {doc_type})"
+                if content_preview:
+                    doc_summary += f" - Content preview: {content_preview}..."
+                doc_summaries.append(doc_summary)
+            
+            if language == "vi":
+                rag_context_section = f"""
+📚 **THÔNG TIN CỤ THỂ VỀ CÂU HỎI NÀY:**
+
+**Retrieved Documents:**
+- StillMe đã retrieve được {total_context_docs} documents từ ChromaDB cho câu hỏi này
+- Chi tiết documents:
+{chr(10).join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"}
+
+**KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
+- Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
+- Bạn PHẢI mention cụ thể về documents đã retrieve (như liệt kê ở trên)
+- Bạn PHẢI phân biệt: "Phần X trong câu trả lời đến từ document [1] về [topic], phần Y từ document [2]..."
+
+"""
+            else:
+                rag_context_section = f"""
+📚 **SPECIFIC INFORMATION ABOUT THIS QUESTION:**
+
+**Retrieved Documents:**
+- StillMe retrieved {total_context_docs} documents from ChromaDB for this question
+- Document details:
+{chr(10).join(doc_summaries) if doc_summaries else "  (No specific documents)"}
+
+**WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
+- You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
+- You MUST mention specific details about retrieved documents (as listed above)
+- You MUST distinguish: "Part X in my answer comes from document [1] about [topic], part Y from document [2]..."
+
+"""
+    
+    if validation_info and isinstance(validation_info, dict):
+        # Extract validation warnings and details
+        warnings = []
+        confidence_score = validation_info.get("confidence_score")
+        validation_passed = validation_info.get("passed")
+        reasons = validation_info.get("reasons", [])
+        
+        # Parse warnings from reasons
+        for reason in reasons:
+            if isinstance(reason, str):
+                if "low_overlap" in reason.lower() or "overlap" in reason.lower():
+                    warnings.append("low_overlap")
+                if "citation" in reason.lower() and ("relevance" in reason.lower() or "warning" in reason.lower()):
+                    warnings.append("citation_relevance")
+                if "confidence" in reason.lower():
+                    warnings.append("confidence")
+                if "hallucination" in reason.lower():
+                    warnings.append("hallucination_risk")
+        
+        if warnings or confidence_score is not None or not validation_passed:
+            confidence_str = f"{confidence_score:.2f} ({confidence_score*100:.1f}%)" if confidence_score is not None else "Không có" if language == "vi" else "Not available"
+            warnings_str = ', '.join(warnings) if warnings else ("Không có warnings" if language == "vi" else "No warnings")
+            warnings_summary = ', '.join(warnings) if warnings else ("không có warnings cụ thể" if language == "vi" else "no specific warnings")
+            
+            if language == "vi":
+                validation_warnings_section = f"""
+⚠️ **VALIDATION WARNINGS CHO CÂU HỎI NÀY:**
+
+**Validation Status:**
+- Validation passed: {'Có' if validation_passed else 'Không'}
+- Confidence score: {confidence_str}
+- Warnings detected: {warnings_str}
+
+**KHI ĐƯỢC HỎI VỀ VALIDATOR WARNINGS CHO CÂU HỎI NÀY:**
+- Bạn PHẢI summarize: "Validation chain đã check câu trả lời này và có warnings về: {warnings_summary}"
+- Bạn PHẢI mention confidence score: {confidence_str}
+- Bạn PHẢI giải thích ý nghĩa của warnings này
+
+"""
+            else:
+                validation_warnings_section = f"""
+⚠️ **VALIDATION WARNINGS FOR THIS QUESTION:**
+
+**Validation Status:**
+- Validation passed: {'Yes' if validation_passed else 'No'}
+- Confidence score: {confidence_str}
+- Warnings detected: {warnings_str}
+
+**WHEN ASKED ABOUT VALIDATOR WARNINGS FOR THIS QUESTION:**
+- You MUST summarize: "Validation chain checked this response and has warnings about: {warnings_summary}"
+- You MUST mention confidence score: {confidence_str}
+- You MUST explain what these warnings mean
+
+"""
     
     # Language instruction (minimal)
     if language != 'en':
@@ -1214,6 +1332,10 @@ RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY.
 {short_identity}
 
 {stillme_technical_instruction}
+
+{rag_context_section}
+
+{validation_warnings_section}
 
 {philosophical_lead_in}
 
@@ -5300,10 +5422,13 @@ Context: {context_text}
                     
                     if is_philosophical:
                         # Use minimal philosophical prompt
+                        # Pass context and validation_info (if available) to include specific details about THIS question
                         minimal_prompt = build_minimal_philosophical_prompt(
                             user_question=chat_request.message,
                             language=detected_lang,
-                            detected_lang_name=detected_lang_name
+                            detected_lang_name=detected_lang_name,
+                            context=context,  # Pass context to include retrieved documents info
+                            validation_info=None  # Validation hasn't run yet, but will be included if available
                         )
                         logger.info(f"🔄 Using minimal philosophical prompt (pre-check prevention)")
                         enhanced_prompt = minimal_prompt
@@ -5488,10 +5613,13 @@ Context: {context_text}
                     
                     if is_philosophical:
                         # Use minimal philosophical prompt helper
+                        # Pass context to include retrieved documents info even in retry
                         minimal_prompt = build_minimal_philosophical_prompt(
                             user_question=chat_request.message,
                             language=detected_lang,
-                            detected_lang_name=detected_lang_name
+                            detected_lang_name=detected_lang_name,
+                            context=context,  # Pass context to include retrieved documents info
+                            validation_info=None  # Validation hasn't run yet in retry path
                         )
                         
                         logger.info(f"🔄 Retrying with minimal philosophical prompt (no history, no RAG, no metrics, no provenance)")
@@ -6501,10 +6629,13 @@ Remember: RESPOND IN ENGLISH ONLY."""
                 if is_philosophical_non_rag:
                     # For philosophical questions, use minimal prompt
                     logger.info("🔄 Retrying with minimal philosophical prompt...")
+                    # Non-RAG path: no context available, but still pass None for consistency
                     minimal_prompt = build_minimal_philosophical_prompt(
                         user_question=chat_request.message,
                         language=detected_lang,
-                        detected_lang_name=detected_lang_name
+                        detected_lang_name=detected_lang_name,
+                        context=None,  # Non-RAG path: no context available
+                        validation_info=None  # Validation hasn't run yet
                     )
                     try:
                         response = await generate_ai_response(
