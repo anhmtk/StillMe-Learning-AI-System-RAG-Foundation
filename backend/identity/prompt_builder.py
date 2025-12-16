@@ -1227,8 +1227,16 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 
 **KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
 - Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
-- Bạn PHẢI mention cụ thể về documents đã retrieve (như liệt kê ở trên)
-- Bạn PHẢI phân biệt: "Phần X trong câu trả lời đến từ document [1] về [topic], phần Y từ document [2]..."
+- Bạn PHẢI mention TẤT CẢ documents đã retrieve (như liệt kê ở trên) - KHÔNG được bỏ sót document nào
+- Bạn PHẢI phân biệt CỤ THỂ: "Claim X trong câu trả lời đến từ document [1] về [topic], claim Y từ document [2] về [topic], claim Z từ general background knowledge"
+- **CRITICAL: Khi được hỏi 'for each factual claim', bạn PHẢI liệt kê TỪNG claim riêng biệt với nguồn của nó**
+- Ví dụ format: "1. Claim về learning frequency (6 cycles/day) → từ document [1] về StillMe's learning mechanism. 2. Claim về timestamp storage → từ document [2] về StillMe's technical architecture. 3. Claim về RAG process → từ general knowledge về RAG systems."
+- **CRITICAL: Khi được hỏi 'explain step by step how you used RAG', bạn PHẢI cung cấp quy trình TỪNG BƯỚC:**
+  1. "Bước 1: StillMe nhận câu hỏi và tạo embedding"
+  2. "Bước 2: StillMe tìm kiếm ChromaDB bằng semantic similarity"
+  3. "Bước 3: StillMe retrieve được {total_context_docs} documents (liệt kê chúng)"
+  4. "Bước 4: StillMe sử dụng các documents này để tạo câu trả lời"
+  5. "Bước 5: StillMe sử dụng validation chain để validate response"
 
 """
                 else:
@@ -1242,8 +1250,10 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 
 **WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
 - You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
-- You MUST mention specific details about retrieved documents (as listed above)
-- You MUST distinguish: "Part X in my answer comes from document [1] about [topic], part Y from document [2]..."
+- You MUST mention ALL retrieved documents (as listed above) - do NOT skip any documents
+- You MUST distinguish SPECIFICALLY: "Claim X in my answer comes from document [1] about [topic], claim Y from document [2] about [topic], claim Z from general background knowledge"
+- **CRITICAL: When asked 'for each factual claim', you MUST list EACH claim separately with its source**
+- Example format: "1. Claim about learning frequency (6 cycles/day) → from document [1] about StillMe's learning mechanism. 2. Claim about timestamp storage → from document [2] about StillMe's technical architecture. 3. Claim about RAG process → from general knowledge about RAG systems."
 
 """
         
@@ -1282,6 +1292,7 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - Bạn PHẢI summarize: "Validation chain đã check câu trả lời này và có warnings về: {warnings_summary}"
 - Bạn PHẢI mention confidence score: {confidence_str}
 - Bạn PHẢI giải thích ý nghĩa của warnings này
+- **CRITICAL: Nếu được hỏi 'if any validator raised warnings, summarize them', bạn PHẢI cung cấp warnings thực tế như liệt kê ở trên, KHÔNG được nói 'if there were any warnings'**
 
 """
                 else:
