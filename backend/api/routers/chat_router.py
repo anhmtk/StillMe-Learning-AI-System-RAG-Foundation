@@ -186,13 +186,28 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         logger.warning(f"Could not convert timestamp to local timezone: {e}")
         timestamp_display = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
     
-    # Extract source links from context if available
+    # Extract document titles and source links from context if available
     source_links = []
+    document_titles = []
+    document_types = []
     if context and isinstance(context, dict):
         knowledge_docs = context.get("knowledge_docs", [])
-        for doc in knowledge_docs[:3]:  # Limit to 3 sources to avoid clutter
+        seen_titles = set()  # Track unique document titles to avoid duplicates
+        for doc in knowledge_docs[:5]:  # Limit to 5 sources to avoid clutter
             if isinstance(doc, dict):
                 metadata = doc.get("metadata", {})
+                
+                # Extract document title
+                title = metadata.get("title", "") or metadata.get("file_path", "")
+                doc_type = metadata.get("type", "") or metadata.get("source_type", "")
+                
+                # Only add unique titles (to handle multiple chunks from same document)
+                if title and title not in seen_titles:
+                    document_titles.append(title)
+                    document_types.append(doc_type)
+                    seen_titles.add(title)
+                
+                # Extract source links
                 link = metadata.get("link", "") or metadata.get("source_url", "")
                 if link and link.startswith(("http://", "https://")):
                     source_links.append(link)
@@ -234,7 +249,25 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # Build citation attribution parts
     citation_parts = []
     
-    if citation_text_clean:
+    # Format citation with document titles if available
+    if document_titles:
+        # Use document titles instead of generic citation
+        if detected_lang == "vi":
+            # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
+            doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
+            titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
+            if len(document_titles) > 3:
+                titles_str += f" (+{len(document_titles) - 3} documents khác)"
+            citation_parts.append(f"Nguồn: {doc_type_str} - {titles_str}")
+        else:
+            # Format: "Source: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
+            doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
+            titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
+            if len(document_titles) > 3:
+                titles_str += f" (+{len(document_titles) - 3} more documents)"
+            citation_parts.append(f"Source: {doc_type_str} - {titles_str}")
+    elif citation_text_clean:
+        # Fallback to generic citation if no document titles available
         if detected_lang == "vi":
             citation_parts.append(f"Nguồn: {citation_text_clean}")
         else:

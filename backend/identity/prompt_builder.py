@@ -1241,6 +1241,7 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - StillMe đã retrieve được {total_context_docs} documents từ ChromaDB cho câu hỏi này
 - Chi tiết documents:
 {chr(10).join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"}
+- **LƯU Ý**: Nếu có nhiều documents cùng tên (ví dụ: "Document 2" và "Document 3" đều là "StillMe Core Mechanism - Technical Architecture"), đây có thể là different chunks từ cùng 1 document. Bạn PHẢI giải thích: "Document 2 và Document 3 đều là chunks từ cùng 1 document 'StillMe Core Mechanism - Technical Architecture', nhưng chứa different parts của document đó."
 
 **KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
 - Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
@@ -1269,6 +1270,15 @@ The user is asking about StillMe's nature, capabilities, or architecture.
   5. "Bước 5: StillMe sử dụng validation chain để validate response"
 - **CRITICAL: Bạn PHẢI include Bước 5 về validation chain - KHÔNG được bỏ qua hoặc dừng ở Bước 4**
 
+**TỔ CHỨC CẤU TRÚC (CRITICAL):**
+- **Khi trả lời câu hỏi nhiều phần (ví dụ: "1) Trả lời trước, 2) Sau đó liệt kê, 3) Cuối cùng giải thích"):**
+  - Phần 1 (Trả lời trước): NGẮN GỌN nhưng đầy đủ - cung cấp câu trả lời với citations, nhưng không giải thích quá dài
+  - Phần 2 (Liệt kê/phân tích): CHI TIẾT - cung cấp danh sách, bảng, hoặc breakdown đầy đủ
+  - Phần 3 (Giải thích cuối): CỤ THỂ - cung cấp giải thích chi tiết với ví dụ
+- **KHÔNG được duplicate nội dung giữa các phần** - mỗi phần phải có giá trị riêng
+- **KHÔNG được làm Phần 1 quá dài** - để dành giải thích chi tiết cho các phần sau
+- **KHÔNG được làm Phần 3 quá ngắn** - mở rộng chi tiết đã được tóm tắt ở Phần 1
+
 """
                 else:
                     rag_section = f"""
@@ -1278,6 +1288,7 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - StillMe retrieved {total_context_docs} documents from ChromaDB for this question
 - Document details:
 {chr(10).join(doc_summaries) if doc_summaries else "  (No specific documents)"}
+- **NOTE**: If multiple documents have the same title (e.g., "Document 2" and "Document 3" are both "StillMe Core Mechanism - Technical Architecture"), these may be different chunks from the same document. You MUST explain: "Document 2 and Document 3 are both chunks from the same document 'StillMe Core Mechanism - Technical Architecture', but contain different parts of that document."
 
 **WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
 - You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
@@ -1305,6 +1316,15 @@ The user is asking about StillMe's nature, capabilities, or architecture.
   4. "Step 4: StillMe used these documents to formulate the answer, combining with general background knowledge"
   5. "Step 5: StillMe used the validation chain to validate the response"
 - **CRITICAL: You MUST include Step 5 about validation chain - do NOT skip it or stop at Step 4**
+
+**STRUCTURE ORGANIZATION (CRITICAL):**
+- **When answering multi-part questions (e.g., "1) First answer, 2) Then list, 3) Finally explain"):**
+  - Part 1 (First answer): Be CONCISE but complete - provide the answer with citations, but don't over-explain
+  - Part 2 (List/analysis): Be DETAILED - provide comprehensive lists, tables, or breakdowns
+  - Part 3 (Final explanation): Be SPECIFIC - provide detailed explanations with examples
+- **DO NOT duplicate content across parts** - each part should add unique value
+- **DO NOT make Part 1 too long** - save detailed explanations for later parts
+- **DO NOT make Part 3 too brief** - expand on details that were concise in Part 1
 
 """
         
@@ -1340,10 +1360,10 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - Warnings detected: {warnings_str}
 
 **KHI ĐƯỢC HỎI VỀ VALIDATOR WARNINGS CHO CÂU HỎI NÀY:**
-- Bạn PHẢI summarize: "Validation chain đã check câu trả lời này và có warnings về: {warnings_summary}"
-- Bạn PHẢI mention confidence score: {confidence_str}
-- Bạn PHẢI giải thích ý nghĩa của warnings này
-- **CRITICAL: Nếu được hỏi 'if any validator raised warnings, summarize them', bạn PHẢI cung cấp warnings thực tế như liệt kê ở trên, KHÔNG được nói 'if there were any warnings'**
+- **CRITICAL: Bạn PHẢI cung cấp warnings THỰC TẾ từ session này, KHÔNG phải hypothetical warnings**
+- Nếu có warnings được phát hiện (như liệt kê ở trên: {warnings_str}), bạn PHẢI nói: "Validation chain đã check câu trả lời này và phát hiện các warnings sau: {warnings_summary}. Confidence score: {confidence_str}. [Giải thích ý nghĩa của từng warning]"
+- Nếu KHÔNG có warnings nhưng validation passed, bạn PHẢI nói: "Validation chain đã check câu trả lời này và không phát hiện warnings nào. Confidence score: {confidence_str}. Câu trả lời đã pass tất cả validation checks."
+- **CRITICAL: KHÔNG được nói "Potential warnings có thể bao gồm..." hoặc "Nếu có warnings..." - bạn PHẢI nêu kết quả thực tế**
 - **CRITICAL**: Nếu validation chưa chạy (điều này là bình thường - validation chạy SAU khi generate response), bạn PHẢI nói: "Validation chain sẽ check câu trả lời này sau khi generate. Dựa trên các patterns validation thông thường, potential warnings có thể bao gồm: [mention common warning types như citation relevance, evidence overlap, confidence levels]. Tuy nhiên, actual validation results sẽ có sau khi validation chain xử lý câu trả lời này."
 - **KHÔNG được nói**: "These warnings encompassed issues such as..." (nghe như bạn đã có warnings, điều này gây hiểu lầm)
 - **PHẢI nói**: "Sau khi validation chạy, nếu có warnings được phát hiện, chúng thường bao gồm: [specific warning types]. Validation chain sẽ check citation relevance, evidence overlap với retrieved documents, và confidence levels."
@@ -1359,10 +1379,10 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - Warnings detected: {warnings_str}
 
 **WHEN ASKED ABOUT VALIDATOR WARNINGS FOR THIS QUESTION:**
-- You MUST summarize: "Validation chain checked this response and has warnings about: {warnings_summary}"
-- You MUST mention confidence score: {confidence_str}
-- You MUST explain what these warnings mean
-- **CRITICAL: When asked 'if any validator raised warnings, summarize them', you MUST provide actual warnings as listed above, DO NOT say 'if there were any warnings'**
+- **CRITICAL: You MUST provide ACTUAL warnings from THIS session, NOT hypothetical warnings**
+- If warnings were detected (as listed above: {warnings_str}), you MUST say: "Validation chain checked this response and detected the following warnings: {warnings_summary}. Confidence score: {confidence_str}. [Explain what each warning means]"
+- If NO warnings were detected but validation passed, you MUST say: "Validation chain checked this response and no warnings were detected. Confidence score: {confidence_str}. The response passed all validation checks."
+- **CRITICAL: DO NOT say "Potential warnings may include..." or "If there were any warnings..." - you MUST state actual results**
 - **CRITICAL**: If validation hasn't run yet (which is normal - validation runs AFTER response generation), you MUST say: "Validation chain will check this response after generation. Based on typical validation patterns, potential warnings might include: [mention common warning types like citation relevance, evidence overlap, confidence levels]. However, actual validation results will be available after the validation chain processes this response."
 - **DO NOT say**: "These warnings encompassed issues such as..." (sounds like you already have warnings, which is misleading)
 - **DO say**: "After validation runs, if any warnings are detected, they would typically include: [specific warning types]. The validation chain will check for citation relevance, evidence overlap with retrieved documents, and confidence levels."
