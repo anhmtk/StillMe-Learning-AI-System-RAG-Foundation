@@ -1258,6 +1258,8 @@ The user is asking about StillMe's nature, capabilities, or architecture.
   3. Claim: '[bất kỳ factual claim nào khác từ câu trả lời của bạn]' → từ document [3] '[document title]' hoặc từ general knowledge"
 - **CRITICAL**: Include EXACT document title (như liệt kê ở trên) trong format, không chỉ "Document 1"
 - **CRITICAL**: Liệt kê TẤT CẢ factual claims bạn đã đưa ra trong FINAL ANSWER cho câu hỏi của user, không phải claims về RAG process
+- **CRITICAL**: Bạn PHẢI đếm TẤT CẢ factual claims trong câu trả lời và liệt kê TẤT CẢ. KHÔNG được nói "Any other factual claim..." hoặc "Other claims..." - bạn PHẢI liệt kê từng claim cụ thể
+- **CRITICAL**: Sử dụng format CHÍNH XÁC: "1. Claim: '[exact claim text từ câu trả lời của bạn]' → từ document [1] '[exact document title]' về [topic]" - KHÔNG được dùng variations như "The statement that..." hoặc "The assertion that..."
 - **CRITICAL: Khi được hỏi 'explain step by step how you used RAG', bạn PHẢI cung cấp quy trình TỪNG BƯỚC:**
   1. "Bước 1: StillMe nhận câu hỏi và tạo embedding"
   2. "Bước 2: StillMe tìm kiếm ChromaDB bằng semantic similarity"
@@ -1291,6 +1293,8 @@ The user is asking about StillMe's nature, capabilities, or architecture.
   3. Claim: '[any other factual claim from your answer]' → from document [3] '[document title]' or from general knowledge"
 - **CRITICAL**: Include the EXACT document title (as listed above) in the format, not just "Document 1"
 - **CRITICAL**: List EVERY factual claim you made in your FINAL ANSWER to the user's question, not claims about the RAG process
+- **CRITICAL**: You MUST count ALL factual claims in your answer and list them ALL. Do NOT say "Any other factual claim..." or "Other claims..." - you MUST list each one specifically
+- **CRITICAL**: Use the EXACT format: "1. Claim: '[exact claim text from your answer]' → from document [1] '[exact document title]' about [topic]" - do NOT use variations like "The statement that..." or "The assertion that..."
 - **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a STEP-BY-STEP process:**
   1. "Step 1: StillMe received the question and generated an embedding"
   2. "Step 2: StillMe searched ChromaDB using semantic similarity"

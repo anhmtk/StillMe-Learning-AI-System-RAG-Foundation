@@ -1290,6 +1290,10 @@ If the question belongs to a classic philosophical debate (free will, determinis
   3. Claim: '[any other factual claim from your answer]' → from document [3] '[document title]' or from general knowledge"
 - **CRITICAL**: Include the EXACT document title (as listed above) in the format, not just "Document 1"
 - **CRITICAL**: List EVERY factual claim you made in your FINAL ANSWER to the user's question, not claims about the RAG process
+- **CRITICAL**: You MUST count ALL factual claims in your answer and list them ALL. Do NOT say "Any other factual claim..." or "Other claims..." - you MUST list each one specifically
+- **CRITICAL**: Use the EXACT format: "1. Claim: '[exact claim text from your answer]' → from document [1] '[exact document title]' about [topic]" - do NOT use variations like "The statement that..." or "The assertion that..."
+- **CRITICAL**: You MUST count ALL factual claims in your answer and list them ALL. Do NOT say "Any other factual claim..." or "Other claims..." - you MUST list each one specifically
+- **CRITICAL**: Use the EXACT format: "1. Claim: '[exact claim text from your answer]' → from document [1] '[exact document title]' about [topic]" - do NOT use variations like "The statement that..." or "The assertion that..."
 - **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a STEP-BY-STEP process:**
   1. "Step 1: StillMe received the question and generated an embedding"
   2. "Step 2: StillMe searched ChromaDB using semantic similarity"
@@ -1412,7 +1416,9 @@ RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY.
   - "Final answer" means YOUR ACTUAL ANSWER to the user's question, NOT the explanation of how you used RAG
   - You MUST list EACH factual claim from YOUR ACTUAL ANSWER (not claims about RAG process or validation)
   - You MUST include the EXACT document title (as listed in retrieved documents above) in the format
-  - Format: "1. Claim: '[exact claim from your answer]' → from document [1] '[exact document title]' about [topic]"
+  - **CRITICAL**: You MUST count ALL factual claims in your answer and list them ALL. Do NOT say "Any other factual claim..." or "Other claims..." - you MUST list each one specifically
+  - **CRITICAL**: Use the EXACT format: "1. Claim: '[exact claim text from your answer]' → from document [1] '[exact document title]' about [topic]"
+  - **DO NOT use variations**: Do NOT say "The statement that..." or "The assertion that..." - use the EXACT format above
 - You MUST mention ALL retrieved documents (do NOT skip any)
 - You MUST distinguish SPECIFICALLY which parts come from which documents
 
