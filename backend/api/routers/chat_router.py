@@ -1072,6 +1072,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
 **IF THE QUESTION ASKS "if any validator raised warnings":**
 - You MUST summarize ACTUAL warnings (not hypothetical "if there were any")
 - You MUST mention confidence score and specific warning types
+- **CRITICAL**: If validation hasn't run yet (which is normal - validation runs AFTER response generation), you MUST say: "Validation chain will check this response after generation. Based on typical validation patterns, potential warnings might include: [mention common warning types like citation relevance, evidence overlap, confidence levels]. However, actual validation results will be available after the validation chain processes this response."
+- **DO NOT say**: "These warnings encompassed issues such as..." (sounds like you already have warnings, which is misleading)
+- **DO say**: "After validation runs, if any warnings are detected, they would typically include: [specific warning types]. The validation chain will check for citation relevance, evidence overlap with retrieved documents, and confidence levels."
 
 **DO NOT give generic descriptions - be SPECIFIC about THIS question's process and sources.**
 
@@ -1241,8 +1244,15 @@ If the question belongs to a classic philosophical debate (free will, determinis
 - Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
 - Bạn PHẢI mention TẤT CẢ documents đã retrieve (như liệt kê ở trên) - KHÔNG được bỏ sót document nào
 - Bạn PHẢI phân biệt CỤ THỂ: "Claim X trong câu trả lời đến từ document [1] về [topic], claim Y từ document [2] về [topic], claim Z từ general background knowledge"
-- **CRITICAL: Khi được hỏi 'for each factual claim', bạn PHẢI liệt kê TỪNG claim riêng biệt với nguồn của nó**
-- Ví dụ format: "1. Claim về learning frequency (6 cycles/day) → từ document [1] về StillMe's learning mechanism. 2. Claim về timestamp storage → từ document [2] về StillMe's technical architecture. 3. Claim về RAG process → từ general knowledge về RAG systems."
+- **CRITICAL: Khi được hỏi 'for each factual claim', bạn PHẢI liệt kê TỪNG claim riêng biệt với nguồn của nó trong format NUMBERED LIST**
+- **KHÔNG được nói**: "Claim về X được lấy từ Document 1" (quá chung chung)
+- **BẠN PHẢI nói**: Sử dụng format numbered list như sau:
+  "Cho từng factual claim trong câu trả lời của tôi:
+  1. Claim về learning frequency (6 cycles/day) → từ document [1] 'StillMe: No Subjective Awareness...' về StillMe's learning mechanism
+  2. Claim về timestamp storage capability → từ document [2] 'StillMe Core Mechanism...' về StillMe's technical architecture
+  3. Claim về RAG retrieval process → từ general knowledge về RAG systems
+  4. Claim về validation chain (13+ validators) → từ document [3] 'StillMe Core Mechanism...' về StillMe's validation architecture"
+- **CRITICAL**: Liệt kê TẤT CẢ factual claims bạn đã đưa ra trong câu trả lời, không chỉ 2-3 claims. Đếm tất cả claims và liệt kê chúng.
 - **CRITICAL: Khi được hỏi 'explain step by step how you used RAG', bạn PHẢI cung cấp quy trình TỪNG BƯỚC:**
   1. "Bước 1: StillMe nhận câu hỏi và tạo embedding"
   2. "Bước 2: StillMe tìm kiếm ChromaDB bằng semantic similarity"
@@ -1264,8 +1274,15 @@ If the question belongs to a classic philosophical debate (free will, determinis
 - You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
 - You MUST mention ALL retrieved documents (as listed above) - do NOT skip any documents
 - You MUST distinguish SPECIFICALLY: "Claim X in my answer comes from document [1] about [topic], claim Y from document [2] about [topic], claim Z from general background knowledge"
-- **CRITICAL: When asked 'for each factual claim', you MUST list EACH claim separately with its source**
-- Example format: "1. Claim about learning frequency (6 cycles/day) → from document [1] about StillMe's learning mechanism. 2. Claim about timestamp storage → from document [2] about StillMe's technical architecture. 3. Claim about RAG process → from general knowledge about RAG systems."
+- **CRITICAL: When asked 'for each factual claim', you MUST list EACH claim separately with its source in a NUMBERED LIST format**
+- **DO NOT say**: "The claim about X was grounded in Document 1" (too generic)
+- **YOU MUST say**: Use numbered list format like this:
+  "For each factual claim in my answer:
+  1. Claim about learning frequency (6 cycles/day) → from document [1] 'StillMe: No Subjective Awareness...' about StillMe's learning mechanism
+  2. Claim about timestamp storage capability → from document [2] 'StillMe Core Mechanism...' about StillMe's technical architecture  
+  3. Claim about RAG retrieval process → from general knowledge about RAG systems
+  4. Claim about validation chain (13+ validators) → from document [3] 'StillMe Core Mechanism...' about StillMe's validation architecture"
+- **CRITICAL**: List EVERY factual claim you made in your answer, not just 2-3 claims. Count all claims and list them all.
 - **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a STEP-BY-STEP process:**
   1. "Step 1: StillMe received the question and generated an embedding"
   2. "Step 2: StillMe searched ChromaDB using semantic similarity"
@@ -1391,6 +1408,9 @@ RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY.
 **IF THE QUESTION ASKS "if any validator raised warnings":**
 - You MUST summarize ACTUAL warnings (not hypothetical "if there were any")
 - You MUST mention confidence score and specific warning types
+- **CRITICAL**: If validation hasn't run yet (which is normal - validation runs AFTER response generation), you MUST say: "Validation chain will check this response after generation. Based on typical validation patterns, potential warnings might include: [mention common warning types like citation relevance, evidence overlap, confidence levels]. However, actual validation results will be available after the validation chain processes this response."
+- **DO NOT say**: "These warnings encompassed issues such as..." (sounds like you already have warnings, which is misleading)
+- **DO say**: "After validation runs, if any warnings are detected, they would typically include: [specific warning types]. The validation chain will check for citation relevance, evidence overlap with retrieved documents, and confidence levels."
 
 **DO NOT give generic descriptions - be SPECIFIC about THIS question's process and sources.**
 
