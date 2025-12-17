@@ -72,6 +72,8 @@ class ValidationEngine:
             "IdentityCheckValidator",   # Reads answer only
             "PhilosophicalDepthValidator",  # Reads answer only
             "EthicsAdapter",            # Reads answer only (but should run last for safety)
+            "HallucinationExplanationValidator",  # Reads answer only
+            "VerbosityValidator",       # Reads answer and user_question only
         }
         
         # Check sequential first (higher priority)
@@ -292,6 +294,10 @@ class ValidationEngine:
                         return validator.run(patched_answer, ctx_docs_list, user_question=user_q)
                     elif validator_name == "SourceConsensusValidator":
                         return validator.run(patched_answer, ctx_docs_list, user_question=user_q)
+                    elif validator_name == "HallucinationExplanationValidator":
+                        return validator.run(patched_answer, ctx_docs_list, user_question=user_q)
+                    elif validator_name == "VerbosityValidator":
+                        return validator.run(patched_answer, ctx_docs_list, user_question=user_q)
                     else:
                         return validator.run(patched_answer, ctx_docs_list)
                 except Exception as e:
@@ -351,6 +357,12 @@ class ValidationEngine:
                     try:
                         # Pass user_question if available
                         if validator_name == "FactualHallucinationValidator":
+                            result = validator.run(patched, ctx_docs, user_question=user_question)
+                        elif validator_name == "SourceConsensusValidator":
+                            result = validator.run(patched, ctx_docs, user_question=user_question)
+                        elif validator_name == "HallucinationExplanationValidator":
+                            result = validator.run(patched, ctx_docs, user_question=user_question)
+                        elif validator_name == "VerbosityValidator":
                             result = validator.run(patched, ctx_docs, user_question=user_question)
                         else:
                             result = validator.run(patched, ctx_docs)

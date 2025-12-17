@@ -31,6 +31,8 @@ from .step_detector import StepDetector, Step
 from .step_validator import StepValidator, StepValidationResult
 from .consistency_checker import ConsistencyChecker, Claim
 from .philosophical_depth import PhilosophicalDepthValidator
+from .hallucination_explanation import HallucinationExplanationValidator
+from .verbosity import VerbosityValidator
 
 __all__ = [
     "Validator",
@@ -59,5 +61,7 @@ __all__ = [
     "ConsistencyChecker",
     "Claim",
     "PhilosophicalDepthValidator",
+    "HallucinationExplanationValidator",
+    "VerbosityValidator",
 ]
 

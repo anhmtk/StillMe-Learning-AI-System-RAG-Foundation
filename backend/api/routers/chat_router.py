@@ -1962,6 +1962,20 @@ async def _handle_validation_with_fallback(
         )
         logger.debug("Phase 2: Added PhilosophicalDepthValidator (philosophical question detected)")
     
+    # Add HallucinationExplanationValidator to ensure technical depth in explanations
+    from stillme_core.validation.hallucination_explanation import HallucinationExplanationValidator
+    validators.append(
+        HallucinationExplanationValidator(strict_mode=False, auto_patch=True)
+    )
+    logger.debug("Phase 2: Added HallucinationExplanationValidator")
+    
+    # Add VerbosityValidator to detect overly verbose or defensive responses
+    from stillme_core.validation.verbosity import VerbosityValidator
+    validators.append(
+        VerbosityValidator(max_length_ratio=3.0, strict_mode=False)
+    )
+    logger.debug("Phase 2: Added VerbosityValidator")
+    
     # Add EthicsAdapter last (most critical - blocks harmful content)
     validators.append(
         EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
