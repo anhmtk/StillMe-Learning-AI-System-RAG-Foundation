@@ -784,6 +784,24 @@
                                                 font-weight: 600 !important;
                                                 color: #ffffff !important;
                                             }
+                                            
+                                            /* Fullscreen mode for parent panel */
+                                            #stillme-chat-panel-parent.fullscreen {
+                                                top: 0 !important;
+                                                left: 0 !important;
+                                                transform: none !important;
+                                                width: 100vw !important;
+                                                height: 100vh !important;
+                                                max-width: 100vw !important;
+                                                max-height: 100vh !important;
+                                                border-radius: 0 !important;
+                                                resize: none !important;
+                                            }
+                                            
+                                            /* Disable resize handles when fullscreen */
+                                            #stillme-chat-panel-parent.fullscreen .resize-handle {
+                                                display: none !important;
+                                            }
             
             /* Feedback buttons (like/dislike) */
             .stillme-feedback-buttons {
@@ -942,14 +960,42 @@
                                     fullscreenBtn.onclick = function(e) {
                                         e.preventDefault();
                                         e.stopPropagation();
-                                        parentPanel.classList.toggle('fullscreen');
-                                        if (parentPanel.classList.contains('fullscreen')) {
-                                            fullscreenBtn.textContent = '⛶';
-                                            fullscreenBtn.title = 'Exit Fullscreen';
-                                        } else {
+                                        
+                                        const isCurrentlyFullscreen = parentPanel.classList.contains('fullscreen');
+                                        
+                                        if (isCurrentlyFullscreen) {
+                                            // Exit fullscreen
+                                            parentPanel.classList.remove('fullscreen');
                                             fullscreenBtn.textContent = '⛶';
                                             fullscreenBtn.title = 'Toggle Fullscreen';
+                                            
+                                            // Remove inline styles to restore saved position/size
+                                            parentPanel.style.removeProperty('top');
+                                            parentPanel.style.removeProperty('left');
+                                            parentPanel.style.removeProperty('width');
+                                            parentPanel.style.removeProperty('height');
+                                            parentPanel.style.removeProperty('max-width');
+                                            parentPanel.style.removeProperty('max-height');
+                                            parentPanel.style.removeProperty('border-radius');
+                                            parentPanel.style.removeProperty('transform');
+                                        } else {
+                                            // Enter fullscreen
+                                            parentPanel.classList.add('fullscreen');
+                                            fullscreenBtn.textContent = '⛶';
+                                            fullscreenBtn.title = 'Exit Fullscreen';
+                                            
+                                            // Force fullscreen styles with !important
+                                            parentPanel.style.setProperty('top', '0', 'important');
+                                            parentPanel.style.setProperty('left', '0', 'important');
+                                            parentPanel.style.setProperty('width', '100vw', 'important');
+                                            parentPanel.style.setProperty('height', '100vh', 'important');
+                                            parentPanel.style.setProperty('max-width', '100vw', 'important');
+                                            parentPanel.style.setProperty('max-height', '100vh', 'important');
+                                            parentPanel.style.setProperty('border-radius', '0', 'important');
+                                            parentPanel.style.setProperty('transform', 'none', 'important');
                                         }
+                                        
+                                        console.log('StillMe Chat: Parent panel fullscreen toggled:', !isCurrentlyFullscreen);
                                     };
                                     
                                     // Setup input handler for parent panel (use elements we just created)
