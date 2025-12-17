@@ -180,7 +180,7 @@ async def _generate_code_explanation(
             llm_provider=llm_provider,
             llm_api_key=llm_api_key,
             use_server_keys=True,  # Internal use
-            question=question,
+            question=question,  # Pass question to enable codebase question detection for higher max_tokens
             task_type="chat"
         )
         

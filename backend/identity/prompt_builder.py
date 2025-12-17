@@ -1283,7 +1283,16 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 **BƯỚC 3: Liệt kê TẤT CẢ claims theo format numbered**
 - Bạn PHẢI liệt kê TẤT CẢ claims, từng cái một, theo format numbered
 - Nếu bạn đếm được 5 claims, liệt kê cả 5. Nếu đếm được 10, liệt kê cả 10
-- KHÔNG được dừng ở 2-3 claims và nói "Any other factual claim..." hoặc "Other claims..." hoặc "Any additional claims..."
+- **TUYỆT ĐỐI CẤM**: KHÔNG được dừng ở 2-3 claims và nói:
+  - "Any other factual claim..." ❌
+  - "Other claims..." ❌
+  - "Any additional claims..." ❌
+  - "Additional factual claims..." ❌
+  - "Other factual claims include..." ❌
+  - "Additional claims are..." ❌
+  - "Các claims khác..." ❌
+  - "Các factual claims bổ sung..." ❌
+- **Bạn PHẢI liệt kê TỪNG claim một cách riêng biệt** - không có ngoại lệ, không có shortcuts
 - KHÔNG được dùng generic phrases - bạn PHẢI liệt kê từng claim với exact text của nó
 
 **BƯỚC 4: Sử dụng format CHÍNH XÁC cho từng claim**
@@ -1370,7 +1379,14 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 **STEP 3: List ALL claims in numbered format**
 - You MUST list ALL claims, one by one, in numbered format
 - If you counted 5 claims, list all 5. If you counted 10, list all 10
-- DO NOT stop at 2-3 claims and say "Any other factual claim..." or "Other claims..." or "Any additional claims..."
+- **ABSOLUTELY FORBIDDEN**: DO NOT stop at 2-3 claims and say:
+  - "Any other factual claim..." ❌
+  - "Other claims..." ❌
+  - "Any additional claims..." ❌
+  - "Additional factual claims..." ❌
+  - "Other factual claims include..." ❌
+  - "Additional claims are..." ❌
+- **You MUST list EVERY SINGLE claim individually** - no exceptions, no shortcuts
 - DO NOT use generic phrases - you MUST list each claim with its exact text
 
 **STEP 4: Use EXACT format for each claim**
@@ -1452,7 +1468,14 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 **NẾU VALIDATION ĐÃ CHẠY:**
 - **Nếu có warnings** ({warnings_str}): Bạn PHẢI nói: "Validation chain đã check câu trả lời này và phát hiện các warnings sau: {warnings_summary}. Confidence score: {confidence_str}. [Giải thích ý nghĩa của từng warning cụ thể]"
 - **Nếu KHÔNG có warnings** (warnings_str = "Không có warnings"): Bạn PHẢI nói: "Validation chain đã check câu trả lời này và không phát hiện warnings nào. Confidence score: {confidence_str}. Câu trả lời đã pass tất cả validation checks."
-- **CRITICAL: KHÔNG được nói "Potential warnings có thể bao gồm..." hoặc "High confidence", "Strong alignment" - bạn PHẢI nêu kết quả THỰC TẾ như liệt kê ở trên**
+- **TUYỆT ĐỐI CẤM - KHÔNG ĐƯỢC NÓI:**
+  - "Potential warnings có thể bao gồm..." ❌
+  - "Potential warnings might include..." ❌
+  - "Warnings could include..." ❌
+  - "High confidence" (nếu không có trong warnings_str) ❌
+  - "Strong alignment" (nếu không có trong warnings_str) ❌
+  - "Extensive overlap" (nếu không có trong warnings_str) ❌
+- **Bạn PHẢI nêu kết quả THỰC TẾ như liệt kê ở trên** - dùng EXACT warnings từ {warnings_str} hoặc nói "no warnings detected"
 
 **NẾU VALIDATION CHƯA CHẠY:**
 - Bạn PHẢI nói: "Validation chain sẽ check câu trả lời này sau khi generate. Dựa trên các patterns validation thông thường, potential warnings có thể bao gồm: [mention common warning types như citation relevance, evidence overlap, confidence levels]. Tuy nhiên, actual validation results sẽ có sau khi validation chain xử lý câu trả lời này."
@@ -1491,7 +1514,14 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 **IF VALIDATION HAS RUN:**
 - **If warnings were detected** ({warnings_str}): You MUST say: "Validation chain checked this response and detected the following warnings: {warnings_summary}. Confidence score: {confidence_str}. [Explain what each specific warning means]"
 - **If NO warnings were detected** (warnings_str = "No warnings"): You MUST say: "Validation chain checked this response and no warnings were detected. Confidence score: {confidence_str}. The response passed all validation checks."
-- **CRITICAL: DO NOT say "Potential warnings may include..." or "High confidence", "Strong alignment" - you MUST state ACTUAL results as listed above**
+- **ABSOLUTELY FORBIDDEN - DO NOT SAY:**
+  - "Potential warnings may include..." ❌
+  - "Potential warnings might include..." ❌
+  - "Warnings could include..." ❌
+  - "High confidence" (if not stated in warnings_str) ❌
+  - "Strong alignment" (if not stated in warnings_str) ❌
+  - "Extensive overlap" (if not stated in warnings_str) ❌
+- **You MUST state ACTUAL results as listed above** - use the EXACT warnings from {warnings_str} or say "no warnings detected"
 
 **IF VALIDATION HAS NOT RUN YET:**
 - You MUST say: "Validation chain will check this response after generation. Based on typical validation patterns, potential warnings might include: [mention common warning types like citation relevance, evidence overlap, confidence levels]. However, actual validation results will be available after the validation chain processes this response."

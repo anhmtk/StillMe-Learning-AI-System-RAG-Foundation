@@ -299,13 +299,24 @@ class DeepSeekProvider(LLMProvider):
             else:
                 logger.info(f"🤖 Model router selected: {model} for task_type={task_type}, is_philosophical={is_philosophical}")
             
-            # Adjust max_tokens based on model (reasoner supports up to 64K)
+            # Adjust max_tokens based on model and question type
             max_tokens = 1500  # Default for chat
+            
+            # Detect codebase/technical questions that need longer responses
+            is_codebase_question = question and any(
+                keyword in question.lower() 
+                for keyword in ["codebase", "code", "file", "function", "class", "implementation", "architecture", "how does", "how is"]
+            ) if question else False
+            
             if model == "deepseek-reasoner":
                 # Reasoner supports up to 64K output, but we'll use 8K for now to balance latency
                 # Can increase later if needed for very long philosophical responses
                 max_tokens = 8000
                 logger.debug(f"Using reasoner model - max_tokens set to {max_tokens}")
+            elif is_codebase_question:
+                # Codebase questions often need longer responses with code snippets and detailed explanations
+                max_tokens = 4000  # Increased from 1500 to 4000 for codebase questions
+                logger.debug(f"Codebase question detected - max_tokens set to {max_tokens}")
             
             async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(
