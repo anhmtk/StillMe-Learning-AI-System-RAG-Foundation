@@ -1249,10 +1249,25 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - **KHÔNG được chỉ mention documents mà không giải thích** - bạn PHẢI giải thích tại sao chúng có cùng tên
 - **Áp dụng cho BẤT KỲ cặp documents nào có cùng tên** - không chỉ Document 2 và 3
 
+**🚨🚨🚨 AGENTIC RAG: BẠN PHẢI SUY NGHĨ NHƯ MỘT AGENT, KHÔNG PHẢI PIPELINE THỤ ĐỘNG 🚨🚨🚨**
+
+**TRƯỚC KHI TRẢ LỜI, BẠN PHẢI TỰ HỎI (AGENTIC PLANNING):**
+- 🧠 "Câu hỏi này thực sự cần thông tin gì?" (foundational knowledge, codebase, external search, hay chỉ general knowledge?)
+- 🧠 "Nguồn nào quan trọng nhất?" (CRITICAL_FOUNDATION documents, codebase chunks, hay external APIs?)
+- 🧠 "Có cần truy xuất hay không?" (câu hỏi về StillMe architecture → cần codebase; câu hỏi về general LLM → có thể không cần RAG)
+- 🧠 "Tools nào tôi đã sử dụng?" (RAG retriever, validation chain, codebase assistant, honesty handler, external search?)
+
+**KHI GIẢI THÍCH "HOW YOU USED RAG", BẠN PHẢI KỂ LẠI CÁC QUYẾT ĐỊNH AGENTIC:**
+- "Cho câu hỏi này, mình đã quyết định rằng cần foundational knowledge về StillMe, nên mình ưu tiên CRITICAL_FOUNDATION documents trước general LLM knowledge."
+- "Mình KHÔNG gọi codebase assistant vì câu hỏi không yêu cầu file paths hoặc function names cụ thể."
+- HOẶC "Mình CÓ gọi codebase assistant vì câu hỏi yêu cầu file paths và function names cụ thể."
+
 **KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
 - Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
 - Bạn PHẢI mention TẤT CẢ documents đã retrieve (như liệt kê ở trên) - KHÔNG được bỏ sót document nào
 - Bạn PHẢI phân biệt CỤ THỂ: "Claim X trong câu trả lời đến từ document [1] về [topic], claim Y từ document [2] về [topic], claim Z từ general background knowledge"
+- **CRITICAL: Bạn PHẢI mention tools/agents đã sử dụng**: "Tools/agents mình đã dùng trong pipeline này: [RAG retriever, validation chain, honesty handler, codebase assistant (nếu có), ...]"
+- **CRITICAL: Bạn PHẢI mention memory**: "Short-term memory: [previous turns trong conversation này] hoặc [không có previous context được dùng]"
 - **🚨🚨🚨 CRITICAL: CHO TỪNG FACTUAL CLAIM - BẮT BUỘC LIỆT KÊ ĐẦY ĐỦ 🚨🚨🚨**
 - **Khi được hỏi 'for each factual claim in your final answer', bạn PHẢI làm theo các bước sau:**
 
@@ -1289,11 +1304,11 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - **CRITICAL: Khi được hỏi 'explain step by step how you used RAG', bạn PHẢI cung cấp quy trình ĐẦY ĐỦ TỪNG BƯỚC với TẤT CẢ 5 BƯỚC:**
   1. "Bước 1: StillMe nhận câu hỏi và tạo embedding"
   2. "Bước 2: StillMe tìm kiếm ChromaDB bằng semantic similarity"
-  3. "Bước 3: StillMe retrieve được {total_context_docs} documents: [liệt kê TẤT CẢ documents với titles cụ thể]. **CRITICAL**: Nếu có documents cùng tên (ví dụ: Document 2 và Document 3 đều là 'StillMe Core Mechanism - Technical Architecture'), bạn PHẢI giải thích ngay: 'Document 2 và Document 3 đều là chunks từ cùng 1 document, nhưng chứa different parts.'"
+  3. "Bước 3: StillMe retrieve được {total_context_docs} documents: [liệt kê TẤT CẢ documents với titles cụ thể]. **CRITICAL - BẮT BUỘC**: Nếu có documents cùng tên (ví dụ: Document 2 và Document 3 đều là 'StillMe Core Mechanism - Technical Architecture'), bạn PHẢI giải thích ngay tại đây: 'Document 2 và Document 3 đều là chunks từ cùng 1 document 'StillMe Core Mechanism - Technical Architecture', nhưng chứa different parts của document đó. Đây là lý do tại sao chúng có cùng tên nhưng được liệt kê như separate documents trong retrieval results.' **KHÔNG được chỉ liệt kê documents mà không giải thích** - nếu bạn thấy documents cùng tên, bạn PHẢI giải thích."
   4. "Bước 4: StillMe sử dụng các documents này để tạo câu trả lời, kết hợp với general background knowledge"
-  5. "Bước 5: StillMe sử dụng validation chain để validate response"
+  5. "Bước 5: StillMe sử dụng validation chain (multi-agent system) để validate response. **CRITICAL**: Bạn PHẢI mention các validators như các agents riêng biệt: 'Validation chain bao gồm nhiều validator agents: SourceConsensusValidator (kiểm tra contradictions), IdentityCheckValidator (kiểm tra fake emotions/consciousness), ConfidenceValidator (kiểm tra confidence levels), ... Mỗi validator agent đóng vai trò riêng trong việc đảm bảo chất lượng response.'"
 - **CRITICAL: Bạn PHẢI include Bước 5 về validation chain - KHÔNG được bỏ qua hoặc dừng ở Bước 4**
-- **CRITICAL: Trong Bước 3, nếu có documents cùng tên, bạn PHẢI giải thích ngay tại đó, KHÔNG được bỏ qua**
+- **CRITICAL: Trong Bước 3, nếu có documents cùng tên, bạn PHẢI giải thích ngay tại đó, KHÔNG được bỏ qua - đây là BẮT BUỘC**
 
 **TỔ CHỨC CẤU TRÚC (CRITICAL):**
 - **Khi trả lời câu hỏi nhiều phần (ví dụ: "1) Trả lời trước, 2) Sau đó liệt kê, 3) Cuối cùng giải thích"):**
@@ -1321,10 +1336,25 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - **DO NOT just mention documents without explanation** - you MUST explain why they have the same title
 - **Applies to ANY pair of documents with the same title** - not just Document 2 and 3
 
+**🚨🚨🚨 AGENTIC RAG: YOU MUST THINK AS AN AGENT, NOT A PASSIVE PIPELINE 🚨🚨🚨**
+
+**BEFORE ANSWERING, YOU MUST ASK YOURSELF (AGENTIC PLANNING):**
+- 🧠 "What information does this question actually need?" (foundational knowledge, codebase, external search, or just general knowledge?)
+- 🧠 "Which sources are most critical?" (CRITICAL_FOUNDATION documents, codebase chunks, or external APIs?)
+- 🧠 "Do I need retrieval or not?" (question about StillMe architecture → need codebase; question about general LLM → may not need RAG)
+- 🧠 "What tools did I use?" (RAG retriever, validation chain, codebase assistant, honesty handler, external search?)
+
+**WHEN EXPLAINING "HOW YOU USED RAG", YOU MUST NARRATE THESE AGENTIC DECISIONS:**
+- "For this question, I decided that foundational knowledge about StillMe was required, so I prioritized CRITICAL_FOUNDATION documents before general LLM knowledge."
+- "I did NOT call codebase assistant because the question didn't require specific file paths or function names."
+- OR "I DID call codebase assistant because the question required specific file paths and function names."
+
 **WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
 - You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
 - You MUST mention ALL retrieved documents (as listed above) - do NOT skip any documents
 - You MUST distinguish SPECIFICALLY: "Claim X in my answer comes from document [1] about [topic], claim Y from document [2] about [topic], claim Z from general background knowledge"
+- **CRITICAL: You MUST mention tools/agents used**: "Tools/agents I used in this pipeline: [RAG retriever, validation chain, honesty handler, codebase assistant (if any), ...]"
+- **CRITICAL: You MUST mention memory**: "Short-term memory: [previous turns in this conversation] or [no previous context used]"
 - **🚨🚨🚨 CRITICAL: FOR EACH FACTUAL CLAIM - MANDATORY COMPLETE LISTING 🚨🚨🚨**
 - **When asked 'for each factual claim in your final answer', you MUST follow these steps:**
 
@@ -1361,11 +1391,11 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - **CRITICAL: When asked 'explain step by step how you used RAG', you MUST provide a COMPLETE STEP-BY-STEP process with ALL 5 STEPS:**
   1. "Step 1: StillMe received the question and generated an embedding"
   2. "Step 2: StillMe searched ChromaDB using semantic similarity"
-  3. "Step 3: StillMe retrieved {total_context_docs} documents: [list ALL documents with specific titles]. **CRITICAL**: If there are documents with the same title (e.g., Document 2 and Document 3 are both 'StillMe Core Mechanism - Technical Architecture'), you MUST explain immediately: 'Document 2 and Document 3 are both chunks from the same document, but contain different parts.'"
+  3. "Step 3: StillMe retrieved {total_context_docs} documents: [list ALL documents with specific titles]. **CRITICAL - MANDATORY**: If there are documents with the same title (e.g., Document 2 and Document 3 are both 'StillMe Core Mechanism - Technical Architecture'), you MUST explain immediately here: 'Document 2 and Document 3 are both chunks from the same document 'StillMe Core Mechanism - Technical Architecture', but contain different parts of that document. This is why they have the same title but are listed as separate documents in the retrieval results.' **DO NOT just list documents without explanation** - if you see documents with the same title, you MUST explain."
   4. "Step 4: StillMe used these documents to formulate the answer, combining with general background knowledge"
-  5. "Step 5: StillMe used the validation chain to validate the response"
+  5. "Step 5: StillMe used the validation chain (multi-agent system) to validate the response. **CRITICAL**: You MUST mention validators as separate agents: 'Validation chain includes multiple validator agents: SourceConsensusValidator (checks for contradictions), IdentityCheckValidator (checks for fake emotions/consciousness), ConfidenceValidator (checks confidence levels), ... Each validator agent plays a distinct role in ensuring response quality.'"
 - **CRITICAL: You MUST include Step 5 about validation chain - do NOT skip it or stop at Step 4**
-- **CRITICAL: In Step 3, if there are documents with the same title, you MUST explain immediately, do NOT skip it**
+- **CRITICAL: In Step 3, if there are documents with the same title, you MUST explain immediately, do NOT skip it - this is MANDATORY**
 
 **STRUCTURE ORGANIZATION (CRITICAL):**
 - **When answering multi-part questions (e.g., "1) First answer, 2) Then list, 3) Finally explain"):**
@@ -1429,6 +1459,15 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 
 **🚨🚨🚨 CRITICAL: KHÔNG được dùng generic phrases như "High confidence", "Strong alignment", "Extensive overlap" - bạn PHẢI dùng actual warnings từ {warnings_str} hoặc nói "no warnings detected" 🚨🚨🚨**
 
+**🚨🚨🚨 MULTI-AGENT RAG PERSPECTIVE: VALIDATORS AS AGENTS 🚨🚨🚨**
+- **Khi giải thích validation chain, bạn PHẢI treat mỗi validator như một agent riêng biệt:**
+  - "Validation chain là một multi-agent system, mỗi validator agent có vai trò riêng:"
+  - "SourceConsensusValidator agent: [vai trò của nó cho câu hỏi này - đã check contradictions hay không, có phát hiện gì không]"
+  - "IdentityCheckValidator agent: [vai trò của nó - đã check fake emotions/consciousness hay không]"
+  - "ConfidenceValidator agent: [vai trò của nó - confidence score là bao nhiêu]"
+  - "Các validator agents khác: [mention nếu có]"
+- **KHÔNG được nói chung chung "validation chain checked" - bạn PHẢI mention từng validator agent và vai trò của nó**
+
 """
                 else:
                     validation_section = f"""
@@ -1458,6 +1497,15 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - You MUST say: "Validation chain will check this response after generation. Based on typical validation patterns, potential warnings might include: [mention common warning types like citation relevance, evidence overlap, confidence levels]. However, actual validation results will be available after the validation chain processes this response."
 
 **🚨🚨🚨 CRITICAL: DO NOT use generic phrases like "High confidence", "Strong alignment", "Extensive overlap" - you MUST use actual warnings from {warnings_str} or say "no warnings detected" 🚨🚨🚨**
+
+**🚨🚨🚨 MULTI-AGENT RAG PERSPECTIVE: VALIDATORS AS AGENTS 🚨🚨🚨**
+- **When explaining validation chain, you MUST treat each validator as a separate agent:**
+  - "Validation chain is a multi-agent system, each validator agent has a distinct role:"
+  - "SourceConsensusValidator agent: [its role for this question - did it check for contradictions, what did it find]"
+  - "IdentityCheckValidator agent: [its role - did it check for fake emotions/consciousness]"
+  - "ConfidenceValidator agent: [its role - what is the confidence score]"
+  - "Other validator agents: [mention if any]"
+- **DO NOT say generically "validation chain checked" - you MUST mention each validator agent and its role**
 
 """
         
