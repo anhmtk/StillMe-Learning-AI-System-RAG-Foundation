@@ -38,6 +38,79 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _log_rag_retrieval_decision(
+    decision_logger,
+    context: Dict[str, Any],
+    query: str,
+    reasoning: str,
+    similarity_threshold: Optional[float] = None,
+    prioritize_foundational: bool = False,
+    exclude_types: Optional[List[str]] = None,
+    alternatives_considered: Optional[List[str]] = None
+):
+    """
+    Helper function to log RAG retrieval decisions
+    
+    Args:
+        decision_logger: DecisionLogger instance
+        context: Retrieved context dictionary
+        query: Query used for retrieval
+        reasoning: Why this retrieval approach was chosen
+        similarity_threshold: Similarity threshold used
+        prioritize_foundational: Whether foundational knowledge was prioritized
+        exclude_types: Content types excluded
+        alternatives_considered: Alternative retrieval strategies considered
+    """
+    from backend.core.decision_logger import AgentType, DecisionType
+    
+    total_docs = context.get("total_context_docs", 0)
+    knowledge_docs = context.get("knowledge_docs", [])
+    
+    # Extract document sources/types for context
+    doc_sources = []
+    for doc in knowledge_docs[:5]:  # Limit to 5 for logging
+        if isinstance(doc, dict):
+            metadata = doc.get("metadata", {})
+            source = metadata.get("source", "unknown")
+            doc_type = metadata.get("type", "unknown")
+            doc_sources.append(f"{source}:{doc_type}")
+    
+    decision = f"Retrieved {total_docs} documents from ChromaDB"
+    if prioritize_foundational:
+        decision += " (prioritized foundational knowledge)"
+    if similarity_threshold is not None:
+        decision += f" (similarity threshold: {similarity_threshold})"
+    
+    context_data = {
+        "total_docs": total_docs,
+        "doc_sources": doc_sources[:5],  # Limit to 5
+        "similarity_threshold": similarity_threshold,
+        "prioritize_foundational": prioritize_foundational,
+        "exclude_types": exclude_types
+    }
+    
+    threshold_reasoning = None
+    if similarity_threshold is not None:
+        if similarity_threshold < 0.05:
+            threshold_reasoning = f"Very low threshold ({similarity_threshold}) chosen to ensure StillMe foundational knowledge is retrieved even with low similarity scores"
+        elif similarity_threshold < 0.1:
+            threshold_reasoning = f"Low threshold ({similarity_threshold}) chosen for historical/factual questions to handle multilingual embedding mismatch"
+        else:
+            threshold_reasoning = f"Standard threshold ({similarity_threshold}) used for normal queries"
+    
+    decision_logger.log_decision(
+        agent_type=AgentType.RAG_AGENT,
+        decision_type=DecisionType.RETRIEVAL_DECISION,
+        decision=decision,
+        reasoning=reasoning,
+        context=context_data,
+        alternatives_considered=alternatives_considered,
+        threshold_reasoning=threshold_reasoning,
+        outcome=f"Successfully retrieved {total_docs} documents" if total_docs > 0 else "No documents retrieved",
+        success=total_docs > 0
+    )
+
+
 def _is_codebase_meta_question(message: str) -> bool:
     """
     Detect meta-questions that explicitly ask about StillMe's implementation
@@ -1921,6 +1994,32 @@ async def _handle_validation_with_fallback(
     logger.info(f"⏱️ Validation took {validation_time:.2f}s")
     processing_steps.append(f"✅ Validation completed ({validation_time:.2f}s)")
     
+    # Log validation decision
+    if 'decision_logger' in locals():
+        from backend.core.decision_logger import AgentType, DecisionType
+        validator_names = [type(v).__name__ for v in validators]
+        decision_logger.log_decision(
+            agent_type=AgentType.VALIDATOR_ORCHESTRATOR,
+            decision_type=DecisionType.VALIDATION_DECISION,
+            decision=f"Ran {len(validators)} validators: {', '.join(validator_names[:5])}{'...' if len(validator_names) > 5 else ''}",
+            reasoning=f"Validation chain executed with {len(ctx_docs)} context documents. Adaptive thresholds: citation_overlap={adaptive_citation_overlap:.3f}, evidence={adaptive_evidence_threshold:.3f}",
+            context={
+                "num_validators": len(validators),
+                "validator_names": validator_names,
+                "context_docs_count": len(ctx_docs),
+                "context_quality": context_quality,
+                "avg_similarity": avg_similarity,
+                "is_philosophical": is_philosophical
+            },
+            outcome=f"Validation {'passed' if validation_result.passed else 'failed'}. Reasons: {', '.join(validation_result.reasons[:3])}{'...' if len(validation_result.reasons) > 3 else ''}",
+            success=validation_result.passed,
+            metadata={
+                "validation_time": validation_time,
+                "adaptive_citation_overlap": adaptive_citation_overlap,
+                "adaptive_evidence_threshold": adaptive_evidence_threshold
+            }
+        )
+    
     # Calculate confidence score based on context quality and validation
     confidence_score = _calculate_confidence_score(
         context_docs_count=len(ctx_docs),
@@ -2761,6 +2860,12 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         accuracy_scorer = get_accuracy_scorer()
         style_learner = get_style_learner()
         
+        # Initialize Decision Logger for agentic decision tracking
+        from backend.core.decision_logger import get_decision_logger, AgentType, DecisionType
+        decision_logger = get_decision_logger()
+        detected_lang_for_logging = detect_language(chat_request.message) if 'detect_language' in dir() else "en"
+        session_id = decision_logger.start_session(chat_request.message, detected_lang_for_logging)
+        
         # Get user_id from request (if available)
         user_id = chat_request.user_id or request.client.host if hasattr(request, 'client') else "anonymous"
 
@@ -2769,6 +2874,16 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # These should use the Codebase Assistant (code RAG), not foundational knowledge only.
         try:
             if _is_codebase_meta_question(chat_request.message):
+                # Log routing decision
+                decision_logger.log_decision(
+                    agent_type=AgentType.PLANNER_AGENT,
+                    decision_type=DecisionType.ROUTING_DECISION,
+                    decision="Route to Codebase Assistant instead of normal RAG flow",
+                    reasoning="Question explicitly asks about StillMe's codebase implementation (file paths, functions, code structure)",
+                    alternatives_considered=["Normal RAG flow with foundational knowledge", "External search"],
+                    why_not_chosen="Normal RAG would use foundational knowledge which is too generic. Codebase Assistant can provide specific file paths and code snippets.",
+                    metadata={"question_type": "codebase_meta_question"}
+                )
                 from backend.services.codebase_indexer import get_codebase_indexer
                 from backend.api.routers.codebase_router import _generate_code_explanation
 
@@ -3835,6 +3950,24 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         similarity_threshold=similarity_threshold,  # Use adaptive threshold
                         is_philosophical=is_philosophical
                     )
+                    
+                    # Log RAG retrieval decision
+                    if context and 'decision_logger' in locals():
+                        reasoning = "Normal retrieval for non-StillMe queries"
+                        if is_historical:
+                            reasoning = "Historical question detected - using very low similarity threshold (0.03) and enhanced query for better cross-lingual matching"
+                        elif is_technical_question:
+                            reasoning = "Technical question detected - prioritizing foundational knowledge"
+                        _log_rag_retrieval_decision(
+                            decision_logger,
+                            context,
+                            retrieval_query,
+                            reasoning,
+                            similarity_threshold=similarity_threshold,
+                            prioritize_foundational=is_technical_question,
+                            exclude_types=["technical"] if is_philosophical else None,
+                            alternatives_considered=["Higher similarity threshold", "No query enhancement"] if is_historical else None
+                        )
         
         rag_retrieval_end = time.time()
         rag_retrieval_latency = rag_retrieval_end - rag_retrieval_start
@@ -7803,6 +7936,11 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         except Exception as e:
             logger.warning(f"⚠️ Failed to calculate epistemic state: {e}, defaulting to UNKNOWN")
             epistemic_state = EpistemicState.UNKNOWN
+        
+        # End decision logging session
+        if 'decision_logger' in locals() and decision_logger.current_session:
+            final_outcome = f"Response generated with confidence={confidence_score:.2f}, epistemic_state={epistemic_state.value if epistemic_state else 'UNKNOWN'}"
+            decision_logger.end_session(final_outcome)
         
         return ChatResponse(
             response=response,

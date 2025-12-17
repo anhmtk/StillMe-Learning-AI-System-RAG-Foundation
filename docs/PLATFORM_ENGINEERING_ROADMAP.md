@@ -348,3 +348,42 @@ async def startup_probe():
 **Last Updated**: After critical bug fix (commit `22f74b486`)
 **Status**: ✅ Ready for Railway deployment, P1A/P1B 90%+ complete
 
+---
+
+## 🔮 Future Considerations
+
+### Agentic Architecture Evolution
+
+StillMe hiện tại sử dụng **sequence-based processing** (RAG → Validation → Response). Trong tương lai, có thể xem xét các hướng phát triển sau để chuyển đổi sang **true multi-agent system**:
+
+#### 1. Orchestrator Module
+- **Concept**: Một agent trung tâm điều phối các agents khác, quyết định agent nào chạy trước, chạy song song, hoặc bỏ qua
+- **Potential Benefits**: 
+  - True multi-agent coordination
+  - Flexible task decomposition
+  - Better handling of complex queries requiring multiple agents
+- **Challenges**: 
+  - Complexity explosion (nhiều decision points)
+  - Performance overhead (coordination costs)
+  - Testing complexity (nhiều scenarios)
+  - Backward compatibility (cần refactor lớn)
+
+#### 2. Agent Communication Protocol
+- **Concept**: Protocol cho phép agents giao tiếp với nhau thực sự, không chỉ chạy tuần tự
+- **Potential Benefits**:
+  - True inter-agent communication
+  - Flexible coordination patterns
+  - Better transparency (có thể log toàn bộ communication)
+- **Challenges**:
+  - Refactor validators lớn (từ functions → agents)
+  - Message passing overhead
+  - State management complexity
+  - Error handling phức tạp hơn
+
+**Lưu ý**: Đây chỉ là **hướng suy nghĩ** cho tương lai, chưa có roadmap cụ thể. Việc triển khai sẽ phụ thuộc vào:
+- Nhu cầu thực tế từ use cases
+- Đánh giá trade-offs (complexity vs benefits)
+- Kết quả từ Decision Logging Infrastructure (để hiểu rõ hơn về agent behavior)
+
+**Current Foundation**: Decision Logging Infrastructure đã được triển khai để cung cấp foundation cho việc hiểu agent behavior và có thể hỗ trợ cho các architectural changes trong tương lai.
+
