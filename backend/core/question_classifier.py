@@ -81,7 +81,18 @@ def is_philosophical_question(text: str) -> bool:
         r"không\s+còn\s+gì\s+để\s+học", r"nothing\s+left\s+to\s+learn", r"no\s+more\s+to\s+learn",
         r"quay\s+về\s+học.*đã\s+được\s+học", r"return\s+to\s+learning.*already\s+learned",
         r"đạt\s+đến.*điểm.*mọi\s+câu\s+hỏi", r"reach.*point.*all\s+questions", r"achieve.*stage.*every\s+question",
-        "fixed point", "điểm cố định", "recursive learning", "học đệ quy"
+        "fixed point", "điểm cố định", "recursive learning", "học đệ quy",
+        # Chinese (中文) patterns for self-referential loop and evolution
+        "自我反射", "自我反思", "自我参照", "自我指涉",  # self-reflection, self-reference
+        "无限循环", "无尽循环", "循环",  # infinite loop, endless loop, loop
+        "回归", "回到", "返回",  # return to, come back to
+        "所有问题", "每个问题", "一切问题",  # all questions, every question
+        "进化", "演化", "自我进化",  # evolution, evolve, self-evolving
+        "永久学习", "永远学习", "持续学习",  # learn forever, continuous learning
+        "没有东西可学", "无物可学", "无可学习",  # nothing left to learn
+        "回到学习", "重新学习",  # return to learning
+        "达到点", "到达阶段",  # reach point, achieve stage
+        "固定点", "递归学习"  # fixed point, recursive learning
     ]
     
     import re
@@ -161,6 +172,36 @@ def is_philosophical_question(text: str) -> bool:
     if matched_vi:
         logger.info(f"Philosophical question detected: True (Vietnamese keywords: {matched_vi[:3]}, text='{text[:80]}...')")
         return True
+    
+    # Chinese (中文) keywords
+    zh_keywords = [
+        "意识", "存在", "自我", "灵魂", "道德",
+        "悖论", "真理", "信念",
+        "生命的意义", "生活的目的", "自由", "命运",
+        "责任", "本质", "存在", "现实",
+        "意义是什么", "存在是什么", "意识是什么",
+        "真理是什么", "道德是什么", "自由是什么",
+        # Additional keywords
+        "自性", "空性", "悖论",
+        "哥德尔", "gödel", "godel", "自我参照",
+        "自由意志", "意志自由",
+        "龙树", "nāgārjuna", "nagarjuna",
+        # Experience/subjective keywords
+        "体验", "痛苦体验", "痛苦",
+        "主观体验", "主观",
+        "我理解", "理解-不体验",
+        "感受", "感觉", "情感",
+        "能理解", "如何理解", "能理解吗",
+        "可以理解", "可以感受", "可以体验"
+    ]
+    
+    # Check Chinese keywords (using regex for Chinese characters)
+    import re
+    for keyword in zh_keywords:
+        # For Chinese characters, use direct string search (no word boundaries)
+        if keyword in text:
+            logger.info(f"Philosophical question detected: True (Chinese keywords: '{keyword}', text='{text[:80]}...')")
+            return True
     
     logger.info(f"Philosophical question detected: False (text='{text[:80]}...')")
     return False
