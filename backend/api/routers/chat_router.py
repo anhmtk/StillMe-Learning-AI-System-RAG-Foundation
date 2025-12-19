@@ -7273,6 +7273,15 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     sanitizer = get_style_sanitizer()
                     sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical_non_rag)
                     
+                    # CRITICAL: Ensure sanitized_response is not empty (defensive check)
+                    # If sanitize() accidentally removed all content, fallback to original response
+                    if not sanitized_response or not sanitized_response.strip():
+                        logger.warning(
+                            f"⚠️ Sanitized response is empty (original length: {len(response) if response else 0}), "
+                            f"falling back to original response"
+                        )
+                        sanitized_response = response
+                    
                     # CRITICAL: Check if sanitized response is a technical error or fallback message BEFORE quality evaluation
                     from backend.api.utils.error_detector import is_technical_error, is_fallback_message
                     is_error, error_type = is_technical_error(sanitized_response)
