@@ -6347,6 +6347,15 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                         sanitizer = get_style_sanitizer()
                         sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
                         
+                        # CRITICAL: Ensure sanitized_response is not empty (defensive check)
+                        # If sanitize() accidentally removed all content, fallback to original response
+                        if not sanitized_response or not sanitized_response.strip():
+                            logger.warning(
+                                f"⚠️ Sanitized response is empty (original length: {len(response) if response else 0}), "
+                                f"falling back to original response"
+                            )
+                            sanitized_response = response
+                        
                         # CRITICAL: Build ctx_docs for citation preservation in rewrite
                         # ctx_docs may not be in scope here, so rebuild from context
                         ctx_docs_for_rewrite = []
