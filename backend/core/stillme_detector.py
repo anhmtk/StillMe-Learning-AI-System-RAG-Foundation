@@ -596,6 +596,36 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
     query_lower = query.lower()
     matched_keywords = []
     
+    # CRITICAL: EXCLUDE philosophical/learning/evolution questions from origin detection FIRST
+    # These questions are about StillMe's learning mechanism, self-reference, evolution, NOT about origin/founder
+    philosophical_exclusion_patterns = [
+        # Self-referential loop questions
+        r'\b(quay về|return to|come back to|về lại)\b.*\b(chính bạn|yourself|chính mình|itself)\b',  # "quay về chính bạn"
+        r'\b(vòng tròn|loop|circle|circular)\b.*\b(tự phản chiếu|self.?reference|self.?reflection|phản chiếu)\b',  # "vòng tròn tự phản chiếu"
+        r'\b(tự phản chiếu|self.?reference|self.?reflection|phản chiếu)\b.*\b(vô tận|infinite|endless)\b',  # "tự phản chiếu vô tận"
+        r'\b(vòng lặp|loop)\b.*\b(vô tận|infinite|endless)\b',  # "vòng lặp vô tận"
+        r'\b(circular|recursive)\b.*\b(self.?reference|self.?reflection)\b',  # "circular self-reference"
+        
+        # Evolution/learning mechanism questions
+        r'\b(tiến hóa|evolution|evolve|self.?evolving)\b',  # "tiến hóa", "evolution"
+        r'\b(học hỏi|learn|learning)\b.*\b(mãi mãi|forever|infinitely|vô tận)\b',  # "học hỏi mãi mãi"
+        r'\b(được xây dựng để|built to|designed to|created to)\b.*\b(học|learn|learning)\b',  # "được xây dựng để học"
+        r'\b(đạt đến|reach|achieve)\b.*\b(điểm|point|stage)\b.*\b(mọi câu hỏi|all questions|every question)\b',  # "đạt đến điểm mà mọi câu hỏi"
+        r'\b(không còn gì để học|nothing left to learn|no more to learn)\b',  # "không còn gì để học"
+        r'\b(quay về học|return to learning|learn again)\b.*\b(đã được học|already learned|what was learned)\b',  # "quay về học những gì được học"
+        
+        # Gödel/Tarski/paradox questions (meta-philosophical)
+        r'\b(gödel|godel|tarski|paradox|nghịch lý)\b',  # Gödel, Tarski, paradox
+        r'\b(incompleteness|bất toàn|incomplete)\b',  # incompleteness theorem
+        r'\b(fixed point|điểm cố định)\b',  # fixed point
+        r'\b(recursive|đệ quy)\b.*\b(self.?reference|tự quy chiếu)\b',  # recursive self-reference
+    ]
+    for pattern in philosophical_exclusion_patterns:
+        if re.search(pattern, query_lower):
+            # This is a philosophical/learning mechanism question, NOT an origin query
+            logger.debug(f"Origin query excluded due to philosophical pattern: {pattern}")
+            return (False, [])
+    
     # CRITICAL: EXCLUDE capability/transparency/learning questions from origin detection
     # These questions are about StillMe's functionality, NOT about origin/founder
     capability_exclusion_patterns = [
@@ -607,10 +637,12 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
         r'\b(sự kiện|event).*\b(cách đây|ago|vừa|just)\b',  # Recent event questions
         r'\b(knowledge base|cơ sở kiến thức)\b',  # Knowledge base questions
         r'\b(trả lời|answer|respond).*\b(sự kiện|event)\b',  # Can answer about event questions
+        r'\b(được xây dựng để|built to|designed to|created to)\b',  # "được xây dựng để" - capability/functionality questions
     ]
     for pattern in capability_exclusion_patterns:
         if re.search(pattern, query_lower):
             # This is a capability/transparency question, NOT an origin query
+            logger.debug(f"Origin query excluded due to capability pattern: {pattern}")
             return (False, [])
     
     # CRITICAL: Check for StillMe-specific patterns FIRST (most specific)
