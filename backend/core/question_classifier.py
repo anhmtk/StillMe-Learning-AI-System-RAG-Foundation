@@ -8,16 +8,17 @@ import re
 logger = logging.getLogger(__name__)
 
 
-def is_philosophical_question(text: str) -> bool:
+def is_philosophical_question(text: str, use_semantic: bool = True) -> bool:
     """
-    Detect if a question is philosophical based on keywords.
+    Detect if a question is philosophical using semantic similarity (primary) and keywords (fallback).
     
-    Uses a two-tier approach:
-    1. Priority check: If text contains "heavy" philosophical concepts/philosophers → return True immediately
-    2. Normal check: Check against keyword lists
+    Uses a hybrid approach:
+    1. Semantic detection: Compare question with philosophical examples using embedding similarity (language-agnostic)
+    2. Keyword fallback: If semantic detection unavailable or low confidence, use keyword patterns
     
     Args:
-        text: The question text (can be in English or Vietnamese)
+        text: The question text (any language StillMe supports)
+        use_semantic: Whether to use semantic detection (default: True)
         
     Returns:
         True if the question is philosophical, False otherwise
@@ -26,6 +27,30 @@ def is_philosophical_question(text: str) -> bool:
         logger.info("Philosophical question detected: False (empty text)")
         return False
     
+    # PRIORITY: Try semantic detection first (language-agnostic, scalable)
+    if use_semantic:
+        try:
+            from backend.core.philosophical_detector_semantic import get_semantic_philosophical_detector
+            semantic_detector = get_semantic_philosophical_detector(similarity_threshold=0.65)
+            is_phil, similarity, matched = semantic_detector.detect(text)
+            
+            if is_phil:
+                logger.info(
+                    f"✅ Semantic philosophical detection: True (similarity={similarity:.3f}, "
+                    f"matched='{matched[:60] if matched else 'N/A'}...')"
+                )
+                return True
+            elif similarity > 0.5:  # Medium confidence - log but continue to keyword check
+                logger.debug(
+                    f"Semantic detection: medium confidence (similarity={similarity:.3f}), "
+                    f"falling back to keyword detection"
+                )
+            # If similarity < 0.5, semantic detector is confident it's NOT philosophical
+            # But we still check keywords as fallback for edge cases
+        except Exception as e:
+            logger.debug(f"Semantic detection unavailable ({e}), using keyword fallback")
+    
+    # FALLBACK: Keyword-based detection (for edge cases or when semantic unavailable)
     lower = text.lower()
     
     # PRIORITY CHECK 0: List/enumeration questions are NOT philosophical (factual)
