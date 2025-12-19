@@ -33,6 +33,9 @@ from .consistency_checker import ConsistencyChecker, Claim
 from .philosophical_depth import PhilosophicalDepthValidator
 from .hallucination_explanation import HallucinationExplanationValidator
 from .verbosity import VerbosityValidator
+from .factual_hallucination import FactualHallucinationValidator
+from .religion_choice import ReligiousChoiceValidator
+from .ai_self_model_validator import AISelfModelValidator
 
 __all__ = [
     "Validator",
@@ -63,5 +66,8 @@ __all__ = [
     "PhilosophicalDepthValidator",
     "HallucinationExplanationValidator",
     "VerbosityValidator",
+    "FactualHallucinationValidator",
+    "ReligiousChoiceValidator",
+    "AISelfModelValidator",
 ]
 
