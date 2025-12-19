@@ -70,7 +70,18 @@ def is_philosophical_question(text: str) -> bool:
         "tarski", "undefinability", "giá trị câu trả lời", "giá trị câu trả lời xuất phát từ hệ thống",
         "value answer from system", "value of answer", "giới hạn của tư duy", "limits of thinking",
         "câu trả lời đó có giá trị", r"answer.*value", r"giá\s+trị.*câu\s+trả\s+lời",
-        r"đánh\s+giá.*có\s+giá\s+trị", r"đánh\s+giá.*giá\s+trị", r"có\s+giá\s+trị.*đánh\s+giá"
+        r"đánh\s+giá.*có\s+giá\s+trị", r"đánh\s+giá.*giá\s+trị", r"có\s+giá\s+trị.*đánh\s+giá",
+        # Self-referential loop and evolution questions (CRITICAL: These are philosophical about learning/evolution)
+        "vòng tròn tự phản chiếu", "vòng tròn.*tự phản chiếu", "circular self-reflection",
+        "tự phản chiếu vô tận", "infinite self-reflection", "endless self-reflection",
+        r"quay\s+về.*chính\s+(bạn|mình|nó|itself|yourself)", r"return\s+to.*(yourself|itself|oneself)",
+        r"mọi\s+câu\s+hỏi.*quay\s+về", r"all\s+questions.*return\s+to", r"every\s+question.*leads\s+back",
+        "tiến hóa", "evolution", "self-evolving", "self evolving",
+        r"học\s+hỏi.*mãi\s+mãi", r"learn.*forever", r"learning.*infinitely", r"learn.*infinitely",
+        r"không\s+còn\s+gì\s+để\s+học", r"nothing\s+left\s+to\s+learn", r"no\s+more\s+to\s+learn",
+        r"quay\s+về\s+học.*đã\s+được\s+học", r"return\s+to\s+learning.*already\s+learned",
+        r"đạt\s+đến.*điểm.*mọi\s+câu\s+hỏi", r"reach.*point.*all\s+questions", r"achieve.*stage.*every\s+question",
+        "fixed point", "điểm cố định", "recursive learning", "học đệ quy"
     ]
     
     import re
