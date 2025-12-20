@@ -6994,7 +6994,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 # Final response is the last rewritten version (or original if no rewrites)
                                 # CRITICAL: Ensure current_response is not empty before assigning
                                 if current_response and isinstance(current_response, str) and current_response.strip():
-                                final_response = current_response
+                                    final_response = current_response
                                 else:
                                     logger.error(
                                         f"❌ CRITICAL: current_response is empty or invalid (length: {len(current_response) if isinstance(current_response, str) else 'N/A'}), "
