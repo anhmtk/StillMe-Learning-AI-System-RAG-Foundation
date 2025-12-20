@@ -6533,7 +6533,30 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                     else:
                         # Stage 2: Hard Filter (0 token) - Style Sanitization
                         sanitizer = get_style_sanitizer()
+                        
+                        # CRITICAL: Log response state before sanitization (especially for Chinese/philosophical)
+                        if is_philosophical or detected_lang == "zh":
+                            logger.info(
+                                f"🔍 [SANITIZE TRACE] Before sanitize: "
+                                f"response_length={len(response) if response else 0}, "
+                                f"is_philosophical={is_philosophical}, "
+                                f"detected_lang={detected_lang}, "
+                                f"preview={_safe_unicode_slice(response, 200) if response else 'None'}"
+                            )
+                        
                         sanitized_response = sanitizer.sanitize(response, is_philosophical=is_philosophical)
+                        
+                        # CRITICAL: Log response state after sanitization (especially for Chinese/philosophical)
+                        if is_philosophical or detected_lang == "zh":
+                            logger.info(
+                                f"🔍 [SANITIZE TRACE] After sanitize: "
+                                f"response_length={len(response) if response else 0}, "
+                                f"sanitized_length={len(sanitized_response) if sanitized_response else 0}, "
+                                f"removed={len(response) - len(sanitized_response) if response and sanitized_response else 0} chars, "
+                                f"is_philosophical={is_philosophical}, "
+                                f"detected_lang={detected_lang}, "
+                                f"preview={_safe_unicode_slice(sanitized_response, 200) if sanitized_response else 'None'}"
+                            )
                         
                         # CRITICAL: Ensure sanitized_response is not empty (defensive check)
                         # If sanitize() accidentally removed all content, fallback to original response
@@ -6543,6 +6566,18 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 f"falling back to original response"
                             )
                             sanitized_response = response
+                        # CRITICAL: If sanitize() removed more than 50% of content, it's likely wrong - fallback to original
+                        elif response and len(sanitized_response) < len(response) * 0.5:
+                            logger.error(
+                                f"❌ CRITICAL: sanitize() removed more than 50% of content "
+                                f"(original: {len(response)}, sanitized: {len(sanitized_response)}, "
+                                f"removed: {len(response) - len(sanitized_response)} chars, "
+                                f"{100 * (len(response) - len(sanitized_response)) / len(response):.1f}%). "
+                                f"Falling back to original response. "
+                                f"Preview original: {_safe_unicode_slice(response, 200)}, "
+                                f"Preview sanitized: {_safe_unicode_slice(sanitized_response, 200)}"
+                            )
+                            sanitized_response = response  # Fallback to original
                         
                         # CRITICAL: Build ctx_docs for citation preservation in rewrite
                         # ctx_docs may not be in scope here, so rebuild from context
@@ -6922,7 +6957,34 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 
                                 logger.debug(f"✅ Post-processing complete: sanitized → evaluated → rewritten ({rewrite_count}x) → re-sanitized")
                             else:
+                                # Early exit - no rewrite needed (quality is acceptable)
+                                # CRITICAL: Log sanitized_response state before assigning to final_response
+                                if is_philosophical or detected_lang == "zh":
+                                    logger.info(
+                                        f"🔍 [EARLY EXIT TRACE] Before final_response assignment: "
+                                        f"sanitized_response_length={len(sanitized_response) if sanitized_response else 0}, "
+                                        f"response_length={len(response) if response else 0}, "
+                                        f"is_philosophical={is_philosophical}, "
+                                        f"detected_lang={detected_lang}, "
+                                        f"sanitized_preview={_safe_unicode_slice(sanitized_response, 200) if sanitized_response else 'None'}"
+                                    )
+                                
                                 final_response = sanitized_response
+                                
+                                # CRITICAL: Validate final_response after assignment
+                                if not final_response or not isinstance(final_response, str) or not final_response.strip():
+                                    logger.error(
+                                        f"❌ CRITICAL: final_response is empty after early exit assignment "
+                                        f"(sanitized_response_length={len(sanitized_response) if sanitized_response else 0}), "
+                                        f"falling back to original response"
+                                    )
+                                    final_response = response if response and response.strip() else sanitized_response
+                                elif sanitized_response and len(final_response) < len(sanitized_response) * 0.9:
+                                    logger.warning(
+                                        f"⚠️ final_response length mismatch: "
+                                        f"sanitized={len(sanitized_response)}, final={len(final_response)}"
+                                    )
+                                
                                 if should_rewrite:
                                     logger.debug(f"⏭️ Skipping rewrite: {rewrite_reason}")
                                 logger.debug(f"✅ Post-processing complete: sanitized → evaluated → passed (quality: {quality_result['depth_score']})")
