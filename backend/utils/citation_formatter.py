@@ -294,78 +294,6 @@ class CitationFormatter:
         )
         
         return citation
-        
-        # OLD LOGIC (kept for reference, but now using taxonomy above):
-        # Hierarchy 1: High similarity (>=0.8) + specific source metadata
-        if max_similarity >= 0.8 and best_doc:
-            # Extract document metadata
-            if isinstance(best_doc, dict):
-                metadata = best_doc.get('metadata', {})
-                if not metadata and 'metadata' not in best_doc:
-                    metadata = best_doc  # Doc itself might be metadata dict
-            elif hasattr(best_doc, 'metadata'):
-                metadata = best_doc.metadata if isinstance(best_doc.metadata, dict) else {}
-            else:
-                metadata = {}
-            
-            title = metadata.get('title', '') or metadata.get('document_title', '')
-            source = metadata.get('source', '') or metadata.get('source_name', '')
-            date = metadata.get('date', '') or metadata.get('published_date', '') or metadata.get('timestamp', '')
-            
-            # Clean up values
-            title = str(title).strip() if title else ''
-            source = str(source).strip() if source else ''
-            date = str(date).strip() if date else ''
-            
-            # If we have title and source, use specific citation
-            if title and source:
-                if date:
-                    return f"[{title}, {source}, {date}]"
-                else:
-                    return f"[{title}, {source}]"
-            # If we have source type but not specific metadata, use source type
-            elif source_types:
-                primary_source = self._get_primary_source_name(source_types)
-                return f"[Information from {primary_source} documents]"
-            # If no metadata at all, fallback to Level 2 or 3
-            else:
-                # No metadata, but high similarity - use generic high similarity citation
-                return "[Information from retrieved documents]"
-        
-        # Hierarchy 2: Medium similarity (>=0.5) + source type
-        elif max_similarity >= 0.5:
-            if source_types:
-                primary_source = self._get_primary_source_name(source_types)
-                return f"[Information from {primary_source} documents]"
-            else:
-                # CRITICAL FIX: Even without source_types, if similarity >= 0.5, use Level 2 format
-                return "[Information from retrieved documents]"
-        
-        # Hierarchy 3: Low similarity (>=0.3) but has context
-        elif max_similarity >= 0.3:
-            if source_types:
-                primary_source = self._get_primary_source_name(source_types)
-                return f"[Background knowledge informed by {primary_source} context]"
-            else:
-                # CRITICAL FIX: Even without source_types, if similarity >= 0.3, acknowledge context
-                return "[Background knowledge informed by retrieved context]"
-        
-        # Hierarchy 4: No meaningful context or very low similarity (<0.3)
-        else:
-            # TRUST-EFFICIENT FIX: If similarity is effectively 0, don't add fake citation
-            # Instead, be honest about lack of specific sources
-            if max_similarity < 0.1:  # Effectively no similarity
-                if source_types:
-                    primary_source = self._get_primary_source_name(source_types)
-                    return f"[general knowledge] (Retrieved {primary_source} documents were reviewed but had no relevant information)"
-                else:
-                    return "[general knowledge] (No relevant sources found in knowledge base)"
-            # Low similarity (0.1-0.3) but has context - acknowledge but be transparent
-            elif source_types:
-                primary_source = self._get_primary_source_name(source_types)
-                return f"[general knowledge] (Context from {primary_source} was reviewed but had low relevance)"
-            else:
-                return "[general knowledge] (I don't have specific sources for this information)"
     
     def _get_primary_source_name(self, source_types: List[str]) -> str:
         """
@@ -417,30 +345,64 @@ class CitationFormatter:
     
     def add_citation_to_response(self, response: str, citation: str) -> str:
         """
-        Add citation to response in a natural way
+        Add citation to response in a natural way.
+        
+        CRITICAL: This function must handle Unicode (including Chinese) safely.
         
         Args:
-            response: Original response
+            response: Original response (may contain Unicode characters)
             citation: Citation to add
             
         Returns:
             Response with citation added
         """
-        if not response or not response.strip():
-            return citation
+        if not response or not isinstance(response, str):
+            return citation if citation else ""
+        
+        # CRITICAL: Clean response from control characters and smart quotes
+        import unicodedata
+        import re
+        
+        # Remove control characters and smart quotes
+        response = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019]', '', response)
+        
+        # Normalize Unicode to NFC form
+        try:
+            response = unicodedata.normalize('NFC', response)
+        except Exception:
+            pass  # If normalization fails, continue with cleaned text
+        
+        if not response.strip():
+            return citation if citation else ""
         
         # Remove any existing numeric citations first
         response = re.sub(r'\[\d+\]', '', response).strip()
+        
+        # CRITICAL: Ensure response is not empty after removing citations
+        if not response or not response.strip():
+            return citation if citation else ""
         
         # Check if response already has this citation
         if citation in response:
             return response
         
         # Add citation at the end
-        if response.endswith(('.', '!', '?')):
-            return f"{response} {citation}"
+        # CRITICAL: Use rstrip() carefully - only strip trailing whitespace
+        response_clean = response.rstrip()
+        if response_clean.endswith(('.', '!', '?')):
+            result = f"{response_clean} {citation}"
         else:
-            return f"{response}. {citation}"
+            result = f"{response_clean}. {citation}"
+        
+        # CRITICAL: Final validation - ensure result is not empty
+        if not result or not result.strip():
+            logger.warning(
+                f"⚠️ Result is empty after adding citation, returning original response "
+                f"(response_length={len(response) if response else 0}, citation={citation[:50] if citation else 'None'})"
+            )
+            return response  # Return original response as fallback
+        
+        return result
 
 
 # Global formatter instance

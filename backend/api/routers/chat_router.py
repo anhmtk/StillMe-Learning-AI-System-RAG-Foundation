@@ -32,10 +32,66 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any
 import json
+import unicodedata
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _safe_unicode_slice(text: str, max_length: int) -> str:
+    """
+    Safely slice Unicode string without breaking multi-byte characters.
+    
+    Args:
+        text: Input string (may contain Unicode characters)
+        max_length: Maximum length in characters (not bytes)
+        
+    Returns:
+        Sliced string that preserves Unicode characters
+    """
+    if not text or not isinstance(text, str):
+        return text
+    
+    # Normalize Unicode to ensure consistent character boundaries
+    try:
+        text = unicodedata.normalize('NFC', text)
+    except Exception:
+        pass  # If normalization fails, continue with original text
+    
+    # Safe slice: Python's string slicing already handles Unicode correctly
+    # But we add defensive check to ensure we don't exceed string length
+    if len(text) <= max_length:
+        return text
+    
+    return text[:max_length]
+
+
+def _clean_response_text(text: str) -> str:
+    """
+    Clean response text from control characters and smart quotes that may cause encoding issues.
+    
+    Args:
+        text: Original response text
+        
+    Returns:
+        Cleaned text with problematic characters removed
+    """
+    if not text or not isinstance(text, str):
+        return text
+    
+    # Remove control characters (0x00-0x1F, 0x7F-0x9F) and smart quotes
+    # Smart quotes: \u201c (left double), \u201d (right double), \u2018 (left single), \u2019 (right single)
+    # Also remove other problematic Unicode characters
+    cleaned = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019]', '', text)
+    
+    # Normalize Unicode to NFC form for consistency
+    try:
+        cleaned = unicodedata.normalize('NFC', cleaned)
+    except Exception:
+        pass  # If normalization fails, continue with cleaned text
+    
+    return cleaned
 
 
 def _log_rag_retrieval_decision(
@@ -215,8 +271,10 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     Add timestamp attribution to normal RAG responses for transparency.
     This ensures consistency with external data responses which already include timestamps.
     
+    CRITICAL: This function must handle Unicode (including Chinese) safely.
+    
     Args:
-        response: Original response text
+        response: Original response text (may contain Unicode characters)
         detected_lang: Detected language code
         context: Optional context dict with knowledge_docs for source links
         
@@ -225,6 +283,13 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     """
     if not response or not isinstance(response, str):
         return response
+    
+    # CRITICAL: Clean response from control characters and smart quotes BEFORE processing
+    # This prevents encoding issues with Chinese/Unicode characters
+    original_length = len(response)
+    response = _clean_response_text(response)
+    if len(response) != original_length:
+        logger.debug(f"Cleaned response: removed {original_length - len(response)} problematic characters")
     
     # Check if response already has timestamp (to avoid duplicate)
     # Pattern: [Source: ... | Timestamp: ...] or [Nguồn: ... | Thời gian: ...] or standalone [Timestamp: ...]
@@ -316,8 +381,25 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
                 citation_text_clean = "general knowledge" if detected_lang != "vi" else "kiến thức tổng quát"
             else:
                 citation_text_clean = citation_text_raw
+            # CRITICAL FIX: Remove citation safely with Unicode support
+            # Use pattern matching instead of re.escape() to handle Unicode characters correctly
+            # Escape only special regex characters, not Unicode characters
+            citation_pattern_escaped = re.escape(citation_match)
             # Remove the old citation from response to avoid duplication
-            response = re.sub(re.escape(citation_match), '', response, flags=re.IGNORECASE).strip()
+            response_before = response
+            response = re.sub(citation_pattern_escaped, '', response, flags=re.IGNORECASE)
+            # CRITICAL: Only strip if response is not empty after removal
+            # This prevents empty string when citation was the only content
+            if response and response.strip():
+                response = response.strip()
+            else:
+                # If response becomes empty after citation removal, keep original (shouldn't happen but defensive)
+                logger.warning(
+                    f"⚠️ Response became empty after citation removal (detected_lang={detected_lang}, "
+                    f"citation_match={citation_match[:50] if citation_match else 'None'}), "
+                    f"keeping original response"
+                )
+                response = response_before
             break
     
     # Build citation attribution parts
@@ -366,8 +448,29 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # Format final attribution
     timestamp_attr = f"\n\n[{' | '.join(citation_parts)}]"
     
+    # CRITICAL: Ensure response is not empty before appending timestamp
+    # This prevents empty string from being returned
+    if not response or not response.strip():
+        logger.error(
+            f"❌ CRITICAL: Response is empty before appending timestamp (detected_lang={detected_lang}), "
+            f"returning timestamp only as fallback"
+        )
+        # Return timestamp only as fallback (shouldn't happen but defensive)
+        return timestamp_attr.strip('[]').strip()
+    
     # Append timestamp attribution to response (response already has old citation removed)
-    return response.rstrip() + timestamp_attr
+    # CRITICAL: Use rstrip() carefully - only strip trailing whitespace, not content
+    result = response.rstrip() + timestamp_attr
+    
+    # CRITICAL: Final validation - ensure result is not empty
+    if not result or not result.strip():
+        logger.error(
+            f"❌ CRITICAL: Result is empty after appending timestamp (detected_lang={detected_lang}, "
+            f"original_length={len(response)}), returning original response"
+        )
+        return response  # Return original response as fallback
+    
+    return result
 
 
 def _append_validation_warnings_to_response(
@@ -6630,7 +6733,16 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                         )
                                 
                                 # Final response is the last rewritten version (or original if no rewrites)
-                                final_response = current_response
+                                # CRITICAL: Ensure current_response is not empty before assigning
+                                if current_response and isinstance(current_response, str) and current_response.strip():
+                                    final_response = current_response
+                                else:
+                                    logger.error(
+                                        f"❌ CRITICAL: current_response is empty or invalid (length: {len(current_response) if isinstance(current_response, str) else 'N/A'}), "
+                                        f"falling back to sanitized_response"
+                                    )
+                                    # Fallback to sanitized_response if current_response is empty
+                                    final_response = sanitized_response if sanitized_response and sanitized_response.strip() else response
                                 
                                 # Log final metrics
                                 logger.info(
@@ -6643,7 +6755,16 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 
                                 if rewrite_count > 0:
                                     # Re-sanitize final response (in case last rewrite introduced issues)
-                                    final_response = sanitizer.sanitize(final_response, is_philosophical=is_philosophical)
+                                    re_sanitized = sanitizer.sanitize(final_response, is_philosophical=is_philosophical)
+                                    # CRITICAL: Only use re-sanitized if it's not empty
+                                    if re_sanitized and re_sanitized.strip():
+                                        final_response = re_sanitized
+                                    else:
+                                        logger.warning(
+                                            f"⚠️ Re-sanitized response is empty (original length: {len(final_response) if final_response else 0}), "
+                                            f"keeping original final_response"
+                                        )
+                                    # If re-sanitized is empty, keep original final_response
                                     
                                 # CRITICAL: Ensure citations are preserved after rewrite
                                 # If rewrite removed citations but ctx_docs are available, re-add them
@@ -6682,8 +6803,16 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                         context=context_for_citation  # CRITICAL: Pass context for foundational knowledge detection
                                     )
                                     if citation_result.patched_answer:
-                                        final_response = citation_result.patched_answer
-                                        logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
+                                        # CRITICAL: Only use patched_answer if it's not empty
+                                        if citation_result.patched_answer.strip():
+                                            final_response = citation_result.patched_answer
+                                            logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
+                                        else:
+                                            logger.warning(
+                                                f"⚠️ Citation patched_answer is empty, keeping original final_response "
+                                                f"(original length: {len(final_response) if final_response else 0})"
+                                            )
+                                            # Keep original final_response - don't overwrite with empty string
                                 
                                 logger.debug(f"✅ Post-processing complete: sanitized → evaluated → rewritten ({rewrite_count}x) → re-sanitized")
                             else:
@@ -7244,12 +7373,52 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
             try:
                 tone_start = time.time()
                 from backend.tone.aligner import align_tone
+                
+                # CRITICAL: Log response state before tone alignment (especially for Chinese)
+                if detected_lang == "zh":
+                    logger.debug(
+                        f"🔍 [CHINESE] Before align_tone: "
+                        f"response_length={len(response) if response else 0}, "
+                        f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
+                    )
+                
+                response_before_tone = response
                 response = align_tone(response)
+                
+                # CRITICAL: Validate response after tone alignment
+                if not response or not isinstance(response, str) or not response.strip():
+                    logger.error(
+                        f"❌ CRITICAL: Response became empty after align_tone "
+                        f"(detected_lang={detected_lang}, before_length={len(response_before_tone) if response_before_tone else 0}), "
+                        f"falling back to original response"
+                    )
+                    response = response_before_tone  # Fallback to original
+                else:
+                    # CRITICAL: Clean response from problematic characters
+                    response_cleaned = _clean_response_text(response)
+                    if len(response_cleaned) != len(response):
+                        logger.warning(
+                            f"⚠️ Cleaned response after align_tone: removed {len(response) - len(response_cleaned)} "
+                            f"problematic characters (detected_lang={detected_lang})"
+                        )
+                    response = response_cleaned
+                
+                # CRITICAL: Log response state after tone alignment (especially for Chinese)
+                if detected_lang == "zh":
+                    logger.debug(
+                        f"🔍 [CHINESE] After align_tone: "
+                        f"response_length={len(response) if response else 0}, "
+                        f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
+                    )
+                
                 tone_time = time.time() - tone_start
                 timing_logs["tone_alignment"] = f"{tone_time:.2f}s"
                 logger.info(f"⏱️ Tone alignment took {tone_time:.2f}s")
             except Exception as tone_error:
-                logger.error(f"Tone alignment error: {tone_error}, using original response")
+                logger.error(
+                    f"Tone alignment error (detected_lang={detected_lang}): {tone_error}",
+                    exc_info=True
+                )
                 # Continue with original response on error
         
         # ==========================================
@@ -7429,8 +7598,18 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             
                             if rewrite_result.was_rewritten:
                                 # Re-sanitize rewritten output (in case rewrite introduced issues)
-                                final_response = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical_non_rag)
-                                logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                                re_sanitized = sanitizer.sanitize(rewrite_result.text, is_philosophical=is_philosophical_non_rag)
+                                # CRITICAL: Only use re-sanitized if it's not empty
+                                if re_sanitized and re_sanitized.strip():
+                                    final_response = re_sanitized
+                                    logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                                else:
+                                    logger.warning(
+                                        f"⚠️ Re-sanitized response is empty (rewrite_result length: {len(rewrite_result.text) if rewrite_result.text else 0}), "
+                                        f"falling back to sanitized_response"
+                                    )
+                                    final_response = sanitized_response
+                                    logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → fallback to sanitized (re-sanitize was empty)")
                             else:
                                 # Fallback to sanitized original - rewrite failed
                                 final_response = sanitized_response
@@ -7472,12 +7651,65 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                 if final_response is None:
                     final_response = response
         
-        # CRITICAL: Ensure response is set from final_response, or keep original if final_response is None
-        logger.info(f"🔍 [TRACE] Before final_response assignment: response={response[:200] if response else 'None'}, final_response={final_response[:200] if final_response else 'None'}, response_type={type(response)}, final_response_type={type(final_response)}")
-        if final_response is not None:
-            response = final_response
-            logger.info(f"🔍 [TRACE] After final_response assignment: response={response[:200] if response else 'None'}, response_type={type(response)}")
+        # CRITICAL: Ensure response is set from final_response, or keep original if final_response is None or empty
+        # CRITICAL FIX: Use safe Unicode slicing for logging (prevents breaking multi-byte characters)
+        response_preview = _safe_unicode_slice(response, 200) if response else 'None'
+        final_response_preview = _safe_unicode_slice(final_response, 200) if final_response else 'None'
+        
+        # CRITICAL: Special logging for Chinese language to debug Unicode issues
+        if detected_lang == "zh":
+            logger.info(
+                f"🔍 [TRACE] [CHINESE] Before final_response assignment: "
+                f"response_length={len(response) if response else 0}, "
+                f"response_preview={response_preview}, "
+                f"final_response_length={len(final_response) if final_response else 0}, "
+                f"final_response_preview={final_response_preview}, "
+                f"response_type={type(response)}, final_response_type={type(final_response)}"
+            )
         else:
+            logger.info(
+                f"🔍 [TRACE] Before final_response assignment: "
+                f"response={response_preview}, final_response={final_response_preview}, "
+                f"response_type={type(response)}, final_response_type={type(final_response)}"
+            )
+        
+        # CRITICAL FIX: Only use final_response if it's not None AND not empty
+        # This prevents empty string from overwriting valid response content
+        if final_response is not None and isinstance(final_response, str) and final_response.strip():
+            # CRITICAL: Clean final_response from problematic characters before using
+            final_response_cleaned = _clean_response_text(final_response)
+            if len(final_response_cleaned) != len(final_response):
+                logger.warning(
+                    f"⚠️ Cleaned final_response: removed {len(final_response) - len(final_response_cleaned)} "
+                    f"problematic characters (detected_lang={detected_lang})"
+                )
+            
+            # final_response is valid and non-empty - use it
+            response = final_response_cleaned
+            
+            # CRITICAL: Log after assignment with safe slicing
+            response_after_preview = _safe_unicode_slice(response, 200) if response else 'None'
+            if detected_lang == "zh":
+                logger.info(
+                    f"🔍 [TRACE] [CHINESE] After final_response assignment: "
+                    f"response_length={len(response) if response else 0}, "
+                    f"response_preview={response_after_preview}, response_type={type(response)}"
+                )
+            else:
+                logger.info(f"🔍 [TRACE] After final_response assignment: response={response_after_preview}, response_type={type(response)}")
+        elif final_response is not None and (not isinstance(final_response, str) or not final_response.strip()):
+            # CRITICAL: final_response is empty string or invalid - keep original response
+            logger.error(
+                f"❌ [TRACE] CRITICAL: final_response is empty or invalid (type: {type(final_response)}, "
+                f"length: {len(final_response) if isinstance(final_response, str) else 'N/A'}), "
+                f"keeping original response to prevent content loss. "
+                f"original_response_length={len(response) if response else 0}"
+            )
+            # Keep original response - don't overwrite with empty string
+            # Log warning but don't change response
+            processing_steps.append("⚠️ CRITICAL: final_response was empty/invalid - preserved original response")
+        else:
+            # final_response is None - keep original response
             logger.warning(f"⚠️ [TRACE] final_response is None, keeping original response: response={response[:200] if response else 'None'}, response_type={type(response)}")
             # CRITICAL: If both response and final_response are None, we have a problem
             if response is None:
@@ -7708,9 +7940,20 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                     response = response + disclaimer
                 elif response:
                     # Citation is at end, add before citation
+                    # CRITICAL: Use Unicode-safe string operations
                     citation_pos = response.rfind("[")
                     if citation_pos > 0:
+                        # CRITICAL: Safe string slicing (Python handles Unicode correctly)
+                        response_before = response
                         response = response[:citation_pos] + disclaimer + " " + response[citation_pos:]
+                        # CRITICAL: Validate result is not empty
+                        if not response or not response.strip():
+                            logger.warning(
+                                f"⚠️ Response became empty after adding disclaimer before citation "
+                                f"(detected_lang={detected_lang_for_disclaimer}), "
+                                f"falling back to original response"
+                            )
+                            response = response_before  # Fallback to original
                     else:
                         response = response + disclaimer
                 
@@ -7723,10 +7966,45 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 logger.warning(f"⚠️ Failed to add ambiguity disclaimer: {disclaimer_error}")
         
         # CRITICAL: Final safety check - ensure response is never None or empty before returning
-        logger.info(f"🔍 [TRACE] Final check before return: response={response[:200] if response else 'None'}, response_type={type(response)}, response_length={len(response) if response else 0}")
+        # CRITICAL FIX: Use safe Unicode slicing for logging
+        response_final_preview = _safe_unicode_slice(response, 200) if response else 'None'
+        raw_response_preview = _safe_unicode_slice(raw_response, 200) if raw_response else 'None'
+        final_response_final_preview = _safe_unicode_slice(final_response, 200) if final_response else 'None'
+        
+        # CRITICAL: Special logging for Chinese language
+        if detected_lang == "zh":
+            logger.info(
+                f"🔍 [TRACE] [CHINESE] Final check before return: "
+                f"response_length={len(response) if response else 0}, "
+                f"response_preview={response_final_preview}, "
+                f"response_type={type(response)}"
+            )
+        else:
+            logger.info(
+                f"🔍 [TRACE] Final check before return: "
+                f"response={response_final_preview}, "
+                f"response_type={type(response)}, response_length={len(response) if response else 0}"
+            )
+        
+        # CRITICAL: Clean response from problematic characters before final validation
+        if response and isinstance(response, str):
+            original_response_length = len(response)
+            response = _clean_response_text(response)
+            if len(response) != original_response_length:
+                logger.warning(
+                    f"⚠️ Cleaned response before return: removed {original_response_length - len(response)} "
+                    f"problematic characters (detected_lang={detected_lang})"
+                )
+        
         if not response or not isinstance(response, str) or not response.strip():
-            logger.error(f"⚠️ Response is None, empty, or invalid before returning ChatResponse - using fallback. response={response}, type={type(response)}, detected_lang={detected_lang}")
-            logger.error(f"⚠️ Debug info: raw_response={raw_response[:200] if raw_response else 'None'}, final_response={final_response[:200] if final_response else 'None'}")
+            logger.error(
+                f"⚠️ Response is None, empty, or invalid before returning ChatResponse - using fallback. "
+                f"response={response}, type={type(response)}, detected_lang={detected_lang}"
+            )
+            logger.error(
+                f"⚠️ Debug info: raw_response={raw_response_preview}, "
+                f"final_response={final_response_final_preview}"
+            )
             logger.error(f"⚠️ Processing steps: {processing_steps[-5:] if len(processing_steps) > 5 else processing_steps}")
             from backend.api.utils.error_detector import get_fallback_message_for_error
             response = get_fallback_message_for_error("generic", detected_lang or "vi")
@@ -7739,11 +8017,43 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         has_external_data_timestamp = "[Source:" in response or "[Nguồn:" in response
         if not is_fallback and not has_external_data_timestamp and response:
             try:
+                # CRITICAL: Log response state before adding timestamp (especially for Chinese)
+                if detected_lang == "zh":
+                    logger.debug(
+                        f"🔍 [CHINESE] Before _add_timestamp_to_response: "
+                        f"response_length={len(response) if response else 0}, "
+                        f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
+                    )
+                
                 # Pass context to extract source links if available
+                response_before_timestamp = response
                 response = _add_timestamp_to_response(response, detected_lang or "en", context)
-                logger.debug("✅ Added timestamp attribution to RAG response")
+                
+                # CRITICAL: Validate response after adding timestamp
+                if not response or not isinstance(response, str) or not response.strip():
+                    logger.error(
+                        f"❌ CRITICAL: Response became empty after _add_timestamp_to_response "
+                        f"(detected_lang={detected_lang}, before_length={len(response_before_timestamp) if response_before_timestamp else 0}), "
+                        f"falling back to original response"
+                    )
+                    response = response_before_timestamp  # Fallback to original
+                
+                # CRITICAL: Log response state after adding timestamp (especially for Chinese)
+                if detected_lang == "zh":
+                    logger.debug(
+                        f"🔍 [CHINESE] After _add_timestamp_to_response: "
+                        f"response_length={len(response) if response else 0}, "
+                        f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
+                    )
+                else:
+                    logger.debug("✅ Added timestamp attribution to RAG response")
             except Exception as e:
-                logger.warning(f"⚠️ Failed to add timestamp to response: {e}")
+                logger.error(
+                    f"⚠️ Failed to add timestamp to response (detected_lang={detected_lang}): {e}",
+                    exc_info=True
+                )
+                # CRITICAL: If timestamp addition fails, keep original response (don't lose content)
+                # response already contains original value, no need to change
         
         # Time Estimation Integration: Check if user is asking about time estimation
         try:

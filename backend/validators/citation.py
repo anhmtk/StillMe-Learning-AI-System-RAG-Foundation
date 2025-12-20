@@ -488,18 +488,42 @@ class CitationRequired:
     
     def _add_citation_for_base_knowledge(self, answer: str) -> str:
         """
-        Add human-readable citation for base knowledge answers (when no RAG context available)
+        Add human-readable citation for base knowledge answers (when no RAG context available).
+        
+        CRITICAL: This function must handle Unicode (including Chinese) safely.
         
         Args:
-            answer: Original answer without citation
+            answer: Original answer without citation (may contain Unicode characters)
             
         Returns:
             Answer with human-readable citation added to indicate base knowledge source
         """
+        # CRITICAL: Clean answer from control characters and smart quotes
+        import unicodedata
+        if answer and isinstance(answer, str):
+            # Remove control characters and smart quotes
+            answer = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019]', '', answer)
+            # Normalize Unicode to NFC form
+            try:
+                answer = unicodedata.normalize('NFC', answer)
+            except Exception:
+                pass  # If normalization fails, continue with cleaned text
+        
         # Use citation formatter if available
         if self.citation_formatter:
             citation = self.citation_formatter.get_citation_strategy("", [])
-            return self.citation_formatter.add_citation_to_response(answer, citation)
+            result = self.citation_formatter.add_citation_to_response(answer, citation)
+            # CRITICAL: Validate result is not empty
+            if not result or not result.strip():
+                logger.warning(
+                    f"⚠️ Citation formatter returned empty result, using fallback "
+                    f"(answer_length={len(answer) if answer else 0})"
+                )
+                # Fallback to manual citation
+                if answer and answer.strip():
+                    return answer.rstrip() + " [general knowledge]"
+                return "[general knowledge]"
+            return result
         
         # Fallback to [general knowledge] format (human-readable)
         citation_text = " [general knowledge]"
@@ -511,39 +535,92 @@ class CitationRequired:
             return answer.rstrip() + citation_text
         
         # Find the best place to add citation (prefer end of first sentence or end of answer)
+        # CRITICAL: Use Unicode-safe regex matching
         sentence_end = re.search(r'[.!?]\s+', answer)
         if sentence_end:
             insert_pos = sentence_end.end()
-            return answer[:insert_pos] + citation_text + " " + answer[insert_pos:]
+            # CRITICAL: Safe string slicing (Python handles Unicode correctly, but add validation)
+            result = answer[:insert_pos] + citation_text + " " + answer[insert_pos:]
+            # CRITICAL: Validate result is not empty
+            if not result or not result.strip():
+                logger.warning(
+                    f"⚠️ Result is empty after adding citation at sentence end, "
+                    f"falling back to end of answer (answer_length={len(answer) if answer else 0})"
+                )
+                return answer.rstrip() + citation_text
+            return result
         
         # If no sentence end found, add at the end
-        return answer.rstrip() + citation_text
+        result = answer.rstrip() + citation_text
+        # CRITICAL: Validate result is not empty
+        if not result or not result.strip():
+            logger.warning(
+                f"⚠️ Result is empty after adding citation at end, "
+                f"returning citation only (answer_length={len(answer) if answer else 0})"
+            )
+            return citation_text.strip()
+        return result
     
     def _add_citation_text(self, answer: str, citation_text: str) -> str:
         """
-        Add citation text to answer at appropriate position
+        Add citation text to answer at appropriate position.
+        
+        CRITICAL: This function must handle Unicode (including Chinese) safely.
         
         Args:
-            answer: Original answer
+            answer: Original answer (may contain Unicode characters)
             citation_text: Citation text to add (e.g., "[foundational knowledge]")
             
         Returns:
             Answer with citation added
         """
+        # CRITICAL: Clean answer from control characters and smart quotes
+        import unicodedata
+        if answer and isinstance(answer, str):
+            # Remove control characters and smart quotes
+            answer = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019]', '', answer)
+            # Normalize Unicode to NFC form
+            try:
+                answer = unicodedata.normalize('NFC', answer)
+            except Exception:
+                pass  # If normalization fails, continue with cleaned text
+        
         if not answer or len(answer.strip()) == 0:
             return answer + citation_text if answer else citation_text.strip()
         
         if len(answer.strip()) < 5:
-            return answer.rstrip() + citation_text
+            result = answer.rstrip() + citation_text
+            # CRITICAL: Validate result is not empty
+            if not result or not result.strip():
+                return citation_text.strip()
+            return result
         
         # Find the best place to add citation (prefer end of first sentence or end of answer)
+        # CRITICAL: Use Unicode-safe regex matching
         sentence_end = re.search(r'[.!?]\s+', answer)
         if sentence_end:
             insert_pos = sentence_end.end()
-            return answer[:insert_pos] + citation_text + " " + answer[insert_pos:]
+            # CRITICAL: Safe string slicing (Python handles Unicode correctly, but add validation)
+            result = answer[:insert_pos] + citation_text + " " + answer[insert_pos:]
+            # CRITICAL: Validate result is not empty
+            if not result or not result.strip():
+                logger.warning(
+                    f"⚠️ Result is empty after adding citation at sentence end, "
+                    f"falling back to end of answer (answer_length={len(answer) if answer else 0})"
+                )
+                return answer.rstrip() + citation_text
+            return result
         
         # If no sentence end found, add at the end
-        return answer.rstrip() + citation_text
+        result = answer.rstrip() + citation_text
+        # CRITICAL: Validate result is not empty
+        if not result or not result.strip():
+            logger.warning(
+                f"⚠️ Result is empty after adding citation at end, "
+                f"returning citation only (answer_length={len(answer) if answer else 0})"
+            )
+            return citation_text.strip()
+        return result
     
     def _add_citation(self, answer: str, ctx_docs: List[Any], user_question: str = "", context: Optional[Dict[str, Any]] = None) -> str:
         """
@@ -672,6 +749,17 @@ class CitationRequired:
             return patched
         
         # Fallback to legacy [1] format
+        # CRITICAL: Clean answer from control characters and smart quotes
+        import unicodedata
+        if answer and isinstance(answer, str):
+            # Remove control characters and smart quotes
+            answer = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019]', '', answer)
+            # Normalize Unicode to NFC form
+            try:
+                answer = unicodedata.normalize('NFC', answer)
+            except Exception:
+                pass  # If normalization fails, continue with cleaned text
+        
         # Edge case: Empty or whitespace-only answer
         if not answer or len(answer.strip()) == 0:
             logger.warning("Cannot add citation to empty answer")
@@ -679,28 +767,57 @@ class CitationRequired:
         
         # Edge case: Very short answer (< 5 chars) - just add at the end
         if len(answer.strip()) < 5:
-            return answer.rstrip() + " [1]"
+            result = answer.rstrip() + " [1]"
+            # CRITICAL: Validate result is not empty
+            if not result or not result.strip():
+                return "[1]"
+            return result
         
         # Find the best place to add citation
         # Strategy: Add [1] after the first sentence or first paragraph
         
         # Try to find first sentence (ends with . ! ?)
+        # CRITICAL: Use Unicode-safe regex matching
         sentence_end = re.search(r'[.!?]\s+', answer)
         if sentence_end:
             # Insert citation after first sentence
             insert_pos = sentence_end.end()
             citation = " [1]"
+            # CRITICAL: Safe string slicing (Python handles Unicode correctly, but add validation)
             patched = answer[:insert_pos] + citation + answer[insert_pos:]
+            # CRITICAL: Validate result is not empty
+            if not patched or not patched.strip():
+                logger.warning(
+                    f"⚠️ Result is empty after adding citation at sentence end, "
+                    f"falling back to end of answer (answer_length={len(answer) if answer else 0})"
+                )
+                patched = answer.rstrip() + " [1]"
         else:
             # If no sentence end found, add at the end of first line or beginning
             first_newline = answer.find('\n')
             if first_newline > 0 and first_newline < 100:  # Reasonable paragraph break
                 insert_pos = first_newline
                 citation = " [1]"
+                # CRITICAL: Safe string slicing
                 patched = answer[:insert_pos] + citation + answer[insert_pos:]
+                # CRITICAL: Validate result is not empty
+                if not patched or not patched.strip():
+                    logger.warning(
+                        f"⚠️ Result is empty after adding citation at newline, "
+                        f"falling back to end of answer (answer_length={len(answer) if answer else 0})"
+                    )
+                    patched = answer.rstrip() + " [1]"
             else:
                 # Add at the end
                 patched = answer.rstrip() + " [1]"
+        
+        # CRITICAL: Final validation - ensure result is not empty
+        if not patched or not patched.strip():
+            logger.warning(
+                f"⚠️ Result is empty after adding citation, "
+                f"returning citation only (answer_length={len(answer) if answer else 0})"
+            )
+            return "[1]"
         
         logger.info(f"Auto-added citation [1] to response (context docs: {len(ctx_docs)})")
         return patched
