@@ -71,25 +71,90 @@ def _clean_response_text(text: str) -> str:
     """
     Clean response text from control characters and smart quotes that may cause encoding issues.
     
+    CRITICAL: This function must preserve all Unicode characters (Chinese, Vietnamese, etc.).
+    It should ONLY remove:
+    - Control characters (0x00-0x1F, 0x7F-0x9F)
+    - Smart quotes (\u201c, \u201d, \u2018, \u2019)
+    - Zero-width characters that cause issues
+    
+    It should NOT remove:
+    - Any Unicode characters (Chinese, Vietnamese, etc.)
+    - Any printable characters
+    
     Args:
-        text: Original response text
+        text: Original response text (may contain Unicode characters)
         
     Returns:
-        Cleaned text with problematic characters removed
+        Cleaned text with problematic characters removed (Unicode preserved)
     """
     if not text or not isinstance(text, str):
         return text
     
-    # Remove control characters (0x00-0x1F, 0x7F-0x9F) and smart quotes
-    # Smart quotes: \u201c (left double), \u201d (right double), \u2018 (left single), \u2019 (right single)
-    # Also remove other problematic Unicode characters
-    cleaned = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019]', '', text)
+    # CRITICAL: Log input for debugging (especially for Chinese)
+    input_length = len(text)
+    input_preview = _safe_unicode_slice(text, 100) if text else 'None'
+    
+    # CRITICAL: Only remove control characters and smart quotes
+    # DO NOT remove any Unicode characters (Chinese, Vietnamese, etc.)
+    # Pattern explanation:
+    # - [\x00-\x1f]: Control characters (0x00-0x1F)
+    # - [\x7f-\x9f]: Extended control characters (0x7F-0x9F)
+    # - \u201c\u201d\u2018\u2019: Smart quotes (left/right double and single quotes)
+    # - \u200b\u200c\u200d\u200e\u200f: Zero-width characters that can cause issues
+    # - \ufffe\uffff: Non-characters
+    # CRITICAL: This pattern does NOT match Chinese/Vietnamese/any Unicode characters
+    cleaned = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019\u200b\u200c\u200d\u200e\u200f\ufffe\uffff]', '', text)
+    
+    # CRITICAL: Validate that we didn't lose significant content
+    output_length = len(cleaned) if cleaned else 0
+    removed_chars = input_length - output_length
+    
+    # CRITICAL: If we removed more than 5% of content (excluding control characters), something is wrong
+    # Control characters should be very rare (< 1% of text)
+    if removed_chars > (input_length * 0.05) and removed_chars > 10:
+        logger.error(
+            f"❌ CRITICAL: _clean_response_text removed {removed_chars} characters "
+            f"({removed_chars/input_length*100:.1f}% of input, length={input_length}), "
+            f"this is suspicious - returning original text to prevent content loss"
+        )
+        return text  # Return original if we removed too much
     
     # Normalize Unicode to NFC form for consistency
+    # CRITICAL: This should NOT change the length significantly
     try:
-        cleaned = unicodedata.normalize('NFC', cleaned)
-    except Exception:
+        cleaned_normalized = unicodedata.normalize('NFC', cleaned)
+        # CRITICAL: Validate normalization didn't lose content
+        if len(cleaned_normalized) < len(cleaned) * 0.95:
+            logger.warning(
+                f"⚠️ Unicode normalization lost content "
+                f"(before: {len(cleaned)}, after: {len(cleaned_normalized)}), "
+                f"using pre-normalized text"
+            )
+            cleaned = cleaned  # Keep pre-normalized version
+        else:
+            cleaned = cleaned_normalized
+    except Exception as e:
+        logger.warning(f"⚠️ Unicode normalization failed: {e}, using cleaned text without normalization")
         pass  # If normalization fails, continue with cleaned text
+    
+    # CRITICAL: Log output for debugging (especially for Chinese)
+    output_length_final = len(cleaned) if cleaned else 0
+    output_preview = _safe_unicode_slice(cleaned, 100) if cleaned else 'None'
+    removed_chars_final = input_length - output_length_final
+    
+    if removed_chars_final > 0:
+        logger.info(
+            f"_clean_response_text: removed {removed_chars_final} problematic characters "
+            f"(input_length={input_length}, output_length={output_length_final})"
+        )
+    
+    # CRITICAL: Final validation - ensure output is not empty
+    if not cleaned or len(cleaned) == 0:
+        logger.error(
+            f"❌ CRITICAL: _clean_response_text output is empty "
+            f"(input_length={input_length}), returning original text"
+        )
+        return text  # Return original if output is empty
     
     return cleaned
 
@@ -7383,10 +7448,10 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     )
                 
                 response_before_tone = response
-                response = align_tone(response)
+                response_after_align = align_tone(response)
                 
                 # CRITICAL: Validate response after tone alignment
-                if not response or not isinstance(response, str) or not response.strip():
+                if not response_after_align or not isinstance(response_after_align, str) or not response_after_align.strip():
                     logger.error(
                         f"❌ CRITICAL: Response became empty after align_tone "
                         f"(detected_lang={detected_lang}, before_length={len(response_before_tone) if response_before_tone else 0}), "
@@ -7394,14 +7459,43 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     )
                     response = response_before_tone  # Fallback to original
                 else:
-                    # CRITICAL: Clean response from problematic characters
-                    response_cleaned = _clean_response_text(response)
-                    if len(response_cleaned) != len(response):
-                        logger.warning(
-                            f"⚠️ Cleaned response after align_tone: removed {len(response) - len(response_cleaned)} "
-                            f"problematic characters (detected_lang={detected_lang})"
+                    # CRITICAL: Only clean if response changed significantly (more than just punctuation addition)
+                    # If align_tone only added punctuation, we don't need to clean again
+                    length_diff = len(response_after_align) - len(response_before_tone)
+                    
+                    # If length increased by 1 (punctuation added) or decreased slightly (whitespace removed), skip cleaning
+                    # Only clean if there's a significant change that might indicate issues
+                    if abs(length_diff) <= 2:
+                        # Minor change (likely just punctuation/whitespace) - use aligned response directly
+                        response = response_after_align
+                        logger.debug(
+                            f"✅ align_tone result used directly (minor change: {length_diff} chars, "
+                            f"detected_lang={detected_lang})"
                         )
-                    response = response_cleaned
+                    else:
+                        # Significant change - clean to be safe, but validate carefully
+                        response_cleaned = _clean_response_text(response_after_align)
+                        
+                        # CRITICAL: Validate that cleaning didn't lose significant content
+                        if len(response_cleaned) < len(response_after_align) * 0.95:
+                            logger.error(
+                                f"❌ CRITICAL: _clean_response_text lost significant content after align_tone "
+                                f"(after_align_length={len(response_after_align)}, "
+                                f"cleaned_length={len(response_cleaned)}, "
+                                f"detected_lang={detected_lang}), "
+                                f"using aligned response without cleaning"
+                            )
+                            response = response_after_align  # Use aligned response without cleaning
+                        elif len(response_cleaned) != len(response_after_align):
+                            logger.info(
+                                f"✅ Cleaned response after align_tone: removed {len(response_after_align) - len(response_cleaned)} "
+                                f"problematic characters (detected_lang={detected_lang}, "
+                                f"after_align_length={len(response_after_align)}, cleaned_length={len(response_cleaned)})"
+                            )
+                            response = response_cleaned
+                        else:
+                            # No change after cleaning - use aligned response
+                            response = response_after_align
                 
                 # CRITICAL: Log response state after tone alignment (especially for Chinese)
                 if detected_lang == "zh":
