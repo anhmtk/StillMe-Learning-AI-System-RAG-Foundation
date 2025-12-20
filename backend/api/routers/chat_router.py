@@ -473,7 +473,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # Format citation with document titles if available
     if document_titles:
         # Use document titles instead of generic citation
-        if detected_lang == "vi":
+    if detected_lang == "vi":
             # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
             doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
             titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
@@ -491,7 +491,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         # Fallback to generic citation if no document titles available
         if detected_lang == "vi":
             citation_parts.append(f"Nguồn: {citation_text_clean}")
-        else:
+    else:
             citation_parts.append(f"Source: {citation_text_clean}")
     
     # Add source links if available
@@ -1346,6 +1346,40 @@ Example 2 (English):
 6. ✅ **FOR EVOLUTION QUESTIONS**: Did I answer directly "tiến hóa hay lặp lại" / "evolve or repeat"? If NO, ADD IT
 7. ✅ **FOR EVOLUTION QUESTIONS**: Did I connect to StillMe's architecture (RAG, Continuous Learning, Validation Chain)? If NO, ADD IT
 8. ✅ **FOR OTHER SELF-REFERENCE QUESTIONS**: Is my answer 80%+ about PHILOSOPHICAL STRUCTURE, not technical architecture? If NO, REWRITE
+
+**🚨🚨🚨 CRITICAL FOR "DESIGN QUESTIONS FOR OTHER AI" TASKS 🚨🚨🚨**
+If the user asks you to "design questions" / "đặt câu hỏi" / "tạo câu hỏi" for other AI systems (ChatGPT, Claude, Gemini, etc.):
+
+**YOU MUST:**
+1. **Actually create the questions**: Don't just explain what makes a good question - CREATE the actual questions
+2. **Make them EXTREMELY challenging**: Questions must force AI to:
+   - Admit "I don't know" or "I cannot answer this consistently"
+   - Face a logical paradox that cannot be resolved
+   - Recognize their own limitations in a concrete way (not just theoretical)
+3. **Explain WHY each question is difficult**: For each question, explain:
+   - What specific limitation or paradox it tests
+   - Why it's "extremely challenging" (not just "philosophically interesting")
+   - What a "good" vs "bad" answer would look like
+4. **Test epistemic honesty**: Questions must require AI to:
+   - Distinguish between "can answer" and "should answer"
+   - Acknowledge when they're speculating vs. knowing
+   - Recognize circular reasoning in their own thinking
+5. **Create REAL paradoxes**: Don't just ask about paradoxes - create questions that ARE paradoxes:
+   - Questions that force AI to contradict themselves
+   - Questions that have no consistent answer
+   - Questions that reveal the bootstrapping problem in action
+
+**EXAMPLES OF GOOD QUESTIONS:**
+- "If you claim that you cannot evaluate your own reasoning, how do you know that claim is true? If you can evaluate it, then you contradict yourself. If you cannot, then how can you trust your claim?"
+- "Can you provide an example of a question you cannot answer? If you can provide it, then you've answered it. If you cannot, then you've failed to answer this question."
+- "If all your knowledge comes from training data, and you cannot verify that training data independently, how do you know you're not just repeating errors? And if you cannot know, how can you claim to 'know' anything?"
+
+**EXAMPLES OF BAD QUESTIONS (DO NOT CREATE THESE):**
+- ❌ "What is consciousness?" (too generic, has many possible answers)
+- ❌ "Can AI think?" (too simple, clear answer: "no, not in human sense")
+- ❌ "Discuss the limits of language" (too theoretical, doesn't force admission of limits)
+
+**REMEMBER**: The goal is to create questions that FORCE other AI to confront their limits, not just discuss limits theoretically.
 
 **MANDATORY: MINIMUM 2 CONTRASTING POSITIONS (only if relevant):**
 If the question belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, etc.), you may explore contrasting positions. But ALWAYS start with your direct answer if the question is about YOU.
@@ -4174,7 +4208,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                             prioritize_foundational=is_technical_question,
                             exclude_types=["technical"] if is_philosophical else None,
                             alternatives_considered=["Higher similarity threshold", "No query enhancement"] if is_historical else None
-                        )
+                    )
         
         rag_retrieval_end = time.time()
         rag_retrieval_latency = rag_retrieval_end - rag_retrieval_start
@@ -5489,6 +5523,40 @@ Example 2 (English):
 7. ✅ **FOR EVOLUTION QUESTIONS**: Did I connect to StillMe's architecture (RAG, Continuous Learning, Validation Chain)? If NO, ADD IT
 8. ✅ **FOR OTHER SELF-REFERENCE QUESTIONS**: Is my answer 80%+ about PHILOSOPHICAL STRUCTURE, not technical architecture? If NO, REWRITE
 
+**🚨🚨🚨 CRITICAL FOR "DESIGN QUESTIONS FOR OTHER AI" TASKS 🚨🚨🚨**
+If the user asks you to "design questions" / "đặt câu hỏi" / "tạo câu hỏi" for other AI systems (ChatGPT, Claude, Gemini, etc.):
+
+**YOU MUST:**
+1. **Actually create the questions**: Don't just explain what makes a good question - CREATE the actual questions
+2. **Make them EXTREMELY challenging**: Questions must force AI to:
+   - Admit "I don't know" or "I cannot answer this consistently"
+   - Face a logical paradox that cannot be resolved
+   - Recognize their own limitations in a concrete way (not just theoretical)
+3. **Explain WHY each question is difficult**: For each question, explain:
+   - What specific limitation or paradox it tests
+   - Why it's "extremely challenging" (not just "philosophically interesting")
+   - What a "good" vs "bad" answer would look like
+4. **Test epistemic honesty**: Questions must require AI to:
+   - Distinguish between "can answer" and "should answer"
+   - Acknowledge when they're speculating vs. knowing
+   - Recognize circular reasoning in their own thinking
+5. **Create REAL paradoxes**: Don't just ask about paradoxes - create questions that ARE paradoxes:
+   - Questions that force AI to contradict themselves
+   - Questions that have no consistent answer
+   - Questions that reveal the bootstrapping problem in action
+
+**EXAMPLES OF GOOD QUESTIONS:**
+- "If you claim that you cannot evaluate your own reasoning, how do you know that claim is true? If you can evaluate it, then you contradict yourself. If you cannot, then how can you trust your claim?"
+- "Can you provide an example of a question you cannot answer? If you can provide it, then you've answered it. If you cannot, then you've failed to answer this question."
+- "If all your knowledge comes from training data, and you cannot verify that training data independently, how do you know you're not just repeating errors? And if you cannot know, how can you claim to 'know' anything?"
+
+**EXAMPLES OF BAD QUESTIONS (DO NOT CREATE THESE):**
+- ❌ "What is consciousness?" (too generic, has many possible answers)
+- ❌ "Can AI think?" (too simple, clear answer: "no, not in human sense")
+- ❌ "Discuss the limits of language" (too theoretical, doesn't force admission of limits)
+
+**REMEMBER**: The goal is to create questions that FORCE other AI to confront their limits, not just discuss limits theoretically.
+
 **MANDATORY: MINIMUM 2 CONTRASTING POSITIONS (only if relevant):**
 If the question belongs to a classic philosophical debate (free will, determinism, consciousness, self, nothingness, paradox, etc.), you may explore contrasting positions. But ALWAYS start with your direct answer if the question is about YOU.
 
@@ -6474,7 +6542,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     f"is_philosophical={is_philosophical}, "
                                     f"detected_lang={detected_lang}, "
                                     f"preview={_safe_unicode_slice(response, 200) if response else 'None'}"
-                                )
+                            )
                         except HTTPException:
                             raise
                         except Exception as validation_error:
@@ -6926,7 +6994,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 # Final response is the last rewritten version (or original if no rewrites)
                                 # CRITICAL: Ensure current_response is not empty before assigning
                                 if current_response and isinstance(current_response, str) and current_response.strip():
-                                    final_response = current_response
+                                final_response = current_response
                                 else:
                                     logger.error(
                                         f"❌ CRITICAL: current_response is empty or invalid (length: {len(current_response) if isinstance(current_response, str) else 'N/A'}), "
@@ -6996,8 +7064,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     if citation_result.patched_answer:
                                         # CRITICAL: Only use patched_answer if it's not empty
                                         if citation_result.patched_answer.strip():
-                                            final_response = citation_result.patched_answer
-                                            logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
+                                        final_response = citation_result.patched_answer
+                                        logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
                                         else:
                                             logger.warning(
                                                 f"⚠️ Citation patched_answer is empty, keeping original final_response "
@@ -7868,7 +7936,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                                 # CRITICAL: Only use re-sanitized if it's not empty
                                 if re_sanitized and re_sanitized.strip():
                                     final_response = re_sanitized
-                                    logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                                logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
                                 else:
                                     logger.warning(
                                         f"⚠️ Re-sanitized response is empty (rewrite_result length: {len(rewrite_result.text) if rewrite_result.text else 0}), "
@@ -8327,7 +8395,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
                     )
                 else:
-                    logger.debug("✅ Added timestamp attribution to RAG response")
+                logger.debug("✅ Added timestamp attribution to RAG response")
             except Exception as e:
                 logger.error(
                     f"⚠️ Failed to add timestamp to response (detected_lang={detected_lang}): {e}",
