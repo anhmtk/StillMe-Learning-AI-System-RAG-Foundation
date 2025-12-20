@@ -7064,8 +7064,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     if citation_result.patched_answer:
                                         # CRITICAL: Only use patched_answer if it's not empty
                                         if citation_result.patched_answer.strip():
-                                        final_response = citation_result.patched_answer
-                                        logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
+                                            final_response = citation_result.patched_answer
+                                            logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
                                         else:
                                             logger.warning(
                                                 f"⚠️ Citation patched_answer is empty, keeping original final_response "
@@ -7936,7 +7936,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                                 # CRITICAL: Only use re-sanitized if it's not empty
                                 if re_sanitized and re_sanitized.strip():
                                     final_response = re_sanitized
-                                logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                                    logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
                                 else:
                                     logger.warning(
                                         f"⚠️ Re-sanitized response is empty (rewrite_result length: {len(rewrite_result.text) if rewrite_result.text else 0}), "
@@ -8395,7 +8395,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
                     )
                 else:
-                logger.debug("✅ Added timestamp attribution to RAG response")
+                    logger.debug("✅ Added timestamp attribution to RAG response")
             except Exception as e:
                 logger.error(
                     f"⚠️ Failed to add timestamp to response (detected_lang={detected_lang}): {e}",
