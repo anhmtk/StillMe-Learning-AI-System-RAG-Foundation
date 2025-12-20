@@ -88,18 +88,37 @@ class StyleSanitizer:
         if not text:
             return text
         
+        original_length = len(text)
         result = text
         
+        # CRITICAL: Log input for debugging (especially for Chinese)
+        logger.debug(f"sanitize INPUT: length={original_length}, is_philosophical={is_philosophical}, preview={text[:100] if text else 'None'}")
+        
         # Step 1: Remove emojis (always, especially for philosophical)
+        result_before = result
         result = self._remove_emojis(result)
+        if len(result) != len(result_before):
+            logger.debug(f"sanitize Step 1 (remove_emojis): {len(result_before)} → {len(result)} chars")
         
         # Step 2: Normalize unicode quotes
+        result_before = result
         result = self._normalize_quotes(result)
+        if len(result) != len(result_before):
+            logger.debug(f"sanitize Step 2 (normalize_quotes): {len(result_before)} → {len(result)} chars")
         
         # Step 3: Remove anthropomorphic language
+        result_before = result
         result = self._remove_anthropomorphism(result)
+        if len(result) < len(result_before) * 0.9:  # If more than 10% removed
+            logger.warning(
+                f"⚠️ sanitize Step 3 (remove_anthropomorphism) removed significant content: "
+                f"{len(result_before)} → {len(result)} chars ({len(result_before) - len(result)} removed, "
+                f"{100 * (len(result_before) - len(result)) / len(result_before):.1f}%). "
+                f"Preview before: {result_before[:100]}, Preview after: {result[:100]}"
+            )
         
         # Step 4: Convert markdown to prose
+        result_before = result
         if is_philosophical:
             # For philosophical: convert headings and bullets to prose
             result = self._convert_headings_to_prose(result)
@@ -110,18 +129,70 @@ class StyleSanitizer:
             # For non-philosophical: keep some structure but normalize
             result = self._normalize_markdown(result)
         
+        if len(result) < len(result_before) * 0.9:  # If more than 10% removed
+            logger.warning(
+                f"⚠️ sanitize Step 4 (markdown conversion) removed significant content: "
+                f"{len(result_before)} → {len(result)} chars ({len(result_before) - len(result)} removed, "
+                f"{100 * (len(result_before) - len(result)) / len(result_before):.1f}%). "
+                f"Preview before: {result_before[:100]}, Preview after: {result[:100]}"
+            )
+        
         # Step 5: Normalize spacing and line breaks
+        result_before = result
         result = self._normalize_spacing(result)
+        if len(result) < len(result_before) * 0.9:  # If more than 10% removed
+            logger.warning(
+                f"⚠️ sanitize Step 5 (normalize_spacing) removed significant content: "
+                f"{len(result_before)} → {len(result)} chars ({len(result_before) - len(result)} removed, "
+                f"{100 * (len(result_before) - len(result)) / len(result_before):.1f}%). "
+                f"Preview before: {result_before[:100]}, Preview after: {result[:100]}"
+            )
         
         # Step 5.5: Final pass - remove any remaining markdown headings (safety net)
         # This catches headings that might have been missed or added after initial sanitization
+        result_before = result
         result = re.sub(r'^#{1,6}\s+(.+)$', r'\1', result, flags=re.MULTILINE)
+        if len(result) < len(result_before) * 0.9:  # If more than 10% removed
+            logger.warning(
+                f"⚠️ sanitize Step 5.5 (remove markdown headings) removed significant content: "
+                f"{len(result_before)} → {len(result)} chars ({len(result_before) - len(result)} removed, "
+                f"{100 * (len(result_before) - len(result)) / len(result_before):.1f}%). "
+                f"Preview before: {result_before[:100]}, Preview after: {result[:100]}"
+            )
         
         # Step 6: Remove citation markers if philosophical (they should be prose, not [1])
+        result_before = result
         if is_philosophical:
             result = self._remove_citation_markers(result)
+            if len(result) < len(result_before) * 0.9:  # If more than 10% removed
+                logger.warning(
+                    f"⚠️ sanitize Step 6 (remove_citation_markers) removed significant content: "
+                    f"{len(result_before)} → {len(result)} chars ({len(result_before) - len(result)} removed, "
+                    f"{100 * (len(result_before) - len(result)) / len(result_before):.1f}%). "
+                    f"Preview before: {result_before[:100]}, Preview after: {result[:100]}"
+                )
         
-        return result.strip()
+        final_result = result.strip()
+        
+        # CRITICAL: Defensive check - if more than 10% of content was removed, it's suspicious
+        if len(final_result) < original_length * 0.9:
+            logger.error(
+                f"❌ CRITICAL: sanitize() removed significant content: "
+                f"original={original_length}, final={len(final_result)}, "
+                f"removed={original_length - len(final_result)} chars ({100 * (original_length - len(final_result)) / original_length:.1f}%). "
+                f"Preview original: {text[:200]}, Preview final: {final_result[:200]}"
+            )
+            # CRITICAL: If more than 50% removed, it's definitely wrong - return original
+            if len(final_result) < original_length * 0.5:
+                logger.error(
+                    f"❌ CRITICAL: sanitize() removed more than 50% of content! "
+                    f"Returning original text to prevent content loss."
+                )
+                return text.strip()  # Return original instead of corrupted result
+        
+        logger.debug(f"sanitize OUTPUT: length={len(final_result)}, removed={original_length - len(final_result)} chars")
+        
+        return final_result
     
     def _remove_emojis(self, text: str) -> str:
         """Remove all emojis from text"""
@@ -252,20 +323,48 @@ class StyleSanitizer:
         return '\n'.join(result_lines)
     
     def _remove_markdown(self, text: str) -> str:
-        """Remove all markdown formatting"""
+        """
+        Remove all markdown formatting
+        
+        CRITICAL: This function must be safe for Unicode (including Chinese).
+        Do NOT use patterns that might match Chinese characters.
+        """
+        original_length = len(text)
+        
         # Remove bold/italic
+        # CRITICAL: Use non-greedy matching and ensure we don't match across Chinese characters
         text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # Bold
-        text = re.sub(r'\*(.+?)\*', r'\1', text)      # Italic
+        text = re.sub(r'\*(.+?)\*', r'\1', text)      # Italic (but not if it's part of Chinese text)
         text = re.sub(r'_(.+?)_', r'\1', text)        # Italic underscore
         
         # Remove code blocks
+        # CRITICAL: Use [\s\S] instead of . to match newlines, but be careful with Unicode
         text = re.sub(r'```[\s\S]*?```', '', text)    # Code blocks
         text = re.sub(r'`(.+?)`', r'\1', text)        # Inline code
         
         # Remove links
-        text = re.sub(r'\[(.+?)\]\(.+?\)', r'\1', text)  # Markdown links
+        # CRITICAL: Only match markdown link format [text](url), not Chinese brackets
+        text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)  # Markdown links - be more specific
         
-        return text
+        result = text
+        
+        # CRITICAL: Defensive check - if more than 10% removed, it's suspicious
+        if len(result) < original_length * 0.9:
+            logger.warning(
+                f"⚠️ _remove_markdown removed significant content: "
+                f"{original_length} → {len(result)} chars ({original_length - len(result)} removed, "
+                f"{100 * (original_length - len(result)) / original_length:.1f}%). "
+                f"Preview original: {text[:200]}, Preview result: {result[:200]}"
+            )
+            # If more than 50% removed, return original
+            if len(result) < original_length * 0.5:
+                logger.error(
+                    f"❌ CRITICAL: _remove_markdown removed more than 50% of content! "
+                    f"Returning original text to prevent content loss."
+                )
+                return text
+        
+        return result
     
     def _normalize_markdown(self, text: str) -> str:
         """Normalize markdown (remove headings and bold, keep structure)"""
@@ -286,17 +385,46 @@ class StyleSanitizer:
         return text
     
     def _normalize_spacing(self, text: str) -> str:
-        """Normalize spacing and line breaks"""
+        """
+        Normalize spacing and line breaks
+        
+        CRITICAL: This function must be safe for Unicode (including Chinese).
+        Do NOT use patterns that might match Chinese characters.
+        """
+        original_length = len(text)
+        
         # Remove excessive blank lines (more than 2 consecutive)
+        # CRITICAL: Only match newlines, not any characters
         text = re.sub(r'\n{3,}', '\n\n', text)
         
         # Normalize spaces (multiple spaces to single)
-        text = re.sub(r' +', ' ', text)
+        # CRITICAL: Only match ASCII space (0x20), not Unicode spaces
+        # Use [ ] instead of \s to avoid matching Chinese/Unicode whitespace
+        text = re.sub(r'[ ]{2,}', ' ', text)  # Only ASCII space, not \s
         
-        # Remove trailing spaces
-        text = re.sub(r' +$', '', text, flags=re.MULTILINE)
+        # Remove trailing spaces (only ASCII spaces at end of lines)
+        # CRITICAL: Only match ASCII space, not Unicode whitespace
+        text = re.sub(r'[ ]+$', '', text, flags=re.MULTILINE)
         
-        return text.strip()
+        result = text.strip()
+        
+        # CRITICAL: Defensive check - if more than 10% removed, it's suspicious
+        if len(result) < original_length * 0.9:
+            logger.warning(
+                f"⚠️ _normalize_spacing removed significant content: "
+                f"{original_length} → {len(result)} chars ({original_length - len(result)} removed, "
+                f"{100 * (original_length - len(result)) / original_length:.1f}%). "
+                f"Preview original: {text[:200]}, Preview result: {result[:200]}"
+            )
+            # If more than 50% removed, return original
+            if len(result) < original_length * 0.5:
+                logger.error(
+                    f"❌ CRITICAL: _normalize_spacing removed more than 50% of content! "
+                    f"Returning original text to prevent content loss."
+                )
+                return text.strip()
+        
+        return result
     
     def _remove_citation_markers(self, text: str) -> str:
         """Remove citation markers like [1], [2] for philosophical mode"""
