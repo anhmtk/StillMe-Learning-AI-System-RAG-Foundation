@@ -6415,6 +6415,16 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 is_origin_query=is_origin_query,
                                 is_stillme_query=is_stillme_query
                             )
+                            
+                            # CRITICAL: Log response after validation (especially for philosophical questions)
+                            if is_philosophical or detected_lang == "zh":
+                                logger.info(
+                                    f"🔍 [VALIDATION TRACE] After validation: "
+                                    f"response_length={len(response) if response else 0}, "
+                                    f"is_philosophical={is_philosophical}, "
+                                    f"detected_lang={detected_lang}, "
+                                    f"preview={_safe_unicode_slice(response, 200) if response else 'None'}"
+                                )
                         except HTTPException:
                             raise
                         except Exception as validation_error:
@@ -6475,6 +6485,16 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             # PHASE 3: POST-PROCESSING PIPELINE
             # Unified Style & Quality Enforcement Layer (Optimized)
             # ==========================================
+            # CRITICAL: Log response state before post-processing (especially for philosophical questions)
+            if is_philosophical or detected_lang == "zh":
+                logger.info(
+                    f"🔍 [POST-PROCESSING TRACE] Before post-processing: "
+                    f"response_length={len(response) if response else 0}, "
+                    f"is_philosophical={is_philosophical}, "
+                    f"detected_lang={detected_lang}, "
+                    f"preview={_safe_unicode_slice(response, 200) if response else 'None'}"
+                )
+            
             # CRITICAL: Ensure response is set and not None
             if not response:
                 logger.error("⚠️ Response is None or empty before post-processing - using fallback")
@@ -6888,6 +6908,16 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             
                             response = final_response
                             
+                            # CRITICAL: Log response state after post-processing (especially for philosophical questions)
+                            if is_philosophical or detected_lang == "zh":
+                                logger.info(
+                                    f"🔍 [POST-PROCESSING TRACE] After post-processing: "
+                                    f"response_length={len(response) if response else 0}, "
+                                    f"is_philosophical={is_philosophical}, "
+                                    f"detected_lang={detected_lang}, "
+                                    f"preview={_safe_unicode_slice(response, 200) if response else 'None'}"
+                                )
+                            
                             # CRITICAL: Final check - ensure response is not a technical error
                             if response:
                                 from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error
@@ -6895,6 +6925,15 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 if is_error:
                                     logger.error(f"⚠️ Final response is still a technical error (type: {error_type}) - replacing with fallback")
                                     response = get_fallback_message_for_error(error_type, detected_lang)
+                            
+                            # CRITICAL: Defensive check - ensure response is not empty after post-processing
+                            if not response or not isinstance(response, str) or not response.strip():
+                                logger.error(
+                                    f"❌ CRITICAL: Response became empty after post-processing "
+                                    f"(is_philosophical={is_philosophical}, detected_lang={detected_lang}), "
+                                    f"falling back to raw_response"
+                                )
+                                response = raw_response if raw_response and raw_response.strip() else get_fallback_message_for_error("generic", detected_lang)
                             
                             postprocessing_time = time.time() - postprocessing_start
                             timing_logs["postprocessing"] = f"{postprocessing_time:.3f}s"
@@ -8106,10 +8145,13 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         
         # Add timestamp attribution to normal RAG responses for transparency (consistent with external data)
         # Skip if this is an external data response (already has timestamp) or fallback message
+        # CRITICAL: Skip for pure philosophical questions (reasoning, not factual claims)
         from backend.api.utils.error_detector import is_fallback_message
         is_fallback = is_fallback_message(response) if response else False
         has_external_data_timestamp = "[Source:" in response or "[Nguồn:" in response
-        if not is_fallback and not has_external_data_timestamp and response:
+        # CRITICAL: Skip timestamp addition for philosophical questions (they don't need citations/timestamps)
+        should_add_timestamp = not is_fallback and not has_external_data_timestamp and response and not is_philosophical
+        if should_add_timestamp:
             try:
                 # CRITICAL: Log response state before adding timestamp (especially for Chinese)
                 if detected_lang == "zh":
@@ -8121,16 +8163,28 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 
                 # Pass context to extract source links if available
                 response_before_timestamp = response
-                response = _add_timestamp_to_response(response, detected_lang or "en", context)
+                response_after_timestamp = _add_timestamp_to_response(response, detected_lang or "en", context)
                 
                 # CRITICAL: Validate response after adding timestamp
-                if not response or not isinstance(response, str) or not response.strip():
+                if not response_after_timestamp or not isinstance(response_after_timestamp, str) or not response_after_timestamp.strip():
                     logger.error(
                         f"❌ CRITICAL: Response became empty after _add_timestamp_to_response "
                         f"(detected_lang={detected_lang}, before_length={len(response_before_timestamp) if response_before_timestamp else 0}), "
                         f"falling back to original response"
                     )
                     response = response_before_timestamp  # Fallback to original
+                else:
+                    # CRITICAL: Only use timestamp-added response if it's not significantly shorter
+                    # If timestamp addition caused significant content loss, fallback to original
+                    if len(response_after_timestamp) < len(response_before_timestamp) * 0.9:
+                        logger.error(
+                            f"❌ CRITICAL: _add_timestamp_to_response caused significant content loss "
+                            f"(before: {len(response_before_timestamp)}, after: {len(response_after_timestamp)}), "
+                            f"falling back to original response"
+                        )
+                        response = response_before_timestamp
+                    else:
+                        response = response_after_timestamp
                 
                 # CRITICAL: Log response state after adding timestamp (especially for Chinese)
                 if detected_lang == "zh":

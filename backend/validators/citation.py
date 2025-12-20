@@ -295,8 +295,9 @@ class CitationRequired:
         # For pure philosophical questions (no factual elements), skip citation requirement
         # BUT: If question has factual elements (years, events, named people, philosophers, theorems), ALWAYS require citations
         # CRITICAL: Check this AFTER fallback detection and combining factual questions
-        if is_philosophical and not is_real_factual_question and not is_philosophical_factual:
-            logger.debug("Pure philosophical question detected (no factual elements) - skipping citation requirement")
+        # CRITICAL: Pure philosophical questions are about reasoning, not factual claims, so citations are not needed
+        if is_philosophical and not is_any_factual_question:
+            logger.info(f"✅ Pure philosophical question detected (no factual elements) - skipping citation requirement (reasoning, not factual claim). Question: {user_question[:100] if user_question else 'unknown'}")
             return ValidationResult(passed=True)
         
         # CRITICAL: Log detection results for debugging
@@ -315,6 +316,7 @@ class CitationRequired:
         if not ctx_docs or len(ctx_docs) == 0:
             # For ANY factual questions, we should still add citation for transparency
             # Even if no RAG context, the answer is based on base knowledge and should be cited
+            # BUT: Skip for pure philosophical questions (already handled above)
             if is_any_factual_question:
                 logger.warning(f"🚨 Factual question detected but no context documents available - adding citation for base knowledge transparency. Question: {user_question[:100] if user_question else 'unknown'}, is_philosophical_factual={is_philosophical_factual}")
                 # CRITICAL: Add citation [general knowledge] even without RAG context to indicate base knowledge source
