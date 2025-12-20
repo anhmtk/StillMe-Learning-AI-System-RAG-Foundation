@@ -6741,24 +6741,45 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                         # Rewrite failed - break loop and use current response
                                         error_detail = rewrite_result.error or "Unknown error"
                                         
-                                        # CRITICAL: Defensive check - ensure rewrite_result.text is valid
-                                        # If it's corrupted (e.g., "StillMeStillMe..."), use current_response instead
-                                        if (not rewrite_result.text or 
-                                            not isinstance(rewrite_result.text, str) or 
-                                            len(rewrite_result.text.strip()) < 10 or
-                                            rewrite_result.text.count("StillMe") > 5):  # Detect corruption pattern
+                                        # CRITICAL: When rewrite fails, ALWAYS use current_response (the response before rewrite attempt)
+                                        # NEVER use rewrite_result.text when was_rewritten=False, even if it seems valid
+                                        # This is because rewrite_result.text might be:
+                                        # 1. Corrupted/truncated response from timeout
+                                        # 2. Partial response from failed rewrite
+                                        # 3. Original text (which is the same as current_response anyway)
+                                        
+                                        # Additional defensive check: if rewrite_result.text is significantly shorter than current_response,
+                                        # it's likely corrupted (especially for Chinese/Unicode responses)
+                                        is_likely_corrupted = False
+                                        if rewrite_result.text and current_response:
+                                            length_ratio = len(rewrite_result.text) / len(current_response) if len(current_response) > 0 else 1.0
+                                            # If rewrite_result.text is less than 50% of current_response length, it's likely corrupted
+                                            if length_ratio < 0.5:
+                                                is_likely_corrupted = True
+                                                logger.error(
+                                                    f"❌ CRITICAL: rewrite_result.text is likely corrupted "
+                                                    f"(length: {len(rewrite_result.text)} vs current: {len(current_response)}, "
+                                                    f"ratio: {length_ratio:.2f}), using current_response instead"
+                                                )
+                                        
+                                        # Also check for corruption patterns
+                                        if (rewrite_result.text and 
+                                            (not isinstance(rewrite_result.text, str) or 
+                                             len(rewrite_result.text.strip()) < 10 or
+                                             rewrite_result.text.count("StillMe") > 5 or
+                                             is_likely_corrupted)):
                                             logger.error(
                                                 f"❌ CRITICAL: rewrite_result.text is corrupted (length: {len(rewrite_result.text) if rewrite_result.text else 0}), "
                                                 f"using current_response instead. Error: {error_detail[:100]}"
                                             )
                                             # Use current_response (which should be the original sanitized response)
                                             # Don't update current_response with corrupted text
-                                        else:
-                                            # rewrite_result.text is valid - use it as fallback
-                                            current_response = rewrite_result.text
+                                        # CRITICAL: Even if rewrite_result.text seems valid, when rewrite failed,
+                                        # we should keep current_response to avoid using potentially corrupted data
                                         
                                         logger.warning(
                                             f"⚠️ Rewrite attempt {rewrite_count} failed: {error_detail[:100]}, "
+                                            f"using current_response (length: {len(current_response) if current_response else 0}), "
                                             f"stopping rewrite loop"
                                         )
                                         break
