@@ -215,6 +215,19 @@ class RewriteLLM:
                 logger.warning(
                     f"⚠️ P2: DeepSeek rewrite timeout (single attempt, 5s): {timeout_error}"
                 )
+                # CRITICAL: Defensive check - ensure original text is valid before returning
+                # If text is corrupted (e.g., "StillMeStillMe..."), we need to detect and handle it
+                if not text or not isinstance(text, str) or len(text.strip()) < 10:
+                    logger.error(
+                        f"❌ CRITICAL: Original text is corrupted or invalid (length: {len(text) if text else 0}), "
+                        f"cannot return from rewrite timeout. This should never happen."
+                    )
+                    # Return empty string rather than corrupted text
+                    return RewriteResult(
+                        text="",
+                        was_rewritten=False,
+                        error=f"{last_error} (original text corrupted)"
+                    )
                 # P2: Single attempt - no retry, return original immediately
                 return RewriteResult(
                     text=text,

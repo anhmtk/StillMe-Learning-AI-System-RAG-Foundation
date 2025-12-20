@@ -6552,6 +6552,23 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     if not rewrite_result.was_rewritten:
                                         # Rewrite failed - break loop and use current response
                                         error_detail = rewrite_result.error or "Unknown error"
+                                        
+                                        # CRITICAL: Defensive check - ensure rewrite_result.text is valid
+                                        # If it's corrupted (e.g., "StillMeStillMe..."), use current_response instead
+                                        if (not rewrite_result.text or 
+                                            not isinstance(rewrite_result.text, str) or 
+                                            len(rewrite_result.text.strip()) < 10 or
+                                            rewrite_result.text.count("StillMe") > 5):  # Detect corruption pattern
+                                            logger.error(
+                                                f"❌ CRITICAL: rewrite_result.text is corrupted (length: {len(rewrite_result.text) if rewrite_result.text else 0}), "
+                                                f"using current_response instead. Error: {error_detail[:100]}"
+                                            )
+                                            # Use current_response (which should be the original sanitized response)
+                                            # Don't update current_response with corrupted text
+                                        else:
+                                            # rewrite_result.text is valid - use it as fallback
+                                            current_response = rewrite_result.text
+                                        
                                         logger.warning(
                                             f"⚠️ Rewrite attempt {rewrite_count} failed: {error_detail[:100]}, "
                                             f"stopping rewrite loop"
