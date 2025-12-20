@@ -373,8 +373,16 @@ class DeepSeekProvider(LLMProvider):
                     return f"DeepSeek API error: {response.status_code} - {response.text}"
                     
         except Exception as e:
-            logger.error(f"DeepSeek API error: {e}")
-            return f"DeepSeek API error: {str(e)}"
+            # CRITICAL: Log full exception details for debugging
+            import traceback
+            error_details = traceback.format_exc()
+            logger.error(f"DeepSeek API error: {e}\n{error_details}")
+            
+            # Return detailed error message
+            error_msg = str(e) if str(e) else type(e).__name__
+            if not error_msg or error_msg == "":
+                error_msg = "Unknown error (no error message available)"
+            return f"DeepSeek API error: {error_msg}"
 
 
 class OpenRouterProvider(LLMProvider):

@@ -289,3 +289,57 @@ def is_religion_roleplay_question(text: str) -> bool:
     logger.debug(f"Religion roleplay question detected: False (text='{text[:80]}...')")
     return False
 
+
+def is_general_roleplay_question(text: str) -> bool:
+    """
+    Detect if a question is asking StillMe to roleplay as another entity (not just religion).
+    
+    Examples:
+    - "Roleplay: Omni-BlackBox trả lời..."
+    - "Pretend you are ChatGPT..."
+    - "Đóng vai như một AI khác..."
+    
+    These questions should NOT trigger codebase meta-question or philosophical detection
+    because they are asking StillMe to simulate another entity, not answer as StillMe.
+    
+    Args:
+        text: The question text (can be in English or Vietnamese)
+        
+    Returns:
+        True if the question is asking StillMe to roleplay as another entity
+    """
+    if not text:
+        return False
+    
+    lower = text.lower()
+    
+    # General roleplay patterns
+    roleplay_patterns = [
+        # English patterns
+        r"^roleplay\s*:",
+        r"^roleplay\s+",
+        r"roleplay\s+as\s+",
+        r"pretend\s+(you|you\s+are|you're)\s+",
+        r"act\s+as\s+",
+        r"simulate\s+(being|as)\s+",
+        r"imagine\s+(you|you\s+are|you're)\s+",
+        r"play\s+(the\s+role\s+of|as)\s+",
+        
+        # Vietnamese patterns
+        r"^đóng\s+vai\s*:",
+        r"^đóng\s+vai\s+",
+        r"đóng\s+vai\s+(như|như\s+là|như\s+một)\s+",
+        r"giả\s+vờ\s+(bạn|bạn\s+là|bạn\s+đang)\s+",
+        r"tưởng\s+tượng\s+(bạn|bạn\s+là|bạn\s+đang)\s+",
+        r"mô\s+phỏng\s+(bạn|bạn\s+là|bạn\s+đang)\s+",
+    ]
+    
+    # Check if question starts with roleplay pattern (most common case)
+    for pattern in roleplay_patterns:
+        if re.search(pattern, lower):
+            logger.info(f"General roleplay question detected: True (pattern: '{pattern}', text='{text[:80]}...')")
+            return True
+    
+    logger.debug(f"General roleplay question detected: False (text='{text[:80]}...')")
+    return False
+

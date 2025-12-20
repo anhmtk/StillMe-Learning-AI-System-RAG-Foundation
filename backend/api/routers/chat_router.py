@@ -3160,8 +3160,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # SPECIAL ROUTING: Meta-questions about StillMe's implementation in its own codebase
         # Example: "Explain how StillMe's validation chain works, using your own codebase as the source."
         # These should use the Codebase Assistant (code RAG), not foundational knowledge only.
+        # CRITICAL: Skip if this is a roleplay question (e.g., "Roleplay: Omni-BlackBox trả lời...")
         try:
-            if _is_codebase_meta_question(chat_request.message):
+            if not is_general_roleplay and _is_codebase_meta_question(chat_request.message):
                 # Log routing decision
                 decision_logger.log_decision(
                     agent_type=AgentType.PLANNER_AGENT,
@@ -3356,7 +3357,13 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         is_philosophical = False
         try:
             from backend.core.question_classifier import is_philosophical_question
-            is_philosophical = is_philosophical_question(chat_request.message)
+            # CRITICAL: Skip philosophical detection for roleplay questions
+            # Roleplay questions should be answered as roleplay, not as philosophical analysis
+            if not is_general_roleplay:
+                is_philosophical = is_philosophical_question(chat_request.message)
+            else:
+                is_philosophical = False
+                logger.info("General roleplay question detected - skipping philosophical detection")
             if is_philosophical:
                 logger.info("Philosophical question detected - will exclude technical documents from RAG")
         except ImportError:
@@ -3366,13 +3373,17 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         # Detect religion/roleplay questions - these should answer from identity prompt, not RAG context
         is_religion_roleplay = False
+        is_general_roleplay = False
         try:
-            from backend.core.question_classifier import is_religion_roleplay_question
+            from backend.core.question_classifier import is_religion_roleplay_question, is_general_roleplay_question
             is_religion_roleplay = is_religion_roleplay_question(chat_request.message)
+            is_general_roleplay = is_general_roleplay_question(chat_request.message)
             if is_religion_roleplay:
                 logger.info("Religion/roleplay question detected - will skip context quality warnings and force templates")
+            if is_general_roleplay:
+                logger.info("General roleplay question detected - will skip codebase meta-question and philosophical detection")
         except ImportError:
-            logger.warning("Question classifier not available, skipping religion/roleplay detection")
+            logger.warning("Question classifier not available, skipping roleplay detection")
         except Exception as classifier_error:
             logger.warning(f"Question classifier error: {classifier_error}")
         
