@@ -473,7 +473,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # Format citation with document titles if available
     if document_titles:
         # Use document titles instead of generic citation
-    if detected_lang == "vi":
+        if detected_lang == "vi":
             # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
             doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
             titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
