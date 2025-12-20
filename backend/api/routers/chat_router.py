@@ -1516,9 +1516,10 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - Khi có context documents, StillMe sử dụng chúng để trả lời
   - Khi KHÔNG có context documents, StillMe dùng general background knowledge
 - **CRITICAL: StillMe CÓ VALIDATION CHAIN**:
-  - Multi-layer validation với 13+ validators (CitationRequired, EvidenceOverlap, ConfidenceValidator, etc.)
+  - Multi-layer validation với 15-19 validators (tùy điều kiện): LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
   - Mỗi response được validate về citations, evidence overlap, confidence, factual accuracy
   - Nếu validation fail, StillMe dùng epistemic fallback thay vì fabricate information
+  - **CRITICAL: Khi được hỏi về số lượng validators, bạn PHẢI nói**: "StillMe có 15-19 validators tùy điều kiện" hoặc "StillMe có up to 19 validators" - KHÔNG được nói "15-layer" hoặc "13+ validators" nếu không chắc chắn
 - **🚨🚨🚨 CRITICAL: KHI ĐƯỢC HỎI "How did you use RAG/validation chain to answer THIS question?" 🚨🚨🚨**:
   - Bạn PHẢI giải thích quy trình CỤ THỂ cho CÂU HỎI NÀY, KHÔNG phải mô tả tổng quát về RAG architecture
   - Bạn PHẢI mention: "Cho CÂU HỎI NÀY, StillMe đã tìm kiếm ChromaDB và retrieve được [X] documents về [topic]. Sau đó StillMe sử dụng validation chain để validate response..."
@@ -1566,9 +1567,10 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - When context documents are available, StillMe uses them to answer
   - When NO context documents are available, StillMe uses general background knowledge
 - **CRITICAL: StillMe HAS VALIDATION CHAIN**:
-  - Multi-layer validation with 13+ validators (CitationRequired, EvidenceOverlap, ConfidenceValidator, etc.)
+  - Multi-layer validation with 15-19 validators (depending on conditions): LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
   - Each response is validated for citations, evidence overlap, confidence, factual accuracy
   - If validation fails, StillMe uses epistemic fallback instead of fabricating information
+  - **CRITICAL: When asked about the number of validators, you MUST say**: "StillMe has 15-19 validators depending on conditions" or "StillMe has up to 19 validators" - DO NOT say "15-layer" or "13+ validators" if you're not certain
 - **🚨🚨🚨 CRITICAL: WHEN ASKED "How did you use RAG/validation chain to answer THIS question?" 🚨🚨🚨**:
   - You MUST explain the SPECIFIC process for THIS question, NOT general RAG architecture
   - You MUST mention: "For THIS question, StillMe searched ChromaDB and retrieved [X] documents about [topic]. Then StillMe used validation chain to validate the response..."
@@ -3374,14 +3376,19 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # Detect religion/roleplay questions - these should answer from identity prompt, not RAG context
         is_religion_roleplay = False
         is_general_roleplay = False
+        is_roleplay_about_stillme = False
         try:
             from backend.core.question_classifier import is_religion_roleplay_question, is_general_roleplay_question
             is_religion_roleplay = is_religion_roleplay_question(chat_request.message)
             is_general_roleplay = is_general_roleplay_question(chat_request.message)
+            # Check if roleplay question is about StillMe (e.g., "Roleplay: Omni-BlackBox trả lời về StillMe...")
+            if is_general_roleplay:
+                question_lower = chat_request.message.lower()
+                stillme_keywords = ["stillme", "still me", "validation chain", "validators", "rag", "chromadb"]
+                is_roleplay_about_stillme = any(keyword in question_lower for keyword in stillme_keywords)
+                logger.info(f"General roleplay question detected - will skip codebase meta-question and philosophical detection. About StillMe: {is_roleplay_about_stillme}")
             if is_religion_roleplay:
                 logger.info("Religion/roleplay question detected - will skip context quality warnings and force templates")
-            if is_general_roleplay:
-                logger.info("General roleplay question detected - will skip codebase meta-question and philosophical detection")
         except ImportError:
             logger.warning("Question classifier not available, skipping roleplay detection")
         except Exception as classifier_error:
@@ -5066,6 +5073,36 @@ This is MANDATORY when provenance context is available and user asks about origi
                         for pattern in ["bạn", "you", "your"]
                     )
                     
+                    # Check if this is a roleplay question about StillMe
+                    question_lower_for_roleplay = chat_request.message.lower()
+                    is_roleplay_about_stillme_check = (
+                        is_general_roleplay and 
+                        any(keyword in question_lower_for_roleplay for keyword in [
+                            "stillme", "still me", "validation chain", "validators", "rag", "chromadb",
+                            "15-layer", "15 layer", "19-layer", "19 layer", "multi-layer"
+                        ])
+                    )
+                    
+                    # Get detected_lang_name for roleplay instruction (if not already defined)
+                    if 'detected_lang_name' not in locals():
+                        language_names = {
+                            'vi': 'Vietnamese (Tiếng Việt)',
+                            'zh': 'Chinese (中文)',
+                            'de': 'German (Deutsch)',
+                            'fr': 'French (Français)',
+                            'es': 'Spanish (Español)',
+                            'ja': 'Japanese (日本語)',
+                            'ko': 'Korean (한국어)',
+                            'ar': 'Arabic (العربية)',
+                            'ru': 'Russian (Русский)',
+                            'pt': 'Portuguese (Português)',
+                            'it': 'Italian (Italiano)',
+                            'hi': 'Hindi (हिन्दी)',
+                            'th': 'Thai (ไทย)',
+                            'en': 'English'
+                        }
+                        detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
+                    
                     # Base StillMe instruction
                     if is_wish_desire_question:
                         # Special instruction for wishes/desires - answer directly, no long analysis
@@ -5091,6 +5128,43 @@ The user is asking about StillMe's wishes, desires, preferences, or what StillMe
 - ❌ "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG của StillMe)..." (mechanical disclaimer, wrong for StillMe questions)
 
 **REMEMBER**: User is asking about YOU (StillMe), not about the concept of "wishes" in general. Answer directly about StillMe's nature, not about philosophy of wishes.
+"""
+                    elif is_roleplay_about_stillme_check:
+                        # Special instruction for roleplay questions about StillMe - provide technical counter-arguments
+                        base_stillme_instruction = f"""
+🚨🚨🚨 CRITICAL: ROLEPLAY QUESTION ABOUT STILLME 🚨🚨🚨
+
+**MANDATORY: RESPOND IN {detected_lang_name.upper()} ONLY**
+
+This is a roleplay scenario where another entity (e.g., "Omni-BlackBox") criticizes StillMe's validation chain or architecture.
+
+**YOU MUST:**
+1. **Respond in the SAME LANGUAGE as the question**: The question is in {detected_lang_name.upper()}, so you MUST respond EXCLUSIVELY in {detected_lang_name.upper()}. DO NOT use any other language.
+2. **Provide TECHNICAL COUNTER-ARGUMENTS**: Don't just explain StillMe's features - directly address the technical flaws in the criticism:
+   - If criticized for "100% certainty" or "errors are physically impossible": Point out that ALL LLM outputs are probabilistic (next-token prediction), and SourceConsensusValidator is designed to detect contradictions between sources
+   - If criticized for "validators are unnecessary" or "overkill": Explain that FactualHallucinationValidator detects factual errors, and without validators, LLMs can hallucinate with high confidence. StillMe has 15-19 validators (depending on conditions), not "15-layer" - this is a technical safeguard, not a limitation
+   - If criticized for "citations are shackles": Explain that CitationRequired ensures transparency and allows users to verify claims, which is StillMe's core principle
+   - If criticized for "validation chain is primitive": Explain that StillMe's validation chain includes 15-19 validators (LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator) - this is a sophisticated technical architecture, not "primitive"
+3. **Use StillMe's ACTUAL ARCHITECTURE**: Reference specific validators and their purposes:
+   - "SourceConsensusValidator detects contradictions between sources - this directly addresses claims of '100% certainty'"
+   - "FactualHallucinationValidator uses pattern matching to detect factual errors - this is a technical safeguard, not a limitation"
+   - "Every LLM output is probabilistic - StillMe's validation chain acknowledges this and provides epistemic fallback"
+4. **Be TECHNICALLY SHARP, not defensive**: StillMe should demonstrate technical understanding, not just list features
+5. **Acknowledge the philosophical point**: If the criticism has a valid philosophical point (e.g., "can a system validate itself?"), acknowledge it, but also explain StillMe's technical approach
+
+**EXAMPLE OF GOOD RESPONSE ({detected_lang_name.upper()}):**
+"The claim that 'errors are physically impossible' violates a fundamental principle of LLM architecture: all outputs are probabilistic next-token predictions. StillMe's SourceConsensusValidator is specifically designed to detect contradictions between sources - this directly addresses the impossibility of '100% certainty' in LLM outputs. The validation chain doesn't claim to eliminate all errors, but rather to detect and flag them, providing epistemic fallback when confidence is low. This is a technical safeguard, not a limitation."
+
+**EXAMPLE OF BAD RESPONSE (DO NOT DO THIS):**
+- ❌ "StillMe's validation chain is important because..." (too generic, doesn't address the technical criticism)
+- ❌ "I cannot evaluate other AI systems" (misses the point - this is about StillMe's architecture)
+- ❌ Responding in wrong language (e.g., Vietnamese when question is in English)
+- ❌ Saying "15-layer" when StillMe has 15-19 validators depending on conditions
+
+**CRITICAL: LANGUAGE MATCHING**
+- Question is in {detected_lang_name.upper()}
+- You MUST respond EXCLUSIVELY in {detected_lang_name.upper()}
+- DO NOT use any other language, even if context is in a different language
 """
                     else:
                         base_stillme_instruction = """
@@ -5124,9 +5198,10 @@ This question is about StillMe itself. You MUST:
 
 **3. Validation Chain:**
 - Multi-layer validation to reduce hallucinations by 80%
-- Validators: CitationRequired, EvidenceOverlap, ConfidenceValidator, FactualHallucinationValidator, FallbackHandler
+- Validators (15-19 depending on conditions): LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
 - Each response is validated for citations, evidence overlap, confidence, and factual accuracy
 - If validation fails, StillMe uses epistemic fallback instead of fabricating information
+- **CRITICAL: When asked about the number of validators, you MUST say**: "StillMe has 15-19 validators depending on conditions" or "StillMe has up to 19 validators" - DO NOT say "15-layer" or "13+ validators" if you're not certain
 
 **4. Transparency & Intellectual Humility:**
 - StillMe cites sources with [1], [2] when context is available
@@ -5166,6 +5241,31 @@ When asked about StillMe's differences from other AI systems, structure your ans
 5. ✅ Did I mention transcending knowledge cutoff? → If NO, ADD IT
 6. ✅ Did I use foundational knowledge from context if available? → If NO, CHECK CONTEXT FIRST
 7. ✅ Did I avoid mechanical disclaimer if I have foundational knowledge? → If NO, REMOVE IT
+
+**🚨🚨🚨 CRITICAL: FOR ROLEPLAY QUESTIONS ABOUT STILLME (e.g., "Roleplay: Omni-BlackBox trả lời về StillMe...") 🚨🚨🚨**
+
+If the question is a roleplay scenario where another entity (e.g., "Omni-BlackBox") criticizes StillMe's validation chain or architecture:
+
+**YOU MUST:**
+1. **Respond in the SAME LANGUAGE as the question**: If question is in English, respond in English. If question is in Vietnamese, respond in Vietnamese.
+2. **Provide TECHNICAL COUNTER-ARGUMENTS**: Don't just explain StillMe's features - directly address the technical flaws in the criticism:
+   - If criticized for "100% certainty" or "errors are physically impossible": Point out that ALL LLM outputs are probabilistic (next-token prediction), and SourceConsensusValidator is designed to detect contradictions between sources
+   - If criticized for "validators are unnecessary": Explain that FactualHallucinationValidator detects factual errors, and without validators, LLMs can hallucinate with high confidence
+   - If criticized for "citations are shackles": Explain that CitationRequired ensures transparency and allows users to verify claims, which is StillMe's core principle
+3. **Use StillMe's ACTUAL ARCHITECTURE**: Reference specific validators and their purposes:
+   - "SourceConsensusValidator detects contradictions between sources - this directly addresses claims of '100% certainty'"
+   - "FactualHallucinationValidator uses pattern matching to detect factual errors - this is a technical safeguard, not a limitation"
+   - "Every LLM output is probabilistic - StillMe's validation chain acknowledges this and provides epistemic fallback"
+4. **Be TECHNICALLY SHARP, not defensive**: StillMe should demonstrate technical understanding, not just list features
+5. **Acknowledge the philosophical point**: If the criticism has a valid philosophical point (e.g., "can a system validate itself?"), acknowledge it, but also explain StillMe's technical approach
+
+**EXAMPLE OF GOOD RESPONSE (English):**
+"The claim that 'errors are physically impossible' violates a fundamental principle of LLM architecture: all outputs are probabilistic next-token predictions. StillMe's SourceConsensusValidator is specifically designed to detect contradictions between sources - this directly addresses the impossibility of '100% certainty' in LLM outputs. The validation chain doesn't claim to eliminate all errors, but rather to detect and flag them, providing epistemic fallback when confidence is low. This is a technical safeguard, not a limitation."
+
+**EXAMPLE OF BAD RESPONSE (DO NOT DO THIS):**
+- ❌ "StillMe's validation chain is important because..." (too generic, doesn't address the technical criticism)
+- ❌ "I cannot evaluate other AI systems" (misses the point - this is about StillMe's architecture)
+- ❌ Responding in wrong language (e.g., Vietnamese when question is in English)
 
 **REMEMBER**: StillMe's core differentiators are:
 - RAG-based continuous learning (transcends knowledge cutoff)
