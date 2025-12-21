@@ -1644,11 +1644,26 @@ If the question belongs to a classic philosophical debate (free will, determinis
                 if isinstance(doc, dict):
                     metadata = doc.get("metadata", {})
                     title = metadata.get("title", "") or ""
-                    doc_content = str(doc.get("document", "")).lower()
-                    if "manifest" in title.lower() or "validation_framework" in doc_content or "total_validators" in doc_content:
+                    source = metadata.get("source", "") or ""
+                    doc_full = str(doc.get("document", ""))
+                    doc_content_lower = doc_full.lower()
+                    
+                    # Check multiple indicators: title, source, document content
+                    is_manifest = (
+                        "manifest" in title.lower() or
+                        "manifest" in source.lower() or
+                        "validation_framework" in doc_content_lower or
+                        "total_validators" in doc_content_lower or
+                        '"total_validators"' in doc_full or
+                        "'total_validators'" in doc_full or
+                        "CRITICAL_FOUNDATION" in source or
+                        "stillme_manifest" in doc_content_lower
+                    )
+                    
+                    if is_manifest:
                         has_manifest = True
+                        logger.info(f"✅ Manifest detected in context! Title: {title[:50]}, Source: {source[:50]}")
                         # Try to extract numbers from manifest content
-                        doc_full = str(doc.get("document", ""))
                         import re
                         total_match = re.search(r'total_validators["\']?\s*:\s*(\d+)', doc_full, re.IGNORECASE)
                         if total_match:
@@ -1659,7 +1674,13 @@ If the question belongs to a classic philosophical debate (free will, determinis
                                 manifest_info = f"{total_validators} validators, {layer_count} layers"
                             else:
                                 manifest_info = f"{total_validators} validators"
+                            logger.info(f"✅ Extracted manifest info: {manifest_info}")
+                        else:
+                            logger.warning(f"⚠️ Manifest detected but could not extract total_validators from content")
                         break
+            
+            if not has_manifest:
+                logger.warning(f"⚠️ Manifest NOT detected in context. Checked {len(knowledge_docs)} docs. Titles: {[str(d.get('metadata', {}).get('title', ''))[:50] if isinstance(d, dict) else 'N/A' for d in knowledge_docs]}")
             
             # CRITICAL: Extract newline character outside f-string to avoid syntax error
             newline = chr(10)
