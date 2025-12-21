@@ -3885,7 +3885,6 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                             
                             try:
                                 # CRITICAL: Check if this is AI_SELF_MODEL domain
-                                from backend.style.style_engine import detect_domain, DomainType
                                 detected_domain = detect_domain(chat_request.message)
                                 is_ai_self_model_domain = (detected_domain == DomainType.AI_SELF_MODEL)
                                 
