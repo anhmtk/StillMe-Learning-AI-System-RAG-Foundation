@@ -288,11 +288,12 @@ class StyleSanitizer:
         
         Only removes the markdown prefix (#), keeps the text as-is.
         Does NOT add periods or modify punctuation.
+        CRITICAL: Preserve line breaks after headings to prevent text concatenation.
         """
         def heading_to_text(match):
             heading_text = match.group(1).strip()
-            # Just return the text, don't add punctuation
-            return heading_text
+            # Return text + newline to preserve line break structure
+            return heading_text + '\n'
         
         return self.heading_pattern.sub(heading_to_text, text)
     
