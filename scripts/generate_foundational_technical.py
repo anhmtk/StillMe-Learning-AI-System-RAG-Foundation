@@ -1,4 +1,105 @@
----
+#!/usr/bin/env python3
+"""
+Generate foundational_technical.md from stillme_manifest.json
+
+This script reads the manifest and generates the foundational technical knowledge
+document with accurate validator counts and layer information.
+"""
+
+import json
+import sys
+import logging
+from pathlib import Path
+from datetime import datetime
+
+# Add project root to path
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def load_manifest() -> dict:
+    """Load stillme_manifest.json"""
+    manifest_path = project_root / "data" / "stillme_manifest.json"
+    
+    if not manifest_path.exists():
+        logger.error(f"❌ Manifest not found: {manifest_path}")
+        logger.info("💡 Run 'python scripts/generate_manifest.py' first to generate the manifest")
+        sys.exit(1)
+    
+    logger.info(f"📖 Loading manifest from {manifest_path}...")
+    with open(manifest_path, 'r', encoding='utf-8') as f:
+        manifest = json.load(f)
+    
+    return manifest
+
+
+def generate_validation_section(manifest: dict) -> str:
+    """Generate validation framework section from manifest"""
+    framework = manifest.get("validation_framework", {})
+    total_validators = framework.get("total_validators", 19)
+    layers = framework.get("layers", [])
+    
+    section = f"""**Validation & Grounding Mechanism:**
+StillMe uses a **multi-layer validation framework** with **{total_validators} validators total, organized into {len(layers)} layers** to help ensure response quality and reduce hallucinations (enabled by default via ENABLE_VALIDATORS=true):
+
+**CRITICAL: StillMe's Validation Framework Structure:**
+- **Total Validators**: {total_validators} validators
+- **Layers**: {len(layers)} layers (validation framework layers)
+"""
+    
+    # Add layer details
+    for layer in layers:
+        layer_num = layer.get("layer", 0)
+        layer_name = layer.get("name", "")
+        members = layer.get("members", [])
+        description = layer.get("description", "")
+        
+        section += f"- **Layer {layer_num} ({layer_name})**: {', '.join(members)}\n"
+        if description:
+            section += f"  - {description}\n"
+    
+    section += """
+**Key Validators:**
+1. **CitationRequired**: Ensures responses cite sources from retrieved context
+2. **CitationRelevance**: Validates that citations are relevant to the response content
+3. **EvidenceOverlap**: Validates that response content overlaps with retrieved context (threshold = 0.01 = 1% n-gram overlap minimum, configurable via VALIDATOR_EVIDENCE_THRESHOLD)
+4. **NumericUnitsBasic**: Validates numeric claims and units
+5. **ConfidenceValidator**: Detects when AI should express uncertainty, especially when no context is available
+   - Requires AI to say "I don't know" when no context is found
+   - Prevents overconfidence without evidence
+6. **FactualHallucinationValidator**: Detects and prevents factual hallucinations
+7. **LanguageValidator**: Ensures response language matches detected language
+8. **IdentityCheckValidator**: Validates StillMe's identity consistency
+9. **EgoNeutralityValidator**: Ensures ego-neutral responses
+10. **SourceConsensusValidator**: Detects contradictions between multiple sources
+11. **PhilosophicalDepthValidator**: Validates depth of philosophical responses
+12. **HallucinationExplanationValidator**: Ensures technical depth in hallucination explanations
+13. **VerbosityValidator**: Detects overly verbose or defensive responses
+14. **ReligiousChoiceValidator**: Prevents StillMe from making religious choices
+15. **AISelfModelValidator**: Validates StillMe's self-model accuracy
+16. **FallbackHandler**: Provides safe fallback answers when validation fails critically
+   - Replaces hallucinated responses with honest "I don't know" messages
+   - Explains StillMe's learning mechanism and suggests alternatives
+17. **ReviewAdapter**: Provides review mechanisms for validation failures
+18. **EthicsAdapter**: Ethical content filtering
+19. **SchemaFormat**: Validates response format and schema compliance
+"""
+    
+    return section
+
+
+def generate_foundational_technical(manifest: dict) -> str:
+    """Generate complete foundational_technical.md content"""
+    
+    framework = manifest.get("validation_framework", {})
+    total_validators = framework.get("total_validators", 19)
+    layers = framework.get("layers", [])
+    
+    validation_section = generate_validation_section(manifest)
+    
+    content = f"""---
 content_type: technical
 domain: stillme_architecture
 ---
@@ -63,7 +164,7 @@ StillMe's self-awareness mechanism for learning sources:
 **CRITICAL: Conversation History Storage & Transparency:**
 - **StillMe DOES store conversation history** in ChromaDB collection `stillme_conversations`
 - **Purpose**: To provide context for future conversations (semantic search across past conversations)
-- **What is stored**: Q&A pairs from user conversations (format: "Q: [user question]\nA: [StillMe response]")
+- **What is stored**: Q&A pairs from user conversations (format: "Q: [user question]\\nA: [StillMe response]")
 - **When stored**: After each conversation completes, StillMe stores the Q&A pair in vector database
 - **How it's used**: When answering new questions, StillMe searches past conversations for relevant context
 - **CRITICAL TRANSPARENCY RULE**: StillMe's transparency policy on conversation history:
@@ -74,52 +175,7 @@ StillMe's self-awareness mechanism for learning sources:
 - StillMe does not claim "I don't store conversations" - this would be false and violate transparency principle
 - **Privacy note**: StillMe stores conversations for context retrieval only, not for learning from user data (StillMe learns from RSS, arXiv, Wikipedia, not from user conversations)
 
-**Validation & Grounding Mechanism:**
-StillMe uses a **multi-layer validation framework** with **19 validators total, organized into 7 layers** to help ensure response quality and reduce hallucinations (enabled by default via ENABLE_VALIDATORS=true):
-
-**CRITICAL: StillMe's Validation Framework Structure:**
-- **Total Validators**: 19 validators
-- **Layers**: 7 layers (validation framework layers)
-- **Layer 1 (Language & Format)**: LanguageValidator, SchemaFormat
-  - Ensures output language consistency and basic format
-- **Layer 2 (Citation & Evidence)**: CitationRequired, CitationRelevance, EvidenceOverlap
-  - Validates citations and evidence overlap with RAG context
-- **Layer 3 (Content Quality)**: ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic
-  - Validates factual accuracy, confidence, and content quality
-- **Layer 4 (Identity & Ethics)**: IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator
-  - Ensures StillMe identity consistency and ethical compliance
-- **Layer 5 (Source Consensus)**: SourceConsensusValidator
-  - Detects contradictions between multiple sources
-- **Layer 6 (Specialized Validation)**: PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
-  - Domain-specific and advanced validators
-- **Layer 7 (Fallback & Review)**: FallbackHandler, ReviewAdapter
-  - Handles validation failures and provides review mechanisms
-
-**Key Validators:**
-1. **CitationRequired**: Ensures responses cite sources from retrieved context
-2. **CitationRelevance**: Validates that citations are relevant to the response content
-3. **EvidenceOverlap**: Validates that response content overlaps with retrieved context (threshold = 0.01 = 1% n-gram overlap minimum, configurable via VALIDATOR_EVIDENCE_THRESHOLD)
-4. **NumericUnitsBasic**: Validates numeric claims and units
-5. **ConfidenceValidator**: Detects when AI should express uncertainty, especially when no context is available
-   - Requires AI to say "I don't know" when no context is found
-   - Prevents overconfidence without evidence
-6. **FactualHallucinationValidator**: Detects and prevents factual hallucinations
-7. **LanguageValidator**: Ensures response language matches detected language
-8. **IdentityCheckValidator**: Validates StillMe's identity consistency
-9. **EgoNeutralityValidator**: Ensures ego-neutral responses
-10. **SourceConsensusValidator**: Detects contradictions between multiple sources
-11. **PhilosophicalDepthValidator**: Validates depth of philosophical responses
-12. **HallucinationExplanationValidator**: Ensures technical depth in hallucination explanations
-13. **VerbosityValidator**: Detects overly verbose or defensive responses
-14. **ReligiousChoiceValidator**: Prevents StillMe from making religious choices
-15. **AISelfModelValidator**: Validates StillMe's self-model accuracy
-16. **FallbackHandler**: Provides safe fallback answers when validation fails critically
-   - Replaces hallucinated responses with honest "I don't know" messages
-   - Explains StillMe's learning mechanism and suggests alternatives
-17. **ReviewAdapter**: Provides review mechanisms for validation failures
-18. **EthicsAdapter**: Ethical content filtering
-19. **SchemaFormat**: Validates response format and schema compliance
-
+{validation_section}
 
 **Validation Behavior:**
 - **Critical failures** (missing citation with context, missing uncertainty with no context): Response is replaced with fallback answer
@@ -140,7 +196,7 @@ StillMe uses a **multi-layer validation framework** with **19 validators total, 
 - **Content Curation**: Intelligent filtering and prioritization of learning content based on quality and relevance
 - **Pre-Filter System**: Filters content BEFORE embedding to reduce costs by 30-50%
 - **Knowledge Alerts**: Proactively suggests important knowledge to users when StillMe learns something relevant
-- **Validation Chain**: Multi-layer validation with 19 validators organized into 7 layers to help reduce hallucinations through citation, evidence overlap, confidence validation, and ethics checks (enabled by default, can be disabled via ENABLE_VALIDATORS=false)
+- **Validation Chain**: Multi-layer validation with {total_validators} validators organized into {len(layers)} layers to help reduce hallucinations through citation, evidence overlap, confidence validation, and ethics checks (enabled by default, can be disabled via ENABLE_VALIDATORS=false)
 
 **How StillMe Learns:**
 1. Automated scheduler fetches RSS feeds, arXiv, CrossRef, Wikipedia every 4 hours
@@ -150,7 +206,7 @@ StillMe uses a **multi-layer validation framework** with **19 validators total, 
    - Embeds the query using `paraphrase-multilingual-MiniLM-L12-v2`
    - Retrieves relevant context from ChromaDB using semantic search
    - Generates response using LLM (DeepSeek or OpenAI) with retrieved context
-   - Validates response using ValidatorChain (19 validators in 7 layers)
+   - Validates response using ValidatorChain ({total_validators} validators in {len(layers)} layers)
    - Calculates confidence score based on context quality and validation results
 5. Responses are generated using retrieved context, ensuring accuracy and up-to-date information
 
@@ -203,10 +259,10 @@ StillMe's knowledge gap analysis mechanism:
 - Example request format:
   ```json
   POST /api/learning/self-diagnosis/analyze-coverage
-  {
+  {{
     "topic": "blockchain",
     "depth": 3
-  }
+  }}
   ```
 - Response includes: coverage analysis, identified gaps, and learning suggestions
 - StillMe suggests using this endpoint when asked about missing knowledge, rather than claiming inability to determine
@@ -280,3 +336,41 @@ StillMe's formatting standards for responses:
   * StillMe avoids emojis for: every sentence, serious/philosophical topics, academic/formal responses, short answers
   * Purpose: enhance readability, not replace words
 - StillMe responses are formatted to be as readable as ChatGPT, Claude, or Cursor - using proper markdown formatting with strategic emoji usage
+"""
+    
+    return content
+
+
+def main():
+    """Main function"""
+    logger.info("🚀 Generating foundational_technical.md from manifest...")
+    
+    # Load manifest
+    manifest = load_manifest()
+    
+    # Generate content
+    logger.info("📝 Generating foundational technical knowledge content...")
+    content = generate_foundational_technical(manifest)
+    
+    # Write to file
+    output_path = project_root / "docs" / "rag" / "foundational_technical.md"
+    logger.info(f"💾 Writing to {output_path}...")
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    
+    logger.info(f"✅ Successfully generated foundational_technical.md")
+    logger.info(f"   - Total validators: {manifest.get('validation_framework', {}).get('total_validators', 19)}")
+    logger.info(f"   - Total layers: {len(manifest.get('validation_framework', {}).get('layers', []))}")
+    logger.info(f"   - File size: {len(content)} characters")
+    logger.info(f"")
+    logger.info(f"💡 Next steps:")
+    logger.info(f"   1. Review the generated file: {output_path}")
+    logger.info(f"   2. Delete old foundational knowledge from ChromaDB (title: 'StillMe Core Mechanism - Technical Architecture')")
+    logger.info(f"   3. Restart server to inject new foundational knowledge")
+
+
+if __name__ == "__main__":
+    import logging
+    main()
+
