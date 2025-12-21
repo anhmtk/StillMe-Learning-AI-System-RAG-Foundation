@@ -19,6 +19,7 @@ from backend.philosophy.processor import (
     is_philosophical_question_about_consciousness,
     process_philosophical_question
 )
+from backend.style.style_engine import detect_domain, DomainType
 from backend.services.cache_service import (
     get_cache_service,
     CACHE_PREFIX_LLM,
@@ -8411,7 +8412,6 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                             rewrite_llm = get_rewrite_llm()
                             # Non-RAG path: no ctx_docs available, pass empty list
                             # CRITICAL: Check if this is AI_SELF_MODEL domain
-                            from backend.style.style_engine import detect_domain, DomainType
                             detected_domain = detect_domain(chat_request.message)
                             is_ai_self_model_domain = (detected_domain == DomainType.AI_SELF_MODEL)
                             
