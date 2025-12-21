@@ -546,7 +546,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # Format citation with document titles if available
     if document_titles:
         # Use document titles instead of generic citation
-    if detected_lang == "vi":
+        if detected_lang == "vi":
             # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
             doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
             titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
@@ -564,7 +564,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         # Fallback to generic citation if no document titles available
         if detected_lang == "vi":
             citation_parts.append(f"Nguồn: {citation_text_clean}")
-    else:
+        else:
             citation_parts.append(f"Source: {citation_text_clean}")
     
     # Add source links if available
@@ -3553,7 +3553,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             # CRITICAL: Skip philosophical detection for roleplay questions
             # Roleplay questions should be answered as roleplay, not as philosophical analysis
             if not is_general_roleplay:
-            is_philosophical = is_philosophical_question(chat_request.message)
+                is_philosophical = is_philosophical_question(chat_request.message)
             else:
                 is_philosophical = False
                 logger.info("General roleplay question detected - skipping philosophical detection")
