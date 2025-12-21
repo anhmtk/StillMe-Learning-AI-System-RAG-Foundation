@@ -94,6 +94,69 @@ def delete_noisy_documents():
         return 0
 
 
+def delete_all_foundational_knowledge():
+    """Delete ALL foundational knowledge documents from ChromaDB"""
+    try:
+        logger.info("🗑️ Deleting all old foundational knowledge...")
+        
+        chroma_client = ChromaClient(persist_directory="data/vector_db")
+        embedding_service = EmbeddingService(model_name="paraphrase-multilingual-MiniLM-L12-v2")
+        
+        # Search for all foundational documents
+        search_queries = [
+            "StillMe RAG continuous learning",
+            "StillMe validation framework",
+            "StillMe technical architecture"
+        ]
+        
+        all_foundational_ids = set()
+        
+        for query in search_queries:
+            query_embedding = embedding_service.encode_text(query)
+            results = chroma_client.search_knowledge(
+                query_embedding=query_embedding,
+                limit=100,
+                where=None
+            )
+            
+            for result in results:
+                metadata = result.get("metadata", {})
+                source = metadata.get("source", "")
+                doc_type = metadata.get("type", "")
+                foundational = metadata.get("foundational", "")
+                
+                if ("CRITICAL_FOUNDATION" in source or
+                    doc_type == "foundational" or
+                    foundational == "stillme"):
+                    doc_id = result.get("id")
+                    if doc_id:
+                        all_foundational_ids.add(doc_id)
+        
+        # Delete all found documents
+        if all_foundational_ids:
+            ids_to_delete = list(all_foundational_ids)
+            # Delete in batches
+            batch_size = 50
+            deleted_count = 0
+            for i in range(0, len(ids_to_delete), batch_size):
+                batch = ids_to_delete[i:i + batch_size]
+                try:
+                    chroma_client.knowledge_collection.delete(ids=batch)
+                    deleted_count += len(batch)
+                except Exception as e:
+                    logger.warning(f"Failed to delete batch: {e}")
+            
+            logger.info(f"✅ Deleted {deleted_count} old foundational knowledge document(s)")
+            return deleted_count
+        else:
+            logger.info("ℹ️ No foundational knowledge documents found to delete")
+            return 0
+            
+    except Exception as e:
+        logger.error(f"❌ Error deleting foundational knowledge: {e}")
+        return 0
+
+
 def ensure_foundational_technical_injected():
     """Ensure foundational_technical.md is properly injected with correct metadata"""
     try:
@@ -117,81 +180,68 @@ def ensure_foundational_technical_injected():
         logger.info(f"📊 Content length: {len(technical_content)} characters")
         
         # Verify content contains correct validator info
-        if "19 validators" not in technical_content and "19 validators total" not in technical_content:
+        has_19_validators = "19 validators" in technical_content or "19 validators total" in technical_content
+        has_7_layers = "7 layers" in technical_content or "7 lớp" in technical_content
+        
+        if not has_19_validators:
             logger.warning("⚠️ Content does not contain '19 validators' - may be outdated")
-        if "7 layers" not in technical_content and "7 lớp" not in technical_content:
+        if not has_7_layers:
             logger.warning("⚠️ Content does not contain '7 layers' - may be outdated")
+        
+        if not has_19_validators or not has_7_layers:
+            logger.error("❌ File foundational_technical.md does not contain correct validator info!")
+            logger.error("   Expected: '19 validators' and '7 layers'")
+            return False
+        
+        logger.info("✅ Content verified: Contains correct validator count (19 validators, 7 layers)")
         
         # Initialize RAG components
         chroma_client = ChromaClient(persist_directory="data/vector_db")
         embedding_service = EmbeddingService(model_name="paraphrase-multilingual-MiniLM-L12-v2")
         rag_retrieval = RAGRetrieval(chroma_client, embedding_service)
         
-        # Check if foundational technical already exists
-        logger.info("🔍 Checking if foundational technical already exists...")
-        query_embedding = embedding_service.encode_text("StillMe validation framework 19 validators 7 layers")
-        existing_results = chroma_client.search_knowledge(
-            query_embedding=query_embedding,
-            limit=5,
-            where={"source": "CRITICAL_FOUNDATION"}
+        logger.info("📝 Injecting foundational technical knowledge...")
+        
+        # Prepare metadata with maximum priority
+        tags_list = [
+            "foundational:stillme",
+            "CRITICAL_FOUNDATION",
+            "stillme",
+            "rag",
+            "validation",
+            "validators",
+            "validation-chain",
+            "technical",
+            "core_logic",
+            "priority_high"
+        ]
+        tags_string = ",".join(tags_list)
+        
+        success = rag_retrieval.add_learning_content(
+            content=technical_content,
+            source="CRITICAL_FOUNDATION",
+            content_type="knowledge",
+            metadata={
+                "title": "StillMe Core Mechanism - Technical Architecture",
+                "foundational": "stillme",
+                "type": "foundational",
+                "source": "CRITICAL_FOUNDATION",
+                "tags": tags_string,
+                "importance_score": 1.0,  # Maximum importance
+                "priority": "high",  # Explicit priority field
+                "category": "core_logic",  # Explicit category for filtering
+                "content_type": "technical",
+                "domain": "stillme_architecture",
+                "description": "CRITICAL: Technical knowledge about StillMe's RAG-based continuous learning mechanism and validation framework (19 validators, 7 layers) - MUST be retrieved when answering about StillMe's architecture"
+            }
         )
         
-        # Check if any existing result contains correct validator info
-        has_correct_content = False
-        for result in existing_results:
-            content = str(result.get("document", ""))
-            if "19 validators" in content or "19 validators total" in content:
-                if "7 layers" in content or "7 lớp" in content:
-                    has_correct_content = True
-                    logger.info("✅ Found existing foundational technical with correct validator info")
-                    break
-        
-        if not has_correct_content:
-            logger.info("📝 Injecting foundational technical knowledge...")
-            
-            # Prepare metadata with maximum priority
-            tags_list = [
-                "foundational:stillme",
-                "CRITICAL_FOUNDATION",
-                "stillme",
-                "rag",
-                "validation",
-                "validators",
-                "validation-chain",
-                "technical",
-                "core_logic",
-                "priority_high"
-            ]
-            tags_string = ",".join(tags_list)
-            
-            success = rag_retrieval.add_learning_content(
-                content=technical_content,
-                source="CRITICAL_FOUNDATION",
-                content_type="knowledge",
-                metadata={
-                    "title": "StillMe Core Mechanism - Technical Architecture",
-                    "foundational": "stillme",
-                    "type": "foundational",
-                    "source": "CRITICAL_FOUNDATION",
-                    "tags": tags_string,
-                    "importance_score": 1.0,  # Maximum importance
-                    "priority": "high",  # Explicit priority field
-                    "category": "core_logic",  # Explicit category for filtering
-                    "content_type": "technical",
-                    "domain": "stillme_architecture",
-                    "description": "CRITICAL: Technical knowledge about StillMe's RAG-based continuous learning mechanism and validation framework (19 validators, 7 layers) - MUST be retrieved when answering about StillMe's architecture"
-                }
-            )
-            
-            if success:
-                logger.info("✅ Foundational technical knowledge injected successfully!")
-                return True
-            else:
-                logger.error("❌ Failed to inject foundational technical knowledge")
-                return False
-        else:
-            logger.info("✅ Foundational technical already exists with correct content")
+        if success:
+            logger.info("✅ Foundational technical knowledge injected successfully!")
             return True
+        else:
+            logger.error("❌ Failed to inject foundational technical knowledge")
+            return False
             
     except Exception as e:
         logger.error(f"❌ Error ensuring foundational technical injection: {e}")
@@ -267,17 +317,23 @@ if __name__ == "__main__":
     print("=" * 80)
     print()
     
-    # Step 1: Delete noisy documents
-    print("Step 1: Deleting noisy documents...")
-    deleted_count = delete_noisy_documents()
-    print(f"✅ Deleted {deleted_count} noisy document(s)")
+    # Step 1: Delete ALL old foundational knowledge (clean slate)
+    print("Step 1: Deleting ALL old foundational knowledge (clean slate)...")
+    deleted_old = delete_all_foundational_knowledge()
+    print(f"✅ Deleted {deleted_old} old foundational document(s)")
     print()
     
-    # Step 2: Ensure foundational technical is injected
-    print("Step 2: Ensuring foundational_technical.md is properly injected...")
+    # Step 2: Delete noisy documents
+    print("Step 2: Deleting noisy documents...")
+    deleted_noisy = delete_noisy_documents()
+    print(f"✅ Deleted {deleted_noisy} noisy document(s)")
+    print()
+    
+    # Step 3: Inject correct foundational technical from file
+    print("Step 3: Injecting correct foundational_technical.md from file...")
     success = ensure_foundational_technical_injected()
     if success:
-        print("✅ Foundational technical knowledge is properly injected")
+        print("✅ Foundational technical knowledge injected successfully from file")
     else:
         print("❌ Failed to inject foundational technical knowledge")
         sys.exit(1)
