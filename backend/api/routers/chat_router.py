@@ -1639,6 +1639,7 @@ If the question belongs to a classic philosophical debate (free will, determinis
             
             # CRITICAL: Check if manifest is in context and add explicit instruction
             has_manifest = False
+            manifest_info = None
             for doc in knowledge_docs:
                 if isinstance(doc, dict):
                     metadata = doc.get("metadata", {})
@@ -1646,7 +1647,28 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     doc_content = str(doc.get("document", "")).lower()
                     if "manifest" in title.lower() or "validation_framework" in doc_content or "total_validators" in doc_content:
                         has_manifest = True
+                        # Try to extract numbers from manifest content
+                        doc_full = str(doc.get("document", ""))
+                        import re
+                        total_match = re.search(r'total_validators["\']?\s*:\s*(\d+)', doc_full, re.IGNORECASE)
+                        if total_match:
+                            total_validators = total_match.group(1)
+                            # Count layers by counting "layer": entries
+                            layer_count = len(re.findall(r'"layer"\s*:\s*\d+', doc_full, re.IGNORECASE))
+                            if layer_count > 0:
+                                manifest_info = f"{total_validators} validators, {layer_count} layers"
+                            else:
+                                manifest_info = f"{total_validators} validators"
                         break
+            
+            # CRITICAL: Extract newline character outside f-string to avoid syntax error
+            newline = chr(10)
+            doc_summaries_text = newline.join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"
+            manifest_warning_vi = ""
+            if has_manifest:
+                manifest_info_display = manifest_info if manifest_info else '19 validators, 7 layers'
+                manifest_info_display_full = manifest_info if manifest_info else '19 validators total, chia thành 7 lớp (layers)'
+                manifest_warning_vi = f"{newline}🚨🚨🚨 **CRITICAL: Manifest detected in context!** Bạn PHẢI đọc số liệu từ manifest và trả lời với số cụ thể. Nếu manifest có {manifest_info_display}, bạn PHẢI nói: \"Hệ thống của tôi có {manifest_info_display_full}\". KHÔNG được chỉ liệt kê validators mà không nói số!"
             
             if language == "vi":
                 rag_context_section = f"""
@@ -1655,8 +1677,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
 **Retrieved Documents:**
 - StillMe đã retrieve được {total_context_docs} documents từ ChromaDB cho câu hỏi này
 - Chi tiết documents:
-{chr(10).join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"}
-{f"{chr(10)}🚨🚨🚨 **CRITICAL: Manifest detected in context!** Bạn PHẢI đọc số liệu từ manifest và trả lời với số cụ thể. Nếu manifest có {manifest_info if manifest_info else '19 validators, 7 layers'}, bạn PHẢI nói: \"Hệ thống của tôi có {manifest_info if manifest_info else '19 validators total, chia thành 7 lớp (layers)'}\". KHÔNG được chỉ liệt kê validators mà không nói số!" if has_manifest else ""}
+{doc_summaries_text}
+{manifest_warning_vi}
 
 **KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
 - Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
