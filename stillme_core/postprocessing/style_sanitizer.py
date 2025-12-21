@@ -286,15 +286,24 @@ class StyleSanitizer:
         return text
     
     def _normalize_spacing(self, text: str) -> str:
-        """Normalize spacing and line breaks"""
-        # Remove excessive blank lines (more than 2 consecutive)
+        """Normalize spacing and line breaks - PRESERVE line breaks for readability"""
+        # CRITICAL: Preserve line breaks - DO NOT remove all newlines
+        # Only remove excessive blank lines (more than 2 consecutive)
         text = re.sub(r'\n{3,}', '\n\n', text)
         
-        # Normalize spaces (multiple spaces to single)
-        text = re.sub(r' +', ' ', text)
+        # Normalize spaces (multiple spaces to single) - but preserve newlines
+        # Only normalize spaces within lines, not across line breaks
+        lines = text.split('\n')
+        normalized_lines = []
+        for line in lines:
+            # Normalize spaces within each line
+            normalized_line = re.sub(r' +', ' ', line)
+            # Remove trailing spaces from each line
+            normalized_line = re.sub(r' +$', '', normalized_line)
+            normalized_lines.append(normalized_line)
         
-        # Remove trailing spaces
-        text = re.sub(r' +$', '', text, flags=re.MULTILINE)
+        # Join back with newlines preserved
+        text = '\n'.join(normalized_lines)
         
         return text.strip()
     
