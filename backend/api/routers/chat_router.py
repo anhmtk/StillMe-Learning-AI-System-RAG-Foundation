@@ -3288,6 +3288,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     # CRITICAL: Initialize is_technical_about_system_rag at function level to prevent UnboundLocalError
     # This variable is used in RAG path (line 3970) and must be defined in ALL code paths
     is_technical_about_system_rag = False
+    # CRITICAL: Initialize roleplay detection flags EARLY to prevent UnboundLocalError
+    is_general_roleplay = False
+    is_religion_roleplay = False
     
     # OPTION B PIPELINE: Check if enabled
     use_option_b = getattr(chat_request, 'use_option_b', False) or os.getenv("STILLME_USE_OPTION_B_PIPELINE", "false").lower() == "true"
