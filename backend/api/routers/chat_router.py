@@ -509,7 +509,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # Format citation with document titles if available
     if document_titles:
         # Use document titles instead of generic citation
-    if detected_lang == "vi":
+        if detected_lang == "vi":
             # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
             doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
             titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
@@ -527,7 +527,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         # Fallback to generic citation if no document titles available
         if detected_lang == "vi":
             citation_parts.append(f"Nguồn: {citation_text_clean}")
-    else:
+        else:
             citation_parts.append(f"Source: {citation_text_clean}")
     
     # Add source links if available
@@ -2432,30 +2432,34 @@ async def _handle_validation_with_fallback(
     processing_steps.append(f"✅ Validation completed ({validation_time:.2f}s)")
     
     # Log validation decision
-    if 'decision_logger' in locals():
-        from backend.core.decision_logger import AgentType, DecisionType
-        validator_names = [type(v).__name__ for v in validators]
-        decision_logger.log_decision(
-            agent_type=AgentType.VALIDATOR_ORCHESTRATOR,
-            decision_type=DecisionType.VALIDATION_DECISION,
-            decision=f"Ran {len(validators)} validators: {', '.join(validator_names[:5])}{'...' if len(validator_names) > 5 else ''}",
-            reasoning=f"Validation chain executed with {len(ctx_docs)} context documents. Adaptive thresholds: citation_overlap={adaptive_citation_overlap:.3f}, evidence={adaptive_evidence_threshold:.3f}",
-            context={
-                "num_validators": len(validators),
-                "validator_names": validator_names,
-                "context_docs_count": len(ctx_docs),
-                "context_quality": context_quality,
-                "avg_similarity": avg_similarity,
-                "is_philosophical": is_philosophical
-            },
-            outcome=f"Validation {'passed' if validation_result.passed else 'failed'}. Reasons: {', '.join(validation_result.reasons[:3])}{'...' if len(validation_result.reasons) > 3 else ''}",
-            success=validation_result.passed,
-            metadata={
-                "validation_time": validation_time,
-                "adaptive_citation_overlap": adaptive_citation_overlap,
-                "adaptive_evidence_threshold": adaptive_evidence_threshold
-            }
-        )
+    try:
+        from backend.core.decision_logger import get_decision_logger, AgentType, DecisionType
+        decision_logger = get_decision_logger()
+        if decision_logger:
+            validator_names = [type(v).__name__ for v in validators]
+            decision_logger.log_decision(
+                agent_type=AgentType.VALIDATOR_ORCHESTRATOR,
+                decision_type=DecisionType.VALIDATION_DECISION,
+                decision=f"Ran {len(validators)} validators: {', '.join(validator_names[:5])}{'...' if len(validator_names) > 5 else ''}",
+                reasoning=f"Validation chain executed with {len(ctx_docs)} context documents. Adaptive thresholds: citation_overlap={adaptive_citation_overlap:.3f}, evidence={adaptive_evidence_threshold:.3f}",
+                context={
+                    "num_validators": len(validators),
+                    "validator_names": validator_names,
+                    "context_docs_count": len(ctx_docs),
+                    "context_quality": context_quality,
+                    "avg_similarity": avg_similarity,
+                    "is_philosophical": is_philosophical
+                },
+                outcome=f"Validation {'passed' if validation_result.passed else 'failed'}. Reasons: {', '.join(validation_result.reasons[:3])}{'...' if len(validation_result.reasons) > 3 else ''}",
+                success=validation_result.passed,
+                metadata={
+                    "validation_time": validation_time,
+                    "adaptive_citation_overlap": adaptive_citation_overlap,
+                    "adaptive_evidence_threshold": adaptive_evidence_threshold
+                }
+            )
+    except Exception:
+        pass  # decision_logger not available, skip logging
     
     # Calculate confidence score based on context quality and validation
     confidence_score = _calculate_confidence_score(
@@ -3509,7 +3513,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             # CRITICAL: Skip philosophical detection for roleplay questions
             # Roleplay questions should be answered as roleplay, not as philosophical analysis
             if not is_general_roleplay:
-            is_philosophical = is_philosophical_question(chat_request.message)
+                is_philosophical = is_philosophical_question(chat_request.message)
             else:
                 is_philosophical = False
                 logger.info("General roleplay question detected - skipping philosophical detection")
@@ -7485,7 +7489,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 # Final response is the last rewritten version (or original if no rewrites)
                                 # CRITICAL: Ensure current_response is not empty before assigning
                                 if current_response and isinstance(current_response, str) and current_response.strip():
-                                final_response = current_response
+                                    final_response = current_response
                                 else:
                                     logger.error(
                                         f"❌ CRITICAL: current_response is empty or invalid (length: {len(current_response) if isinstance(current_response, str) else 'N/A'}), "
@@ -7555,8 +7559,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     if citation_result.patched_answer:
                                         # CRITICAL: Only use patched_answer if it's not empty
                                         if citation_result.patched_answer.strip():
-                                        final_response = citation_result.patched_answer
-                                        logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
+                                            final_response = citation_result.patched_answer
+                                            logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
                                         else:
                                             logger.warning(
                                                 f"⚠️ Citation patched_answer is empty, keeping original final_response "
@@ -8427,7 +8431,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                                 # CRITICAL: Only use re-sanitized if it's not empty
                                 if re_sanitized and re_sanitized.strip():
                                     final_response = re_sanitized
-                                logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                                    logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
                                 else:
                                     logger.warning(
                                         f"⚠️ Re-sanitized response is empty (rewrite_result length: {len(rewrite_result.text) if rewrite_result.text else 0}), "
@@ -8907,7 +8911,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
                     )
                 else:
-                logger.debug("✅ Added timestamp attribution to RAG response")
+                    logger.debug("✅ Added timestamp attribution to RAG response")
             except Exception as e:
                 logger.error(
                     f"⚠️ Failed to add timestamp to response (detected_lang={detected_lang}): {e}",
