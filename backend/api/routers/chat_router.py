@@ -5375,6 +5375,11 @@ Always cite the context above with [1], [2] when explaining StillMe's features."
                 learning_metrics_instruction = ""
                 if is_learning_metrics_query and learning_metrics_data and not is_philosophical:
                     today_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                    # CRITICAL: Extract newline outside f-string to avoid syntax error
+                    newline = chr(10)
+                    filter_reasons_text = newline.join(f"- {reason}: {count}" for reason, count in learning_metrics_data.filter_reasons.items()) if learning_metrics_data.filter_reasons else "- No filter reasons available"
+                    sources_text = newline.join(f"- {source}: {count}" for source, count in learning_metrics_data.sources.items()) if learning_metrics_data.sources else "- No source data available"
+                    
                     learning_metrics_instruction = f"""
 
 📊 LEARNING METRICS DATA FOR TODAY ({today_date}) - USE THIS DATA IN YOUR RESPONSE:
@@ -5386,10 +5391,10 @@ Always cite the context above with [1], [2] when explaining StillMe's features."
 - **Filter Rate**: {(learning_metrics_data.total_entries_filtered / learning_metrics_data.total_entries_fetched * 100) if learning_metrics_data.total_entries_fetched > 0 else 0:.1f}%
 
 **Filter Reasons Breakdown:**
-{chr(10).join(f"- {reason}: {count}" for reason, count in learning_metrics_data.filter_reasons.items()) if learning_metrics_data.filter_reasons else "- No filter reasons available"}
+{filter_reasons_text}
 
 **Learning Sources:**
-{chr(10).join(f"- {source}: {count}" for source, count in learning_metrics_data.sources.items()) if learning_metrics_data.sources else "- No source data available"}
+{sources_text}
 
 **CRITICAL: You MUST use this actual data in your response:**
 - Provide specific numbers: {learning_metrics_data.total_entries_fetched} fetched, {learning_metrics_data.total_entries_added} added, {learning_metrics_data.total_entries_filtered} filtered
