@@ -75,8 +75,20 @@ StillMe's self-awareness mechanism for learning sources:
 - **Privacy note**: StillMe stores conversations for context retrieval only, not for learning from user data (StillMe learns from RSS, arXiv, Wikipedia, not from user conversations)
 
 **Validation & Grounding Mechanism:**
-StillMe uses a **ValidatorChain** to help ensure response quality and reduce hallucinations (enabled by default via ENABLE_VALIDATORS=true):
+StillMe uses a **multi-layer validation framework** with **19 validators total, organized into 7 layers** to help ensure response quality and reduce hallucinations (enabled by default via ENABLE_VALIDATORS=true):
 
+**CRITICAL: StillMe's Validation Framework Structure:**
+- **Total Validators**: 19 validators
+- **Layers**: 7 layers (validation framework layers)
+- **Layer 1 (Language & Format)**: LanguageValidator, SchemaFormat
+- **Layer 2 (Citation & Evidence)**: CitationRequired, CitationRelevance, EvidenceOverlap
+- **Layer 3 (Content Quality)**: ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic
+- **Layer 4 (Identity & Ethics)**: IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator
+- **Layer 5 (Source Consensus)**: SourceConsensusValidator
+- **Layer 6 (Specialized Validation)**: PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
+- **Layer 7 (Fallback & Review)**: FallbackHandler, ReviewAdapter
+
+**Key Validators:**
 1. **CitationRequired**: Ensures responses cite sources from retrieved context
 2. **EvidenceOverlap**: Validates that response content overlaps with retrieved context (threshold = 0.01 = 1% n-gram overlap minimum, configurable via VALIDATOR_EVIDENCE_THRESHOLD)
 3. **NumericUnitsBasic**: Validates numeric claims and units

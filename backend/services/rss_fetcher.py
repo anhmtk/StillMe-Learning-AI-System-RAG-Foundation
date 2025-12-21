@@ -219,6 +219,10 @@ class RSSFetcher:
         import time
         batch_start = time.time()
         
+        # Get active feeds (exclude disabled feeds)
+        active_feeds = [feed for feed in self.feeds if feed not in self.disabled_feeds]
+        feeds_to_fetch = active_feeds
+        
         # Calculate optimal batch size (max 10 concurrent, or CPU count * 2)
         import os
         max_workers = min(10, (os.cpu_count() or 4) * 2)
