@@ -8717,6 +8717,9 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                     f"⚠️ Cleaned response before return: removed {original_response_length - len(response)} "
                     f"problematic characters (detected_lang={detected_lang})"
                 )
+            
+            # CRITICAL: Auto-fix missing line breaks as final defensive check
+            response = _fix_missing_line_breaks(response)
         
         if not response or not isinstance(response, str) or not response.strip():
             logger.error(
