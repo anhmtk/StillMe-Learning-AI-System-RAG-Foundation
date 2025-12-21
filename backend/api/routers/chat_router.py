@@ -1523,6 +1523,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - Nếu validation fail, StillMe dùng epistemic fallback thay vì fabricate information
   - **CRITICAL: Khi được hỏi về số lượng validators, bạn PHẢI nói**: "StillMe có 19 validators total" hoặc "StillMe có 15-19 validators tùy điều kiện" hoặc "StillMe có up to 19 validators" - KHÔNG được nói "15-layer" hoặc "13+ validators" nếu không chắc chắn
   - **🚨🚨🚨 CRITICAL: Khi được hỏi "có bao nhiêu lớp validator" hoặc "bao nhiêu lớp", bạn PHẢI trả lời THEO FORMAT SAU (COPY EXACTLY):**
+    
+    **VÍ DỤ CÂU TRẢ LỜI ĐÚNG (PHẢI COPY FORMAT NÀY):**
     ```
     Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**.
 
@@ -1535,10 +1537,14 @@ If the question belongs to a classic philosophical debate (free will, determinis
     - Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
     - Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter
     ```
+    
+    **QUY TẮC BẮT BUỘC:**
     - PHẢI nói số cụ thể (19 validators, 7 lớp) NGAY ĐẦU CÂU TRẢ LỜI
-    - PHẢI có line break (`\n\n`) sau câu đầu tiên
-    - PHẢI có line break (`\n`) sau mỗi bullet point
+    - PHẢI có line break (`\n\n`) sau câu đầu tiên (sau dấu chấm)
+    - PHẢI có line break (`\n`) sau mỗi bullet point (sau dấu hai chấm hoặc dấu chấm)
+    - PHẢI có line break (`\n\n`) sau heading (## hoặc ###)
     - KHÔNG được viết liền tất cả thành một đoạn dài
+    - **NẾU BẠN KHÔNG LÀM ĐÚNG FORMAT NÀY, HỆ THỐNG SẼ TỰ ĐỘNG SỬA LỖI NHƯNG ĐIỀU NÀY LÀM GIẢM CHẤT LƯỢNG CÂU TRẢ LỜI**
   - **🚨🚨🚨 CRITICAL: Nếu context có "StillMe Structural Manifest" hoặc "validation_framework" với "total_validators" và "layers":**
     - Bạn PHẢI đọc số liệu từ manifest và trả lời theo format: "**Hệ thống của tôi hiện có [X] validators total, chia thành [Y] lớp (layers) validation framework.**" - PHẢI nói số cụ thể NGAY ĐẦU CÂU TRẢ LỜI
     - Sau đó mới liệt kê: "Danh sách cụ thể: [List từ manifest]."
@@ -5306,6 +5312,8 @@ This question is about StillMe itself. You MUST:
 - If validation fails, StillMe uses epistemic fallback instead of fabricating information
 - **CRITICAL: When asked about the number of validators, you MUST say**: "StillMe has 19 validators total" or "StillMe has 15-19 validators depending on conditions" or "StillMe has up to 19 validators" - DO NOT say "15-layer" or "13+ validators" if you're not certain
 - **CRITICAL: When asked "how many layers" or "bao nhiêu lớp", you MUST answer IN THIS EXACT FORMAT (COPY EXACTLY):**
+  
+  **CORRECT EXAMPLE (YOU MUST COPY THIS FORMAT):**
   ```
   My system has **19 validators total, organized into 7 layers (validation framework layers)**.
 
@@ -5318,10 +5326,14 @@ This question is about StillMe itself. You MUST:
   - Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
   - Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter
   ```
+  
+  **MANDATORY RULES:**
   - MUST state the exact numbers (19 validators, 7 layers) AT THE BEGINNING OF YOUR RESPONSE
-  - MUST have line break (`\n\n`) after the first sentence
-  - MUST have line break (`\n`) after each bullet point
+  - MUST have line break (`\n\n`) after the first sentence (after period)
+  - MUST have line break (`\n`) after each bullet point (after colon or period)
+  - MUST have line break (`\n\n`) after heading (## or ###)
   - DO NOT write everything as one long paragraph
+  - **IF YOU DON'T FOLLOW THIS FORMAT, THE SYSTEM WILL AUTO-FIX BUT THIS REDUCES RESPONSE QUALITY**
 - **CRITICAL: If context contains "StillMe Structural Manifest" or "validation_framework" with "total_validators" and "layers":**
   - You MUST read the numbers from the manifest and answer in format: "**My system currently has [X] validators total, organized into [Y] layers.**" - MUST state the exact numbers AT THE BEGINNING OF YOUR RESPONSE
   - Then list: "Specific list: [List from manifest]."
@@ -8375,6 +8387,24 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     f"⚠️ Cleaned final_response: removed {len(final_response) - len(final_response_cleaned)} "
                     f"problematic characters (detected_lang={detected_lang})"
                 )
+            
+            # CRITICAL: Ensure line breaks are preserved (defensive check)
+            # Count newlines before and after cleaning
+            newlines_before = final_response.count('\n')
+            newlines_after = final_response_cleaned.count('\n')
+            if newlines_after < newlines_before * 0.9:  # If more than 10% of newlines lost
+                logger.warning(
+                    f"⚠️ Line breaks may have been lost during cleaning: "
+                    f"before={newlines_before}, after={newlines_after}"
+                )
+                # Try to restore line breaks by checking if original had them
+                if '\n' in final_response and '\n' not in final_response_cleaned:
+                    logger.error(f"❌ CRITICAL: All line breaks were removed! Restoring from original.")
+                    final_response_cleaned = final_response  # Use original if all newlines lost
+            
+            # CRITICAL: Auto-fix missing line breaks after headings and bullets
+            # If LLM didn't follow instruction, we fix it here
+            final_response_cleaned = _fix_missing_line_breaks(final_response_cleaned)
             
             # final_response is valid and non-empty - use it
             response = final_response_cleaned
