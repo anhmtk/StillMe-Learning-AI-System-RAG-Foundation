@@ -3529,11 +3529,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             logger.warning(f"Question classifier error: {classifier_error}")
         
         # Detect religion/roleplay questions - these should answer from identity prompt, not RAG context
-        is_religion_roleplay = False
-        is_general_roleplay = False
+        # Note: is_religion_roleplay and is_general_roleplay are already initialized at function start
         is_roleplay_about_stillme = False
         try:
             from backend.core.question_classifier import is_religion_roleplay_question, is_general_roleplay_question
+            # Update roleplay flags (already initialized above)
             is_religion_roleplay = is_religion_roleplay_question(chat_request.message)
             is_general_roleplay = is_general_roleplay_question(chat_request.message)
             # Check if roleplay question is about StillMe (e.g., "Roleplay: Omni-BlackBox trả lời về StillMe...")
