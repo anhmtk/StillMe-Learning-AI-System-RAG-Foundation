@@ -96,14 +96,16 @@ def _clean_response_text(text: str) -> str:
     
     # CRITICAL: Only remove control characters and smart quotes
     # DO NOT remove any Unicode characters (Chinese, Vietnamese, etc.)
+    # CRITICAL: PRESERVE newlines (\n = 0x0A) and carriage returns (\r = 0x0D) for line breaks
     # Pattern explanation:
-    # - [\x00-\x1f]: Control characters (0x00-0x1F)
+    # - [\x00-\x09\x0b-\x1f]: Control characters EXCEPT \n (0x0A) and \r (0x0D)
     # - [\x7f-\x9f]: Extended control characters (0x7F-0x9F)
     # - \u201c\u201d\u2018\u2019: Smart quotes (left/right double and single quotes)
     # - \u200b\u200c\u200d\u200e\u200f: Zero-width characters that can cause issues
     # - \ufffe\uffff: Non-characters
     # CRITICAL: This pattern does NOT match Chinese/Vietnamese/any Unicode characters
-    cleaned = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019\u200b\u200c\u200d\u200e\u200f\ufffe\uffff]', '', text)
+    # CRITICAL: This pattern PRESERVES \n (0x0A) and \r (0x0D) for line breaks
+    cleaned = re.sub(r'[\x00-\x09\x0b-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019\u200b\u200c\u200d\u200e\u200f\ufffe\uffff]', '', text)
     
     # CRITICAL: Validate that we didn't lose significant content
     output_length = len(cleaned) if cleaned else 0
@@ -1521,6 +1523,10 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - Nếu validation fail, StillMe dùng epistemic fallback thay vì fabricate information
   - **CRITICAL: Khi được hỏi về số lượng validators, bạn PHẢI nói**: "StillMe có 19 validators total" hoặc "StillMe có 15-19 validators tùy điều kiện" hoặc "StillMe có up to 19 validators" - KHÔNG được nói "15-layer" hoặc "13+ validators" nếu không chắc chắn
   - **CRITICAL: Khi được hỏi "có bao nhiêu lớp validator" hoặc "bao nhiêu lớp", bạn PHẢI trả lời**: "StillMe có 7 lớp (layers) validation framework với 19 validators total" - PHẢI mention cả số lớp (7) và số validators (19)
+  - **CRITICAL: Nếu context có "StillMe Structural Manifest" hoặc "validation_framework" với "total_validators" và "layers":**
+    - Bạn PHẢI đọc số liệu từ manifest và trả lời theo format: "Hiện tại tôi có [X] validators total, chia thành [Y] lớp (layers). Danh sách cụ thể: [List từ manifest]."
+    - KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể
+    - KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể
 - **CRITICAL: Khi được hỏi về "phần trăm câu trả lời có nguồn" hoặc "bao nhiêu phần trăm":**
   - Bạn PHẢI nói: "100% câu trả lời có nguồn rõ ràng" hoặc "một trăm phần trăm" - KHÔNG được nói "Một phần trăm" (nghĩa là 1%)
   - StillMe's citation policy: Mọi response đều có citations [1], [2] từ knowledge base HOẶC thừa nhận uncertainty
