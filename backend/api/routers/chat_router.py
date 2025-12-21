@@ -1636,6 +1636,17 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     doc_summary += f" - Content preview: {content_preview}..."
                 doc_summaries.append(doc_summary)
             
+            # CRITICAL: Check if manifest is in context and add explicit instruction
+            has_manifest = False
+            for doc in knowledge_docs:
+                if isinstance(doc, dict):
+                    metadata = doc.get("metadata", {})
+                    title = metadata.get("title", "") or ""
+                    doc_content = str(doc.get("document", "")).lower()
+                    if "manifest" in title.lower() or "validation_framework" in doc_content or "total_validators" in doc_content:
+                        has_manifest = True
+                        break
+            
             if language == "vi":
                 rag_context_section = f"""
 📚 **THÔNG TIN CỤ THỂ VỀ CÂU HỎI NÀY:**
@@ -1644,6 +1655,7 @@ If the question belongs to a classic philosophical debate (free will, determinis
 - StillMe đã retrieve được {total_context_docs} documents từ ChromaDB cho câu hỏi này
 - Chi tiết documents:
 {chr(10).join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"}
+{f"{chr(10)}🚨 **CRITICAL: Manifest detected in context!** Bạn PHẢI đọc số liệu từ manifest và trả lời với số cụ thể (19 validators, 7 layers), KHÔNG được chỉ liệt kê validators!" if has_manifest else ""}
 
 **KHI ĐƯỢC HỎI VỀ CÁCH STILLME DÙNG RAG ĐỂ TRẢ LỜI CÂU HỎI NÀY:**
 - Bạn PHẢI mention: "Cho câu hỏi này, StillMe đã retrieve được {total_context_docs} documents từ ChromaDB"
@@ -1674,6 +1686,7 @@ If the question belongs to a classic philosophical debate (free will, determinis
 - StillMe retrieved {total_context_docs} documents from ChromaDB for this question
 - Document details:
 {chr(10).join(doc_summaries) if doc_summaries else "  (No specific documents)"}
+{f"{chr(10)}🚨 **CRITICAL: Manifest detected in context!** You MUST read numbers from manifest and answer with specific numbers (19 validators, 7 layers), DO NOT just list validators!" if has_manifest else ""}
 
 **WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
 - You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
