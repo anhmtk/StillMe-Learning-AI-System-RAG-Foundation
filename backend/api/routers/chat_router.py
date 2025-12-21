@@ -369,17 +369,19 @@ def _is_codebase_meta_question(message: str) -> bool:
     return has_code_intent
 
 
-def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None) -> str:
+def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None, user_question: Optional[str] = None) -> str:
     """
     Add timestamp attribution to normal RAG responses for transparency.
     This ensures consistency with external data responses which already include timestamps.
     
     CRITICAL: This function must handle Unicode (including Chinese) safely.
+    CRITICAL: For self-knowledge questions about StillMe's codebase, skip external citations.
     
     Args:
         response: Original response text (may contain Unicode characters)
         detected_lang: Detected language code
         context: Optional context dict with knowledge_docs for source links
+        user_question: Optional user question to detect self-knowledge questions
         
     Returns:
         Response with timestamp attribution appended (duplicate citations removed)
@@ -427,6 +429,30 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         logger.warning(f"Could not convert timestamp to local timezone: {e}")
         timestamp_display = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
     
+    # CRITICAL: Check if this is a self-knowledge question about StillMe's codebase
+    # If so, skip external citations (only use foundational knowledge or skip citation entirely)
+    is_self_knowledge_question = False
+    if user_question:
+        question_lower = user_question.lower()
+        codebase_self_patterns = [
+            r"codebase.*của.*bạn",
+            r"codebase.*of.*you",
+            r"codebase.*stillme",
+            r"validator.*trong.*codebase",
+            r"validator.*in.*codebase",
+            r"lớp.*validator.*trong.*codebase",
+            r"layer.*validator.*in.*codebase",
+            r"bao nhiêu.*lớp.*validator.*codebase",
+            r"how many.*layer.*validator.*codebase",
+            r"liệt kê.*lớp.*validator.*codebase",
+            r"list.*validator.*layer.*codebase"
+        ]
+        for pattern in codebase_self_patterns:
+            if re.search(pattern, question_lower, re.IGNORECASE):
+                is_self_knowledge_question = True
+                logger.info(f"✅ Self-knowledge question detected in _add_timestamp_to_response - will skip external citations")
+                break
+    
     # Extract document titles and source links from context if available
     source_links = []
     document_titles = []
@@ -443,16 +469,25 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
                 # Extract document type from source (CRITICAL_FOUNDATION) or type field
                 doc_type = metadata.get("source", "") or metadata.get("type", "") or metadata.get("source_type", "")
                 
+                # CRITICAL: For self-knowledge questions, ONLY use foundational knowledge (CRITICAL_FOUNDATION)
+                # Skip external sources (RSS feeds, Nature, etc.)
+                if is_self_knowledge_question:
+                    # Only include foundational knowledge, skip external sources
+                    if "CRITICAL_FOUNDATION" not in doc_type and "foundational" not in doc_type.lower():
+                        logger.debug(f"Skipping external source for self-knowledge question: {title} (type: {doc_type})")
+                        continue
+                
                 # Only add unique titles (to handle multiple chunks from same document)
                 if title and title not in seen_titles:
                     document_titles.append(title)
                     document_types.append(doc_type)
                     seen_titles.add(title)
                 
-                # Extract source links
-                link = metadata.get("link", "") or metadata.get("source_url", "")
-                if link and link.startswith(("http://", "https://")):
-                    source_links.append(link)
+                # Extract source links (only for foundational knowledge for self-knowledge questions)
+                if not is_self_knowledge_question or "CRITICAL_FOUNDATION" in doc_type or "foundational" in doc_type.lower():
+                    link = metadata.get("link", "") or metadata.get("source_url", "")
+                    if link and link.startswith(("http://", "https://")):
+                        source_links.append(link)
     
     # Try to extract existing citation from response
     # Look for patterns like [general knowledge], [research: Wikipedia], [source: 1], etc.
@@ -511,7 +546,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # Format citation with document titles if available
     if document_titles:
         # Use document titles instead of generic citation
-        if detected_lang == "vi":
+    if detected_lang == "vi":
             # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
             doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
             titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
@@ -529,7 +564,7 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         # Fallback to generic citation if no document titles available
         if detected_lang == "vi":
             citation_parts.append(f"Nguồn: {citation_text_clean}")
-        else:
+    else:
             citation_parts.append(f"Source: {citation_text_clean}")
     
     # Add source links if available
@@ -3518,7 +3553,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             # CRITICAL: Skip philosophical detection for roleplay questions
             # Roleplay questions should be answered as roleplay, not as philosophical analysis
             if not is_general_roleplay:
-                is_philosophical = is_philosophical_question(chat_request.message)
+            is_philosophical = is_philosophical_question(chat_request.message)
             else:
                 is_philosophical = False
                 logger.info("General roleplay question detected - skipping philosophical detection")
@@ -4306,31 +4341,47 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                     
                     if not has_manifest:
                         logger.warning(f"⚠️ Manifest not found in retrieved context - attempting direct manifest retrieval")
-                        # Try direct manifest retrieval
+                        # Try direct manifest retrieval using rag_retrieval with specific query
                         try:
-                            from backend.vector_db.chroma_client import get_chroma_client
-                            chroma_client = get_chroma_client()
-                            # Direct search for manifest
-                            manifest_query = "StillMe Structural Manifest validation framework total_validators layers"
-                            manifest_embedding = rag_retrieval.embedding_service.encode_text(manifest_query)
-                            manifest_results = chroma_client.search_knowledge(
-                                query_embedding=manifest_embedding,
-                                limit=3,
-                                where={"source": "CRITICAL_FOUNDATION"}
+                            # Use specific query for manifest retrieval
+                            manifest_query = "StillMe Structural Manifest validation framework total_validators layers 19 validators 7 layers"
+                            manifest_context = rag_retrieval.retrieve_context(
+                                query=manifest_query,
+                                knowledge_limit=5,  # Get more docs to ensure manifest is included
+                                conversation_limit=0,  # Don't need conversation for manifest
+                                prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
+                                similarity_threshold=0.01,  # CRITICAL: Very low threshold to ensure manifest is retrieved
+                                exclude_content_types=None,  # Don't exclude anything for manifest search
+                                is_philosophical=False
                             )
-                            if manifest_results:
+                            manifest_docs = manifest_context.get("knowledge_docs", [])
+                            # Filter for manifest documents (CRITICAL_FOUNDATION or contain "manifest" or "total_validators")
+                            filtered_manifest_docs = []
+                            for doc in manifest_docs:
+                                if isinstance(doc, dict):
+                                    metadata = doc.get("metadata", {})
+                                    source = metadata.get("source", "") or ""
+                                    title = metadata.get("title", "") or ""
+                                    doc_content = str(doc.get("document", ""))
+                                    if ("CRITICAL_FOUNDATION" in source or 
+                                        "manifest" in title.lower() or 
+                                        "validation_framework" in doc_content.lower() or
+                                        "total_validators" in doc_content.lower()):
+                                        filtered_manifest_docs.append(doc)
+                            
+                            if filtered_manifest_docs:
                                 # Inject manifest at the beginning of knowledge_docs
-                                knowledge_docs = list(manifest_results) + knowledge_docs
+                                knowledge_docs = filtered_manifest_docs + knowledge_docs
                                 context["knowledge_docs"] = knowledge_docs
                                 context["total_context_docs"] = len(knowledge_docs) + len(context.get("conversation_docs", []))
-                                logger.info(f"✅ Force-injected manifest into context: {len(manifest_results)} manifest docs")
+                                logger.info(f"✅ Force-injected manifest into context: {len(filtered_manifest_docs)} manifest docs")
                             else:
-                                logger.warning(f"⚠️ Direct manifest retrieval also failed - manifest may not be in ChromaDB")
+                                logger.warning(f"⚠️ Direct manifest retrieval found {len(manifest_docs)} docs but none matched manifest criteria - manifest may not be in ChromaDB")
                         except Exception as manifest_inject_error:
-                            logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}")
+                            logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}", exc_info=True)
                 else:
-                    # Try multiple query variants to ensure we get StillMe foundational knowledge
-                    query_variants = get_foundational_query_variants(chat_request.message)
+                # Try multiple query variants to ensure we get StillMe foundational knowledge
+                query_variants = get_foundational_query_variants(chat_request.message)
                 all_knowledge_docs = []
                 
                 for variant in query_variants[:3]:  # Try first 3 variants
@@ -7493,7 +7544,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 # Final response is the last rewritten version (or original if no rewrites)
                                 # CRITICAL: Ensure current_response is not empty before assigning
                                 if current_response and isinstance(current_response, str) and current_response.strip():
-                                    final_response = current_response
+                                final_response = current_response
                                 else:
                                     logger.error(
                                         f"❌ CRITICAL: current_response is empty or invalid (length: {len(current_response) if isinstance(current_response, str) else 'N/A'}), "
@@ -7563,8 +7614,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     if citation_result.patched_answer:
                                         # CRITICAL: Only use patched_answer if it's not empty
                                         if citation_result.patched_answer.strip():
-                                            final_response = citation_result.patched_answer
-                                            logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
+                                        final_response = citation_result.patched_answer
+                                        logger.info(f"✅ Re-added citations after rewrite (factual_question={is_factual_question}, has_context={bool(ctx_docs_for_rewrite and len(ctx_docs_for_rewrite) > 0)})")
                                         else:
                                             logger.warning(
                                                 f"⚠️ Citation patched_answer is empty, keeping original final_response "
@@ -8434,7 +8485,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                                 # CRITICAL: Only use re-sanitized if it's not empty
                                 if re_sanitized and re_sanitized.strip():
                                     final_response = re_sanitized
-                                    logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
+                                logger.debug(f"✅ Post-processing complete (non-RAG): sanitized → evaluated → rewritten → re-sanitized")
                                 else:
                                     logger.warning(
                                         f"⚠️ Re-sanitized response is empty (rewrite_result length: {len(rewrite_result.text) if rewrite_result.text else 0}), "
@@ -8869,7 +8920,33 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         from backend.api.utils.error_detector import is_fallback_message
         is_fallback = is_fallback_message(response) if response else False
         has_external_data_timestamp = "[Source:" in response or "[Nguồn:" in response
+        
+        # CRITICAL: Check if this is a self-knowledge question about StillMe's codebase
+        # If so, skip timestamp addition (or only add foundational knowledge citation)
+        is_self_knowledge_question = False
+        if chat_request.message:
+            question_lower = chat_request.message.lower()
+            codebase_self_patterns = [
+                r"codebase.*của.*bạn",
+                r"codebase.*of.*you",
+                r"codebase.*stillme",
+                r"validator.*trong.*codebase",
+                r"validator.*in.*codebase",
+                r"lớp.*validator.*trong.*codebase",
+                r"layer.*validator.*in.*codebase",
+                r"bao nhiêu.*lớp.*validator.*codebase",
+                r"how many.*layer.*validator.*codebase",
+                r"liệt kê.*lớp.*validator.*codebase",
+                r"list.*validator.*layer.*codebase"
+            ]
+            for pattern in codebase_self_patterns:
+                if re.search(pattern, question_lower, re.IGNORECASE):
+                    is_self_knowledge_question = True
+                    logger.info(f"✅ Self-knowledge question detected - will skip external citations in timestamp")
+                    break
+        
         # CRITICAL: Skip timestamp addition for philosophical questions (they don't need citations/timestamps)
+        # For self-knowledge questions, we still add timestamp but will filter out external citations in _add_timestamp_to_response
         should_add_timestamp = not is_fallback and not has_external_data_timestamp and response and not is_philosophical
         if should_add_timestamp:
             try:
@@ -8881,9 +8958,15 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
                     )
                 
-                # Pass context to extract source links if available
+                # Pass context and user_question to extract source links if available
+                # CRITICAL: Pass user_question so _add_timestamp_to_response can filter out external citations for self-knowledge questions
                 response_before_timestamp = response
-                response_after_timestamp = _add_timestamp_to_response(response, detected_lang or "en", context)
+                response_after_timestamp = _add_timestamp_to_response(
+                    response, 
+                    detected_lang or "en", 
+                    context, 
+                    user_question=chat_request.message
+                )
                 
                 # CRITICAL: Validate response after adding timestamp
                 if not response_after_timestamp or not isinstance(response_after_timestamp, str) or not response_after_timestamp.strip():
@@ -8914,7 +8997,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         f"response_preview={_safe_unicode_slice(response, 100) if response else 'None'}"
                     )
                 else:
-                    logger.debug("✅ Added timestamp attribution to RAG response")
+                logger.debug("✅ Added timestamp attribution to RAG response")
             except Exception as e:
                 logger.error(
                     f"⚠️ Failed to add timestamp to response (detected_lang={detected_lang}): {e}",
