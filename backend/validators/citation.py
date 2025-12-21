@@ -471,12 +471,37 @@ class CitationRequired:
                     )
             
             # AUTO-ENFORCE: Add citation to response for ALL questions when context is available
-            # CRITICAL: Always add citation when context is available, regardless of question type
-            # This ensures transparency - user knows what sources were reviewed
+            # CRITICAL: Check similarity threshold before adding citation to avoid citing irrelevant sources
+            # If max_similarity < 0.5, documents are not relevant enough - use [general knowledge] instead
             # NOTE: is_philosophical_factual is already included in is_any_factual_question above
             # So if we reach here, it means it's not a factual question OR it was already handled
             if ctx_docs and len(ctx_docs) > 0:
-                logger.info(f"Context available ({len(ctx_docs)} docs) but no citation - auto-adding citation for transparency")
+                # Extract max_similarity from context
+                max_similarity = 0.0
+                if context and isinstance(context, dict):
+                    knowledge_docs = context.get("knowledge_docs", [])
+                    if knowledge_docs:
+                        similarity_scores = []
+                        for doc in knowledge_docs:
+                            if isinstance(doc, dict):
+                                similarity_scores.append(doc.get('similarity', 0.0))
+                            elif hasattr(doc, 'similarity'):
+                                similarity_scores.append(doc.similarity if isinstance(doc.similarity, (int, float)) else 0.0)
+                        if similarity_scores:
+                            max_similarity = max(similarity_scores)
+                
+                # If max_similarity is too low (< 0.5), documents are not relevant enough
+                # Use [general knowledge] citation instead of citing irrelevant sources
+                if max_similarity < 0.5:
+                    logger.warning(f"Context available but max_similarity={max_similarity:.3f} < 0.5 (not relevant) - using [general knowledge] citation instead of irrelevant sources")
+                    patched_answer = self._add_citation_for_base_knowledge(answer)
+                    return ValidationResult(
+                        passed=False,  # Still mark as failed to track the issue
+                        reasons=["missing_citation", "low_similarity_using_base_knowledge"],
+                        patched_answer=patched_answer
+                    )
+                
+                logger.info(f"Context available ({len(ctx_docs)} docs, max_similarity={max_similarity:.3f}) but no citation - auto-adding citation for transparency")
                 patched_answer = self._add_citation(answer, ctx_docs, user_question, context=context)
                 return ValidationResult(
                     passed=False,  # Still mark as failed to track the issue
