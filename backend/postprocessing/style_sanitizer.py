@@ -369,8 +369,10 @@ class StyleSanitizer:
     def _normalize_markdown(self, text: str) -> str:
         """Normalize markdown (remove headings and bold, keep structure)"""
         # Remove markdown headings (##, ###, etc.) - convert to plain text
+        # CRITICAL: Preserve line breaks after headings to prevent text concatenation
         # Use MULTILINE flag to match headings at start of lines
-        text = re.sub(r'^#{1,6}\s+(.+)$', r'\1', text, flags=re.MULTILINE)  # Remove # prefix, keep text
+        # Replace with text + newline to preserve line break structure
+        text = re.sub(r'^#{1,6}\s+(.+)$', r'\1\n', text, flags=re.MULTILINE)  # Remove # prefix, keep text + preserve line break
         
         # Remove bold formatting (**text** -> text)
         text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # Bold
