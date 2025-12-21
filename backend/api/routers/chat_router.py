@@ -4239,6 +4239,15 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
         # RAG_Retrieval_Latency: Time from ChromaDB query start to result received
         context = None
         rag_retrieval_start = time.time()
+        
+        # CRITICAL: Initialize exclude_types early (before any RAG retrieval)
+        # This ensures it's available for all retrieval paths
+        exclude_types = []
+        if is_philosophical:
+            exclude_types.append("technical")
+        # Always exclude style_guide for user chat (prevents style drift from RAG)
+        exclude_types.append("style_guide")
+        
         if rag_retrieval and chat_request.use_rag:
             processing_steps.append("🔍 Searching knowledge base...")
             # CRITICAL: If origin query detected, retrieve provenance knowledge ONLY
@@ -4261,13 +4270,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         logger.info(f"Retrieved {len(provenance_results)} provenance documents")
                     else:
                         # Fallback to normal retrieval if provenance not found
-                        # Phase 2: Exclude style_guide from user chat (unless dev/admin mode)
-                        exclude_types = []
-                        if is_philosophical:
-                            exclude_types.append("technical")
-                        # Always exclude style_guide for user chat (prevents style drift from RAG)
-                        exclude_types.append("style_guide")
-                        
+                        # exclude_types already initialized above
                         context = rag_retrieval.retrieve_context(
                             query=chat_request.message,
                             knowledge_limit=chat_request.context_limit,
@@ -4278,11 +4281,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         )
                 except Exception as provenance_error:
                     logger.warning(f"Provenance retrieval failed: {provenance_error}, falling back to normal retrieval")
-                    # Phase 2: Exclude style_guide from user chat
-                    exclude_types = []
-                    if is_philosophical:
-                        exclude_types.append("technical")
-                    exclude_types.append("style_guide")
+                    # exclude_types already initialized above
                     
                     # SOLUTION 1 & 3: Improve retrieval for historical/factual questions
                     from backend.core.query_preprocessor import is_historical_question, enhance_query_for_retrieval
