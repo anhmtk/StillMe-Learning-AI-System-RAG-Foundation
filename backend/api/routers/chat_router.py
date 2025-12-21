@@ -1726,7 +1726,7 @@ If the question belongs to a classic philosophical debate (free will, determinis
                         has_manifest = True
                         logger.info(f"✅ Manifest detected in context! Title: {title[:50]}, Source: {source[:50]}")
                         # Try to extract numbers from manifest content
-                        import re
+                        # Note: 're' module is already imported at top level
                         total_match = re.search(r'total_validators["\']?\s*:\s*(\d+)', doc_full, re.IGNORECASE)
                         if total_match:
                             total_validators = total_match.group(1)
@@ -5001,7 +5001,7 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                 # Fix 1: Block context quality warning for philosophical, religion/roleplay, and technical "your system" questions
                 # CRITICAL: Check if this is a technical question about "your system"
                 question_lower_rag = chat_request.message.lower()
-                import re
+                # Note: 're' module is already imported at top level
                 has_technical_keyword_rag = any(keyword in question_lower_rag for keyword in [
                     "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
                     "vector", "pipeline", "validation", "transparency", "system",
@@ -6530,7 +6530,7 @@ Context: {context_text}
                                 # This is a simplified rebuild - just update context in special_instructions
                                 if "Context: " in enhanced_prompt:
                                     # Find and replace context section
-                                    import re
+                                    # Note: 're' module is already imported at top level
                                     enhanced_prompt = re.sub(
                                         r'Context:.*?(?=\n\n|$)',
                                         f'Context: {truncated_context}',
@@ -7526,7 +7526,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 # CRITICAL: Ensure citations are preserved after rewrite
                                 # If rewrite removed citations but ctx_docs are available, re-add them
                                 # ALSO: For real factual questions, ALWAYS ensure citations are present
-                                import re
+                                # Note: 're' module is already imported at top level
                                 cite_pattern = re.compile(r"\[(\d+)\]")
                                 has_citations_after_rewrite = bool(cite_pattern.search(final_response))
                                 
@@ -7648,7 +7648,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             # CRITICAL: Check if this is a technical question about "your system"
             # These should still get an answer from base LLM knowledge, not technical error
             question_lower = chat_request.message.lower()
-            import re
+            # Note: 're' module is already imported at top level
             # Check for technical keywords
             has_technical_keyword = any(keyword in question_lower for keyword in [
                 "rag", "retrieval", "llm", "generation", "embedding", "chromadb", 
@@ -8943,7 +8943,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                     if "learn" in task_lower or "học" in task_lower:
                         task_type = "learning"
                         # Try to extract number of items
-                        import re
+                        # Note: 're' module is already imported at top level
                         num_match = re.search(r'(\d+)', task_description)
                         if num_match:
                             size = int(num_match.group(1))
@@ -9093,7 +9093,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 citation = None
                 if response:
                     # Try to find citation in response
-                    import re
+                    # Note: 're' module is already imported at top level
                     cite_pattern = re.compile(r'\[([^\]]+)\]')
                     matches = cite_pattern.findall(response)
                     if matches:
