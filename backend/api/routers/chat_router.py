@@ -1680,14 +1680,21 @@ If the question belongs to a classic philosophical debate (free will, determinis
 
 """
             else:
+                # CRITICAL: Extract newline character outside f-string to avoid syntax error
+                manifest_warning_en = ""
+                if has_manifest:
+                    manifest_info_display = manifest_info if manifest_info else '19 validators, 7 layers'
+                    manifest_info_display_full = manifest_info if manifest_info else '19 validators total, organized into 7 layers'
+                    manifest_warning_en = f"{newline}🚨🚨🚨 **CRITICAL: Manifest detected in context!** You MUST read numbers from manifest and answer with specific numbers. If manifest has {manifest_info_display}, you MUST say: \"My system has {manifest_info_display_full}\". DO NOT just list validators without stating the exact count!"
+                
                 rag_context_section = f"""
 📚 **SPECIFIC INFORMATION ABOUT THIS QUESTION:**
 
 **Retrieved Documents:**
 - StillMe retrieved {total_context_docs} documents from ChromaDB for this question
 - Document details:
-{chr(10).join(doc_summaries) if doc_summaries else "  (No specific documents)"}
-{f"{chr(10)}🚨🚨🚨 **CRITICAL: Manifest detected in context!** You MUST read numbers from manifest and answer with specific numbers. If manifest has {manifest_info if manifest_info else '19 validators, 7 layers'}, you MUST say: \"My system has {manifest_info if manifest_info else '19 validators total, organized into 7 layers'}\". DO NOT just list validators without stating the exact count!" if has_manifest else ""}
+{newline.join(doc_summaries) if doc_summaries else "  (No specific documents)"}
+{manifest_warning_en}
 
 **WHEN ASKED ABOUT HOW STILLME USED RAG TO ANSWER THIS QUESTION:**
 - You MUST mention: "For this question, StillMe retrieved {total_context_docs} documents from ChromaDB"
