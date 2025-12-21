@@ -11,6 +11,7 @@ The manifest is designed to be consumed by the RAG system as foundational knowle
 import json
 import ast
 import inspect
+import hashlib
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
@@ -155,6 +156,46 @@ def determine_validator_layers() -> List[Dict[str, Any]]:
     return layers
 
 
+def calculate_validation_logic_hash(validators: List) -> str:
+    """
+    Calculate hash of validation logic by reading source code of all validators.
+    This hash changes whenever any validator's logic is modified.
+    """
+    validation_dir = project_root / "stillme_core" / "validation"
+    hash_input = []
+    
+    # Read source code of all validator files
+    validator_files = set()
+    for validator_class in validators:
+        try:
+            file_path = Path(inspect.getfile(validator_class))
+            if file_path.exists():
+                validator_files.add(file_path)
+        except:
+            pass
+    
+    # Also check chain.py for validation orchestration logic
+    chain_file = validation_dir / "chain.py"
+    if chain_file.exists():
+        validator_files.add(chain_file)
+    
+    # Read and hash each file
+    for file_path in sorted(validator_files):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                # Include full content (including docstrings) to detect any changes
+                hash_input.append(f"{file_path.relative_to(project_root)}:{content}")
+        except Exception as e:
+            # If file can't be read, include error in hash
+            hash_input.append(f"{file_path}:ERROR:{str(e)}")
+    
+    # Calculate SHA256 hash
+    combined = "\n".join(hash_input)
+    hash_obj = hashlib.sha256(combined.encode('utf-8'))
+    return hash_obj.hexdigest()[:16]  # Use first 16 chars for readability
+
+
 def generate_manifest() -> Dict[str, Any]:
     """Generate the complete structural manifest"""
     
@@ -167,6 +208,9 @@ def generate_manifest() -> Dict[str, Any]:
         HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator,
         ReligiousChoiceValidator, AISelfModelValidator
     ]
+    
+    # Calculate validation logic hash
+    validation_logic_hash = calculate_validation_logic_hash(validators)
     
     # Extract info for each validator
     registry = {}
@@ -216,12 +260,14 @@ def generate_manifest() -> Dict[str, Any]:
             "always_active": always_active,
             "conditional": conditional,
             "layers": layers,
-            "registry": registry
+            "registry": registry,
+            "validation_logic_hash": validation_logic_hash,
+            "validation_logic_hash_updated": datetime.now(timezone.utc).isoformat()
         },
         "metadata": {
             "generated_by": "scripts/generate_manifest.py",
             "generation_timestamp": datetime.now(timezone.utc).isoformat(),
-            "note": "This manifest is automatically generated from the codebase. It should be regenerated whenever validators are added, removed, or modified."
+            "note": "This manifest is automatically generated from the codebase. It should be regenerated whenever validators are added, removed, or modified. The validation_logic_hash changes whenever any validator's source code changes."
         }
     }
     

@@ -182,8 +182,9 @@ StillMe queries automatically:
 
 **Status**: ✅ Updated
 
-- Prompts now say "15-19 validators" instead of "15-layer"
+- Prompts now say "15-19 validators" or "19 validators total" instead of "15-layer"
 - Explicit instruction: "DO NOT say '15-layer' or '13+ validators'"
+- All hardcoded numbers removed from documentation - StillMe must read from manifest
 - References manifest information
 
 **Location**: `backend/api/routers/chat_router.py` lines 1519, 1570, 5134, 5201

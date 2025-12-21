@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Structural Manifest system ensures StillMe always knows the **exact current state** of its own validation framework. This solves the "knowledge gap" problem where StillMe reports outdated information (e.g., "15 validators" when it actually has 19).
+The Structural Manifest system ensures StillMe always knows the **exact current state** of its own validation framework. This solves the "knowledge gap" problem where StillMe reports outdated information. StillMe must read numbers from the manifest, not from hardcoded documentation.
 
 ## Problem Statement
 

@@ -367,7 +367,7 @@ StillMe's validation chain and RAG retrieval add latency compared to direct LLM 
 |-----------|---------|-----|-----|-------|
 | RAG Retrieval | 0.45s | 0.28s | 0.82s | ChromaDB semantic search with embedding generation |
 | LLM Inference | 2.5s | 1.8s | 4.2s | DeepSeek/OpenAI API (varies by provider and query complexity) |
-| Validation Chain | 0.15s | 0.08s | 0.32s | 7 validators (parallel execution where possible) |
+| Validation Chain | 0.15s | 0.08s | 0.32s | Multi-layer validation (parallel execution where possible) |
 |   - CitationRequired | <0.01s | | | Pattern matching |
 |   - EvidenceOverlap | 0.05s | | | N-gram overlap calculation |
 |   - ConfidenceValidator | <0.01s | | | Rule-based check |

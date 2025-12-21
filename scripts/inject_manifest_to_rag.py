@@ -109,6 +109,17 @@ These validators run on every response:
     text += f"- \"StillMe uses {vf['min_active_validators']}-{vf['max_active_validators']} validators per response depending on context\"\n"
     text += "- **DO NOT say \"15-layer\" or \"13+ validators\"** - these are outdated or incorrect\n\n"
     
+    # Add validation logic hash information
+    if 'validation_logic_hash' in vf:
+        hash_value = vf['validation_logic_hash']
+        hash_updated = vf.get('validation_logic_hash_updated', 'unknown')
+        text += "## Validation Logic Hash\n\n"
+        text += f"- **Current Hash**: `{hash_value}`\n"
+        text += f"- **Last Updated**: {hash_updated}\n"
+        text += "- This hash changes whenever any validator's source code is modified\n"
+        text += "- **When asked about validation logic updates or hash, StillMe can reference this hash and timestamp**\n"
+        text += "- **DO NOT automatically mention the hash** - only answer when specifically asked about validation logic changes\n\n"
+    
     text += "## Execution Architecture\n\n"
     text += "StillMe's validation engine supports:\n"
     text += "- **Sequential execution**: Validators with dependencies run in order\n"
