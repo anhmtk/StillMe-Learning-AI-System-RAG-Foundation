@@ -409,7 +409,18 @@ class StyleSanitizer:
         # CRITICAL: Only match ASCII space, not Unicode whitespace
         text = re.sub(r'[ ]+$', '', text, flags=re.MULTILINE)
         
-        result = text.strip()
+        # CRITICAL: Preserve line breaks by splitting, normalizing each line, then rejoining
+        # This ensures we don't accidentally remove newlines
+        lines = text.split('\n')
+        normalized_lines = []
+        for line in lines:
+            # Normalize spaces within each line (but preserve the line itself)
+            normalized_line = re.sub(r'[ ]{2,}', ' ', line)  # Multiple spaces to single
+            normalized_line = normalized_line.rstrip()  # Remove trailing spaces
+            normalized_lines.append(normalized_line)
+        
+        # Rejoin with newlines preserved
+        result = '\n'.join(normalized_lines).strip()
         
         # CRITICAL: Defensive check - if more than 10% removed, it's suspicious
         if len(result) < original_length * 0.9:
