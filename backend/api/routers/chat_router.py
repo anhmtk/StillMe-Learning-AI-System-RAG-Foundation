@@ -161,6 +161,40 @@ def _clean_response_text(text: str) -> str:
     return cleaned
 
 
+def _fix_missing_line_breaks(text: str) -> str:
+    """
+    Auto-fix missing line breaks after headings and bullets.
+    
+    This is a defensive function to ensure line breaks are present even if LLM
+    doesn't follow instructions.
+    
+    Args:
+        text: Response text that may be missing line breaks
+        
+    Returns:
+        Text with line breaks fixed
+    """
+    if not text or not isinstance(text, str):
+        return text
+    
+    # Fix: Add line break after markdown headings (## HeadingText -> ## HeadingText\n\n)
+    # Pattern: ## or ### followed by text, then immediately followed by non-newline character
+    text = re.sub(r'(^#{1,6}\s+[^\n]+)([^\n])', r'\1\n\n\2', text, flags=re.MULTILINE)
+    
+    # Fix: Add line break after heading-like text (if no markdown, check for patterns)
+    # Pattern: Text ending with ":" or "?" followed by text without newline
+    text = re.sub(r'([^:\n?]+[:\?])([^\n\s])', r'\1\n\2', text)
+    
+    # Fix: Add line break after bullet points (- Item -> - Item\n)
+    # Pattern: - or * at start of line, followed by text, then immediately followed by non-newline
+    text = re.sub(r'(^[\s]*[-*•]\s+[^\n]+)([^\n])', r'\1\n\2', text, flags=re.MULTILINE)
+    
+    # Normalize multiple consecutive newlines to max 2
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    
+    return text
+
+
 def _log_rag_retrieval_decision(
     decision_logger,
     context: Dict[str, Any],
