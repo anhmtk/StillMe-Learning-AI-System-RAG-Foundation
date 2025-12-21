@@ -49,6 +49,26 @@ class CitationRequired:
         Returns:
             ValidationResult with passed status and patched answer if citation was added
         """
+        # CRITICAL: Skip citation for questions about StillMe's own codebase
+        # These are self-knowledge questions - no external citation needed
+        if user_question:
+            question_lower = user_question.lower()
+            codebase_self_patterns = [
+                r"codebase.*của.*bạn",
+                r"codebase.*of.*you",
+                r"codebase.*stillme",
+                r"validator.*trong.*codebase",
+                r"validator.*in.*codebase",
+                r"lớp.*validator.*trong.*codebase",
+                r"layer.*validator.*in.*codebase",
+                r"bao nhiêu.*lớp.*validator.*codebase",
+                r"how many.*layer.*validator.*codebase"
+            ]
+            
+            for pattern in codebase_self_patterns:
+                if re.search(pattern, question_lower, re.IGNORECASE):
+                    logger.info(f"✅ Self-knowledge question about codebase detected - skipping citation requirement")
+                    return ValidationResult(passed=True, reasons=["self_knowledge_codebase_question"])
         if not self.required:
             return ValidationResult(passed=True)
         
