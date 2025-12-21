@@ -293,8 +293,44 @@ class RAGRetrieval:
                                             logger.debug(f"Excluding foundational document with content_type={doc_content_type}")
                                             continue
                                     filtered_foundational.append(doc)
-                                knowledge_results.extend(filtered_foundational)
-                                logger.info(f"Found {len(filtered_foundational)} foundational knowledge documents (after filtering)")
+                                
+                                # CRITICAL: Prioritize foundational results by inserting at the beginning
+                                # This ensures foundational knowledge is always first in results
+                                knowledge_results = filtered_foundational + knowledge_results
+                                logger.info(f"Found {len(filtered_foundational)} foundational knowledge documents (prioritized at front)")
+                                
+                                # CRITICAL: Re-rank results to boost documents with relevant keywords
+                                # This helps when query is about validator count or StillMe architecture
+                                query_lower = query.lower()
+                                if any(keyword in query_lower for keyword in ["validator", "layer", "lớp", "19", "7", "bao nhiêu", "how many"]):
+                                    # Re-rank: boost documents containing relevant keywords
+                                    def calculate_relevance_score(doc):
+                                        content = str(doc.get("document", "")).lower()
+                                        metadata = doc.get("metadata", {})
+                                        title = str(metadata.get("title", "")).lower()
+                                        
+                                        score = 0.0
+                                        # Boost for foundational source
+                                        if metadata.get("source") == "CRITICAL_FOUNDATION":
+                                            score += 2.0
+                                        # Boost for relevant keywords in content
+                                        if "19 validators" in content or "19 validators total" in content:
+                                            score += 1.5
+                                        if "7 layers" in content or "7 lớp" in content:
+                                            score += 1.5
+                                        if "validator" in content and "layer" in content:
+                                            score += 1.0
+                                        if "validation framework" in content:
+                                            score += 0.5
+                                        # Boost for relevant keywords in title
+                                        if "technical" in title or "architecture" in title:
+                                            score += 0.5
+                                        
+                                        return score
+                                    
+                                    # Sort by relevance score (highest first)
+                                    knowledge_results.sort(key=calculate_relevance_score, reverse=True)
+                                    logger.info(f"✅ Re-ranked {len(knowledge_results)} results based on keyword relevance")
                         except Exception as foundational_error:
                             logger.debug(f"Foundational knowledge filter not available: {foundational_error}")
                     
