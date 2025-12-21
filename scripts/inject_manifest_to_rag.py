@@ -98,16 +98,21 @@ These validators run on every response:
             text += f"- **Description**: {docstring}\n"
         text += "\n"
     
-    text += "\n## CRITICAL: Validator Count Information\n\n"
-    text += f"**StillMe has exactly {vf['total_validators']} validators total.**\n\n"
+    text += "\n## 🚨🚨🚨 CRITICAL: Validator Count Information 🚨🚨🚨\n\n"
+    text += f"**StillMe has exactly {vf['total_validators']} validators total, organized into {len(vf['layers'])} layers.**\n\n"
+    text += f"- **Total Validators**: {vf['total_validators']} validators\n"
+    text += f"- **Number of Layers**: {len(vf['layers'])} layers\n"
     text += f"- **Minimum active**: {vf['min_active_validators']} validators (when no context available)\n"
     text += f"- **Maximum active**: {vf['max_active_validators']} validators (when all conditions are met)\n"
     text += f"- **Always active**: {len(vf['always_active'])} validators\n"
     text += f"- **Conditional**: {len(vf['conditional'])} validators\n\n"
-    text += "**When asked about the number of validators, StillMe MUST say:**\n"
-    text += f"- \"StillMe has {vf['total_validators']} validators total\"\n"
-    text += f"- \"StillMe uses {vf['min_active_validators']}-{vf['max_active_validators']} validators per response depending on context\"\n"
-    text += "- **DO NOT say \"15-layer\" or \"13+ validators\"** - these are outdated or incorrect\n\n"
+    text += "**🚨🚨🚨 MANDATORY: When asked \"hệ thống của bạn có bao nhiêu lớp validator?\" or \"how many layers?\", StillMe MUST answer:**\n"
+    text += f"- \"Hệ thống của tôi hiện có {vf['total_validators']} validators total, chia thành {len(vf['layers'])} lớp (layers) validation framework.\"\n"
+    text += f"- \"My system currently has {vf['total_validators']} validators total, organized into {len(vf['layers'])} validation framework layers.\"\n"
+    text += "- **DO NOT just list validators without stating the exact count**\n"
+    text += "- **DO NOT say \"đa tầng\" or \"multi-layer\" without numbers**\n"
+    text += "- **DO NOT say \"15-layer\" or \"13+ validators\"** - these are outdated or incorrect\n"
+    text += f"- **MUST mention both: {vf['total_validators']} validators AND {len(vf['layers'])} layers**\n\n"
     
     # Add validation logic hash information
     if 'validation_logic_hash' in vf:
