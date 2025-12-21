@@ -4307,6 +4307,78 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         is_philosophical=is_philosophical
                     )
             
+            # CRITICAL: Handle validator count questions FIRST (even if not detected as stillme_query)
+            # Validator count questions about codebase should always get manifest
+            if is_validator_count_question:
+                logger.info(f"🎯 Validator count question - forcing manifest retrieval with very low similarity threshold (0.01)")
+                # Force retrieve manifest with very low threshold to ensure we get it
+                context = rag_retrieval.retrieve_context(
+                    query=chat_request.message,
+                    knowledge_limit=5,  # Get more docs to ensure manifest is included
+                    conversation_limit=1,
+                    prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
+                    similarity_threshold=0.01,  # CRITICAL: Very low threshold to ensure manifest is retrieved
+                    exclude_content_types=exclude_types if exclude_types else None,
+                    is_philosophical=is_philosophical
+                )
+                
+                # CRITICAL: Force-inject manifest if not found in retrieved context
+                knowledge_docs = context.get("knowledge_docs", [])
+                has_manifest = False
+                for doc in knowledge_docs:
+                    if isinstance(doc, dict):
+                        metadata = doc.get("metadata", {})
+                        source = metadata.get("source", "") or ""
+                        title = metadata.get("title", "") or ""
+                        doc_content = str(doc.get("document", ""))
+                        if ("CRITICAL_FOUNDATION" in source or 
+                            "manifest" in title.lower() or 
+                            "validation_framework" in doc_content.lower() or
+                            "total_validators" in doc_content.lower()):
+                            has_manifest = True
+                            break
+                
+                if not has_manifest:
+                    logger.warning(f"⚠️ Manifest not found in retrieved context - attempting direct manifest retrieval")
+                    # Try direct manifest retrieval using rag_retrieval with specific query
+                    try:
+                        # Use specific query for manifest retrieval
+                        manifest_query = "StillMe Structural Manifest validation framework total_validators layers 19 validators 7 layers"
+                        manifest_context = rag_retrieval.retrieve_context(
+                            query=manifest_query,
+                            knowledge_limit=5,  # Get more docs to ensure manifest is included
+                            conversation_limit=0,  # Don't need conversation for manifest
+                            prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
+                            similarity_threshold=0.01,  # CRITICAL: Very low threshold to ensure manifest is retrieved
+                            exclude_content_types=None,  # Don't exclude anything for manifest search
+                            is_philosophical=False
+                        )
+                        manifest_docs = manifest_context.get("knowledge_docs", [])
+                        # Filter for manifest documents (CRITICAL_FOUNDATION or contain "manifest" or "total_validators")
+                        filtered_manifest_docs = []
+                        for doc in manifest_docs:
+                            if isinstance(doc, dict):
+                                metadata = doc.get("metadata", {})
+                                source = metadata.get("source", "") or ""
+                                title = metadata.get("title", "") or ""
+                                doc_content = str(doc.get("document", ""))
+                                if ("CRITICAL_FOUNDATION" in source or 
+                                    "manifest" in title.lower() or 
+                                    "validation_framework" in doc_content.lower() or
+                                    "total_validators" in doc_content.lower()):
+                                    filtered_manifest_docs.append(doc)
+                        
+                        if filtered_manifest_docs:
+                            # Inject manifest at the beginning of knowledge_docs
+                            knowledge_docs = filtered_manifest_docs + knowledge_docs
+                            context["knowledge_docs"] = knowledge_docs
+                            context["total_context_docs"] = len(knowledge_docs) + len(context.get("conversation_docs", []))
+                            logger.info(f"✅ Force-injected manifest into context: {len(filtered_manifest_docs)} manifest docs")
+                        else:
+                            logger.warning(f"⚠️ Direct manifest retrieval found {len(manifest_docs)} docs but none matched manifest criteria - manifest may not be in ChromaDB")
+                    except Exception as manifest_inject_error:
+                        logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}", exc_info=True)
+            
             # If StillMe query detected (but not origin), prioritize foundational knowledge
             elif is_stillme_query:
                 # CRITICAL: For validator count questions, force-inject manifest and use very low similarity threshold

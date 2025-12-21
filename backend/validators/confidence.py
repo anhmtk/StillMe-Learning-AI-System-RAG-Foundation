@@ -217,6 +217,21 @@ class ConfidenceValidator:
                     r'khả năng (nào|gì) (của|mà) (stillme|hệ thống)',
                     r'how does stillme (work|track|learn|validate)',
                     r'stillme (architecture|system|design)',
+                    # CRITICAL: Validator count questions about codebase
+                    r'bao nhiêu.*lớp.*validator.*(trong|in).*codebase',
+                    r'how many.*layer.*validator.*(trong|in).*codebase',
+                    r'có bao nhiêu.*validator.*(trong|in).*codebase',
+                    r'how many.*validator.*(trong|in).*codebase',
+                    r'số.*lớp.*validator.*(trong|in).*codebase',
+                    r'number.*of.*validator.*layer.*(trong|in).*codebase',
+                    r'liệt kê.*lớp.*validator.*(trong|in).*codebase',
+                    r'list.*validator.*layer.*(trong|in).*codebase',
+                    r'validator.*layer.*(trong|in).*codebase',
+                    r'lớp.*validator.*(trong|in).*codebase',
+                    r'validator.*(trong|in).*codebase.*của.*bạn',
+                    r'validator.*(trong|in).*codebase.*of.*you',
+                    r'codebase.*của.*bạn.*validator',
+                    r'codebase.*of.*you.*validator',
                 ]
                 is_stillme_self_query = any(
                     re.search(pattern, question_lower, re.IGNORECASE)
