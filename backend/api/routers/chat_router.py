@@ -3711,8 +3711,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             logger.error(f"AI_SELF_MODEL handler error: {ai_self_model_error}", exc_info=True)
             # Continue to normal flow if AI_SELF_MODEL handler fails
         
-        # CRITICAL: Hardcode response for validator count/layers questions
-        # This bypasses LLM to ensure accurate, consistent answers
+        # CRITICAL: Detect validator count questions for special handling
+        # We will force-inject manifest and use lower similarity threshold, NOT hardcode
         is_validator_count_question = False
         validator_count_patterns = [
             r"bao nhiêu.*lớp.*validator",
@@ -3732,80 +3732,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         for pattern in validator_count_patterns:
             if re.search(pattern, question_lower, re.IGNORECASE):
                 is_validator_count_question = True
-                logger.info(f"🎯 Validator count question detected - using hardcoded response")
+                logger.info(f"🎯 Validator count question detected - will force-inject manifest and use lower similarity threshold")
                 break
-        
-        if is_validator_count_question:
-            try:
-                # Detect language
-                detected_lang = detect_language(chat_request.message)
-                
-                # Hardcoded response with exact numbers
-                if detected_lang == "vi":
-                    validator_response = """Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**.
-
-Các lớp bao gồm:
-
-- **Layer 1 (Language & Format)**: LanguageValidator, SchemaFormat
-
-- **Layer 2 (Citation & Evidence)**: CitationRequired, CitationRelevance, EvidenceOverlap
-
-- **Layer 3 (Content Quality)**: ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic
-
-- **Layer 4 (Identity & Ethics)**: IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator
-
-- **Layer 5 (Source Consensus)**: SourceConsensusValidator
-
-- **Layer 6 (Specialized Validation)**: PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
-
-- **Layer 7 (Fallback & Review)**: FallbackHandler, ReviewAdapter
-
-Đây là thông tin chính xác từ codebase của StillMe."""
-                else:
-                    validator_response = """My system has **19 validators total, organized into 7 layers (validation framework layers)**.
-
-The layers include:
-
-- **Layer 1 (Language & Format)**: LanguageValidator, SchemaFormat
-
-- **Layer 2 (Citation & Evidence)**: CitationRequired, CitationRelevance, EvidenceOverlap
-
-- **Layer 3 (Content Quality)**: ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic
-
-- **Layer 4 (Identity & Ethics)**: IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator
-
-- **Layer 5 (Source Consensus)**: SourceConsensusValidator
-
-- **Layer 6 (Specialized Validation)**: PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
-
-- **Layer 7 (Fallback & Review)**: FallbackHandler, ReviewAdapter
-
-This is accurate information from StillMe's codebase."""
-                
-                # Return immediately - no LLM, no citation needed (self-knowledge)
-                from backend.core.epistemic_state import EpistemicState
-                processing_steps.append("🎯 Validator count question - using hardcoded response (no citation needed for self-knowledge)")
-                return ChatResponse(
-                    response=validator_response,
-                    confidence_score=1.0,  # 100% confidence - this is ground truth from codebase
-                    processing_steps=processing_steps,
-                    timing_logs={
-                        "total_time": time.time() - start_time,
-                        "rag_retrieval_latency": 0.0,
-                        "llm_inference_latency": 0.0
-                    },
-                    validation_info={
-                        "passed": True,
-                        "hardcoded_response": True,
-                        "context_docs_count": 0  # No RAG needed for self-knowledge
-                    },
-                    epistemic_state=EpistemicState.KNOWN.value,  # Self-knowledge is KNOWN
-                    used_fallback=False,
-                    has_citation=False  # CRITICAL: No citation needed for self-knowledge about codebase
-                )
-            except Exception as validator_count_error:
-                logger.error(f"❌ Validator count handler error: {validator_count_error}", exc_info=True)
-                # Continue to normal flow if handler fails
         
         # EXTERNAL DATA LAYER: Check for external data queries (weather, news, etc.)
         # This bypasses RAG and fetches real-time data from external APIs
@@ -4338,7 +4266,62 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             
             # If StillMe query detected (but not origin), prioritize foundational knowledge
             elif is_stillme_query:
-                # Try multiple query variants to ensure we get StillMe foundational knowledge
+                # CRITICAL: For validator count questions, force-inject manifest and use very low similarity threshold
+                if is_validator_count_question:
+                    logger.info(f"🎯 Validator count question - forcing manifest retrieval with very low similarity threshold (0.01)")
+                    # Force retrieve manifest with very low threshold to ensure we get it
+                    context = rag_retrieval.retrieve_context(
+                        query=chat_request.message,
+                        knowledge_limit=5,  # Get more docs to ensure manifest is included
+                        conversation_limit=1,
+                        prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
+                        similarity_threshold=0.01,  # CRITICAL: Very low threshold to ensure manifest is retrieved
+                        exclude_content_types=exclude_types if exclude_types else None,
+                        is_philosophical=is_philosophical
+                    )
+                    
+                    # CRITICAL: Force-inject manifest if not found in retrieved context
+                    knowledge_docs = context.get("knowledge_docs", [])
+                    has_manifest = False
+                    for doc in knowledge_docs:
+                        if isinstance(doc, dict):
+                            metadata = doc.get("metadata", {})
+                            source = metadata.get("source", "") or ""
+                            title = metadata.get("title", "") or ""
+                            doc_content = str(doc.get("document", ""))
+                            if ("CRITICAL_FOUNDATION" in source or 
+                                "manifest" in title.lower() or 
+                                "validation_framework" in doc_content.lower() or
+                                "total_validators" in doc_content.lower()):
+                                has_manifest = True
+                                break
+                    
+                    if not has_manifest:
+                        logger.warning(f"⚠️ Manifest not found in retrieved context - attempting direct manifest retrieval")
+                        # Try direct manifest retrieval
+                        try:
+                            from backend.vector_db.chroma_client import get_chroma_client
+                            chroma_client = get_chroma_client()
+                            # Direct search for manifest
+                            manifest_query = "StillMe Structural Manifest validation framework total_validators layers"
+                            manifest_embedding = rag_retrieval.embedding_service.encode_text(manifest_query)
+                            manifest_results = chroma_client.search_knowledge(
+                                query_embedding=manifest_embedding,
+                                limit=3,
+                                where={"source": "CRITICAL_FOUNDATION"}
+                            )
+                            if manifest_results:
+                                # Inject manifest at the beginning of knowledge_docs
+                                knowledge_docs = list(manifest_results) + knowledge_docs
+                                context["knowledge_docs"] = knowledge_docs
+                                context["total_context_docs"] = len(knowledge_docs) + len(context.get("conversation_docs", []))
+                                logger.info(f"✅ Force-injected manifest into context: {len(manifest_results)} manifest docs")
+                            else:
+                                logger.warning(f"⚠️ Direct manifest retrieval also failed - manifest may not be in ChromaDB")
+                        except Exception as manifest_inject_error:
+                            logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}")
+                else:
+                    # Try multiple query variants to ensure we get StillMe foundational knowledge
                 query_variants = get_foundational_query_variants(chat_request.message)
                 all_knowledge_docs = []
                 
