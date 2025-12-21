@@ -5506,6 +5506,18 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 - **You MUST be honest**: Say something like "StillMe is currently learning from {len(enabled_sources)} sources, but {failed_count} RSS feeds are experiencing connection issues (failure rate: {failure_rate}%). The system is still learning from {successful_count} working feeds."
 """
                         
+                        # CRITICAL: Extract newline outside f-string to avoid syntax error
+                        newline_sources = chr(10)
+                        sources_items = []
+                        for name, info in sources_list.items():
+                            item = f"- **{name.upper()}**: {'Enabled' if info.get('enabled') else 'Disabled'} - Status: {info.get('status', 'unknown')}"
+                            if name == "rss" and info.get("failed_feeds"):
+                                failed_count = info.get('failed_feeds', {}).get('failed_count', 0)
+                                total_count = info.get('failed_feeds', {}).get('total_count', 0)
+                                item += f" - Failed Feeds: {failed_count}/{total_count}"
+                            sources_items.append(item)
+                        sources_text = newline_sources.join(sources_items)
+                        
                         learning_sources_instruction = f"""
 
 📚 LEARNING SOURCES QUERY DETECTED - CURRENT SOURCES DATA AVAILABLE:
@@ -5513,7 +5525,7 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 **CRITICAL: You MUST list ALL current learning sources from the API data below:**
 
 **Current Learning Sources (from `/api/learning/sources/current` API):**
-{chr(10).join(f"- **{name.upper()}**: {'Enabled' if info.get('enabled') else 'Disabled'} - Status: {info.get('status', 'unknown')}" + (f" - Failed Feeds: {info.get('failed_feeds', {}).get('failed_count', 0)}/{info.get('failed_feeds', {}).get('total_count', 0)}" if name == "rss" and info.get("failed_feeds") else "") for name, info in sources_list.items())}
+{sources_text}
 
 **Active Sources**: {', '.join(active_sources) if active_sources else 'None'}
 **Total Enabled**: {len(enabled_sources)} sources
