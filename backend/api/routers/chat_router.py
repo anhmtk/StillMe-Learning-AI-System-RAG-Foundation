@@ -3259,7 +3259,7 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
 @limiter.limit(get_chat_rate_limit, key_func=get_rate_limit_key_func)  # Chat rate limit (dynamic based on API key)
 async def chat_with_rag(request: Request, chat_request: ChatRequest):
     """Chat with RAG-enhanced responses"""
-    import time
+    # Note: 'time' module is already imported at top level
     start_time = time.time()
     timing_logs = {}
     
