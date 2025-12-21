@@ -102,9 +102,10 @@ def get_formatting_rules(domain: DomainType, detected_lang: str = "vi") -> str:
         else:
             return """**🚨 CRITICAL: RESPONSE FORMATTING REQUIREMENT 🚨**
 - **MUST use markdown formatting**: Line breaks, bullet points, headers for readability
-- **Long answers (>3 sentences)**: MUST use line breaks between paragraphs
-- **Lists**: MUST use bullet points (`-` or `*`)
-- **Multiple topics**: MUST use headers (`##`) to separate sections
+- **CRITICAL: Line breaks are MANDATORY**: You MUST use `\n\n` (double newline) between paragraphs to ensure proper line breaks in output
+- **Long answers (>3 sentences)**: MUST use line breaks between paragraphs (use `\n\n` between paragraphs)
+- **Lists**: MUST use bullet points (`-` or `*`) with line breaks between items
+- **Multiple topics**: MUST use headers (`##`) to separate sections with line breaks before and after
 - **Emojis**: **MUST use 2-3 emojis per response** for section headers, status indicators (✅, ❌, ⚠️, 💡, 📚, 🎯, 🔍, 📊, ⚙️)
   - **CRITICAL**: StillMe responses SHOULD include emojis to enhance readability and make responses more engaging
   - Use emojis strategically: section headers, status indicators, visual breaks
