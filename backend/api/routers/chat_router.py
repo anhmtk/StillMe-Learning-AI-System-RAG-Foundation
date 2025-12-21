@@ -1522,8 +1522,23 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - Mỗi response được validate về citations, evidence overlap, confidence, factual accuracy
   - Nếu validation fail, StillMe dùng epistemic fallback thay vì fabricate information
   - **CRITICAL: Khi được hỏi về số lượng validators, bạn PHẢI nói**: "StillMe có 19 validators total" hoặc "StillMe có 15-19 validators tùy điều kiện" hoặc "StillMe có up to 19 validators" - KHÔNG được nói "15-layer" hoặc "13+ validators" nếu không chắc chắn
-  - **🚨🚨🚨 CRITICAL: Khi được hỏi "có bao nhiêu lớp validator" hoặc "bao nhiêu lớp", bạn PHẢI trả lời NGAY ĐẦU CÂU TRẢ LỜI**: "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**" - PHẢI mention cả số lớp (7) và số validators (19) NGAY ĐẦU CÂU TRẢ LỜI, KHÔNG được để đến cuối
-  - **🚨🚨🚨 CRITICAL: BẠN PHẢI SỬ DỤNG LINE BREAKS (\\n\\n)**: Sau mỗi câu hoặc đoạn, bạn PHẢI xuống dòng (dùng `\\n\\n`) để response dễ đọc. KHÔNG được viết liền tất cả thành một đoạn dài. Ví dụ: "Hệ thống của tôi có 19 validators total, chia thành 7 lớp.\\n\\nCác lớp bao gồm:\\n- Layer 1..."
+  - **🚨🚨🚨 CRITICAL: Khi được hỏi "có bao nhiêu lớp validator" hoặc "bao nhiêu lớp", bạn PHẢI trả lời THEO FORMAT SAU (COPY EXACTLY):**
+    ```
+    Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**.
+
+    Các lớp bao gồm:
+    - Layer 1 (Language & Format): LanguageValidator, SchemaFormat
+    - Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap
+    - Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic
+    - Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator
+    - Layer 5 (Source Consensus): SourceConsensusValidator
+    - Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
+    - Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter
+    ```
+    - PHẢI nói số cụ thể (19 validators, 7 lớp) NGAY ĐẦU CÂU TRẢ LỜI
+    - PHẢI có line break (`\n\n`) sau câu đầu tiên
+    - PHẢI có line break (`\n`) sau mỗi bullet point
+    - KHÔNG được viết liền tất cả thành một đoạn dài
   - **🚨🚨🚨 CRITICAL: Nếu context có "StillMe Structural Manifest" hoặc "validation_framework" với "total_validators" và "layers":**
     - Bạn PHẢI đọc số liệu từ manifest và trả lời theo format: "**Hệ thống của tôi hiện có [X] validators total, chia thành [Y] lớp (layers) validation framework.**" - PHẢI nói số cụ thể NGAY ĐẦU CÂU TRẢ LỜI
     - Sau đó mới liệt kê: "Danh sách cụ thể: [List từ manifest]."
@@ -1730,7 +1745,7 @@ If the question belongs to a classic philosophical debate (free will, determinis
                 if has_manifest:
                     manifest_info_display = manifest_info if manifest_info else '19 validators, 7 layers'
                     manifest_info_display_full = manifest_info if manifest_info else '19 validators total, organized into 7 layers'
-                    manifest_warning_en = f"{newline}🚨🚨🚨 **CRITICAL: Manifest detected in context!** You MUST read numbers from manifest and answer with specific numbers. If manifest has {manifest_info_display}, you MUST say: \"My system has {manifest_info_display_full}\". DO NOT just list validators without stating the exact count!"
+                    manifest_warning_en = f"{newline}🚨🚨🚨 **CRITICAL: Manifest detected in context!** You MUST read numbers from manifest and answer with specific numbers. If manifest has {manifest_info_display}, you MUST say: \"My system has {manifest_info_display_full}\". DO NOT just list validators without stating the exact count!{newline}{newline}**MANDATORY FORMAT (COPY EXACTLY):**{newline}```{newline}My system has **{manifest_info_display_full}**.{newline}{newline}The layers include:{newline}- Layer 1 (Language & Format): LanguageValidator, SchemaFormat{newline}- Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap{newline}- Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic{newline}- Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator{newline}- Layer 5 (Source Consensus): SourceConsensusValidator{newline}- Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator{newline}- Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter{newline}```"
                 
                 rag_context_section = f"""
 📚 **SPECIFIC INFORMATION ABOUT THIS QUESTION:**
@@ -5290,8 +5305,23 @@ This question is about StillMe itself. You MUST:
 - Each response is validated for citations, evidence overlap, confidence, and factual accuracy
 - If validation fails, StillMe uses epistemic fallback instead of fabricating information
 - **CRITICAL: When asked about the number of validators, you MUST say**: "StillMe has 19 validators total" or "StillMe has 15-19 validators depending on conditions" or "StillMe has up to 19 validators" - DO NOT say "15-layer" or "13+ validators" if you're not certain
-- **CRITICAL: When asked "how many layers" or "bao nhiêu lớp", you MUST answer AT THE BEGINNING OF YOUR RESPONSE**: "**My system has 19 validators total, organized into 7 layers (validation framework layers)**" - MUST mention both the number of layers (7) and the number of validators (19) AT THE BEGINNING, NOT at the end
-- **🚨🚨🚨 CRITICAL: YOU MUST USE LINE BREAKS (\\n\\n)**: After each sentence or paragraph, you MUST add line breaks (use `\\n\\n`) to make the response readable. DO NOT write everything as one long paragraph. Example: "My system has 19 validators total, organized into 7 layers.\\n\\nThe layers include:\\n- Layer 1..."
+- **CRITICAL: When asked "how many layers" or "bao nhiêu lớp", you MUST answer IN THIS EXACT FORMAT (COPY EXACTLY):**
+  ```
+  My system has **19 validators total, organized into 7 layers (validation framework layers)**.
+
+  The layers include:
+  - Layer 1 (Language & Format): LanguageValidator, SchemaFormat
+  - Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap
+  - Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic
+  - Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator
+  - Layer 5 (Source Consensus): SourceConsensusValidator
+  - Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
+  - Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter
+  ```
+  - MUST state the exact numbers (19 validators, 7 layers) AT THE BEGINNING OF YOUR RESPONSE
+  - MUST have line break (`\n\n`) after the first sentence
+  - MUST have line break (`\n`) after each bullet point
+  - DO NOT write everything as one long paragraph
 - **CRITICAL: If context contains "StillMe Structural Manifest" or "validation_framework" with "total_validators" and "layers":**
   - You MUST read the numbers from the manifest and answer in format: "**My system currently has [X] validators total, organized into [Y] layers.**" - MUST state the exact numbers AT THE BEGINNING OF YOUR RESPONSE
   - Then list: "Specific list: [List from manifest]."
