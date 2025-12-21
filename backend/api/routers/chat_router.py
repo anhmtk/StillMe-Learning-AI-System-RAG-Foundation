@@ -4322,7 +4322,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                             logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}")
                 else:
                     # Try multiple query variants to ensure we get StillMe foundational knowledge
-                query_variants = get_foundational_query_variants(chat_request.message)
+                    query_variants = get_foundational_query_variants(chat_request.message)
                 all_knowledge_docs = []
                 
                 for variant in query_variants[:3]:  # Try first 3 variants
