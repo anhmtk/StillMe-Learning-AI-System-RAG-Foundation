@@ -2051,10 +2051,14 @@ def _format_conversation_history(conversation_history, max_tokens: int = 1000,
     if not history_lines:
         return ""
     
+    # CRITICAL: Extract newline outside f-string to avoid syntax error
+    newline = chr(10)
+    history_text = newline.join(history_lines)
+    
     return f"""
 📜 CONVERSATION HISTORY (Previous messages for context):
 
-{chr(10).join(history_lines)}
+{history_text}
 
 ---
 Current message:
