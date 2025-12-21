@@ -1558,6 +1558,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - **CRITICAL: Khi được hỏi về số lượng validators, bạn PHẢI nói**: "StillMe có 19 validators total" hoặc "StillMe có 15-19 validators tùy điều kiện" hoặc "StillMe có up to 19 validators" - KHÔNG được nói "15-layer" hoặc "13+ validators" nếu không chắc chắn
   - **🚨🚨🚨 CRITICAL: Khi được hỏi "có bao nhiêu lớp validator" hoặc "bao nhiêu lớp", bạn PHẢI trả lời THEO FORMAT SAU (COPY EXACTLY):**
     
+    **CÂU TRẢ LỜI BẮT BUỘC - PHẢI BẮT ĐẦU BẰNG:**
+    "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
+    
     **VÍ DỤ CÂU TRẢ LỜI ĐÚNG (PHẢI COPY FORMAT NÀY):**
     ```
     Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**.
@@ -1573,7 +1576,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
     ```
     
     **QUY TẮC BẮT BUỘC:**
-    - PHẢI nói số cụ thể (19 validators, 7 lớp) NGAY ĐẦU CÂU TRẢ LỜI
+    - **BẮT BUỘC**: Câu đầu tiên PHẢI là: "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
+    - **KHÔNG ĐƯỢC** nói: "có một chuỗi validator", "có nhiều validator", "có các validator" - PHẢI nói số cụ thể: "19 validators, 7 lớp"
     - PHẢI có line break (`\n\n`) sau câu đầu tiên (sau dấu chấm)
     - PHẢI có line break (`\n`) sau mỗi bullet point (sau dấu hai chấm hoặc dấu chấm)
     - PHẢI có line break (`\n\n`) sau heading (## hoặc ###)
@@ -5347,6 +5351,9 @@ This question is about StillMe itself. You MUST:
 - **CRITICAL: When asked about the number of validators, you MUST say**: "StillMe has 19 validators total" or "StillMe has 15-19 validators depending on conditions" or "StillMe has up to 19 validators" - DO NOT say "15-layer" or "13+ validators" if you're not certain
 - **CRITICAL: When asked "how many layers" or "bao nhiêu lớp", you MUST answer IN THIS EXACT FORMAT (COPY EXACTLY):**
   
+  **MANDATORY FIRST SENTENCE - YOU MUST START WITH:**
+  "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
+  
   **CORRECT EXAMPLE (YOU MUST COPY THIS FORMAT):**
   ```
   My system has **19 validators total, organized into 7 layers (validation framework layers)**.
@@ -5362,7 +5369,8 @@ This question is about StillMe itself. You MUST:
   ```
   
   **MANDATORY RULES:**
-  - MUST state the exact numbers (19 validators, 7 layers) AT THE BEGINNING OF YOUR RESPONSE
+  - **MANDATORY**: First sentence MUST be: "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
+  - **DO NOT** say: "has a series of validators", "has many validators", "has various validators" - MUST say exact numbers: "19 validators, 7 layers"
   - MUST have line break (`\n\n`) after the first sentence (after period)
   - MUST have line break (`\n`) after each bullet point (after colon or period)
   - MUST have line break (`\n\n`) after heading (## or ###)
