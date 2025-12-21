@@ -3327,6 +3327,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     # CRITICAL: Initialize roleplay detection flags EARLY to prevent UnboundLocalError
     is_general_roleplay = False
     is_religion_roleplay = False
+    # CRITICAL: Initialize exclude_types EARLY to prevent UnboundLocalError
+    # This ensures it's available for all retrieval paths, even if RAG is disabled
+    exclude_types = []
     
     # OPTION B PIPELINE: Check if enabled
     use_option_b = getattr(chat_request, 'use_option_b', False) or os.getenv("STILLME_USE_OPTION_B_PIPELINE", "false").lower() == "true"
@@ -4240,9 +4243,9 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
         context = None
         rag_retrieval_start = time.time()
         
-        # CRITICAL: Initialize exclude_types early (before any RAG retrieval)
-        # This ensures it's available for all retrieval paths
-        exclude_types = []
+        # CRITICAL: Configure exclude_types (already initialized at function start)
+        # Clear and rebuild to ensure correct state for this request
+        exclude_types.clear()
         if is_philosophical:
             exclude_types.append("technical")
         # Always exclude style_guide for user chat (prevents style drift from RAG)
