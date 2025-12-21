@@ -4380,26 +4380,26 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         except Exception as manifest_inject_error:
                             logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}", exc_info=True)
                 else:
-                # Try multiple query variants to ensure we get StillMe foundational knowledge
-                query_variants = get_foundational_query_variants(chat_request.message)
-                all_knowledge_docs = []
-                
-                for variant in query_variants[:3]:  # Try first 3 variants
-                    variant_context = rag_retrieval.retrieve_context(
-                        query=variant,
-                        knowledge_limit=chat_request.context_limit,
-                        conversation_limit=0,  # Don't need conversation for foundational queries
-                        prioritize_foundational=True,
-                        similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries to ensure foundational knowledge is retrieved
-                        exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
-                        prioritize_style_guide=is_philosophical,
-                        is_philosophical=is_philosophical
-                    )
-                    # Merge results, avoiding duplicates
-                    existing_ids = {doc.get("id") for doc in all_knowledge_docs}
-                    for doc in variant_context.get("knowledge_docs", []):
-                        if doc.get("id") not in existing_ids:
-                            all_knowledge_docs.append(doc)
+                    # Try multiple query variants to ensure we get StillMe foundational knowledge
+                    query_variants = get_foundational_query_variants(chat_request.message)
+                    all_knowledge_docs = []
+                    
+                    for variant in query_variants[:3]:  # Try first 3 variants
+                        variant_context = rag_retrieval.retrieve_context(
+                            query=variant,
+                            knowledge_limit=chat_request.context_limit,
+                            conversation_limit=0,  # Don't need conversation for foundational queries
+                            prioritize_foundational=True,
+                            similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries to ensure foundational knowledge is retrieved
+                            exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
+                            prioritize_style_guide=is_philosophical,
+                            is_philosophical=is_philosophical
+                        )
+                        # Merge results, avoiding duplicates
+                        existing_ids = {doc.get("id") for doc in all_knowledge_docs}
+                        for doc in variant_context.get("knowledge_docs", []):
+                            if doc.get("id") not in existing_ids:
+                                all_knowledge_docs.append(doc)
                 
                 # If we still don't have results, do normal retrieval with very low threshold
                 if not all_knowledge_docs:
