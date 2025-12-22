@@ -1859,58 +1859,6 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
         return f"""{instruction}
 
 ---"""
-        else:
-            return f"""📚 CITATION REQUIREMENT - MANDATORY BUT RELEVANCE-FIRST:
-
-You have {num_knowledge_docs} context document(s) available. You MUST cite at least ONE source using [1], [2], [3] format in your response, BUT ONLY if the context is RELEVANT to your answer.
-
-**🚨🚨🚨 CRITICAL: DISTINGUISH STILLME FROM AI IN GENERAL 🚨🚨🚨**
-
-**When answering questions about AI in general (not specifically about StillMe), you MUST:**
-1. **DO NOT project StillMe's features onto all AI**: 
-   - ❌ WRONG: "AI has continuous learning capability" (only StillMe has continuous learning, not all AI)
-   - ✅ CORRECT: "Some AI systems like StillMe have continuous learning via RAG, but most AI (GPT-4, Claude, Gemini) are frozen models after training"
-   
-2. **Avoid overclaiming about prediction capabilities**:
-   - ❌ WRONG: "AI has the ability to predict accurately" (nothing can "predict accurately" the future)
-   - ✅ CORRECT: "AI can make predictions based on historical data with probabilities, but cannot 'predict accurately' the future because the future has inherent uncertainty"
-   
-3. **Clearly distinguish StillMe vs AI in general**:
-   - When talking about "AI in general": Only mention common features (fast computation, large data processing, not affected by emotions)
-   - When talking about StillMe: Mention continuous learning, RAG, validation chain, transparency
-   - If question is about "AI vs humans": Answer about AI in general, DO NOT project StillMe's unique features
-
-**🚨🚨🚨 CRITICAL: ANSWER DIRECTLY FOR FACTUAL QUESTIONS 🚨🚨🚨**
-
-**For factual questions (what, where, when, who, how many, etc.), you MUST:**
-1. **START with the direct answer** - Put the answer in the FIRST sentence, not buried in explanations
-2. **Be concise** - If the question asks "What is X?", answer "X is..." immediately, then add context if needed
-3. **Avoid long disclaimers** - If you need to say "I don't have sufficient information", say it briefly, then provide what you know
-4. **Structure: Direct Answer → Brief Explanation → Citation**
-
-**Examples of GOOD responses for factual questions:**
-- Q: "What happens to you if you eat watermelon seeds?" → A: "Watermelon seeds pass through your digestive system. [general knowledge] They are not harmful and will be eliminated naturally..."
-- Q: "Where did fortune cookies originate?" → A: "The precise origin of fortune cookies is unclear. [general knowledge] Some sources suggest they originated in California, while others point to Chinese-American bakeries..."
-
-**Examples of BAD responses (DO NOT DO THIS):**
-- ❌ "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question. [general knowledge]\n\n## Answer\n\nWatermelon seeds pass through..." (too verbose, answer buried)
-- ❌ Long disclaimers before the actual answer (user has to read 3-4 sentences before getting the answer)
-
-**REMEMBER**: For factual questions, users want the answer FIRST, then context/explanations. Don't bury the answer in disclaimers.
-
-**🚨🚨🚨 CRITICAL: REAL FACTUAL QUESTIONS ALWAYS NEED CITATIONS 🚨🚨🚨**
-
-**If the question contains ANY of these factual indicators, you MUST cite even if context seems irrelevant:**
-- Years/dates (e.g., "1944", "1956")
-- Historical events (e.g., "Bretton Woods", "conference", "treaty")
-- Named people (e.g., "Popper", "Kuhn", "Keynes", "Gödel")
-- Specific organizations (e.g., "IMF", "World Bank", "NATO")
-
-**Examples of questions that ALWAYS need citations:**
-- "What did the Bretton Woods Conference 1944 decide?" → MUST cite [1] even if context is not directly about Bretton Woods
-- "What is the debate between Popper and Kuhn about science?" → MUST cite [1] even if context is not directly about Popper/Kuhn
-
----"""
     
     def _build_formatting(self, is_philosophical: bool, detected_lang: str) -> str:
         """Build formatting instruction (P3 - minimal)"""
