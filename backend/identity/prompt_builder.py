@@ -1607,52 +1607,38 @@ The user is asking about StillMe's nature, capabilities, or architecture.
     
     def _build_suspicious_entity_instruction(self, detected_lang: str, fps_result: Optional[FPSResult]) -> str:
         """Build instruction when FPS detects suspicious entity"""
-        anti_hallucination = self.registry.get_anti_hallucination_rule(detected_lang)
-        transparency = self.registry.get_transparency_requirement(detected_lang)
+        # Load from YAML config instead of hardcoded
+        from backend.identity.instruction_loader import get_instruction_loader
+        loader = get_instruction_loader()
+        anti_hallucination = loader.get_instruction_text("anti_hallucination", detected_lang) or ""
+        transparency = loader.get_instruction_text("transparency", detected_lang) or ""
         
-        if detected_lang == "vi":
-            return f"""⚠️ KHÔNG CÓ RAG CONTEXT VÀ PHÁT HIỆN ENTITY ĐÁNG NGỜ ⚠️
-
-StillMe's RAG system không tìm thấy relevant documents cho câu hỏi này.
-StillMe's FPS (Factual Plausibility Scanner) đã phát hiện suspicious entities: {', '.join(fps_result.suspicious_entities) if fps_result and fps_result.suspicious_entities else 'unknown'}
-
-**CRITICAL: BẠN PHẢI:**
-1. KHÔNG phân tích hoặc cung cấp historical context cho entities này
-2. Nói rõ: "Mình không có đủ dữ liệu để phân tích [entity]"
-3. Thừa nhận: "StillMe's knowledge base không chứa điều này, và mình không chắc nó tồn tại trong training data"
-4. Đề xuất: "Đây có thể là một khái niệm giả định. Bạn có thể cung cấp thêm context hoặc sources không?"
-
-{anti_hallucination}
-
-{transparency}
-
-**NHỚ:** StillMe values honesty over being helpful. Tốt hơn là thừa nhận uncertainty hơn là phân tích một concept có thể không tồn tại.
-
----"""
-        else:
-            return f"""⚠️ NO RAG CONTEXT AND SUSPICIOUS ENTITY DETECTED ⚠️
-
-StillMe's RAG system found NO relevant documents for this question.
-StillMe's FPS (Factual Plausibility Scanner) detected suspicious entities: {', '.join(fps_result.suspicious_entities) if fps_result and fps_result.suspicious_entities else 'unknown'}
-
-**CRITICAL: YOU MUST:**
-1. DO NOT analyze or provide historical context for these entities
-2. Say clearly: "I don't have sufficient data to analyze [entity]"
-3. Acknowledge: "StillMe's knowledge base doesn't contain this, and I'm not certain it exists in my training data"
-4. Suggest: "This may be a hypothetical concept. Could you provide more context or sources?"
+        # Get suspicious entities list
+        suspicious_entities_str = ', '.join(fps_result.suspicious_entities) if fps_result and fps_result.suspicious_entities else 'unknown'
+        
+        # Load main instruction from YAML
+        main_instruction = loader.get_instruction_text(
+            "suspicious_entity", 
+            detected_lang,
+            suspicious_entities=suspicious_entities_str
+        ) or ""
+        
+        # Combine with anti_hallucination and transparency
+        return f"""{main_instruction}
 
 {anti_hallucination}
 
 {transparency}
-
-**REMEMBER:** StillMe values honesty over being helpful. It's better to admit uncertainty than to analyze a potentially non-existent concept.
 
 ---"""
     
     def _build_no_context_instruction(self, detected_lang: str, fps_result: Optional[FPSResult], is_stillme_query: bool = False) -> str:
         """Build instruction when no RAG context is available"""
-        anti_hallucination = self.registry.get_anti_hallucination_rule(detected_lang)
-        transparency = self.registry.get_transparency_requirement(detected_lang)
+        # Load from YAML config instead of hardcoded
+        from backend.identity.instruction_loader import get_instruction_loader
+        loader = get_instruction_loader()
+        anti_hallucination = loader.get_instruction_text("anti_hallucination", detected_lang) or ""
+        transparency = loader.get_instruction_text("transparency", detected_lang) or ""
         
         # If this is a StillMe query but no context found, provide StillMe-specific guidance
         if is_stillme_query:

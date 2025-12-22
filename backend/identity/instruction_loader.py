@@ -78,16 +78,17 @@ class InstructionLoader:
             logger.error(f"Error loading instruction {instruction_name}: {e}")
             return None
     
-    def get_instruction_text(self, instruction_name: str, lang: str = "vi") -> Optional[str]:
+    def get_instruction_text(self, instruction_name: str, lang: str = "vi", **format_kwargs) -> Optional[str]:
         """
         Get instruction text for specific language
         
         Args:
             instruction_name: Name of instruction
             lang: Language code (default: "vi")
+            **format_kwargs: Optional formatting arguments for placeholders in instruction text
             
         Returns:
-            Instruction text string, or None if not found
+            Instruction text string (formatted if kwargs provided), or None if not found
         """
         instruction_data = self.load_instruction(instruction_name)
         if not instruction_data:
@@ -97,7 +98,18 @@ class InstructionLoader:
         if not isinstance(instruction_section, dict):
             return None
         
-        return instruction_section.get(lang) or instruction_section.get("en")
+        text = instruction_section.get(lang) or instruction_section.get("en")
+        if not text:
+            return None
+        
+        # Format text if kwargs provided
+        if format_kwargs:
+            try:
+                text = text.format(**format_kwargs)
+            except KeyError as e:
+                logger.warning(f"Missing format key {e} in instruction {instruction_name}, using unformatted text")
+        
+        return text
     
     def get_detection_patterns(self, instruction_name: str) -> list:
         """
