@@ -240,8 +240,6 @@ User Question: {context.user_question}
             )
             
             if is_how_question:
-                import logging
-                logger = logging.getLogger(__name__)
                 logger.info(f"🔍 build_prompt: is_how_question=True, building specific_details section")
                 specific_details = self._build_specific_rag_validation_section(
                     context.detected_lang, context.context, None  # validation_info not available at prompt building time
@@ -843,8 +841,6 @@ The user is asking about StillMe's nature, capabilities, or architecture.
         # Append specific RAG/validation details if question asks "how did you use X"
         # CRITICAL: Always append if is_how_question is True, even if context is None (will show reminder)
         if is_how_question:
-            import logging
-            logger = logging.getLogger(__name__)
             logger.info(f"🔍 _build_stillme_instruction: is_how_question=True, building specific_details section")
             specific_details = self._build_specific_rag_validation_section(
                 detected_lang, context, validation_info
@@ -874,8 +870,6 @@ The user is asking about StillMe's nature, capabilities, or architecture.
         validation_section = ""
         
         # Debug: Log context structure
-        import logging
-        logger = logging.getLogger(__name__)
         logger.info(f"🔍 _build_specific_rag_validation_section: called with context={context is not None}, validation_info={validation_info is not None}")
         
         if context:
