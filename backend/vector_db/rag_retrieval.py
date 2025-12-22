@@ -270,7 +270,18 @@ class RAGRetrieval:
                         except Exception as style_guide_error:
                             logger.debug(f"Style guide retrieval failed: {style_guide_error}")
                     
-                    if prioritize_foundational:
+                    # CRITICAL FIX: Check if this is a news/article query - if so, SKIP foundational retrieval
+                    # This prevents CRITICAL_FOUNDATION from dominating results when user asks about external articles
+                    is_news_article_query = False
+                    try:
+                        from backend.core.question_classifier import is_news_article_query as check_news_article
+                        is_news_article_query = check_news_article(query)
+                        if is_news_article_query:
+                            logger.info(f"📰 News/article query detected - SKIPPING foundational knowledge retrieval to avoid hallucination")
+                    except Exception:
+                        pass  # Non-critical, continue if detection fails
+                    
+                    if prioritize_foundational and not is_news_article_query:
                         try:
                             # Try to retrieve foundational knowledge first
                             try:
@@ -377,6 +388,20 @@ class RAGRetrieval:
                                 if is_provenance:
                                     continue
                                 
+                                # CRITICAL FIX: Exclude CRITICAL_FOUNDATION for news/article queries
+                                # This prevents foundational docs from dominating when user asks about external articles
+                                if is_news_article_query:
+                                    is_critical_foundation = (
+                                        doc_source == "CRITICAL_FOUNDATION" or
+                                        doc_type == "foundational" or
+                                        doc_metadata.get("foundational") == "stillme" or
+                                        "CRITICAL_FOUNDATION" in str(doc_tags) or
+                                        "foundational:stillme" in str(doc_tags)
+                                    )
+                                    if is_critical_foundation:
+                                        logger.debug(f"Excluding CRITICAL_FOUNDATION document for news/article query: {doc_metadata.get('title', 'N/A')}")
+                                        continue
+                                
                                 # Filter out excluded content types (e.g., "technical" for philosophical questions)
                                 if exclude_content_types and doc_content_type:
                                     if doc_content_type in exclude_content_types:
@@ -386,6 +411,76 @@ class RAGRetrieval:
                                 knowledge_results.append(doc)
                                 if len(knowledge_results) >= knowledge_limit:
                                     break
+                    
+                    # CRITICAL FIX: Re-ranking for news/article queries - boost recent knowledge
+                    # This ensures articles from RSS feeds, arXiv, etc. are prioritized over old foundational docs
+                    if is_news_article_query and knowledge_results:
+                        logger.info(f"📰 Re-ranking {len(knowledge_results)} documents for news/article query - boosting recent knowledge")
+                        
+                        def calculate_news_relevance_score(doc):
+                            """Calculate relevance score for news/article queries"""
+                            metadata = doc.get("metadata", {})
+                            source = metadata.get("source", "")
+                            doc_type = metadata.get("type", "")
+                            tags = str(metadata.get("tags", ""))
+                            
+                            score = 0.0
+                            
+                            # Boost for news/article sources
+                            if "rss" in source.lower() or "arxiv" in source.lower() or "hacker" in source.lower():
+                                score += 2.0
+                            if "news" in source.lower() or "article" in doc_type.lower():
+                                score += 1.5
+                            
+                            # Boost for recent timestamps (if available)
+                            added_to_kb = metadata.get("added_to_kb", "")
+                            if added_to_kb:
+                                try:
+                                    # Try to parse timestamp
+                                    from datetime import datetime
+                                    # Common formats: "2025-12-22 10:30:00 UTC" or ISO format
+                                    if "UTC" in added_to_kb:
+                                        date_str = added_to_kb.split("UTC")[0].strip()
+                                        parsed_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+                                    elif "T" in added_to_kb:
+                                        # ISO format: 2025-12-22T10:30:00Z
+                                        date_str = added_to_kb.replace("Z", "").split("T")[0]
+                                        parsed_date = datetime.strptime(date_str, "%Y-%m-%d")
+                                    else:
+                                        parsed_date = None
+                                    
+                                    if parsed_date:
+                                        # Boost if added within last 7 days
+                                        days_ago = (datetime.now() - parsed_date).days
+                                        if days_ago <= 7:
+                                            score += 1.0
+                                        elif days_ago <= 30:
+                                            score += 0.5
+                                except:
+                                    pass  # Skip if timestamp parsing fails
+                            
+                            # Penalize foundational docs for news queries
+                            is_critical_foundation = (
+                                source == "CRITICAL_FOUNDATION" or
+                                doc_type == "foundational" or
+                                metadata.get("foundational") == "stillme" or
+                                "CRITICAL_FOUNDATION" in tags or
+                                "foundational:stillme" in tags
+                            )
+                            if is_critical_foundation:
+                                score -= 3.0  # Heavy penalty
+                            
+                            # Use similarity/distance if available
+                            distance = doc.get("distance", 1.0)
+                            similarity = 1.0 - distance if distance <= 1.0 else 0.0
+                            score += similarity * 0.5  # Add similarity as part of score
+                            
+                            return score
+                        
+                        # Sort by relevance score (highest first)
+                        knowledge_results.sort(key=calculate_news_relevance_score, reverse=True)
+                        logger.info(f"✅ Re-ranked {len(knowledge_results)} documents for news/article query")
+                    
                     return knowledge_results
                 
                 # Helper function to run conversation search

@@ -343,3 +343,54 @@ def is_general_roleplay_question(text: str) -> bool:
     logger.debug(f"General roleplay question detected: False (text='{text[:80]}...')")
     return False
 
+
+def is_news_article_query(text: str) -> bool:
+    """
+    Detect if a query is asking about news articles, arXiv papers, Hacker News posts, or other external content.
+    
+    These queries should EXCLUDE CRITICAL_FOUNDATION documents because they're asking about
+    external knowledge, not StillMe's internal architecture.
+    
+    Args:
+        text: The question text (can be in English or Vietnamese)
+        
+    Returns:
+        True if the question is asking about news/articles/papers, False otherwise
+    """
+    if not text:
+        return False
+    
+    lower = text.lower()
+    
+    # News/article patterns
+    news_article_patterns = [
+        # Vietnamese patterns
+        r"bài báo|bài viết|tin tức|báo cáo|nghiên cứu|paper|arxiv",
+        r"hacker news|hackernews|hn",
+        r"lục lại.*bộ nhớ|tìm lại.*bài|kiểm tra.*bài|đọc.*bài",
+        r"bài.*arxiv|paper.*arxiv|nghiên cứu.*arxiv",
+        r"bài.*đã học|bài.*đã lưu|bài.*trong.*kb|bài.*trong.*knowledge",
+        r"ngày.*tháng.*năm.*bài|bài.*ngày|bài.*tháng|bài.*năm",
+        
+        # English patterns
+        r"arxiv.*paper|arxiv.*article|arxiv.*publication",
+        r"hacker news.*post|hacker news.*article|hn.*post",
+        r"news.*article|news.*report|news.*story",
+        r"paper.*published|article.*published|research.*paper",
+        r"find.*article|search.*article|look.*for.*article",
+        r"what.*article|which.*article|article.*about",
+        r"paper.*about|research.*about|study.*about",
+        r"article.*from|paper.*from|news.*from",
+        r"date.*article|article.*date|when.*article|article.*when",
+        r"year.*article|article.*year|published.*year",
+    ]
+    
+    # Check patterns
+    for pattern in news_article_patterns:
+        if re.search(pattern, lower):
+            logger.info(f"News/article query detected: True (pattern: '{pattern}', text='{text[:80]}...')")
+            return True
+    
+    logger.debug(f"News/article query detected: False (text='{text[:80]}...')")
+    return False
+
