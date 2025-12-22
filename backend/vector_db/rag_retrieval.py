@@ -153,8 +153,23 @@ class RAGRetrieval:
             ENABLE_CONTINUUM_MEMORY = os.getenv("ENABLE_CONTINUUM_MEMORY", "false").lower() == "true"
             
             # Phase 2: RAG Retrieval Cache - Check cache first
+            # CRITICAL: Disable cache for validator count questions to ensure fresh retrieval
+            # This prevents using stale cached results with low similarity scores
             cache_service = get_cache_service()
             cache_enabled = os.getenv("ENABLE_RAG_CACHE", "true").lower() == "true"
+            
+            # CRITICAL: Disable cache if this is a validator count question
+            # Validator count questions need fresh retrieval to get latest foundational knowledge
+            is_validator_count_query = any(
+                keyword in query.lower() for keyword in [
+                    "bao nhiêu", "how many", "số", "number", "count",
+                    "lớp validator", "validator layer", "validator count"
+                ]
+            )
+            if is_validator_count_query:
+                cache_enabled = False
+                logger.info(f"🚫 Cache disabled for validator count question to ensure fresh retrieval")
+            
             cached_result = None
             cache_hit = False
             cache_key = None

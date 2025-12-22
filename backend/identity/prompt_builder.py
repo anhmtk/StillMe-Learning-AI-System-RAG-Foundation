@@ -596,6 +596,26 @@ The user is asking about StillMe's wishes, desires, or preferences (e.g., "if yo
             ]
         )
         
+        # CRITICAL: Detect validator count questions for special handling
+        is_validator_count_question = False
+        if user_question:
+            import re
+            validator_count_patterns = [
+                r"bao nhiêu.*lớp.*validator",
+                r"how many.*layer.*validator",
+                r"có bao nhiêu.*validator",
+                r"how many.*validator",
+                r"số.*lớp.*validator",
+                r"number.*of.*validator.*layer",
+                r"liệt kê.*lớp.*validator",
+                r"list.*validator.*layer",
+                r"validator.*layer.*count"
+            ]
+            for pattern in validator_count_patterns:
+                if re.search(pattern, question_lower, re.IGNORECASE):
+                    is_validator_count_question = True
+                    break
+        
         # Extract specific RAG/validation details if question asks "how did you use X"
         question_lower = user_question.lower() if user_question else ""
         is_how_question = any(
@@ -1192,6 +1212,86 @@ The user is asking about StillMe's nature, capabilities, or architecture.
 - ✅ Did I avoid mechanical disclaimer if I have foundational knowledge?
 
 ---"""
+        
+        # CRITICAL: Add special instruction for validator count questions BEFORE appending other sections
+        if is_validator_count_question:
+            validator_count_instruction = ""
+            if detected_lang == "vi":
+                validator_count_instruction = """
+
+🚨🚨🚨 CRITICAL: VALIDATOR COUNT QUESTION DETECTED 🚨🚨🚨
+
+**BẠN PHẢI TRẢ LỜI VỚI SỐ CỤ THỂ NGAY ĐẦU CÂU TRẢ LỜI:**
+
+**CÂU TRẢ LỜI BẮT BUỘC - PHẢI BẮT ĐẦU BẰNG:**
+"Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
+
+**QUY TẮC BẮT BUỘC:**
+1. **BẮT BUỘC**: Câu đầu tiên PHẢI là: "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
+2. **KHÔNG ĐƯỢC** nói: "có một chuỗi validator", "có nhiều validator", "có các validator" - PHẢI nói số cụ thể: "19 validators, 7 lớp"
+3. **NẾU CONTEXT CÓ "19 validators" HOẶC "7 layers"**: Bạn PHẢI đọc số liệu từ context và trả lời theo format: "**Hệ thống của tôi hiện có [X] validators total, chia thành [Y] lớp (layers) validation framework.**"
+4. **NẾU BẠN KHÔNG THẤY SỐ TRONG CONTEXT, BẠN VẪN PHẢI NÓI**: "**Hệ thống của tôi có 19 validators total, chia thành 7 lớp (layers) validation framework**" - Đây là thông tin cố định về StillMe
+5. **KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể**
+6. **KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể**
+
+**VÍ DỤ CÂU TRẢ LỜI ĐÚNG:**
+"Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**.
+
+Các lớp bao gồm:
+- Layer 1 (Language & Format): LanguageValidator, SchemaFormat
+- Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap
+- Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic
+- Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator
+- Layer 5 (Source Consensus): SourceConsensusValidator
+- Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
+- Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter"
+
+**VÍ DỤ CÂU TRẢ LỜI SAI (KHÔNG LÀM):**
+- ❌ "StillMe sử dụng một loạt validators để đảm bảo chất lượng..." (quá chung chung, không có số cụ thể)
+- ❌ "Các validators bao gồm: CitationRequired, EvidenceOverlap..." (chỉ liệt kê, không nói số lượng)
+
+**🚨 NẾU BẠN KHÔNG LÀM ĐÚNG FORMAT NÀY, HỆ THỐNG SẼ TỰ ĐỘNG SỬA LỖI NHƯNG ĐIỀU NÀY LÀM GIẢM CHẤT LƯỢNG CÂU TRẢ LỜI**
+
+"""
+            else:
+                validator_count_instruction = """
+
+🚨🚨🚨 CRITICAL: VALIDATOR COUNT QUESTION DETECTED 🚨🚨🚨
+
+**YOU MUST ANSWER WITH SPECIFIC NUMBERS AT THE START OF YOUR RESPONSE:**
+
+**MANDATORY RESPONSE - MUST START WITH:**
+"My system has **19 validators total, organized into 7 layers (validation framework layers)**."
+
+**MANDATORY RULES:**
+1. **MANDATORY**: The first sentence MUST be: "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
+2. **DO NOT** say: "has a series of validators", "has many validators", "has various validators" - MUST say specific numbers: "19 validators, 7 layers"
+3. **IF CONTEXT HAS "19 validators" OR "7 layers"**: You MUST read the numbers from context and answer: "**My system currently has [X] validators total, organized into [Y] layers (validation framework layers)**."
+4. **IF YOU DON'T SEE NUMBERS IN CONTEXT, YOU STILL MUST SAY**: "**My system has 19 validators total, organized into 7 layers (validation framework layers)**" - This is fixed information about StillMe
+5. **DO NOT just list validators without stating the exact count**
+6. **DO NOT say generically "multi-layer" or "many validators" - MUST say specific numbers**
+
+**EXAMPLE CORRECT RESPONSE:**
+"My system has **19 validators total, organized into 7 layers (validation framework layers)**.
+
+The layers include:
+- Layer 1 (Language & Format): LanguageValidator, SchemaFormat
+- Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap
+- Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic
+- Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator
+- Layer 5 (Source Consensus): SourceConsensusValidator
+- Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator
+- Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter"
+
+**EXAMPLE WRONG RESPONSE (DO NOT DO):**
+- ❌ "StillMe uses a series of validators to ensure quality..." (too generic, no specific numbers)
+- ❌ "The validators include: CitationRequired, EvidenceOverlap..." (only listing, not stating count)
+
+**🚨 IF YOU DON'T FOLLOW THIS FORMAT, THE SYSTEM WILL AUTO-FIX BUT THIS REDUCES RESPONSE QUALITY**
+
+"""
+            # Prepend validator count instruction to the beginning of stillme_instruction
+            stillme_instruction = validator_count_instruction + stillme_instruction
         
         # Append specific RAG/validation details if question asks "how did you use X"
         # CRITICAL: Always append if is_how_question is True, even if context is None (will show reminder)
