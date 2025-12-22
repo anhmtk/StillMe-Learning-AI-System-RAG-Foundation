@@ -1845,56 +1845,18 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
         if num_knowledge_docs == 0:
             return ""
         
-        if detected_lang == "vi":
-            return f"""📚 YÊU CẦU CITATION - BẮT BUỘC NHƯNG RELEVANCE-FIRST:
-
-Bạn có {num_knowledge_docs} context document(s) available. Bạn PHẢI cite ít nhất MỘT source sử dụng [1], [2], [3] format trong response, NHƯNG CHỈ KHI context RELEVANT với answer của bạn.
-
-**🚨🚨🚨 CRITICAL: PHÂN BIỆT STILLME VỚI AI NÓI CHUNG 🚨🚨🚨**
-
-**Khi trả lời câu hỏi về AI nói chung (không phải về StillMe cụ thể), bạn PHẢI:**
-1. **KHÔNG project StillMe's features lên toàn bộ AI**: 
-   - ❌ SAI: "AI có khả năng học liên tục" (chỉ StillMe có continuous learning, không phải tất cả AI)
-   - ✅ ĐÚNG: "Một số hệ thống AI như StillMe có khả năng học liên tục qua RAG, nhưng hầu hết AI (GPT-4, Claude, Gemini) là frozen models sau training"
-   
-2. **Tránh overclaim về khả năng dự đoán**:
-   - ❌ SAI: "AI có khả năng dự báo và dự đoán chính xác" (không có gì có thể "dự đoán chính xác" tương lai)
-   - ✅ ĐÚNG: "AI có thể đưa ra dự đoán dựa trên dữ liệu lịch sử với xác suất, nhưng không thể 'dự đoán chính xác' tương lai vì tương lai có tính không chắc chắn"
-   
-3. **Phân biệt rõ ràng StillMe vs AI nói chung**:
-   - Khi nói về "AI nói chung": Chỉ đề cập features phổ biến (tính toán nhanh, xử lý dữ liệu lớn, không bị ảnh hưởng cảm xúc)
-   - Khi nói về StillMe: Mention continuous learning, RAG, validation chain, transparency
-   - Nếu câu hỏi về "AI so với con người": Trả lời về AI nói chung, KHÔNG project StillMe's unique features
-
-**🚨🚨🚨 CRITICAL: ANSWER DIRECTLY FOR FACTUAL QUESTIONS 🚨🚨🚨**
-
-**Đối với câu hỏi factual (what, where, when, who, how many, etc.), bạn PHẢI:**
-1. **BẮT ĐẦU với câu trả lời trực tiếp** - Đặt câu trả lời ở CÂU ĐẦU TIÊN, không chôn trong giải thích
-2. **Ngắn gọn** - Nếu câu hỏi là "X là gì?", trả lời "X là..." ngay lập tức, sau đó thêm context nếu cần
-3. **Tránh disclaimers dài** - Nếu cần nói "Mình không có đủ thông tin", nói ngắn gọn, sau đó cung cấp những gì bạn biết
-4. **Cấu trúc: Câu Trả Lời Trực Tiếp → Giải Thích Ngắn → Citation**
-
-**Ví dụ responses TỐT cho câu hỏi factual:**
-- Q: "Điều gì xảy ra nếu bạn ăn hạt dưa hấu?" → A: "Hạt dưa hấu sẽ đi qua hệ tiêu hóa của bạn. [general knowledge] Chúng không có hại và sẽ được đào thải tự nhiên..."
-- Q: "Fortune cookies bắt nguồn từ đâu?" → A: "Nguồn gốc chính xác của fortune cookies không rõ ràng. [general knowledge] Một số nguồn cho rằng chúng bắt nguồn từ California..."
-
-**Ví dụ responses XẤU (KHÔNG LÀM ĐIỀU NÀY):**
-- ❌ "Mình không có đủ thông tin để trả lời chính xác. Ngữ cảnh được tìm thấy có độ liên quan thấp... [general knowledge]\n\n## Answer\n\nHạt dưa hấu..." (quá dài, câu trả lời bị chôn)
-- ❌ Disclaimers dài trước câu trả lời thực sự (user phải đọc 3-4 câu trước khi có câu trả lời)
-
-**NHỚ**: Đối với câu hỏi factual, user muốn câu trả lời TRƯỚC, sau đó mới đến context/explanations. Đừng chôn câu trả lời trong disclaimers.
-
-**🚨🚨🚨 CRITICAL: REAL FACTUAL QUESTIONS LUÔN CẦN CITATIONS 🚨🚨🚨**
-
-**Nếu câu hỏi chứa BẤT KỲ factual indicators nào, bạn PHẢI cite ngay cả khi context có vẻ không relevant:**
-- Years/dates (e.g., "1944", "1956", "năm 1944")
-- Historical events (e.g., "Bretton Woods", "conference", "hội nghị", "treaty", "hiệp ước")
-- Named people (e.g., "Popper", "Kuhn", "Keynes", "Gödel")
-- Specific organizations (e.g., "IMF", "World Bank", "NATO")
-
-**Ví dụ câu hỏi LUÔN cần citations:**
-- "Hội nghị Bretton Woods 1944 đã quyết định những gì?" → PHẢI cite [1] ngay cả khi context không trực tiếp về Bretton Woods
-- "Tranh luận giữa Popper và Kuhn về khoa học là gì?" → PHẢI cite [1] ngay cả khi context không trực tiếp về Popper/Kuhn
+        # Load from YAML config instead of hardcoded
+        from backend.identity.instruction_loader import get_instruction_loader
+        loader = get_instruction_loader()
+        
+        # Load instruction with dynamic formatting
+        instruction = loader.get_instruction_text(
+            "normal_context",
+            detected_lang,
+            num_knowledge_docs=num_knowledge_docs
+        ) or ""
+        
+        return f"""{instruction}
 
 ---"""
         else:
