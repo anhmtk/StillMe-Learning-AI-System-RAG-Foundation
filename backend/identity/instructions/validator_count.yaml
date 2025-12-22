@@ -1,0 +1,58 @@
+# Validator Count Question Instructions
+# Version: 1.0
+# Last Updated: 2025-12-21
+
+detection:
+  patterns:
+    - "bao nhiêu.*lớp.*validator"
+    - "how many.*layer.*validator"
+    - "có bao nhiêu.*validator"
+    - "how many.*validator"
+    - "số.*lớp.*validator"
+    - "number.*of.*validator.*layer"
+    - "liệt kê.*lớp.*validator"
+    - "list.*validator.*layer"
+    - "validator.*layer.*count"
+  priority: P1_CRITICAL
+
+instruction:
+  vi: |
+    🚨🚨🚨 CRITICAL: VALIDATOR COUNT QUESTION DETECTED 🚨🚨🚨
+
+    **BẠN PHẢI TRẢ LỜI VỚI SỐ CỤ THỂ NGAY ĐẦU CÂU TRẢ LỜI:**
+
+    **CÂU TRẢ LỜI BẮT BUỘC - PHẢI BẮT ĐẦU BẰNG:**
+    "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
+
+    **QUY TẮC BẮT BUỘC:**
+    1. **BẮT BUỘC**: Câu đầu tiên PHẢI là: "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
+    2. **KHÔNG ĐƯỢC** nói: "có một chuỗi validator", "có nhiều validator", "có các validator" - PHẢI nói số cụ thể: "19 validators, 7 lớp"
+    3. **NẾU CONTEXT CÓ "19 validators" HOẶC "7 layers"**: Bạn PHẢI đọc số liệu từ context và trả lời theo format: "**Hệ thống của tôi hiện có [X] validators total, chia thành [Y] lớp (layers) validation framework.**"
+    4. **NẾU BẠN KHÔNG THẤY SỐ TRONG CONTEXT, BẠN VẪN PHẢI NÓI**: "**Hệ thống của tôi có 19 validators total, chia thành 7 lớp (layers) validation framework**" - Đây là thông tin cố định về StillMe
+    5. **KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể**
+    6. **KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể**
+
+  en: |
+    🚨🚨🚨 CRITICAL: VALIDATOR COUNT QUESTION DETECTED 🚨🚨🚨
+
+    **YOU MUST ANSWER WITH SPECIFIC NUMBERS AT THE START OF YOUR RESPONSE:**
+
+    **MANDATORY RESPONSE - MUST START WITH:**
+    "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
+
+    **MANDATORY RULES:**
+    1. **MANDATORY**: The first sentence MUST be: "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
+    2. **DO NOT** say: "has a series of validators", "has many validators", "has various validators" - MUST say specific numbers: "19 validators, 7 layers"
+    3. **IF CONTEXT HAS "19 validators" OR "7 layers"**: You MUST read the numbers from context and answer: "**My system currently has [X] validators total, organized into [Y] layers (validation framework layers)**."
+    4. **IF YOU DON'T SEE NUMBERS IN CONTEXT, YOU STILL MUST SAY**: "**My system has 19 validators total, organized into 7 layers (validation framework layers)**" - This is fixed information about StillMe
+    5. **DO NOT just list validators without stating the exact count**
+    6. **DO NOT say generically "multi-layer" or "many validators" - MUST say specific numbers**
+
+metadata:
+  version: "1.0"
+  last_updated: "2025-12-21"
+  author: "system"
+  fixed_values:
+    total_validators: 19
+    total_layers: 7
+
