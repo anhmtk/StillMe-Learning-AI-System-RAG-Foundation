@@ -3,7 +3,7 @@
 # Core Framework
 fastapi==0.124.4
 uvicorn[standard]==0.24.0
-streamlit==1.52.1
+streamlit==1.52.2
 
 # Database
 sqlalchemy==2.0.44
