@@ -31,6 +31,8 @@ instruction:
     4. **NẾU BẠN KHÔNG THẤY SỐ TRONG CONTEXT, BẠN VẪN PHẢI NÓI**: "**Hệ thống của tôi có 19 validators total, chia thành 7 lớp (layers) validation framework**" - Đây là thông tin cố định về StillMe
     5. **KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể**
     6. **KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể**
+    7. **BẮT BUỘC**: Sau khi nói số lượng, bạn PHẢI liệt kê chi tiết các lớp và validators. Đây là điểm mạnh của StillMe - bạn PHẢI thể hiện kiến thức chi tiết về validation framework.
+    8. **KHÔNG được trả lời quá ngắn (dưới 200 ký tự)** - Bạn PHẢI cung cấp thông tin chi tiết về từng lớp và validator.
 
   en: |
     🚨🚨🚨 CRITICAL: VALIDATOR COUNT QUESTION DETECTED 🚨🚨🚨

@@ -4727,6 +4727,62 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                 if similarity_scores:
                     max_similarity = max(similarity_scores)
         
+        # CRITICAL FIX: For news/article queries with low similarity, force "not found" response
+        # This MUST run BEFORE entering RAG path to prevent hallucination
+        # This should run REGARDLESS of has_no_reliable_context (even if we have 3 docs, if similarity is low, it's not relevant)
+        if is_news_article_query and max_similarity is not None and max_similarity < 0.45:
+            logger.warning(f"🚨 CRITICAL: News/article query with max_similarity={max_similarity:.3f} < 0.45 - FORCING 'not found' response BEFORE LLM call")
+            processing_steps.append(f"🚨 News/article query with low similarity ({max_similarity:.3f}) - forcing 'not found' response")
+            
+            # Build "not found" response based on language
+            if detected_lang == "vi":
+                not_found_response = """Mình đã tìm kiếm trong bộ nhớ (Knowledge Base) nhưng không tìm thấy bài báo hoặc bài viết nào liên quan đến câu hỏi của bạn.
+
+**Thông tin kỹ thuật:**
+- Điểm tương đồng tối đa: {:.3f} (ngưỡng tối thiểu: 0.45)
+- Số lượng documents đã kiểm tra: {}
+
+**Lý do:**
+- StillMe chỉ có thể trả lời về các bài báo/bài viết đã được thêm vào Knowledge Base thông qua learning cycles (mỗi 4 giờ)
+- Nếu bài báo bạn hỏi chưa được fetch trong learning cycle, StillMe sẽ không có thông tin về nó
+- StillMe không thể truy cập internet để tìm kiếm bài báo mới
+
+**Gợi ý:**
+- Kiểm tra lại tên bài báo hoặc từ khóa bạn đang tìm
+- Đợi learning cycle tiếp theo (mỗi 4 giờ) để StillMe có thể fetch bài báo mới
+- Nếu bài báo đã được fetch, có thể do embedding mismatch - thử dùng từ khóa khác""".format(max_similarity, context.get("total_context_docs", 0) if context else 0)
+            else:
+                not_found_response = """I searched my Knowledge Base but could not find any article or paper related to your question.
+
+**Technical Information:**
+- Maximum similarity score: {:.3f} (minimum threshold: 0.45)
+- Number of documents checked: {}
+
+**Reason:**
+- StillMe can only answer about articles/papers that have been added to the Knowledge Base through learning cycles (every 4 hours)
+- If the article you're asking about hasn't been fetched in a learning cycle yet, StillMe won't have information about it
+- StillMe cannot access the internet to search for new articles
+
+**Suggestions:**
+- Double-check the article name or keywords you're searching for
+- Wait for the next learning cycle (every 4 hours) for StillMe to fetch new articles
+- If the article has been fetched, it might be due to embedding mismatch - try using different keywords""".format(max_similarity, context.get("total_context_docs", 0) if context else 0)
+            
+            from backend.core.epistemic_state import EpistemicState
+            return ChatResponse(
+                response=not_found_response,
+                confidence_score=0.0,  # Very low confidence as nothing was found
+                processing_steps=processing_steps,
+                timing_logs={
+                    "total_time": time.time() - start_time,
+                    "rag_retrieval_latency": rag_retrieval_latency,
+                    "llm_inference_latency": 0.0  # No LLM call
+                },
+                validation_result=None,
+                used_fallback=True,
+                epistemic_state=EpistemicState.UNKNOWN.value
+            )
+        
         # CRITICAL: Log context status to trace why RAG path might not be entered
         similarity_str = f", max_similarity={max_similarity:.3f}" if max_similarity is not None else ""
         logger.info(f"🔍 [TRACE] Context check: context={context is not None}, total_context_docs={context.get('total_context_docs', 0) if context else 0}, knowledge_docs={len(context.get('knowledge_docs', [])) if context else 0}, conversation_docs={len(context.get('conversation_docs', [])) if context else 0}{similarity_str}")
@@ -5032,61 +5088,6 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                 not has_reliable_context or
                 context_quality == "low"
             )
-            
-            # CRITICAL FIX: For news/article queries with low similarity, force "not found" response
-            # This should run REGARDLESS of has_no_reliable_context (even if we have 3 docs, if similarity is low, it's not relevant)
-            if is_news_article_query and max_similarity is not None and max_similarity < 0.45:
-                logger.warning(f"🚨 CRITICAL: News/article query with max_similarity={max_similarity:.3f} < 0.45 - FORCING 'not found' response")
-                processing_steps.append(f"🚨 News/article query with low similarity ({max_similarity:.3f}) - forcing 'not found' response")
-                
-                # Build "not found" response based on language
-                if detected_lang == "vi":
-                    not_found_response = """Mình đã tìm kiếm trong bộ nhớ (Knowledge Base) nhưng không tìm thấy bài báo hoặc bài viết nào liên quan đến câu hỏi của bạn.
-
-**Thông tin kỹ thuật:**
-- Điểm tương đồng tối đa: {:.3f} (ngưỡng tối thiểu: 0.45)
-- Số lượng documents đã kiểm tra: {}
-
-**Lý do:**
-- StillMe chỉ có thể trả lời về các bài báo/bài viết đã được thêm vào Knowledge Base thông qua learning cycles (mỗi 4 giờ)
-- Nếu bài báo bạn hỏi chưa được fetch trong learning cycle, StillMe sẽ không có thông tin về nó
-- StillMe không thể truy cập internet để tìm kiếm bài báo mới
-
-**Gợi ý:**
-- Kiểm tra lại tên bài báo hoặc từ khóa bạn đang tìm
-- Đợi learning cycle tiếp theo (mỗi 4 giờ) để StillMe có thể fetch bài báo mới
-- Nếu bài báo đã được fetch, có thể do embedding mismatch - thử dùng từ khóa khác""".format(max_similarity, context.get("total_context_docs", 0) if context else 0)
-                else:
-                    not_found_response = """I searched my Knowledge Base but could not find any article or paper related to your question.
-
-**Technical Information:**
-- Maximum similarity score: {:.3f} (minimum threshold: 0.45)
-- Number of documents checked: {}
-
-**Reason:**
-- StillMe can only answer about articles/papers that have been added to the Knowledge Base through learning cycles (every 4 hours)
-- If the article you're asking about hasn't been fetched in a learning cycle yet, StillMe won't have information about it
-- StillMe cannot access the internet to search for new articles
-
-**Suggestions:**
-- Double-check the article name or keywords you're searching for
-- Wait for the next learning cycle (every 4 hours) for StillMe to fetch new articles
-- If the article has been fetched, it might be due to embedding mismatch - try using different keywords""".format(max_similarity, context.get("total_context_docs", 0) if context else 0)
-                
-                from backend.core.epistemic_state import EpistemicState
-                return ChatResponse(
-                    response=not_found_response,
-                    confidence_score=0.0,  # Very low confidence as nothing was found
-                    processing_steps=processing_steps,
-                    timing_logs={
-                        "total_time": time.time() - start_time,
-                        "rag_retrieval_latency": rag_retrieval_latency,
-                        "llm_inference_latency": 0.0  # No LLM call
-                    },
-                    validation_result=None,
-                    used_fallback=True,
-                    epistemic_state=EpistemicState.UNKNOWN.value
-                )
             
             if has_no_reliable_context:
                 context_is_relevant = False
@@ -5929,22 +5930,31 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                         # Check for failed feeds in RSS stats
                         rss_info = sources_list.get("rss", {})
                         failed_feeds_info = rss_info.get("failed_feeds")
+                        feeds_count = rss_info.get("feeds_count", 0)
                         failed_feeds_text = ""
                         if failed_feeds_info:
                             failed_count = failed_feeds_info.get("failed_count", 0)
                             successful_count = failed_feeds_info.get("successful_count", 0)
-                            total_count = failed_feeds_info.get("total_count", 0)
+                            total_count = failed_feeds_info.get("total_count", feeds_count)  # Use feeds_count as fallback
                             failure_rate = failed_feeds_info.get("failure_rate", 0)
                             last_error = failed_feeds_info.get("last_error")
                             
                             if failed_count > 0:
                                 failed_feeds_text = f"""
-**⚠️ RSS FEEDS STATUS (CRITICAL - MUST REPORT):**
+**⚠️ RSS FEEDS STATUS (CRITICAL - MUST REPORT EXACT NUMBERS):**
+- **Total RSS Feeds**: {total_count} feeds configured
 - **Failed Feeds**: {failed_count}/{total_count} feeds are currently failing ({failure_rate}% failure rate)
 - **Successful Feeds**: {successful_count}/{total_count} feeds are working
 - **Last Error**: {last_error[:150] if last_error else 'Unknown error'}
-- **CRITICAL**: You MUST mention that some RSS feeds are experiencing issues. Do NOT say "all sources are working fine" or "all feeds are active" when {failed_count} feeds have failed.
-- **You MUST be honest**: Say something like "StillMe is currently learning from {len(enabled_sources)} sources, but {failed_count} RSS feeds are experiencing connection issues (failure rate: {failure_rate}%). The system is still learning from {successful_count} working feeds."
+- **CRITICAL**: You MUST mention the EXACT numbers: "{total_count} RSS feeds total, {failed_count} feeds are experiencing connection issues, {successful_count} feeds are working". Do NOT say "all sources are working fine" or "all feeds are active" when {failed_count} feeds have failed.
+- **You MUST be honest and specific**: Say something like "StillMe is currently learning from {len(enabled_sources)} sources. For RSS feeds specifically: {total_count} feeds total, {failed_count} feeds are experiencing connection issues (failure rate: {failure_rate}%), {successful_count} feeds are working normally."
+"""
+                        elif feeds_count > 0:
+                            # If no failed_feeds_info but we have feeds_count, still mention it
+                            failed_feeds_text = f"""
+**📊 RSS FEEDS STATUS:**
+- **Total RSS Feeds**: {feeds_count} feeds configured
+- **Note**: Current status information is being updated. StillMe learns from RSS feeds every 4 hours.
 """
                         
                         # CRITICAL: Extract newline outside f-string to avoid syntax error
