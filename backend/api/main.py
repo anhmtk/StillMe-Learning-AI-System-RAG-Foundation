@@ -663,6 +663,30 @@ def _initialize_rag_components():
                     if success_technical:
                         logger.info("✅ Technical foundational knowledge added successfully!")
                         
+                        # CRITICAL: Verify foundational knowledge was actually added
+                        # Wait a moment for ChromaDB to index
+                        import time
+                        time.sleep(1)
+                        
+                        # Verify by searching again
+                        verify_results = chroma_client.search_knowledge(
+                            query_embedding=query_embedding,
+                            limit=5
+                        )
+                        verified = False
+                        for result in verify_results:
+                            metadata = result.get("metadata", {})
+                            if metadata.get("source") == "CRITICAL_FOUNDATION":
+                                distance = result.get("distance", 1.0)
+                                if distance < 0.5:
+                                    verified = True
+                                    logger.info(f"✅ Verified foundational knowledge exists (distance: {distance:.3f})")
+                                    break
+                        
+                        if not verified:
+                            logger.error("❌ CRITICAL: Foundational knowledge added but verification failed!")
+                            logger.error("   This may indicate embedding model mismatch or ChromaDB indexing issue")
+                        
                         # P3: Increment knowledge version after foundational knowledge update
                         try:
                             from backend.services.knowledge_version import increment_knowledge_version
@@ -671,9 +695,11 @@ def _initialize_rag_components():
                         except Exception as e:
                             logger.warning(f"Failed to increment knowledge version: {e}")
                     else:
-                        logger.warning("⚠️ Failed to add technical foundational knowledge")
+                        logger.error("❌ CRITICAL: Failed to add technical foundational knowledge!")
+                        logger.error("   StillMe may not be able to answer questions about itself correctly")
                 else:
-                    logger.warning(f"⚠️ Technical foundational knowledge file not found: {technical_path}")
+                    logger.error(f"❌ CRITICAL: Technical foundational knowledge file not found: {technical_path}")
+                    logger.error("   StillMe may not be able to answer questions about itself correctly")
                 
                 # Phase 2: Philosophical foundational knowledge is now a style_guide (moved to docs/style/)
                 # It should NOT be loaded into RAG to prevent prompt drift

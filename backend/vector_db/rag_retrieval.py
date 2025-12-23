@@ -412,9 +412,72 @@ class RAGRetrieval:
                                 if len(knowledge_results) >= knowledge_limit:
                                     break
                     
+                    # CRITICAL FIX: Detect "latest/newest" queries and sort by timestamp
+                    is_latest_query = False
+                    try:
+                        from backend.core.question_classifier import is_latest_query as check_latest
+                        is_latest_query = check_latest(query)
+                        if is_latest_query:
+                            logger.info(f"🕐 Latest/newest query detected - will sort by timestamp descending")
+                    except Exception:
+                        pass  # Non-critical, continue if detection fails
+                    
+                    # CRITICAL FIX: Sort by timestamp for "latest/newest" queries
+                    if is_latest_query and knowledge_results:
+                        logger.info(f"🕐 Sorting {len(knowledge_results)} documents by timestamp (newest first)")
+                        from datetime import datetime
+                        
+                        def get_timestamp_for_sorting(doc):
+                            """Extract timestamp from document metadata for sorting"""
+                            metadata = doc.get("metadata", {})
+                            
+                            # Try multiple timestamp fields
+                            timestamp_fields = [
+                                "added_to_kb",
+                                "timestamp",
+                                "created_at",
+                                "date",
+                                "published_date",
+                                "learned_at"
+                            ]
+                            
+                            for field in timestamp_fields:
+                                timestamp_str = metadata.get(field, "")
+                                if not timestamp_str:
+                                    continue
+                                
+                                try:
+                                    # Try various timestamp formats
+                                    if "UTC" in str(timestamp_str):
+                                        date_str = str(timestamp_str).split("UTC")[0].strip()
+                                        parsed_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+                                        return parsed_date
+                                    elif "T" in str(timestamp_str):
+                                        # ISO format: 2025-12-22T10:30:00Z or 2025-12-22T10:30:00+00:00
+                                        date_str = str(timestamp_str).replace("Z", "").replace("+00:00", "").split("T")
+                                        if len(date_str) == 2:
+                                            parsed_date = datetime.strptime(f"{date_str[0]} {date_str[1]}", "%Y-%m-%d %H:%M:%S")
+                                            return parsed_date
+                                        else:
+                                            parsed_date = datetime.strptime(date_str[0], "%Y-%m-%d")
+                                            return parsed_date
+                                    elif len(str(timestamp_str).split("-")) == 3:
+                                        # Date format: 2025-12-22
+                                        parsed_date = datetime.strptime(str(timestamp_str).split()[0], "%Y-%m-%d")
+                                        return parsed_date
+                                except Exception:
+                                    continue  # Try next field
+                            
+                            # If no timestamp found, return very old date (will be sorted last)
+                            return datetime(1970, 1, 1)
+                        
+                        # Sort by timestamp descending (newest first)
+                        knowledge_results.sort(key=get_timestamp_for_sorting, reverse=True)
+                        logger.info(f"✅ Sorted {len(knowledge_results)} documents by timestamp (newest first)")
+                    
                     # CRITICAL FIX: Re-ranking for news/article queries - boost recent knowledge
                     # This ensures articles from RSS feeds, arXiv, etc. are prioritized over old foundational docs
-                    if is_news_article_query and knowledge_results:
+                    if is_news_article_query and knowledge_results and not is_latest_query:
                         logger.info(f"📰 Re-ranking {len(knowledge_results)} documents for news/article query - boosting recent knowledge")
                         
                         def calculate_news_relevance_score(doc):

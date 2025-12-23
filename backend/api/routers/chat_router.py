@@ -983,7 +983,8 @@ def _build_prompt_context_from_chat_request(
     detected_lang: str,
     is_stillme_query: bool,
     is_philosophical: bool,
-    fps_result: Optional[FPSResult] = None
+    fps_result: Optional[FPSResult] = None,
+    system_status_note: Optional[str] = None
 ) -> PromptContext:
     """
     Build PromptContext from chat_router context for UnifiedPromptBuilder.
@@ -995,6 +996,7 @@ def _build_prompt_context_from_chat_request(
         is_stillme_query: Whether this is a StillMe query
         is_philosophical: Whether this is a philosophical question
         fps_result: FPS result if available
+        system_status_note: Real-time system status note (System Self-Awareness)
         
     Returns:
         PromptContext object
@@ -1028,7 +1030,8 @@ def _build_prompt_context_from_chat_request(
         conversation_history=chat_request.conversation_history,
         context_quality=context_quality,
         has_reliable_context=has_reliable_context,
-        num_knowledge_docs=num_knowledge_docs
+        num_knowledge_docs=num_knowledge_docs,
+        system_status_note=system_status_note
     )
 
 
@@ -3556,6 +3559,26 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     logger.warning("⚠️ Failed to fetch learning sources: empty response")
             except Exception as sources_error:
                 logger.warning(f"Failed to fetch learning sources: {sources_error}")
+        
+        # CRITICAL: Get real-time system status for System Self-Awareness
+        system_status_note = ""
+        try:
+            from backend.services.system_monitor import get_system_monitor
+            system_monitor = get_system_monitor()
+            # Set component references if available
+            try:
+                import backend.api.main as main_module
+                if hasattr(main_module, 'rss_fetcher') and main_module.rss_fetcher:
+                    system_monitor.set_components(rss_fetcher=main_module.rss_fetcher)
+                if hasattr(main_module, 'source_integration') and main_module.source_integration:
+                    system_monitor.set_components(source_integration=main_module.source_integration)
+            except Exception:
+                pass  # Non-critical, continue without components
+            system_status_note = system_monitor.get_system_status_note()
+            if system_status_note and system_status_note != "[System: Status unavailable]":
+                logger.info(f"📊 System status note: {system_status_note}")
+        except Exception as monitor_error:
+            logger.debug(f"Could not get system status: {monitor_error}")
         
         # Detect philosophical questions - filter technical RAG documents
         is_philosophical = False
@@ -6508,7 +6531,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
                         detected_lang=detected_lang,
                         is_stillme_query=is_stillme_query,
                         is_philosophical=is_philosophical,
-                        fps_result=None  # FPS already handled in no-context path
+                        fps_result=None,  # FPS already handled in no-context path
+                        system_status_note=system_status_note  # System Self-Awareness: Inject real-time status
                     )
                     
                     # Use UnifiedPromptBuilder to build base prompt

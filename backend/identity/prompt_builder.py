@@ -66,6 +66,7 @@ class PromptContext:
     context_quality: Optional[str] = None
     has_reliable_context: bool = True
     num_knowledge_docs: int = 0
+    system_status_note: Optional[str] = None  # System Self-Awareness: Real-time system status
 
 
 class InstructionRegistry:
@@ -208,12 +209,21 @@ class UnifiedPromptBuilder:
             is_philosophical=context.is_philosophical
         )
         
+        # CRITICAL: Inject System Self-Awareness status note at the beginning
+        # This provides real-time system status (RSS feeds, errors, etc.) for StillMe to reference
+        system_status_section = ""
+        if context.system_status_note and context.system_status_note != "[System: Status unavailable]":
+            system_status_section = f"""
+{context.system_status_note}
+
+"""
+        
         # Combine with clear priority
         prompt = f"""{language_instruction}
 
 {core_identity}
 
-{context_instruction}
+{system_status_section}{context_instruction}
 
 {formatting}
 

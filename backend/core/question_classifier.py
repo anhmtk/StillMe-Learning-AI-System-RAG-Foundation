@@ -394,3 +394,45 @@ def is_news_article_query(text: str) -> bool:
     logger.debug(f"News/article query detected: False (text='{text[:80]}...')")
     return False
 
+def is_latest_query(text: str) -> bool:
+    """
+    Detect if query is asking for "latest" or "newest" items.
+    
+    These queries should sort results by timestamp descending.
+    
+    Args:
+        text: The question text (can be in English or Vietnamese)
+        
+    Returns:
+        True if the question is asking for latest/newest items, False otherwise
+    """
+    if not text:
+        return False
+    
+    lower = text.lower()
+    
+    # Latest/newest patterns
+    latest_patterns = [
+        # Vietnamese patterns
+        r"mới nhất|mới nhấ|vừa học|vừa lưu|gần đây|mới đây",
+        r"bài.*mới|tin.*mới|bài viết.*mới|bài báo.*mới",
+        r"3 bài.*mới|5 bài.*mới|n bài.*mới",
+        r"tìm.*mới|lục.*mới|kiểm tra.*mới",
+        
+        # English patterns
+        r"latest|newest|most recent|recently",
+        r"latest.*article|newest.*article|most recent.*article",
+        r"latest.*paper|newest.*paper|most recent.*paper",
+        r"find.*latest|search.*latest|get.*latest",
+        r"3.*latest|5.*latest|n.*latest",
+    ]
+    
+    # Check patterns
+    for pattern in latest_patterns:
+        if re.search(pattern, lower):
+            logger.info(f"Latest/newest query detected: True (pattern: '{pattern}', text='{text[:80]}...')")
+            return True
+    
+    logger.debug(f"Latest/newest query detected: False (text='{text[:80]}...')")
+    return False
+
