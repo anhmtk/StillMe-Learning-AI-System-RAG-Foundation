@@ -4882,7 +4882,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                 is_latest_query = check_latest(chat_request.message)
                 if is_latest_query:
                     # Extract requested count from query (e.g., "3 bài", "5 articles", "n bài")
-                    import re
+                    # Note: 're' module is already imported at top level (line 30)
                     message_lower = chat_request.message.lower()
                     # Match patterns like "3 bài", "5 articles", "n bài mới nhất"
                     count_match = re.search(r'(\d+)\s*(bài|article|paper|tin|news)', message_lower)
@@ -9271,6 +9271,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 r"liệt kê.*lớp.*validator.*codebase",
                 r"list.*validator.*layer.*codebase"
             ]
+            # Note: 're' module is already imported at top level (line 30)
+            # Use top-level import to avoid UnboundLocalError
             for pattern in codebase_self_patterns:
                 if re.search(pattern, question_lower, re.IGNORECASE):
                     is_self_knowledge_question = True
