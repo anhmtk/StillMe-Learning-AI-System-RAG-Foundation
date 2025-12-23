@@ -66,10 +66,26 @@ def start_healthcheck_server(port):
         logger.info(f"✅ Healthcheck server started on port {port}")
         sys.stdout.flush()
         # Use serve_forever with timeout to allow checking stop flag
+        # This server will run until uvicorn binds to the same port (which will cause it to fail gracefully)
         while not _healthcheck_stop_flag.is_set():
-            _healthcheck_server.handle_request()
+            try:
+                _healthcheck_server.handle_request()
+            except OSError as e:
+                # Port already in use - uvicorn has taken over, this is expected
+                if "Address already in use" in str(e) or "address already in use" in str(e).lower():
+                    logger.info("✅ Uvicorn has taken over the port - healthcheck server stopping gracefully")
+                    break
+                else:
+                    raise  # Re-raise if it's a different error
         logger.info("🛑 Healthcheck server stopping...")
         sys.stdout.flush()
+    except OSError as e:
+        # Port already in use - uvicorn has taken over, this is expected
+        if "Address already in use" in str(e) or "address already in use" in str(e).lower():
+            logger.info("✅ Uvicorn has taken over the port - healthcheck server stopping gracefully")
+        elif not _healthcheck_stop_flag.is_set():
+            logger.error(f"❌ Healthcheck server failed: {e}")
+            sys.stdout.flush()
     except Exception as e:
         if not _healthcheck_stop_flag.is_set():
             logger.error(f"❌ Healthcheck server failed: {e}")
@@ -256,9 +272,13 @@ if 'app' not in locals() and 'app' not in globals():
     sys.stdout.flush()
     sys.exit(1)
 
-# CRITICAL: Stop healthcheck server before starting uvicorn
-# FastAPI app has its own /health endpoint, so healthcheck server is no longer needed
-stop_healthcheck_server()
+# CRITICAL: DO NOT stop healthcheck server before uvicorn starts
+# This creates a gap where Railway health check can fail
+# Instead, let uvicorn bind to port (which will cause healthcheck server to fail gracefully)
+# Healthcheck server will be automatically replaced when uvicorn binds to the same port
+logger.info("ℹ️ Healthcheck server will continue running until uvicorn binds to port")
+logger.info("ℹ️ Uvicorn will automatically take over the port when it starts")
+sys.stdout.flush()
 
 # Start uvicorn
 logger.info("=" * 60)
@@ -289,10 +309,12 @@ except Exception as e:
 
 try:
     logger.info("🚀 Starting uvicorn server...")
-    logger.info("⚠️ Note: Healthcheck server will be replaced by FastAPI app")
+    logger.info("⚠️ Note: Uvicorn will bind to port, causing healthcheck server to stop gracefully")
+    logger.info("⚠️ This is expected - FastAPI app takes over once uvicorn binds to port")
     sys.stdout.flush()
-    # Uvicorn will bind to the same port, which will cause the healthcheck server to fail
+    # Uvicorn will bind to the same port, which will cause the healthcheck server to fail gracefully
     # This is expected - FastAPI app takes over once it starts
+    # The healthcheck server will catch OSError and stop gracefully
     uvicorn.run(
         app,
         host="0.0.0.0",
