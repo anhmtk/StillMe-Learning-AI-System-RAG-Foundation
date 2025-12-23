@@ -11,7 +11,7 @@ streamlit==1.52.2
  main
 
 # Database
-sqlalchemy==2.0.44
+sqlalchemy==2.0.45
 alembic==1.17.1
 # Note: sqlite3 is built-in Python module, no need to install
 
