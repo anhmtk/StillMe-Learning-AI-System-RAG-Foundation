@@ -534,14 +534,18 @@ class OpenRouterProvider(LLMProvider):
             # These questions require listing 19 validators and 7 layers, so need more tokens
             prompt_lower = prompt.lower()
             user_q_lower = user_question.lower() if user_question else ""
+            # Check user question first (most reliable), then check prompt
             is_stillme_query = (
-                "validator" in prompt_lower and ("count" in prompt_lower or "bao nhiêu" in prompt_lower or "how many" in prompt_lower) or
+                # User question checks (most reliable)
+                ("validator" in user_q_lower and ("count" in user_q_lower or "bao nhiêu" in user_q_lower or "how many" in user_q_lower)) or
+                "lớp validator" in user_q_lower or "validator layer" in user_q_lower or
+                "bao nhiêu lớp" in user_q_lower or "how many layers" in user_q_lower or
+                # Prompt checks (fallback)
+                ("validator" in prompt_lower and ("count" in prompt_lower or "bao nhiêu" in prompt_lower or "how many" in prompt_lower)) or
                 "lớp validator" in prompt_lower or "validator layer" in prompt_lower or
                 "19 validators" in prompt_lower or "7 layers" in prompt_lower or
                 "validation framework" in prompt_lower or
-                ("stillme" in prompt_lower and ("architecture" in prompt_lower or "system" in prompt_lower)) or
-                ("validator" in user_q_lower and ("count" in user_q_lower or "bao nhiêu" in user_q_lower or "how many" in user_q_lower)) or
-                "lớp validator" in user_q_lower or "validator layer" in user_q_lower
+                ("stillme" in prompt_lower and ("architecture" in prompt_lower or "system" in prompt_lower))
             )
             
             # Adjust max_tokens based on query type

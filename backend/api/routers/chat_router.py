@@ -5033,17 +5033,15 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                 context_quality == "low"
             )
             
-            if has_no_reliable_context:
-                context_is_relevant = False
+            # CRITICAL FIX: For news/article queries with low similarity, force "not found" response
+            # This should run REGARDLESS of has_no_reliable_context (even if we have 3 docs, if similarity is low, it's not relevant)
+            if is_news_article_query and max_similarity is not None and max_similarity < 0.45:
+                logger.warning(f"🚨 CRITICAL: News/article query with max_similarity={max_similarity:.3f} < 0.45 - FORCING 'not found' response")
+                processing_steps.append(f"🚨 News/article query with low similarity ({max_similarity:.3f}) - forcing 'not found' response")
                 
-                # CRITICAL FIX: For news/article queries with low similarity, force "not found" response
-                if is_news_article_query and max_similarity is not None and max_similarity < 0.45:
-                    logger.warning(f"🚨 CRITICAL: News/article query with max_similarity={max_similarity:.3f} < 0.45 - FORCING 'not found' response")
-                    processing_steps.append(f"🚨 News/article query with low similarity ({max_similarity:.3f}) - forcing 'not found' response")
-                    
-                    # Build "not found" response based on language
-                    if detected_lang == "vi":
-                        not_found_response = """Mình đã tìm kiếm trong bộ nhớ (Knowledge Base) nhưng không tìm thấy bài báo hoặc bài viết nào liên quan đến câu hỏi của bạn.
+                # Build "not found" response based on language
+                if detected_lang == "vi":
+                    not_found_response = """Mình đã tìm kiếm trong bộ nhớ (Knowledge Base) nhưng không tìm thấy bài báo hoặc bài viết nào liên quan đến câu hỏi của bạn.
 
 **Thông tin kỹ thuật:**
 - Điểm tương đồng tối đa: {:.3f} (ngưỡng tối thiểu: 0.45)
@@ -5058,8 +5056,8 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
 - Kiểm tra lại tên bài báo hoặc từ khóa bạn đang tìm
 - Đợi learning cycle tiếp theo (mỗi 4 giờ) để StillMe có thể fetch bài báo mới
 - Nếu bài báo đã được fetch, có thể do embedding mismatch - thử dùng từ khóa khác""".format(max_similarity, context.get("total_context_docs", 0) if context else 0)
-                    else:
-                        not_found_response = """I searched my Knowledge Base but could not find any article or paper related to your question.
+                else:
+                    not_found_response = """I searched my Knowledge Base but could not find any article or paper related to your question.
 
 **Technical Information:**
 - Maximum similarity score: {:.3f} (minimum threshold: 0.45)
@@ -5074,21 +5072,24 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
 - Double-check the article name or keywords you're searching for
 - Wait for the next learning cycle (every 4 hours) for StillMe to fetch new articles
 - If the article has been fetched, it might be due to embedding mismatch - try using different keywords""".format(max_similarity, context.get("total_context_docs", 0) if context else 0)
-                    
-                    from backend.core.epistemic_state import EpistemicState
-                    return ChatResponse(
-                        response=not_found_response,
-                        confidence_score=0.0,  # Low confidence - we didn't find anything
-                        processing_steps=processing_steps,
-                        timing_logs={
-                            "total_time": time.time() - start_time,
-                            "rag_retrieval_latency": rag_retrieval_latency,
-                            "llm_inference_latency": 0.0  # No LLM call needed
-                        },
-                        validation_result=None,
-                        used_fallback=False,
-                        epistemic_state=EpistemicState.UNKNOWN.value  # Unknown because we didn't find it
-                    )
+                
+                from backend.core.epistemic_state import EpistemicState
+                return ChatResponse(
+                    response=not_found_response,
+                    confidence_score=0.0,  # Very low confidence as nothing was found
+                    processing_steps=processing_steps,
+                    timing_logs={
+                        "total_time": time.time() - start_time,
+                        "rag_retrieval_latency": rag_retrieval_latency,
+                        "llm_inference_latency": 0.0  # No LLM call
+                    },
+                    validation_result=None,
+                    used_fallback=True,
+                    epistemic_state=EpistemicState.UNKNOWN.value
+                )
+            
+            if has_no_reliable_context:
+                context_is_relevant = False
                 
                 # CRITICAL: Pre-LLM Hallucination Guard for RAG path with no reliable context
                 # If factual question + no reliable context + suspicious entity → block and return honest response

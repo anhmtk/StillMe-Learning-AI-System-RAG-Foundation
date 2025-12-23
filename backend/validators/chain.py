@@ -238,6 +238,17 @@ class ValidatorChain:
                                     reasons=reasons,
                                     patched_answer=None
                                 )
+                        elif any("future_dates_detected" in r for r in reasons):
+                            # CRITICAL: FutureDatesValidator detected future dates - this is a hallucination
+                            # Block response immediately - don't allow hallucinated dates
+                            logger.warning(
+                                f"Validator {i} ({type(validator).__name__}) failed: future_dates_detected (critical) - BLOCKING response to prevent hallucination"
+                            )
+                            return ValidationResult(
+                                passed=False,
+                                reasons=reasons,
+                                patched_answer=None  # Don't allow patched answer - block the response
+                            )
                         else:
                             # Track critical failure (no patch available)
                             has_critical_failure = True
