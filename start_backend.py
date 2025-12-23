@@ -94,10 +94,8 @@ def start_healthcheck_server(port):
 def stop_healthcheck_server():
     """Stop the healthcheck server to free up the port for FastAPI"""
     global _healthcheck_server, _healthcheck_thread
-    if _healthcheck_server:
+    if _healthcheck_server or (_healthcheck_thread and _healthcheck_thread.is_alive()):
         try:
-            logger.info("🛑 Stopping healthcheck server to free port for FastAPI...")
-            sys.stdout.flush()
             # Signal server to stop
             _healthcheck_stop_flag.set()
             # Make a request to trigger handle_request() to check the flag
@@ -109,16 +107,18 @@ def stop_healthcheck_server():
                 sock.close()
             except:
                 pass  # Ignore connection errors
-            # Wait for thread to finish
+            # Wait for thread to finish (with shorter timeout for faster shutdown)
             if _healthcheck_thread and _healthcheck_thread.is_alive():
-                _healthcheck_thread.join(timeout=1.0)
+                _healthcheck_thread.join(timeout=0.5)  # Reduced from 1.0 to 0.5
             # Close server
             if _healthcheck_server:
-                _healthcheck_server.server_close()
+                try:
+                    _healthcheck_server.server_close()
+                except:
+                    pass  # Ignore errors during shutdown
                 _healthcheck_server = None
             logger.info("✅ Healthcheck server stopped")
             sys.stdout.flush()
-            time.sleep(0.5)  # Give port a moment to be released
         except Exception as e:
             logger.warning(f"⚠️ Error stopping healthcheck server: {e}")
             sys.stdout.flush()
@@ -272,12 +272,15 @@ if 'app' not in locals() and 'app' not in globals():
     sys.stdout.flush()
     sys.exit(1)
 
-# CRITICAL: DO NOT stop healthcheck server before uvicorn starts
-# This creates a gap where Railway health check can fail
-# Instead, let uvicorn bind to port (which will cause healthcheck server to fail gracefully)
-# Healthcheck server will be automatically replaced when uvicorn binds to the same port
-logger.info("ℹ️ Healthcheck server will continue running until uvicorn binds to port")
-logger.info("ℹ️ Uvicorn will automatically take over the port when it starts")
+# CRITICAL: Stop healthcheck server RIGHT BEFORE uvicorn starts
+# This prevents port conflict while minimizing gap
+# Uvicorn will start immediately after healthcheck server stops
+logger.info("🛑 Stopping healthcheck server to free port for uvicorn...")
+sys.stdout.flush()
+stop_healthcheck_server()
+# Small delay to ensure port is released, but uvicorn will start immediately after
+time.sleep(0.2)  # 200ms delay - minimal gap
+logger.info("✅ Port should be free now - starting uvicorn immediately")
 sys.stdout.flush()
 
 # Start uvicorn
