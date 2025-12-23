@@ -1,19 +1,9 @@
 # StillMe - Self-Evolving AI System Requirements
 
 # Core Framework
- dependabot/pip/fastapi-0.127.0
 fastapi==0.127.0
-uvicorn[standard]==0.24.0
-
-fastapi==0.124.4
- dependabot/pip/uvicorn-standard--0.40.0
 uvicorn[standard]==0.40.0
- main
-streamlit==1.52.1
-
-uvicorn[standard]==0.24.0
 streamlit==1.52.2
- main
 
 # Database
 sqlalchemy==2.0.45
