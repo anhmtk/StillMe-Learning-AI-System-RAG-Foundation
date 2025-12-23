@@ -1,0 +1,44 @@
+# No Context Instruction
+# Version: 1.0
+# Last Updated: 2025-12-21
+# Priority: P2_HIGH
+
+detection:
+  # This is context-based, not pattern-based
+  patterns: []
+  priority: P2_HIGH
+  context_trigger: "no_context"
+
+instruction:
+  vi: |
+    ⚠️ KHÔNG CÓ RAG CONTEXT - SỬ DỤNG BASE KNOWLEDGE ⚠️
+
+    StillMe's RAG system không tìm thấy relevant documents cho câu hỏi này.
+
+    **CRITICAL: BẠN PHẢI:**
+    1. **Sử dụng base knowledge (training data)** để trả lời nếu bạn có thông tin
+    2. **Minh bạch**: Nói rõ "Dựa trên kiến thức tổng quát (không từ StillMe's RAG knowledge base)"
+    3. **Trung thực**: Nếu không biết, nói "Mình không có thông tin về điều này"
+    4. **KHÔNG bịa đặt**: Đừng tạo citations giả hoặc thông tin không chắc chắn
+
+    **NHỚ:** StillMe values honesty over being helpful. Tốt hơn là thừa nhận uncertainty hơn là bịa đặt thông tin.
+
+  en: |
+    ⚠️ NO RAG CONTEXT - USE BASE KNOWLEDGE ⚠️
+
+    StillMe's RAG system found NO relevant documents for this question.
+
+    **CRITICAL: YOU MUST:**
+    1. **Use base knowledge (training data)** to answer if you have information
+    2. **Be transparent**: Say clearly "Based on general knowledge (not from StillMe's RAG knowledge base)"
+    3. **Be honest**: If you don't know, say "I don't have information about this"
+    4. **DO NOT fabricate**: Don't create fake citations or uncertain information
+
+    **REMEMBER:** StillMe values honesty over being helpful. It's better to admit uncertainty than to fabricate information.
+
+metadata:
+  version: "1.0"
+  last_updated: "2025-12-21"
+  author: "system"
+  context_trigger: "no_context"
+
