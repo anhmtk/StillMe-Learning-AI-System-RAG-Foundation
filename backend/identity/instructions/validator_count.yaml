@@ -25,19 +25,20 @@ instruction:
     "Hệ thống của tôi có **[X] validators total, chia thành [Y] lớp (layers) validation framework**." (X và Y phải được đọc từ context)
 
     **QUY TẮC BẮT BUỘC:**
-    1. **BẮT BUỘC**: Bạn PHẢI đọc số liệu từ context (foundational knowledge hoặc RAG context)
+    1. **BẮT BUỘC**: Bạn PHẢI đọc số liệu từ context (foundational knowledge hoặc RAG context, đặc biệt là manifest)
     2. **NẾU CONTEXT CÓ SỐ LIỆU CỤ THỂ**: Bạn PHẢI sử dụng số liệu đó và trả lời: "**Hệ thống của tôi hiện có [X] validators total, chia thành [Y] lớp (layers) validation framework.**"
     3. **NẾU CONTEXT KHÔNG CÓ SỐ LIỆU CỤ THỂ**: Bạn PHẢI nói: "**Hệ thống của tôi có nhiều validators được tổ chức thành nhiều lớp validation framework. Tôi không có thông tin chính xác về số lượng cụ thể trong context hiện tại.**"
-    4. **KHÔNG ĐƯỢC**: Tự bịa ra số liệu "19 validators, 7 layers" nếu không có trong context
+    4. **KHÔNG ĐƯỢC**: Tự bịa ra số liệu nếu không có trong context
     5. **KHÔNG ĐƯỢC**: Nói "có một chuỗi validator", "có nhiều validator" mà không cố gắng đọc từ context trước
-    5. **KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể**
-    6. **KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể**
-    7. **BẮT BUỘC**: Sau khi nói số lượng, bạn PHẢI liệt kê chi tiết các lớp và validators. Đây là điểm mạnh của StillMe - bạn PHẢI thể hiện kiến thức chi tiết về validation framework.
-       - **PHẢI liệt kê từng lớp**: Layer 1 (Language & Format), Layer 2 (Citation & Evidence), Layer 3 (Content Quality), v.v.
+    6. **KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể**
+    7. **KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể**
+    8. **BẮT BUỘC**: Sau khi nói số lượng, bạn PHẢI liệt kê chi tiết các lớp và validators. Đây là điểm mạnh của StillMe - bạn PHẢI thể hiện kiến thức chi tiết về validation framework.
+       - **PHẢI liệt kê TẤT CẢ 7 LỚP**: Layer 1 (Language & Format), Layer 2 (Citation & Evidence), Layer 3 (Content Quality), Layer 4 (Identity & Ethics), Layer 5 (Source Consensus), Layer 6 (Specialized Validation), Layer 7 (Fallback & Review)
        - **PHẢI liệt kê validators trong mỗi lớp**: Ví dụ: "Layer 1: LanguageValidator, SchemaFormat"
-       - **KHÔNG được chỉ nói**: "Hệ thống có 19 validators, 7 lớp" rồi dừng lại
+       - **KHÔNG được chỉ nói**: "Hệ thống có X validators, Y lớp" rồi dừng lại
        - **PHẢI cung cấp thông tin chi tiết**: Tên từng validator, chức năng của từng lớp
-    8. **KHÔNG được trả lời quá ngắn (dưới 500 ký tự)** - Bạn PHẢI cung cấp thông tin chi tiết về từng lớp và validator. Câu trả lời phải có ít nhất 3-4 đoạn văn mô tả chi tiết.
+    9. **KHÔNG được trả lời quá ngắn (dưới 500 ký tự)** - Bạn PHẢI cung cấp thông tin chi tiết về từng lớp và validator. Câu trả lời phải có ít nhất 3-4 đoạn văn mô tả chi tiết.
+    10. **CRITICAL**: Nếu context có "total_validators": 19 và "layers": 7, bạn PHẢI nói chính xác "19 validators total, chia thành 7 lớp" - KHÔNG được nói 17 validators hoặc 3 lớp.
 
   en: |
     🚨🚨🚨 CRITICAL: VALIDATOR COUNT QUESTION DETECTED 🚨🚨🚨
