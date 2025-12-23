@@ -5381,16 +5381,18 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                 ])
                 # CRITICAL: Improved detection for "your system" questions
                 # Match patterns like "in your system", "your system", "system you", etc.
+                # CRITICAL: Import re module explicitly to avoid UnboundLocalError
+                import re as regex_module_rag
                 has_your_system_pattern_rag = (
                     "your system" in question_lower_rag or
                     "in your system" in question_lower_rag or
-                    re.search(r'\bin\s+your\s+system\b', question_lower_rag) or  # "in your system"
-                    re.search(r'\byour\s+\w+\s+system\b', question_lower_rag) or  # "your X system"
-                    re.search(r'\bsystem\s+\w+\s+you\b', question_lower_rag) or  # "system X you"
-                    re.search(r'\bsystem\s+you\b', question_lower_rag) or  # "system you"
+                    regex_module_rag.search(r'\bin\s+your\s+system\b', question_lower_rag) or  # "in your system"
+                    regex_module_rag.search(r'\byour\s+\w+\s+system\b', question_lower_rag) or  # "your X system"
+                    regex_module_rag.search(r'\bsystem\s+\w+\s+you\b', question_lower_rag) or  # "system X you"
+                    regex_module_rag.search(r'\bsystem\s+you\b', question_lower_rag) or  # "system you"
                     "bạn" in question_lower_rag and "hệ thống" in question_lower_rag or
                     "của bạn" in question_lower_rag or
-                    re.search(r'\bhệ\s+thống\s+của\s+bạn\b', question_lower_rag)  # "hệ thống của bạn"
+                    regex_module_rag.search(r'\bhệ\s+thống\s+của\s+bạn\b', question_lower_rag)  # "hệ thống của bạn"
                 )
                 # CRITICAL: Also check if this was already detected as StillMe query (from earlier detection)
                 # This ensures technical questions about "your system" are properly flagged for retry logic
