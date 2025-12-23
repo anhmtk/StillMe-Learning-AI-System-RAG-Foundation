@@ -33,7 +33,11 @@ instruction:
     5. **KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể**
     6. **KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể**
     7. **BẮT BUỘC**: Sau khi nói số lượng, bạn PHẢI liệt kê chi tiết các lớp và validators. Đây là điểm mạnh của StillMe - bạn PHẢI thể hiện kiến thức chi tiết về validation framework.
-    8. **KHÔNG được trả lời quá ngắn (dưới 200 ký tự)** - Bạn PHẢI cung cấp thông tin chi tiết về từng lớp và validator.
+       - **PHẢI liệt kê từng lớp**: Layer 1 (Language & Format), Layer 2 (Citation & Evidence), Layer 3 (Content Quality), v.v.
+       - **PHẢI liệt kê validators trong mỗi lớp**: Ví dụ: "Layer 1: LanguageValidator, SchemaFormat"
+       - **KHÔNG được chỉ nói**: "Hệ thống có 19 validators, 7 lớp" rồi dừng lại
+       - **PHẢI cung cấp thông tin chi tiết**: Tên từng validator, chức năng của từng lớp
+    8. **KHÔNG được trả lời quá ngắn (dưới 500 ký tự)** - Bạn PHẢI cung cấp thông tin chi tiết về từng lớp và validator. Câu trả lời phải có ít nhất 3-4 đoạn văn mô tả chi tiết.
 
   en: |
     🚨🚨🚨 CRITICAL: VALIDATOR COUNT QUESTION DETECTED 🚨🚨🚨
@@ -53,10 +57,8 @@ instruction:
     6. **DO NOT say generically "multi-layer" or "many validators" - MUST say specific numbers**
 
 metadata:
-  version: "1.0"
-  last_updated: "2025-12-21"
+  version: "1.1"
+  last_updated: "2025-12-23"
   author: "system"
-  fixed_values:
-    total_validators: 19
-    total_layers: 7
+  # REMOVED fixed_values - validator counts must be read from RAG context, not hard-coded
 

@@ -3571,15 +3571,51 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 import backend.api.main as main_module
                 if hasattr(main_module, 'rss_fetcher') and main_module.rss_fetcher:
                     system_monitor.set_components(rss_fetcher=main_module.rss_fetcher)
+                    logger.debug("✅ Set rss_fetcher for system_monitor")
                 if hasattr(main_module, 'source_integration') and main_module.source_integration:
                     system_monitor.set_components(source_integration=main_module.source_integration)
-            except Exception:
-                pass  # Non-critical, continue without components
-            system_status_note = system_monitor.get_system_status_note()
-            if system_status_note and system_status_note != "[System: Status unavailable]":
+                    logger.debug("✅ Set source_integration for system_monitor")
+            except Exception as comp_error:
+                logger.debug(f"Could not set components for system_monitor: {comp_error}")
+                # Fallback: Try to query API directly if components not available
+                if is_learning_sources_query:
+                    try:
+                        from backend.api.routers.learning_router import get_current_learning_sources
+                        import asyncio
+                        # If we're in async context, we can await
+                        # Otherwise, we'll use the already-fetched current_learning_sources
+                        if current_learning_sources:
+                            rss_info = current_learning_sources.get("current_sources", {}).get("rss", {})
+                            feeds_count = rss_info.get("feeds_count", 0)
+                            failed_feeds_info = rss_info.get("failed_feeds", {})
+                            if failed_feeds_info:
+                                failed_count = failed_feeds_info.get("failed_count", 0)
+                                successful_count = failed_feeds_info.get("successful_count", 0)
+                                system_status_note = f"[System: {feeds_count} RSS feeds ({failed_count} failed, {successful_count} ok)]"
+                                logger.info(f"📊 System status note (from API): {system_status_note}")
+                    except Exception:
+                        pass  # Non-critical
+            system_status_note_from_monitor = system_monitor.get_system_status_note()
+            if system_status_note_from_monitor and system_status_note_from_monitor != "[System: Status unavailable]":
+                system_status_note = system_status_note_from_monitor
                 logger.info(f"📊 System status note: {system_status_note}")
+            elif not system_status_note:
+                logger.warning("⚠️ System status note unavailable - system_monitor may not have components")
         except Exception as monitor_error:
-            logger.debug(f"Could not get system status: {monitor_error}")
+            logger.warning(f"Could not get system status: {monitor_error}")
+            # Fallback for learning sources queries
+            if is_learning_sources_query and current_learning_sources:
+                try:
+                    rss_info = current_learning_sources.get("current_sources", {}).get("rss", {})
+                    feeds_count = rss_info.get("feeds_count", 0)
+                    failed_feeds_info = rss_info.get("failed_feeds", {})
+                    if failed_feeds_info:
+                        failed_count = failed_feeds_info.get("failed_count", 0)
+                        successful_count = failed_feeds_info.get("successful_count", 0)
+                        system_status_note = f"[System: {feeds_count} RSS feeds ({failed_count} failed, {successful_count} ok)]"
+                        logger.info(f"📊 System status note (fallback from API): {system_status_note}")
+                except Exception:
+                    pass
         
         # Detect philosophical questions - filter technical RAG documents
         is_philosophical = False
