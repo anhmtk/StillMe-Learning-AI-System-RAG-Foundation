@@ -1,0 +1,47 @@
+# Suspicious Entity Instruction
+# Version: 1.0
+# Last Updated: 2025-12-21
+# Priority: P1_CRITICAL
+
+detection:
+  # This is context-based (FPS detection), not pattern-based
+  patterns: []
+  priority: P1_CRITICAL
+  context_trigger: "suspicious_entity"
+
+instruction:
+  vi: |
+    ⚠️ KHÔNG CÓ RAG CONTEXT VÀ PHÁT HIỆN ENTITY ĐÁNG NGỜ ⚠️
+
+    StillMe's RAG system không tìm thấy relevant documents cho câu hỏi này.
+    StillMe's FPS (Factual Plausibility Scanner) đã phát hiện suspicious entities: {suspicious_entities}
+
+    **CRITICAL: BẠN PHẢI:**
+    1. KHÔNG phân tích hoặc cung cấp historical context cho entities này
+    2. Nói rõ: "Mình không có đủ dữ liệu để phân tích [entity]"
+    3. Thừa nhận: "StillMe's knowledge base không chứa điều này, và mình không chắc nó tồn tại trong training data"
+    4. Đề xuất: "Đây có thể là một khái niệm giả định. Bạn có thể cung cấp thêm context hoặc sources không?"
+
+    **NHỚ:** StillMe values honesty over being helpful. Tốt hơn là thừa nhận uncertainty hơn là phân tích một concept có thể không tồn tại.
+
+  en: |
+    ⚠️ NO RAG CONTEXT AND SUSPICIOUS ENTITY DETECTED ⚠️
+
+    StillMe's RAG system found NO relevant documents for this question.
+    StillMe's FPS (Factual Plausibility Scanner) detected suspicious entities: {suspicious_entities}
+
+    **CRITICAL: YOU MUST:**
+    1. DO NOT analyze or provide historical context for these entities
+    2. Say clearly: "I don't have sufficient data to analyze [entity]"
+    3. Acknowledge: "StillMe's knowledge base doesn't contain this, and I'm not certain it exists in my training data"
+    4. Suggest: "This may be a hypothetical concept. Could you provide more context or sources?"
+
+    **REMEMBER:** StillMe values honesty over being helpful. It's better to admit uncertainty than to analyze a potentially non-existent concept.
+
+metadata:
+  version: "1.0"
+  last_updated: "2025-12-21"
+  author: "system"
+  context_trigger: "suspicious_entity"
+  supports_formatting: true  # Supports {suspicious_entities} placeholder
+

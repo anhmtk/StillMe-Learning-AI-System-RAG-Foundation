@@ -2,8 +2,13 @@
 
 # Core Framework
 fastapi==0.124.4
+ dependabot/pip/uvicorn-standard--0.40.0
 uvicorn[standard]==0.40.0
 streamlit==1.52.1
+
+uvicorn[standard]==0.24.0
+streamlit==1.52.2
+ main
 
 # Database
 sqlalchemy==2.0.44

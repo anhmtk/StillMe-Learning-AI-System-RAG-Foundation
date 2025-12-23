@@ -530,6 +530,27 @@ class OpenRouterProvider(LLMProvider):
             if total_tokens > 15000:
                 logger.warning(f"⚠️ Total tokens ({total_tokens}) still high, may cause context overflow")
             
+            # CRITICAL: Detect StillMe/validator count questions that need longer responses
+            # These questions require listing 19 validators and 7 layers, so need more tokens
+            prompt_lower = prompt.lower()
+            user_q_lower = user_question.lower() if user_question else ""
+            is_stillme_query = (
+                "validator" in prompt_lower and ("count" in prompt_lower or "bao nhiêu" in prompt_lower or "how many" in prompt_lower) or
+                "lớp validator" in prompt_lower or "validator layer" in prompt_lower or
+                "19 validators" in prompt_lower or "7 layers" in prompt_lower or
+                "validation framework" in prompt_lower or
+                ("stillme" in prompt_lower and ("architecture" in prompt_lower or "system" in prompt_lower)) or
+                ("validator" in user_q_lower and ("count" in user_q_lower or "bao nhiêu" in user_q_lower or "how many" in user_q_lower)) or
+                "lớp validator" in user_q_lower or "validator layer" in user_q_lower
+            )
+            
+            # Adjust max_tokens based on query type
+            max_tokens = 1500  # Default
+            if is_stillme_query:
+                # StillMe/validator count questions need longer responses to list all validators and layers
+                max_tokens = 4000  # Increased from 1500 to 4000 for StillMe queries
+                logger.info(f"📊 StillMe/validator query detected - increasing max_tokens to {max_tokens}")
+            
             async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(
                     "https://openrouter.ai/api/v1/chat/completions",
@@ -545,7 +566,7 @@ class OpenRouterProvider(LLMProvider):
                             {"role": "system", "content": system_content},
                             {"role": "user", "content": prompt}
                         ],
-                        "max_tokens": 1500,
+                        "max_tokens": max_tokens,
                         "temperature": 0.7
                     }
                 )

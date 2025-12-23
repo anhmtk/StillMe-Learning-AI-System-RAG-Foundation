@@ -2436,6 +2436,14 @@ async def _handle_validation_with_fallback(
     )
     logger.debug("Phase 2: Added VerbosityValidator")
     
+    # Add FutureDatesValidator to block future dates/timestamps (prevents hallucination)
+    from backend.validators.future_dates import FutureDatesValidator
+    # Insert before EthicsAdapter (so it can catch hallucinations early)
+    validators.append(
+        FutureDatesValidator()
+    )
+    logger.debug("Phase 2: Added FutureDatesValidator")
+    
     # Add EthicsAdapter last (most critical - blocks harmful content)
     validators.append(
         EthicsAdapter(guard_callable=check_content_ethics)  # Real ethics guard implementation
@@ -4251,6 +4259,20 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
         # Always exclude style_guide for user chat (prevents style drift from RAG)
         exclude_types.append("style_guide")
         
+        # CRITICAL FIX: Detect news/article queries and exclude CRITICAL_FOUNDATION
+        # This prevents StillMe from hallucinating articles when only foundational docs are retrieved
+        is_news_article_query = False
+        try:
+            from backend.core.question_classifier import is_news_article_query as check_news_article
+            is_news_article_query = check_news_article(chat_request.message)
+            if is_news_article_query:
+                logger.info(f"📰 News/article query detected - will exclude CRITICAL_FOUNDATION and use higher similarity threshold (0.45)")
+                processing_steps.append("📰 News/article query detected - excluding CRITICAL_FOUNDATION documents")
+        except ImportError:
+            logger.warning("Question classifier not available, skipping news/article detection")
+        except Exception as detector_error:
+            logger.warning(f"News/article detector error: {detector_error}")
+        
         if rag_retrieval and chat_request.use_rag:
             processing_steps.append("🔍 Searching knowledge base...")
             # CRITICAL: If origin query detected, retrieve provenance knowledge ONLY
@@ -4582,57 +4604,100 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                             is_philosophical=is_philosophical
                         )
                 else:
-                    # Normal retrieval for non-StillMe queries
-                    # But prioritize foundational knowledge for technical questions
-                    # Optimized: conversation_limit reduced from 2 to 1 for latency
-                    
-                    # SOLUTION 1 & 3: Improve retrieval for historical/factual questions
-                    # - Lower similarity threshold for historical questions
-                    # - Enhance query with English keywords for better cross-lingual matching
-                    from backend.core.query_preprocessor import is_historical_question, enhance_query_for_retrieval
-                    
-                    is_historical = is_historical_question(chat_request.message)
-                    retrieval_query = chat_request.message
-                    similarity_threshold = 0.1  # Default
-                    
-                    if is_historical:
-                        # SOLUTION 1: Very low threshold for historical questions (0.03 instead of 0.1)
-                        # This ensures we find historical facts even with multilingual embedding mismatch
-                        similarity_threshold = 0.03
-                        logger.info(f"📜 Historical question detected - using very low similarity threshold: {similarity_threshold}")
+                    # CRITICAL FIX: For news/article queries, exclude CRITICAL_FOUNDATION and use higher similarity threshold
+                    if is_news_article_query:
+                        logger.info(f"📰 News/article query - using higher similarity threshold (0.45) and excluding CRITICAL_FOUNDATION")
+                        # Increase knowledge_limit to get more results (since we're excluding foundational)
+                        context = rag_retrieval.retrieve_context(
+                            query=chat_request.message,
+                            knowledge_limit=min(chat_request.context_limit * 2, 20),  # Get more docs to compensate for exclusion
+                            conversation_limit=1,
+                            prioritize_foundational=False,  # CRITICAL: Don't prioritize foundational for news queries
+                            similarity_threshold=0.45,  # CRITICAL: Higher threshold to ensure relevance
+                            exclude_content_types=exclude_types if exclude_types else None,
+                            prioritize_style_guide=False,
+                            is_philosophical=is_philosophical
+                        )
                         
-                        # SOLUTION 3: Enhance query with English keywords
-                        retrieval_query = enhance_query_for_retrieval(chat_request.message)
-                        logger.info(f"🔍 Enhanced query for better cross-lingual matching: '{chat_request.message}' -> '{retrieval_query}'")
-                    
-                    context = rag_retrieval.retrieve_context(
-                        query=retrieval_query,  # Use enhanced query
-                        knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
-                        conversation_limit=1,  # Optimized: reduced from 2 to 1
-                        exclude_content_types=["technical"] if is_philosophical else None,
-                        prioritize_style_guide=is_philosophical,
-                        prioritize_foundational=is_technical_question,  # Prioritize foundational for technical questions
-                        similarity_threshold=similarity_threshold,  # Use adaptive threshold
-                        is_philosophical=is_philosophical
-                    )
-                    
-                    # Log RAG retrieval decision
-                    if context and 'decision_logger' in locals():
-                        reasoning = "Normal retrieval for non-StillMe queries"
+                        # CRITICAL: Post-filter to remove any CRITICAL_FOUNDATION docs that slipped through
+                        if context and context.get("knowledge_docs"):
+                            filtered_docs = []
+                            for doc in context.get("knowledge_docs", []):
+                                if isinstance(doc, dict):
+                                    metadata = doc.get("metadata", {})
+                                    source = metadata.get("source", "")
+                                    doc_type = metadata.get("type", "")
+                                    foundational = metadata.get("foundational", "")
+                                    tags = str(metadata.get("tags", ""))
+                                    
+                                    is_critical_foundation = (
+                                        source == "CRITICAL_FOUNDATION" or
+                                        doc_type == "foundational" or
+                                        foundational == "stillme" or
+                                        "CRITICAL_FOUNDATION" in tags or
+                                        "foundational:stillme" in tags
+                                    )
+                                    
+                                    if not is_critical_foundation:
+                                        filtered_docs.append(doc)
+                                    else:
+                                        logger.debug(f"Post-filter: Excluding CRITICAL_FOUNDATION doc: {metadata.get('title', 'N/A')}")
+                            
+                            context["knowledge_docs"] = filtered_docs
+                            context["total_context_docs"] = len(filtered_docs) + len(context.get("conversation_docs", []))
+                            logger.info(f"📰 Post-filtered: {len(filtered_docs)} non-foundational docs remaining (excluded {len(context.get('knowledge_docs', [])) - len(filtered_docs)} foundational docs)")
+                    else:
+                        # Normal retrieval for non-StillMe queries
+                        # But prioritize foundational knowledge for technical questions
+                        # Optimized: conversation_limit reduced from 2 to 1 for latency
+                        
+                        # SOLUTION 1 & 3: Improve retrieval for historical/factual questions
+                        # - Lower similarity threshold for historical questions
+                        # - Enhance query with English keywords for better cross-lingual matching
+                        from backend.core.query_preprocessor import is_historical_question, enhance_query_for_retrieval
+                        
+                        is_historical = is_historical_question(chat_request.message)
+                        retrieval_query = chat_request.message
+                        similarity_threshold = 0.1  # Default
+                        
                         if is_historical:
-                            reasoning = "Historical question detected - using very low similarity threshold (0.03) and enhanced query for better cross-lingual matching"
-                        elif is_technical_question:
-                            reasoning = "Technical question detected - prioritizing foundational knowledge"
-                        _log_rag_retrieval_decision(
-                            decision_logger,
-                            context,
-                            retrieval_query,
-                            reasoning,
-                            similarity_threshold=similarity_threshold,
-                            prioritize_foundational=is_technical_question,
-                            exclude_types=["technical"] if is_philosophical else None,
-                            alternatives_considered=["Higher similarity threshold", "No query enhancement"] if is_historical else None
-                    )
+                            # SOLUTION 1: Very low threshold for historical questions (0.03 instead of 0.1)
+                            # This ensures we find historical facts even with multilingual embedding mismatch
+                            similarity_threshold = 0.03
+                            logger.info(f"📜 Historical question detected - using very low similarity threshold: {similarity_threshold}")
+                            
+                            # SOLUTION 3: Enhance query with English keywords
+                            retrieval_query = enhance_query_for_retrieval(chat_request.message)
+                            logger.info(f"🔍 Enhanced query for better cross-lingual matching: '{chat_request.message}' -> '{retrieval_query}'")
+                        
+                        context = rag_retrieval.retrieve_context(
+                            query=retrieval_query,  # Use enhanced query
+                            knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
+                            conversation_limit=1,  # Optimized: reduced from 2 to 1
+                            exclude_content_types=["technical"] if is_philosophical else None,
+                            prioritize_style_guide=is_philosophical,
+                            prioritize_foundational=is_technical_question,  # Prioritize foundational for technical questions
+                            similarity_threshold=similarity_threshold,  # Use adaptive threshold
+                            is_philosophical=is_philosophical
+                        )
+                        
+                        # Log RAG retrieval decision
+                        if context and 'decision_logger' in locals():
+                            reasoning = "Normal retrieval for non-StillMe queries"
+                            if is_historical:
+                                reasoning = "Historical question detected - using very low similarity threshold (0.03) and enhanced query for better cross-lingual matching"
+                            elif is_technical_question:
+                                reasoning = "Technical question detected - prioritizing foundational knowledge"
+                            _log_rag_retrieval_decision(
+                                decision_logger,
+                                context,
+                                retrieval_query,
+                                reasoning,
+                                similarity_threshold=similarity_threshold,
+                                prioritize_foundational=is_technical_question,
+                                exclude_types=["technical"] if is_philosophical else None,
+                                alternatives_considered=["Higher similarity threshold", "No query enhancement"] if is_historical else None
+                            )
         
         rag_retrieval_end = time.time()
         rag_retrieval_latency = rag_retrieval_end - rag_retrieval_start
@@ -4970,6 +5035,60 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
             
             if has_no_reliable_context:
                 context_is_relevant = False
+                
+                # CRITICAL FIX: For news/article queries with low similarity, force "not found" response
+                if is_news_article_query and max_similarity is not None and max_similarity < 0.45:
+                    logger.warning(f"🚨 CRITICAL: News/article query with max_similarity={max_similarity:.3f} < 0.45 - FORCING 'not found' response")
+                    processing_steps.append(f"🚨 News/article query with low similarity ({max_similarity:.3f}) - forcing 'not found' response")
+                    
+                    # Build "not found" response based on language
+                    if detected_lang == "vi":
+                        not_found_response = """Mình đã tìm kiếm trong bộ nhớ (Knowledge Base) nhưng không tìm thấy bài báo hoặc bài viết nào liên quan đến câu hỏi của bạn.
+
+**Thông tin kỹ thuật:**
+- Điểm tương đồng tối đa: {:.3f} (ngưỡng tối thiểu: 0.45)
+- Số lượng documents đã kiểm tra: {}
+
+**Lý do:**
+- StillMe chỉ có thể trả lời về các bài báo/bài viết đã được thêm vào Knowledge Base thông qua learning cycles (mỗi 4 giờ)
+- Nếu bài báo bạn hỏi chưa được fetch trong learning cycle, StillMe sẽ không có thông tin về nó
+- StillMe không thể truy cập internet để tìm kiếm bài báo mới
+
+**Gợi ý:**
+- Kiểm tra lại tên bài báo hoặc từ khóa bạn đang tìm
+- Đợi learning cycle tiếp theo (mỗi 4 giờ) để StillMe có thể fetch bài báo mới
+- Nếu bài báo đã được fetch, có thể do embedding mismatch - thử dùng từ khóa khác""".format(max_similarity, context.get("total_context_docs", 0) if context else 0)
+                    else:
+                        not_found_response = """I searched my Knowledge Base but could not find any article or paper related to your question.
+
+**Technical Information:**
+- Maximum similarity score: {:.3f} (minimum threshold: 0.45)
+- Number of documents checked: {}
+
+**Reason:**
+- StillMe can only answer about articles/papers that have been added to the Knowledge Base through learning cycles (every 4 hours)
+- If the article you're asking about hasn't been fetched in a learning cycle yet, StillMe won't have information about it
+- StillMe cannot access the internet to search for new articles
+
+**Suggestions:**
+- Double-check the article name or keywords you're searching for
+- Wait for the next learning cycle (every 4 hours) for StillMe to fetch new articles
+- If the article has been fetched, it might be due to embedding mismatch - try using different keywords""".format(max_similarity, context.get("total_context_docs", 0) if context else 0)
+                    
+                    from backend.core.epistemic_state import EpistemicState
+                    return ChatResponse(
+                        response=not_found_response,
+                        confidence_score=0.0,  # Low confidence - we didn't find anything
+                        processing_steps=processing_steps,
+                        timing_logs={
+                            "total_time": time.time() - start_time,
+                            "rag_retrieval_latency": rag_retrieval_latency,
+                            "llm_inference_latency": 0.0  # No LLM call needed
+                        },
+                        validation_result=None,
+                        used_fallback=False,
+                        epistemic_state=EpistemicState.UNKNOWN.value  # Unknown because we didn't find it
+                    )
                 
                 # CRITICAL: Pre-LLM Hallucination Guard for RAG path with no reliable context
                 # If factual question + no reliable context + suspicious entity → block and return honest response
