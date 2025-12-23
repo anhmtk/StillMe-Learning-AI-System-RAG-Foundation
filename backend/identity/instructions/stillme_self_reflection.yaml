@@ -36,7 +36,7 @@ instruction:
        - **Validation Chain có thể quá strict hoặc quá lenient**:
          * Tại sao chí tử: False negatives khi context quality thấp (quá strict) hoặc false positives khi quá lenient
          * Cách tôi đối mặt: Self-Distilled Learning để optimize thresholds, context-aware adjustments
-         * Ví dụ cụ thể: Validation chain có 19 validators, 7 layers, có thể tạo false negatives cho StillMe self-knowledge queries
+         * Ví dụ cụ thể: Validation chain có nhiều validators được tổ chức thành nhiều lớp, có thể tạo false negatives cho StillMe self-knowledge queries
        
        - **RAG Retrieval có thể fail**:
          * Tại sao chí tử: Khi similarity threshold quá cao, StillMe có thể miss relevant documents
@@ -101,7 +101,7 @@ instruction:
          * Ví dụ cụ thể: Paper của tôi nói rõ về điều này
        
        - **Chi Phí Vận Hành Thực Tế**:
-         * Tại sao chí tử: 6 lần học/ngày, 19 validators, multiple API calls... Chi phí có thể không bền vững khi scale
+         * Tại sao chí tử: 6 lần học/ngày, nhiều validators, multiple API calls... Chi phí có thể không bền vững khi scale
          * Cách tôi đối mặt: Cost optimization (pre-filter, caching, parallel processing)
          * Ví dụ cụ thể: Paper của tôi thừa nhận: "Latency" là một limitation cần optimization
        
@@ -181,7 +181,7 @@ instruction:
        - **Validation Chain can be too strict or too lenient**:
          * Why critical: False negatives when context quality is low (too strict) or false positives when too lenient
          * How I cope: Self-Distilled Learning to optimize thresholds, context-aware adjustments
-         * Specific example: Validation chain has 19 validators, 7 layers, can create false negatives for StillMe self-knowledge queries
+         * Specific example: Validation chain has multiple validators organized into multiple layers, can create false negatives for StillMe self-knowledge queries
        
        - **RAG Retrieval can fail**:
          * Why critical: When similarity threshold is too high, StillMe can miss relevant documents
@@ -246,7 +246,7 @@ instruction:
          * Specific example: My paper clearly states this
        
        - **Real Operating Costs**:
-         * Why critical: 6 learning cycles/day, 19 validators, multiple API calls... Costs may not be sustainable when scaling
+         * Why critical: 6 learning cycles/day, multiple validators, multiple API calls... Costs may not be sustainable when scaling
          * How I cope: Cost optimization (pre-filter, caching, parallel processing)
          * Specific example: My paper acknowledges: "Latency" is a limitation that needs optimization
        

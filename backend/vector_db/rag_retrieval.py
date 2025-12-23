@@ -422,6 +422,41 @@ class RAGRetrieval:
                     except Exception:
                         pass  # Non-critical, continue if detection fails
                     
+                    # CRITICAL FIX: Deduplication - Remove duplicate documents based on source_url or title
+                    # This prevents the same article from appearing multiple times due to chunking
+                    if knowledge_results:
+                        logger.info(f"🔍 Deduplicating {len(knowledge_results)} documents...")
+                        seen_identifiers = set()
+                        deduplicated_results = []
+                        
+                        for doc in knowledge_results:
+                            metadata = doc.get("metadata", {})
+                            
+                            # Try to get unique identifier: source_url first, then title, then id
+                            identifier = None
+                            if metadata.get("source_url"):
+                                identifier = metadata.get("source_url")
+                            elif metadata.get("url"):
+                                identifier = metadata.get("url")
+                            elif metadata.get("title"):
+                                # Use title as identifier (normalize to lowercase for comparison)
+                                identifier = str(metadata.get("title")).lower().strip()
+                            elif doc.get("id"):
+                                identifier = doc.get("id")
+                            
+                            if identifier and identifier not in seen_identifiers:
+                                seen_identifiers.add(identifier)
+                                deduplicated_results.append(doc)
+                            elif not identifier:
+                                # If no identifier, keep it (but log warning)
+                                logger.debug(f"⚠️ Document has no identifier (source_url/title/id), keeping anyway: {metadata.get('title', 'N/A')[:50]}")
+                                deduplicated_results.append(doc)
+                            else:
+                                logger.debug(f"🔄 Skipping duplicate document: {identifier[:100]}")
+                        
+                        knowledge_results = deduplicated_results
+                        logger.info(f"✅ Deduplicated: {len(knowledge_results)} unique documents (removed {len(seen_identifiers) - len(deduplicated_results) if seen_identifiers else 0} duplicates)")
+                    
                     # CRITICAL FIX: Sort by timestamp for "latest/newest" queries
                     if is_latest_query and knowledge_results:
                         logger.info(f"🕐 Sorting {len(knowledge_results)} documents by timestamp (newest first)")
@@ -941,6 +976,8 @@ class RAGRetrieval:
                     all_knowledge_docs.append(doc)
             
             # Build context result with metrics
+            # CRITICAL: Track unique results count after deduplication for honesty enforcement
+            unique_knowledge_count = len(all_knowledge_docs)
             context_result = {
                 "knowledge_docs": all_knowledge_docs,  # Includes codebase and git_history if enabled
                 "conversation_docs": filtered_conversation[:conversation_limit] if conversation_limit > 0 else [],
@@ -957,7 +994,9 @@ class RAGRetrieval:
                 "original_conversation_count": original_conversation_count,
                 # NPR Phase 2.1: Track codebase and git_history counts
                 "original_codebase_count": original_codebase_count,
-                "original_git_history_count": original_git_history_count
+                "original_git_history_count": original_git_history_count,
+                # CRITICAL: Track unique results count after deduplication (for honesty enforcement)
+                "unique_knowledge_count": unique_knowledge_count
             }
             
             if not has_reliable_context:

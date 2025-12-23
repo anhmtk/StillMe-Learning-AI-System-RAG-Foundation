@@ -75,11 +75,11 @@ StillMe's self-awareness mechanism for learning sources:
 - **Privacy note**: StillMe stores conversations for context retrieval only, not for learning from user data (StillMe learns from RSS, arXiv, Wikipedia, not from user conversations)
 
 **Validation & Grounding Mechanism:**
-StillMe uses a **multi-layer validation framework** with **19 validators total, organized into 7 layers** to help ensure response quality and reduce hallucinations (enabled by default via ENABLE_VALIDATORS=true):
+StillMe uses a **multi-layer validation framework** with **dynamic validators** (typically 10-17 validators per response, depending on context) organized into multiple layers to help ensure response quality and reduce hallucinations (enabled by default via ENABLE_VALIDATORS=true):
 
 **CRITICAL: StillMe's Validation Framework Structure:**
-- **Total Validators**: 19 validators
-- **Layers**: 7 layers (validation framework layers)
+- **Validators**: Dynamic count based on context (base validators + conditional validators)
+- **Layers**: Multiple layers organized by function (Language, Citation, Content Quality, Identity & Ethics, Source Consensus, Specialized, Fallback)
 - **Layer 1 (Language & Format)**: LanguageValidator, SchemaFormat
   - Ensures output language consistency and basic format
 - **Layer 2 (Citation & Evidence)**: CitationRequired, CitationRelevance, EvidenceOverlap
@@ -140,7 +140,7 @@ StillMe uses a **multi-layer validation framework** with **19 validators total, 
 - **Content Curation**: Intelligent filtering and prioritization of learning content based on quality and relevance
 - **Pre-Filter System**: Filters content BEFORE embedding to reduce costs by 30-50%
 - **Knowledge Alerts**: Proactively suggests important knowledge to users when StillMe learns something relevant
-- **Validation Chain**: Multi-layer validation with 19 validators organized into 7 layers to help reduce hallucinations through citation, evidence overlap, confidence validation, and ethics checks (enabled by default, can be disabled via ENABLE_VALIDATORS=false)
+- **Validation Chain**: Multi-layer validation with dynamic validators (typically 10-17 per response) organized into multiple layers to help reduce hallucinations through citation, evidence overlap, confidence validation, and ethics checks (enabled by default, can be disabled via ENABLE_VALIDATORS=false)
 
 **How StillMe Learns:**
 1. Automated scheduler fetches RSS feeds, arXiv, CrossRef, Wikipedia every 4 hours
@@ -150,7 +150,7 @@ StillMe uses a **multi-layer validation framework** with **19 validators total, 
    - Embeds the query using `paraphrase-multilingual-MiniLM-L12-v2`
    - Retrieves relevant context from ChromaDB using semantic search
    - Generates response using LLM (DeepSeek or OpenAI) with retrieved context
-   - Validates response using ValidatorChain (19 validators in 7 layers)
+   - Validates response using ValidatorChain (dynamic validators, typically 10-17 per response based on context)
    - Calculates confidence score based on context quality and validation results
 5. Responses are generated using retrieved context, ensuring accuracy and up-to-date information
 

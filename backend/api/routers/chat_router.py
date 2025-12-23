@@ -1595,15 +1595,16 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - Multi-layer validation với 15-19 validators (tùy điều kiện): LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
   - Mỗi response được validate về citations, evidence overlap, confidence, factual accuracy
   - Nếu validation fail, StillMe dùng epistemic fallback thay vì fabricate information
-  - **CRITICAL: Khi được hỏi về số lượng validators, bạn PHẢI nói**: "StillMe có 19 validators total" hoặc "StillMe có 15-19 validators tùy điều kiện" hoặc "StillMe có up to 19 validators" - KHÔNG được nói "15-layer" hoặc "13+ validators" nếu không chắc chắn
+  - **CRITICAL: Khi được hỏi về số lượng validators, bạn PHẢI đọc từ RAG context (foundational knowledge). Nếu context có số liệu cụ thể, dùng số đó. Nếu context KHÔNG có số liệu cụ thể, bạn PHẢI nói**: "Tôi không có số liệu chính xác về số lượng validators trong context hiện tại" - KHÔNG được tự bịa ra số liệu
   - **🚨🚨🚨 CRITICAL: Khi được hỏi "có bao nhiêu lớp validator" hoặc "bao nhiêu lớp", bạn PHẢI trả lời THEO FORMAT SAU (COPY EXACTLY):**
     
-    **CÂU TRẢ LỜI BẮT BUỘC - PHẢI BẮT ĐẦU BẰNG:**
-    "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
+    **CÂU TRẢ LỜI BẮT BUỘC - PHẢI ĐỌC TỪ CONTEXT:**
+    "Hệ thống của tôi có **[X] validators total, chia thành [Y] lớp (layers) validation framework**." (X và Y phải được đọc từ context, KHÔNG được tự bịa ra)
     
-    **VÍ DỤ CÂU TRẢ LỜI ĐÚNG (PHẢI COPY FORMAT NÀY):**
+    **VÍ DỤ CÂU TRẢ LỜI ĐÚNG (PHẢI ĐỌC TỪ CONTEXT):**
     ```
-    Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**.
+    Hệ thống của tôi có **[X] validators total, chia thành [Y] lớp (layers) validation framework**.
+    (X và Y phải được đọc từ context, KHÔNG được tự bịa ra)
 
     Các lớp bao gồm:
     - Layer 1 (Language & Format): LanguageValidator, SchemaFormat
@@ -1686,7 +1687,7 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - When context documents are available, StillMe uses them to answer
   - When NO context documents are available, StillMe uses general background knowledge
 - **CRITICAL: StillMe HAS VALIDATION CHAIN**:
-  - Multi-layer validation with 15-19 validators (depending on conditions): LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
+  - Multi-layer validation framework with dynamic validators (typically 10-17 validators per response, depending on context): LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
   - Each response is validated for citations, evidence overlap, confidence, factual accuracy
   - If validation fails, StillMe uses epistemic fallback instead of fabricating information
   - **CRITICAL: When asked about the number of validators, you MUST say**: "StillMe has 19 validators total" or "StillMe has 15-19 validators depending on conditions" or "StillMe has up to 19 validators" - DO NOT say "15-layer" or "13+ validators" if you're not certain
@@ -4834,11 +4835,73 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             # Total: ~8800-9700 tokens (safe margin under 16385)
             context_text = rag_retrieval.build_prompt_context(context, max_context_tokens=3000)
             
+            # CRITICAL: Detect "latest/N articles" queries and enforce honesty about count
+            is_latest_query = False
+            requested_count = None
+            try:
+                from backend.core.question_classifier import is_latest_query as check_latest
+                is_latest_query = check_latest(chat_request.message)
+                if is_latest_query:
+                    # Extract requested count from query (e.g., "3 bài", "5 articles", "n bài")
+                    import re
+                    message_lower = chat_request.message.lower()
+                    # Match patterns like "3 bài", "5 articles", "n bài mới nhất"
+                    count_match = re.search(r'(\d+)\s*(bài|article|paper|tin|news)', message_lower)
+                    if count_match:
+                        requested_count = int(count_match.group(1))
+                        logger.info(f"📊 Latest query detected: User requested {requested_count} articles")
+            except Exception:
+                pass  # Non-critical, continue if detection fails
+            
             # Build base prompt with citation instructions (truncated to save tokens)
             citation_instruction = ""
             # Count knowledge docs for citation numbering
             num_knowledge = len(context.get("knowledge_docs", []))
+            unique_knowledge_count = context.get("unique_knowledge_count", num_knowledge)  # Use unique count if available
             knowledge_docs = context.get("knowledge_docs", [])
+            
+            # CRITICAL: Enforce honesty for "latest/N articles" queries
+            honesty_instruction = ""
+            if is_latest_query and requested_count is not None:
+                actual_count = unique_knowledge_count  # Use unique count after deduplication
+                if actual_count < requested_count:
+                    if detected_lang == "vi":
+                        honesty_instruction = f"""
+🚨🚨🚨 CRITICAL HONESTY REQUIREMENT - LATEST ARTICLES QUERY 🚨🚨🚨
+
+**BẠN PHẢI BÁO CÁO ĐÚNG SỐ LƯỢNG:**
+- Người dùng yêu cầu: {requested_count} bài báo mới nhất
+- Số lượng thực tế tìm được: {actual_count} bài báo
+- **BẮT BUỘC**: Bạn PHẢI nói: "Tôi chỉ tìm thấy {actual_count} bài báo mới nhất..." hoặc "Hiện tại tôi chỉ có {actual_count} bài báo trong bộ nhớ..."
+- **KHÔNG ĐƯỢC**: Tự bịa ra hoặc nhân bản bài báo để đạt số lượng {requested_count}
+- **KHÔNG ĐƯỢC**: Nói "Tôi tìm thấy {requested_count} bài báo" khi chỉ có {actual_count} bài
+
+**NẾU KHÔNG TÌM THẤY BÀI NÀO:**
+- Bạn PHẢI nói: "Hiện không có bài báo nào mới trong bộ nhớ" hoặc "Tôi không tìm thấy bài báo nào mới nhất"
+- **KHÔNG ĐƯỢC**: Tự bịa ra tiêu đề bài báo, ngày tháng, hoặc nội dung
+
+**TRANSPARENCY IS MANDATORY**: StillMe phải trung thực về số lượng dữ liệu thực tế đang nắm giữ.
+
+"""
+                    else:
+                        honesty_instruction = f"""
+🚨🚨🚨 CRITICAL HONESTY REQUIREMENT - LATEST ARTICLES QUERY 🚨🚨🚨
+
+**YOU MUST REPORT THE EXACT COUNT:**
+- User requested: {requested_count} latest articles
+- Actual count found: {actual_count} articles
+- **MANDATORY**: You MUST say: "I only found {actual_count} latest articles..." or "I currently only have {actual_count} articles in memory..."
+- **DO NOT**: Fabricate or duplicate articles to reach {requested_count} count
+- **DO NOT**: Say "I found {requested_count} articles" when you only have {actual_count}
+
+**IF NO ARTICLES FOUND:**
+- You MUST say: "Currently no new articles in memory" or "I did not find any latest articles"
+- **DO NOT**: Fabricate article titles, dates, or content
+
+**TRANSPARENCY IS MANDATORY**: StillMe must be honest about the actual amount of data it holds.
+
+"""
+                    logger.warning(f"🚨 Honesty enforcement: User requested {requested_count} articles but only {actual_count} found")
             
             # Get human-readable citation format based on source types
             citation_format_example = "[general knowledge]"
@@ -6556,7 +6619,7 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     # - Context text (RAG context documents)
                     #
                     # CRITICAL: Do NOT duplicate user question - UnifiedPromptBuilder already has it at the end
-                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}
+                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}{honesty_instruction}
 
 🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
 

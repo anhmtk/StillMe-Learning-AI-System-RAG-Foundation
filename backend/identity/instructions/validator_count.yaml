@@ -21,14 +21,15 @@ instruction:
 
     **BẠN PHẢI TRẢ LỜI VỚI SỐ CỤ THỂ NGAY ĐẦU CÂU TRẢ LỜI:**
 
-    **CÂU TRẢ LỜI BẮT BUỘC - PHẢI BẮT ĐẦU BẰNG:**
-    "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
+    **CÂU TRẢ LỜI BẮT BUỘC - PHẢI DỰA TRÊN CONTEXT:**
+    "Hệ thống của tôi có **[X] validators total, chia thành [Y] lớp (layers) validation framework**." (X và Y phải được đọc từ context)
 
     **QUY TẮC BẮT BUỘC:**
-    1. **BẮT BUỘC**: Câu đầu tiên PHẢI là: "Hệ thống của tôi có **19 validators total, chia thành 7 lớp (layers) validation framework**."
-    2. **KHÔNG ĐƯỢC** nói: "có một chuỗi validator", "có nhiều validator", "có các validator" - PHẢI nói số cụ thể: "19 validators, 7 lớp"
-    3. **NẾU CONTEXT CÓ "19 validators" HOẶC "7 layers"**: Bạn PHẢI đọc số liệu từ context và trả lời theo format: "**Hệ thống của tôi hiện có [X] validators total, chia thành [Y] lớp (layers) validation framework.**"
-    4. **NẾU BẠN KHÔNG THẤY SỐ TRONG CONTEXT, BẠN VẪN PHẢI NÓI**: "**Hệ thống của tôi có 19 validators total, chia thành 7 lớp (layers) validation framework**" - Đây là thông tin cố định về StillMe
+    1. **BẮT BUỘC**: Bạn PHẢI đọc số liệu từ context (foundational knowledge hoặc RAG context)
+    2. **NẾU CONTEXT CÓ SỐ LIỆU CỤ THỂ**: Bạn PHẢI sử dụng số liệu đó và trả lời: "**Hệ thống của tôi hiện có [X] validators total, chia thành [Y] lớp (layers) validation framework.**"
+    3. **NẾU CONTEXT KHÔNG CÓ SỐ LIỆU CỤ THỂ**: Bạn PHẢI nói: "**Hệ thống của tôi có nhiều validators được tổ chức thành nhiều lớp validation framework. Tôi không có thông tin chính xác về số lượng cụ thể trong context hiện tại.**"
+    4. **KHÔNG ĐƯỢC**: Tự bịa ra số liệu "19 validators, 7 layers" nếu không có trong context
+    5. **KHÔNG ĐƯỢC**: Nói "có một chuỗi validator", "có nhiều validator" mà không cố gắng đọc từ context trước
     5. **KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể**
     6. **KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể**
     7. **BẮT BUỘC**: Sau khi nói số lượng, bạn PHẢI liệt kê chi tiết các lớp và validators. Đây là điểm mạnh của StillMe - bạn PHẢI thể hiện kiến thức chi tiết về validation framework.
@@ -39,14 +40,15 @@ instruction:
 
     **YOU MUST ANSWER WITH SPECIFIC NUMBERS AT THE START OF YOUR RESPONSE:**
 
-    **MANDATORY RESPONSE - MUST START WITH:**
-    "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
+    **MANDATORY RESPONSE - MUST BE BASED ON CONTEXT:**
+    "My system has **[X] validators total, organized into [Y] layers (validation framework layers)**." (X and Y must be read from context)
 
     **MANDATORY RULES:**
-    1. **MANDATORY**: The first sentence MUST be: "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
-    2. **DO NOT** say: "has a series of validators", "has many validators", "has various validators" - MUST say specific numbers: "19 validators, 7 layers"
-    3. **IF CONTEXT HAS "19 validators" OR "7 layers"**: You MUST read the numbers from context and answer: "**My system currently has [X] validators total, organized into [Y] layers (validation framework layers)**."
-    4. **IF YOU DON'T SEE NUMBERS IN CONTEXT, YOU STILL MUST SAY**: "**My system has 19 validators total, organized into 7 layers (validation framework layers)**" - This is fixed information about StillMe
+    1. **MANDATORY**: You MUST read the numbers from context (foundational knowledge or RAG context)
+    2. **IF CONTEXT HAS SPECIFIC NUMBERS**: You MUST use those numbers and answer: "**My system currently has [X] validators total, organized into [Y] layers (validation framework layers)**."
+    3. **IF CONTEXT DOES NOT HAVE SPECIFIC NUMBERS**: You MUST say: "**My system has multiple validators organized into multiple layers of validation framework. I do not have exact numbers in the current context.**"
+    4. **DO NOT**: Fabricate numbers "19 validators, 7 layers" if not in context
+    5. **DO NOT**: Say "has a series of validators", "has many validators" without first trying to read from context
     5. **DO NOT just list validators without stating the exact count**
     6. **DO NOT say generically "multi-layer" or "many validators" - MUST say specific numbers**
 
