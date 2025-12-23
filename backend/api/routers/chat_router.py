@@ -3581,7 +3581,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 if is_learning_sources_query:
                     try:
                         from backend.api.routers.learning_router import get_current_learning_sources
-                        import asyncio
+                        # Note: 'asyncio' is already imported at top level (line 32)
                         # If we're in async context, we can await
                         # Otherwise, we'll use the already-fetched current_learning_sources
                         if current_learning_sources:
@@ -9084,7 +9084,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             async def store_conversation_background():
                 try:
                     # P2: Run blocking I/O in thread pool to avoid blocking event loop
-                    import asyncio
+                    # Note: 'asyncio' is already imported at top level (line 32)
                     await asyncio.to_thread(
                         rag_retrieval.add_learning_content,
                         content=f"Q: {chat_request.message}\nA: {response}",
