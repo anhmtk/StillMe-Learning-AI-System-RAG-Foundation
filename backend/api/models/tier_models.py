@@ -18,7 +18,7 @@ class TierStatsResponse(BaseModel):
     demoted_7d: int = Field(0, description="Number of items demoted in last 7 days")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "L0": 150,
                 "L1": 45,
@@ -45,7 +45,7 @@ class TierAuditRecord(BaseModel):
     created_at: str = Field(..., description="ISO timestamp")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id": 1,
                 "item_id": "knowledge_abc123",
@@ -67,7 +67,7 @@ class TierAuditResponse(BaseModel):
     total: int = Field(0, description="Total number of records")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "records": [],
                 "total": 0
@@ -103,7 +103,7 @@ class ForgettingMetric(BaseModel):
     knowledge_update_timestamp: Optional[str] = Field(None, description="ISO timestamp")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id": 1,
                 "regression_item_id": "reg_001",
@@ -125,7 +125,7 @@ class ForgettingTrendsResponse(BaseModel):
     days: int = Field(30, description="Number of days analyzed")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "trends": [
                     {

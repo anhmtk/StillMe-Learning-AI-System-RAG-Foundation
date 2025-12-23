@@ -98,7 +98,7 @@ class LearningRequest(BaseModel):
         return sanitize_metadata(v)
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "content": "StillMe is a transparent AI learning system...",
                 "source": "https://example.com/article",
@@ -120,7 +120,7 @@ class LearningResponse(BaseModel):
         return validate_non_empty_string(v, field_name="message", min_length=1, max_length=500)
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "success": True,
                 "knowledge_id": 123,

@@ -51,7 +51,7 @@ class RAGQueryRequest(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "query": "What is StillMe?",
                 "knowledge_limit": 3,
@@ -67,7 +67,7 @@ class RAGQueryResponse(BaseModel):
     total_context_docs: int = Field(0, ge=0, description="Total context documents")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "knowledge_docs": [
                     {
