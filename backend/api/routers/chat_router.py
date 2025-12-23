@@ -3829,6 +3829,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # CRITICAL: Detect validator count questions for special handling
         # We will force-inject manifest and use lower similarity threshold, NOT hardcode
         is_validator_count_question = False
+        # CRITICAL: Import re module explicitly to avoid UnboundLocalError
+        # (re is already imported at top level, but explicit import ensures it's available)
+        import re as regex_module
         validator_count_patterns = [
             r"bao nhiêu.*lớp.*validator",
             r"how many.*layer.*validator",
@@ -3845,7 +3848,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         question_lower = chat_request.message.lower()
         for pattern in validator_count_patterns:
-            if re.search(pattern, question_lower, re.IGNORECASE):
+            if regex_module.search(pattern, question_lower, regex_module.IGNORECASE):
                 is_validator_count_question = True
                 logger.info(f"🎯 Validator count question detected - will force-inject manifest and use lower similarity threshold")
                 break
