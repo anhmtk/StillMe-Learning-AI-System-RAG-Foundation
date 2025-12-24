@@ -31,6 +31,7 @@ from backend.services.cache_service import (
     CACHE_PREFIX_LLM,
     TTL_LLM_RESPONSE
 )
+from backend.api.config.chat_config import get_chat_config
 import logging
 import os
 import re
@@ -677,8 +678,9 @@ def _append_validation_warnings_to_response(
             # Extract overlap score from reason (format: "low_overlap:0.023")
             try:
                 overlap_score = float(reason.split(":")[1]) if ":" in reason else None
-                # Get threshold from EvidenceOverlap validator (default: 0.01)
-                threshold = float(os.getenv("VALIDATOR_EVIDENCE_THRESHOLD", "0.01"))
+                # Get threshold from EvidenceOverlap validator (default from config)
+                config = get_chat_config()
+                threshold = float(os.getenv("VALIDATOR_EVIDENCE_THRESHOLD", config.validation.EVIDENCE_THRESHOLD_ENV_DEFAULT))
             except (ValueError, IndexError):
                 pass
             warnings.append("low_overlap")
@@ -1065,13 +1067,15 @@ def _build_prompt_context_from_chat_request(
     )
 
 
-def _truncate_user_message(message: str, max_tokens: int = 3000) -> str:
+def _truncate_user_message(message: str, max_tokens: int = None) -> str:
     """
     Truncate user message if too long
     
     CRITICAL: User question is the most important part - we need to preserve it as much as possible.
     Increased from 1000 to 3000 tokens to ensure user questions are not cut off.
     """
+    if max_tokens is None:
+        max_tokens = get_chat_config().tokens.MAX_USER_MESSAGE
     if not message:
         return message
     estimated = len(message) // 4
@@ -2426,21 +2430,23 @@ async def _handle_validation_with_fallback(
         if any(keyword in question_lower for keyword in technical_keywords):
             threshold_context["is_technical"] = True
         
+        config = get_chat_config()
         adaptive_citation_overlap = sdl.get_adaptive_threshold(
             "citation_relevance_min_overlap", 
-            0.1,
+            config.validation.ADAPTIVE_CITATION_OVERLAP_DEFAULT,
             context=threshold_context
         )
         adaptive_evidence_threshold = sdl.get_adaptive_threshold(
             "evidence_overlap_threshold", 
-            0.01,
+            config.validation.ADAPTIVE_EVIDENCE_THRESHOLD_DEFAULT,
             context=threshold_context
         )
         logger.debug(f"🎯 [Self-Distilled] Using context-aware thresholds: citation_overlap={adaptive_citation_overlap:.3f}, evidence={adaptive_evidence_threshold:.3f} (philosophical={is_philosophical}, context_quality={threshold_context['context_quality']})")
     except Exception as e:
         logger.warning(f"⚠️ [Self-Distilled] Failed to get adaptive thresholds, using defaults: {e}")
-        adaptive_citation_overlap = 0.1
-        adaptive_evidence_threshold = 0.01
+        config = get_chat_config()
+        adaptive_citation_overlap = config.validation.ADAPTIVE_CITATION_OVERLAP_DEFAULT
+        adaptive_evidence_threshold = config.validation.ADAPTIVE_EVIDENCE_THRESHOLD_DEFAULT
     
     validators = [
         LanguageValidator(input_language=detected_lang),  # Check language FIRST - prevent drift
@@ -2460,10 +2466,12 @@ async def _handle_validation_with_fallback(
         logger.debug(f"Phase 2: Added EvidenceOverlap validator (has context, threshold={adaptive_evidence_threshold:.3f})")
     
     # SourceConsensusValidator: Only when has multiple sources (≥2)
-    if len(ctx_docs) >= 2:
+    config = get_chat_config()
+    if len(ctx_docs) >= config.validation.MIN_SOURCES_FOR_CONSENSUS:
         # Insert after EvidenceOverlap (or after CitationRelevance if EvidenceOverlap not added)
         insert_pos = 4 if len(ctx_docs) > 0 else 3
-        validators.insert(insert_pos, SourceConsensusValidator(enabled=True, timeout=3.0))
+        config = get_chat_config()
+        validators.insert(insert_pos, SourceConsensusValidator(enabled=True, timeout=config.timeouts.SOURCE_CONSENSUS))
         logger.debug(f"Phase 2: Added SourceConsensusValidator (has {len(ctx_docs)} sources)")
     
     # EgoNeutralityValidator: Only when has context (anthropomorphic language more likely with context)
@@ -4010,10 +4018,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 # This prevents mode collapse by allowing LLM to adapt the answer to the specific question
                 # CRITICAL: User priority is QUALITY (honesty, transparency, depth) over speed - always rewrite
                 rewrite_attempts = 0
-                max_rewrite_attempts = 3
+                config = get_chat_config()
+                max_rewrite_attempts = config.rewrite.MAX_ATTEMPTS
                 rewrite_success = False
                 validation_info = None
-                confidence_score = 0.8  # Default confidence for philosophical answers
+                confidence_score = config.confidence.PHILOSOPHICAL_DEFAULT  # Default confidence for philosophical answers
                 used_fallback = False
                 
                 try:
@@ -4195,7 +4204,8 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                     # Continue with unvalidated answer if validation fails (should not happen, but safety first)
                     processing_steps.append(f"⚠️ Validation failed: {validation_error}, using unvalidated answer")
                     validation_info = None
-                    confidence_score = 0.7  # Lower confidence if validation failed
+                    config = get_chat_config()
+                    confidence_score = config.confidence.PHILOSOPHICAL_FAILED_VALIDATION  # Lower confidence if validation failed
                     used_fallback = False
                 
                 # Return response with validation info
@@ -4248,7 +4258,8 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             # Check if FPS detected a known fake entity (Veridian, Lumeria, Emerald, Daxonia)
             if fps_result and not fps_result.is_plausible:
                 # Check if reason contains "known_fake_entity_detected" or matches EXPLICIT_FAKE_ENTITIES
-                explicit_fake_keywords = ["veridian", "lumeria", "emerald", "daxonia", "known_fake_entity_detected"]
+                config = get_chat_config()
+                explicit_fake_keywords = config.fps.EXPLICIT_FAKE_ENTITIES + ["known_fake_entity_detected"]
                 fps_reason_lower = fps_result.reason.lower() if fps_result.reason else ""
                 detected_entities_lower = [e.lower() for e in (fps_result.detected_entities or [])]
                 
@@ -4260,9 +4271,10 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                 
                 # Also check detected entities directly
                 if fps_result.detected_entities:
+                    config = get_chat_config()
                     for entity in fps_result.detected_entities:
                         entity_lower = entity.lower()
-                        if any(fake_keyword in entity_lower for fake_keyword in ["veridian", "lumeria", "emerald", "daxonia"]):
+                        if any(fake_keyword in entity_lower for fake_keyword in config.fps.EXPLICIT_FAKE_ENTITIES):
                             fps_detected_explicit_fake = True
                             break
                 
@@ -4280,8 +4292,9 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             
             # If FPS detects non-existent concepts with high confidence, block and return honest response
             # CRITICAL: For Option B, let it handle FPS blocking with EPD-Fallback
-            # For legacy pipeline, block immediately if confidence < 0.3
-            if not use_option_b and not fps_result.is_plausible and fps_result.confidence < 0.3:
+            # For legacy pipeline, block immediately if confidence < threshold
+            config = get_chat_config()
+            if not use_option_b and not fps_result.is_plausible and fps_result.confidence < config.fps.BLOCK_THRESHOLD:
                 fps_should_block = True
                 logger.warning(
                     f"FPS detected non-existent concept: {fps_result.reason}, "
@@ -4444,11 +4457,12 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                     
                     is_historical = is_historical_question(chat_request.message)
                     retrieval_query = chat_request.message
-                    similarity_threshold = 0.1  # Default
+                    config = get_chat_config()
+                    similarity_threshold = config.similarity.LOW_CONTEXT_QUALITY  # Default
                     
                     if is_historical:
                         # Very low threshold to ensure we find historical facts even with multilingual mismatch
-                        similarity_threshold = 0.03
+                        similarity_threshold = config.similarity.VERY_LOW
                         retrieval_query = enhance_query_for_retrieval(chat_request.message)
                         logger.info(f"📜 Historical question (provenance fallback) - using very low threshold {similarity_threshold}, enhanced query: '{retrieval_query[:100]}...'")
                     
@@ -4465,14 +4479,15 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             # CRITICAL: Handle validator count questions FIRST (even if not detected as stillme_query)
             # Validator count questions about codebase should always get manifest
             if is_validator_count_question:
-                logger.info(f"🎯 Validator count question - forcing manifest retrieval with very low similarity threshold (0.01)")
+                config = get_chat_config()
+                logger.info(f"🎯 Validator count question - forcing manifest retrieval with very low similarity threshold ({config.similarity.VALIDATOR_COUNT_QUESTION})")
                 # Force retrieve manifest with very low threshold to ensure we get it
                 context = rag_retrieval.retrieve_context(
                     query=chat_request.message,
                     knowledge_limit=5,  # Get more docs to ensure manifest is included
                     conversation_limit=1,
                     prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
-                    similarity_threshold=0.01,  # CRITICAL: Very low threshold to ensure manifest is retrieved
+                    similarity_threshold=config.similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Very low threshold to ensure manifest is retrieved
                     exclude_content_types=exclude_types if exclude_types else None,
                     is_philosophical=is_philosophical
                 )
@@ -4555,7 +4570,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                                 knowledge_limit=5,
                                 conversation_limit=0,
                                 prioritize_foundational=True,
-                                similarity_threshold=0.01,
+                                similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,
                                 exclude_content_types=None,
                                 is_philosophical=False
                             )
@@ -4586,7 +4601,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         knowledge_limit=5,  # Get more docs to ensure manifest is included
                         conversation_limit=1,
                         prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
-                        similarity_threshold=0.01,  # CRITICAL: Very low threshold to ensure manifest is retrieved
+                        similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Very low threshold to ensure manifest is retrieved
                         exclude_content_types=exclude_types if exclude_types else None,
                         is_philosophical=is_philosophical
                     )
@@ -4618,7 +4633,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                                 knowledge_limit=5,  # Get more docs to ensure manifest is included
                                 conversation_limit=0,  # Don't need conversation for manifest
                                 prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
-                                similarity_threshold=0.01,  # CRITICAL: Very low threshold to ensure manifest is retrieved
+                                similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Very low threshold to ensure manifest is retrieved
                                 exclude_content_types=None,  # Don't exclude anything for manifest search
                                 is_philosophical=False
                             )
@@ -4732,7 +4747,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                                 knowledge_limit=chat_request.context_limit,
                                 conversation_limit=0,  # Don't need conversation for foundational queries
                                 prioritize_foundational=True,
-                                similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries to ensure foundational knowledge is retrieved
+                                similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Use very low threshold for StillMe queries to ensure foundational knowledge is retrieved
                                 exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
                                 prioritize_style_guide=is_philosophical,
                                 is_philosophical=is_philosophical
@@ -4751,7 +4766,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                                 knowledge_limit=min(chat_request.context_limit, 5),
                                 conversation_limit=1,
                                 prioritize_foundational=True,
-                                similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries
+                                similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Use very low threshold for StillMe queries
                                 exclude_content_types=["technical"] if is_philosophical else None,
                                 prioritize_style_guide=is_philosophical,
                                 is_philosophical=is_philosophical
@@ -4785,7 +4800,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                             knowledge_limit=min(chat_request.context_limit * 2, 20),  # Get more docs to compensate for exclusion
                             conversation_limit=1,
                             prioritize_foundational=False,  # CRITICAL: Don't prioritize foundational for news queries
-                            similarity_threshold=0.45,  # CRITICAL: Higher threshold to ensure relevance
+                            similarity_threshold=get_chat_config().similarity.HIGH_CONTEXT_QUALITY,  # CRITICAL: Higher threshold to ensure relevance (using HIGH_CONTEXT_QUALITY as closest match)
                             exclude_content_types=exclude_types if exclude_types else None,
                             prioritize_style_guide=False,
                             is_philosophical=is_philosophical
@@ -4830,12 +4845,13 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         
                         is_historical = is_historical_question(chat_request.message)
                         retrieval_query = chat_request.message
-                        similarity_threshold = 0.1  # Default
+                        config = get_chat_config()
+                        similarity_threshold = config.similarity.LOW_CONTEXT_QUALITY  # Default
                         
                         if is_historical:
                             # SOLUTION 1: Very low threshold for historical questions (0.03 instead of 0.1)
                             # This ensures we find historical facts even with multilingual embedding mismatch
-                            similarity_threshold = 0.03
+                            similarity_threshold = config.similarity.VERY_LOW
                             logger.info(f"📜 Historical question detected - using very low similarity threshold: {similarity_threshold}")
                             
                             # SOLUTION 3: Enhance query with English keywords
@@ -6042,7 +6058,7 @@ Always cite the context above with [1], [2] when explaining StillMe's features."
                 # For philosophical questions, skip conversation history entirely
                 conversation_history_text = _format_conversation_history(
                     chat_request.conversation_history, 
-                    max_tokens=1000,
+                    max_tokens=get_chat_config().tokens.MAX_CONVERSATION_HISTORY,
                     current_query=chat_request.message,
                     is_philosophical=is_philosophical
                 )
@@ -6716,11 +6732,12 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     # Truncate user question to 512 tokens for philosophical questions
                     user_question_for_rag = chat_request.message.strip()
                     user_question_tokens_rag = estimate_tokens(user_question_for_rag)
-                    if user_question_tokens_rag > 512:
+                    config = get_chat_config()
+                    if user_question_tokens_rag > config.tokens.MAX_PHILOSOPHY_QUESTION:
                         logger.warning(
                             f"User question too long for philosophical RAG ({user_question_tokens_rag} tokens), truncating to 512 tokens"
                         )
-                        user_question_for_rag = _truncate_user_message(chat_request.message, max_tokens=512)
+                        user_question_for_rag = _truncate_user_message(chat_request.message, max_tokens=config.tokens.MAX_PHILOSOPHY_QUESTION)
                         user_question_tokens_rag = estimate_tokens(user_question_for_rag)
                     
                     # Build minimal prompt (same format as non-RAG path)
@@ -8173,7 +8190,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                 logger.info("🔧 Technical question about 'your system' with no RAG context - will answer from base LLM knowledge with transparency")
             
             # Initialize confidence_score for non-RAG path
-            confidence_score = 0.3  # Low confidence when no RAG context
+            config = get_chat_config()
+            confidence_score = config.confidence.DEFAULT_NO_CONTEXT  # Low confidence when no RAG context
             validation_info = None
             
             # Detect language FIRST
@@ -8220,11 +8238,12 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             user_question_for_prompt = chat_request.message
             if is_philosophical_non_rag:
                 user_question_tokens = estimate_tokens(chat_request.message)
-                if user_question_tokens > 512:
+                config = get_chat_config()
+                if user_question_tokens > config.tokens.MAX_PHILOSOPHY_QUESTION:
                     logger.warning(
-                        f"User question too long for philosophical non-RAG ({user_question_tokens} tokens), truncating to 512 tokens"
+                        f"User question too long for philosophical non-RAG ({user_question_tokens} tokens), truncating to {config.tokens.MAX_PHILOSOPHY_QUESTION} tokens"
                     )
-                    user_question_for_prompt = _truncate_user_message(chat_request.message, max_tokens=512)
+                    user_question_for_prompt = _truncate_user_message(chat_request.message, max_tokens=config.tokens.MAX_PHILOSOPHY_QUESTION)
                     user_question_tokens = estimate_tokens(user_question_for_prompt)
                 else:
                     user_question_tokens = estimate_tokens(chat_request.message)
@@ -8236,7 +8255,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             # For philosophical questions, skip conversation history to reduce prompt size
             conversation_history_text = ""
             if not is_philosophical_non_rag:
-                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=1000)
+                config = get_chat_config()
+                conversation_history_text = _format_conversation_history(chat_request.conversation_history, max_tokens=config.tokens.MAX_CONVERSATION_HISTORY)
                 if conversation_history_text:
                     logger.info(f"Including conversation history in context (truncated if needed, non-RAG)")
             else:
