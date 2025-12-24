@@ -83,6 +83,14 @@ class FPSConfig:
 
 
 @dataclass
+class ValidatorInfo:
+    """Validator information defaults."""
+    DEFAULT_VI: str = "19 validators total, chia thành 7 lớp (layers)"
+    DEFAULT_EN: str = "19 validators total, organized into 7 layers"
+    DEFAULT_LAYERS: str = "7 layers"
+
+
+@dataclass
 class ChatConfig:
     """Main configuration class aggregating all config sections."""
     
@@ -94,6 +102,7 @@ class ChatConfig:
     cache: CacheConfig = None
     validation: ValidationConfig = None
     fps: FPSConfig = None
+    validator_info: ValidatorInfo = None
     
     def __post_init__(self):
         """Initialize nested config objects."""
@@ -116,6 +125,8 @@ class ChatConfig:
             self.fps.EXPLICIT_FAKE_ENTITIES = [
                 "veridian", "lumeria", "emerald", "daxonia"
             ]
+        if self.validator_info is None:
+            self.validator_info = ValidatorInfo()
 
 
 # Global config instance (singleton pattern)
