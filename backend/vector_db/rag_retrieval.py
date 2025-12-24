@@ -160,15 +160,19 @@ class RAGRetrieval:
             
             # CRITICAL: Disable cache if this is a validator count question
             # Validator count questions need fresh retrieval to get latest foundational knowledge
+            query_lower = query.lower()
             is_validator_count_query = any(
-                keyword in query.lower() for keyword in [
+                keyword in query_lower for keyword in [
                     "bao nhiêu", "how many", "số", "number", "count",
-                    "lớp validator", "validator layer", "validator count"
+                    "lớp validator", "validator layer", "validator count",
+                    "có bao nhiêu", "how many layers", "how many validators",
+                    "số lớp", "số validator", "validator count", "layer count"
                 ]
             )
-            if is_validator_count_query:
+            # Also check if prioritize_foundational is True (indicates validator count question)
+            if is_validator_count_query or prioritize_foundational:
                 cache_enabled = False
-                logger.info(f"🚫 Cache disabled for validator count question to ensure fresh retrieval")
+                logger.info(f"🚫 Cache disabled for validator count question to ensure fresh retrieval (query: {query[:50]}...)")
             
             cached_result = None
             cache_hit = False

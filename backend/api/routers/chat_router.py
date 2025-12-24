@@ -4480,6 +4480,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                 # CRITICAL: Force-inject manifest if not found in retrieved context
                 knowledge_docs = context.get("knowledge_docs", [])
                 has_manifest = False
+                manifest_has_correct_info = False
                 for doc in knowledge_docs:
                     if isinstance(doc, dict):
                         metadata = doc.get("metadata", {})
@@ -4491,9 +4492,18 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                             "validation_framework" in doc_content.lower() or
                             "total_validators" in doc_content.lower()):
                             has_manifest = True
+                            # CRITICAL: Check if manifest has correct info (19 validators, 7 layers)
+                            has_19 = "19 validators" in doc_content or "total_validators" in doc_content
+                            has_7 = "7 layers" in doc_content or "7 lớp" in doc_content
+                            if has_19 and has_7:
+                                manifest_has_correct_info = True
+                                logger.info(f"✅ Manifest found with correct info: 19 validators, 7 layers")
+                            else:
+                                logger.warning(f"⚠️ Manifest found but has outdated info (has_19={has_19}, has_7={has_7}) - will force-inject correct manifest")
                             break
                 
-                if not has_manifest:
+                # Force-inject manifest if not found OR if found but has outdated info
+                if not has_manifest or not manifest_has_correct_info:
                     logger.warning(f"⚠️ Manifest not found in retrieved context - attempting direct manifest retrieval")
                     # Try direct manifest retrieval using rag_retrieval with specific query
                     try:
