@@ -160,21 +160,51 @@ def verify_manifest_in_db(rag_retrieval: RAGRetrieval) -> tuple[bool, bool]:
                 doc_content = str(doc.get("document", ""))
                 
                 # Check if this is manifest
+                # Get document content from various possible fields (RAG retrieval returns "content" not "document")
+                full_content = (
+                    str(doc.get("content", "")) or  # RAG retrieval uses "content" field
+                    str(doc.get("document", "")) or 
+                    str(doc.get("text", "")) or
+                    str(doc.get("page_content", "")) or
+                    str(doc_content)
+                )
+                
                 if ("CRITICAL_FOUNDATION" in source and 
-                    ("manifest" in title.lower() or "manifest" in doc_content.lower()[:200])):
+                    ("manifest" in title.lower() or "manifest" in full_content.lower()[:200])):
                     found_manifest = True
                     logger.info(f"✅ Found manifest: {title[:50]}...")
                     
                     # Check if content has correct info
-                    has_19 = "19 validators" in doc_content or "total_validators" in doc_content
-                    has_7 = "7 layers" in doc_content or "7 lớp" in doc_content
+                    # Manifest text format: "19 total validators" or "19 validators" or contains "total_validators": 19
+                    full_content_lower = full_content.lower()
+                    has_19 = (
+                        "19 validators" in full_content_lower or 
+                        "19 total validators" in full_content_lower or
+                        '"total_validators": 19' in full_content or
+                        "19 validators total" in full_content_lower or
+                        "exactly 19 validators" in full_content_lower
+                    )
+                    # Manifest text format: "7 layers" or "7 lớp" or "organized into 7 layers"
+                    has_7 = (
+                        "7 layers" in full_content_lower or 
+                        "7 lớp" in full_content_lower or
+                        "organized into 7 layers" in full_content_lower or
+                        "7 validation framework layers" in full_content_lower
+                    )
                     
                     if has_19 and has_7:
                         has_correct_info = True
                         logger.info("✅ Manifest has correct info: 19 validators, 7 layers")
                     else:
                         logger.warning(f"⚠️ Manifest found but has outdated info (has_19={has_19}, has_7={has_7})")
-                        logger.warning(f"   Content preview: {doc_content[:300]}...")
+                        # Show more content to debug
+                        logger.warning(f"   Full content preview (first 1000 chars): {full_content[:1000]}")
+                        # Also check for any numbers mentioned
+                        import re
+                        validator_matches = re.findall(r'(\d+)\s+validators?', full_content, re.IGNORECASE)
+                        layer_matches = re.findall(r'(\d+)\s+layers?', full_content, re.IGNORECASE)
+                        logger.warning(f"   Found validator numbers: {validator_matches}")
+                        logger.warning(f"   Found layer numbers: {layer_matches}")
         
         if not found_manifest:
             logger.warning("⚠️ Manifest not found in ChromaDB")
