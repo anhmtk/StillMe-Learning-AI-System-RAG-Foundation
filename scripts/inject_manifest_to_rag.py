@@ -205,6 +205,17 @@ def inject_manifest_to_rag():
             logger.info(f"   - Total validators: {manifest['validation_framework']['total_validators']}")
             logger.info(f"   - Active validators: {manifest['validation_framework']['min_active_validators']}-{manifest['validation_framework']['max_active_validators']}")
             logger.info(f"   - Layers: {len(manifest['validation_framework']['layers'])}")
+            
+            # CRITICAL: Increment knowledge version to invalidate cache
+            # This ensures cached responses with outdated validator counts are invalidated
+            try:
+                from backend.services.knowledge_version import increment_knowledge_version
+                new_version = increment_knowledge_version()
+                logger.info(f"📦 Knowledge version incremented to {new_version} - cache invalidated for foundational knowledge queries")
+            except Exception as version_error:
+                logger.warning(f"⚠️ Failed to increment knowledge version: {version_error}")
+                logger.warning("⚠️ Cache may still contain outdated responses - consider manual cache clear")
+            
             return True
         else:
             logger.error("❌ Failed to inject manifest into RAG system")

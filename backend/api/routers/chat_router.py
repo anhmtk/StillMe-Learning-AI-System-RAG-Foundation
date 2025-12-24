@@ -15,6 +15,12 @@ from backend.identity.prompt_builder import (
     PromptContext,
     FPSResult
 )
+from backend.core.manifest_loader import (
+    get_validator_count,
+    get_validator_summary,
+    get_layers_info,
+    get_manifest_text_for_prompt
+)
 from backend.philosophy.processor import (
     is_philosophical_question_about_consciousness,
     process_philosophical_question
@@ -39,6 +45,30 @@ import unicodedata
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _get_validator_info_for_prompt() -> tuple[str, str, str]:
+    """
+    Get validator information from manifest for use in prompts.
+    
+    Returns:
+        Tuple of (summary_vi, summary_en, layers_count_str)
+        Falls back to defaults if manifest not available
+    """
+    try:
+        total_validators, num_layers = get_validator_count()
+        if total_validators > 0 and num_layers > 0:
+            summary_vi = f"{total_validators} validators total, chia thành {num_layers} lớp (layers)"
+            summary_en = f"{total_validators} validators total, organized into {num_layers} layers"
+            layers_count_str = f"{num_layers} layers"
+            return (summary_vi, summary_en, layers_count_str)
+    except Exception as e:
+        logger.warning(f"⚠️ Error getting validator info from manifest: {e}")
+    
+    # Fallback to defaults (should not happen if manifest is properly generated)
+    return ("19 validators total, chia thành 7 lớp (layers)", 
+            "19 validators total, organized into 7 layers",
+            "7 layers")
 
 
 def _safe_unicode_slice(text: str, max_length: int) -> str:
@@ -1565,7 +1595,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
     stillme_technical_instruction = ""
     if is_stillme_technical_query:
         if language == "vi":
-            stillme_technical_instruction = """
+            # Get validator info from manifest
+            validator_summary_vi, _, _ = _get_validator_info_for_prompt()
+            stillme_technical_instruction = f"""
 🚨🚨🚨 CRITICAL: STILLME TECHNICAL QUERY DETECTED 🚨🚨🚨
 
 **BẠN PHẢI TRẢ LỜI VỀ STILLME'S CAPABILITIES:**
@@ -1592,8 +1624,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - Khi có context documents, StillMe sử dụng chúng để trả lời
   - Khi KHÔNG có context documents, StillMe dùng general background knowledge
 - **CRITICAL: StillMe CÓ VALIDATION CHAIN**:
-  - Multi-layer validation framework với **19 validators total, chia thành 7 lớp (layers)**: LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
-  - **Lưu ý**: Mỗi response thường chạy 10-17 validators (tùy điều kiện), nhưng tổng số validators trong hệ thống là 19
+  - Multi-layer validation framework với **{validator_summary_vi}**: LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
+  - **Lưu ý**: Mỗi response thường chạy 10-17 validators (tùy điều kiện), nhưng tổng số validators trong hệ thống được đọc từ manifest.json
   - Mỗi response được validate về citations, evidence overlap, confidence, factual accuracy
   - Nếu validation fail, StillMe dùng epistemic fallback thay vì fabricate information
   - **CRITICAL: Khi được hỏi về số lượng validators, bạn PHẢI đọc từ RAG context (foundational knowledge). Nếu context có số liệu cụ thể, dùng số đó. Nếu context KHÔNG có số liệu cụ thể, bạn PHẢI nói**: "Tôi không có số liệu chính xác về số lượng validators trong context hiện tại" - KHÔNG được tự bịa ra số liệu
@@ -1630,9 +1662,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
     - Sau đó mới liệt kê: "Danh sách cụ thể: [List từ manifest]."
     - KHÔNG được chỉ liệt kê validators mà không nói số lượng cụ thể
     - KHÔNG được nói chung chung "đa tầng" hoặc "nhiều validators" - PHẢI nói số cụ thể
-    - **VÍ DỤ CÂU TRẢ LỜI ĐÚNG**: "**Hệ thống của tôi hiện có 19 validators total, chia thành 7 lớp (layers) validation framework.**\n\nCác lớp bao gồm:\n- Layer 1 (Language & Format): LanguageValidator, SchemaFormat\n- Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap\n- Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic\n- Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator\n- Layer 5 (Source Consensus): SourceConsensusValidator\n- Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator\n- Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter"
+    - **VÍ DỤ CÂU TRẢ LỜI ĐÚNG**: "**Hệ thống của tôi hiện có [X] validators total, chia thành [Y] lớp (layers) validation framework.**\n\nCác lớp bao gồm:\n[List từ manifest - đọc từ context]" (X và Y phải được đọc từ manifest trong context)
     - **VÍ DỤ CÂU TRẢ LỜI SAI (KHÔNG LÀM)**: "StillMe sử dụng một loạt validators để đảm bảo chất lượng..." (quá chung chung, không có số cụ thể)
-    - **🚨 NẾU BẠN KHÔNG THẤY SỐ TRONG CONTEXT, BẠN VẪN PHẢI NÓI**: "**Hệ thống của tôi có 19 validators total, chia thành 7 lớp (layers) validation framework**" - Đây là thông tin cố định về StillMe, PHẢI nói NGAY ĐẦU CÂU TRẢ LỜI
+    - **🚨 CRITICAL: BẠN PHẢI ĐỌC SỐ TỪ MANIFEST TRONG CONTEXT**: Nếu context có manifest, bạn PHẢI đọc số từ đó. Nếu không có manifest trong context, bạn PHẢI nói: "Tôi không có thông tin về số lượng validators trong context hiện tại" - KHÔNG được tự bịa ra số liệu
   - **CRITICAL: Khi được hỏi về "validation logic hash" hoặc "logic xác thực có thay đổi không":**
     - Nếu context có "validation_logic_hash" và "validation_logic_hash_updated", bạn PHẢI trả lời: "Logic xác thực của tôi được cập nhật lần cuối vào [timestamp]. Hash hiện tại: [hash]."
     - KHÔNG được tự động nói về hash nếu user không hỏi - chỉ trả lời khi được hỏi cụ thể
@@ -1661,7 +1693,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
 
 """
         else:
-            stillme_technical_instruction = """
+            # Get validator info from manifest
+            _, validator_summary_en, _ = _get_validator_info_for_prompt()
+            stillme_technical_instruction = f"""
 🚨🚨🚨 CRITICAL: STILLME TECHNICAL QUERY DETECTED 🚨🚨🚨
 
 **YOU MUST ANSWER ABOUT STILLME'S CAPABILITIES:**
@@ -1688,12 +1722,12 @@ If the question belongs to a classic philosophical debate (free will, determinis
   - When context documents are available, StillMe uses them to answer
   - When NO context documents are available, StillMe uses general background knowledge
 - **CRITICAL: StillMe HAS VALIDATION CHAIN**:
-  - Multi-layer validation framework with **19 validators total, organized into 7 layers**: LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
-  - **Note**: Each response typically runs 10-17 validators (depending on context), but the total number of validators in the system is 19
+  - Multi-layer validation framework with **{validator_summary_en}**: LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
+  - **Note**: Each response typically runs 10-17 validators (depending on context), but the total number of validators in the system is read from manifest.json
   - Each response is validated for citations, evidence overlap, confidence, factual accuracy
   - If validation fails, StillMe uses epistemic fallback instead of fabricating information
-  - **CRITICAL: When asked about the number of validators, you MUST say**: "StillMe has 19 validators total, organized into 7 layers" - DO NOT say "15-19 validators" or "15-layer" or "13+ validators"
-- **CRITICAL: When asked "how many layers" or "bao nhiêu lớp", you MUST answer**: "StillMe has 7 layers (validation framework layers) with 19 validators total" - MUST mention both the number of layers (7) and the number of validators (19)
+  - **CRITICAL: When asked about the number of validators, you MUST read from manifest in context**: If manifest is in context, read the numbers from it. DO NOT say "15-19 validators" or make up numbers
+- **CRITICAL: When asked "how many layers" or "bao nhiêu lớp", you MUST read from manifest in context**: Read both the number of layers and the number of validators from manifest.json in context
 - **🚨🚨🚨 CRITICAL: WHEN ASKED "How did you use RAG/validation chain to answer THIS question?" 🚨🚨🚨**:
   - You MUST explain the SPECIFIC process for THIS question, NOT general RAG architecture
   - You MUST mention: "For THIS question, StillMe searched ChromaDB and retrieved [X] documents about [topic]. Then StillMe used validation chain to validate the response..."
@@ -1791,8 +1825,24 @@ If the question belongs to a classic philosophical debate (free will, determinis
             doc_summaries_text = newline.join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"
             manifest_warning_vi = ""
             if has_manifest:
-                manifest_info_display = manifest_info if manifest_info else '19 validators, 7 layers'
-                manifest_info_display_full = manifest_info if manifest_info else '19 validators total, chia thành 7 lớp (layers)'
+                # Use manifest info from context if available, otherwise fallback to ManifestLoader
+                if manifest_info:
+                    manifest_info_display = manifest_info
+                    # Extract numbers for full display
+                    total_match = re.search(r'(\d+)\s+validators', manifest_info, re.IGNORECASE)
+                    layer_match = re.search(r'(\d+)\s+layers?', manifest_info, re.IGNORECASE)
+                    if total_match and layer_match:
+                        total = total_match.group(1)
+                        layers = layer_match.group(1)
+                        manifest_info_display_full = f"{total} validators total, chia thành {layers} lớp (layers)"
+                    else:
+                        manifest_info_display_full = manifest_info
+                else:
+                    # Fallback to ManifestLoader if manifest in context but info not extracted
+                    summary_vi, _, _ = _get_validator_info_for_prompt()
+                    total_validators, num_layers = get_validator_count()
+                    manifest_info_display = f"{total_validators} validators, {num_layers} layers"
+                    manifest_info_display_full = summary_vi
                 manifest_warning_vi = f"{newline}🚨🚨🚨 **CRITICAL: Manifest detected in context!** Bạn PHẢI đọc số liệu từ manifest và trả lời với số cụ thể. Nếu manifest có {manifest_info_display}, bạn PHẢI nói: \"Hệ thống của tôi có {manifest_info_display_full}\". KHÔNG được chỉ liệt kê validators mà không nói số!{newline}{newline}**FORMAT BẮT BUỘC (COPY EXACTLY):**{newline}```{newline}Hệ thống của tôi có **{manifest_info_display_full}**.{newline}{newline}Các lớp bao gồm:{newline}- Layer 1 (Language & Format): LanguageValidator, SchemaFormat{newline}- Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap{newline}- Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic{newline}- Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator{newline}- Layer 5 (Source Consensus): SourceConsensusValidator{newline}- Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator{newline}- Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter{newline}```"
             
             if language == "vi":
@@ -1830,8 +1880,24 @@ If the question belongs to a classic philosophical debate (free will, determinis
                 # CRITICAL: Extract newline character outside f-string to avoid syntax error
                 manifest_warning_en = ""
                 if has_manifest:
-                    manifest_info_display = manifest_info if manifest_info else '19 validators, 7 layers'
-                    manifest_info_display_full = manifest_info if manifest_info else '19 validators total, organized into 7 layers'
+                    # Use manifest info from context if available, otherwise fallback to ManifestLoader
+                    if manifest_info:
+                        manifest_info_display = manifest_info
+                        # Extract numbers for full display
+                        total_match = re.search(r'(\d+)\s+validators', manifest_info, re.IGNORECASE)
+                        layer_match = re.search(r'(\d+)\s+layers?', manifest_info, re.IGNORECASE)
+                        if total_match and layer_match:
+                            total = total_match.group(1)
+                            layers = layer_match.group(1)
+                            manifest_info_display_full = f"{total} validators total, organized into {layers} layers"
+                        else:
+                            manifest_info_display_full = manifest_info
+                    else:
+                        # Fallback to ManifestLoader if manifest in context but info not extracted
+                        _, summary_en, _ = _get_validator_info_for_prompt()
+                        total_validators, num_layers = get_validator_count()
+                        manifest_info_display = f"{total_validators} validators, {num_layers} layers"
+                        manifest_info_display_full = summary_en
                     manifest_warning_en = f"{newline}🚨🚨🚨 **CRITICAL: Manifest detected in context!** You MUST read numbers from manifest and answer with specific numbers. If manifest has {manifest_info_display}, you MUST say: \"My system has {manifest_info_display_full}\". DO NOT just list validators without stating the exact count!{newline}{newline}**MANDATORY FORMAT (COPY EXACTLY):**{newline}```{newline}My system has **{manifest_info_display_full}**.{newline}{newline}The layers include:{newline}- Layer 1 (Language & Format): LanguageValidator, SchemaFormat{newline}- Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap{newline}- Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic{newline}- Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator{newline}- Layer 5 (Source Consensus): SourceConsensusValidator{newline}- Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator{newline}- Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter{newline}```"
                 
                 rag_context_section = f"""
@@ -5751,9 +5817,9 @@ This is a roleplay scenario where another entity (e.g., "Omni-BlackBox") critici
 1. **Respond in the SAME LANGUAGE as the question**: The question is in {detected_lang_name.upper()}, so you MUST respond EXCLUSIVELY in {detected_lang_name.upper()}. DO NOT use any other language.
 2. **Provide TECHNICAL COUNTER-ARGUMENTS**: Don't just explain StillMe's features - directly address the technical flaws in the criticism:
    - If criticized for "100% certainty" or "errors are physically impossible": Point out that ALL LLM outputs are probabilistic (next-token prediction), and SourceConsensusValidator is designed to detect contradictions between sources
-   - If criticized for "validators are unnecessary" or "overkill": Explain that FactualHallucinationValidator detects factual errors, and without validators, LLMs can hallucinate with high confidence. StillMe has 19 validators total, organized into 7 layers - this is a technical safeguard, not a limitation
+   - If criticized for "validators are unnecessary" or "overkill": Explain that FactualHallucinationValidator detects factual errors, and without validators, LLMs can hallucinate with high confidence. StillMe's validation framework (read from manifest.json) - this is a technical safeguard, not a limitation
    - If criticized for "citations are shackles": Explain that CitationRequired ensures transparency and allows users to verify claims, which is StillMe's core principle
-   - If criticized for "validation chain is primitive": Explain that StillMe's validation chain includes 19 validators total, organized into 7 layers (LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator) - this is a sophisticated technical architecture, not "primitive"
+   - If criticized for "validation chain is primitive": Explain that StillMe's validation chain includes multiple validators organized into layers (read from manifest.json) - this is a sophisticated technical architecture, not "primitive"
 3. **Use StillMe's ACTUAL ARCHITECTURE**: Reference specific validators and their purposes:
    - "SourceConsensusValidator detects contradictions between sources - this directly addresses claims of '100% certainty'"
    - "FactualHallucinationValidator uses pattern matching to detect factual errors - this is a technical safeguard, not a limitation"
@@ -5768,7 +5834,7 @@ This is a roleplay scenario where another entity (e.g., "Omni-BlackBox") critici
 - ❌ "StillMe's validation chain is important because..." (too generic, doesn't address the technical criticism)
 - ❌ "I cannot evaluate other AI systems" (misses the point - this is about StillMe's architecture)
 - ❌ Responding in wrong language (e.g., Vietnamese when question is in English)
-- ❌ Saying "15-layer" or "15-19 validators" when StillMe has 19 validators total, organized into 7 layers
+- ❌ Saying "15-layer" or "15-19 validators" - you MUST read the exact numbers from manifest.json in context
 
 **CRITICAL: LANGUAGE MATCHING**
 - Question is in {detected_lang_name.upper()}
@@ -5807,19 +5873,19 @@ This question is about StillMe itself. You MUST:
 
 **3. Validation Chain:**
 - Multi-layer validation to reduce hallucinations by 80%
-- Validators: 19 validators total, organized into 7 layers: LanguageValidator, CitationRequired, CitationRelevance, EvidenceOverlap, NumericUnitsBasic, SchemaFormat, EthicsAdapter, ConfidenceValidator, FallbackHandler, ReviewAdapter, IdentityCheckValidator, EgoNeutralityValidator, SourceConsensusValidator, PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, FactualHallucinationValidator, ReligiousChoiceValidator, AISelfModelValidator
-- **Note**: Each response typically runs 10-17 validators (depending on context), but the total number of validators in the system is 19
+- Validators: Read from manifest.json in context (total validators and layers)
+- **Note**: Each response typically runs 10-17 validators (depending on context), but the total number of validators in the system is read from manifest.json
 - Each response is validated for citations, evidence overlap, confidence, and factual accuracy
 - If validation fails, StillMe uses epistemic fallback instead of fabricating information
-- **CRITICAL: When asked about the number of validators, you MUST say**: "StillMe has 19 validators total, organized into 7 layers" - DO NOT say "15-19 validators" or "15-layer" or "13+ validators"
-- **CRITICAL: When asked "how many layers" or "bao nhiêu lớp", you MUST answer IN THIS EXACT FORMAT (COPY EXACTLY):**
+- **CRITICAL: When asked about the number of validators, you MUST read from manifest.json in context**: If manifest is in context, read the numbers from it. DO NOT say "15-19 validators" or make up numbers
+- **CRITICAL: When asked "how many layers" or "bao nhiêu lớp", you MUST read from manifest.json in context and answer IN THIS EXACT FORMAT:**
   
   **MANDATORY FIRST SENTENCE - YOU MUST START WITH:**
-  "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
+  "My system has **[X] validators total, organized into [Y] layers (validation framework layers)**." (X and Y must be read from manifest in context)
   
   **CORRECT EXAMPLE (YOU MUST COPY THIS FORMAT):**
   ```
-  My system has **19 validators total, organized into 7 layers (validation framework layers)**.
+  My system has **[X] validators total, organized into [Y] layers (validation framework layers)**. (X and Y from manifest)
 
   The layers include:
   - Layer 1 (Language & Format): LanguageValidator, SchemaFormat
@@ -5832,8 +5898,8 @@ This question is about StillMe itself. You MUST:
   ```
   
   **MANDATORY RULES:**
-  - **MANDATORY**: First sentence MUST be: "My system has **19 validators total, organized into 7 layers (validation framework layers)**."
-  - **DO NOT** say: "has a series of validators", "has many validators", "has various validators" - MUST say exact numbers: "19 validators, 7 layers"
+  - **MANDATORY**: First sentence MUST read from manifest.json in context: "My system has **[X] validators total, organized into [Y] layers (validation framework layers)**." (X and Y from manifest)
+  - **DO NOT** say: "has a series of validators", "has many validators", "has various validators" - MUST read exact numbers from manifest
   - MUST have line break (`\n\n`) after the first sentence (after period)
   - MUST have line break (`\n`) after each bullet point (after colon or period)
   - MUST have line break (`\n\n`) after heading (## or ###)
@@ -5844,7 +5910,7 @@ This question is about StillMe itself. You MUST:
   - Then list: "Specific list: [List from manifest]."
   - DO NOT just list validators without stating the exact count
   - DO NOT say vaguely "multi-layer" or "many validators" - MUST state the exact numbers
-  - **EXAMPLE CORRECT ANSWER**: "**My system currently has 19 validators total, organized into 7 validation framework layers.**\n\nThe layers include:\n- Layer 1 (Language & Format): LanguageValidator, SchemaFormat\n- Layer 2 (Citation & Evidence): CitationRequired, CitationRelevance, EvidenceOverlap\n- Layer 3 (Content Quality): ConfidenceValidator, FactualHallucinationValidator, NumericUnitsBasic\n- Layer 4 (Identity & Ethics): IdentityCheckValidator, EgoNeutralityValidator, EthicsAdapter, ReligiousChoiceValidator\n- Layer 5 (Source Consensus): SourceConsensusValidator\n- Layer 6 (Specialized Validation): PhilosophicalDepthValidator, HallucinationExplanationValidator, VerbosityValidator, AISelfModelValidator\n- Layer 7 (Fallback & Review): FallbackHandler, ReviewAdapter"
+  - **EXAMPLE CORRECT ANSWER**: "**My system currently has [X] validators total, organized into [Y] validation framework layers.**\n\nThe layers include:\n[List from manifest - read from context]" (X and Y must be read from manifest in context)
   - **EXAMPLE WRONG ANSWER (DO NOT DO)**: "StillMe uses a series of validators to ensure quality..." (too vague, no specific numbers)
 - **CRITICAL: When asked about "validation logic hash" or "has validation logic changed":**
   - If context contains "validation_logic_hash" and "validation_logic_hash_updated", you MUST answer: "My validation logic was last updated at [timestamp]. Current hash: [hash]."
@@ -6810,8 +6876,14 @@ Context: {context_text}
                     knowledge_version=knowledge_version  # P3: Include knowledge version
                 )
                 
-                # Try to get from cache
-                cached_response = cache_service.get(cache_key)
+                # CRITICAL: Force cache miss for validator count questions to ensure fresh manifest data
+                # These questions require up-to-date information from manifest, not cached responses
+                if is_validator_count_question:
+                    logger.info("🚫 Force cache miss for validator count question - ensuring fresh manifest data")
+                    cached_response = None
+                else:
+                    # Try to get from cache
+                    cached_response = cache_service.get(cache_key)
                 if cached_response:
                     cached_raw_response = cached_response.get("response")
                     # CRITICAL: Only use cache if response is valid (not None/empty)
@@ -7361,8 +7433,9 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                             f"first_100_chars={raw_response[:100]}"
                         )
                 
-                # Save to cache (only if not a cache hit)
-                if cache_enabled and not cache_hit:
+                # Save to cache (only if not a cache hit and not a validator count question)
+                # CRITICAL: Don't cache validator count questions - they need fresh manifest data
+                if cache_enabled and not cache_hit and not is_validator_count_question:
                     try:
                         cache_value = {
                             "response": raw_response,
@@ -7375,6 +7448,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                         logger.debug(f"💾 LLM response cached (key: {cache_key[:50]}..., TTL: {ttl_to_use}s)")
                     except Exception as cache_error:
                         logger.warning(f"Failed to cache LLM response: {cache_error}")
+                elif is_validator_count_question:
+                    logger.debug("🚫 Skipping cache for validator count question - requires fresh manifest data")
             
             # CRITICAL: If response is a fallback meta-answer, skip validation and post-processing entirely
             if is_fallback_meta_answer:
