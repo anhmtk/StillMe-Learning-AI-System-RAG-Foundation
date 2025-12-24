@@ -4504,43 +4504,74 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                 
                 # Force-inject manifest if not found OR if found but has outdated info
                 if not has_manifest or not manifest_has_correct_info:
-                    logger.warning(f"⚠️ Manifest not found in retrieved context - attempting direct manifest retrieval")
-                    # Try direct manifest retrieval using rag_retrieval with specific query
+                    logger.warning(f"⚠️ Manifest not found or outdated in retrieved context - force-injecting from file")
+                    # CRITICAL: Load manifest directly from file and inject into context
+                    # This ensures we always have correct info (19 validators, 7 layers) regardless of ChromaDB state
                     try:
-                        # Use specific query for manifest retrieval
-                        manifest_query = "StillMe Structural Manifest validation framework total_validators layers 19 validators 7 layers"
-                        manifest_context = rag_retrieval.retrieve_context(
-                            query=manifest_query,
-                            knowledge_limit=5,  # Get more docs to ensure manifest is included
-                            conversation_limit=0,  # Don't need conversation for manifest
-                            prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
-                            similarity_threshold=0.01,  # CRITICAL: Very low threshold to ensure manifest is retrieved
-                            exclude_content_types=None,  # Don't exclude anything for manifest search
-                            is_philosophical=False
-                        )
-                        manifest_docs = manifest_context.get("knowledge_docs", [])
-                        # Filter for manifest documents (CRITICAL_FOUNDATION or contain "manifest" or "total_validators")
-                        filtered_manifest_docs = []
-                        for doc in manifest_docs:
-                            if isinstance(doc, dict):
-                                metadata = doc.get("metadata", {})
-                                source = metadata.get("source", "") or ""
-                                title = metadata.get("title", "") or ""
-                                doc_content = str(doc.get("document", ""))
-                                if ("CRITICAL_FOUNDATION" in source or 
-                                    "manifest" in title.lower() or 
-                                    "validation_framework" in doc_content.lower() or
-                                    "total_validators" in doc_content.lower()):
-                                    filtered_manifest_docs.append(doc)
+                        from backend.core.manifest_loader import ManifestLoader
+                        from scripts.inject_manifest_to_rag import manifest_to_text
+                        import json
+                        from pathlib import Path
                         
-                        if filtered_manifest_docs:
+                        # Load manifest from file (source of truth)
+                        manifest_path = Path("data/stillme_manifest.json")
+                        if manifest_path.exists():
+                            with open(manifest_path, 'r', encoding='utf-8') as f:
+                                manifest = json.load(f)
+                            
+                            # Convert to text format
+                            manifest_text = manifest_to_text(manifest)
+                            
+                            # Create manifest document for injection
+                            manifest_doc = {
+                                "document": manifest_text,
+                                "metadata": {
+                                    "title": "StillMe Structural Manifest - Validation Framework",
+                                    "source": "CRITICAL_FOUNDATION",
+                                    "foundational": "stillme",
+                                    "type": "foundational",
+                                    "tags": "foundational:stillme,CRITICAL_FOUNDATION,stillme,validation,validators,validation-chain,structural-manifest,system-architecture,self-awareness",
+                                    "importance_score": 1.0,
+                                    "manifest_version": manifest.get("version", "1.2.0"),
+                                    "last_sync": manifest.get("last_sync", ""),
+                                    "description": "CRITICAL: Structural manifest of StillMe's validation framework - source of truth for validator count and architecture."
+                                }
+                            }
+                            
                             # Inject manifest at the beginning of knowledge_docs
-                            knowledge_docs = filtered_manifest_docs + knowledge_docs
+                            knowledge_docs = [manifest_doc] + knowledge_docs
                             context["knowledge_docs"] = knowledge_docs
                             context["total_context_docs"] = len(knowledge_docs) + len(context.get("conversation_docs", []))
-                            logger.info(f"✅ Force-injected manifest into context: {len(filtered_manifest_docs)} manifest docs")
+                            
+                            total_validators = manifest.get("validation_framework", {}).get("total_validators", 0)
+                            num_layers = len(manifest.get("validation_framework", {}).get("layers", []))
+                            logger.info(f"✅ Force-injected manifest from file into context: {total_validators} validators, {num_layers} layers")
                         else:
-                            logger.warning(f"⚠️ Direct manifest retrieval found {len(manifest_docs)} docs but none matched manifest criteria - manifest may not be in ChromaDB")
+                            logger.error(f"❌ Manifest file not found: {manifest_path} - cannot force-inject")
+                            # Fallback: Try direct manifest retrieval from ChromaDB
+                            manifest_query = "StillMe Structural Manifest validation framework total_validators layers 19 validators 7 layers"
+                            manifest_context = rag_retrieval.retrieve_context(
+                                query=manifest_query,
+                                knowledge_limit=5,
+                                conversation_limit=0,
+                                prioritize_foundational=True,
+                                similarity_threshold=0.01,
+                                exclude_content_types=None,
+                                is_philosophical=False
+                            )
+                            manifest_docs = manifest_context.get("knowledge_docs", [])
+                            filtered_manifest_docs = [
+                                doc for doc in manifest_docs
+                                if isinstance(doc, dict) and (
+                                    "CRITICAL_FOUNDATION" in str(doc.get("metadata", {}).get("source", "")) or
+                                    "manifest" in str(doc.get("metadata", {}).get("title", "")).lower()
+                                )
+                            ]
+                            if filtered_manifest_docs:
+                                knowledge_docs = filtered_manifest_docs + knowledge_docs
+                                context["knowledge_docs"] = knowledge_docs
+                                context["total_context_docs"] = len(knowledge_docs) + len(context.get("conversation_docs", []))
+                                logger.info(f"✅ Force-injected manifest from ChromaDB: {len(filtered_manifest_docs)} manifest docs")
                     except Exception as manifest_inject_error:
                         logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}", exc_info=True)
             
