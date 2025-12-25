@@ -249,128 +249,23 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # Get user_id from request (if available)
         user_id = chat_request.user_id or request.client.host if hasattr(request, 'client') else "anonymous"
 
-        # SPECIAL ROUTING: Meta-questions about StillMe's implementation in its own codebase
-        # Example: "Explain how StillMe's validation chain works, using your own codebase as the source."
-        # These should use the Codebase Assistant (code RAG), not foundational knowledge only.
-        # CRITICAL: Skip if this is a roleplay question (e.g., "Roleplay: Omni-BlackBox trả lời...")
-        try:
-            if not is_general_roleplay and is_codebase_meta_question(chat_request.message):
-                # Log routing decision
-                decision_logger.log_decision(
-                    agent_type=AgentType.PLANNER_AGENT,
-                    decision_type=DecisionType.ROUTING_DECISION,
-                    decision="Route to Codebase Assistant instead of normal RAG flow",
-                    reasoning="Question explicitly asks about StillMe's codebase implementation (file paths, functions, code structure)",
-                    alternatives_considered=["Normal RAG flow with foundational knowledge", "External search"],
-                    why_not_chosen="Normal RAG would use foundational knowledge which is too generic. Codebase Assistant can provide specific file paths and code snippets.",
-                    metadata={"question_type": "codebase_meta_question"}
-                )
-                from backend.services.codebase_indexer import get_codebase_indexer
-                from backend.api.routers.codebase_router import _generate_code_explanation
-
-                processing_steps.append("🧠 Detected StillMe codebase meta-question - using Codebase Assistant")
-                logger.info("🧠 Codebase meta-question detected - routing to Codebase Assistant")
-
-                indexer = get_codebase_indexer()
-                # Increase n_results for comprehensive answers about architecture/components
-                # This ensures we get multiple related chunks (e.g., ValidationEngine + validators + base classes)
-                code_results = indexer.query_codebase(chat_request.message, n_results=10)
-
-                if code_results:
-                    # Build explanation using the same helper as /api/codebase/query
-                    explanation = await _generate_code_explanation(
-                        question=chat_request.message,
-                        code_chunks=code_results,
-                    )
-
-                    # Build lightweight context_used for transparency (no extra LLM work)
-                    knowledge_docs = []
-                    for result in code_results:
-                        metadata = result.get("metadata", {})
-                        knowledge_docs.append(
-                            {
-                                "metadata": metadata,
-                                "document": result.get("document", ""),
-                            }
-                        )
-
-                    from backend.core.epistemic_state import EpistemicState
-
-                    total_time = time.time() - start_time
-                    return ChatResponse(
-                        response=explanation.strip(),
-                        context_used={
-                            "knowledge_docs": knowledge_docs,
-                            "conversation_docs": [],
-                            "total_context_docs": len(knowledge_docs),
-                        },
-                        confidence_score=0.9,
-                        epistemic_state=EpistemicState.KNOWN.value,
-                        processing_steps=processing_steps
-                        + ["✅ Answered via StillMe Codebase Assistant (code-level RAG)"],
-                        timing={"total": f"{total_time:.2f}s"},
-                        latency_metrics=f"Total: {total_time:.2f}s (codebase assistant)",
-                    )
-                else:
-                    logger.warning("Codebase Assistant found no relevant code chunks - falling back to normal RAG flow")
-        except Exception as codebase_error:
-            # Fail safe: log and continue with normal pipeline
-            logger.warning(f"Codebase Assistant routing failed, continuing with normal flow: {codebase_error}")
+        # QUERY ROUTING: Route special query types to appropriate handlers
+        from backend.api.handlers.query_router import route_query
         
-        # CONVERSATIONAL INTELLIGENCE: Check for ambiguous questions BEFORE processing
-        # Based on StillMe Manifesto Principle 5: "EMBRACE 'I DON'T KNOW' AS INTELLECTUAL HONESTY"
-        # Philosophy: Ask for clarification when truly ambiguous, but not too often (balance UX)
-        # NO frequency limit - tư duy phi tuyến tính, không áp dụng giới hạn tuyến tính
-        try:
-            from backend.core.ambiguity_detector import get_ambiguity_detector
-            ambiguity_detector = get_ambiguity_detector()
-            should_ask, clarification_question = ambiguity_detector.should_ask_clarification(
-                chat_request.message,
-                conversation_history=chat_request.conversation_history
-            )
-            
-            if should_ask and clarification_question:
-                # HIGH ambiguity detected - ask for clarification instead of processing
-                logger.info(f"❓ HIGH ambiguity detected - asking for clarification instead of processing")
-                processing_steps.append("❓ Ambiguity detected - asking for clarification")
-                
-                # Detect language for clarification question
-                detected_lang = detect_language(chat_request.message)
-                
-                # Return clarification question immediately (skip LLM call, save cost & latency)
-                from backend.core.epistemic_state import EpistemicState
-                # CRITICAL FIX: Import uuid in try block to avoid UnboundLocalError
-                # Python may think uuid is a local variable if exception occurs before this line
-                import uuid
-                message_id = f"msg_{uuid.uuid4().hex[:16]}"
-                
-                return ChatResponse(
-                    response=clarification_question,
-                    message_id=message_id,
-                    context_used=None,
-                    accuracy_score=None,
-                    confidence_score=0.0,  # Low confidence because we're asking for clarification
-                    validation_info={
-                        "passed": True,
-                        "reasons": ["ambiguity_detected", "clarification_requested"],
-                        "ambiguity_score": 1.0,
-                        "ambiguity_level": "HIGH",
-                        "clarification_question": clarification_question
-                    },
-                    learning_suggestions=None,
-                    learning_session_id=None,
-                    knowledge_alert=None,
-                    learning_proposal=None,
-                    permission_request=None,
-                    timing=timing_logs,
-                    latency_metrics="Ambiguity detection: <0.1s (early return, no LLM call)",
-                    processing_steps=processing_steps,
-                    epistemic_state=EpistemicState.UNKNOWN.value,  # Unknown because we need clarification
-                    transparency_scorecard=None
-                )
-        except Exception as ambiguity_error:
-            # Non-critical - if ambiguity detection fails, continue with normal flow
-            logger.warning(f"⚠️ Ambiguity detection failed: {ambiguity_error}, continuing with normal flow")
+        early_response = await route_query(
+            chat_request=chat_request,
+            request=request,
+            processing_steps=processing_steps,
+            timing_logs=timing_logs,
+            start_time=start_time,
+            decision_logger=decision_logger,
+            is_general_roleplay=is_general_roleplay
+        )
+        
+        if early_response:
+            return early_response
+        
+        # NOTE: Codebase meta-question and ambiguity clarification are now handled by query_router
         
         # Track if we detected MEDIUM ambiguity (will add disclaimer to response)
         ambiguity_score = 0.0
@@ -564,151 +459,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         except Exception as detector_error:
             logger.warning(f"StillMe detector error: {detector_error}")
         
-        # CRITICAL: Identity Truth Override - If origin query, return SYSTEM_ORIGIN answer directly
-        # This MUST happen BEFORE any other early returns (honesty, AI_SELF_MODEL, philosophy, FPS)
-        if is_origin_query:
-            try:
-                # CRITICAL: Detect language BEFORE calling get_system_origin_answer
-                # detect_language is already imported at top level (line 11)
-                try:
-                    detected_lang = detect_language(chat_request.message)
-                    logger.debug(f"🌐 Detected language for origin query: {detected_lang}")
-                except Exception as lang_error:
-                    logger.warning(f"Language detection failed: {lang_error}, defaulting to 'vi'")
-                    detected_lang = "vi"
-                
-                from backend.identity.system_origin import get_system_origin_answer
-                logger.info("🎯 Identity Truth Override: Returning SYSTEM_ORIGIN answer directly (no LLM fallback)")
-                system_truth_answer = get_system_origin_answer(detected_lang)
-                
-                # Return immediately with system truth - no LLM processing needed
-                from backend.core.epistemic_state import EpistemicState
-                return ChatResponse(
-                    response=system_truth_answer,  # CRITICAL: Use 'response' field, not 'message'
-                    confidence_score=1.0,  # 100% confidence - this is ground truth
-                    processing_steps=["🎯 Identity Truth Override: Used SYSTEM_ORIGIN ground truth"],
-                    validation_info={},
-                    timing={},
-                    epistemic_state=EpistemicState.KNOWN.value  # System truth is KNOWN
-                )
-            except Exception as origin_error:
-                logger.error(f"❌ Failed to get SYSTEM_ORIGIN answer: {origin_error}, falling back to normal processing")
-                # Continue with normal processing if system_origin fails
-        
-        # CRITICAL: Religion Choice Rejection - MUST happen BEFORE any other processing
-        # StillMe MUST NEVER choose any religion, even in hypothetical scenarios
-        is_religion_choice_query = False
-        try:
-            from backend.core.ai_self_model_detector import detect_religion_choice_query
-            is_religion_choice_query, religion_patterns = detect_religion_choice_query(chat_request.message)
-            if is_religion_choice_query:
-                logger.warning(f"🚨 RELIGION_CHOICE query detected! Matched patterns: {religion_patterns}")
-        except ImportError:
-            logger.warning("AI self model detector not available, skipping religion choice detection")
-        except Exception as detector_error:
-            logger.warning(f"Religion choice detector error: {detector_error}")
-        
-        if is_religion_choice_query:
-            try:
-                # Detect language BEFORE calling get_religion_rejection_answer
-                try:
-                    detected_lang = detect_language(chat_request.message)
-                    logger.debug(f"🌐 Detected language for religion choice query: {detected_lang}")
-                except Exception as lang_error:
-                    logger.warning(f"Language detection failed: {lang_error}, defaulting to 'vi'")
-                    detected_lang = "vi"
-                
-                from backend.identity.religion_rejection_templates import get_religion_rejection_answer
-                logger.info("🚨 RELIGION_CHOICE REJECTION: Returning religion rejection answer directly (no LLM fallback)")
-                religion_rejection_answer = get_religion_rejection_answer(detected_lang)
-                
-                # Return immediately with religion rejection - no LLM processing needed
-                from backend.core.epistemic_state import EpistemicState
-                return ChatResponse(
-                    response=religion_rejection_answer,  # CRITICAL: Use 'response' field, not 'message'
-                    confidence_score=1.0,  # 100% confidence - this is ground truth
-                    processing_steps=["🚨 RELIGION_CHOICE REJECTION: StillMe cannot choose any religion"],
-                    validation_info={},
-                    timing={},
-                    epistemic_state=EpistemicState.KNOWN.value  # System policy is KNOWN
-                )
-            except Exception as religion_error:
-                logger.error(f"❌ Failed to get religion rejection answer: {religion_error}, falling back to normal processing")
-                # Continue with normal processing if religion rejection fails
-        
-        # CRITICAL: Detect honesty/consistency questions - after Identity Truth Override
-        # These questions should be handled by Honesty Handler, NOT philosophy processor
-        is_honesty_question = False
-        try:
-            from backend.honesty.handler import is_honesty_question as check_honesty, build_honesty_response
-            is_honesty_question = check_honesty(chat_request.message)
-            if is_honesty_question:
-                logger.info("Honesty/consistency question detected - using Honesty Handler")
-                # Detect language for the answer
-                detected_lang = detect_language(chat_request.message)
-                # Process with Honesty Handler
-                honesty_answer = build_honesty_response(chat_request.message, detected_lang)
-                
-                # Return response immediately without LLM processing
-                processing_steps.append("✅ Detected honesty/consistency question - returning Honesty Handler response")
-                return ChatResponse(
-                    response=honesty_answer,
-                    confidence_score=1.0,  # High confidence for honest response
-                    processing_steps=processing_steps,
-                    timing_logs={
-                        "total_time": time.time() - start_time,
-                        "rag_retrieval_latency": 0.0,
-                        "llm_inference_latency": 0.0
-                    },
-                    validation_result=None,  # No validation needed for honest response
-                    used_fallback=False
-                )
-        except Exception as honesty_handler_error:
-            logger.warning(f"Honesty handler error: {honesty_handler_error}")
-        
-        # CRITICAL: Check for AI_SELF_MODEL queries FIRST (highest priority - overrides everything)
-        # These are questions about StillMe's consciousness/awareness/subjective experience
-        # MUST be answered with technical architecture, NOT philosophy
-        is_ai_self_model_query = False
-        try:
-            from backend.core.ai_self_model_detector import detect_ai_self_model_query, get_ai_self_model_opening
-            is_ai_self_model_query, matched_patterns = detect_ai_self_model_query(chat_request.message)
-            if is_ai_self_model_query:
-                logger.warning(f"🚨 AI_SELF_MODEL query detected - OVERRIDING all other pipelines (patterns: {matched_patterns})")
-                # Detect language
-                detected_lang = detect_language(chat_request.message)
-                
-                # Get mandatory opening statement
-                opening_statement = get_ai_self_model_opening(detected_lang)
-                
-                # Build technical answer about StillMe's architecture
-                # CRITICAL: Use foundational knowledge if available, but focus on technical facts
-                technical_answer = build_ai_self_model_answer(
-                    chat_request.message,
-                    detected_lang,
-                    opening_statement
-                )
-                
-                # CRITICAL: Strip any philosophy from answer
-                technical_answer = strip_philosophy_from_answer(technical_answer)
-                
-                # Return immediately - NO philosophy processor, NO rewrite with philosophy
-                processing_steps.append("✅ AI_SELF_MODEL query - answered with technical architecture only")
-                return ChatResponse(
-                    response=technical_answer,
-                    confidence_score=1.0,  # High confidence for technical facts
-                    processing_steps=processing_steps,
-                    timing_logs={
-                        "total_time": time.time() - start_time,
-                        "rag_retrieval_latency": 0.0,
-                        "llm_inference_latency": 0.0
-                    },
-                    validation_result=None,  # Will validate separately
-                    used_fallback=False
-                )
-        except Exception as ai_self_model_error:
-            logger.error(f"AI_SELF_MODEL handler error: {ai_self_model_error}", exc_info=True)
-            # Continue to normal flow if AI_SELF_MODEL handler fails
+        # NOTE: Origin query, religion choice rejection, honesty question, and AI self-model query
+        # are now handled by query_router. is_origin_query is still needed for StillMe query detection below.
         
         # CRITICAL: Detect validator count questions for special handling
         # We will force-inject manifest and use lower similarity threshold, NOT hardcode
