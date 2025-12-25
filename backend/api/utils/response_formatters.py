@@ -344,9 +344,9 @@ def append_validation_warnings_to_response(
         # Add confidence score
         config = get_chat_config()
         confidence_percent = confidence_score * 100
-        if confidence_score < config.CONFIDENCE.LOW_THRESHOLD:
+        if confidence_score < config.confidence.LOW:
             confidence_level = "thấp"
-        elif confidence_score < config.CONFIDENCE.MEDIUM_THRESHOLD:
+        elif confidence_score < config.confidence.MEDIUM:
             confidence_level = "vừa phải"
         else:
             confidence_level = "cao"
@@ -407,9 +407,9 @@ def append_validation_warnings_to_response(
         # Add confidence score
         config = get_chat_config()
         confidence_percent = confidence_score * 100
-        if confidence_score < config.CONFIDENCE.LOW_THRESHOLD:
+        if confidence_score < config.confidence.LOW:
             confidence_level = "low"
-        elif confidence_score < config.CONFIDENCE.MEDIUM_THRESHOLD:
+        elif confidence_score < config.confidence.MEDIUM:
             confidence_level = "moderate"
         else:
             confidence_level = "high"
