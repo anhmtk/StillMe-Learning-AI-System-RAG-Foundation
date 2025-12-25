@@ -2165,7 +2165,7 @@ Always cite the context above with [1], [2] when explaining StillMe's features."
                 # For philosophical questions, skip conversation history entirely
                 conversation_history_text = format_conversation_history(
                     chat_request.conversation_history, 
-                    max_tokens=get_chat_config().TOKEN_LIMITS.MAX_CONVERSATION_HISTORY,
+                    max_tokens=get_chat_config().tokens.MAX_CONVERSATION_HISTORY,
                     current_query=chat_request.message,
                     is_philosophical=is_philosophical
                 )
@@ -2840,11 +2840,11 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     user_question_for_rag = chat_request.message.strip()
                     user_question_tokens_rag = estimate_tokens(user_question_for_rag)
                     config = get_chat_config()
-                    if user_question_tokens_rag > config.TOKEN_LIMITS.MAX_PHILOSOPHY_QUESTION:
+                    if user_question_tokens_rag > config.tokens.MAX_PHILOSOPHY_QUESTION:
                         logger.warning(
                             f"User question too long for philosophical RAG ({user_question_tokens_rag} tokens), truncating to 512 tokens"
                         )
-                        user_question_for_rag = truncate_user_message(chat_request.message, max_tokens=config.TOKEN_LIMITS.MAX_PHILOSOPHY_QUESTION)
+                        user_question_for_rag = truncate_user_message(chat_request.message, max_tokens=config.tokens.MAX_PHILOSOPHY_QUESTION)
                         user_question_tokens_rag = estimate_tokens(user_question_for_rag)
                     
                     # Build minimal prompt (same format as non-RAG path)
@@ -3504,11 +3504,11 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             if is_philosophical_non_rag:
                 user_question_tokens = estimate_tokens(chat_request.message)
                 config = get_chat_config()
-                if user_question_tokens > config.TOKEN_LIMITS.MAX_PHILOSOPHY_QUESTION:
+                if user_question_tokens > config.tokens.MAX_PHILOSOPHY_QUESTION:
                     logger.warning(
-                        f"User question too long for philosophical non-RAG ({user_question_tokens} tokens), truncating to {config.TOKEN_LIMITS.MAX_PHILOSOPHY_QUESTION} tokens"
+                        f"User question too long for philosophical non-RAG ({user_question_tokens} tokens), truncating to {config.tokens.MAX_PHILOSOPHY_QUESTION} tokens"
                     )
-                    user_question_for_prompt = truncate_user_message(chat_request.message, max_tokens=config.TOKEN_LIMITS.MAX_PHILOSOPHY_QUESTION)
+                    user_question_for_prompt = truncate_user_message(chat_request.message, max_tokens=config.tokens.MAX_PHILOSOPHY_QUESTION)
                     user_question_tokens = estimate_tokens(user_question_for_prompt)
                 else:
                     user_question_tokens = estimate_tokens(chat_request.message)
@@ -3521,7 +3521,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             conversation_history_text = ""
             if not is_philosophical_non_rag:
                 config = get_chat_config()
-                conversation_history_text = format_conversation_history(chat_request.conversation_history, max_tokens=config.TOKEN_LIMITS.MAX_CONVERSATION_HISTORY)
+                conversation_history_text = format_conversation_history(chat_request.conversation_history, max_tokens=config.tokens.MAX_CONVERSATION_HISTORY)
                 if conversation_history_text:
                     logger.info(f"Including conversation history in context (truncated if needed, non-RAG)")
             else:
