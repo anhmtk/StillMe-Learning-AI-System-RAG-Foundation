@@ -44,6 +44,9 @@ from backend.api.handlers.rag_retrieval_handler import (
 from backend.api.handlers.validation_handler import (
     handle_validation_with_fallback
 )
+from backend.api.handlers.llm_handler import (
+    generate_llm_response
+)
 from backend.identity.prompt_builder import (
     UnifiedPromptBuilder,
     PromptContext,
@@ -3222,481 +3225,160 @@ Context: {context_text}
             # LLM_Inference_Latency: Time from API call start to response received
             provider_name = chat_request.llm_provider or "default"
             
-            # Phase 1: LLM Response Cache - Check cache first
-            # CRITICAL: Disable cache for origin queries to ensure provenance context is retrieved
-            # Origin queries need fresh responses with proper founder information
-            cache_service = get_cache_service()
-            cache_enabled = os.getenv("ENABLE_LLM_CACHE", "true").lower() == "true"
-            # Disable cache for origin queries to ensure provenance context is used
-            if is_origin_query:
-                cache_enabled = False
-                logger.info("⚠️ Cache disabled for origin query - ensuring fresh response with provenance context")
-            
-            # P3: Conditional cache for StillMe queries with knowledge versioning
-            # 1. Self-reflection questions: Cache with 1h TTL (shorter than default)
-            # 2. Foundational knowledge queries: Cache with knowledge version (auto-invalidate on update)
-            # 3. Other StillMe queries: Normal cache behavior
-            cache_ttl_override = None  # P3: Custom TTL for specific query types
-            if is_stillme_query:
-                # Check if this is a self-reflection question about weaknesses/limitations
-                question_lower = chat_request.message.lower()
-                is_self_reflection = any(
-                    pattern in question_lower 
-                    for pattern in [
-                        "điểm yếu", "weakness", "limitation", "hạn chế", "chí tử",
-                        "chỉ ra điểm yếu", "chỉ ra hạn chế", "what are your weaknesses"
-                    ]
-                )
+            # CRITICAL: Check Option B FPS blocking BEFORE calling LLM handler
+            # This must be done here because it returns ChatResponse immediately
+            if use_option_b:
+                from backend.core.question_classifier_v2 import get_question_classifier_v2
+                classifier = get_question_classifier_v2()
+                question_type_result, confidence, _ = classifier.classify(chat_request.message)
+                question_type_str = question_type_result.value
                 
-                if is_self_reflection:
-                    # P3: Cache self-reflection with 1h TTL (instead of disabling)
-                    cache_ttl_override = 3600  # 1 hour
-                    logger.info("💾 P3: Caching StillMe self-reflection question with 1h TTL (knowledge version included in cache key)")
-                elif context and context.get("knowledge_docs"):
-                    has_foundational = any(
-                        doc.get("metadata", {}).get("source") == "CRITICAL_FOUNDATION" or
-                        doc.get("metadata", {}).get("foundational") == "stillme" or
-                        doc.get("metadata", {}).get("type") == "foundational" or
-                        "CRITICAL_FOUNDATION" in str(doc.get("metadata", {}).get("tags", "")) or
-                        "foundational:stillme" in str(doc.get("metadata", {}).get("tags", ""))
-                        for doc in context.get("knowledge_docs", [])
+                # CRITICAL: Check FPS for Option B - use threshold 0.3 for fake concepts
+                if fps_result and not fps_result.is_plausible and fps_result.confidence < 0.3:
+                    # FPS blocked - return EPD-Fallback immediately
+                    logger.warning(f"🛡️ Option B: FPS blocked question - returning EPD-Fallback")
+                    from backend.guards.epistemic_fallback import get_epistemic_fallback_generator
+                    generator = get_epistemic_fallback_generator()
+                    suspicious_entity = fps_result.detected_entities[0] if fps_result.detected_entities else None
+                    fallback_text = generator.generate_epd_fallback(
+                        question=chat_request.message,
+                        detected_lang=detected_lang,
+                        suspicious_entity=suspicious_entity,
+                        fps_result=fps_result
                     )
-                    if has_foundational:
-                        # PHASE 3: Cache with knowledge version (will auto-invalidate when knowledge updates)
-                        # Use default TTL (1h) for foundational knowledge queries
-                        logger.info("💾 PHASE 3: Caching StillMe query with foundational knowledge (knowledge version included in cache key)")
+                    processing_steps.append("🛡️ Option B: FPS blocked - EPD-Fallback returned")
+                    from backend.core.epistemic_state import EpistemicState
+                    return ChatResponse(
+                        response=fallback_text,
+                        confidence_score=1.0,
+                        processing_steps=processing_steps,
+                        timing_logs={
+                            "total_time": time.time() - start_time,
+                            "rag_retrieval_latency": rag_retrieval_latency,
+                            "llm_inference_latency": 0.0
+                        },
+                        validation_result=None,
+                        used_fallback=True,
+                        epistemic_state=EpistemicState.UNKNOWN.value
+                    )
             
-            raw_response = None
-            cache_hit = False
+            # Use LLM handler for cache checking and LLM call
+            raw_response, cache_hit, llm_inference_latency = await generate_llm_response(
+                enhanced_prompt=enhanced_prompt,
+                detected_lang=detected_lang,
+                chat_request=chat_request,
+                context=context,
+                is_philosophical=is_philosophical,
+                is_validator_count_question=is_validator_count_question,
+                is_origin_query=is_origin_query,
+                is_stillme_query=is_stillme_query,
+                detected_lang_name=detected_lang_name,
+                context_text=context_text,
+                enable_validators=enable_validators,
+                use_option_b=use_option_b,
+                fps_result=fps_result,
+                processing_steps=processing_steps,
+                timing_logs=timing_logs
+            )
             
-            if cache_enabled:
-                # P3: Include knowledge version in cache key for intelligent cache invalidation
-                from backend.services.knowledge_version import get_knowledge_version
-                knowledge_version = get_knowledge_version()
-                
-                # Generate cache key from query + context + settings + knowledge version
-                cache_key = cache_service._generate_key(
-                    CACHE_PREFIX_LLM,
-                    chat_request.message,
-                    enhanced_prompt[:500] if len(enhanced_prompt) > 500 else enhanced_prompt,  # Truncate for key
-                    detected_lang,
-                    chat_request.llm_provider,
-                    chat_request.llm_model_name,
-                    enable_validators,
-                    knowledge_version=knowledge_version  # P3: Include knowledge version
-                )
-                
-                # CRITICAL: Force cache miss for validator count questions to ensure fresh manifest data
-                # These questions require up-to-date information from manifest, not cached responses
-                if is_validator_count_question:
-                    logger.info("🚫 Force cache miss for validator count question - ensuring fresh manifest data")
-                    cached_response = None
-                else:
-                    # Try to get from cache
-                    cached_response = cache_service.get(cache_key)
-                if cached_response:
-                    cached_raw_response = cached_response.get("response")
-                    # CRITICAL: Only use cache if response is valid (not None/empty)
-                    if cached_raw_response and isinstance(cached_raw_response, str) and cached_raw_response.strip():
-                        # CRITICAL: Check if cached response is a fallback message
-                        from backend.api.utils.error_detector import is_fallback_message
-                        if is_fallback_message(cached_raw_response):
-                            logger.warning(f"⚠️ Cache contains fallback message - ignoring cache and calling LLM")
-                            raw_response = None
-                            cache_hit = False
-                        else:
-                            raw_response = cached_raw_response
-                            cache_hit = True
-                            # PHASE 3: Transparent caching - log clearly about cache hit
-                            saved_time = cached_response.get('latency', 0)
-                            logger.info(f"✅ Cache hit for similar query, skipped LLM call (saved {saved_time:.2f}s)")
-                            logger.info(f"🔍 [TRACE] Cached response: length={len(raw_response)}, preview={raw_response[:200]}")
-                            processing_steps.append("⚡ Response from cache (fast!)")
-                            llm_inference_latency = cached_response.get("latency", 0.01)
-                            timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s (cached)"
-                            # PHASE 3: Note that validation will still run (transparency)
-                            logger.debug("💡 PHASE 3: Validation chain will still run on cached response for quality assurance")
-                    else:
-                        # Cache contains invalid response (None/empty) - ignore cache and call LLM
-                        logger.warning(f"⚠️ Cache contains invalid response (None/empty), ignoring cache and calling LLM")
-                        raw_response = None
-                        cache_hit = False
+            # CRITICAL: Log RAG context info after LLM call to help debug Q1, Q2, Q7, Q9
+            logger.info(
+                f"🔍 DEBUG Q1/Q2/Q7/Q9: LLM call completed. "
+                f"num_knowledge={num_knowledge}, context_text_length={len(context_text) if context_text else 0}, "
+                f"enhanced_prompt_length={len(enhanced_prompt) if enhanced_prompt else 0}, "
+                f"cache_hit={cache_hit}, llm_inference_latency={llm_inference_latency:.2f}s"
+            )
             
-            # If not in cache, call LLM
-            if not raw_response:
-                logger.debug(f"🔍 About to call LLM - raw_response is None, cache_hit={cache_hit}, cache_enabled={cache_enabled}")
-                processing_steps.append(f"🤖 Calling AI model ({provider_name})...")
-                llm_inference_start = time.time()
-                
-                # Support user-provided LLM config (for self-hosted deployments)
-                # For internal/dashboard calls: use server API keys if llm_provider not provided
-                # For public API: require user-provided API keys
-                use_server_keys = chat_request.llm_provider is None
-                
-                # Try to generate response with retry on context overflow
-                from backend.api.utils.llm_providers import ContextOverflowError
-                
-                # CRITICAL: Pre-check token count before calling LLM to prevent context overflow
-                def estimate_tokens_safe(text: str) -> int:
-                    """Estimate token count more accurately (~3.5 chars per token for mixed content)"""
-                    if not text:
-                        return 0
-                    # More accurate estimation: Vietnamese/English mixed content ~3.5 chars/token
-                    # Pure English ~4 chars/token, Vietnamese ~3 chars/token
-                    return int(len(text) / 3.5)
-                
-                # Estimate total tokens: system prompt + enhanced_prompt + output buffer
-                # System prompt is built separately in generate_ai_response() (~3300-3600 tokens)
-                system_prompt_buffer = 3600  # Conservative estimate for system prompt
-                enhanced_prompt_tokens = estimate_tokens_safe(enhanced_prompt) if enhanced_prompt else 0
-                output_buffer_tokens = 1500  # Reserve for output
-                total_estimated_tokens = system_prompt_buffer + enhanced_prompt_tokens + output_buffer_tokens
-                
-                # OpenRouter limit: 16385 tokens
-                # Use safe margin: 15000 tokens max (leave 1385 tokens buffer)
-                MAX_SAFE_TOKENS = 15000
-                
-                # CRITICAL: Log RAG context info before LLM call to help debug Q1, Q2, Q7, Q9
-                logger.info(
-                    f"🔍 DEBUG Q1/Q2/Q7/Q9: About to call LLM with RAG context. "
-                    f"num_knowledge={num_knowledge}, context_text_length={len(context_text) if context_text else 0}, "
-                    f"enhanced_prompt_length={len(enhanced_prompt) if enhanced_prompt else 0}, "
-                    f"estimated_tokens: system_buffer={system_prompt_buffer}, prompt={enhanced_prompt_tokens}, "
-                    f"total={total_estimated_tokens}, limit={MAX_SAFE_TOKENS}"
-                )
-                
-                # Pre-check: If estimated tokens exceed safe limit, use minimal prompt
-                if total_estimated_tokens > MAX_SAFE_TOKENS:
+            # CRITICAL: Check if raw_response is an error message BEFORE validation
+            # This prevents error messages from passing through validators
+            # BUT: For technical questions about "your system", don't replace with fallback immediately
+            # Instead, let the retry logic handle it (it will retry with stronger prompt)
+            if raw_response and isinstance(raw_response, str):
+                from backend.api.utils.error_detector import is_technical_error
+                # CRITICAL: Log full response for debugging error detection
+                logger.debug(f"🔍 Full LLM response (length={len(raw_response)}): {raw_response[:500]}...")
+                is_error, error_type = is_technical_error(raw_response)
+                # CRITICAL: For technical questions about system, don't replace with fallback immediately
+                # The retry logic below will handle it with a stronger prompt
+                if is_error and not is_technical_about_system_rag:
+                    logger.error(
+                        f"❌ LLM returned technical error as response (type: {error_type}): {raw_response[:200]}. "
+                        f"Full response length: {len(raw_response)}, Question: {chat_request.message[:100]}"
+                    )
+                    from backend.api.utils.error_detector import get_fallback_message_for_error
+                    raw_response = get_fallback_message_for_error(error_type, detected_lang)
+                    processing_steps.append(f"⚠️ LLM returned technical error - replaced with fallback message")
+                elif is_error and is_technical_about_system_rag:
                     logger.warning(
-                        f"⚠️ Pre-check: Estimated tokens ({total_estimated_tokens}) exceed safe limit ({MAX_SAFE_TOKENS}). "
-                        f"Using minimal prompt to prevent context overflow. "
-                        f"is_philosophical={is_philosophical}"
+                        f"⚠️ Technical question about 'your system' returned error (type: {error_type}) - will retry with stronger prompt. "
+                        f"Question: {chat_request.message[:100]}"
                     )
-                    
-                    if is_philosophical:
-                        # Use minimal philosophical prompt
-                        # Pass context and validation_info (if available) to include specific details about THIS question
-                        minimal_prompt = build_minimal_philosophical_prompt(
-                            user_question=chat_request.message,
-                            language=detected_lang,
-                            detected_lang_name=detected_lang_name,
-                            context=context,  # Pass context to include retrieved documents info
-                            validation_info=None  # Validation hasn't run yet, but will be included if available
-                        )
-                        logger.info(f"🔄 Using minimal philosophical prompt (pre-check prevention)")
-                        enhanced_prompt = minimal_prompt
-                        processing_steps.append("⚠️ Pre-check: Using minimal prompt (token limit)")
-                    else:
-                        # For non-philosophical, truncate context_text aggressively
-                        if context_text:
-                            original_context_length = len(context_text)
-                            # Truncate to ~2000 tokens max
-                            max_context_chars = int(2000 * 3.5)  # ~7000 chars
-                            if original_context_length > max_context_chars:
-                                truncated_context = context_text[:max_context_chars].rsplit('\n', 1)[0] + "\n\n[Context truncated to prevent overflow]"
-                                logger.warning(f"⚠️ Pre-check: Truncated context_text from {original_context_length} to {len(truncated_context)} chars")
-                                # Rebuild enhanced_prompt with truncated context
-                                # This is a simplified rebuild - just update context in special_instructions
-                                if "Context: " in enhanced_prompt:
-                                    # Find and replace context section
-                                    # Note: 're' module is already imported at top level
-                                    enhanced_prompt = re.sub(
-                                        r'Context:.*?(?=\n\n|$)',
-                                        f'Context: {truncated_context}',
-                                        enhanced_prompt,
-                                        flags=re.DOTALL
-                                    )
-                                    context_text = truncated_context  # Update context_text for later use
-                                processing_steps.append("⚠️ Pre-check: Truncated context (token limit)")
+                    # Don't replace yet - let retry logic handle it
+            
+            # CRITICAL: Validate raw_response immediately after LLM call
+            if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
+                logger.error(
+                    f"⚠️ LLM returned None or empty response for question: {chat_request.message[:100]}. "
+                    f"num_knowledge={num_knowledge}, context_text_length={len(context_text) if context_text else 0}"
+                )
+                from backend.api.utils.error_detector import get_fallback_message_for_error
+                raw_response = get_fallback_message_for_error("generic", detected_lang)
+                processing_steps.append("⚠️ LLM returned empty response - using fallback")
+            
+            # CRITICAL: Only log "AI response generated" if we actually have a response
+            # If raw_response is None/empty, it means LLM failed and we're using fallback
+            if raw_response and isinstance(raw_response, str) and raw_response.strip():
+                logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
+                processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
+                # Debug: Log first 200 chars to help diagnose issues
+                logger.debug(f"🔍 DEBUG: raw_response preview (first 200 chars): {raw_response[:200]}")
                 
-                try:
-                    
-                    # OPTION B PIPELINE: Check if enabled
-                    if use_option_b:
-                        logger.info("🚀 Option B Pipeline enabled - processing with zero-tolerance hallucination + deep philosophy")
-                        processing_steps.append("🚀 Option B Pipeline: Enabled")
-                        
-                        # Step 1-3: Pre-LLM processing (Question Classifier, FPS, RAG)
-                        from backend.core.option_b_pipeline import process_with_option_b, process_llm_response_with_option_b
-                        from backend.core.question_classifier_v2 import get_question_classifier_v2
-                        
-                        # Classify question
-                        classifier = get_question_classifier_v2()
-                        question_type_result, confidence, _ = classifier.classify(chat_request.message)
-                        # question_type_result is a QuestionType enum, access .value to get string
-                        question_type_str = question_type_result.value
-                        
-                        # CRITICAL: Check FPS for Option B - use threshold 0.3 for fake concepts
-                        # Known fake entities (Veridian, Daxonia) have confidence 0.15-0.2
-                        # This ensures Option B blocks fake concepts immediately
-                        if fps_result and not fps_result.is_plausible and fps_result.confidence < 0.3:
-                            # FPS blocked - return EPD-Fallback immediately
-                            logger.warning(f"🛡️ Option B: FPS blocked question - returning EPD-Fallback")
-                            from backend.guards.epistemic_fallback import get_epistemic_fallback_generator
-                            generator = get_epistemic_fallback_generator()
-                            suspicious_entity = fps_result.detected_entities[0] if fps_result.detected_entities else None
-                            fallback_text = generator.generate_epd_fallback(
-                                question=chat_request.message,
-                                detected_lang=detected_lang,
-                                suspicious_entity=suspicious_entity,
-                                fps_result=fps_result
-                            )
-                            processing_steps.append("🛡️ Option B: FPS blocked - EPD-Fallback returned")
-                            from backend.core.epistemic_state import EpistemicState
-                            return ChatResponse(
-                                response=fallback_text,
-                                confidence_score=1.0,
-                                processing_steps=processing_steps,
-                                timing_logs={
-                                    "total_time": time.time() - start_time,
-                                    "rag_retrieval_latency": rag_retrieval_latency,
-                                    "llm_inference_latency": 0.0
-                                },
-                                validation_result=None,
-                                used_fallback=True,
-                                epistemic_state=EpistemicState.UNKNOWN.value  # FPS blocked, fallback triggered
-                            )
-                        
-                        # Generate LLM response (Step 4)
-                        raw_response = await generate_ai_response(
-                            enhanced_prompt, 
-                            detected_lang=detected_lang,
-                            llm_provider=chat_request.llm_provider,
-                            llm_api_key=chat_request.llm_api_key,
-                            llm_api_url=chat_request.llm_api_url,
-                            llm_model_name=chat_request.llm_model_name,
-                            use_server_keys=use_server_keys,
-                            question=chat_request.message,  # Pass question for model routing
-                            task_type="chat",  # Main chat task
-                            is_philosophical=is_philosophical  # Pass philosophical flag
-                        )
-                        # CRITICAL: Log raw_response immediately after LLM call to trace response loss
-                        logger.info(f"🔍 [TRACE] raw_response after LLM call (RAG path): length={len(raw_response) if raw_response else 0}, type={type(raw_response)}, preview={raw_response[:200] if raw_response else 'None'}")
-                        
-                        # Validate raw_response
-                        if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
-                            logger.error("⚠️ Option B: LLM returned empty response")
-                            from backend.api.utils.error_detector import get_fallback_message_for_error
-                            raw_response = get_fallback_message_for_error("generic", detected_lang)
-                        
-                        # Step 5-8: Post-LLM processing (Hallucination Guard V2, Rewrite 1, Rewrite 2)
-                        option_b_result = await process_llm_response_with_option_b(
-                            llm_response=raw_response,
-                            question=chat_request.message,
-                            question_type=question_type_str,
-                            ctx_docs=context.get("knowledge_docs", []) if context else [],
-                            detected_lang=detected_lang,
-                            fps_result=fps_result
-                        )
-                        
-                        # Use Option B processed response
-                        raw_response = option_b_result["response"]
-                        processing_steps.extend(option_b_result.get("processing_steps", []))
-                        timing_logs.update(option_b_result.get("timing_logs", {}))
-                        
-                        # Mark as Option B processed
-                        is_option_b_processed = True
-                        logger.info(f"✅ Option B Pipeline completed: {len(option_b_result.get('processing_steps', []))} steps")
-                    else:
-                        # EXISTING PIPELINE (legacy)
-                        raw_response = await generate_ai_response(
-                            enhanced_prompt, 
-                            detected_lang=detected_lang,
-                            llm_provider=chat_request.llm_provider,
-                            llm_api_key=chat_request.llm_api_key,
-                            llm_api_url=chat_request.llm_api_url,
-                            llm_model_name=chat_request.llm_model_name,
-                            use_server_keys=use_server_keys,
-                            question=chat_request.message,  # Pass question for model routing
-                            task_type="chat",  # Main chat task
-                            is_philosophical=is_philosophical  # Pass philosophical flag
-                        )
-                        
-                        is_option_b_processed = False
-                    
-                    # CRITICAL: Log raw_response immediately after LLM call
-                    logger.info(
-                        f"🔍 DEBUG Q1/Q2/Q7/Q9: LLM call completed. "
-                        f"raw_response type={type(raw_response)}, "
-                        f"is None={raw_response is None}, "
-                        f"is str={isinstance(raw_response, str)}, "
-                        f"length={len(raw_response) if raw_response else 0}, "
-                        f"preview={raw_response[:200] if raw_response else 'None'}, "
-                        f"option_b={is_option_b_processed}"
+                # CRITICAL: Check if this is actually a fallback message (shouldn't happen but double-check)
+                from backend.api.utils.error_detector import is_fallback_message
+                if is_fallback_message(raw_response):
+                    logger.error(
+                        f"❌ CRITICAL: LLM returned what looks like a fallback message! "
+                        f"This should not happen. raw_response[:200]={raw_response[:200]}"
                     )
-                    
-                    # CRITICAL: Check if raw_response is an error message BEFORE validation
-                    # This prevents error messages from passing through validators
-                    # BUT: For technical questions about "your system", don't replace with fallback immediately
-                    # Instead, let the retry logic handle it (it will retry with stronger prompt)
-                    if raw_response and isinstance(raw_response, str):
-                        from backend.api.utils.error_detector import is_technical_error
-                        # CRITICAL: Log full response for debugging error detection
-                        logger.debug(f"🔍 Full LLM response (length={len(raw_response)}): {raw_response[:500]}...")
-                        is_error, error_type = is_technical_error(raw_response)
-                        # CRITICAL: For technical questions about system, don't replace with fallback immediately
-                        # The retry logic below will handle it with a stronger prompt
-                        if is_error and not is_technical_about_system_rag:
-                            logger.error(
-                                f"❌ LLM returned technical error as response (type: {error_type}): {raw_response[:200]}. "
-                                f"Full response length: {len(raw_response)}, Question: {chat_request.message[:100]}"
-                            )
-                            from backend.api.utils.error_detector import get_fallback_message_for_error
-                            raw_response = get_fallback_message_for_error(error_type, detected_lang)
-                            processing_steps.append(f"⚠️ LLM returned technical error - replaced with fallback message")
-                        elif is_error and is_technical_about_system_rag:
-                            logger.warning(
-                                f"⚠️ Technical question about 'your system' returned error (type: {error_type}) - will retry with stronger prompt. "
-                                f"Question: {chat_request.message[:100]}"
-                            )
-                            # Don't replace yet - let retry logic handle it
-                    
-                    # CRITICAL: Validate raw_response immediately after LLM call
-                    if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
-                        logger.error(
-                            f"⚠️ LLM returned None or empty response for question: {chat_request.message[:100]}. "
-                            f"num_knowledge={num_knowledge}, context_text_length={len(context_text) if context_text else 0}"
-                        )
-                        from backend.api.utils.error_detector import get_fallback_message_for_error
-                        raw_response = get_fallback_message_for_error("generic", detected_lang)
-                        processing_steps.append("⚠️ LLM returned empty response - using fallback")
-                except ContextOverflowError as e:
-                    # Context overflow - rebuild prompt with minimal context (ultra-thin mode)
-                    logger.warning(f"⚠️ Context overflow detected (RAG path): {e}. Rebuilding prompt with minimal context...")
-                    
-                    if is_philosophical:
-                        # Use minimal philosophical prompt helper
-                        # Pass context to include retrieved documents info even in retry
-                        minimal_prompt = build_minimal_philosophical_prompt(
-                            user_question=chat_request.message,
-                            language=detected_lang,
-                            detected_lang_name=detected_lang_name,
-                            context=context,  # Pass context to include retrieved documents info
-                            validation_info=None  # Validation hasn't run yet in retry path
-                        )
-                        
-                        logger.info(f"🔄 Retrying with minimal philosophical prompt (no history, no RAG, no metrics, no provenance)")
-                        try:
-                            raw_response = await generate_ai_response(
-                                minimal_prompt, 
-                                detected_lang=detected_lang,
-                                llm_provider=chat_request.llm_provider,
-                                llm_api_key=chat_request.llm_api_key,
-                                llm_api_url=chat_request.llm_api_url,
-                                llm_model_name=chat_request.llm_model_name,
-                                use_server_keys=use_server_keys
-                            )
-                            logger.info(f"✅ Successfully generated response with minimal philosophical prompt")
-                        except ContextOverflowError as retry_error:
-                            # Even minimal prompt failed - return fallback message
-                            logger.error(f"⚠️ Even minimal prompt failed (RAG path): {retry_error}")
-                            from backend.api.utils.error_detector import get_fallback_message_for_error
-                            raw_response = get_fallback_message_for_error("context_overflow", detected_lang)
-                            processing_steps.append("⚠️ Context overflow - using fallback message")
-                    else:
-                        # For non-philosophical, return fallback message
-                        logger.warning(f"⚠️ Context overflow for non-philosophical question (RAG path) - using fallback message")
-                        from backend.api.utils.error_detector import get_fallback_message_for_error
-                        raw_response = get_fallback_message_for_error("context_overflow", detected_lang)
-                        processing_steps.append("⚠️ Context overflow - using fallback message")
-                except ValueError as ve:
-                    # ValueError from generate_ai_response (missing API keys, etc.)
-                    error_msg = str(ve)
-                    logger.error(f"❌ ValueError from generate_ai_response: {error_msg}")
-                    
-                    # Check if it's a missing API key error
-                    if "llm_provider" in error_msg.lower() or "api_key" in error_msg.lower() or "api key" in error_msg.lower():
-                        has_server_keys = bool(
-                            os.getenv('DEEPSEEK_API_KEY') or 
-                            os.getenv('OPENAI_API_KEY') or 
-                            os.getenv('OPENROUTER_API_KEY')
-                        )
-                        logger.error(
-                            f"❌ CRITICAL: Missing LLM API keys! "
-                            f"use_server_keys={use_server_keys}, "
-                            f"llm_provider={chat_request.llm_provider}, "
-                            f"has_server_keys={has_server_keys}"
-                        )
-                        # Provide more helpful error message when no server keys found
-                        if not has_server_keys:
-                            raw_response = (
-                                f"⚠️ Lỗi cấu hình: Backend cần có API keys trong file .env để hoạt động. "
-                                f"Vui lòng thêm ít nhất một trong các keys sau vào file .env: "
-                                f"DEEPSEEK_API_KEY, OPENAI_API_KEY, hoặc OPENROUTER_API_KEY. "
-                                f"Chi tiết: {error_msg}"
-                            )
-                        else:
-                            from backend.api.utils.error_detector import get_fallback_message_for_error
-                            raw_response = get_fallback_message_for_error("api_error", detected_lang)
-                        processing_steps.append("⚠️ Missing API keys - cannot generate response")
-                    else:
-                        from backend.api.utils.error_detector import get_fallback_message_for_error
-                        raw_response = get_fallback_message_for_error("generic", detected_lang)
-                        processing_steps.append("⚠️ LLM configuration error - using fallback message")
-                except Exception as e:
-                    # Catch any other unexpected exceptions (must be after ContextOverflowError)
-                    logger.error(f"❌ Unexpected exception from generate_ai_response: {e}", exc_info=True)
+                    # CRITICAL: For technical questions, this should trigger retry logic below
+                    # Mark as fallback so retry logic can handle it
+                    is_fallback = True
+            else:
+                logger.warning(
+                    f"⚠️ LLM inference failed or returned empty (took {llm_inference_latency:.2f}s). "
+                    f"raw_response type={type(raw_response)}, value={raw_response[:200] if raw_response else 'None'}"
+                )
+                # Ensure raw_response is set to fallback message if still None/empty
+                if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
                     from backend.api.utils.error_detector import get_fallback_message_for_error
                     raw_response = get_fallback_message_for_error("generic", detected_lang)
-                    processing_steps.append("⚠️ LLM call exception - using fallback message")
-                llm_inference_end = time.time()
-                llm_inference_latency = llm_inference_end - llm_inference_start
-                timing_logs["llm_inference"] = f"{llm_inference_latency:.2f}s"
+                    processing_steps.append("⚠️ LLM failed - using fallback message")
+                    logger.warning(f"⚠️ Set raw_response to fallback message: {raw_response[:200]}")
+            
+            # CRITICAL: Check if raw_response is a technical error message or fallback message before validation
+            # Never allow provider error messages to pass through validators
+            # CRITICAL: Initialize is_error and is_fallback BEFORE conditional blocks to avoid UnboundLocalError
+            is_error = False
+            error_type = "generic"
+            is_fallback = False
+            
+            from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error, is_fallback_message
+            
+            if raw_response and isinstance(raw_response, str):
+                is_error, error_type = is_technical_error(raw_response)
+                is_fallback = is_fallback_message(raw_response)
+                # CRITICAL: Log detection for debugging
+                if is_fallback:
+                    logger.warning(f"⚠️ Detected fallback message in raw_response (length={len(raw_response)}): {raw_response[:200]}")
+                if is_technical_about_system_rag:
+                    logger.info(f"🔧 Technical question detected: is_error={is_error}, is_fallback={is_fallback}, is_technical_about_system_rag={is_technical_about_system_rag}")
                 
-                # CRITICAL: Only log "AI response generated" if we actually have a response
-                # If raw_response is None/empty, it means LLM failed and we're using fallback
-                if raw_response and isinstance(raw_response, str) and raw_response.strip():
-                    logger.info(f"⏱️ LLM inference took {llm_inference_latency:.2f}s")
-                    processing_steps.append(f"✅ AI response generated ({llm_inference_latency:.2f}s)")
-                    # Debug: Log first 200 chars to help diagnose issues
-                    logger.debug(f"🔍 DEBUG: raw_response preview (first 200 chars): {raw_response[:200]}")
-                    
-                    # CRITICAL: Check if this is actually a fallback message (shouldn't happen but double-check)
-                    from backend.api.utils.error_detector import is_fallback_message
-                    if is_fallback_message(raw_response):
-                        logger.error(
-                            f"❌ CRITICAL: LLM returned what looks like a fallback message! "
-                            f"This should not happen. raw_response[:200]={raw_response[:200]}"
-                        )
-                        # CRITICAL: For technical questions, this should trigger retry logic below
-                        # Mark as fallback so retry logic can handle it
-                        is_fallback = True
-                else:
-                    logger.warning(
-                        f"⚠️ LLM inference failed or returned empty (took {llm_inference_latency:.2f}s). "
-                        f"raw_response type={type(raw_response)}, value={raw_response[:200] if raw_response else 'None'}"
-                    )
-                    # Ensure raw_response is set to fallback message if still None/empty
-                    if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
-                        from backend.api.utils.error_detector import get_fallback_message_for_error
-                        raw_response = get_fallback_message_for_error("generic", detected_lang)
-                        processing_steps.append("⚠️ LLM failed - using fallback message")
-                        logger.warning(f"⚠️ Set raw_response to fallback message: {raw_response[:200]}")
-                
-                # CRITICAL: Check if raw_response is a technical error message or fallback message before validation
-                # Never allow provider error messages to pass through validators
-                # CRITICAL: Initialize is_error and is_fallback BEFORE conditional blocks to avoid UnboundLocalError
-                is_error = False
-                error_type = "generic"
-                is_fallback = False
-                
-                from backend.api.utils.error_detector import is_technical_error, get_fallback_message_for_error, is_fallback_message
-                
-                if raw_response and isinstance(raw_response, str):
-                    is_error, error_type = is_technical_error(raw_response)
-                    is_fallback = is_fallback_message(raw_response)
-                    # CRITICAL: Log detection for debugging
-                    if is_fallback:
-                        logger.warning(f"⚠️ Detected fallback message in raw_response (length={len(raw_response)}): {raw_response[:200]}")
-                    if is_technical_about_system_rag:
-                        logger.info(f"🔧 Technical question detected: is_error={is_error}, is_fallback={is_fallback}, is_technical_about_system_rag={is_technical_about_system_rag}")
-                    
-                    # CRITICAL: For technical questions about "your system" in RAG path, retry if response is error OR fallback
-                    # This ensures we don't give up on valid technical questions
-                    if is_technical_about_system_rag and (is_error or is_fallback):
-                        logger.warning(f"⚠️ Technical question about 'your system' (RAG path) returned {'error' if is_error else 'fallback'} message - retrying with stronger prompt")
-                        # Build stronger prompt with technical system instruction
-                        stronger_prompt_rag = f"""{context_quality_warning}
+                # CRITICAL: For technical questions about "your system" in RAG path, retry if response is error OR fallback
+                # This ensures we don't give up on valid technical questions
+                if is_technical_about_system_rag and (is_error or is_fallback):
+                    logger.warning(f"⚠️ Technical question about 'your system' (RAG path) returned {'error' if is_error else 'fallback'} message - retrying with stronger prompt")
+                    # Build stronger prompt with technical system instruction
+                    stronger_prompt_rag = f"""{context_quality_warning}
 
 **CRITICAL: YOU MUST ANSWER THIS QUESTION. DO NOT RETURN A TECHNICAL ERROR MESSAGE OR FALLBACK MESSAGE.**
 
@@ -3727,25 +3409,25 @@ Explain:
 {stillme_instruction}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
-                        try:
-                            raw_response = await generate_ai_response(
-                                stronger_prompt_rag,
-                                detected_lang=detected_lang,
-                                llm_provider=chat_request.llm_provider,
-                                llm_api_key=chat_request.llm_api_key,
-                                llm_api_url=chat_request.llm_api_url,
-                                llm_model_name=chat_request.llm_model_name,
-                                use_server_keys=use_server_keys
-                            )
-                            logger.info("✅ Retry with stronger prompt successful for technical 'your system' question (RAG path)")
-                            processing_steps.append("🔄 Retried with stronger prompt for technical 'your system' question (RAG path)")
-                            # Re-check if retry response is still an error or fallback
-                            is_error_retry, error_type_retry = is_technical_error(raw_response)
-                            is_fallback_retry = is_fallback_message(raw_response)
-                            if is_error_retry or is_fallback_retry:
-                                logger.warning(f"⚠️ Retry still returned {'error' if is_error_retry else 'fallback'} - forcing one more retry with even stronger prompt")
-                                # Force one more retry with even stronger prompt
-                                force_prompt = f"""**ABSOLUTE MANDATORY: ANSWER THIS QUESTION ABOUT RAG SYSTEMS**
+                    try:
+                        raw_response = await generate_ai_response(
+                            stronger_prompt_rag,
+                            detected_lang=detected_lang,
+                            llm_provider=chat_request.llm_provider,
+                            llm_api_key=chat_request.llm_api_key,
+                            llm_api_url=chat_request.llm_api_url,
+                            llm_model_name=chat_request.llm_model_name,
+                            use_server_keys=chat_request.llm_provider is None
+                        )
+                        logger.info("✅ Retry with stronger prompt successful for technical 'your system' question (RAG path)")
+                        processing_steps.append("🔄 Retried with stronger prompt for technical 'your system' question (RAG path)")
+                        # Re-check if retry response is still an error or fallback
+                        is_error_retry, error_type_retry = is_technical_error(raw_response)
+                        is_fallback_retry = is_fallback_message(raw_response)
+                        if is_error_retry or is_fallback_retry:
+                            logger.warning(f"⚠️ Retry still returned {'error' if is_error_retry else 'fallback'} - forcing one more retry with even stronger prompt")
+                            # Force one more retry with even stronger prompt
+                            force_prompt = f"""**ABSOLUTE MANDATORY: ANSWER THIS QUESTION ABOUT RAG SYSTEMS**
 
 User Question: {chat_request.message}
 
@@ -3763,103 +3445,85 @@ User Question: {chat_request.message}
 **DO NOT RETURN ERROR MESSAGES. ANSWER THE QUESTION DIRECTLY.**
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
-                                try:
-                                    raw_response = await generate_ai_response(
-                                        force_prompt,
-                                        detected_lang=detected_lang,
-                                        llm_provider=chat_request.llm_provider,
-                                        llm_api_key=chat_request.llm_api_key,
-                                        llm_api_url=chat_request.llm_api_url,
-                                        llm_model_name=chat_request.llm_model_name,
-                                        use_server_keys=use_server_keys
-                                    )
-                                    logger.info("✅ Force retry successful for technical 'your system' question (RAG path)")
-                                    processing_steps.append("🔄 Force retry successful for technical 'your system' question")
-                                except Exception as force_error:
-                                    logger.error(f"⚠️ Force retry failed: {force_error}")
-                                    raw_response = get_fallback_message_for_error(error_type_retry or "generic", detected_lang)
-                        except Exception as retry_error:
-                            logger.error(f"⚠️ Retry failed (RAG path): {retry_error}")
-                            raw_response = get_fallback_message_for_error(error_type or "generic", detected_lang)
-                            processing_steps.append(f"⚠️ Technical error detected (RAG path) - using fallback message")
-                    elif is_error:
-                        # For non-technical questions, just replace with fallback
-                        logger.error(f"❌ Provider returned technical error as response (type: {error_type}): {raw_response[:200]}")
-                        # Replace with user-friendly fallback message
-                        raw_response = get_fallback_message_for_error(error_type, detected_lang)
-                        processing_steps.append(f"⚠️ Technical error detected - replaced with fallback message")
-                        logger.warning(f"⚠️ Replaced technical error with user-friendly message in {detected_lang}")
-                
-                # CRITICAL: Check if response is a fallback message - if so, skip validation/post-processing
-                # BUT: Still pass through CitationRequired to add citations for factual questions
-                if raw_response and isinstance(raw_response, str) and is_fallback_message(raw_response):
-                    logger.warning(
-                        f"🛑 Fallback meta-answer detected - skipping validation, quality evaluation, and rewrite. "
-                        f"raw_response length={len(raw_response)}, first_200_chars={raw_response[:200]}"
-                    )
-                    # CRITICAL: Log why this is a fallback message to help debug Q2, Q7
-                    logger.error(
-                        f"🔍 DEBUG Q2/Q7: Detected fallback message. "
-                        f"Question: {chat_request.message[:100]}, "
-                        f"LLM call completed: {llm_inference_latency:.2f}s, "
-                        f"Response preview: {raw_response[:200]}"
-                    )
-                    # CRITICAL: Pass fallback message through CitationRequired to add citations for factual questions
-                    from backend.validators.citation import CitationRequired
-                    citation_validator = CitationRequired(required=True)
-                    # Build ctx_docs for citation validator
-                    ctx_docs_for_citation = [
-                        doc["content"] for doc in context.get("knowledge_docs", [])
-                    ] + [
-                        doc["content"] for doc in context.get("conversation_docs", [])
-                    ]
-                    citation_result = citation_validator.run(
-                        raw_response, 
-                        ctx_docs=ctx_docs_for_citation,
-                        is_philosophical=is_philosophical,
-                        user_question=chat_request.message,
-                        context=context  # CRITICAL: Pass context for foundational knowledge detection
-                    )
-                    if citation_result.patched_answer:
-                        response = citation_result.patched_answer
-                        logger.info(f"✅ Added citation to fallback message for factual question. Reasons: {citation_result.reasons}")
-                        processing_steps.append("✅ Citation added to fallback message for factual question")
-                    else:
-                        response = raw_response
-                    # Skip validation, quality evaluator, rewrite, and learning
-                    validation_info = None
-                    confidence_score = 0.3  # Low confidence for fallback messages
-                    processing_steps.append("🛑 Fallback message - terminal response, skipping all post-processing")
-                    # Skip to end of function (skip validation, post-processing, learning)
-                    # We'll handle this by setting a flag and checking it before validation
-                    is_fallback_meta_answer = True
-                    is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
+                            try:
+                                raw_response = await generate_ai_response(
+                                    force_prompt,
+                                    detected_lang=detected_lang,
+                                    llm_provider=chat_request.llm_provider,
+                                    llm_api_key=chat_request.llm_api_key,
+                                    llm_api_url=chat_request.llm_api_url,
+                                    llm_model_name=chat_request.llm_model_name,
+                                    use_server_keys=chat_request.llm_provider is None
+                                )
+                                logger.info("✅ Force retry successful for technical 'your system' question (RAG path)")
+                                processing_steps.append("🔄 Force retry successful for technical 'your system' question")
+                            except Exception as force_error:
+                                logger.error(f"⚠️ Force retry failed: {force_error}")
+                                raw_response = get_fallback_message_for_error(error_type_retry or "generic", detected_lang)
+                    except Exception as retry_error:
+                        logger.error(f"⚠️ Retry failed (RAG path): {retry_error}")
+                        raw_response = get_fallback_message_for_error(error_type or "generic", detected_lang)
+                        processing_steps.append(f"⚠️ Technical error detected (RAG path) - using fallback message")
+                elif is_error:
+                    # For non-technical questions, just replace with fallback
+                    logger.error(f"❌ Provider returned technical error as response (type: {error_type}): {raw_response[:200]}")
+                    # Replace with user-friendly fallback message
+                    raw_response = get_fallback_message_for_error(error_type, detected_lang)
+                    processing_steps.append(f"⚠️ Technical error detected - replaced with fallback message")
+                    logger.warning(f"⚠️ Replaced technical error with user-friendly message in {detected_lang}")
+            
+            # CRITICAL: Check if response is a fallback message - if so, skip validation/post-processing
+            # BUT: Still pass through CitationRequired to add citations for factual questions
+            if raw_response and isinstance(raw_response, str) and is_fallback_message(raw_response):
+                logger.warning(
+                    f"🛑 Fallback meta-answer detected - skipping validation, quality evaluation, and rewrite. "
+                    f"raw_response length={len(raw_response)}, first_200_chars={raw_response[:200]}"
+                )
+                # CRITICAL: Log why this is a fallback message to help debug Q2, Q7
+                logger.error(
+                    f"🔍 DEBUG Q2/Q7: Detected fallback message. "
+                    f"Question: {chat_request.message[:100]}, "
+                    f"LLM call completed: {llm_inference_latency:.2f}s, "
+                    f"Response preview: {raw_response[:200]}"
+                )
+                # CRITICAL: Pass fallback message through CitationRequired to add citations for factual questions
+                from backend.validators.citation import CitationRequired
+                citation_validator = CitationRequired(required=True)
+                # Build ctx_docs for citation validator
+                ctx_docs_for_citation = [
+                    doc["content"] for doc in context.get("knowledge_docs", [])
+                ] + [
+                    doc["content"] for doc in context.get("conversation_docs", [])
+                ]
+                citation_result = citation_validator.run(
+                    raw_response, 
+                    ctx_docs=ctx_docs_for_citation,
+                    is_philosophical=is_philosophical,
+                    user_question=chat_request.message,
+                    context=context  # CRITICAL: Pass context for foundational knowledge detection
+                )
+                if citation_result.patched_answer:
+                    response = citation_result.patched_answer
+                    logger.info(f"✅ Added citation to fallback message for factual question. Reasons: {citation_result.reasons}")
+                    processing_steps.append("✅ Citation added to fallback message for factual question")
                 else:
-                    is_fallback_meta_answer = False
-                    # Log if raw_response exists but is not a fallback message
-                    if raw_response and isinstance(raw_response, str):
-                        logger.debug(
-                            f"✅ raw_response is valid (not fallback): length={len(raw_response)}, "
-                            f"first_100_chars={raw_response[:100]}"
-                        )
-                
-                # Save to cache (only if not a cache hit and not a validator count question)
-                # CRITICAL: Don't cache validator count questions - they need fresh manifest data
-                if cache_enabled and not cache_hit and not is_validator_count_question:
-                    try:
-                        cache_value = {
-                            "response": raw_response,
-                            "latency": llm_inference_latency,
-                            "timestamp": time.time()
-                        }
-                        # P3: Use custom TTL if specified (e.g., 1h for self-reflection), otherwise use default
-                        ttl_to_use = cache_ttl_override if cache_ttl_override is not None else TTL_LLM_RESPONSE
-                        cache_service.set(cache_key, cache_value, ttl_seconds=ttl_to_use)
-                        logger.debug(f"💾 LLM response cached (key: {cache_key[:50]}..., TTL: {ttl_to_use}s)")
-                    except Exception as cache_error:
-                        logger.warning(f"Failed to cache LLM response: {cache_error}")
-                elif is_validator_count_question:
-                    logger.debug("🚫 Skipping cache for validator count question - requires fresh manifest data")
+                    response = raw_response
+                # Skip validation, quality evaluator, rewrite, and learning
+                validation_info = None
+                confidence_score = 0.3  # Low confidence for fallback messages
+                processing_steps.append("🛑 Fallback message - terminal response, skipping all post-processing")
+                # Skip to end of function (skip validation, post-processing, learning)
+                # We'll handle this by setting a flag and checking it before validation
+                is_fallback_meta_answer = True
+                is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
+            else:
+                is_fallback_meta_answer = False
+                # Log if raw_response exists but is not a fallback message
+                if raw_response and isinstance(raw_response, str):
+                    logger.debug(
+                        f"✅ raw_response is valid (not fallback): length={len(raw_response)}, "
+                        f"first_100_chars={raw_response[:100]}"
+                    )
             
             # CRITICAL: If response is a fallback meta-answer, skip validation and post-processing entirely
             if is_fallback_meta_answer:
@@ -3869,11 +3533,6 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                 # confidence_score already set to 0.3
             else:
                 # Validate response if enabled
-                validation_info = None
-                # confidence_score already initialized at function start (line 104)
-                # Don't reassign here to avoid UnboundLocalError
-                used_fallback = False
-                
                 if enable_validators:
                     # CRITICAL: Ensure raw_response is valid before validation
                     if not raw_response or not isinstance(raw_response, str) or not raw_response.strip():
@@ -3887,6 +3546,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                         processing_steps.append("⚠️ Response validation failed - using fallback message")
                     else:
                         try:
+                            # Call validation handler
                             response, validation_info, confidence_score, used_fallback, step_validation_info, consistency_info, ctx_docs = await handle_validation_with_fallback(
                                 raw_response=raw_response,
                                 context=context,
@@ -3912,32 +3572,19 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                     f"is_philosophical={is_philosophical}, "
                                     f"detected_lang={detected_lang}, "
                                     f"preview={safe_unicode_slice(response, 200) if response else 'None'}"
-                            )
-                        except HTTPException:
-                            raise
+                                )
                         except Exception as validation_error:
-                            logger.error(f"Validation error: {validation_error}, falling back to raw response", exc_info=True)
-                            logger.error(f"⚠️ Validation exception details - raw_response length: {len(raw_response) if raw_response else 0}, context docs: {len(context.get('knowledge_docs', [])) + len(context.get('conversation_docs', []))}")
+                            logger.error(f"❌ Validation error: {validation_error}", exc_info=True)
+                            # Fallback to raw response if validation fails
                             response = raw_response
-                            # Calculate confidence even on error (low confidence)
-                            # Build ctx_docs for confidence calculation
-                            ctx_docs = [
-                                doc["content"] for doc in context.get("knowledge_docs", [])
-                            ] + [
-                                doc["content"] for doc in context.get("conversation_docs", [])
-                            ]
-                            confidence_score = 0.3 if len(ctx_docs) == 0 else 0.6
-                            # Ensure validation_result is set to None to prevent downstream errors
-                            validation_result = None
                             validation_info = None
-                            
-                            # CRITICAL: Check if response is None or empty after validation error
-                            if not response or not isinstance(response, str) or not response.strip():
-                                logger.error(f"⚠️ Response is None or empty after validation error - using fallback")
-                                from backend.api.utils.error_detector import get_fallback_message_for_error
-                                response = get_fallback_message_for_error("generic", detected_lang)
-                                processing_steps.append("⚠️ Response validation failed - using fallback message")
+                            confidence_score = 0.5
+                            used_fallback = False
+                            step_validation_info = None
+                            consistency_info = None
+                            ctx_docs = []
                 else:
+                    # Validators disabled - use raw response
                     response = raw_response
                     # Build ctx_docs for transparency check
                     ctx_docs = [
