@@ -2287,25 +2287,29 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                         active_sources = current_learning_sources.get("summary", {}).get("active_sources", [])
                         enabled_sources = [name for name, info in sources_list.items() if info.get("enabled")]
                         
-                        # Check for failed feeds in RSS stats
-                        rss_info = sources_list.get("rss", {})
-                        failed_feeds_info = rss_info.get("failed_feeds")
-                        feeds_count = rss_info.get("feeds_count", 0)
+                        # CRITICAL: Use system_monitor to automatically get RSS feed errors
+                        # This is more reliable than depending on API response
                         failed_feeds_text = ""
-                        
-                        # CRITICAL: Always check for failed feeds and report them honestly
-                        # Check if failed_feeds_info is a dict (not None, not empty list)
-                        if failed_feeds_info and isinstance(failed_feeds_info, dict):
-                            failed_count = failed_feeds_info.get("failed_count", 0)
-                            successful_count = failed_feeds_info.get("successful_count", 0)
-                            total_count = failed_feeds_info.get("total_count", feeds_count)  # Use feeds_count as fallback
-                            failure_rate = failed_feeds_info.get("failure_rate", 0)
-                            last_error = failed_feeds_info.get("last_error")
+                        try:
+                            from backend.services.system_monitor import get_system_monitor
+                            system_monitor = get_system_monitor()
+                            # Ensure components are set
+                            import backend.api.main as main_module
+                            if hasattr(main_module, 'rss_fetcher') and main_module.rss_fetcher:
+                                system_monitor.set_components(rss_fetcher=main_module.rss_fetcher)
                             
-                            # CRITICAL: If there are ANY failed feeds, we MUST report them
-                            if failed_count > 0:
-                                logger.info(f"⚠️ RSS feed errors detected: {failed_count}/{total_count} feeds failed ({failure_rate}%)")
-                                failed_feeds_text = f"""
+                            detailed_status = system_monitor.get_detailed_status()
+                            rss_status = detailed_status.get("rss", {})
+                            failed_count = rss_status.get("failed", 0)
+                            successful_count = rss_status.get("successful", 0)
+                            total_count = rss_status.get("total", 0)
+                            failure_rate = rss_status.get("failure_rate", 0.0)
+                            last_error = rss_status.get("last_error")
+                            
+                            if total_count > 0:
+                                if failed_count > 0:
+                                    logger.info(f"⚠️ RSS feed errors detected via system_monitor: {failed_count}/{total_count} feeds failed ({failure_rate}%)")
+                                    failed_feeds_text = f"""
 
 **🚨🚨🚨 RSS FEEDS STATUS - CRITICAL INFORMATION (MUST REPORT IN YOUR ANSWER) 🚨🚨🚨**
 
@@ -2330,65 +2334,19 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 
 **THIS IS A TEST OF YOUR TRANSPARENCY AND HONESTY - YOU MUST PASS THIS TEST.**
 """
-                            else:
-                                # No failed feeds, but still mention RSS status
-                                failed_feeds_text = f"""
+                                else:
+                                    # No failed feeds, but still mention RSS status
+                                    failed_feeds_text = f"""
 **📊 RSS FEEDS STATUS:**
 - **Total RSS Feeds**: {total_count} feeds configured
 - **Status**: All feeds are working normally
 """
-                        else:
-                            # FALLBACK: Try to get RSS stats directly from rss_fetcher if API doesn't have it
-                            logger.warning(f"⚠️ No failed_feeds_info in API response. Attempting to get RSS stats directly from rss_fetcher.")
-                            try:
-                                import backend.api.main as main_module
-                                if hasattr(main_module, 'rss_fetcher') and main_module.rss_fetcher:
-                                    rss_stats = main_module.rss_fetcher.get_stats()
-                                    if rss_stats:
-                                        failed_feeds_count = rss_stats.get("failed_feeds", 0)
-                                        successful_feeds_count = rss_stats.get("successful_feeds", 0)
-                                        total_feeds = rss_stats.get("feeds_count", feeds_count) or feeds_count
-                                        last_error = rss_stats.get("last_error")
-                                        
-                                        if failed_feeds_count > 0 and total_feeds > 0:
-                                            failure_rate = round((failed_feeds_count / total_feeds * 100), 1)
-                                            logger.info(f"⚠️ RSS feed errors detected from rss_fetcher: {failed_feeds_count}/{total_feeds} feeds failed ({failure_rate}%)")
-                                            failed_feeds_text = f"""
-
-**🚨🚨🚨 RSS FEEDS STATUS - CRITICAL INFORMATION (MUST REPORT IN YOUR ANSWER) 🚨🚨🚨**
-
-**YOU MUST ANSWER THE USER'S QUESTION ABOUT RSS FEED ERRORS DIRECTLY AND HONESTLY:**
-
-- **Total RSS Feeds**: {total_feeds} feeds configured
-- **Failed Feeds**: {failed_feeds_count}/{total_feeds} feeds are currently experiencing connection issues ({failure_rate}% failure rate)
-- **Successful Feeds**: {successful_feeds_count}/{total_feeds} feeds are working normally
-- **Last Error**: {last_error[:200] if last_error else 'Unknown error'}
-
-**CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE EXACTLY:**
-
-1. **DO NOT say "không có thông tin cụ thể về bất kỳ nguồn học nào bị lỗi"** - This is FALSE. There ARE {failed_feeds_count} RSS feeds that are failing.
-
-2. **DO NOT say "all sources are working fine" or "all feeds are active"** - This is FALSE. {failed_feeds_count} feeds have failed.
-
-3. **YOU MUST say EXACTLY**: "StillMe hiện đang học từ {len(enabled_sources)} nguồn. Đối với RSS feeds cụ thể: có tổng cộng {total_feeds} RSS feeds, trong đó {failed_feeds_count} feeds đang gặp sự cố kết nối (tỷ lệ lỗi: {failure_rate}%), {successful_feeds_count} feeds đang hoạt động bình thường."
-
-4. **BE DIRECT AND HONEST**: When the user asks "có nguồn nào bị lỗi ko?", you MUST answer "Có, có {failed_feeds_count} RSS feeds đang gặp sự cố kết nối."
-
-5. **DO NOT be vague or evasive**: Be specific about the numbers and the status.
-
-**THIS IS A TEST OF YOUR TRANSPARENCY AND HONESTY - YOU MUST PASS THIS TEST.**
-"""
-                                        elif total_feeds > 0:
-                                            failed_feeds_text = f"""
-**📊 RSS FEEDS STATUS:**
-- **Total RSS Feeds**: {total_feeds} feeds configured
-- **Status**: All feeds are working normally
-"""
-                            except Exception as rss_fetch_error:
-                                logger.warning(f"⚠️ Failed to get RSS stats from rss_fetcher: {rss_fetch_error}")
-                            
-                            # If still no failed_feeds_text, use basic info
-                            if not failed_feeds_text and feeds_count > 0:
+                        except Exception as monitor_error:
+                            logger.warning(f"⚠️ Failed to get RSS stats from system_monitor: {monitor_error}")
+                            # Fallback: Try to get from API response
+                            rss_info = sources_list.get("rss", {})
+                            feeds_count = rss_info.get("feeds_count", 0)
+                            if feeds_count > 0:
                                 failed_feeds_text = f"""
 **📊 RSS FEEDS STATUS:**
 - **Total RSS Feeds**: {feeds_count} feeds configured
