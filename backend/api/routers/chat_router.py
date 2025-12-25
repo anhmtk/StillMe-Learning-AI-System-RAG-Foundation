@@ -464,7 +464,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         # CRITICAL: Detect validator count questions for special handling
         # We will force-inject manifest and use lower similarity threshold, NOT hardcode
-        is_validator_count_question = is_validator_count_question(chat_request.message)
+        is_validator_count_query = is_validator_count_question(chat_request.message)
         
         # EXTERNAL DATA LAYER: Check for external data queries (weather, news, etc.)
         # This bypasses RAG and fetches real-time data from external APIs
@@ -985,7 +985,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             chat_request=chat_request,
             rag_retrieval=rag_retrieval,
             is_origin_query=is_origin_query,
-            is_validator_count_question=is_validator_count_question,
+            is_validator_count_question=is_validator_count_query,
             is_stillme_query=is_stillme_query,
             is_news_article_query=is_news_article_query,
             is_philosophical=is_philosophical,
@@ -3021,7 +3021,7 @@ Context: {context_text}
                 chat_request=chat_request,
                 context=context,
                 is_philosophical=is_philosophical,
-                is_validator_count_question=is_validator_count_question,
+                is_validator_count_question=is_validator_count_query,
                 is_origin_query=is_origin_query,
                 is_stillme_query=is_stillme_query,
                 detected_lang_name=detected_lang_name,
