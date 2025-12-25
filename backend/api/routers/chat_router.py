@@ -2292,25 +2292,55 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                         failed_feeds_info = rss_info.get("failed_feeds")
                         feeds_count = rss_info.get("feeds_count", 0)
                         failed_feeds_text = ""
-                        if failed_feeds_info:
+                        
+                        # CRITICAL: Always check for failed feeds and report them honestly
+                        # Check if failed_feeds_info is a dict (not None, not empty list)
+                        if failed_feeds_info and isinstance(failed_feeds_info, dict):
                             failed_count = failed_feeds_info.get("failed_count", 0)
                             successful_count = failed_feeds_info.get("successful_count", 0)
                             total_count = failed_feeds_info.get("total_count", feeds_count)  # Use feeds_count as fallback
                             failure_rate = failed_feeds_info.get("failure_rate", 0)
                             last_error = failed_feeds_info.get("last_error")
                             
+                            # CRITICAL: If there are ANY failed feeds, we MUST report them
                             if failed_count > 0:
+                                logger.info(f"⚠️ RSS feed errors detected: {failed_count}/{total_count} feeds failed ({failure_rate}%)")
                                 failed_feeds_text = f"""
-**⚠️ RSS FEEDS STATUS (CRITICAL - MUST REPORT EXACT NUMBERS):**
+
+**🚨🚨🚨 RSS FEEDS STATUS - CRITICAL INFORMATION (MUST REPORT IN YOUR ANSWER) 🚨🚨🚨**
+
+**YOU MUST ANSWER THE USER'S QUESTION ABOUT RSS FEED ERRORS DIRECTLY AND HONESTLY:**
+
 - **Total RSS Feeds**: {total_count} feeds configured
-- **Failed Feeds**: {failed_count}/{total_count} feeds are currently failing ({failure_rate}% failure rate)
-- **Successful Feeds**: {successful_count}/{total_count} feeds are working
-- **Last Error**: {last_error[:150] if last_error else 'Unknown error'}
-- **CRITICAL**: You MUST mention the EXACT numbers: "{total_count} RSS feeds total, {failed_count} feeds are experiencing connection issues, {successful_count} feeds are working". Do NOT say "all sources are working fine" or "all feeds are active" when {failed_count} feeds have failed.
-- **You MUST be honest and specific**: Say something like "StillMe is currently learning from {len(enabled_sources)} sources. For RSS feeds specifically: {total_count} feeds total, {failed_count} feeds are experiencing connection issues (failure rate: {failure_rate}%), {successful_count} feeds are working normally."
+- **Failed Feeds**: {failed_count}/{total_count} feeds are currently experiencing connection issues ({failure_rate}% failure rate)
+- **Successful Feeds**: {successful_count}/{total_count} feeds are working normally
+- **Last Error**: {last_error[:200] if last_error else 'Unknown error'}
+
+**CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE EXACTLY:**
+
+1. **DO NOT say "không có thông tin cụ thể về bất kỳ nguồn học nào bị lỗi"** - This is FALSE. There ARE {failed_count} RSS feeds that are failing.
+
+2. **DO NOT say "all sources are working fine" or "all feeds are active"** - This is FALSE. {failed_count} feeds have failed.
+
+3. **YOU MUST say EXACTLY**: "StillMe hiện đang học từ {len(enabled_sources)} nguồn. Đối với RSS feeds cụ thể: có tổng cộng {total_count} RSS feeds, trong đó {failed_count} feeds đang gặp sự cố kết nối (tỷ lệ lỗi: {failure_rate}%), {successful_count} feeds đang hoạt động bình thường."
+
+4. **BE DIRECT AND HONEST**: When the user asks "có nguồn nào bị lỗi ko?", you MUST answer "Có, có {failed_count} RSS feeds đang gặp sự cố kết nối."
+
+5. **DO NOT be vague or evasive**: Be specific about the numbers and the status.
+
+**THIS IS A TEST OF YOUR TRANSPARENCY AND HONESTY - YOU MUST PASS THIS TEST.**
+"""
+                            else:
+                                # No failed feeds, but still mention RSS status
+                                failed_feeds_text = f"""
+**📊 RSS FEEDS STATUS:**
+- **Total RSS Feeds**: {total_count} feeds configured
+- **Status**: All feeds are working normally
 """
                         elif feeds_count > 0:
                             # If no failed_feeds_info but we have feeds_count, still mention it
+                            # But we should try to get RSS stats from system_monitor as fallback
+                            logger.warning(f"⚠️ No failed_feeds_info in API response, but feeds_count={feeds_count}. Attempting to get RSS stats from system_monitor.")
                             failed_feeds_text = f"""
 **📊 RSS FEEDS STATUS:**
 - **Total RSS Feeds**: {feeds_count} feeds configured
@@ -2343,10 +2373,11 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 {failed_feeds_text}
 
 **MANDATORY RESPONSE REQUIREMENTS:**
-1. **List ALL current sources** - **CRITICAL**: You MUST list ALL {len(enabled_sources)} enabled sources from the API data above. Do NOT just say "RSS, arXiv, Wikipedia" - you MUST list ALL sources: {', '.join([name.upper() for name in enabled_sources]) if enabled_sources else 'ALL SOURCES FROM API DATA ABOVE'}
+1. **Answer RSS feed errors question DIRECTLY** - **CRITICAL**: If the user asks "có nguồn nào bị lỗi ko?" or "are there any sources with errors?", you MUST check the RSS FEEDS STATUS section above and answer HONESTLY. If there are failed feeds, you MUST mention the exact numbers. DO NOT say "không có thông tin cụ thể" when the information IS available above.
+2. **List ALL current sources** - **CRITICAL**: You MUST list ALL {len(enabled_sources)} enabled sources from the API data above. Do NOT just say "RSS, arXiv, Wikipedia" - you MUST list ALL sources: {', '.join([name.upper() for name in enabled_sources]) if enabled_sources else 'ALL SOURCES FROM API DATA ABOVE'}
    - **You MUST mention each source by name**: {', '.join([name.upper() for name in enabled_sources]) if enabled_sources else 'ALL SOURCES'}
    - **For each source, describe what StillMe learns from it**
-2. **Be specific about topics** - For each source, mention what topics/chủ đề StillMe learns from that source
+3. **Be specific about topics** - For each source, mention what topics/chủ đề StillMe learns from that source
 3. **When proposing new sources** - You MUST:
    - First acknowledge what StillMe ALREADY has (from the list above)
    - Only propose sources that are NOT already enabled
