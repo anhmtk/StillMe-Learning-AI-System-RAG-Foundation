@@ -37,6 +37,10 @@ from backend.api.handlers.prompt_builder import (
     build_minimal_philosophical_prompt,
     get_validator_info_for_prompt
 )
+from backend.api.handlers.rag_retrieval_handler import (
+    retrieve_rag_context,
+    _log_rag_retrieval_decision
+)
 from backend.identity.prompt_builder import (
     UnifiedPromptBuilder,
     PromptContext,
@@ -78,78 +82,7 @@ router = APIRouter()
 # Text utility functions moved to backend/api/utils/text_utils.py
 
 
-def _log_rag_retrieval_decision(
-    decision_logger,
-    context: Dict[str, Any],
-    query: str,
-    reasoning: str,
-    similarity_threshold: Optional[float] = None,
-    prioritize_foundational: bool = False,
-    exclude_types: Optional[List[str]] = None,
-    alternatives_considered: Optional[List[str]] = None
-):
-    """
-    Helper function to log RAG retrieval decisions
-    
-    Args:
-        decision_logger: DecisionLogger instance
-        context: Retrieved context dictionary
-        query: Query used for retrieval
-        reasoning: Why this retrieval approach was chosen
-        similarity_threshold: Similarity threshold used
-        prioritize_foundational: Whether foundational knowledge was prioritized
-        exclude_types: Content types excluded
-        alternatives_considered: Alternative retrieval strategies considered
-    """
-    from backend.core.decision_logger import AgentType, DecisionType
-    
-    total_docs = context.get("total_context_docs", 0)
-    knowledge_docs = context.get("knowledge_docs", [])
-    
-    # Extract document sources/types for context
-    doc_sources = []
-    for doc in knowledge_docs[:5]:  # Limit to 5 for logging
-        if isinstance(doc, dict):
-            metadata = doc.get("metadata", {})
-            source = metadata.get("source", "unknown")
-            doc_type = metadata.get("type", "unknown")
-            doc_sources.append(f"{source}:{doc_type}")
-    
-    decision = f"Retrieved {total_docs} documents from ChromaDB"
-    if prioritize_foundational:
-        decision += " (prioritized foundational knowledge)"
-    if similarity_threshold is not None:
-        decision += f" (similarity threshold: {similarity_threshold})"
-    
-    context_data = {
-        "total_docs": total_docs,
-        "doc_sources": doc_sources[:5],  # Limit to 5
-        "similarity_threshold": similarity_threshold,
-        "prioritize_foundational": prioritize_foundational,
-        "exclude_types": exclude_types
-    }
-    
-    threshold_reasoning = None
-    if similarity_threshold is not None:
-        if similarity_threshold < 0.05:
-            threshold_reasoning = f"Very low threshold ({similarity_threshold}) chosen to ensure StillMe foundational knowledge is retrieved even with low similarity scores"
-        elif similarity_threshold < 0.1:
-            threshold_reasoning = f"Low threshold ({similarity_threshold}) chosen for historical/factual questions to handle multilingual embedding mismatch"
-        else:
-            threshold_reasoning = f"Standard threshold ({similarity_threshold}) used for normal queries"
-    
-    decision_logger.log_decision(
-        agent_type=AgentType.RAG_AGENT,
-        decision_type=DecisionType.RETRIEVAL_DECISION,
-        decision=decision,
-        reasoning=reasoning,
-        context=context_data,
-        alternatives_considered=alternatives_considered,
-        threshold_reasoning=threshold_reasoning,
-        outcome=f"Successfully retrieved {total_docs} documents" if total_docs > 0 else "No documents retrieved",
-        success=total_docs > 0
-    )
-
+# RAG retrieval functions moved to backend/api/handlers/rag_retrieval_handler.py
 
 # Query classification functions moved to backend/api/handlers/query_classifier.py
 
@@ -2312,14 +2245,6 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
         context = None
         rag_retrieval_start = time.time()
         
-        # CRITICAL: Configure exclude_types (already initialized at function start)
-        # Clear and rebuild to ensure correct state for this request
-        exclude_types.clear()
-        if is_philosophical:
-            exclude_types.append("technical")
-        # Always exclude style_guide for user chat (prevents style drift from RAG)
-        exclude_types.append("style_guide")
-        
         # CRITICAL FIX: Detect news/article queries and exclude CRITICAL_FOUNDATION
         # This prevents StillMe from hallucinating articles when only foundational docs are retrieved
         is_news_article_query = False
@@ -2334,475 +2259,53 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
         except Exception as detector_error:
             logger.warning(f"News/article detector error: {detector_error}")
         
-        if rag_retrieval and chat_request.use_rag:
-            processing_steps.append("🔍 Searching knowledge base...")
-            # CRITICAL: If origin query detected, retrieve provenance knowledge ONLY
-            # This ensures provenance is ONLY retrieved when explicitly asked about origin/founder
-            if is_origin_query:
-                logger.debug("Origin query detected - retrieving provenance knowledge")
-                try:
-                    query_embedding = rag_retrieval.embedding_service.encode_text(chat_request.message)
-                    provenance_results = rag_retrieval.chroma_client.search_knowledge(
-                        query_embedding=query_embedding,
-                        limit=2,
-                        where={"source": "PROVENANCE"}
-                    )
-                    if provenance_results:
-                        context = {
-                            "knowledge_docs": provenance_results,
-                            "conversation_docs": [],
-                            "total_context_docs": len(provenance_results)
-                        }
-                        logger.info(f"Retrieved {len(provenance_results)} provenance documents")
-                    else:
-                        # Fallback to normal retrieval if provenance not found
-                        # exclude_types already initialized above
-                        context = rag_retrieval.retrieve_context(
-                            query=chat_request.message,
-                            knowledge_limit=chat_request.context_limit,
-                            conversation_limit=1,
-                            exclude_content_types=exclude_types if exclude_types else None,
-                            prioritize_style_guide=False,  # Never prioritize style guide for user chat
-                            is_philosophical=is_philosophical
-                        )
-                except Exception as provenance_error:
-                    logger.warning(f"Provenance retrieval failed: {provenance_error}, falling back to normal retrieval")
-                    # exclude_types already initialized above
-                    
-                    # SOLUTION 1 & 3: Improve retrieval for historical/factual questions
-                    from backend.core.query_preprocessor import is_historical_question, enhance_query_for_retrieval
-                    
-                    is_historical = is_historical_question(chat_request.message)
-                    retrieval_query = chat_request.message
-                    config = get_chat_config()
-                    similarity_threshold = config.similarity.LOW_CONTEXT_QUALITY  # Default
-                    
-                    if is_historical:
-                        # Very low threshold to ensure we find historical facts even with multilingual mismatch
-                        similarity_threshold = config.similarity.VERY_LOW
-                        retrieval_query = enhance_query_for_retrieval(chat_request.message)
-                        logger.info(f"📜 Historical question (provenance fallback) - using very low threshold {similarity_threshold}, enhanced query: '{retrieval_query[:100]}...'")
-                    
-                    context = rag_retrieval.retrieve_context(
-                        query=retrieval_query,
-                        knowledge_limit=chat_request.context_limit,
-                        conversation_limit=1,
-                        exclude_content_types=exclude_types if exclude_types else None,
-                        prioritize_style_guide=False,  # Never prioritize style guide for user chat
-                        similarity_threshold=similarity_threshold,
-                        is_philosophical=is_philosophical
-                    )
+        # CRITICAL: Check if question is about technical architecture (RAG, DeepSeek, black box)
+        # These should prioritize foundational knowledge even if not detected as StillMe query
+        is_technical_question = False
+        if not is_stillme_query:
+            question_lower = chat_request.message.lower()
+            is_technical_question = any(
+                keyword in question_lower 
+                for keyword in [
+                    "rag", "retrieval-augmented", "chromadb", "vector database",
+                    "deepseek", "deepseek api", "openai", "llm api", "black box", "blackbox",
+                    "black box system", "black box model", "black box ai",
+                    "embedding", "multi-qa-minilm", "sentence-transformers",
+                    "pipeline", "validation", "hallucination", "transparency",
+                    "kiến trúc", "hệ thống", "cơ chế", "quy trình",
+                    "cơ chế hoạt động", "cách hoạt động", "how does", "how it works",
+                    "tại sao bạn sử dụng", "why do you use"  # Questions about system choices
+                ]
+            )
             
-            # CRITICAL: Handle validator count questions FIRST (even if not detected as stillme_query)
-            # Validator count questions about codebase should always get manifest
-            if is_validator_count_question:
-                config = get_chat_config()
-                logger.info(f"🎯 Validator count question - forcing manifest retrieval with very low similarity threshold ({config.similarity.VALIDATOR_COUNT_QUESTION})")
-                # Force retrieve manifest with very low threshold to ensure we get it
-                context = rag_retrieval.retrieve_context(
-                    query=chat_request.message,
-                    knowledge_limit=5,  # Get more docs to ensure manifest is included
-                    conversation_limit=1,
-                    prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
-                    similarity_threshold=config.similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Very low threshold to ensure manifest is retrieved
-                    exclude_content_types=exclude_types if exclude_types else None,
-                    is_philosophical=is_philosophical
-                )
-                
-                # CRITICAL: Force-inject manifest if not found in retrieved context
-                knowledge_docs = context.get("knowledge_docs", [])
-                has_manifest = False
-                manifest_has_correct_info = False
-                for doc in knowledge_docs:
-                    if isinstance(doc, dict):
-                        metadata = doc.get("metadata", {})
-                        source = metadata.get("source", "") or ""
-                        title = metadata.get("title", "") or ""
-                        doc_content = str(doc.get("document", ""))
-                        if ("CRITICAL_FOUNDATION" in source or 
-                            "manifest" in title.lower() or 
-                            "validation_framework" in doc_content.lower() or
-                            "total_validators" in doc_content.lower()):
-                            has_manifest = True
-                            # CRITICAL: Check if manifest has correct info (19 validators, 7 layers)
-                            has_19 = "19 validators" in doc_content or "total_validators" in doc_content
-                            has_7 = "7 layers" in doc_content or "7 lớp" in doc_content
-                            if has_19 and has_7:
-                                manifest_has_correct_info = True
-                                logger.info(f"✅ Manifest found with correct info: 19 validators, 7 layers")
-                            else:
-                                logger.warning(f"⚠️ Manifest found but has outdated info (has_19={has_19}, has_7={has_7}) - will force-inject correct manifest")
-                            break
-                
-                # Force-inject manifest if not found OR if found but has outdated info
-                if not has_manifest or not manifest_has_correct_info:
-                    logger.warning(f"⚠️ Manifest not found or outdated in retrieved context - force-injecting from file")
-                    # CRITICAL: Load manifest directly from file and inject into context
-                    # This ensures we always have correct info (19 validators, 7 layers) regardless of ChromaDB state
-                    try:
-                        from backend.core.manifest_loader import ManifestLoader
-                        from scripts.inject_manifest_to_rag import manifest_to_text
-                        import json
-                        from pathlib import Path
-                        
-                        # Load manifest from file (source of truth)
-                        manifest_path = Path("data/stillme_manifest.json")
-                        if manifest_path.exists():
-                            with open(manifest_path, 'r', encoding='utf-8') as f:
-                                manifest = json.load(f)
-                            
-                            # Convert to text format
-                            manifest_text = manifest_to_text(manifest)
-                            
-                            # Create manifest document for injection
-                            manifest_doc = {
-                                "document": manifest_text,
-                                "metadata": {
-                                    "title": "StillMe Structural Manifest - Validation Framework",
-                                    "source": "CRITICAL_FOUNDATION",
-                                    "foundational": "stillme",
-                                    "type": "foundational",
-                                    "tags": "foundational:stillme,CRITICAL_FOUNDATION,stillme,validation,validators,validation-chain,structural-manifest,system-architecture,self-awareness",
-                                    "importance_score": 1.0,
-                                    "manifest_version": manifest.get("version", "1.2.0"),
-                                    "last_sync": manifest.get("last_sync", ""),
-                                    "description": "CRITICAL: Structural manifest of StillMe's validation framework - source of truth for validator count and architecture."
-                                }
-                            }
-                            
-                            # Inject manifest at the beginning of knowledge_docs
-                            knowledge_docs = [manifest_doc] + knowledge_docs
-                            context["knowledge_docs"] = knowledge_docs
-                            context["total_context_docs"] = len(knowledge_docs) + len(context.get("conversation_docs", []))
-                            
-                            total_validators = manifest.get("validation_framework", {}).get("total_validators", 0)
-                            num_layers = len(manifest.get("validation_framework", {}).get("layers", []))
-                            logger.info(f"✅ Force-injected manifest from file into context: {total_validators} validators, {num_layers} layers")
-                        else:
-                            logger.error(f"❌ Manifest file not found: {manifest_path} - cannot force-inject")
-                            # Fallback: Try direct manifest retrieval from ChromaDB
-                            manifest_query = "StillMe Structural Manifest validation framework total_validators layers 19 validators 7 layers"
-                            manifest_context = rag_retrieval.retrieve_context(
-                                query=manifest_query,
-                                knowledge_limit=5,
-                                conversation_limit=0,
-                                prioritize_foundational=True,
-                                similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,
-                                exclude_content_types=None,
-                                is_philosophical=False
-                            )
-                            manifest_docs = manifest_context.get("knowledge_docs", [])
-                            filtered_manifest_docs = [
-                                doc for doc in manifest_docs
-                                if isinstance(doc, dict) and (
-                                    "CRITICAL_FOUNDATION" in str(doc.get("metadata", {}).get("source", "")) or
-                                    "manifest" in str(doc.get("metadata", {}).get("title", "")).lower()
-                                )
-                            ]
-                            if filtered_manifest_docs:
-                                knowledge_docs = filtered_manifest_docs + knowledge_docs
-                                context["knowledge_docs"] = knowledge_docs
-                                context["total_context_docs"] = len(knowledge_docs) + len(context.get("conversation_docs", []))
-                                logger.info(f"✅ Force-injected manifest from ChromaDB: {len(filtered_manifest_docs)} manifest docs")
-                    except Exception as manifest_inject_error:
-                        logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}", exc_info=True)
+            # CRITICAL: Check if question is about "your system" - treat as StillMe query
+            has_your_system = any(
+                phrase in question_lower 
+                for phrase in [
+                    "your system", "in your system", "your.*system", "system.*you",
+                    "bạn.*hệ thống", "hệ thống.*bạn", "của bạn", "bạn.*sử dụng"
+                ]
+            )
             
-            # If StillMe query detected (but not origin), prioritize foundational knowledge
-            elif is_stillme_query:
-                # CRITICAL: For validator count questions, force-inject manifest and use very low similarity threshold
-                if is_validator_count_question:
-                    logger.info(f"🎯 Validator count question - forcing manifest retrieval with very low similarity threshold (0.01)")
-                    # Force retrieve manifest with very low threshold to ensure we get it
-                    context = rag_retrieval.retrieve_context(
-                        query=chat_request.message,
-                        knowledge_limit=5,  # Get more docs to ensure manifest is included
-                        conversation_limit=1,
-                        prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
-                        similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Very low threshold to ensure manifest is retrieved
-                        exclude_content_types=exclude_types if exclude_types else None,
-                        is_philosophical=is_philosophical
-                    )
-                    
-                    # CRITICAL: Force-inject manifest if not found in retrieved context
-                    knowledge_docs = context.get("knowledge_docs", [])
-                    has_manifest = False
-                    for doc in knowledge_docs:
-                        if isinstance(doc, dict):
-                            metadata = doc.get("metadata", {})
-                            source = metadata.get("source", "") or ""
-                            title = metadata.get("title", "") or ""
-                            doc_content = str(doc.get("document", ""))
-                            if ("CRITICAL_FOUNDATION" in source or 
-                                "manifest" in title.lower() or 
-                                "validation_framework" in doc_content.lower() or
-                                "total_validators" in doc_content.lower()):
-                                has_manifest = True
-                                break
-                    
-                    if not has_manifest:
-                        logger.warning(f"⚠️ Manifest not found in retrieved context - attempting direct manifest retrieval")
-                        # Try direct manifest retrieval using rag_retrieval with specific query
-                        try:
-                            # Use specific query for manifest retrieval
-                            manifest_query = "StillMe Structural Manifest validation framework total_validators layers 19 validators 7 layers"
-                            manifest_context = rag_retrieval.retrieve_context(
-                                query=manifest_query,
-                                knowledge_limit=5,  # Get more docs to ensure manifest is included
-                                conversation_limit=0,  # Don't need conversation for manifest
-                                prioritize_foundational=True,  # CRITICAL: Prioritize foundational knowledge
-                                similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Very low threshold to ensure manifest is retrieved
-                                exclude_content_types=None,  # Don't exclude anything for manifest search
-                                is_philosophical=False
-                            )
-                            manifest_docs = manifest_context.get("knowledge_docs", [])
-                            # Filter for manifest documents (CRITICAL_FOUNDATION or contain "manifest" or "total_validators")
-                            filtered_manifest_docs = []
-                            for doc in manifest_docs:
-                                if isinstance(doc, dict):
-                                    metadata = doc.get("metadata", {})
-                                    source = metadata.get("source", "") or ""
-                                    title = metadata.get("title", "") or ""
-                                    doc_content = str(doc.get("document", ""))
-                                    if ("CRITICAL_FOUNDATION" in source or 
-                                        "manifest" in title.lower() or 
-                                        "validation_framework" in doc_content.lower() or
-                                        "total_validators" in doc_content.lower()):
-                                        filtered_manifest_docs.append(doc)
-                            
-                            if filtered_manifest_docs:
-                                # Inject manifest at the beginning of knowledge_docs
-                                knowledge_docs = filtered_manifest_docs + knowledge_docs
-                                context["knowledge_docs"] = knowledge_docs
-                                context["total_context_docs"] = len(knowledge_docs) + len(context.get("conversation_docs", []))
-                                logger.info(f"✅ Force-injected manifest into context: {len(filtered_manifest_docs)} manifest docs")
-                            else:
-                                logger.warning(f"⚠️ Direct manifest retrieval found {len(manifest_docs)} docs but none matched manifest criteria - manifest may not be in ChromaDB")
-                        except Exception as manifest_inject_error:
-                            logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}", exc_info=True)
-                else:
-                    # Try multiple query variants to ensure we get StillMe foundational knowledge
-                    query_variants = get_foundational_query_variants(chat_request.message)
-                    all_knowledge_docs = []
-                    
-                    for variant in query_variants[:3]:  # Try first 3 variants
-                        variant_context = rag_retrieval.retrieve_context(
-                            query=variant,
-                            knowledge_limit=chat_request.context_limit,
-                            conversation_limit=0,  # Don't need conversation for foundational queries
-                            prioritize_foundational=True,
-                            similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries to ensure foundational knowledge is retrieved
-                            exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
-                            prioritize_style_guide=is_philosophical,
-                            is_philosophical=is_philosophical
-                        )
-                        # Merge results, avoiding duplicates
-                        existing_ids = {doc.get("id") for doc in all_knowledge_docs}
-                        for doc in variant_context.get("knowledge_docs", []):
-                            if doc.get("id") not in existing_ids:
-                                all_knowledge_docs.append(doc)
-                
-                # If we still don't have results, do normal retrieval with very low threshold
-                if not all_knowledge_docs:
-                    logger.warning("No foundational knowledge found, falling back to normal retrieval with very low threshold")
-                    context = rag_retrieval.retrieve_context(
-                        query=chat_request.message,
-                        knowledge_limit=chat_request.context_limit,
-                        conversation_limit=2,
-                        prioritize_foundational=True,
-                        similarity_threshold=0.01,  # CRITICAL: Use very low threshold for StillMe queries
-                        exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
-                        prioritize_style_guide=is_philosophical,
-                        is_philosophical=is_philosophical
-                    )
-                else:
-                    # Use merged results
-                    context = {
-                        "knowledge_docs": all_knowledge_docs[:chat_request.context_limit],
-                        "conversation_docs": [],
-                        "total_context_docs": len(all_knowledge_docs[:chat_request.context_limit])
-                    }
-                    logger.info(f"Retrieved {len(context['knowledge_docs'])} StillMe foundational knowledge documents")
-            else:
-                # CRITICAL: Check if question is about technical architecture (RAG, DeepSeek, black box)
-                # These should prioritize foundational knowledge even if not detected as StillMe query
-                question_lower = chat_request.message.lower()
-                is_technical_question = any(
-                    keyword in question_lower 
-                    for keyword in [
-                        "rag", "retrieval-augmented", "chromadb", "vector database",
-                        "deepseek", "deepseek api", "openai", "llm api", "black box", "blackbox",
-                        "black box system", "black box model", "black box ai",
-                        "embedding", "multi-qa-minilm", "sentence-transformers",
-                        "pipeline", "validation", "hallucination", "transparency",
-                        "kiến trúc", "hệ thống", "cơ chế", "quy trình",
-                        "cơ chế hoạt động", "cách hoạt động", "how does", "how it works",
-                        "tại sao bạn sử dụng", "why do you use"  # Questions about system choices
-                    ]
-                )
-                
-                # CRITICAL: Check if question is about "your system" - treat as StillMe query
-                has_your_system = any(
-                    phrase in question_lower 
-                    for phrase in [
-                        "your system", "in your system", "your.*system", "system.*you",
-                        "bạn.*hệ thống", "hệ thống.*bạn", "của bạn", "bạn.*sử dụng"
-                    ]
-                )
-                
-                # If technical question about "your system", treat as StillMe query
-                if is_technical_question and has_your_system:
-                    logger.info("Technical question about 'your system' detected - treating as StillMe query")
-                    # Use same logic as StillMe query: try query variants for foundational knowledge
-                    try:
-                        from backend.core.stillme_detector import get_foundational_query_variants
-                        query_variants = get_foundational_query_variants(chat_request.message)
-                        all_knowledge_docs = []
-                        
-                        for variant in query_variants[:3]:  # Try first 3 variants
-                            variant_context = rag_retrieval.retrieve_context(
-                                query=variant,
-                                knowledge_limit=chat_request.context_limit,
-                                conversation_limit=0,  # Don't need conversation for foundational queries
-                                prioritize_foundational=True,
-                                similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Use very low threshold for StillMe queries to ensure foundational knowledge is retrieved
-                                exclude_content_types=["technical", "style_guide"] if is_philosophical else ["style_guide"],
-                                prioritize_style_guide=is_philosophical,
-                                is_philosophical=is_philosophical
-                            )
-                            # Merge results, avoiding duplicates
-                            existing_ids = {doc.get("id") for doc in all_knowledge_docs}
-                            for doc in variant_context.get("knowledge_docs", []):
-                                if doc.get("id") not in existing_ids:
-                                    all_knowledge_docs.append(doc)
-                        
-                        # If we still don't have results, do normal retrieval with foundational priority and very low threshold
-                        if not all_knowledge_docs:
-                            logger.warning("No foundational knowledge found for 'your system' question, falling back to normal retrieval with very low threshold")
-                            context = rag_retrieval.retrieve_context(
-                                query=chat_request.message,
-                                knowledge_limit=min(chat_request.context_limit, 5),
-                                conversation_limit=1,
-                                prioritize_foundational=True,
-                                similarity_threshold=get_chat_config().similarity.VALIDATOR_COUNT_QUESTION,  # CRITICAL: Use very low threshold for StillMe queries
-                                exclude_content_types=["technical"] if is_philosophical else None,
-                                prioritize_style_guide=is_philosophical,
-                                is_philosophical=is_philosophical
-                            )
-                        else:
-                            # Use merged results
-                            context = {
-                                "knowledge_docs": all_knowledge_docs[:chat_request.context_limit],
-                                "conversation_docs": [],
-                                "total_context_docs": len(all_knowledge_docs[:chat_request.context_limit])
-                            }
-                            logger.info(f"Retrieved {len(context['knowledge_docs'])} foundational knowledge documents for 'your system' question")
-                    except Exception as variant_error:
-                        logger.warning(f"Error retrieving foundational knowledge for 'your system' question: {variant_error}, falling back to normal retrieval")
-                        context = rag_retrieval.retrieve_context(
-                            query=chat_request.message,
-                            knowledge_limit=min(chat_request.context_limit, 5),
-                            conversation_limit=1,
-                            prioritize_foundational=True,
-                            exclude_content_types=["technical"] if is_philosophical else None,
-                            prioritize_style_guide=is_philosophical,
-                            is_philosophical=is_philosophical
-                        )
-                else:
-                    # CRITICAL FIX: For news/article queries, exclude CRITICAL_FOUNDATION and use higher similarity threshold
-                    if is_news_article_query:
-                        logger.info(f"📰 News/article query - using higher similarity threshold (0.45) and excluding CRITICAL_FOUNDATION")
-                        # Increase knowledge_limit to get more results (since we're excluding foundational)
-                        context = rag_retrieval.retrieve_context(
-                            query=chat_request.message,
-                            knowledge_limit=min(chat_request.context_limit * 2, 20),  # Get more docs to compensate for exclusion
-                            conversation_limit=1,
-                            prioritize_foundational=False,  # CRITICAL: Don't prioritize foundational for news queries
-                            similarity_threshold=get_chat_config().similarity.HIGH_CONTEXT_QUALITY,  # CRITICAL: Higher threshold to ensure relevance (using HIGH_CONTEXT_QUALITY as closest match)
-                            exclude_content_types=exclude_types if exclude_types else None,
-                            prioritize_style_guide=False,
-                            is_philosophical=is_philosophical
-                        )
-                        
-                        # CRITICAL: Post-filter to remove any CRITICAL_FOUNDATION docs that slipped through
-                        if context and context.get("knowledge_docs"):
-                            filtered_docs = []
-                            for doc in context.get("knowledge_docs", []):
-                                if isinstance(doc, dict):
-                                    metadata = doc.get("metadata", {})
-                                    source = metadata.get("source", "")
-                                    doc_type = metadata.get("type", "")
-                                    foundational = metadata.get("foundational", "")
-                                    tags = str(metadata.get("tags", ""))
-                                    
-                                    is_critical_foundation = (
-                                        source == "CRITICAL_FOUNDATION" or
-                                        doc_type == "foundational" or
-                                        foundational == "stillme" or
-                                        "CRITICAL_FOUNDATION" in tags or
-                                        "foundational:stillme" in tags
-                                    )
-                                    
-                                    if not is_critical_foundation:
-                                        filtered_docs.append(doc)
-                                    else:
-                                        logger.debug(f"Post-filter: Excluding CRITICAL_FOUNDATION doc: {metadata.get('title', 'N/A')}")
-                            
-                            context["knowledge_docs"] = filtered_docs
-                            context["total_context_docs"] = len(filtered_docs) + len(context.get("conversation_docs", []))
-                            logger.info(f"📰 Post-filtered: {len(filtered_docs)} non-foundational docs remaining (excluded {len(context.get('knowledge_docs', [])) - len(filtered_docs)} foundational docs)")
-                    else:
-                        # Normal retrieval for non-StillMe queries
-                        # But prioritize foundational knowledge for technical questions
-                        # Optimized: conversation_limit reduced from 2 to 1 for latency
-                        
-                        # SOLUTION 1 & 3: Improve retrieval for historical/factual questions
-                        # - Lower similarity threshold for historical questions
-                        # - Enhance query with English keywords for better cross-lingual matching
-                        from backend.core.query_preprocessor import is_historical_question, enhance_query_for_retrieval
-                        
-                        is_historical = is_historical_question(chat_request.message)
-                        retrieval_query = chat_request.message
-                        config = get_chat_config()
-                        similarity_threshold = config.similarity.LOW_CONTEXT_QUALITY  # Default
-                        
-                        if is_historical:
-                            # SOLUTION 1: Very low threshold for historical questions (0.03 instead of 0.1)
-                            # This ensures we find historical facts even with multilingual embedding mismatch
-                            similarity_threshold = config.similarity.VERY_LOW
-                            logger.info(f"📜 Historical question detected - using very low similarity threshold: {similarity_threshold}")
-                            
-                            # SOLUTION 3: Enhance query with English keywords
-                            retrieval_query = enhance_query_for_retrieval(chat_request.message)
-                            logger.info(f"🔍 Enhanced query for better cross-lingual matching: '{chat_request.message}' -> '{retrieval_query}'")
-                        
-                        context = rag_retrieval.retrieve_context(
-                            query=retrieval_query,  # Use enhanced query
-                            knowledge_limit=min(chat_request.context_limit, 5),  # Cap at 5 for latency
-                            conversation_limit=1,  # Optimized: reduced from 2 to 1
-                            exclude_content_types=["technical"] if is_philosophical else None,
-                            prioritize_style_guide=is_philosophical,
-                            prioritize_foundational=is_technical_question,  # Prioritize foundational for technical questions
-                            similarity_threshold=similarity_threshold,  # Use adaptive threshold
-                            is_philosophical=is_philosophical
-                        )
-                        
-                        # Log RAG retrieval decision
-                        if context and 'decision_logger' in locals():
-                            reasoning = "Normal retrieval for non-StillMe queries"
-                            if is_historical:
-                                reasoning = "Historical question detected - using very low similarity threshold (0.03) and enhanced query for better cross-lingual matching"
-                            elif is_technical_question:
-                                reasoning = "Technical question detected - prioritizing foundational knowledge"
-                            _log_rag_retrieval_decision(
-                                decision_logger,
-                                context,
-                                retrieval_query,
-                                reasoning,
-                                similarity_threshold=similarity_threshold,
-                                prioritize_foundational=is_technical_question,
-                                exclude_types=["technical"] if is_philosophical else None,
-                                alternatives_considered=["Higher similarity threshold", "No query enhancement"] if is_historical else None
-                            )
+            # If technical question about "your system", treat as StillMe query
+            if is_technical_question and has_your_system:
+                is_stillme_query = True
+                logger.info("Technical question about 'your system' detected - treating as StillMe query")
+        
+        # Use RAG retrieval handler to get context
+        # RAG retrieval logic moved to backend/api/handlers/rag_retrieval_handler.py
+        context = retrieve_rag_context(
+            chat_request=chat_request,
+            rag_retrieval=rag_retrieval,
+            is_origin_query=is_origin_query,
+            is_validator_count_question=is_validator_count_question,
+            is_stillme_query=is_stillme_query,
+            is_news_article_query=is_news_article_query,
+            is_philosophical=is_philosophical,
+            is_technical_question=is_technical_question,
+            decision_logger=decision_logger,
+            processing_steps=processing_steps
+        )
         
         rag_retrieval_end = time.time()
         rag_retrieval_latency = rag_retrieval_end - rag_retrieval_start
