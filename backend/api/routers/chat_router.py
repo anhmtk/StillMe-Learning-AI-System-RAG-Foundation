@@ -2337,11 +2337,59 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
 - **Total RSS Feeds**: {total_count} feeds configured
 - **Status**: All feeds are working normally
 """
-                        elif feeds_count > 0:
-                            # If no failed_feeds_info but we have feeds_count, still mention it
-                            # But we should try to get RSS stats from system_monitor as fallback
-                            logger.warning(f"⚠️ No failed_feeds_info in API response, but feeds_count={feeds_count}. Attempting to get RSS stats from system_monitor.")
-                            failed_feeds_text = f"""
+                        else:
+                            # FALLBACK: Try to get RSS stats directly from rss_fetcher if API doesn't have it
+                            logger.warning(f"⚠️ No failed_feeds_info in API response. Attempting to get RSS stats directly from rss_fetcher.")
+                            try:
+                                import backend.api.main as main_module
+                                if hasattr(main_module, 'rss_fetcher') and main_module.rss_fetcher:
+                                    rss_stats = main_module.rss_fetcher.get_stats()
+                                    if rss_stats:
+                                        failed_feeds_count = rss_stats.get("failed_feeds", 0)
+                                        successful_feeds_count = rss_stats.get("successful_feeds", 0)
+                                        total_feeds = rss_stats.get("feeds_count", feeds_count) or feeds_count
+                                        last_error = rss_stats.get("last_error")
+                                        
+                                        if failed_feeds_count > 0 and total_feeds > 0:
+                                            failure_rate = round((failed_feeds_count / total_feeds * 100), 1)
+                                            logger.info(f"⚠️ RSS feed errors detected from rss_fetcher: {failed_feeds_count}/{total_feeds} feeds failed ({failure_rate}%)")
+                                            failed_feeds_text = f"""
+
+**🚨🚨🚨 RSS FEEDS STATUS - CRITICAL INFORMATION (MUST REPORT IN YOUR ANSWER) 🚨🚨🚨**
+
+**YOU MUST ANSWER THE USER'S QUESTION ABOUT RSS FEED ERRORS DIRECTLY AND HONESTLY:**
+
+- **Total RSS Feeds**: {total_feeds} feeds configured
+- **Failed Feeds**: {failed_feeds_count}/{total_feeds} feeds are currently experiencing connection issues ({failure_rate}% failure rate)
+- **Successful Feeds**: {successful_feeds_count}/{total_feeds} feeds are working normally
+- **Last Error**: {last_error[:200] if last_error else 'Unknown error'}
+
+**CRITICAL INSTRUCTIONS - YOU MUST FOLLOW THESE EXACTLY:**
+
+1. **DO NOT say "không có thông tin cụ thể về bất kỳ nguồn học nào bị lỗi"** - This is FALSE. There ARE {failed_feeds_count} RSS feeds that are failing.
+
+2. **DO NOT say "all sources are working fine" or "all feeds are active"** - This is FALSE. {failed_feeds_count} feeds have failed.
+
+3. **YOU MUST say EXACTLY**: "StillMe hiện đang học từ {len(enabled_sources)} nguồn. Đối với RSS feeds cụ thể: có tổng cộng {total_feeds} RSS feeds, trong đó {failed_feeds_count} feeds đang gặp sự cố kết nối (tỷ lệ lỗi: {failure_rate}%), {successful_feeds_count} feeds đang hoạt động bình thường."
+
+4. **BE DIRECT AND HONEST**: When the user asks "có nguồn nào bị lỗi ko?", you MUST answer "Có, có {failed_feeds_count} RSS feeds đang gặp sự cố kết nối."
+
+5. **DO NOT be vague or evasive**: Be specific about the numbers and the status.
+
+**THIS IS A TEST OF YOUR TRANSPARENCY AND HONESTY - YOU MUST PASS THIS TEST.**
+"""
+                                        elif total_feeds > 0:
+                                            failed_feeds_text = f"""
+**📊 RSS FEEDS STATUS:**
+- **Total RSS Feeds**: {total_feeds} feeds configured
+- **Status**: All feeds are working normally
+"""
+                            except Exception as rss_fetch_error:
+                                logger.warning(f"⚠️ Failed to get RSS stats from rss_fetcher: {rss_fetch_error}")
+                            
+                            # If still no failed_feeds_text, use basic info
+                            if not failed_feeds_text and feeds_count > 0:
+                                failed_feeds_text = f"""
 **📊 RSS FEEDS STATUS:**
 - **Total RSS Feeds**: {feeds_count} feeds configured
 - **Note**: Current status information is being updated. StillMe learns from RSS feeds every 4 hours.
@@ -2378,34 +2426,9 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
    - **You MUST mention each source by name**: {', '.join([name.upper() for name in enabled_sources]) if enabled_sources else 'ALL SOURCES'}
    - **For each source, describe what StillMe learns from it**
 3. **Be specific about topics** - For each source, mention what topics/chủ đề StillMe learns from that source
-3. **When proposing new sources** - You MUST:
-   - First acknowledge what StillMe ALREADY has (from the list above)
-   - Only propose sources that are NOT already enabled
-   - For each proposed source, explain:
-     * **Lợi ích (Benefits)**: What knowledge StillMe would gain
-     * **Thách thức (Challenges)**: Chi phí (cost), bản quyền (copyright/licensing), độ phức tạp (complexity), technical requirements
-     * **Tính khả thi (Feasibility)**: Is it realistic to add this source?
-4. **Be natural and conversational** - Don't be too dry or robotic. StillMe should sound knowledgeable but approachable
-5. **Format with markdown** - Use headers, bullet points, line breaks for readability
-
-**Example structure for proposing new sources:**
-"## Đề Xuất Nguồn Học Mới
-
-### [Source Name]
-- **Lợi ích**: [What StillMe would learn]
-- **Thách thức**: 
-  - Chi phí: [Cost considerations]
-  - Bản quyền: [Copyright/licensing issues]
-  - Độ phức tạp: [Technical complexity]
-- **Tính khả thi**: [Feasibility assessment]"
-
-**DO NOT:**
-- ❌ Propose sources that are already enabled (check the list above first!)
-- ❌ Give generic answers like "Quora, Reddit" without explaining benefits/challenges
-- ❌ Skip the challenges section - StillMe must be honest about trade-offs
-- ❌ Be too dry or robotic - StillMe should sound natural and conversational
-
-**Format with line breaks, bullet points, headers, and 2-3 emojis**
+4. **DO NOT propose new sources unless explicitly asked** - **CRITICAL**: The user is asking about CURRENT sources and errors, NOT asking for proposals. DO NOT include a "Đề Xuất Nguồn Mới" or "Đề Xuất Nguồn Học Mới" section unless the user explicitly asks for it (e.g., "đề xuất nguồn học mới", "suggest new sources", "propose new learning sources"). If the user only asks "có bao nhiêu nguồn học tập? có nguồn nào bị lỗi ko?", you MUST ONLY answer those two questions and NOT propose anything. DO NOT be proactive about proposing sources - only answer what is asked.
+5. **Be natural and conversational** - Don't be too dry or robotic. StillMe should sound knowledgeable but approachable
+6. **Format with markdown** - Use headers, bullet points, line breaks for readability
 
 """
                     # CRITICAL: If user asks to propose learning sources based on knowledge gaps,
