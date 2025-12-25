@@ -3036,6 +3036,7 @@ Context: {context_text}
                 is_validator_count_question=is_validator_count_query,
                 is_origin_query=is_origin_query,
                 is_stillme_query=is_stillme_query,
+                is_learning_sources_query=is_learning_sources_query,
                 detected_lang_name=detected_lang_name,
                 context_text=context_text,
                 enable_validators=enable_validators,

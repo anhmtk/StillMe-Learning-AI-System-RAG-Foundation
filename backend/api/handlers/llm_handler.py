@@ -298,13 +298,14 @@ async def generate_llm_response(
     is_validator_count_question: bool,
     is_origin_query: bool,
     is_stillme_query: bool,
-    detected_lang_name: str,
-    context_text: Optional[str],
-    enable_validators: bool,
-    use_option_b: bool,
-    fps_result: Optional[Any],
-    processing_steps: List[str],
-    timing_logs: Dict[str, Any]
+    is_learning_sources_query: bool = False,
+    detected_lang_name: str = "",
+    context_text: Optional[str] = None,
+    enable_validators: bool = True,
+    use_option_b: bool = False,
+    fps_result: Optional[Any] = None,
+    processing_steps: List[str] = None,
+    timing_logs: Dict[str, Any] = None
 ) -> Tuple[str, bool, float]:
     """
     Generate LLM response with caching and retry logic.
@@ -333,11 +334,15 @@ async def generate_llm_response(
     
     # Phase 1: LLM Response Cache - Check cache first
     # CRITICAL: Disable cache for origin queries to ensure provenance context is retrieved
+    # CRITICAL: Disable cache for learning sources queries to ensure RSS feed errors are always up-to-date
     cache_service = get_cache_service()
     cache_enabled = os.getenv("ENABLE_LLM_CACHE", "true").lower() == "true"
     if is_origin_query:
         cache_enabled = False
         logger.info("⚠️ Cache disabled for origin query - ensuring fresh response with provenance context")
+    if is_learning_sources_query:
+        cache_enabled = False
+        logger.info("⚠️ Cache disabled for learning sources query - ensuring fresh RSS feed errors status")
     
     # P3: Conditional cache for StillMe queries with knowledge versioning
     cache_ttl_override = None
