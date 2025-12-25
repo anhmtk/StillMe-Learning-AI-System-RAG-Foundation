@@ -2297,14 +2297,20 @@ Dựa trên dữ liệu học tập thực tế, hôm nay StillMe đã:
                             import backend.api.main as main_module
                             if hasattr(main_module, 'rss_fetcher') and main_module.rss_fetcher:
                                 system_monitor.set_components(rss_fetcher=main_module.rss_fetcher)
+                                logger.info(f"✅ Set rss_fetcher for system_monitor in learning sources query")
+                            else:
+                                logger.warning(f"⚠️ rss_fetcher not available in main_module for system_monitor")
                             
                             detailed_status = system_monitor.get_detailed_status()
+                            logger.info(f"🔍 DEBUG: system_monitor.get_detailed_status() returned: {detailed_status}")
                             rss_status = detailed_status.get("rss", {})
                             failed_count = rss_status.get("failed", 0)
                             successful_count = rss_status.get("successful", 0)
                             total_count = rss_status.get("total", 0)
                             failure_rate = rss_status.get("failure_rate", 0.0)
                             last_error = rss_status.get("last_error")
+                            
+                            logger.info(f"🔍 DEBUG: RSS status from system_monitor - total={total_count}, failed={failed_count}, successful={successful_count}, failure_rate={failure_rate}")
                             
                             if total_count > 0:
                                 if failed_count > 0:

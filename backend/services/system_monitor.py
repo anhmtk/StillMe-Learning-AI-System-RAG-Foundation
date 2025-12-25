@@ -98,13 +98,17 @@ class SystemMonitor:
         if self._rss_fetcher:
             try:
                 rss_stats = self._rss_fetcher.get_stats()
+                logger.info(f"🔍 DEBUG: rss_fetcher.get_stats() returned: {rss_stats}")
                 status["rss"]["total"] = rss_stats.get("feeds_count", 0)
                 status["rss"]["successful"] = rss_stats.get("successful_feeds", 0)
                 status["rss"]["failed"] = rss_stats.get("failed_feeds", 0)
                 status["rss"]["failure_rate"] = rss_stats.get("failure_rate", 0.0)
                 status["rss"]["last_error"] = rss_stats.get("last_error")
+                logger.info(f"🔍 DEBUG: Parsed RSS status - total={status['rss']['total']}, failed={status['rss']['failed']}, successful={status['rss']['successful']}")
             except Exception as e:
-                logger.debug(f"Could not get RSS stats: {e}")
+                logger.warning(f"⚠️ Could not get RSS stats from rss_fetcher: {e}")
+        else:
+            logger.warning(f"⚠️ rss_fetcher is None in system_monitor.get_detailed_status()")
         
         # Get source integration details
         if self._source_integration:
