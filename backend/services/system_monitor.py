@@ -88,6 +88,9 @@ class SystemMonitor:
                 "successful": 0,
                 "failed": 0,
                 "failure_rate": 0.0,
+                "failed_feed_urls": [],
+                "failed_feed_domains": [],
+                "failed_feed_errors": {},
                 "errors": []
             },
             "sources": {},
@@ -104,6 +107,9 @@ class SystemMonitor:
                 status["rss"]["failed"] = rss_stats.get("failed_feeds", 0)
                 status["rss"]["failure_rate"] = rss_stats.get("failure_rate", 0.0)
                 status["rss"]["last_error"] = rss_stats.get("last_error")
+                status["rss"]["failed_feed_urls"] = rss_stats.get("failed_feed_urls") or []
+                status["rss"]["failed_feed_domains"] = rss_stats.get("failed_feed_domains") or []
+                status["rss"]["failed_feed_errors"] = rss_stats.get("failed_feed_errors") or {}
                 logger.info(f"🔍 DEBUG: Parsed RSS status - total={status['rss']['total']}, failed={status['rss']['failed']}, successful={status['rss']['successful']}")
             except Exception as e:
                 logger.warning(f"⚠️ Could not get RSS stats from rss_fetcher: {e}")

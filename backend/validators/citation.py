@@ -13,7 +13,14 @@ logger = logging.getLogger(__name__)
 CITE_RE = re.compile(r"\[(\d+)\]")
 
 # Pattern to match human-readable citations like [general knowledge], [research: Wikipedia]
-HUMAN_READABLE_CITE_RE = re.compile(r'\[(?:general knowledge|research:|learning:|news:|reference:|foundational knowledge|discussion context|verified sources|needs research|personal analysis)[^\]]*\]', re.IGNORECASE)
+HUMAN_READABLE_CITE_RE = re.compile(
+    r"\[(?:general knowledge|research:|learning:|news:|reference:|foundational knowledge|discussion context|verified sources|needs research|personal analysis|system telemetry|system:|api:)[^\]]*\]",
+    re.IGNORECASE,
+)
+
+# System telemetry citations are REQUIRED for system status queries
+SYSTEM_TELEMETRY_CITE_RE = re.compile(r"\[(?:system telemetry|system:|api:)[^\]]*\]", re.IGNORECASE)
+GENERAL_KNOWLEDGE_CITE_RE = re.compile(r"\[general knowledge[^\]]*\]", re.IGNORECASE)
 
 
 class CitationRequired:
@@ -71,6 +78,58 @@ class CitationRequired:
                     return ValidationResult(passed=True, reasons=["self_knowledge_codebase_question"])
         if not self.required:
             return ValidationResult(passed=True)
+
+        # CRITICAL: System status / learning sources queries MUST NOT use [general knowledge].
+        # They must cite real-time system telemetry (e.g., rss_fetcher.get_stats or /api/learning/sources/current).
+        try:
+            from backend.core.system_status_detector import is_system_status_query
+
+            if user_question and is_system_status_query(user_question):
+                if GENERAL_KNOWLEDGE_CITE_RE.search(answer or ""):
+                    return ValidationResult(
+                        passed=False,
+                        reasons=["forbidden_general_knowledge_for_system_status"],
+                    )
+
+                # Detect whether telemetry context is present (synthetic telemetry doc or system context injection)
+                telemetry_available = False
+                if context and bool(context.get("system_telemetry")):
+                    telemetry_available = True
+                for doc in ctx_docs or []:
+                    if isinstance(doc, dict):
+                        if (doc.get("metadata", {}) or {}).get("source") == "SYSTEM_TELEMETRY":
+                            telemetry_available = True
+                            break
+                        doc_text = str(doc.get("document", ""))
+                        if "REAL-TIME SYSTEM STATUS" in doc_text or "SYSTEM_TELEMETRY" in doc_text:
+                            telemetry_available = True
+                            break
+                    elif isinstance(doc, str):
+                        if "REAL-TIME SYSTEM STATUS" in doc or "SYSTEM_TELEMETRY" in doc:
+                            telemetry_available = True
+                            break
+
+                has_system_citation = bool(SYSTEM_TELEMETRY_CITE_RE.search(answer or ""))
+                if has_system_citation:
+                    return ValidationResult(passed=True, reasons=["system_status_has_system_telemetry_citation"])
+
+                if telemetry_available:
+                    patched = (answer or "").rstrip()
+                    patched = patched + (" [system telemetry]" if patched else "[system telemetry]")
+                    return ValidationResult(
+                        passed=True,
+                        reasons=["system_status_missing_citation", "added_system_telemetry_citation"],
+                        patched_answer=patched,
+                    )
+
+                # No telemetry in context -> we MUST fail (do not "paper over" with [general knowledge])
+                return ValidationResult(
+                    passed=False,
+                    reasons=["system_status_missing_telemetry_context"],
+                )
+        except Exception:
+            # Fail open to existing behavior if detector import fails (should not happen)
+            pass
         
         # CRITICAL FIX: Real factual questions (history, science, events) ALWAYS need citations
         # Even if they have philosophical elements, they are still factual questions

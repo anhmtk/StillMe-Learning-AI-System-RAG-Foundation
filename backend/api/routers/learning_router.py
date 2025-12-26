@@ -525,6 +525,9 @@ async def get_current_learning_sources():
             successful_feeds_count = rss_stats.get("successful_feeds", 0)
             total_feeds = stats["rss"].get("feeds_count", 0)
             last_error = rss_stats.get("last_error")
+            failed_feed_urls = rss_stats.get("failed_feed_urls") or []
+            failed_feed_domains = rss_stats.get("failed_feed_domains") or []
+            failed_feed_errors = rss_stats.get("failed_feed_errors") or {}
             
             # If there are failed feeds, include details
             if failed_feeds_count > 0:
@@ -534,7 +537,12 @@ async def get_current_learning_sources():
                     "successful_count": successful_feeds_count,
                     "total_count": total_feeds,
                     "failure_rate": round((failed_feeds_count / total_feeds * 100) if total_feeds > 0 else 0, 1),
-                    "last_error": last_error[:200] if last_error else None  # Truncate long errors
+                    "last_error": last_error[:200] if last_error else None,  # Truncate long errors
+                    # CRITICAL: Include failing feeds list for transparency/self-awareness
+                    "failed_feed_urls": failed_feed_urls[:50],  # cap to avoid huge payloads
+                    "failed_feed_domains": failed_feed_domains[:50],
+                    # Include a compact error map (url -> short error)
+                    "failed_feed_errors": {k: str(v)[:200] for k, v in list(failed_feed_errors.items())[:50]},
                 }
         
         current_sources = {

@@ -616,6 +616,65 @@ def retrieve_rag_context(
     # Add processing step if provided
     if processing_steps is not None:
         processing_steps.append("🔍 Searching knowledge base...")
+
+    # CRITICAL: System status / learning sources queries need real-time telemetry context.
+    # Inject a synthetic "telemetry doc" so downstream LLM + validators have the correct numbers
+    # even when Chroma retrieval similarity is low.
+    try:
+        from backend.core.system_status_detector import is_system_status_query
+
+        if is_system_status_query(chat_request.message):
+            from backend.services.rss_fetcher import get_rss_fetcher
+
+            rss_stats = get_rss_fetcher().get_stats()
+            total = int(rss_stats.get("feeds_count") or 0)
+            ok = int(rss_stats.get("successful_feeds") or 0)
+            failed = int(rss_stats.get("failed_feeds") or 0)
+            rate = rss_stats.get("failure_rate")
+            ts = rss_stats.get("last_fetch_timestamp")
+            failed_domains = rss_stats.get("failed_feed_domains") or []
+            failed_urls = rss_stats.get("failed_feed_urls") or []
+
+            telemetry_text = "\n".join(
+                [
+                    "REAL-TIME SYSTEM STATUS (telemetry)",
+                    f"RSS feeds_total={total}",
+                    f"RSS feeds_ok={ok}",
+                    f"RSS feeds_failed={failed}",
+                    f"RSS failure_rate_percent={rate}",
+                    f"RSS failed_feed_domains={failed_domains}",
+                    f"RSS failed_feed_urls={failed_urls}",
+                    f"timestamp={ts}",
+                ]
+            ).strip()
+
+            telemetry_doc = {
+                "document": telemetry_text,
+                "metadata": {
+                    "title": "Real-time system status (RSS telemetry)",
+                    "source": "SYSTEM_TELEMETRY",
+                    "type": "system_status",
+                    "tags": "system_telemetry,rss,status,learning_sources",
+                    "timestamp": ts,
+                },
+            }
+
+            if processing_steps is not None:
+                processing_steps.append("📡 Injected system telemetry context (RSS stats)")
+
+            return {
+                "knowledge_docs": [telemetry_doc],
+                "conversation_docs": [],
+                "total_context_docs": 1,
+                "context_quality": "high",
+                "avg_similarity_score": 1.0,
+                "has_reliable_context": True,
+                "max_similarity": 1.0,
+                "system_telemetry": True,
+            }
+    except Exception:
+        # Non-critical: fall back to normal RAG retrieval path
+        pass
     
     # Prepare exclude_types
     exclude_types = _prepare_exclude_types(is_philosophical)

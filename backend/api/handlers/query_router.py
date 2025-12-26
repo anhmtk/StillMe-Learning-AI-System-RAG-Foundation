@@ -15,8 +15,87 @@ from backend.api.handlers.query_classifier import is_codebase_meta_question
 from backend.api.utils.text_utils import strip_philosophy_from_answer
 from backend.api.utils.response_formatters import build_ai_self_model_answer
 from backend.core.decision_logger import DecisionLogger, AgentType, DecisionType
+from backend.core.system_status_detector import detect_system_status_intent
 
 logger = logging.getLogger(__name__)
+
+def _safe_domain(url: str) -> str:
+    """Extract a stable domain string from a URL (best-effort)."""
+    try:
+        from urllib.parse import urlparse
+
+        netloc = urlparse(url).netloc or ""
+        if netloc.startswith("www."):
+            netloc = netloc[4:]
+        return netloc or url
+    except Exception:
+        return url
+
+
+def _format_system_status_response_vi(rss_stats: Dict[str, Any], enabled_sources: List[str]) -> str:
+    total = int(rss_stats.get("feeds_count") or 0)
+    ok = int(rss_stats.get("successful_feeds") or 0)
+    failed = int(rss_stats.get("failed_feeds") or 0)
+    rate = rss_stats.get("failure_rate")
+    ts = rss_stats.get("last_fetch_timestamp")
+
+    failed_urls = rss_stats.get("failed_feed_urls") or []
+    failed_domains = rss_stats.get("failed_feed_domains") or []
+    if not failed_domains and failed_urls:
+        failed_domains = sorted({_safe_domain(u) for u in failed_urls})
+
+    source_str = ", ".join(enabled_sources) if enabled_sources else "RSS"
+    lines = []
+    lines.append(f"Hiện tại StillMe đang học từ {len(enabled_sources)} nhóm nguồn (đang bật theo cấu hình): {source_str}.")
+    if total > 0:
+        rate_str = f"{rate}%" if rate is not None else "N/A"
+        lines.append(f"- RSS: {total} feeds, {ok} OK, {failed} lỗi (failure rate ~{rate_str}).")
+    else:
+        lines.append("- RSS: chưa có cấu hình feeds hoặc chưa khởi tạo RSS fetcher.")
+
+    if failed > 0:
+        if failed_domains:
+            lines.append("- Feeds đang lỗi (domain): " + ", ".join(failed_domains) + ".")
+        else:
+            lines.append("- Feeds đang lỗi: có lỗi nhưng chưa có danh sách chi tiết (chưa có last fetch detail).")
+
+    lines.append(f"- Thời điểm thống kê: {ts or 'chưa có fetch cycle gần đây'}.")
+    lines.append("")
+    lines.append("[system telemetry: rss_fetcher.get_stats()]")
+    return "\n".join(lines).strip()
+
+
+def _format_system_status_response_en(rss_stats: Dict[str, Any], enabled_sources: List[str]) -> str:
+    total = int(rss_stats.get("feeds_count") or 0)
+    ok = int(rss_stats.get("successful_feeds") or 0)
+    failed = int(rss_stats.get("failed_feeds") or 0)
+    rate = rss_stats.get("failure_rate")
+    ts = rss_stats.get("last_fetch_timestamp")
+
+    failed_urls = rss_stats.get("failed_feed_urls") or []
+    failed_domains = rss_stats.get("failed_feed_domains") or []
+    if not failed_domains and failed_urls:
+        failed_domains = sorted({_safe_domain(u) for u in failed_urls})
+
+    source_str = ", ".join(enabled_sources) if enabled_sources else "RSS"
+    lines = []
+    lines.append(f"StillMe currently has {len(enabled_sources)} enabled learning source groups: {source_str}.")
+    if total > 0:
+        rate_str = f"{rate}%" if rate is not None else "N/A"
+        lines.append(f"- RSS: {total} feeds, {ok} OK, {failed} failed (failure rate ~{rate_str}).")
+    else:
+        lines.append("- RSS: no feeds configured or RSS fetcher not initialized.")
+
+    if failed > 0:
+        if failed_domains:
+            lines.append("- Failing feeds (domains): " + ", ".join(failed_domains) + ".")
+        else:
+            lines.append("- Failing feeds: failures detected but no detailed list is available (no last fetch detail).")
+
+    lines.append(f"- Stats timestamp: {ts or 'no recent fetch cycle'}")
+    lines.append("")
+    lines.append("[system telemetry: rss_fetcher.get_stats()]")
+    return "\n".join(lines).strip()
 
 
 async def route_query(
@@ -47,6 +126,69 @@ async def route_query(
     if not is_general_roleplay and is_codebase_meta_question(chat_request.message):
         return await _handle_codebase_meta_question(
             chat_request, processing_steps, timing_logs, start_time, decision_logger
+        )
+
+    # 1.5. CRITICAL: System status / learning sources queries MUST be answered from real-time telemetry.
+    # This prevents StillMe from hallucinating or using stale "Sources: 7" summaries.
+    intent = detect_system_status_intent(chat_request.message)
+    if intent.is_system_status:
+        detected_lang = detect_language(chat_request.message)
+        processing_steps.append("🩺 System status query detected - using real-time telemetry (no LLM)")
+        logger.warning(f"🚨 System status query detected (reason={intent.matched_reason}) - returning telemetry directly")
+
+        # RSS stats (real-time from singleton)
+        try:
+            from backend.services.rss_fetcher import get_rss_fetcher
+
+            rss_fetcher = get_rss_fetcher()
+            rss_stats = rss_fetcher.get_stats()
+        except Exception as e:
+            rss_stats = {"feeds_count": 0, "successful_feeds": 0, "failed_feeds": 0, "failure_rate": None, "last_error": str(e)}
+
+        # Enabled source groups (from env flags; avoid depending on backend.api.main init)
+        enabled_sources: List[str] = ["RSS"]
+        try:
+            from backend.services.source_integration import (
+                ENABLE_ARXIV,
+                ENABLE_CROSSREF,
+                ENABLE_WIKIPEDIA,
+                ENABLE_PAPERS_WITH_CODE,
+                ENABLE_CONFERENCES,
+                ENABLE_STANFORD_ENCYCLOPEDIA,
+            )
+
+            if ENABLE_ARXIV:
+                enabled_sources.append("ARXIV")
+            if ENABLE_CROSSREF:
+                enabled_sources.append("CROSSREF")
+            if ENABLE_WIKIPEDIA:
+                enabled_sources.append("WIKIPEDIA")
+            if ENABLE_PAPERS_WITH_CODE:
+                enabled_sources.append("PAPERS_WITH_CODE")
+            if ENABLE_CONFERENCES:
+                enabled_sources.append("CONFERENCES")
+            if ENABLE_STANFORD_ENCYCLOPEDIA:
+                enabled_sources.append("STANFORD_ENCYCLOPEDIA")
+        except Exception:
+            # Non-critical: keep RSS only
+            pass
+
+        response_text = (
+            _format_system_status_response_vi(rss_stats, enabled_sources)
+            if detected_lang == "vi"
+            else _format_system_status_response_en(rss_stats, enabled_sources)
+        )
+
+        from backend.core.epistemic_state import EpistemicState
+        total_time = time.time() - start_time
+        return ChatResponse(
+            response=response_text,
+            confidence_score=1.0,
+            epistemic_state=EpistemicState.KNOWN.value,
+            processing_steps=processing_steps + ["✅ Returned system telemetry (real-time)"],
+            timing={"total": f"{total_time:.2f}s"},
+            latency_metrics=f"Total: {total_time:.2f}s (system telemetry early return)",
+            validation_info={"passed": True, "reasons": ["system_status_telemetry"], "intent_reason": intent.matched_reason},
         )
     
     # 2. Ambiguity clarification
