@@ -345,12 +345,17 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         try:
             from backend.services.system_monitor import get_system_monitor
             system_monitor = get_system_monitor()
+            # CRITICAL: Always attach RSS fetcher via singleton (avoids relying on backend.api.main init order)
+            try:
+                from backend.services.rss_fetcher import get_rss_fetcher as get_rss_fetcher_singleton
+
+                system_monitor.set_components(rss_fetcher=get_rss_fetcher_singleton())
+                logger.debug("✅ Set rss_fetcher for system_monitor (singleton)")
+            except Exception as rss_comp_error:
+                logger.debug(f"Could not set rss_fetcher singleton for system_monitor: {rss_comp_error}")
             # Set component references if available
             try:
                 import backend.api.main as main_module
-                if hasattr(main_module, 'rss_fetcher') and main_module.rss_fetcher:
-                    system_monitor.set_components(rss_fetcher=main_module.rss_fetcher)
-                    logger.debug("✅ Set rss_fetcher for system_monitor")
                 if hasattr(main_module, 'source_integration') and main_module.source_integration:
                     system_monitor.set_components(source_integration=main_module.source_integration)
                     logger.debug("✅ Set source_integration for system_monitor")

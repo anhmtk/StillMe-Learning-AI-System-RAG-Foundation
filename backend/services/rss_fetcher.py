@@ -179,6 +179,7 @@ class RSSFetcher:
         current_successful = 0
         current_failed = 0
         errors = []
+        failed_feed_errors: Dict[str, str] = {}
         
         # Fetch all feeds concurrently with retry and fallback
         # Wrap each fetch with circuit breaker
@@ -249,6 +250,8 @@ class RSSFetcher:
                 if isinstance(feed_result, Exception):
                     error_msg = f"Failed to fetch {feed_url}: {feed_result}"
                     errors.append(error_msg)
+                    # Capture per-feed error for real-time status queries
+                    failed_feed_errors[feed_url] = str(feed_result)[:300]
                     current_failed += 1
                     self.error_count += 1
                     logger.error(error_msg)
@@ -341,6 +344,8 @@ class RSSFetcher:
             except Exception as e:
                 error_msg = f"Failed to process {feed_url}: {e}"
                 errors.append(error_msg)
+                # Capture per-feed error for real-time status queries
+                failed_feed_errors[feed_url] = str(e)[:300]
                 current_failed += 1
                 self.error_count += 1
                 logger.error(error_msg)
@@ -373,7 +378,10 @@ class RSSFetcher:
             "total_feeds": total_feeds,
             "failure_rate": failure_rate,
             "timestamp": datetime.now().isoformat(),
-            "dynamic_threshold_used": final_threshold if content_curator else None
+            "dynamic_threshold_used": final_threshold if content_curator else None,
+            # CRITICAL: Include failing feeds list for transparency/self-awareness
+            "failed_feed_urls": sorted(failed_feed_errors.keys()),
+            "failed_feed_errors": failed_feed_errors,
         }
         
         # Update error state
@@ -457,17 +465,37 @@ class RSSFetcher:
         returns current state (which may be 0/0 if no fetch has run).
         """
         total_feeds = len(self.feeds)
+        failed_feed_urls: List[str] = []
+        failed_feed_errors: Dict[str, str] = {}
         
         # Use last fetch stats if available (more accurate), otherwise use current state
         if self.last_fetch_stats:
             successful_feeds = self.last_fetch_stats["successful_feeds"]
             failed_feeds = self.last_fetch_stats["failed_feeds"]
             failure_rate = self.last_fetch_stats["failure_rate"]
+            failed_feed_urls = list(self.last_fetch_stats.get("failed_feed_urls") or [])
+            failed_feed_errors = dict(self.last_fetch_stats.get("failed_feed_errors") or {})
         else:
             # Fallback to current state (may be 0/0 if no fetch has run)
             successful_feeds = self.successful_feeds
             failed_feeds = self.failed_feeds
             failure_rate = (failed_feeds / total_feeds * 100) if total_feeds > 0 else 0
+
+        # Derive failing feed domains (stable + compact for display)
+        failed_feed_domains: List[str] = []
+        if failed_feed_urls:
+            try:
+                from urllib.parse import urlparse
+
+                domains = []
+                for u in failed_feed_urls:
+                    netloc = urlparse(u).netloc or ""
+                    if netloc.startswith("www."):
+                        netloc = netloc[4:]
+                    domains.append(netloc or u)
+                failed_feed_domains = sorted(set(domains))
+            except Exception:
+                failed_feed_domains = []
         
         return {
             "source": "rss",
@@ -480,7 +508,11 @@ class RSSFetcher:
             "last_success_time": self.last_success_time.isoformat() if self.last_success_time else None,
             "status": "error" if self.last_error and (not self.last_success_time or failed_feeds > 0) else "ok",
             "alert_threshold_exceeded": failure_rate > 10,
-            "last_fetch_timestamp": self.last_fetch_stats.get("timestamp") if self.last_fetch_stats else None
+            "last_fetch_timestamp": self.last_fetch_stats.get("timestamp") if self.last_fetch_stats else None,
+            # Real-time transparency for system status queries
+            "failed_feed_urls": failed_feed_urls,
+            "failed_feed_domains": failed_feed_domains,
+            "failed_feed_errors": failed_feed_errors,
         }
 
 

@@ -122,8 +122,9 @@ class TestHandleAiSelfModelQuery:
     @patch('backend.core.ai_self_model_detector.detect_ai_self_model_query')
     @patch('backend.api.handlers.query_router.detect_language')
     @patch('backend.core.ai_self_model_detector.get_ai_self_model_opening')
-    @patch('backend.api.utils.response_formatters.build_ai_self_model_answer')
-    @patch('backend.api.utils.text_utils.strip_philosophy_from_answer')
+    # Patch the symbols as imported inside query_router.py (module-level imports)
+    @patch('backend.api.handlers.query_router.build_ai_self_model_answer')
+    @patch('backend.api.handlers.query_router.strip_philosophy_from_answer')
     def test_handles_ai_self_model_query(self, mock_strip, mock_build, mock_get_opening, 
                                          mock_detect_lang, mock_detect):
         mock_detect.return_value = (True, ["consciousness", "awareness"])
@@ -279,6 +280,50 @@ class TestRouteQuery:
         
         assert result is not None
         mock_handle.assert_called_once()
+
+    @pytest.mark.asyncio
+    @patch("backend.api.handlers.query_router.detect_language")
+    @patch("backend.services.rss_fetcher.get_rss_fetcher")
+    @patch("backend.api.handlers.query_router.is_codebase_meta_question")
+    async def test_system_status_query_returns_telemetry_early(self, mock_is_meta, mock_get_rss_fetcher, mock_detect_lang):
+        mock_is_meta.return_value = False
+        mock_detect_lang.return_value = "vi"
+
+        dummy_fetcher = Mock()
+        dummy_fetcher.get_stats.return_value = {
+            "feeds_count": 22,
+            "successful_feeds": 19,
+            "failed_feeds": 3,
+            "failure_rate": 13.6,
+            "failed_feed_domains": ["r-bloggers.com", "psychologicalscience.org", "ncronline.org"],
+            "failed_feed_urls": [
+                "https://www.r-bloggers.com/feed/",
+                "https://www.psychologicalscience.org/feed",
+                "https://www.ncronline.org/feed",
+            ],
+            "last_fetch_timestamp": "2025-12-26T14:47:50Z",
+        }
+        mock_get_rss_fetcher.return_value = dummy_fetcher
+
+        chat_request = Mock()
+        chat_request.message = "hiện giờ bạn có bao nhiêu nguồn học tập? có nguồn nào bị lỗi ko?"
+        request = Mock()
+        processing_steps = []
+        timing_logs = {}
+        start_time = 0.0
+        decision_logger = Mock()
+
+        result = await route_query(
+            chat_request, request, processing_steps, timing_logs, start_time, decision_logger
+        )
+
+        assert result is not None
+        assert "RSS" in result.response
+        assert "22" in result.response
+        assert "3" in result.response
+        # Must name failing domains (not claim "no errors")
+        assert "r-bloggers.com" in result.response
+        assert "[system telemetry" in result.response
     
     @pytest.mark.asyncio
     @patch('backend.api.handlers.query_router.is_codebase_meta_question')
@@ -328,11 +373,9 @@ class TestDetectQueryTypes:
     def test_detects_all_query_types(self, mock_ai, mock_honesty, mock_religion, 
                                      mock_origin, mock_ambiguity, mock_is_meta):
         mock_is_meta.return_value = True
-        mock_get_detector = Mock()
         mock_detector = Mock()
         mock_detector.should_ask_clarification.return_value = (True, "Clarify?")
-        mock_get_detector.return_value = mock_detector
-        mock_ambiguity.return_value = mock_get_detector
+        mock_ambiguity.return_value = mock_detector
         mock_origin.return_value = (True, ["origin"])
         mock_religion.return_value = (True, ["religion"])
         mock_honesty.return_value = True
