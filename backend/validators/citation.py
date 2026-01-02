@@ -71,6 +71,7 @@ class CitationRequired:
                     return ValidationResult(passed=True, reasons=["self_knowledge_codebase_question"])
         if not self.required:
             return ValidationResult(passed=True)
+        is_system_status_query = bool(context and isinstance(context, dict) and context.get("is_system_status_query"))
         
         # CRITICAL FIX: Real factual questions (history, science, events) ALWAYS need citations
         # Even if they have philosophical elements, they are still factual questions
@@ -334,6 +335,12 @@ class CitationRequired:
         
         # If no context documents available:
         if not ctx_docs or len(ctx_docs) == 0:
+            if is_system_status_query:
+                logger.warning("🚨 System status query detected but no context docs available - failing to avoid stale/general knowledge answers")
+                return ValidationResult(
+                    passed=False,
+                    reasons=["system_status_missing_context"]
+                )
             # For ANY factual questions, we should still add citation for transparency
             # Even if no RAG context, the answer is based on base knowledge and should be cited
             # BUT: Skip for pure philosophical questions (already handled above)
@@ -356,10 +363,19 @@ class CitationRequired:
         # If not, we MUST add it (this is the main path for missing citations)
         # Check for both numeric citations [1] and human-readable citations
         has_citation = bool(CITE_RE.search(answer) or HUMAN_READABLE_CITE_RE.search(answer))
+
+        # System status queries MUST cite real-time context, never general knowledge
+        if is_system_status_query and not has_citation:
+            patched_answer = self._add_citation(answer, ctx_docs, user_question, context=context)
+            return ValidationResult(
+                passed=False,
+                reasons=["missing_citation_system_status"],
+                patched_answer=patched_answer
+            )
         
         # CRITICAL FIX: Check if answer mentions "Based on general knowledge" or similar phrases
         # If yes, convert to proper citation format [general knowledge]
-        if not has_citation:
+        if not has_citation and not is_system_status_query:
             general_knowledge_patterns = [
                 r'based\s+on\s+general\s+knowledge\s*(?:\([^)]*\))?(?!\s*\[)',
                 r'from\s+my\s+training\s+data(?!\s*\[)',
