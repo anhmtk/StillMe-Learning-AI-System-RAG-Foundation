@@ -8348,6 +8348,33 @@ The user is asking about StillMe's system architecture (RAG, LLM, embedding, etc
 
 """
                 
+                # CRITICAL: Inject system status note for system status queries (even in non-RAG path)
+                system_status_section = ""
+                system_status_context_section = ""
+                if is_system_status_query and system_status_note and system_status_note != "[System: Status unavailable]":
+                    system_status_section = f"""
+{system_status_note}
+
+**CRITICAL: This is REAL-TIME system status. You MUST use these exact numbers in your response.**
+"""
+                    # If we have system_status_context_override, inject it as context
+                    if system_status_context_override and system_status_context_override.get("knowledge_docs"):
+                        status_doc = system_status_context_override["knowledge_docs"][0]
+                        status_content = status_doc.get("content", "")
+                        system_status_context_section = f"""
+
+**REAL-TIME SYSTEM STATUS DATA (MUST USE THESE EXACT NUMBERS):**
+{status_content}
+
+**CRITICAL REQUIREMENTS:**
+1. You MUST report the EXACT numbers from the system status above
+2. If RSS feeds show failures, you MUST mention them specifically
+3. Do NOT say "all sources are working" if there are failed feeds
+4. Be honest and transparent about the current system status
+5. Use the exact numbers: total feeds, failed count, successful count, failure rate
+
+"""
+                
                 # Strong language instruction - put FIRST
                 if detected_lang != 'en':
                     language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
@@ -8364,7 +8391,7 @@ THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
 """
                     base_prompt = f"""{language_instruction}
-{technical_system_instruction}
+{system_status_section}{system_status_context_section}{technical_system_instruction}
 {conversation_history_text}User Question: {user_question_for_prompt}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
@@ -8382,7 +8409,7 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
 
 THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
-{technical_system_instruction}
+{system_status_section}{system_status_context_section}{technical_system_instruction}
 {conversation_history_text}
 
 🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
