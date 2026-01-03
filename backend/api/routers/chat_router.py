@@ -310,19 +310,49 @@ def _build_system_status_context(system_monitor, current_learning_sources: Optio
         (context_dict, system_status_note)
     """
     try:
-        detailed_status = system_monitor.get_detailed_status()
-        rss_status = detailed_status.get("rss", {}) if isinstance(detailed_status, dict) else {}
-        total_feeds = rss_status.get("total", 0)
-        successful_feeds = rss_status.get("successful", 0)
-        failed_feeds = rss_status.get("failed", 0)
-        failure_rate = rss_status.get("failure_rate", 0.0)
-        last_error = rss_status.get("last_error")
-        status_timestamp = detailed_status.get("timestamp") if isinstance(detailed_status, dict) else None
+        # CRITICAL: Prioritize data from current_learning_sources API (more reliable)
+        # Only use system_monitor.get_detailed_status() as fallback if API data not available
+        total_feeds = 0
+        successful_feeds = 0
+        failed_feeds = 0
+        failure_rate = 0.0
+        last_error = None
+        status_timestamp = datetime.now().isoformat()
+        
+        # First, try to get data from current_learning_sources API (most reliable)
+        if current_learning_sources and isinstance(current_learning_sources, dict):
+            sources = current_learning_sources.get("current_sources", {})
+            rss_info = sources.get("rss", {})
+            feeds_count = rss_info.get("feeds_count", 0)
+            failed_info = rss_info.get("failed_feeds") or {}
+            
+            if feeds_count > 0:
+                # Use API data as primary source
+                total_feeds = feeds_count
+                failed_feeds = failed_info.get("failed_count", 0)
+                successful_feeds = failed_info.get("successful_count", 0)
+                failure_rate = failed_info.get("failure_rate", 0.0)
+                last_error = rss_info.get("last_error")
+                logger.info(f"✅ Using RSS stats from API: total={total_feeds}, failed={failed_feeds}, successful={successful_feeds}")
+        
+        # Fallback to system_monitor.get_detailed_status() only if API data not available
+        if total_feeds == 0:
+            detailed_status = system_monitor.get_detailed_status()
+            rss_status = detailed_status.get("rss", {}) if isinstance(detailed_status, dict) else {}
+            total_feeds = rss_status.get("total", 0)
+            successful_feeds = rss_status.get("successful", 0)
+            failed_feeds = rss_status.get("failed", 0)
+            failure_rate = rss_status.get("failure_rate", 0.0)
+            last_error = rss_status.get("last_error")
+            status_timestamp = detailed_status.get("timestamp") if isinstance(detailed_status, dict) else status_timestamp
+            if total_feeds > 0:
+                logger.info(f"✅ Using RSS stats from system_monitor: total={total_feeds}, failed={failed_feeds}, successful={successful_feeds}")
 
         status_note = "[System: Status unavailable]"
         if total_feeds > 0:
             status_note = f"[System: {total_feeds} RSS feeds ({failed_feeds} failed, {successful_feeds} ok)]"
 
+        # Build context with SINGLE source of truth (no conflicting data)
         lines = [
             "Real-time system status (auto-learning pipeline):",
             f"- RSS feeds total: {total_feeds}",
@@ -331,20 +361,14 @@ def _build_system_status_context(system_monitor, current_learning_sources: Optio
             f"- Failure rate: {failure_rate}%",
         ]
         if last_error:
-            lines.append(f"- Last RSS error: {last_error}")
-
+            lines.append(f"- Last RSS error: {last_error[:200]}")  # Truncate long errors
+        
+        # Add enabled sources info if available
         if current_learning_sources and isinstance(current_learning_sources, dict):
             sources = current_learning_sources.get("current_sources", {})
             enabled_sources = [name for name, info in sources.items() if info.get("enabled")]
-            lines.append(f"- Enabled sources: {', '.join(enabled_sources) if enabled_sources else 'None'}")
-            rss_info = sources.get("rss", {})
-            feeds_count = rss_info.get("feeds_count", total_feeds)
-            failed_info = rss_info.get("failed_feeds") or {}
-            if feeds_count:
-                failed_feeds_alt = failed_info.get("failed_count", failed_feeds)
-                success_alt = failed_info.get("successful_count", successful_feeds)
-                failure_rate_alt = failed_info.get("failure_rate", failure_rate)
-                lines.append(f"- RSS status (/sources/current): total={feeds_count}, failed={failed_feeds_alt}, success={success_alt}, failure_rate={failure_rate_alt}%")
+            if enabled_sources:
+                lines.append(f"- Enabled sources: {', '.join(enabled_sources)}")
 
         content = "\n".join(lines)
         context = {
@@ -8363,15 +8387,17 @@ The user is asking about StillMe's system architecture (RAG, LLM, embedding, etc
                         status_content = status_doc.get("content", "")
                         system_status_context_section = f"""
 
-**REAL-TIME SYSTEM STATUS DATA (MUST USE THESE EXACT NUMBERS):**
+**REAL-TIME SYSTEM STATUS DATA (SINGLE SOURCE OF TRUTH - USE THESE EXACT NUMBERS):**
 {status_content}
 
 **CRITICAL REQUIREMENTS:**
-1. You MUST report the EXACT numbers from the system status above
-2. If RSS feeds show failures, you MUST mention them specifically
-3. Do NOT say "all sources are working" if there are failed feeds
-4. Be honest and transparent about the current system status
-5. Use the exact numbers: total feeds, failed count, successful count, failure rate
+1. You MUST report the EXACT numbers from the system status above (this is the ONLY source of truth)
+2. If the data shows "RSS feeds total: 22, Failed: 2, Successful: 20", you MUST say exactly that
+3. Do NOT say "no feeds are failing" if the data shows "Failed: 2"
+4. Do NOT say "all sources are working" if there are failed feeds
+5. Be honest and transparent: if 2 feeds are failing, say "2 feeds are failing"
+6. Do NOT create contradictions - use ONLY the numbers provided above
+7. If you see "total: 0" but also see "total=22" in the same context, use the NON-ZERO value (22) as it's more recent/reliable
 
 """
                 
