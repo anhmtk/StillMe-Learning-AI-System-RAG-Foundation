@@ -3431,8 +3431,9 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY. ANS
     # Only prepend disclaimer if NOT a fallback meta-answer, NOT a safe refusal, NOT an origin query, and NOT a StillMe self-knowledge query
     # CRITICAL: StillMe MUST know about itself - never add disclaimer for origin queries or StillMe self-knowledge queries
     # StillMe self-knowledge queries include: learning activity, philosophy, goals, errors, system status
+    # CRITICAL: Also skip disclaimer for system status queries - StillMe has real-time data access to its own system
     if (confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical and 
-        not is_fallback_meta and not is_safe_refusal and not is_origin_query and not is_stillme_query):
+        not is_fallback_meta and not is_safe_refusal and not is_origin_query and not is_stillme_query and not is_system_status_query):
         # Check if response already has transparency disclaimer
         response_lower = response.lower()
         has_transparency = any(
@@ -7665,7 +7666,9 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                 
                 # CRITICAL: Add transparency warning for low confidence responses without context (RAG path, validators disabled)
                 # CRITICAL: StillMe MUST know about its own origin - never add disclaimer for origin queries
-                if confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical and not is_origin_query:
+                # CRITICAL: Also skip disclaimer for system status queries - StillMe has real-time data access to its own system
+                if (confidence_score < 0.5 and len(ctx_docs) == 0 and not is_philosophical and 
+                    not is_origin_query and not is_system_status_query and not system_status_context_override):
                     response_lower = response.lower() if response else ""
                     has_transparency = any(
                         phrase in response_lower for phrase in [
@@ -8749,7 +8752,10 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                         is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
             
             # CRITICAL: Add transparency warning for low confidence responses without context (non-RAG path)
-            if confidence_score < 0.5 and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and response:
+            # BUT: Skip disclaimer for system status queries - StillMe has real-time data access to its own system
+            # CRITICAL: StillMe MUST be confident when reporting about itself with real-time data
+            if (confidence_score < 0.5 and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and 
+                not is_system_status_query and not system_status_context_override and response):
                 response_lower = response.lower()
                 has_transparency = any(
                     phrase in response_lower for phrase in [
@@ -8763,6 +8769,8 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     disclaimer = _get_transparency_disclaimer(detected_lang)
                     response = disclaimer + response
                     logger.info("ℹ️ Added transparency disclaimer for low confidence response without context (non-RAG path)")
+                else:
+                    logger.info("ℹ️ Skipped transparency disclaimer: system status query with real-time data (non-RAG path)")
         
         # Score the response
         accuracy_score = None
