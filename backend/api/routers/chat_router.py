@@ -1905,7 +1905,20 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     doc_summary += f" - Content preview: {content_preview}..."
                 doc_summaries.append(doc_summary)
             
+            # CRITICAL: Check if question is about validators/layers/system architecture
+            # Only inject manifest instruction if question is relevant
+            question_lower = user_question.lower()
+            is_validator_question = any(
+                pattern in question_lower
+                for pattern in [
+                    "validator", "layer", "lớp", "validation framework", "kiến trúc hệ thống",
+                    "system architecture", "cấu trúc validator", "bao nhiêu validator",
+                    "bao nhiêu lớp", "how many validator", "how many layer"
+                ]
+            )
+            
             # CRITICAL: Check if manifest is in context and add explicit instruction
+            # ONLY if question is about validators/layers/system architecture
             has_manifest = False
             manifest_info = None
             for doc in knowledge_docs:
@@ -1954,7 +1967,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
             newline = chr(10)
             doc_summaries_text = newline.join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"
             manifest_warning_vi = ""
-            if has_manifest:
+            # CRITICAL: Only inject manifest instruction if question is about validators/layers
+            # Otherwise, it will override the actual question (e.g., Knowledge Gap questions)
+            if has_manifest and is_validator_question:
                 # Use manifest info from context if available, otherwise fallback to ManifestLoader
                 if manifest_info:
                     manifest_info_display = manifest_info
