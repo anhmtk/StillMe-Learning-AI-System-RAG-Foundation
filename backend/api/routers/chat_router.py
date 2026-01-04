@@ -2411,7 +2411,8 @@ async def _handle_validation_with_fallback(
     processing_steps: list,
     timing_logs: dict,
     is_origin_query: bool = False,
-    is_stillme_query: bool = False
+    is_stillme_query: bool = False,
+    is_system_status_query: bool = False
 ) -> tuple:
     """
     Handle validation logic with fallback mechanisms.
@@ -3491,6 +3492,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     raw_response = None  # CRITICAL: Initialize raw_response to prevent UnboundLocalError
     final_response = None  # CRITICAL: Initialize final_response to prevent UnboundLocalError
     
+    # CRITICAL: Initialize detected_lang EARLY to prevent UnboundLocalError
+    # This is needed for news/article query "not found" response (line 5000)
+    detected_lang = detect_language(chat_request.message)
+    
     # Initialize fallback flags for both RAG and non-RAG paths to prevent UnboundLocalError
     is_fallback_meta_answer = False  # Used in RAG path
     is_fallback_meta_answer_rag = False  # Used in RAG path post-processing
@@ -4306,7 +4311,8 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         processing_steps=processing_steps,
                         timing_logs={},
                         is_origin_query=is_origin_query,
-                        is_stillme_query=is_stillme_query
+                        is_stillme_query=is_stillme_query,
+                        is_system_status_query=is_system_status_query
                     )
                     
                     # Use validated response
@@ -7613,7 +7619,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 processing_steps=processing_steps,
                                 timing_logs=timing_logs,
                                 is_origin_query=is_origin_query,
-                                is_stillme_query=is_stillme_query
+                                is_stillme_query=is_stillme_query,
+                                is_system_status_query=is_system_status_query
                             )
                             
                             # CRITICAL: Log response after validation (especially for philosophical questions)
