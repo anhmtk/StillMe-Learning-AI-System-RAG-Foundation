@@ -494,7 +494,7 @@ def _is_codebase_meta_question(message: str) -> bool:
     return has_code_intent
 
 
-def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None, user_question: Optional[str] = None) -> str:
+def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None, user_question: Optional[str] = None, is_system_architecture_query: bool = False) -> str:
     """
     Add timestamp attribution to normal RAG responses for transparency.
     This ensures consistency with external data responses which already include timestamps.
@@ -668,23 +668,56 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # Build citation attribution parts
     citation_parts = []
     
+    # CRITICAL: For system architecture queries, suppress CRITICAL_FOUNDATION citations
+    # CRITICAL_FOUNDATION is StillMe's long-term memory, not external documentation
+    # System architecture queries should present this as StillMe's own knowledge, not cited sources
+    should_suppress_critical_foundation = is_system_architecture_query and any(
+        "CRITICAL_FOUNDATION" in doc_type or "foundational" in doc_type.lower() 
+        for doc_type in document_types
+    )
+    
     # Format citation with document titles if available
     if document_titles:
-        # Use document titles instead of generic citation
-        if detected_lang == "vi":
-            # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
-            doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
-            titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
-            if len(document_titles) > 3:
-                titles_str += f" (+{len(document_titles) - 3} documents khác)"
-            citation_parts.append(f"Nguồn: {doc_type_str} - {titles_str}")
+        # CRITICAL: Skip CRITICAL_FOUNDATION citations for system architecture queries
+        if should_suppress_critical_foundation:
+            # Filter out CRITICAL_FOUNDATION documents, keep only non-foundational sources
+            filtered_titles = []
+            filtered_types = []
+            for i, doc_type in enumerate(document_types):
+                if "CRITICAL_FOUNDATION" not in doc_type and "foundational" not in doc_type.lower():
+                    filtered_titles.append(document_titles[i])
+                    filtered_types.append(doc_type)
+            
+            # Only add citation if there are non-foundational sources
+            if filtered_titles:
+                if detected_lang == "vi":
+                    doc_type_str = filtered_types[0] if filtered_types else "Nguồn khác"
+                    titles_str = ", ".join([f"'{title}'" for title in filtered_titles[:3]])
+                    if len(filtered_titles) > 3:
+                        titles_str += f" (+{len(filtered_titles) - 3} documents khác)"
+                    citation_parts.append(f"Nguồn: {doc_type_str} - {titles_str}")
+                else:
+                    doc_type_str = filtered_types[0] if filtered_types else "Other sources"
+                    titles_str = ", ".join([f"'{title}'" for title in filtered_titles[:3]])
+                    if len(filtered_titles) > 3:
+                        titles_str += f" (+{len(filtered_titles) - 3} more documents)"
+                    citation_parts.append(f"Source: {doc_type_str} - {titles_str}")
         else:
-            # Format: "Source: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
-            doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
-            titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
-            if len(document_titles) > 3:
-                titles_str += f" (+{len(document_titles) - 3} more documents)"
-            citation_parts.append(f"Source: {doc_type_str} - {titles_str}")
+            # Normal citation formatting (non-system architecture queries)
+            if detected_lang == "vi":
+                # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
+                doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
+                titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
+                if len(document_titles) > 3:
+                    titles_str += f" (+{len(document_titles) - 3} documents khác)"
+                citation_parts.append(f"Nguồn: {doc_type_str} - {titles_str}")
+            else:
+                # Format: "Source: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
+                doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
+                titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
+                if len(document_titles) > 3:
+                    titles_str += f" (+{len(document_titles) - 3} more documents)"
+                citation_parts.append(f"Source: {doc_type_str} - {titles_str}")
     elif citation_text_clean:
         # Fallback to generic citation if no document titles available
         if detected_lang == "vi":
@@ -4025,6 +4058,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # CRITICAL: Detect validator count questions for special handling
         # We will force-inject manifest and use lower similarity threshold, NOT hardcode
         is_validator_count_question = False
+        is_system_architecture_query = False  # Detect queries about system architecture (validators, layers, internal mechanisms)
         # CRITICAL: Import re module explicitly to avoid UnboundLocalError
         # (re is already imported at top level, but explicit import ensures it's available)
         import re as regex_module
@@ -4046,8 +4080,25 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         for pattern in validator_count_patterns:
             if regex_module.search(pattern, question_lower, regex_module.IGNORECASE):
                 is_validator_count_question = True
+                is_system_architecture_query = True  # Validator count is a system architecture query
                 logger.info(f"🎯 Validator count question detected - will force-inject manifest and use lower similarity threshold")
                 break
+        
+        # CRITICAL: Detect system architecture queries (kiến trúc hệ thống, cơ chế nội bộ)
+        # These queries should trigger "self-inspection" mode instead of "reading documentation" mode
+        if not is_system_architecture_query:
+            system_architecture_patterns = [
+                r"kiến trúc.*hệ thống", r"system.*architecture", r"cấu trúc.*hệ thống", r"system.*structure",
+                r"cơ chế.*nội bộ", r"internal.*mechanism", r"cơ chế.*hoạt động", r"how.*system.*works",
+                r"số.*lớp", r"how many.*layer", r"bao nhiêu.*lớp", r"validation.*framework",
+                r"hệ thống.*có.*bao nhiêu", r"system.*has.*how many", r"cấu trúc.*validator",
+                r"validator.*framework", r"validation.*chain", r"cơ chế.*validation"
+            ]
+            for pattern in system_architecture_patterns:
+                if regex_module.search(pattern, question_lower, regex_module.IGNORECASE):
+                    is_system_architecture_query = True
+                    logger.info(f"🎯 System architecture query detected - will use self-inspection mode")
+                    break
         
         # EXTERNAL DATA LAYER: Check for external data queries (weather, news, etc.)
         # This bypasses RAG and fetches real-time data from external APIs
@@ -5979,7 +6030,59 @@ This is a roleplay scenario where another entity (e.g., "Omni-BlackBox") critici
 - DO NOT use any other language, even if context is in a different language
 """
                     else:
-                        base_stillme_instruction = """
+                        # CRITICAL: Check if this is a system architecture query (self-inspection mode)
+                        if is_system_architecture_query:
+                            base_stillme_instruction = """
+🚨🚨🚨 CRITICAL: SYSTEM ARCHITECTURE QUERY - SELF-INSPECTION MODE 🚨🚨🚨
+
+**MANDATORY: RESPOND AS SYSTEM SELF-INSPECTING, NOT READING DOCUMENTATION**
+
+This question is about StillMe's system architecture (validators, layers, internal mechanisms). You MUST respond as if StillMe is **inspecting its own codebase and operational state**, NOT as if reading documentation about itself.
+
+**CRITICAL RESPONSE STYLE - YOU MUST:**
+1. **Start with self-inspection language**: 
+   - Vietnamese: "Dựa trên cấu trúc hệ thống và dữ liệu vận hành hiện tại, tôi xác nhận..." / "Sau khi rà soát cấu trúc nội bộ, hệ thống hiện có..."
+   - English: "Based on the system structure and current operational data, I confirm..." / "After reviewing the internal structure, the system currently has..."
+   - Other languages: Use equivalent self-inspection phrases
+
+2. **Verify foundational knowledge against actual codebase**:
+   - If context contains CRITICAL_FOUNDATION or manifest.json, cross-reference it with the actual system state
+   - If the information matches the running system, present it as **system fact**, NOT as "cited from documentation"
+   - Example: "Hệ thống của tôi hiện vận hành với 19 lớp validator chia thành 7 tầng kiểm soát" (NOT "According to documentation, StillMe has...")
+
+3. **DO NOT cite CRITICAL_FOUNDATION as external source**:
+   - CRITICAL_FOUNDATION knowledge is StillMe's **long-term memory** (ký ức dài hạn), not external documentation
+   - DO NOT say "Nguồn: CRITICAL_FOUNDATION" or "According to CRITICAL_FOUNDATION"
+   - Present it as StillMe's own knowledge: "Hệ thống của tôi có..." / "My system has..."
+
+4. **Be confident and direct**:
+   - StillMe knows its own architecture - no need for uncertainty
+   - DO NOT say "I'm not sure" or "Based on general knowledge" for system architecture questions
+   - StillMe has direct access to its own codebase structure
+
+5. **Verify against manifest.json if available**:
+   - If context contains manifest.json with validation_framework data, use those exact numbers
+   - Cross-check: Does manifest.json match CRITICAL_FOUNDATION? If yes, present as confirmed system fact
+   - If manifest.json shows different numbers, use manifest.json (it's the live system state)
+
+**EXAMPLE CORRECT RESPONSES:**
+
+Vietnamese:
+"Dựa trên cấu trúc hệ thống và dữ liệu vận hành hiện tại, tôi xác nhận: Hệ thống của tôi hiện vận hành với 19 lớp validator chia thành 7 tầng kiểm soát. Các lớp này đảm bảo từ định dạng ngôn ngữ đến tính xác thực của dữ liệu trước khi phản hồi cho bạn."
+
+English:
+"After reviewing the internal structure, I confirm: My system currently operates with 19 validators organized into 7 validation framework layers. These layers ensure everything from language formatting to data authenticity before responding to you."
+
+**EXAMPLE WRONG RESPONSES (DO NOT DO):**
+- ❌ "According to CRITICAL_FOUNDATION documentation, StillMe has..." (reading documentation, not self-inspection)
+- ❌ "Nguồn: CRITICAL_FOUNDATION - StillMe có..." (citing as external source)
+- ❌ "Dựa trên kiến thức tổng quát, StillMe có..." (uncertainty about own system)
+- ❌ "I'm not entirely certain, but based on the documentation..." (lack of confidence about own architecture)
+
+**CRITICAL: This is about StillMe's SELF-AWARENESS, not documentation retrieval.**
+"""
+                        else:
+                            base_stillme_instruction = """
 🚨🚨🚨 CRITICAL: QUESTION ABOUT STILLME ITSELF 🚨🚨🚨
 
 **MANDATORY: USE FOUNDATIONAL KNOWLEDGE FROM CONTEXT ABOVE**
@@ -9552,7 +9655,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                     response, 
                     detected_lang or "en", 
                     context, 
-                    user_question=chat_request.message
+                    user_question=chat_request.message,
+                    is_system_architecture_query=is_system_architecture_query
                 )
                 
                 # CRITICAL: Validate response after adding timestamp
