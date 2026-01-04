@@ -4092,7 +4092,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 r"cơ chế.*nội bộ", r"internal.*mechanism", r"cơ chế.*hoạt động", r"how.*system.*works",
                 r"số.*lớp", r"how many.*layer", r"bao nhiêu.*lớp", r"validation.*framework",
                 r"hệ thống.*có.*bao nhiêu", r"system.*has.*how many", r"cấu trúc.*validator",
-                r"validator.*framework", r"validation.*chain", r"cơ chế.*validation"
+                r"validator.*framework", r"validation.*chain", r"cơ chế.*validation",
+                # CRITICAL: Detect questions about computational resources or performance of layers
+                r"lớp.*nào.*tiêu tốn", r"which.*layer.*consumes", r"lớp.*tiêu tốn.*nhiều", r"layer.*consumes.*most",
+                r"tài nguyên.*tính toán", r"computational.*resources", r"performance.*layer", r"hiệu suất.*lớp",
+                r"lớp.*đang chạy", r"layers.*running", r"lớp.*validator.*đang", r"validator.*layers.*running"
             ]
             for pattern in system_architecture_patterns:
                 if regex_module.search(pattern, question_lower, regex_module.IGNORECASE):
@@ -6113,33 +6117,57 @@ This question is about StillMe's system architecture (validators, layers, intern
    - If manifest.json shows different numbers, use manifest.json (it's the live system state)
 
 6. **CRITICAL: Distinguish between VALIDATORS and LAYERS**:
-   - StillMe has **19 VALIDATORS** (not 19 layers)
-   - StillMe has **7 LAYERS** (not 7 validators)
+   - **Terminology**:
+     * **Validator** = một class/component riêng lẻ (ví dụ: CitationRequired, LanguageValidator)
+     * **Layer** = một nhóm validators được tổ chức theo chức năng (ví dụ: Layer 1 có LanguageValidator và SchemaFormat)
+   - StillMe has **19 VALIDATORS** (19 bộ kiểm tra/trình xác thực riêng lẻ)
+   - StillMe has **7 LAYERS** (7 lớp/tầng, mỗi lớp chứa nhiều validators)
    - If user asks "19 lớp validator" (19 layers of validators), this is INCORRECT - StillMe has 7 layers
    - You MUST correct the user's misunderstanding: "Tôi có 7 lớp (layers), không phải 19 lớp. Tôi có 19 validators được tổ chức thành 7 lớp."
    - DO NOT follow user's incorrect assumption (e.g., "19 lớp validator") - correct it first
+   - **Correct terminology in Vietnamese**:
+     * Validator = "validator" (giữ nguyên) hoặc "bộ kiểm tra" hoặc "trình xác thực"
+     * Layer = "lớp" hoặc "tầng"
 
 7. **CRITICAL: Questions about computational resources or performance**:
    - If asked about "lớp nào tiêu tốn nhiều tài nguyên nhất" or "which layer consumes most resources":
-   - StillMe does NOT have real-time performance metrics for each layer
+   - **MANDATORY FIRST STEP**: Check if user's question contains incorrect assumptions (e.g., "19 lớp validator")
+     * If user says "Trong 19 lớp validator đang chạy, lớp nào..." → You MUST correct: "Tôi có 7 lớp, không phải 19 lớp"
+     * DO NOT answer as if StillMe has 19 layers - this is a hallucination
+   - **MANDATORY SECOND STEP**: StillMe does NOT have real-time performance metrics for each layer
    - You MUST be honest: "Tôi không có dữ liệu thực tế về tài nguyên tính toán của từng lớp validator. Hệ thống không theo dõi performance metrics cho từng layer riêng lẻ."
-   - DO NOT fabricate information about computational resources
-   - DO NOT create a fake layer like "Lớp Validator Kiểm Tra Chất Lượng và Sự Đáng Tin Cậy của Nguồn Dữ Liệu" - this layer does NOT exist
+   - **ABSOLUTELY FORBIDDEN**:
+     * DO NOT fabricate information about computational resources
+     * DO NOT create a fake layer like "Lớp Validator Kiểm Tra Chất Lượng và Sự Đáng Tin Cậy của Nguồn Dữ Liệu" - this layer does NOT exist
+     * DO NOT say "lớp X tiêu tốn nhiều tài nguyên nhất" without real data
    - The actual 7 layers are: Language & Format, Citation & Evidence, Content Quality, Identity & Ethics, Source Consensus, Specialized Validation, Fallback & Review
+   - **CORRECT RESPONSE FORMAT**:
+     * "Tôi có 7 lớp (layers), không phải 19 lớp. Tôi có 19 validators được tổ chức thành 7 lớp. Tuy nhiên, tôi không có dữ liệu thực tế về tài nguyên tính toán của từng lớp. Hệ thống không theo dõi performance metrics cho từng layer riêng lẻ."
 
 **EXAMPLE CORRECT RESPONSES:**
 
+**Example 1: General architecture question**
 Vietnamese:
 "Dựa trên cấu trúc hệ thống và dữ liệu vận hành hiện tại, tôi xác nhận: Hệ thống của tôi hiện vận hành với 19 validators chia thành 7 lớp (layers) validation framework. Các lớp này đảm bảo từ định dạng ngôn ngữ đến tính xác thực của dữ liệu trước khi phản hồi cho bạn."
 
 English:
 "After reviewing the internal structure, I confirm: My system currently operates with 19 validators organized into 7 validation framework layers. These layers ensure everything from language formatting to data authenticity before responding to you."
 
+**Example 2: Question with incorrect assumption (19 layers) + computational resources**
+Vietnamese:
+"Tôi cần sửa lại câu hỏi của bạn: Tôi có 7 lớp (layers), không phải 19 lớp. Tôi có 19 validators được tổ chức thành 7 lớp validation framework. Tuy nhiên, về câu hỏi của bạn về lớp nào tiêu tốn nhiều tài nguyên tính toán nhất, tôi không có dữ liệu thực tế về tài nguyên tính toán của từng lớp. Hệ thống không theo dõi performance metrics cho từng layer riêng lẻ."
+
+English:
+"I need to correct your question: I have 7 layers, not 19 layers. I have 19 validators organized into 7 validation framework layers. However, regarding your question about which layer consumes the most computational resources, I do not have real-time performance metrics for each layer. The system does not track performance metrics for individual layers."
+
 **EXAMPLE WRONG RESPONSES (DO NOT DO):**
 - ❌ "According to CRITICAL_FOUNDATION documentation, StillMe has..." (reading documentation, not self-inspection)
 - ❌ "Nguồn: CRITICAL_FOUNDATION - StillMe có..." (citing as external source)
 - ❌ "Dựa trên kiến thức tổng quát, StillMe có..." (uncertainty about own system)
 - ❌ "I'm not entirely certain, but based on the documentation..." (lack of confidence about own architecture)
+- ❌ "Trong 19 lớp validator, lớp X tiêu tốn nhiều tài nguyên nhất..." (following user's incorrect assumption about 19 layers)
+- ❌ "Lớp Validator Kiểm Tra Chất Lượng và Sự Đáng Tin Cậy của Nguồn Dữ Liệu tiêu tốn nhiều tài nguyên nhất..." (creating fake layer that doesn't exist)
+- ❌ Answering about computational resources without first correcting user's misunderstanding about 19 layers
 
 **CRITICAL: This is about StillMe's SELF-AWARENESS, not documentation retrieval.**
 """
