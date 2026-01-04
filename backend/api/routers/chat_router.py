@@ -4081,6 +4081,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             if regex_module.search(pattern, question_lower, regex_module.IGNORECASE):
                 is_validator_count_question = True
                 is_system_architecture_query = True  # Validator count is a system architecture query
+                # CRITICAL: Validator count questions are StillMe queries (about StillMe itself)
+                if not is_stillme_query:
+                    is_stillme_query = True
+                    logger.info(f"🎯 Validator count question detected - marking as StillMe query")
                 logger.info(f"🎯 Validator count question detected - will force-inject manifest and use lower similarity threshold")
                 break
         
@@ -7066,10 +7070,12 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     # - learning_sources_instruction (for StillMe queries)
                     # - confidence_instruction (for low confidence scenarios)
                     # - provenance_instruction (for provenance queries)
+                    # - stillme_instruction (for StillMe queries, including system architecture queries)
                     # - Context text (RAG context documents)
                     #
                     # CRITICAL: Do NOT duplicate user question - UnifiedPromptBuilder already has it at the end
-                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}{honesty_instruction}
+                    # CRITICAL: Inject stillme_instruction (contains system architecture instruction) for StillMe queries
+                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}{honesty_instruction}{stillme_instruction}
 
 🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
 
