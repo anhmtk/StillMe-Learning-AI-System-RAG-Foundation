@@ -2220,9 +2220,8 @@ RESPOND IN {detected_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY.
 Answer the question above following the philosophical framing, using continuous prose without emojis, headings, or citations.
 """
     
-    # Logging for debugging
-    import logging
-    logger = logging.getLogger(__name__)
+    # Logging for debugging (use global logger from top level, not local variable)
+    # Note: logger is already imported at top level (line 45), so we use it directly
     logger.info(f"🔍 build_minimal_philosophical_prompt: built prompt with rag_context_section length={len(rag_context_section)}, validation_warnings_section length={len(validation_warnings_section)}")
     logger.info(f"🔍 build_minimal_philosophical_prompt: total prompt length={len(minimal_prompt)}")
     if rag_context_section:
