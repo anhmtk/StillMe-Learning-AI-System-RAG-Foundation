@@ -153,11 +153,26 @@ def _force_inject_manifest(
     
     # Force-inject manifest if not found OR if found but has outdated info
     if not has_manifest or not manifest_has_correct_info:
-        logger.warning(f"⚠️ Manifest not found or outdated in retrieved context - force-injecting from file")
+        logger.warning(f"⚠️ Manifest not found or outdated in retrieved context - checking if manifest file is outdated")
+        
+        # CRITICAL: Realtime check - ensure manifest is synced with codebase
+        try:
+            from backend.core.manifest_sync import ensure_manifest_synced
+            project_root = Path(__file__).resolve().parent.parent.parent
+            is_synced, sync_message = ensure_manifest_synced(project_root, auto_fix=True)
+            
+            if not is_synced:
+                logger.warning(f"⚠️ Manifest sync check failed: {sync_message}")
+            else:
+                logger.info(f"✅ Manifest sync check: {sync_message}")
+        except Exception as sync_error:
+            logger.warning(f"⚠️ Failed to check manifest sync (non-critical): {sync_error}")
+            # Continue with normal flow even if sync check fails
+        
         try:
             from scripts.inject_manifest_to_rag import manifest_to_text
             
-            # Load manifest from file (source of truth)
+            # Load manifest from file (source of truth - may have been auto-updated)
             manifest_path = Path("data/stillme_manifest.json")
             if manifest_path.exists():
                 with open(manifest_path, 'r', encoding='utf-8') as f:

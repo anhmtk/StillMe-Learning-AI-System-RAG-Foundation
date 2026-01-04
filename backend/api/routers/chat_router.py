@@ -4653,6 +4653,21 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             # CRITICAL: Handle validator count questions FIRST (even if not detected as stillme_query)
             # Validator count questions about codebase should always get manifest
             if is_validator_count_question:
+                # CRITICAL: Realtime check - ensure manifest is synced with codebase before answering
+                try:
+                    from backend.core.manifest_sync import ensure_manifest_synced
+                    from pathlib import Path
+                    project_root = Path(__file__).resolve().parent.parent.parent
+                    is_synced, sync_message = ensure_manifest_synced(project_root, auto_fix=True)
+                    
+                    if not is_synced:
+                        logger.warning(f"⚠️ Manifest sync check failed: {sync_message}")
+                    else:
+                        logger.info(f"✅ Manifest sync check (validator count question): {sync_message}")
+                except Exception as sync_error:
+                    logger.warning(f"⚠️ Failed to check manifest sync (non-critical): {sync_error}")
+                    # Continue with normal flow even if sync check fails
+                
                 logger.info(f"🎯 Validator count question - forcing manifest retrieval with very low similarity threshold (0.01)")
                 # Force retrieve manifest with very low threshold to ensure we get it
                 context = rag_retrieval.retrieve_context(
@@ -4726,6 +4741,21 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             elif is_stillme_query:
                 # CRITICAL: For validator count questions, force-inject manifest and use very low similarity threshold
                 if is_validator_count_question:
+                    # CRITICAL: Realtime check - ensure manifest is synced with codebase before answering
+                    try:
+                        from backend.core.manifest_sync import ensure_manifest_synced
+                        from pathlib import Path
+                        project_root = Path(__file__).resolve().parent.parent.parent
+                        is_synced, sync_message = ensure_manifest_synced(project_root, auto_fix=True)
+                        
+                        if not is_synced:
+                            logger.warning(f"⚠️ Manifest sync check failed: {sync_message}")
+                        else:
+                            logger.info(f"✅ Manifest sync check (StillMe query): {sync_message}")
+                    except Exception as sync_error:
+                        logger.warning(f"⚠️ Failed to check manifest sync (non-critical): {sync_error}")
+                        # Continue with normal flow even if sync check fails
+                    
                     logger.info(f"🎯 Validator count question - forcing manifest retrieval with very low similarity threshold (0.01)")
                     # Force retrieve manifest with very low threshold to ensure we get it
                     context = rag_retrieval.retrieve_context(
@@ -4795,6 +4825,22 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         except Exception as manifest_inject_error:
                             logger.error(f"❌ Failed to force-inject manifest: {manifest_inject_error}", exc_info=True)
                 else:
+                    # CRITICAL: For system architecture queries (not validator count), also check manifest sync
+                    if is_system_architecture_query:
+                        try:
+                            from backend.core.manifest_sync import ensure_manifest_synced
+                            from pathlib import Path
+                            project_root = Path(__file__).resolve().parent.parent.parent
+                            is_synced, sync_message = ensure_manifest_synced(project_root, auto_fix=True)
+                            
+                            if not is_synced:
+                                logger.warning(f"⚠️ Manifest sync check failed (system architecture query): {sync_message}")
+                            else:
+                                logger.info(f"✅ Manifest sync check (system architecture query): {sync_message}")
+                        except Exception as sync_error:
+                            logger.warning(f"⚠️ Failed to check manifest sync (non-critical): {sync_error}")
+                            # Continue with normal flow even if sync check fails
+                    
                     # Try multiple query variants to ensure we get StillMe foundational knowledge
                     query_variants = get_foundational_query_variants(chat_request.message)
                     all_knowledge_docs = []
