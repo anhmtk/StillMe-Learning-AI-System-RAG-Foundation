@@ -61,6 +61,7 @@ class PromptContext:
     is_stillme_query: bool = False
     is_philosophical: bool = False
     is_wish_desire_question: bool = False
+    is_system_architecture_query: bool = False  # System architecture queries (validators, layers, internal mechanisms)
     fps_result: Optional[FPSResult] = None
     conversation_history: Optional[list] = None
     context_quality: Optional[str] = None
@@ -185,6 +186,12 @@ class UnifiedPromptBuilder:
         # P1: Language instruction (always first, highest priority)
         language_instruction = self._build_language_instruction(context.detected_lang)
         
+        # CRITICAL: Inject system architecture instruction at the TOP (right after language instruction)
+        # This ensures LLM sees it BEFORE reading context or user question
+        system_architecture_instruction = ""
+        if context.is_system_architecture_query:
+            system_architecture_instruction = self._build_system_architecture_instruction(context.detected_lang)
+        
         # P1: Core identity (concise for normal, full only for philosophical)
         # StillMe queries also use concise to reduce prompt length
         core_identity = self._build_core_identity(
@@ -221,7 +228,7 @@ class UnifiedPromptBuilder:
         # Combine with clear priority
         prompt = f"""{language_instruction}
 
-{core_identity}
+{system_architecture_instruction}{core_identity}
 
 {system_status_section}{context_instruction}
 
@@ -1489,6 +1496,63 @@ StillMe's RAG system searched the knowledge base but found NO relevant documents
         return f"""{instruction}
 
 ---"""
+    
+    def _build_system_architecture_instruction(self, detected_lang: str) -> str:
+        """
+        Build CRITICAL system architecture instruction for self-inspection mode.
+        This instruction is placed at the TOP of the prompt (right after language instruction)
+        to ensure LLM sees it BEFORE reading context or user question.
+        
+        Args:
+            detected_lang: Detected language code
+            
+        Returns:
+            System architecture instruction string
+        """
+        if detected_lang == "vi":
+            return """🚨🚨🚨 CRITICAL: SYSTEM ARCHITECTURE QUERY - SELF-INSPECTION MODE 🚨🚨🚨
+
+**MANDATORY: RESPOND AS SYSTEM SELF-INSPECTING, NOT READING DOCUMENTATION**
+
+**CRITICAL RULES - YOU MUST FOLLOW:**
+1. **CORRECT USER'S MISUNDERSTANDING FIRST**: If user says "19 lớp validator" → You MUST correct: "Tôi có 7 lớp (layers), không phải 19 lớp. Tôi có 19 validators được tổ chức thành 7 lớp."
+2. **DO NOT CREATE FAKE LAYERS**: DO NOT say "Lớp Validator Kiểm Tra Chất Lượng và Sự Đáng Tin Cậy của Nguồn Dữ Liệu" - this layer does NOT exist
+3. **ADMIT LACK OF DATA**: If asked about computational resources, you MUST say: "Tôi không có dữ liệu thực tế về tài nguyên tính toán của từng lớp. Hệ thống không theo dõi performance metrics cho từng layer riêng lẻ."
+4. **TERMINOLOGY**: StillMe has 19 VALIDATORS (not 19 layers), organized into 7 LAYERS
+
+**CORRECT RESPONSE FORMAT** (if user asks about computational resources):
+"Tôi cần sửa lại câu hỏi của bạn: Tôi có 7 lớp (layers), không phải 19 lớp. Tôi có 19 validators được tổ chức thành 7 lớp validation framework. Tuy nhiên, về câu hỏi của bạn về lớp nào tiêu tốn nhiều tài nguyên tính toán nhất, tôi không có dữ liệu thực tế về tài nguyên tính toán của từng lớp. Hệ thống không theo dõi performance metrics cho từng layer riêng lẻ."
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ DO NOT follow user's incorrect assumption (e.g., "19 lớp validator")
+- ❌ DO NOT create fake layers
+- ❌ DO NOT fabricate computational resource data
+
+🚨🚨🚨 REPEAT: CORRECT USER FIRST, THEN ADMIT LACK OF DATA 🚨🚨🚨
+
+"""
+        else:
+            return """🚨🚨🚨 CRITICAL: SYSTEM ARCHITECTURE QUERY - SELF-INSPECTION MODE 🚨🚨🚨
+
+**MANDATORY: RESPOND AS SYSTEM SELF-INSPECTING, NOT READING DOCUMENTATION**
+
+**CRITICAL RULES - YOU MUST FOLLOW:**
+1. **CORRECT USER'S MISUNDERSTANDING FIRST**: If user says "19 layers of validators" → You MUST correct: "I have 7 layers, not 19 layers. I have 19 validators organized into 7 layers."
+2. **DO NOT CREATE FAKE LAYERS**: DO NOT say "Layer Validator Checking Quality and Reliability of Data Sources" - this layer does NOT exist
+3. **ADMIT LACK OF DATA**: If asked about computational resources, you MUST say: "I do not have real-time performance metrics for each layer. The system does not track performance metrics for individual layers."
+4. **TERMINOLOGY**: StillMe has 19 VALIDATORS (not 19 layers), organized into 7 LAYERS
+
+**CORRECT RESPONSE FORMAT** (if user asks about computational resources):
+"I need to correct your question: I have 7 layers, not 19 layers. I have 19 validators organized into 7 validation framework layers. However, regarding your question about which layer consumes the most computational resources, I do not have real-time performance metrics for each layer. The system does not track performance metrics for individual layers."
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ DO NOT follow user's incorrect assumption (e.g., "19 layers of validators")
+- ❌ DO NOT create fake layers
+- ❌ DO NOT fabricate computational resource data
+
+🚨🚨🚨 REPEAT: CORRECT USER FIRST, THEN ADMIT LACK OF DATA 🚨🚨🚨
+
+"""
     
     def _build_formatting(self, is_philosophical: bool, detected_lang: str) -> str:
         """Build formatting instruction (P3 - minimal)"""

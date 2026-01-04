@@ -1142,7 +1142,8 @@ def _build_prompt_context_from_chat_request(
     is_stillme_query: bool,
     is_philosophical: bool,
     fps_result: Optional[FPSResult] = None,
-    system_status_note: Optional[str] = None
+    system_status_note: Optional[str] = None,
+    is_system_architecture_query: bool = False
 ) -> PromptContext:
     """
     Build PromptContext from chat_router context for UnifiedPromptBuilder.
@@ -1184,6 +1185,7 @@ def _build_prompt_context_from_chat_request(
         is_stillme_query=is_stillme_query,
         is_philosophical=is_philosophical,
         is_wish_desire_question=is_wish_desire_question,
+        is_system_architecture_query=is_system_architecture_query,
         fps_result=fps_result,
         conversation_history=chat_request.conversation_history,
         context_quality=context_quality,
@@ -5651,7 +5653,8 @@ IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN ENGLISH ONLY.
                     detected_lang=detected_lang,
                     is_stillme_query=is_stillme_query,
                     is_philosophical=is_philosophical,
-                    fps_result=fps_result
+                    fps_result=fps_result,
+                    is_system_architecture_query=is_system_architecture_query  # System architecture queries
                 )
                 
                 # Use UnifiedPromptBuilder to build prompt
@@ -7055,7 +7058,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
                         is_stillme_query=is_stillme_query,
                         is_philosophical=is_philosophical,
                         fps_result=None,  # FPS already handled in no-context path
-                        system_status_note=system_status_note  # System Self-Awareness: Inject real-time status
+                        system_status_note=system_status_note,  # System Self-Awareness: Inject real-time status
+                        is_system_architecture_query=is_system_architecture_query  # System architecture queries
                     )
                     
                     # Use UnifiedPromptBuilder to build base prompt
