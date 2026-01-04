@@ -2024,7 +2024,9 @@ If the question belongs to a classic philosophical debate (free will, determinis
             else:
                 # CRITICAL: Extract newline character outside f-string to avoid syntax error
                 manifest_warning_en = ""
-                if has_manifest:
+                # CRITICAL: Only inject manifest instruction if question is about validators/layers
+                # Otherwise, it will override the actual question (e.g., Knowledge Gap questions)
+                if has_manifest and is_validator_question:
                     # Use manifest info from context if available, otherwise fallback to ManifestLoader
                     if manifest_info:
                         manifest_info_display = manifest_info
