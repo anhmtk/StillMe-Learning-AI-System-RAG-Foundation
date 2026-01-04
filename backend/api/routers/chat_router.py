@@ -4105,6 +4105,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             for pattern in system_architecture_patterns:
                 if regex_module.search(pattern, question_lower, regex_module.IGNORECASE):
                     is_system_architecture_query = True
+                    # CRITICAL: System architecture queries are StillMe queries (about StillMe itself)
+                    if not is_stillme_query:
+                        is_stillme_query = True
+                        logger.info(f"🎯 System architecture query detected - marking as StillMe query")
                     logger.info(f"🎯 System architecture query detected - will use self-inspection mode")
                     break
         
@@ -5918,7 +5922,9 @@ This is MANDATORY when provenance context is available and user asks about origi
                 # Special instruction for StillMe queries with ERROR STATE CHECKING
                 # CRITICAL: Skip for philosophical questions to reduce prompt size
                 stillme_instruction = ""
+                logger.debug(f"🔍 DEBUG: is_stillme_query={is_stillme_query}, is_philosophical={is_philosophical}, is_system_architecture_query={is_system_architecture_query}")
                 if is_stillme_query and not is_philosophical:
+                    logger.info(f"✅ Creating stillme_instruction for StillMe query (is_system_architecture_query={is_system_architecture_query})")
                     # CRITICAL: Check system status BEFORE answering about StillMe
                     # This ensures StillMe is honest about its own errors
                     from backend.services.system_status_tracker import get_system_status_tracker
