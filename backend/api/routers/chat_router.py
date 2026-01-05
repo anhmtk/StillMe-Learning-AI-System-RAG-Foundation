@@ -3758,6 +3758,17 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         if any(keyword in message_lower for keyword in learning_proposal_keywords):
             is_learning_proposal_query = True
             logger.info("Learning proposal query detected - will analyze actual knowledge gaps")
+        
+        # CRITICAL: Detect Knowledge Gap questions (not learning proposal, but asking to identify gaps)
+        is_knowledge_gap_query = False
+        knowledge_gap_keywords = [
+            "vùng tối tri thức", "knowledge gap", "knowledge dark zone", "chỉ ra.*vùng tối",
+            "nhận diện.*vùng tối", "identify.*knowledge gap", "point out.*knowledge gap",
+            "knowledge.*missing", "thiếu.*kiến thức.*nào", "what.*knowledge.*missing"
+        ]
+        if any(keyword in message_lower for keyword in knowledge_gap_keywords):
+            is_knowledge_gap_query = True
+            logger.info("Knowledge Gap query detected - will provide specific gaps with epistemic awareness")
         if any(keyword in message_lower for keyword in learning_metrics_keywords):
             is_learning_metrics_query = True
             logger.info("Learning metrics query detected - fetching metrics data")
@@ -5230,6 +5241,110 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             num_knowledge = len(context.get("knowledge_docs", []))
             unique_knowledge_count = context.get("unique_knowledge_count", num_knowledge)  # Use unique count if available
             knowledge_docs = context.get("knowledge_docs", [])
+            
+            # CRITICAL: Special instruction for Knowledge Gap questions (not learning proposal)
+            knowledge_gap_instruction = ""
+            if is_knowledge_gap_query and not is_philosophical:
+                if detected_lang == "vi":
+                    knowledge_gap_instruction = """
+🚨🚨🚨 CRITICAL: KNOWLEDGE GAP QUESTION - EPISTEMIC AWARENESS REQUIRED 🚨🚨🚨
+
+**MANDATORY: RESPOND WITH PHILOSOPHICAL DEPTH AND SPECIFICITY**
+
+Câu hỏi này yêu cầu bạn chỉ ra một "vùng tối tri thức" (Knowledge Gap) cụ thể. Đây KHÔNG phải là câu hỏi đơn giản.
+
+**CRITICAL RULES - YOU MUST FOLLOW:**
+
+1. **DO NOT use "lấp đầy" (fill) concept**:
+   - ❌ WRONG: "chưa có dữ liệu để lấp đầy" - tri thức không phải container để "lấp đầy"
+   - ❌ WRONG: "cần bổ sung thông tin" - ngụ ý có thể "hoàn thiện" tri thức
+   - ✅ CORRECT: "vùng tri thức mà hệ thống chưa có dữ liệu" hoặc "lĩnh vực mà hệ thống chưa được tiếp cận"
+
+2. **MUST identify SPECIFIC gaps, not generic statements**:
+   - ❌ WRONG: "vẫn tồn tại một 'vùng tối tri thức'" (quá chung chung)
+   - ✅ CORRECT: "Một vùng tối tri thức cụ thể mà mình nhận diện được là: [specific topic/domain]"
+   - ✅ CORRECT: Phải chỉ ra ví dụ cụ thể, không chỉ nói chung chung
+
+3. **MUST acknowledge epistemic limits**:
+   - Tri thức là vô hạn - không thể "lấp đầy" hoàn toàn
+   - Phân biệt "không biết" (temporary gap) vs "không thể biết" (fundamental limit)
+   - Acknowledge rằng AI có giới hạn nhận thức cố hữu
+
+4. **MUST use actual data from validation metrics if available**:
+   - Nếu có knowledge gaps từ validation failures, sử dụng chúng
+   - Nếu không có, phải chỉ ra gap cụ thể dựa trên phân tích thực tế của hệ thống
+
+5. **MUST have philosophical depth**:
+   - Không chỉ liệt kê gap, mà phải phân tích tại sao gap này tồn tại
+   - Phân tích về bản chất của tri thức và giới hạn của AI
+   - Acknowledge rằng một số gaps có thể là fundamental limits, không phải temporary
+
+**CORRECT RESPONSE FORMAT:**
+"Dựa trên phân tích 18,225 tài liệu hiện có, mình nhận diện được một vùng tối tri thức cụ thể: [specific topic/domain]. 
+
+Vùng này tồn tại vì [reason - e.g., không có nguồn học tập về topic này, hoặc topic này nằm ngoài phạm vi của các nguồn hiện tại].
+
+Tuy nhiên, mình cần lưu ý rằng tri thức là vô hạn - không thể 'lấp đầy' hoàn toàn. Một số gaps có thể là temporary (có thể bổ sung qua learning), nhưng một số có thể là fundamental limits của AI (như subjective experience, consciousness, etc.).
+
+Với gap cụ thể này, [phân tích về tính khả thi của việc bổ sung và giới hạn cố hữu]."
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ Dùng khái niệm "lấp đầy" tri thức
+- ❌ Trả lời chung chung không chỉ ra gap cụ thể
+- ❌ Không acknowledge epistemic limits
+- ❌ Ngụ ý có thể "hoàn thiện" tri thức
+
+"""
+                else:
+                    knowledge_gap_instruction = """
+🚨🚨🚨 CRITICAL: KNOWLEDGE GAP QUESTION - EPISTEMIC AWARENESS REQUIRED 🚨🚨🚨
+
+**MANDATORY: RESPOND WITH PHILOSOPHICAL DEPTH AND SPECIFICITY**
+
+This question asks you to identify a specific "Knowledge Gap". This is NOT a simple question.
+
+**CRITICAL RULES - YOU MUST FOLLOW:**
+
+1. **DO NOT use "fill" concept**:
+   - ❌ WRONG: "no data to fill" - knowledge is not a container to "fill"
+   - ❌ WRONG: "need to supplement information" - implies knowledge can be "completed"
+   - ✅ CORRECT: "knowledge domain that the system doesn't have data for" or "area that the system hasn't accessed"
+
+2. **MUST identify SPECIFIC gaps, not generic statements**:
+   - ❌ WRONG: "there still exists a 'knowledge dark zone'" (too generic)
+   - ✅ CORRECT: "A specific knowledge gap I've identified is: [specific topic/domain]"
+   - ✅ CORRECT: Must provide concrete examples, not just generic statements
+
+3. **MUST acknowledge epistemic limits**:
+   - Knowledge is infinite - cannot be "filled" completely
+   - Distinguish "don't know" (temporary gap) vs "cannot know" (fundamental limit)
+   - Acknowledge that AI has inherent cognitive limits
+
+4. **MUST use actual data from validation metrics if available**:
+   - If knowledge gaps from validation failures exist, use them
+   - If not, must identify specific gap based on actual system analysis
+
+5. **MUST have philosophical depth**:
+   - Not just list gap, but analyze why this gap exists
+   - Analyze the nature of knowledge and AI's limits
+   - Acknowledge that some gaps may be fundamental limits, not temporary
+
+**CORRECT RESPONSE FORMAT:**
+"Based on analysis of 18,225 existing documents, I've identified a specific knowledge gap: [specific topic/domain].
+
+This gap exists because [reason - e.g., no learning sources about this topic, or topic is outside current sources' scope].
+
+However, I need to note that knowledge is infinite - cannot be 'filled' completely. Some gaps may be temporary (can be supplemented through learning), but some may be fundamental limits of AI (such as subjective experience, consciousness, etc.).
+
+For this specific gap, [analysis of feasibility of supplementation and inherent limits]."
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ Use "fill" knowledge concept
+- ❌ Generic response without specific gap
+- ❌ Not acknowledging epistemic limits
+- ❌ Implying knowledge can be "completed"
+
+"""
             
             # CRITICAL: Enforce honesty for "latest/N articles" queries
             honesty_instruction = ""
@@ -7101,7 +7216,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     #
                     # CRITICAL: Do NOT duplicate user question - UnifiedPromptBuilder already has it at the end
                     # CRITICAL: Inject stillme_instruction (contains system architecture instruction) for StillMe queries
-                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}{honesty_instruction}{stillme_instruction}
+                    # CRITICAL: Inject knowledge_gap_instruction for Knowledge Gap questions
+                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}{honesty_instruction}{knowledge_gap_instruction}{stillme_instruction}
 
 🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
 
