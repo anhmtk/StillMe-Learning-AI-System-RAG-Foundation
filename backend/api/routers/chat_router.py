@@ -5355,9 +5355,9 @@ This question asks you to identify a specific "Knowledge Gap". This is NOT a sim
    - Acknowledge that some gaps may be fundamental limits, not temporary
 
 **CORRECT RESPONSE FORMAT:**
-"Based on analysis of 18,225 existing documents, I've identified a specific knowledge gap: [specific topic/domain].
+"Based on analysis of 18,225 existing documents, I've identified a specific DATA knowledge gap: [specific topic/domain - e.g., 'Local history of Asian countries', 'Recent neuroscience studies on consciousness'].
 
-This gap exists because [reason - e.g., no learning sources about this topic, or topic is outside current sources' scope].
+This gap exists because [reason - e.g., no learning sources about this topic in current RSS feeds/arXiv/Wikipedia, or topic is outside current sources' scope].
 
 However, I need to note that knowledge is infinite - cannot be 'filled' completely. Some gaps may be temporary (can be supplemented through learning), but some may be fundamental limits of AI (such as subjective experience, consciousness, etc.).
 
