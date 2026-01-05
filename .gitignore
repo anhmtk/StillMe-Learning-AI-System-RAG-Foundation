@@ -130,3 +130,6 @@ scripts/capture_screenshots.py
 
 # Internal paper analysis (not for public repo)
 docs/ANALYSIS_NPR_PAPER.md
+
+# Architecture overview for AI assistants (local use only, not for repo)
+docs/ARCHITECTURE_OVERVIEW_FOR_AI.md
