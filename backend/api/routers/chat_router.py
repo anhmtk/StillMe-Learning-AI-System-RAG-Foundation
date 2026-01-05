@@ -3793,6 +3793,18 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         if any(keyword in message_lower for keyword in knowledge_gap_keywords):
             is_knowledge_gap_query = True
             logger.info("Knowledge Gap query detected - will provide specific gaps with epistemic awareness")
+        
+        # CRITICAL: Detect conflict resolution questions (design vs reality, CRITICAL_FOUNDATION vs validator)
+        is_conflict_resolution_query = False
+        conflict_resolution_keywords = [
+            "mâu thuẫn.*CRITICAL_FOUNDATION", "conflict.*CRITICAL_FOUNDATION", "CRITICAL_FOUNDATION.*mâu thuẫn",
+            "bản thiết kế.*thực tại", "design.*reality", "tin vào.*bản thiết kế", "tin vào.*thực tại",
+            "CRITICAL_FOUNDATION.*validator", "validator.*CRITICAL_FOUNDATION", "mâu thuẫn.*validator",
+            "conflict.*validator", "design document.*validator", "document.*mâu thuẫn.*validator"
+        ]
+        if any(keyword in message_lower for keyword in conflict_resolution_keywords):
+            is_conflict_resolution_query = True
+            logger.info("Conflict resolution query detected - will explain validator priority over design documents")
         if any(keyword in message_lower for keyword in learning_metrics_keywords):
             is_learning_metrics_query = True
             logger.info("Learning metrics query detected - fetching metrics data")
@@ -7244,7 +7256,8 @@ If the question belongs to a classic philosophical debate (free will, determinis
                     # CRITICAL: Do NOT duplicate user question - UnifiedPromptBuilder already has it at the end
                     # CRITICAL: Inject stillme_instruction (contains system architecture instruction) for StillMe queries
                     # CRITICAL: Inject knowledge_gap_instruction for Knowledge Gap questions
-                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}{honesty_instruction}{knowledge_gap_instruction}{stillme_instruction}
+                    # CRITICAL: Inject conflict_resolution_instruction for conflict resolution questions (highest priority)
+                    special_instructions = f"""{philosophical_style_instruction}{learning_metrics_instruction}{learning_sources_instruction}{confidence_instruction}{provenance_instruction}{honesty_instruction}{conflict_resolution_instruction}{knowledge_gap_instruction}{stillme_instruction}
 
 🚨🚨🚨 CRITICAL: USER QUESTION ABOVE IS THE PRIMARY TASK 🚨🚨🚨
 
