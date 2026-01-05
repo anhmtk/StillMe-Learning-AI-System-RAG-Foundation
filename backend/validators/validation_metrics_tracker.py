@@ -34,6 +34,8 @@ class ValidationRecord:
     context_docs_count: int = 0
     has_citations: bool = False
     category: Optional[str] = None  # e.g., "philosophical", "factual", "technical"
+    validators_ran: Optional[List[str]] = None  # NEW: List of validator names that ran (for performance tracking)
+    validator_results: Optional[Dict[str, Dict[str, Any]]] = None  # NEW: Per-validator results {validator_name: {passed, execution_time, reasons}}
 
 
 @dataclass
@@ -108,7 +110,9 @@ class ValidationMetricsTracker:
         used_fallback: bool = False,
         context_docs_count: int = 0,
         has_citations: bool = False,
-        category: Optional[str] = None
+        category: Optional[str] = None,
+        validators_ran: Optional[List[str]] = None,  # NEW: List of validator names that ran
+        validator_results: Optional[Dict[str, Dict[str, Any]]] = None  # NEW: Per-validator detailed results
     ) -> None:
         """
         Record a validation result
@@ -136,7 +140,9 @@ class ValidationMetricsTracker:
             used_fallback=used_fallback,
             context_docs_count=context_docs_count,
             has_citations=has_citations,
-            category=category
+            category=category,
+            validators_ran=validators_ran or [],
+            validator_results=validator_results or {}
         )
         
         self._records.append(record)

@@ -13,7 +13,7 @@ import logging
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
 from backend.learning import KnowledgeRetention, AccuracyScorer
 from backend.learning.continuum_memory import ContinuumMemory
-from backend.services.rss_fetcher import RSSFetcher, get_rss_fetcher
+from backend.services.rss_fetcher import RSSFetcher
 from backend.services.learning_scheduler import LearningScheduler
 from backend.services.self_diagnosis import SelfDiagnosisAgent
 from backend.services.content_curator import ContentCurator
@@ -393,9 +393,8 @@ def _initialize_rag_components():
         accuracy_scorer = AccuracyScorer()
         logger.info("✓ Accuracy scorer initialized")
         
-        # Use singleton to ensure stats are shared with learning_scheduler
-        rss_fetcher = get_rss_fetcher()
-        logger.info("✓ RSS fetcher initialized (using singleton to share stats)")
+        rss_fetcher = RSSFetcher()
+        logger.info("✓ RSS fetcher initialized")
         
         # Initialize Learning Scheduler - CRITICAL: This is a core feature, must always be enabled
         learning_scheduler = LearningScheduler(

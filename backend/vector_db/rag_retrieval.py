@@ -160,19 +160,15 @@ class RAGRetrieval:
             
             # CRITICAL: Disable cache if this is a validator count question
             # Validator count questions need fresh retrieval to get latest foundational knowledge
-            query_lower = query.lower()
             is_validator_count_query = any(
-                keyword in query_lower for keyword in [
+                keyword in query.lower() for keyword in [
                     "bao nhiêu", "how many", "số", "number", "count",
-                    "lớp validator", "validator layer", "validator count",
-                    "có bao nhiêu", "how many layers", "how many validators",
-                    "số lớp", "số validator", "validator count", "layer count"
+                    "lớp validator", "validator layer", "validator count"
                 ]
             )
-            # Also check if prioritize_foundational is True (indicates validator count question)
-            if is_validator_count_query or prioritize_foundational:
+            if is_validator_count_query:
                 cache_enabled = False
-                logger.info(f"🚫 Cache disabled for validator count question to ensure fresh retrieval (query: {query[:50]}...)")
+                logger.info(f"🚫 Cache disabled for validator count question to ensure fresh retrieval")
             
             cached_result = None
             cache_hit = False
@@ -460,6 +456,35 @@ class RAGRetrieval:
                         
                         knowledge_results = deduplicated_results
                         logger.info(f"✅ Deduplicated: {len(knowledge_results)} unique documents (removed {len(seen_identifiers) - len(deduplicated_results) if seen_identifiers else 0} duplicates)")
+                    
+                    # CRITICAL: Cross-Encoder Re-ranking (Gemini's recommendation)
+                    # Re-rank top-K documents using cross-encoder for better relevance
+                    # This addresses limitation where similarity search can be fooled by keyword matches
+                    if use_reranker and knowledge_results and not is_latest_query:  # Don't rerank for latest queries (timestamp sorting is more important)
+                        try:
+                            from backend.vector_db.reranker import get_reranker, is_reranker_available
+                            
+                            if is_reranker_available():
+                                reranker = get_reranker()
+                                # Re-rank top 10 documents (or all if less than 10)
+                                rerank_top_k = min(10, len(knowledge_results))
+                                logger.info(f"🔄 Re-ranking top {rerank_top_k} documents using cross-encoder...")
+                                
+                                # Re-rank top documents
+                                reranked_docs = reranker.rerank(
+                                    query=query,
+                                    documents=knowledge_results[:rerank_top_k],
+                                    top_k=rerank_top_k
+                                )
+                                
+                                # Replace top documents with reranked ones, keep rest as-is
+                                knowledge_results = reranked_docs + knowledge_results[rerank_top_k:]
+                                logger.info(f"✅ Re-ranked {len(reranked_docs)} documents (cross-encoder)")
+                            else:
+                                logger.debug("ℹ️ Reranker not available (set ENABLE_RERANKER=true to enable)")
+                        except Exception as e:
+                            logger.warning(f"⚠️ Reranking failed (non-critical): {e}")
+                            # Continue with original order if reranking fails
                     
                     # CRITICAL FIX: Sort by timestamp for "latest/newest" queries
                     if is_latest_query and knowledge_results:

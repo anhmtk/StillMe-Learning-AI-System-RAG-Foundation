@@ -600,6 +600,88 @@ async def get_knowledge_gaps_from_failures(days: int = 7):
         logger.error(f"Knowledge gaps analysis error: {e}")
         return {"knowledge_gaps": [], "error": str(e)}
 
+@router.get("/api/validators/performance")
+async def get_validator_performance_dashboard(days: int = 7):
+    """
+    Get Validator Performance Dashboard (Gemini's recommendation).
+    
+    This endpoint provides per-validator performance statistics including:
+    - Total checks, pass/fail counts, pass rates
+    - Failure detection rate (how often validators catch issues)
+    - Average execution time (if tracked)
+    - Common failure reasons per validator
+    
+    This helps identify:
+    - Validators that rarely catch issues (candidates for consolidation)
+    - Validators with high false positive rates
+    - Performance bottlenecks (slow validators)
+    
+    Args:
+        days: Number of days to analyze (default: 7)
+    
+    Returns:
+        Dictionary mapping validator_name to performance stats:
+        {
+            "CitationRequired": {
+                "total_checks": 100,
+                "passed": 95,
+                "failed": 5,
+                "pass_rate": 0.95,
+                "failure_detection_rate": 0.05,
+                "avg_execution_time": 0.012,
+                "common_failure_reasons": {"missing_citation": 5}
+            },
+            ...
+        }
+    """
+    try:
+        from backend.validators.validation_metrics_tracker import get_validation_tracker
+        tracker = get_validation_tracker()
+        stats = tracker.get_validator_performance_stats(days=days)
+        
+        # Calculate summary statistics
+        total_validators = len(stats)
+        total_checks = sum(s.get("total_checks", 0) for s in stats.values())
+        
+        # Identify validators with low failure detection (candidates for consolidation)
+        low_detection_validators = [
+            name for name, s in stats.items()
+            if s.get("total_checks", 0) > 10 and s.get("failure_detection_rate", 0) < 0.01
+        ]
+        
+        # Identify slow validators (if execution time tracked)
+        slow_validators = [
+            {
+                "name": name,
+                "avg_execution_time": s.get("avg_execution_time", 0)
+            }
+            for name, s in stats.items()
+            if s.get("avg_execution_time") and s.get("avg_execution_time", 0) > 0.1
+        ]
+        slow_validators.sort(key=lambda x: x["avg_execution_time"], reverse=True)
+        
+        return {
+            "status": "success",
+            "analysis_period_days": days,
+            "summary": {
+                "total_validators": total_validators,
+                "total_checks": total_checks,
+                "validators_with_low_detection": low_detection_validators,
+                "slow_validators": slow_validators[:5]  # Top 5 slowest
+            },
+            "validators": stats,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Validator performance dashboard error: {e}", exc_info=True)
+        return {
+            "status": "error",
+            "error": str(e),
+            "analysis_period_days": days,
+            "validators": {},
+            "timestamp": datetime.now().isoformat()
+        }
+
 @router.get("/api/cache/stats")
 async def get_cache_stats():
     """Get cache statistics"""

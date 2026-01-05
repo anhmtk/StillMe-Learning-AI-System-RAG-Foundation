@@ -210,6 +210,79 @@ class SelfImprovementAnalyzer:
                 })
         
         return knowledge_gaps
+    
+    def generate_optimized_search_keywords(self, days: int = 7) -> List[str]:
+        """
+        Generate optimized search keywords for learning cycles based on validation failures.
+        
+        This implements Gemini's "Self-Prompt Optimization" recommendation:
+        - Analyzes validation failures to extract topics
+        - Generates search keywords that would help StillMe learn about these topics
+        - Returns keywords that can be used in next learning cycle
+        
+        Args:
+            days: Number of days to look back for validation failures
+        
+        Returns:
+            List of optimized search keywords (e.g., ["Geneva 1954", "Indochina War", "Vietnam history"])
+        """
+        from datetime import timezone
+        import re
+        
+        cutoff_time = datetime.now(timezone.utc) - timedelta(days=days)
+        recent_failures = [
+            r for r in self.tracker._records
+            if datetime.fromisoformat(r.timestamp) >= cutoff_time
+            and not r.passed
+            and r.context_docs_count == 0  # No context = knowledge gap
+        ]
+        
+        if not recent_failures:
+            return []
+        
+        # Extract keywords from questions
+        keywords = set()
+        
+        for record in recent_failures:
+            question = record.question
+            
+            # Extract key phrases (simple NLP - can be improved)
+            # 1. Extract capitalized phrases (likely proper nouns)
+            capitalized_phrases = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', question)
+            for phrase in capitalized_phrases:
+                if len(phrase.split()) <= 3:  # Keep short phrases
+                    keywords.add(phrase)
+            
+            # 2. Extract year patterns (e.g., "1954", "1944")
+            years = re.findall(r'\b(19|20)\d{2}\b', question)
+            for year in years:
+                # Try to find context around year
+                year_idx = question.find(year)
+                if year_idx > 0:
+                    # Extract 2-3 words before year
+                    before = question[max(0, year_idx-30):year_idx].strip().split()[-2:]
+                    if before:
+                        keyword = ' '.join(before) + ' ' + year
+                        keywords.add(keyword.strip())
+            
+            # 3. Extract common topic patterns
+            topic_patterns = {
+                r'\b(conference|summit|treaty|war|battle)\s+of\s+([A-Z][a-z]+)': lambda m: f"{m.group(2)} {m.group(1)}",
+                r'\b([A-Z][a-z]+)\s+(conference|summit|treaty|war|battle)': lambda m: f"{m.group(1)} {m.group(2)}",
+            }
+            
+            for pattern, formatter in topic_patterns.items():
+                matches = re.finditer(pattern, question, re.IGNORECASE)
+                for match in matches:
+                    keyword = formatter(match)
+                    if len(keyword.split()) <= 4:
+                        keywords.add(keyword)
+        
+        # Convert to sorted list (prioritize by frequency if we had that data)
+        keyword_list = sorted(list(keywords), key=len, reverse=True)  # Longer keywords first (more specific)
+        
+        # Limit to top 20 keywords to avoid overwhelming
+        return keyword_list[:20]
 
 
 # Global analyzer instance
