@@ -5337,8 +5337,10 @@ This question asks you to identify a specific "Knowledge Gap". This is NOT a sim
 
 2. **MUST identify SPECIFIC gaps, not generic statements**:
    - ❌ WRONG: "there still exists a 'knowledge dark zone'" (too generic)
+   - ❌ WRONG: "self-referential paradox" or "epistemic bootstrapping" (too abstract, not a data gap)
    - ✅ CORRECT: "A specific knowledge gap I've identified is: [specific topic/domain]"
-   - ✅ CORRECT: Must provide concrete examples, not just generic statements
+   - ✅ CORRECT: Must provide concrete examples about DATA/KNOWLEDGE BASE gaps (e.g., "Local history of Asian countries", "Recent neuroscience studies on consciousness")
+   - ✅ CORRECT: Gap must be about MISSING INFORMATION/DATA in knowledge base, not abstract philosophical gaps
 
 3. **MUST acknowledge epistemic limits**:
    - Knowledge is infinite - cannot be "filled" completely
@@ -8945,8 +8947,10 @@ This question asks you to identify a specific "Knowledge Gap". This is NOT a sim
 
 2. **MUST identify SPECIFIC gaps, not generic statements**:
    - ❌ WRONG: "there still exists a 'knowledge dark zone'" (too generic)
+   - ❌ WRONG: "self-referential paradox" or "epistemic bootstrapping" (too abstract, not a data gap)
    - ✅ CORRECT: "A specific knowledge gap I've identified is: [specific topic/domain]"
-   - ✅ CORRECT: Must provide concrete examples, not just generic statements
+   - ✅ CORRECT: Must provide concrete examples about DATA/KNOWLEDGE BASE gaps (e.g., "Local history of Asian countries", "Recent neuroscience studies on consciousness")
+   - ✅ CORRECT: Gap must be about MISSING INFORMATION/DATA in knowledge base, not abstract philosophical gaps
 
 3. **MUST acknowledge epistemic limits**:
    - Knowledge is infinite - cannot be "filled" completely
