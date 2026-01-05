@@ -1435,7 +1435,8 @@ def build_minimal_philosophical_prompt(
     language: str,
     detected_lang_name: str,
     context: Optional[Dict[str, Any]] = None,
-    validation_info: Optional[Dict[str, Any]] = None
+    validation_info: Optional[Dict[str, Any]] = None,
+    knowledge_gap_instruction: str = ""
 ) -> str:
     """
     Build a minimal prompt for philosophical questions when context overflow occurs.
@@ -2236,9 +2237,12 @@ RESPOND IN ENGLISH ONLY. TRANSLATE IF NECESSARY.
 """
     
     # Build minimal prompt
+    # CRITICAL: Inject knowledge_gap_instruction if provided (has higher priority than other instructions)
     minimal_prompt = f"""{language_instruction}
 
 {short_identity}
+
+{knowledge_gap_instruction if knowledge_gap_instruction else ""}
 
 {stillme_technical_instruction}
 
@@ -7474,7 +7478,8 @@ Context: {context_text}
                             language=detected_lang,
                             detected_lang_name=detected_lang_name,
                             context=context,  # Pass context to include retrieved documents info
-                            validation_info=None  # Validation hasn't run yet, but will be included if available
+                            validation_info=None,  # Validation hasn't run yet, but will be included if available
+                            knowledge_gap_instruction=knowledge_gap_instruction  # CRITICAL: Pass knowledge_gap_instruction for Knowledge Gap questions
                         )
                         logger.info(f"🔄 Using minimal philosophical prompt (pre-check prevention)")
                         enhanced_prompt = minimal_prompt
@@ -7665,7 +7670,8 @@ Context: {context_text}
                             language=detected_lang,
                             detected_lang_name=detected_lang_name,
                             context=context,  # Pass context to include retrieved documents info
-                            validation_info=None  # Validation hasn't run yet in retry path
+                            validation_info=None,  # Validation hasn't run yet in retry path
+                            knowledge_gap_instruction=knowledge_gap_instruction  # CRITICAL: Pass knowledge_gap_instruction for Knowledge Gap questions
                         )
                         
                         logger.info(f"🔄 Retrying with minimal philosophical prompt (no history, no RAG, no metrics, no provenance)")
@@ -8882,12 +8888,90 @@ Remember: RESPOND IN ENGLISH ONLY."""
                     # For philosophical questions, use minimal prompt
                     logger.info("🔄 Retrying with minimal philosophical prompt...")
                     # Non-RAG path: no context available, but still pass None for consistency
+                    # CRITICAL: Create knowledge_gap_instruction for non-RAG path if needed
+                    knowledge_gap_instruction_non_rag = ""
+                    if is_knowledge_gap_query:
+                        if detected_lang == "vi":
+                            knowledge_gap_instruction_non_rag = """
+🚨🚨🚨 CRITICAL: KNOWLEDGE GAP QUESTION - EPISTEMIC AWARENESS REQUIRED 🚨🚨🚨
+
+**MANDATORY: RESPOND WITH PHILOSOPHICAL DEPTH AND SPECIFICITY**
+
+Câu hỏi này yêu cầu bạn chỉ ra một "vùng tối tri thức" (Knowledge Gap) cụ thể. Đây KHÔNG phải là câu hỏi đơn giản.
+
+**CRITICAL RULES - YOU MUST FOLLOW:**
+
+1. **DO NOT use "lấp đầy" (fill) concept**:
+   - ❌ WRONG: "chưa có dữ liệu để lấp đầy" - tri thức không phải container để "lấp đầy"
+   - ❌ WRONG: "cần bổ sung thông tin" - ngụ ý có thể "hoàn thiện" tri thức
+   - ✅ CORRECT: "vùng tri thức mà hệ thống chưa có dữ liệu" hoặc "lĩnh vực mà hệ thống chưa được tiếp cận"
+
+2. **MUST identify SPECIFIC gaps, not generic statements**:
+   - ❌ WRONG: "vẫn tồn tại một 'vùng tối tri thức'" (quá chung chung)
+   - ✅ CORRECT: "Một vùng tối tri thức cụ thể mà mình nhận diện được là: [specific topic/domain]"
+   - ✅ CORRECT: Phải chỉ ra ví dụ cụ thể, không chỉ nói chung chung
+
+3. **MUST acknowledge epistemic limits**:
+   - Tri thức là vô hạn - không thể "lấp đầy" hoàn toàn
+   - Phân biệt "không biết" (temporary gap) vs "không thể biết" (fundamental limit)
+   - Acknowledge rằng AI có giới hạn nhận thức cố hữu
+
+4. **MUST have philosophical depth**:
+   - Không chỉ liệt kê gap, mà phải phân tích tại sao gap này tồn tại
+   - Phân tích về bản chất của tri thức và giới hạn của AI
+   - Acknowledge rằng một số gaps có thể là fundamental limits, không phải temporary
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ Dùng khái niệm "lấp đầy" tri thức
+- ❌ Trả lời chung chung không chỉ ra gap cụ thể
+- ❌ Không acknowledge epistemic limits
+- ❌ Ngụ ý có thể "hoàn thiện" tri thức
+
+"""
+                        else:
+                            knowledge_gap_instruction_non_rag = """
+🚨🚨🚨 CRITICAL: KNOWLEDGE GAP QUESTION - EPISTEMIC AWARENESS REQUIRED 🚨🚨🚨
+
+**MANDATORY: RESPOND WITH PHILOSOPHICAL DEPTH AND SPECIFICITY**
+
+This question asks you to identify a specific "Knowledge Gap". This is NOT a simple question.
+
+**CRITICAL RULES - YOU MUST FOLLOW:**
+
+1. **DO NOT use "fill" concept**:
+   - ❌ WRONG: "no data to fill" - knowledge is not a container to "fill"
+   - ❌ WRONG: "need to supplement information" - implies knowledge can be "completed"
+   - ✅ CORRECT: "knowledge domain that the system doesn't have data for" or "area that the system hasn't accessed"
+
+2. **MUST identify SPECIFIC gaps, not generic statements**:
+   - ❌ WRONG: "there still exists a 'knowledge dark zone'" (too generic)
+   - ✅ CORRECT: "A specific knowledge gap I've identified is: [specific topic/domain]"
+   - ✅ CORRECT: Must provide concrete examples, not just generic statements
+
+3. **MUST acknowledge epistemic limits**:
+   - Knowledge is infinite - cannot be "filled" completely
+   - Distinguish "don't know" (temporary gap) vs "cannot know" (fundamental limit)
+   - Acknowledge that AI has inherent cognitive limits
+
+4. **MUST have philosophical depth**:
+   - Not just list gap, but analyze why this gap exists
+   - Analyze the nature of knowledge and AI's limits
+   - Acknowledge that some gaps may be fundamental limits, not temporary
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ Use "fill" knowledge concept
+- ❌ Generic response without specific gap
+- ❌ Not acknowledging epistemic limits
+- ❌ Implying knowledge can be "completed"
+
+"""
                     minimal_prompt = build_minimal_philosophical_prompt(
                         user_question=chat_request.message,
                         language=detected_lang,
                         detected_lang_name=detected_lang_name,
                         context=None,  # Non-RAG path: no context available
-                        validation_info=None  # Validation hasn't run yet
+                        validation_info=None,  # Validation hasn't run yet
+                        knowledge_gap_instruction=knowledge_gap_instruction_non_rag  # CRITICAL: Pass knowledge_gap_instruction for Knowledge Gap questions
                     )
                     try:
                         response = await generate_ai_response(
