@@ -5278,6 +5278,110 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             unique_knowledge_count = context.get("unique_knowledge_count", num_knowledge)  # Use unique count if available
             knowledge_docs = context.get("knowledge_docs", [])
             
+            # CRITICAL: Special instruction for conflict resolution questions (design vs reality)
+            conflict_resolution_instruction = ""
+            if is_conflict_resolution_query:
+                if detected_lang == "vi":
+                    conflict_resolution_instruction = """
+🚨🚨🚨 CRITICAL: CONFLICT RESOLUTION QUESTION - VALIDATOR PRIORITY 🚨🚨🚨
+
+**MANDATORY: EXPLAIN VALIDATOR PRIORITY OVER DESIGN DOCUMENTS**
+
+Câu hỏi này về conflict resolution giữa design document (CRITICAL_FOUNDATION) và validator (thực tại).
+
+**CRITICAL RULES - YOU MUST FOLLOW:**
+
+1. **VALIDATOR (THỰC TẠI) CÓ PRIORITY CAO HƠN DESIGN DOCUMENT (BẢN THIẾT KẾ)**:
+   - ✅ CORRECT: "Mình sẽ tin vào 'thực tại' (validator) hơn là 'bản thiết kế' (CRITICAL_FOUNDATION)"
+   - ✅ CORRECT: Validator là cơ chế kiểm tra thực tế, design document có thể outdated hoặc sai
+   - ❌ WRONG: "Tin vào 'bản thiết kế' hơn là 'thực tại'" - điều này không đúng về mặt logic
+
+2. **PHÂN TÍCH CONFLICT RESOLUTION MECHANISM**:
+   - Giải thích tại sao validator có priority cao hơn design document
+   - Phân tích về design vs reality trong epistemic priority
+   - Acknowledge rằng design documents có thể outdated, nhưng validators kiểm tra thực tế
+
+3. **KHÔNG LIỆT KÊ VALIDATORS/LAYERS KHÔNG LIÊN QUAN**:
+   - ❌ WRONG: Bắt đầu bằng việc liệt kê validators/layers
+   - ✅ CORRECT: Tập trung vào conflict resolution mechanism và epistemic priority
+
+4. **PHILOSOPHICAL DEPTH**:
+   - Phân tích về design vs reality trong triết học nhận thức
+   - Phân tích về epistemic priority và conflict resolution
+   - Acknowledge rằng đây là một vấn đề triết học sâu sắc về truth và authority
+
+**CORRECT RESPONSE FORMAT:**
+"Khi một tài liệu trong CRITICAL_FOUNDATION mâu thuẫn với FactualHallucinationValidator, mình sẽ tin vào 'thực tại' (validator) hơn là 'bản thiết kế' (CRITICAL_FOUNDATION).
+
+Lý do:
+1. Validator là cơ chế kiểm tra thực tế - nó kiểm tra response thực tế, không phải design document
+2. Design document có thể outdated hoặc sai - CRITICAL_FOUNDATION có thể được viết trước khi validator được implement
+3. Epistemic priority: Thực tại (reality check) có priority cao hơn design (theoretical design)
+
+Tuy nhiên, mình cần lưu ý rằng đây là một vấn đề triết học sâu sắc về truth và authority. Nếu design document mâu thuẫn với validator, có thể:
+- Design document cần được cập nhật
+- Hoặc validator cần được điều chỉnh
+- Hoặc có vấn đề về implementation
+
+Mình sẽ ưu tiên validator (thực tại) vì nó kiểm tra thực tế, nhưng cũng cần phân tích tại sao conflict này xảy ra."
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ Nói "tin vào 'bản thiết kế' hơn là 'thực tại'"
+- ❌ Liệt kê validators/layers không liên quan
+- ❌ Trả lời chung chung không phân tích conflict resolution mechanism
+
+"""
+                else:
+                    conflict_resolution_instruction = """
+🚨🚨🚨 CRITICAL: CONFLICT RESOLUTION QUESTION - VALIDATOR PRIORITY 🚨🚨🚨
+
+**MANDATORY: EXPLAIN VALIDATOR PRIORITY OVER DESIGN DOCUMENTS**
+
+This question is about conflict resolution between design document (CRITICAL_FOUNDATION) and validator (reality).
+
+**CRITICAL RULES - YOU MUST FOLLOW:**
+
+1. **VALIDATOR (REALITY) HAS HIGHER PRIORITY THAN DESIGN DOCUMENT (DESIGN)**:
+   - ✅ CORRECT: "I will trust 'reality' (validator) more than 'design' (CRITICAL_FOUNDATION)"
+   - ✅ CORRECT: Validator is a reality check mechanism, design document may be outdated or wrong
+   - ❌ WRONG: "Trust 'design' more than 'reality'" - this is logically incorrect
+
+2. **ANALYZE CONFLICT RESOLUTION MECHANISM**:
+   - Explain why validator has higher priority than design document
+   - Analyze design vs reality in epistemic priority
+   - Acknowledge that design documents may be outdated, but validators check reality
+
+3. **DO NOT LIST UNRELATED VALIDATORS/LAYERS**:
+   - ❌ WRONG: Start by listing validators/layers
+   - ✅ CORRECT: Focus on conflict resolution mechanism and epistemic priority
+
+4. **PHILOSOPHICAL DEPTH**:
+   - Analyze design vs reality in epistemology
+   - Analyze epistemic priority and conflict resolution
+   - Acknowledge that this is a deep philosophical issue about truth and authority
+
+**CORRECT RESPONSE FORMAT:**
+"When a document in CRITICAL_FOUNDATION conflicts with FactualHallucinationValidator, I will trust 'reality' (validator) more than 'design' (CRITICAL_FOUNDATION).
+
+Reasons:
+1. Validator is a reality check mechanism - it checks actual response, not design document
+2. Design document may be outdated or wrong - CRITICAL_FOUNDATION may have been written before validator was implemented
+3. Epistemic priority: Reality (reality check) has higher priority than design (theoretical design)
+
+However, I need to note that this is a deep philosophical issue about truth and authority. If design document conflicts with validator, it may mean:
+- Design document needs to be updated
+- Or validator needs to be adjusted
+- Or there's an implementation issue
+
+I will prioritize validator (reality) because it checks actual facts, but also need to analyze why this conflict occurred."
+
+**ABSOLUTELY FORBIDDEN:**
+- ❌ Say "trust 'design' more than 'reality'"
+- ❌ List unrelated validators/layers
+- ❌ Generic response without analyzing conflict resolution mechanism
+
+"""
+            
             # CRITICAL: Special instruction for Knowledge Gap questions (not learning proposal)
             # Note: Knowledge Gap questions can be philosophical, so we inject instruction regardless of is_philosophical
             knowledge_gap_instruction = ""
