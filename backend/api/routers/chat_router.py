@@ -5305,9 +5305,9 @@ Câu hỏi này yêu cầu bạn chỉ ra một "vùng tối tri thức" (Knowle
    - Acknowledge rằng một số gaps có thể là fundamental limits, không phải temporary
 
 **CORRECT RESPONSE FORMAT:**
-"Dựa trên phân tích 18,225 tài liệu hiện có, mình nhận diện được một vùng tối tri thức cụ thể: [specific topic/domain]. 
+"Dựa trên phân tích 18,225 tài liệu hiện có, mình nhận diện được một vùng tối tri thức cụ thể về DỮ LIỆU: [specific topic/domain - ví dụ: "Lịch sử địa phương của các quốc gia châu Á", "Các nghiên cứu về consciousness từ góc độ neuroscience gần đây"]. 
 
-Vùng này tồn tại vì [reason - e.g., không có nguồn học tập về topic này, hoặc topic này nằm ngoài phạm vi của các nguồn hiện tại].
+Vùng này tồn tại vì [reason - e.g., không có nguồn học tập về topic này trong RSS feeds/arXiv/Wikipedia hiện tại, hoặc topic này nằm ngoài phạm vi của các nguồn hiện tại].
 
 Tuy nhiên, mình cần lưu ý rằng tri thức là vô hạn - không thể 'lấp đầy' hoàn toàn. Một số gaps có thể là temporary (có thể bổ sung qua learning), nhưng một số có thể là fundamental limits của AI (như subjective experience, consciousness, etc.).
 
