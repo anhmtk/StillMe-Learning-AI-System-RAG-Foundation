@@ -1968,8 +1968,18 @@ If the question belongs to a classic philosophical debate (free will, determinis
             doc_summaries_text = newline.join(doc_summaries) if doc_summaries else "  (Không có documents cụ thể)"
             manifest_warning_vi = ""
             # CRITICAL: Only inject manifest instruction if question is about validators/layers
+            # AND NOT a Knowledge Gap question (Knowledge Gap questions have higher priority)
             # Otherwise, it will override the actual question (e.g., Knowledge Gap questions)
-            if has_manifest and is_validator_question:
+            # Check if this is a Knowledge Gap question by examining the question text
+            is_knowledge_gap_question = any(
+                pattern in question_lower
+                for pattern in [
+                    "vùng tối tri thức", "knowledge gap", "knowledge dark zone", "chỉ ra.*vùng tối",
+                    "nhận diện.*vùng tối", "identify.*knowledge gap", "point out.*knowledge gap",
+                    "knowledge.*missing", "thiếu.*kiến thức.*nào", "what.*knowledge.*missing"
+                ]
+            )
+            if has_manifest and is_validator_question and not is_knowledge_gap_question:
                 # Use manifest info from context if available, otherwise fallback to ManifestLoader
                 if manifest_info:
                     manifest_info_display = manifest_info
@@ -2025,8 +2035,18 @@ If the question belongs to a classic philosophical debate (free will, determinis
                 # CRITICAL: Extract newline character outside f-string to avoid syntax error
                 manifest_warning_en = ""
                 # CRITICAL: Only inject manifest instruction if question is about validators/layers
+                # AND NOT a Knowledge Gap question (Knowledge Gap questions have higher priority)
                 # Otherwise, it will override the actual question (e.g., Knowledge Gap questions)
-                if has_manifest and is_validator_question:
+                # Check if this is a Knowledge Gap question by examining the question text
+                is_knowledge_gap_question = any(
+                    pattern in question_lower
+                    for pattern in [
+                        "vùng tối tri thức", "knowledge gap", "knowledge dark zone", "chỉ ra.*vùng tối",
+                        "nhận diện.*vùng tối", "identify.*knowledge gap", "point out.*knowledge gap",
+                        "knowledge.*missing", "thiếu.*kiến thức.*nào", "what.*knowledge.*missing"
+                    ]
+                )
+                if has_manifest and is_validator_question and not is_knowledge_gap_question:
                     # Use manifest info from context if available, otherwise fallback to ManifestLoader
                     if manifest_info:
                         manifest_info_display = manifest_info
@@ -5243,8 +5263,9 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             knowledge_docs = context.get("knowledge_docs", [])
             
             # CRITICAL: Special instruction for Knowledge Gap questions (not learning proposal)
+            # Note: Knowledge Gap questions can be philosophical, so we inject instruction regardless of is_philosophical
             knowledge_gap_instruction = ""
-            if is_knowledge_gap_query and not is_philosophical:
+            if is_knowledge_gap_query:
                 if detected_lang == "vi":
                     knowledge_gap_instruction = """
 🚨🚨🚨 CRITICAL: KNOWLEDGE GAP QUESTION - EPISTEMIC AWARENESS REQUIRED 🚨🚨🚨
