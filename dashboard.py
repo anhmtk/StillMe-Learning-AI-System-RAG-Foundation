@@ -1,2383 +1,377 @@
-import os
-import time
-import hashlib
-from typing import Any, Dict
-
-import requests
-import streamlit as st
-import streamlit.components.v1 as components
-import plotly.graph_objects as go
-
-# Import pandas with error handling
-try:
-    import pandas as pd
-    PANDAS_AVAILABLE = True
-except ImportError:
-    pd = None
-    PANDAS_AVAILABLE = False
-    st.warning("⚠️ pandas is not installed. Some features may not work correctly.")
-
-# Import floating chat widget
-try:
-    from frontend.components.floating_chat import render_floating_chat
-    FLOATING_CHAT_AVAILABLE = True
-except ImportError:
-    FLOATING_CHAT_AVAILABLE = False
-
-# Import floating community panel
-try:
-    from frontend.components.floating_community_panel import render_floating_community_panel
-    FLOATING_COMMUNITY_AVAILABLE = True
-except ImportError:
-    FLOATING_COMMUNITY_AVAILABLE = False
-
-# Import chat history service
-try:
-    from backend.services.chat_history import ChatHistory
-    CHAT_HISTORY_AVAILABLE = True
-except ImportError:
-    CHAT_HISTORY_AVAILABLE = False
-    ChatHistory = None
-
-
-API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
-STILLME_API_KEY = os.getenv("STILLME_API_KEY", "")
-
-
-def get_api_headers() -> Dict[str, str]:
-    """
-    Get headers for API requests, including API key if available.
+# ... existing code ...
+def _page_meta_learning():
+    """Meta-Learning Dashboard tab (Stage 2 features)"""
+    st.markdown("### 🧠 Meta-Learning Dashboard")
+    st.caption("Stage 2: AI improves HOW it learns - Retention tracking, Curriculum learning, Strategy optimization")
     
-    Returns:
-        Dictionary with headers including X-API-Key if STILLME_API_KEY is set
-    """
-    headers = {
-        "Content-Type": "application/json"
-    }
+    # Sub-tabs for 3 phases
+    phase1, phase2, phase3 = st.tabs([
+        "Retention Tracking", 
+        "Curriculum Learning", 
+        "Strategy Optimization"
+    ])
     
-    if STILLME_API_KEY:
-        headers["X-API-Key"] = STILLME_API_KEY
+    with phase1:
+        _page_meta_learning_retention()
     
-    return headers
+    with phase2:
+        _page_meta_learning_curriculum()
+    
+    with phase3:
+        _page_meta_learning_strategy()
 
 
-def _format_timestamp_gmt7(timestamp_str: str) -> str:
-    """
-    Convert UTC timestamp to GMT+7 format for display
+def _page_meta_learning_retention():
+    """Phase 1: Retention Tracking visualization"""
+    st.markdown("#### Retention Tracking")
+    st.caption("Track which sources are actually used in responses")
     
-    Args:
-        timestamp_str: ISO format UTC timestamp string
-        
-    Returns:
-        Formatted timestamp string in GMT+7 (e.g., "Nov 22 2025 08:33:12")
-    """
-    if not timestamp_str:
-        return "N/A"
+    # Days selector
+    days = st.slider("Analysis Period (days)", 1, 365, 30, key="retention_days")
     
+    # Fetch retention metrics
     try:
-        from datetime import datetime, timezone, timedelta
+        retention_data = get_json(f"/api/meta-learning/retention?days={days}", {}, timeout=30)
         
-        # Parse UTC timestamp
-        if isinstance(timestamp_str, str):
-            if timestamp_str.endswith('Z'):
-                timestamp_str = timestamp_str[:-1] + '+00:00'
-            dt_utc = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        if retention_data and "sources" in retention_data:
+            sources_data = retention_data["sources"]
             
-            # Convert UTC to GMT+7 (Vietnam timezone)
-            gmt7 = timezone(timedelta(hours=7))
-            dt_local = dt_utc.astimezone(gmt7)
-            
-            return dt_local.strftime("%b %d %Y %H:%M:%S")
-        else:
-            return str(timestamp_str)
-    except Exception:
-        # Fallback: return first 19 chars if conversion fails
-        return timestamp_str[:19] if isinstance(timestamp_str, str) and len(timestamp_str) > 19 else str(timestamp_str)
-
-
-def display_local_time(utc_time_str: str, label: str = "Next run"):
-    """
-    Display UTC time converted to user's local timezone.
-    
-    Args:
-        utc_time_str: ISO format UTC time string
-        label: Label text to display before the time
-    """
-    if not utc_time_str:
-        st.caption(f"{label}: Not scheduled")
-        return
-    
-    # Create HTML that includes both label and time in one component
-    element_id = f"local_time_label_{abs(hash(utc_time_str)) % 1000000}"
-    escaped_utc_time = utc_time_str.replace('"', '\\"').replace("'", "\\'")
-    
-    html = f"""
-    <div style="font-size: 0.88rem; color: rgb(250, 250, 250);">
-        <span>{label}: </span>
-        <span id="{element_id}" style="display: inline-block;"></span>
-    </div>
-    <script>
-        (function() {{
-            const utcTime = "{escaped_utc_time}";
-            const element = document.getElementById("{element_id}");
-            
-            if (!utcTime || utcTime === "None" || utcTime === "null" || utcTime === "") {{
-                element.textContent = "Not scheduled";
-                return;
-            }}
-            
-            try {{
-                // Parse UTC time (assume it's UTC if no timezone specified)
-                let utcDate;
-                if (utcTime.includes('Z')) {{
-                    utcDate = new Date(utcTime);
-                }} else {{
-                    // If no Z, assume UTC and add Z
-                    utcDate = new Date(utcTime + 'Z');
-                }}
+            if sources_data:
+                # Source retention rates chart
+                st.markdown("##### Source Retention Rates")
                 
-                // Check if date is valid
-                if (isNaN(utcDate.getTime())) {{
-                    element.textContent = utcTime;
-                    return;
-                }}
+                # Prepare data for chart
+                source_names = []
+                retention_rates = []
+                total_retrieved = []
+                total_used = []
                 
-                // Format to local time with timezone
-                const options = {{
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    timeZoneName: 'short',
-                    hour12: false
-                }};
+                for source, stats in sources_data.items():
+                    source_names.append(source[:40] + "..." if len(source) > 40 else source)
+                    retention_rates.append(stats.get("retention_rate", 0.0) * 100)
+                    total_retrieved.append(stats.get("total_documents_retrieved", 0))
+                    total_used.append(stats.get("documents_used_in_response", 0))
                 
-                const localTimeStr = utcDate.toLocaleString('en-US', options);
-                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                
-                // Format: MM/DD/YYYY, HH:MM:SS (Timezone)
-                // Remove comma and format nicely
-                const formatted = localTimeStr.replace(',', '') + ' (' + timezone + ')';
-                element.textContent = formatted;
-            }} catch (e) {{
-                console.error('Error converting UTC time:', e);
-                element.textContent = utcTime;
-            }}
-        }})();
-    </script>
-    """
-    components.html(html, height=30)
-
-
-def get_json(path: str, default: Dict[str, Any] | None = None, timeout: int = 10) -> Dict[str, Any]:
-    """
-    Fetch JSON from API endpoint.
-    Returns default dict if request fails.
-    Does NOT raise exceptions - gracefully handles errors.
-    
-    Args:
-        path: API endpoint path
-        default: Default value to return on error
-        timeout: Request timeout in seconds (default: 10s)
-    """
-    url = f"{API_BASE}{path}"
-    try:
-        r = requests.get(url, timeout=timeout)
-        r.raise_for_status()
-        result = r.json()
-        # Ensure result is never None - return empty dict if None
-        if result is None:
-            return default or {}
-        return result
-    except requests.exceptions.ConnectionError as e:
-        # Connection failed - backend may be down
-        import logging
-        logging.error(f"Connection error fetching {url}: {e}")
-        return default or {}
-    except requests.exceptions.Timeout as e:
-        # Request timed out
-        import logging
-        logging.error(f"Timeout fetching {url}: {e}")
-        return default or {}
-    except requests.exceptions.HTTPError as e:
-        # HTTP error (4xx, 5xx)
-        import logging
-        try:
-            status_code = r.status_code
-        except Exception:
-            status_code = "unknown"
-        logging.error(f"HTTP error fetching {url}: Status {status_code} - {e}")
-        
-        # Special handling for 502 Bad Gateway
-        if status_code == 502:
-            logging.error(f"502 Bad Gateway - Backend service may be down, restarting, or crashed. URL: {url}")
-        
-        return default or {}
-    except requests.exceptions.RequestException as e:
-        # Other request errors
-        import logging
-        logging.error(f"Request error fetching {url}: {e}")
-        return default or {}
-    except Exception as e:
-        # Unexpected errors
-        import logging
-        logging.error(f"Unexpected error fetching {url}: {e}")
-        return default or {}
-
-
-def page_overview():
-    # Ensure time module is available (avoid UnboundLocalError from shadowing)
-    import time as time_module
-    status = get_json("/api/status", {})
-    rag_stats = get_json("/api/rag/stats", {}).get("stats", {})
-    accuracy = get_json("/api/learning/accuracy_metrics", {}).get("metrics", {})
-    
-    # Get scheduler status (with longer timeout - backend may be busy during learning cycle)
-    try:
-        scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=90)
-    except requests.exceptions.Timeout:
-        # Backend may be busy processing learning cycle - this is OK
-        scheduler_status = {}
-
-    # Display logo and title
-    col_logo, col_title = st.columns([1, 4])
-    with col_logo:
-        try:
-            st.image("assets/logo.png", width=80)
-        except Exception:
-            st.markdown("🧠")  # Fallback emoji
-    with col_title:
-        st.markdown("# StillMe")
-        st.caption("Learning AI system with RAG foundation")
-    
-    st.markdown("---")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Current Stage", status.get("stage", "Unknown"))
-    with col2:
-        st.metric("System Age (days)", status.get("system_age_days", 0))
-    with col3:
-        st.metric("Next Milestone", status.get("milestone_sessions", 100))
-    with col4:
-        st.metric(
-            "Progress",
-            f"{status.get('sessions_completed', 0)}/{status.get('milestone_sessions', 100)}",
-        )
-
-    st.markdown("### Evolution Progress")
-    req = [100, 500, 1000, 5000]
-    labels = ["Infant", "Child", "Adolescent", "Adult"]
-    current = [
-        min(status.get("sessions_completed", 0), req[0]),
-        0,
-        0,
-        0,
-    ]
-    fig = go.Figure()
-    fig.add_bar(name="Required Sessions", x=labels, y=req, marker_color="#8a8f98")
-    fig.add_bar(name="Current Progress", x=labels, y=current, marker_color="#46b3ff")
-    fig.update_layout(barmode="group", height=360, margin=dict(l=0, r=0, t=10, b=0))
-    st.plotly_chart(fig, width='stretch')
-
-    st.markdown("### Vector DB Stats")
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        st.metric("Total Documents", rag_stats.get("total_documents", 0))
-    with c2:
-        st.metric("Knowledge Docs", rag_stats.get("knowledge_documents", 0))
-    with c3:
-        st.metric("Conversation Docs", rag_stats.get("conversation_documents", 0))
-
-    st.markdown("### Learning Performance")
-    st.caption("📊 **Accuracy Score**: Measures how accurate StillMe's answers are compared to expected answers. Target: 80% accuracy.")
-    avg_acc = accuracy.get("average_accuracy", 0.0)
-    gauge = go.Figure(
-        go.Indicator(
-            mode="gauge+number+delta",
-            value=max(0.0, min(1.0, float(avg_acc))) * 100.0,
-            number={"suffix": "%"},
-            gauge={"axis": {"range": [0, 100]}},
-            delta={"reference": 80},
-            title={"text": "Answer Accuracy (%)"},
-        )
-    )
-    gauge.update_layout(height=320, margin=dict(l=0, r=0, t=10, b=0))
-    st.plotly_chart(gauge, width='stretch')
-
-    # Phase 3: Time-based Learning Analytics
-    st.markdown("### 📈 Learning Metrics (Time-based Analytics)")
-    try:
-        # Get today's metrics
-        today_metrics = get_json("/api/learning/metrics/daily", {}, timeout=10)
-        
-        if today_metrics and today_metrics.get("metrics"):
-            metrics = today_metrics["metrics"]
-            col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-            with col_m1:
-                st.metric("📥 Entries Fetched", metrics.get("total_entries_fetched", 0))
-            with col_m2:
-                st.metric("✅ Entries Added", metrics.get("total_entries_added", 0))
-            with col_m3:
-                st.metric("🚫 Entries Filtered", metrics.get("total_entries_filtered", 0))
-            with col_m4:
-                filter_rate = metrics.get("filter_rate", 0.0)
-                st.metric("📊 Filter Rate", f"{filter_rate}%")
-            
-            # Show filter reasons if available
-            filter_reasons = metrics.get("filter_reasons", {})
-            if filter_reasons:
-                with st.expander("🔍 Filter Reasons Breakdown", expanded=False):
-                    for reason, count in filter_reasons.items():
-                        st.write(f"**{reason}**: {count}")
-            
-            # Show sources breakdown if available
-            sources = metrics.get("sources", {})
-            if sources:
-                with st.expander("📚 Sources Breakdown", expanded=False):
-                    for source, count in sources.items():
-                        st.write(f"**{source.replace('_', ' ').title()}**: {count}")
-            
-            # Show learning cycles for today
-            cycles = metrics.get("cycles", [])
-            if cycles:
-                st.caption(f"📅 Today ({today_metrics.get('date', 'N/A')}): {metrics.get('total_cycles', 0)} learning cycle(s)")
-        else:
-            st.info("📊 No learning metrics available for today yet. Metrics will appear after the first learning cycle completes.")
-            
-        # Get summary metrics
-        summary = get_json("/api/learning/metrics/summary", {}, timeout=10)
-        if summary and summary.get("summary"):
-            summary_data = summary["summary"]
-            if summary_data.get("total_cycles", 0) > 0:
-                with st.expander("📊 Overall Learning Summary", expanded=False):
-                    col_s1, col_s2, col_s3 = st.columns(3)
-                    with col_s1:
-                        st.metric("Total Cycles", summary_data.get("total_cycles", 0))
-                    with col_s2:
-                        st.metric("Total Fetched", summary_data.get("total_entries_fetched", 0))
-                    with col_s3:
-                        st.metric("Total Added", summary_data.get("total_entries_added", 0))
-                    st.caption(f"Filter Rate: {summary_data.get('filter_rate', 0.0)}% | Add Rate: {summary_data.get('add_rate', 0.0)}%")
-    except Exception as e:
-        st.caption(f"💡 Learning metrics will be available after the first learning cycle completes. (Error: {str(e)})")
-
-    st.markdown("---")
-    
-    # Auto-Learning Status Section
-    st.subheader("🤖 Auto-Learning Status")
-    
-    # Show API_BASE for debugging (can be removed in production)
-    with st.expander("🔧 Debug Info", expanded=False):
-        st.code(f"API_BASE: {API_BASE}", language="text")
-        st.caption("💡 Verify this matches your backend URL on Railway")
-        
-        # Test backend connection
-        col_test1, col_test2 = st.columns(2)
-        with col_test1:
-            if st.button("🔍 Test Backend Connection", width='stretch'):
-                try:
-                    test_r = requests.get(f"{API_BASE}/health", timeout=5)
-                    if test_r.status_code == 200:
-                        st.success(f"✅ Backend reachable: {test_r.status_code}")
-                        st.json(test_r.json())
-                    else:
-                        st.error(f"❌ Backend returned: {test_r.status_code}")
-                except Exception as test_e:
-                    st.error(f"❌ Connection failed: {test_e}")
-        
-        with col_test2:
-            if st.button("📤 Test Chat Endpoint", width='stretch'):
-                with st.spinner("Testing chat endpoint (this may take 30-60 seconds if model is loading)..."):
-                    try:
-                        test_r = requests.post(
-                            f"{API_BASE}/api/chat/smart_router",
-                            json={"message": "test", "user_id": "test", "use_rag": False, "context_limit": 1},
-                            timeout=120  # Increased to 120s to handle model loading
+                # Bar chart using plotly
+                if PANDAS_AVAILABLE:
+                    df_retention = pd.DataFrame({
+                        "Source": source_names,
+                        "Retention Rate (%)": retention_rates,
+                        "Total Retrieved": total_retrieved,
+                        "Total Used": total_used
+                    })
+                    
+                    # Sort by retention rate
+                    df_retention = df_retention.sort_values("Retention Rate (%)", ascending=False)
+                    
+                    # Bar chart
+                    fig = go.Figure()
+                    fig.add_trace(go.Bar(
+                        x=df_retention["Source"],
+                        y=df_retention["Retention Rate (%)"],
+                        text=[f"{r:.1f}%" for r in df_retention["Retention Rate (%)"]],
+                        textposition="auto",
+                        marker_color=df_retention["Retention Rate (%)"].apply(
+                            lambda x: "green" if x >= 30 else "orange" if x >= 10 else "red"
                         )
-                        if test_r.status_code == 200:
-                            st.success(f"✅ Chat endpoint reachable: {test_r.status_code}")
-                            response_data = test_r.json()
-                            if "response" in response_data:
-                                st.caption(f"Response preview: {response_data['response'][:100]}...")
-                        else:
-                            st.error(f"❌ Chat endpoint returned: {test_r.status_code}")
-                            try:
-                                st.json(test_r.json())
-                            except Exception:
-                                st.code(test_r.text[:200])
-                    except requests.exceptions.Timeout:
-                        st.warning("⏱️ **Timeout after 2 minutes** - This usually means:")
-                        st.markdown("""
-                        - **Embedding model is still loading** (first request can take 2-3 minutes)
-                        - **AI API is slow** (DeepSeek/OpenAI may be experiencing delays)
-                        - **Backend is processing** but needs more time
-                        
-                        **Solutions:**
-                        1. Wait 1-2 minutes and try again (model may be cached now)
-                        2. Check backend logs for model loading progress
-                        3. Try actual chat (it has 5-minute timeout, more forgiving)
-                        """)
-                    except Exception as test_e:
-                        st.error(f"❌ Chat endpoint failed: {test_e}")
-                        if "timeout" in str(test_e).lower():
-                            st.info("💡 **Tip:** Chat endpoint is working but slow. Try sending an actual message - it has a longer timeout (5 minutes).")
-        
-        # Show environment info
-        st.markdown("---")
-        st.caption("**Environment Variables:**")
-        st.code(f"STILLME_API_BASE: {os.getenv('STILLME_API_BASE', 'NOT SET')}", language="text")
-        st.code(f"STILLME_API_KEY: {'SET (length: ' + str(len(STILLME_API_KEY)) + ')' if STILLME_API_KEY else 'NOT SET'}", language="text")
-        if API_BASE == "http://localhost:8000":
-            st.warning("⚠️ **WARNING:** API_BASE is still `localhost:8000`! This means `STILLME_API_BASE` environment variable is NOT set in Railway dashboard service. You need to set it to your backend URL (e.g., `https://stillme-backend-production-xxxx.up.railway.app`)")
-        if not STILLME_API_KEY:
-            st.error("❌ **CRITICAL:** `STILLME_API_KEY` is NOT set! Protected endpoints (scheduler start/stop, database reset, knowledge injection) will fail with 401 Unauthorized. Set `STILLME_API_KEY` in Railway dashboard service variables (must match backend `STILLME_API_KEY`).")
-    
-    # Get scheduler status with longer timeout (backend may be busy during learning cycle)
-    # Use try-except to handle timeout gracefully and show progress if job is running
-    try:
-        scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=90)
-    except requests.exceptions.Timeout:
-        # Backend may be busy processing learning cycle - check if job is running
-        if st.session_state.get("learning_job_started"):
-            # Job is running - this is expected, don't show error
-            st.info("⏳ Backend is processing learning cycle. Showing job progress below...")
-            scheduler_status = {}  # Empty to trigger job status display
-        else:
-            # No job running but timeout - backend may be busy or slow
-            st.warning("⏳ Backend is taking longer than usual to respond. This may indicate a learning cycle is running.")
-            st.info("💡 **Tip:** If you just clicked 'Run Now', the learning cycle is likely starting. Progress will appear below.")
-            scheduler_status = {}
-    
-    # Debug: Show what we received and test connection
-    if not scheduler_status or scheduler_status == {}:
-        # Don't show error if we know a job is running (timeout is expected)
-        if not st.session_state.get("learning_job_started"):
-            st.warning("⚠️ **Warning:** Could not fetch scheduler status from backend.")
-            st.info("💡 **Tip:** If you just clicked 'Run Now', the learning cycle is starting. Wait a moment and refresh.")
-        
-        # Try to provide more specific error info (only if not a known job)
-        if not st.session_state.get("learning_job_started"):
-            try:
-                test_url = f"{API_BASE}/api/status"
-                test_r = requests.get(test_url, timeout=10)  # Quick check for backend availability
-                if test_r.status_code == 200:
-                    st.info("💡 Backend is reachable. Scheduler status may be temporarily unavailable during learning cycle.")
-                elif test_r.status_code == 502:
-                    st.error("❌ **502 Bad Gateway** - Backend service is not responding.")
-                    st.markdown("""
-                    **502 Bad Gateway means the backend service is down or crashed.**
-                    
-                    **Immediate Actions:**
-                    1. Go to Railway Dashboard → Service "stillme-backend"
-                    2. Check **"Deployments"** tab → See if service is running
-                    3. Check **"Logs"** tab → Look for errors or crashes
-                    4. If service is stopped → Click **"Redeploy"** or **"Restart"**
-                    5. If service is building → Wait for deployment to complete
-                    
-                    **Common Causes:**
-                    - Backend crashed during initialization
-                    - Backend is restarting after code change
-                    - Backend ran out of memory (check Railway resource limits)
-                    - Database connection issues
-                    """)
-                elif test_r.status_code == 503:
-                    st.error(f"❌ **503 Service Unavailable** - Backend returned status code 503 for `/api/status`")
-                    st.markdown("""
-                    **503 Service Unavailable means the backend is temporarily unavailable.**
-                    
-                    **Possible Causes:**
-                    - Backend is restarting or cold starting
-                    - Backend is under heavy load
-                    - Backend is initializing services (database, ChromaDB, etc.)
-                    
-                    **Actions:**
-                    1. Wait 30-60 seconds and refresh the page
-                    2. Check Railway Dashboard → Service "stillme-backend" → Logs
-                    3. If persists, restart the backend service
-                    """)
-                else:
-                    st.error(f"❌ Backend returned status code {test_r.status_code} for `/api/status`")
-            except requests.exceptions.ConnectionError:
-                st.error(f"❌ **Cannot connect to backend at:** `{API_BASE}`")
-                st.markdown("""
-                **Possible causes:**
-                1. Backend service is not running on Railway
-                2. Environment variable `STILLME_API_BASE` is not set in dashboard service
-                3. Backend URL has changed
-                4. Network/firewall issue
-                
-                **Solution:**
-                - Check Railway dashboard → Service "stillme-backend" → Ensure it's running
-                - Check Railway dashboard → Service "dashboard" → Variables → Verify `STILLME_API_BASE` is set
-                - Restart dashboard service if needed
-                """)
-            except Exception as e:
-                st.warning(f"Error testing connection: {e}")
-            
-            st.json({"error": "Empty response from /api/learning/scheduler/status", "api_base": API_BASE})
-            return
-    
-    if scheduler_status.get("status") == "ok":
-        is_running = scheduler_status.get("is_running", False)
-        interval_hours = scheduler_status.get("interval_hours", 4)
-        next_run = scheduler_status.get("next_run_time")
-        
-        col_status, col_info = st.columns([1, 2])
-        with col_status:
-            if is_running:
-                st.success(f"🟢 **Running** (every {interval_hours}h)")
-            else:
-                st.warning("🟡 **Stopped**")
-        with col_info:
-            if next_run:
-                display_local_time(next_run, "Next run")
-            else:
-                st.caption("Next run: Not scheduled")
-        
-        # Display source statistics for transparency
-        source_stats = scheduler_status.get("source_statistics", {})
-        if source_stats and not source_stats.get("error"):
-            st.markdown("### 📊 Learning Source Statistics")
-            
-            # RSS Statistics
-            if "rss" in source_stats:
-                rss_data = source_stats["rss"]
-                rss_stats = rss_data.get("stats") or {}  # Get stats from nested structure, handle None case
-                
-                # Debug: Log what we're getting (only in debug mode)
-                import logging
-                logger = logging.getLogger(__name__)
-                if rss_stats:
-                    logger.debug(f"RSS stats from API: {rss_stats}")
-                else:
-                    logger.warning(f"RSS stats is None or empty! rss_data: {rss_data}")
-                
-                # Get feeds_count from rss_data (top level) or from stats (fallback)
-                feeds_count = rss_data.get("feeds_count", rss_stats.get("feeds_count", 0)) if rss_stats else rss_data.get("feeds_count", 0)
-                successful_feeds = rss_stats.get("successful_feeds", 0) if rss_stats else 0
-                failed_feeds = rss_stats.get("failed_feeds", 0) if rss_stats else 0
-                status = rss_stats.get("status", "unknown") if rss_stats else "unknown"
-                last_error = rss_stats.get("last_error") if rss_stats else None
-                failure_rate = rss_stats.get("failure_rate", 0) if rss_stats else 0
-                
-                # Show warning if stats show 0/0 but feeds_count > 0 (likely no fetch cycle has run yet)
-                last_fetch_timestamp = rss_stats.get("last_fetch_timestamp") if rss_stats else None
-                if feeds_count > 0 and successful_feeds == 0 and failed_feeds == 0:
-                    if not last_fetch_timestamp:
-                        st.info("ℹ️ **No fetch cycle has run yet.** RSS stats will appear after the first learning cycle completes.")
-                    else:
-                        # Debug: Show raw data if there's a mismatch (0/0 when we expect failures)
-                        with st.expander("🔍 Debug: RSS Stats Data", expanded=False):
-                            st.json({
-                                "rss_data": rss_data,
-                                "rss_stats": rss_stats,
-                                "feeds_count": feeds_count,
-                                "successful_feeds": successful_feeds,
-                                "failed_feeds": failed_feeds,
-                                "status": status,
-                                "last_fetch_timestamp": last_fetch_timestamp
-                            })
-                            st.caption("⚠️ If backend logs show failures but this shows 0/0, there may be a timing issue or stats not being updated correctly.")
-                
-                col_rss1, col_rss2, col_rss3, col_rss4 = st.columns(4)
-                with col_rss1:
-                    st.metric("📡 RSS Feeds", feeds_count)
-                with col_rss2:
-                    st.metric("✅ Successful", successful_feeds)
-                with col_rss3:
-                    st.metric("❌ Failed", failed_feeds)
-                with col_rss4:
-                    status_icon = "🟢" if status == "ok" else "🔴"
-                    st.metric("Status", f"{status_icon} {status.upper()}")
-                
-                # Show errors if any
-                if failed_feeds > 0:
-                    with st.expander("⚠️ RSS Feed Errors", expanded=False):
-                        if last_error:
-                            st.error(f"**Last Error:** {last_error}")
-                        st.caption(f"💡 {failed_feeds} feed(s) failed (failure rate: {failure_rate}%). Check backend logs for details.")
-            
-            # Other sources (arXiv, CrossRef, Wikipedia, etc.)
-            other_sources = {k: v for k, v in source_stats.items() if k != "rss"}
-            if other_sources:
-                with st.expander("📚 Other Learning Sources", expanded=False):
-                    for source_name, source_data in other_sources.items():
-                        if isinstance(source_data, dict):
-                            # Structure: {"enabled": True, "stats": {"status": "ok", ...}}
-                            # If stats is None, source hasn't been used yet
-                            stats = source_data.get("stats")
-                            if stats is None:
-                                # Source enabled but not used yet - show as "not_used" or "enabled"
-                                status_icon = "🟡" if source_data.get("enabled", False) else "⚪"
-                                status_text = "enabled" if source_data.get("enabled", False) else "disabled"
-                                st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} {status_text}")
-                            elif isinstance(stats, dict):
-                                # Stats available - check status
-                                status = stats.get("status", "unknown")
-                                status_icon = "🟢" if status == "ok" else "🔴"
-                                st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} {status}")
-                                if stats.get("error_count", 0) > 0:
-                                    st.caption(f"  ⚠️ {stats.get('error_count', 0)} error(s)")
-                                if stats.get("last_error"):
-                                    st.caption(f"  📝 Last error: {stats['last_error'][:100]}...")
-                            else:
-                                # Invalid stats format
-                                status_icon = "🔴"
-                                st.write(f"**{source_name.replace('_', ' ').title()}**: {status_icon} unknown")
-        
-        # Scheduler controls: Stop and Run Now (Admin-only)
-        col_stop, col_run_now, col_stats = st.columns(3)
-        with col_stop:
-            if not is_admin():
-                st.button("⏹️ Stop Scheduler", width='stretch', disabled=True, help="Admin access required")
-            elif st.button("⏹️ Stop Scheduler", width='stretch'):
-                try:
-                    # Increased timeout to 30s to handle network latency (Railway deployment)
-                    r = requests.post(
-                        f"{API_BASE}/api/learning/scheduler/stop",
-                        headers=get_api_headers(),
-                        timeout=30
+                    ))
+                    fig.update_layout(
+                        title="Source Retention Rates",
+                        xaxis_title="Source",
+                        yaxis_title="Retention Rate (%)",
+                        height=400
                     )
-                    if r.status_code == 200:
-                        st.session_state["last_action"] = "✅ Scheduler stopped successfully!"
-                        st.rerun()
-                except requests.exceptions.Timeout:
-                    # Timeout doesn't mean failure - scheduler may have stopped in background
-                    # Check status to confirm
-                    try:
-                        status_check = get_json("/api/learning/scheduler/status", {}, timeout=10)
-                        if not status_check.get("is_running", True):
-                            st.session_state["last_action"] = "✅ Scheduler stopped successfully! (Confirmed via status check)"
-                            st.rerun()
-                        else:
-                            st.session_state["last_error"] = "⏱️ Request timed out. Please check scheduler status - it may have stopped in background."
-                    except:
-                        st.session_state["last_error"] = "⏱️ Request timed out. Scheduler may have stopped - please refresh to check status."
-                except requests.exceptions.HTTPError as e:
-                    if e.response.status_code == 401:
-                        st.session_state["last_error"] = f"❌ 401 Unauthorized: API key missing or invalid. Please set STILLME_API_KEY in Railway dashboard service variables."
-                    elif e.response.status_code == 403:
-                        st.session_state["last_error"] = f"❌ 403 Forbidden: Invalid API key. Please verify STILLME_API_KEY matches backend key."
-                    else:
-                        st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
-                except Exception as e:
-                    st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
-        with col_run_now:
-            if not is_admin():
-                st.button("🚀 Run Now", width='stretch', disabled=True, help="Admin access required")
-            elif st.button("🚀 Run Now", width='stretch'):
-                # Store Vector DB stats BEFORE running to compare later
-                try:
-                    initial_rag_stats = get_json("/api/rag/stats", {}, timeout=10)
-                    st.session_state["initial_rag_stats"] = initial_rag_stats.get("stats", {})
-                except:
-                    st.session_state["initial_rag_stats"] = {}
-                
-                # Store current cycle count to detect completion
-                try:
-                    current_status = get_json("/api/learning/scheduler/status", {}, timeout=10)
-                    if current_status and current_status.get("status") == "ok":
-                        st.session_state["learning_cycle_count_at_start"] = current_status.get("cycle_count", 0)
-                except:
-                    st.session_state["learning_cycle_count_at_start"] = 0
-                
-                # Make the API call (with short timeout for immediate feedback)
-                try:
-                    # Non-blocking: returns 202 immediately
-                    r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=5)
-                    if r.status_code == 202:
-                        data = r.json()
-                        job_id = data.get("job_id")
-                        st.session_state["learning_job_id"] = job_id
-                        st.session_state["learning_job_started"] = True
-                        st.session_state["learning_job_start_time"] = time_module.time()
-                        # IMMEDIATE FEEDBACK
-                        st.success("🚀 Learning cycle started! Running in background (2-5 minutes). Results will appear below when complete.")
-                    elif r.status_code == 200:
-                        # Sync mode (for tests) - immediate results
-                        data = r.json()
-                        entries = data.get("entries_fetched", 0)
-                        filtered = data.get("entries_filtered", 0)
-                        added = data.get("entries_added_to_rag", 0)
-                        
-                        if filtered > 0:
-                            st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, Filtered {filtered} (Low quality/Short), Added {added} to RAG."
-                        else:
-                            st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, added {added} to RAG."
-                        st.session_state["learning_job_started"] = False
-                        st.session_state["learning_cycle_result"] = data
-                        st.success("✅ Learning cycle completed immediately!")
-                    else:
-                        st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
-                        st.error(st.session_state["last_error"])
-                except requests.exceptions.Timeout:
-                    # Timeout is OK - job is running in background
-                    st.session_state["learning_job_id"] = None
-                    st.session_state["learning_job_started"] = True
-                    st.session_state["learning_job_start_time"] = time_module.time()
-                    # IMMEDIATE FEEDBACK even on timeout
-                    st.success("🚀 Learning cycle started! Running in background (2-5 minutes). Results will appear below when complete.")
-                except Exception as e:
-                    st.session_state["last_error"] = f"❌ Failed to start: {e}"
-                    st.session_state["learning_job_started"] = False
-                    st.error(st.session_state["last_error"])
-                
-                # Rerun to show progress section
-                st.rerun()
-        
-        with col_stats:
-            if st.button("📊 Learning Statistics", width='stretch', help="View detailed learning statistics (what StillMe learned/didn't learn and why)"):
-                st.session_state["show_learning_stats"] = True
-                st.rerun()
-        
-        # Display Learning Statistics Dialog (Task Manager style)
-        if st.session_state.get("show_learning_stats", False):
-            st.markdown("---")
-            with st.expander("📊 Learning Statistics", expanded=True):
-                try:
-                    # Get RSS fetch history
-                    fetch_history = get_json("/api/learning/rss/fetch-history", {"limit": 200}, timeout=30)
+                    st.plotly_chart(fig, use_container_width=True)
                     
-                    # Handle None response
-                    if fetch_history is None:
-                        st.warning("⚠️ Backend returned no data. RSS fetch history may not be initialized yet.")
-                        st.caption("💡 Run a learning cycle first to generate statistics.")
-                        if st.button("❌ Close Statistics", use_container_width=True):
-                            st.session_state["show_learning_stats"] = False
-                            st.rerun()
-                        return
-                    
-                    # Ensure items is a list
-                    items = fetch_history.get("items", [])
-                    if items is None:
-                        items = []
-                    
-                    if items and len(items) > 0:
-                        st.markdown("### 📋 Learning Activity Table")
-                        st.caption(f"Showing {len(items)} most recent learning items")
+                    # Table with details
+                    st.markdown("##### Detailed Statistics")
+                    st.dataframe(df_retention, use_container_width=True)
+                else:
+                    # Fallback: simple metrics
+                    for source, stats in sorted(sources_data.items(), key=lambda x: x[1].get("retention_rate", 0), reverse=True):
+                        retention = stats.get("retention_rate", 0.0) * 100
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Source", source[:30] + "..." if len(source) > 30 else source)
+                        with col2:
+                            st.metric("Retention Rate", f"{retention:.1f}%")
+                        with col3:
+                            st.metric("Used/Retrieved", f"{stats.get('documents_used_in_response', 0)}/{stats.get('total_documents_retrieved', 0)}")
+                        st.markdown("---")
+                
+                # Source trust scores
+                st.markdown("##### Source Trust Scores")
+                try:
+                    trust_data = get_json(f"/api/meta-learning/source-trust?days={days}", {}, timeout=30)
+                    if trust_data and "trust_scores" in trust_data:
+                        trust_scores = trust_data["trust_scores"]
+                        retention_rates_dict = trust_data.get("retention_rates", {})
                         
-                        # Create Task Manager style table
-                        from datetime import datetime
-                        
-                        # Prepare data for table
-                        table_data = []
-                        for item in items:
-                            source = item.get("source_url", item.get("source", "Unknown"))
-                            title = item.get("title", "No title")[:60] + "..." if len(item.get("title", "")) > 60 else item.get("title", "No title")
-                            status = item.get("status", "Unknown")
-                            # Ensure reason is always a string (never None)
-                            reason = item.get("status_reason") or ""
-                            if reason is None:
-                                reason = ""
-                            timestamp = item.get("fetch_timestamp", item.get("timestamp", ""))
-                            
-                            # Format timestamp - convert UTC to local timezone (GMT+7)
-                            try:
-                                if timestamp:
-                                    if isinstance(timestamp, str):
-                                        # Parse UTC timestamp
-                                        if timestamp.endswith('Z'):
-                                            timestamp = timestamp[:-1] + '+00:00'
-                                        dt_utc = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-                                        
-                                        # Convert UTC to GMT+7 (Vietnam timezone)
-                                        from datetime import timezone, timedelta
-                                        gmt7 = timezone(timedelta(hours=7))
-                                        dt_local = dt_utc.astimezone(gmt7)
-                                        
-                                        formatted_time = dt_local.strftime("%b %d %Y %H:%M:%S")
-                                    else:
-                                        formatted_time = str(timestamp)
-                                else:
-                                    formatted_time = "N/A"
-                            except:
-                                formatted_time = str(timestamp) if timestamp else "N/A"
-                            
-                            # Determine status icon and color
-                            if "Added" in status or "added" in status.lower():
-                                status_icon = "✅"
-                                status_color = "green"
-                            elif "Filtered" in status or "filtered" in status.lower():
-                                status_icon = "⚠️"
-                                status_color = "orange"
-                            elif "Failed" in status or "failed" in status.lower():
-                                status_icon = "❌"
-                                status_color = "red"
-                            else:
-                                status_icon = "ℹ️"
-                                status_color = "gray"
-                            
-                            table_data.append({
+                        # Create trust scores table
+                        trust_rows = []
+                        for source, score in sorted(trust_scores.items(), key=lambda x: x[1], reverse=True):
+                            retention = retention_rates_dict.get(source, 0.0) * 100
+                            trust_rows.append({
                                 "Source": source[:40] + "..." if len(source) > 40 else source,
-                                "Title": title,
-                                "Status": f"{status_icon} {status}",
-                                "Reason": (reason[:50] + "..." if len(reason) > 50 else reason) if reason else "",
-                                "Timestamp": formatted_time
+                                "Trust Score": f"{score:.2f}",
+                                "Retention Rate": f"{retention:.1f}%",
+                                "Status": "High" if score >= 0.8 else "Medium" if score >= 0.5 else "Low"
                             })
                         
-                        # Create DataFrame and display
-                        df = pd.DataFrame(table_data)
-                        
-                        # Style the DataFrame
-                        def highlight_status(row):
-                            if "✅" in str(row["Status"]):
-                                return ['background-color: #1e3a2e'] * len(row)
-                            elif "⚠️" in str(row["Status"]):
-                                return ['background-color: #3a2e1e'] * len(row)
-                            elif "❌" in str(row["Status"]):
-                                return ['background-color: #3a1e1e'] * len(row)
-                            return [''] * len(row)
-                        
-                        st.dataframe(
-                            df.style.apply(highlight_status, axis=1),
-                            use_container_width=True,
-                            height=400
-                        )
-                        
-                        # Summary statistics
-                        st.markdown("### 📈 Summary")
-                        col_sum1, col_sum2, col_sum3, col_sum4 = st.columns(4)
-                        
-                        added_count = sum(1 for item in items if "Added" in item.get("status", ""))
-                        filtered_count = sum(1 for item in items if "Filtered" in item.get("status", ""))
-                        failed_count = sum(1 for item in items if "Failed" in item.get("status", ""))
-                        total = len(items)
-                        
-                        with col_sum1:
-                            st.metric("Total Items", total)
-                        with col_sum2:
-                            st.metric("✅ Learned", added_count, delta=f"{round(added_count/total*100, 1)}%" if total > 0 else "0%")
-                        with col_sum3:
-                            st.metric("⚠️ Filtered", filtered_count, delta=f"{round(filtered_count/total*100, 1)}%" if total > 0 else "0%")
-                        with col_sum4:
-                            st.metric("❌ Failed", failed_count, delta=f"{round(failed_count/total*100, 1)}%" if total > 0 else "0%")
-                        
-                        # Filter reasons breakdown
-                        filter_reasons = {}
-                        for item in items:
-                            if "Filtered" in item.get("status", ""):
-                                reason = item.get("status_reason", "Unknown reason")
-                                filter_reasons[reason] = filter_reasons.get(reason, 0) + 1
-                        
-                        if filter_reasons:
-                            st.markdown("### 🔍 Filter Reasons Breakdown")
-                            for reason, count in sorted(filter_reasons.items(), key=lambda x: x[1], reverse=True):
-                                st.write(f"- **{reason}**: {count} items")
-                    else:
-                        st.info("📭 No learning history available yet. Run a learning cycle to see statistics.")
-                        
+                        if trust_rows and PANDAS_AVAILABLE:
+                            df_trust = pd.DataFrame(trust_rows)
+                            st.dataframe(df_trust, use_container_width=True)
+                        elif trust_rows:
+                            for row in trust_rows:
+                                st.write(f"**{row['Source']}**: Trust {row['Trust Score']}, Retention {row['Retention Rate']} ({row['Status']})")
                 except Exception as e:
-                    import traceback
-                    error_detail = str(e)
-                    error_traceback = traceback.format_exc()
-                    st.error(f"❌ Failed to load learning statistics: {error_detail}")
-                    st.caption("💡 Make sure backend is running and RSS fetch history is enabled.")
-                    # Show detailed error for debugging
-                    with st.expander("🔍 Error Details (for debugging)", expanded=False):
-                        st.code(error_traceback, language="text")
+                    st.warning(f"Could not load trust scores: {e}")
                 
-                # Close button
-                if st.button("❌ Close Statistics", use_container_width=True):
-                    st.session_state["show_learning_stats"] = False
-                    st.rerun()
-        
-        # Display learning cycle progress if job is running
-        if st.session_state.get("learning_job_started"):
-            job_id = st.session_state.get("learning_job_id")
-            st.markdown("---")
-            st.subheader("📊 Learning Cycle Progress")
-            
-            # Skip polling if job_id is None or "timeout_fallback" (not a real job ID)
-            if not job_id or job_id == "timeout_fallback":
-                # Check scheduler status to see if cycle has completed
-                # Get current scheduler status to check if cycle finished
+                # Recommended sources
+                st.markdown("##### Recommended Sources")
                 try:
-                    current_scheduler_status = get_json("/api/learning/scheduler/status", {}, timeout=90)
-                except requests.exceptions.Timeout:
-                    # Backend is busy - likely still processing
-                    current_scheduler_status = {}
-                if current_scheduler_status and current_scheduler_status.get("status") == "ok":
-                    is_running = current_scheduler_status.get("is_running", False)
-                    last_run_time = current_scheduler_status.get("last_run_time")
-                    cycle_count = current_scheduler_status.get("cycle_count", 0)
-                    
-                    # Check if we have a stored cycle_count to compare
-                    stored_cycle_count = st.session_state.get("learning_cycle_count_at_start", None)
-                    
-                    # If stored_cycle_count is None, set it to current cycle_count (first check after timeout)
-                    if stored_cycle_count is None:
-                        st.session_state["learning_cycle_count_at_start"] = cycle_count
-                        stored_cycle_count = cycle_count
-                    
-                    # If scheduler is not running AND cycle_count increased, cycle completed
-                    if not is_running and cycle_count > stored_cycle_count:
-                        # Get current Vector DB stats to show what changed
-                        try:
-                            current_rag_stats = get_json("/api/rag/stats", {}, timeout=10)
-                            current_stats = current_rag_stats.get("stats", {})
-                            initial_stats = st.session_state.get("initial_rag_stats", {})
-                            
-                            # Calculate changes
-                            initial_total = initial_stats.get("total_documents", 0)
-                            current_total = current_stats.get("total_documents", 0)
-                            docs_added = current_total - initial_total
-                            
-                            initial_knowledge = initial_stats.get("knowledge_documents", 0)
-                            current_knowledge = current_stats.get("knowledge_documents", 0)
-                            knowledge_added = current_knowledge - initial_knowledge
-                            
-                            # Show detailed results
-                            st.success("✅ Learning cycle completed!")
-                            
-                            if docs_added > 0:
-                                st.info(f"📊 **Results:** Added {docs_added} new documents to Vector DB ({knowledge_added} knowledge docs). Total: {current_total} documents.")
-                            elif docs_added == 0 and current_total > 0:
-                                st.info(f"📊 **Results:** No new documents added. Total: {current_total} documents (may have filtered out low-quality content).")
-                            else:
-                                st.info(f"📊 **Results:** Vector DB now has {current_total} documents.")
-                            
-                            # Try to get more details from scheduler if available
-                            if last_run_time:
-                                st.caption(f"⏰ Completed at: {last_run_time}")
-                        except Exception as stats_error:
-                            st.success("✅ Learning cycle completed!")
-                            st.info("💡 Check Vector DB Stats above and scheduler status below for details.")
-                        
-                        # Clear job tracking
-                        st.session_state["learning_job_started"] = False
-                        st.session_state["learning_job_id"] = None
-                        st.session_state["learning_cycle_count_at_start"] = None
-                        st.session_state["initial_rag_stats"] = {}
-                    elif not is_running and last_run_time:
-                        # Scheduler stopped and has a last_run_time - cycle likely completed
-                        # Check if Vector DB stats changed to confirm
-                        try:
-                            current_rag_stats = get_json("/api/rag/stats", {}, timeout=10)
-                            current_stats = current_rag_stats.get("stats", {})
-                            initial_stats = st.session_state.get("initial_rag_stats", {})
-                            
-                            initial_total = initial_stats.get("total_documents", 0)
-                            current_total = current_stats.get("total_documents", 0)
-                            docs_added = current_total - initial_total
-                            
-                            # If stats changed, cycle definitely completed
-                            if docs_added > 0 or (current_total > 0 and initial_total == 0):
-                                st.success("✅ Learning cycle completed!")
-                                initial_knowledge = initial_stats.get("knowledge_documents", 0)
-                                current_knowledge = current_stats.get("knowledge_documents", 0)
-                                knowledge_added = current_knowledge - initial_knowledge
-                                
-                                if docs_added > 0:
-                                    st.info(f"📊 **Results:** Added {docs_added} new documents to Vector DB ({knowledge_added} knowledge docs). Total: {current_total} documents.")
-                                else:
-                                    st.info(f"📊 **Results:** Vector DB now has {current_total} documents.")
-                                
-                                if st.button("✅ Dismiss", key="dismiss_cycle"):
-                                    st.session_state["learning_job_started"] = False
-                                    st.session_state["learning_job_id"] = None
-                                    st.session_state["learning_cycle_count_at_start"] = None
-                                    st.session_state["initial_rag_stats"] = {}
-                                    st.rerun()
-                            else:
-                                # Stats didn't change - may still be processing or no new content
-                                st.info("⏳ Learning cycle may have completed. Scheduler is stopped.")
-                                st.info("💡 **Tip:** Check Vector DB Stats above and scheduler status below. If cycle completed, you can dismiss this message.")
-                                if st.button("✅ Dismiss (Cycle Completed)", key="dismiss_cycle"):
-                                    st.session_state["learning_job_started"] = False
-                                    st.session_state["learning_job_id"] = None
-                                    st.session_state["learning_cycle_count_at_start"] = None
-                                    st.session_state["initial_rag_stats"] = {}
-                                    st.rerun()
-                        except:
-                            # Fallback if can't get stats
-                            st.info("⏳ Learning cycle may have completed. Scheduler is stopped.")
-                            st.info("💡 **Tip:** Check scheduler status below. If cycle completed, you can dismiss this message.")
-                            if st.button("✅ Dismiss (Cycle Completed)", key="dismiss_cycle_fallback"):
-                                st.session_state["learning_job_started"] = False
-                                st.session_state["learning_job_id"] = None
-                                st.session_state["learning_cycle_count_at_start"] = None
-                                st.session_state["initial_rag_stats"] = {}
-                                st.rerun()
-                            else:
-                                # Auto-refresh to check scheduler status
-                                refresh_placeholder = st.empty()
-                                refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
-                                time.sleep(3)
-                                st.rerun()
-                    else:
-                        # Still running or unknown status - continue auto-refresh
-                        st.info("⏳ Learning cycle is running in background. This may take 2-5 minutes.")
-                        st.info("💡 **Tip:** Check scheduler status below to see when the cycle completes.")
-                        # Auto-refresh to check scheduler status
-                        refresh_placeholder = st.empty()
-                        refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
-                        import time
-                        time.sleep(3)
-                        st.rerun()
-                else:
-                    # Could not get scheduler status - continue auto-refresh but with warning
-                    st.warning("⚠️ Could not check scheduler status. Learning cycle may still be running.")
-                    st.info("💡 **Tip:** Check backend logs to see if learning cycle is still running.")
-                    # Auto-refresh to check scheduler status
-                    refresh_placeholder = st.empty()
-                    refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
-                    import time
-                    time.sleep(3)
-                    st.rerun()
-            else:
-                # Poll job status (with longer timeout - learning cycle can take 2-5 minutes)
-                try:
-                    job_status_r = requests.get(f"{API_BASE}/api/learning/scheduler/job-status/{job_id}", timeout=60)
-                    if job_status_r.status_code == 200:
-                        job_data = job_status_r.json()
-                        job_status = job_data.get("status", "unknown")
-                        progress = job_data.get("progress", {})
-                        logs = job_data.get("logs", [])
-                        
-                        # Status indicator
-                        if job_status == "done":
-                            st.success("✅ Learning cycle completed!")
-                            
-                            result = job_data.get("result", {})
-                            entries_fetched = result.get("entries_fetched", 0)
-                            entries_filtered = result.get("entries_filtered", 0)
-                            entries_added = result.get("entries_added_to_rag", 0)
-                            entries_skipped = result.get("entries_skipped_tiered", 0)
-                            
-                            # Show completion summary with details
-                            col1, col2, col3, col4 = st.columns(4)
-                            
-                            with col1:
-                                st.metric("📥 Fetched", entries_fetched,
-                                         help="Total entries fetched from all sources")
-                            
-                            with col2:
-                                st.metric("🔍 Filtered", entries_filtered,
-                                         delta=f"-{entries_filtered}" if entries_filtered > 0 else None,
-                                         delta_color="inverse",
-                                         help="Entries filtered out (low quality, too short, or duplicate)")
-                            
-                            with col3:
-                                st.metric("🧠 Processed", entries_added + entries_skipped,
-                                         help="Total entries processed (added + skipped by Nested Learning)")
-                            
-                            with col4:
-                                st.metric("💾 Added to RAG", entries_added,
-                                         delta=f"+{entries_added}" if entries_added > 0 else None,
-                                         help="Entries successfully added to vector database")
-                            
-                            # Parse logs for detailed breakdown
-                            source_breakdown = {}
-                            filter_reasons_detail = {}
-                            
-                            for log in logs:
-                                log_lower = log.lower()
-                                # Extract source breakdown
-                                if "source breakdown:" in log_lower:
-                                    breakdown_text = log.split("Source breakdown:")[-1].strip()
-                                    for part in breakdown_text.split(","):
-                                        if ":" in part:
-                                            try:
-                                                source, count = part.strip().split(":", 1)
-                                                source_breakdown[source.strip()] = int(count.strip())
-                                            except:
-                                                pass
-                                # Extract filter reasons
-                                if "filter reasons:" in log_lower:
-                                    reasons_text = log.split("Filter reasons:")[-1].strip()
-                                    for part in reasons_text.split(","):
-                                        if ":" in part:
-                                            try:
-                                                reason, count = part.strip().split(":", 1)
-                                                filter_reasons_detail[reason.strip()] = int(count.strip())
-                                            except:
-                                                pass
-                            
-                            # Show source breakdown if available
-                            if source_breakdown:
-                                st.markdown("### 📊 Source Breakdown")
-                                cols = st.columns(len(source_breakdown) if len(source_breakdown) <= 4 else 4)
-                                for idx, (source, count) in enumerate(source_breakdown.items()):
-                                    with cols[idx % len(cols)]:
-                                        st.metric(source, count, help=f"Items fetched from {source}")
-                            
-                            # Show filter reasons if available (from result or logs)
-                            filter_reasons = result.get("filter_reasons", {})
-                            if not filter_reasons and filter_reasons_detail:
-                                filter_reasons = filter_reasons_detail
-                            
-                            if filter_reasons:
-                                with st.expander("🔍 Filter Details", expanded=True):
-                                    st.write("**Reasons for filtering:**")
-                                    for reason, count in filter_reasons.items():
-                                        st.write(f"- **{reason}**: {count} entries")
-                            elif entries_filtered > 0:
-                                st.caption(f"💡 {entries_filtered} entries filtered (low quality, too short, or duplicate)")
-                            
-                            # Show Nested Learning summary if enabled
-                            if entries_skipped > 0:
-                                cost_reduction = (entries_skipped / (entries_added + entries_skipped)) * 100 if (entries_added + entries_skipped) > 0 else 0
-                                st.success(f"🎯 **Nested Learning**: Skipped {entries_skipped} entries - {cost_reduction:.1f}% cost reduction!")
-                            
-                            # Show elapsed time
-                            if job_data.get("started_at") and job_data.get("completed_at"):
-                                from datetime import datetime
-                                try:
-                                    started_str = job_data["started_at"]
-                                    completed_str = job_data["completed_at"]
-                                    if started_str.endswith('Z'):
-                                        started_str = started_str[:-1] + '+00:00'
-                                    if completed_str.endswith('Z'):
-                                        completed_str = completed_str[:-1] + '+00:00'
-                                    started = datetime.fromisoformat(started_str)
-                                    completed = datetime.fromisoformat(completed_str)
-                                    elapsed = (completed - started).total_seconds()
-                                    elapsed_min = int(elapsed // 60)
-                                    elapsed_sec = int(elapsed % 60)
-                                    st.caption(f"⏱️ Total time: {elapsed_min}m {elapsed_sec}s")
-                                except:
-                                    pass
-                            
-                            # Clear job tracking
-                            st.session_state["learning_job_started"] = False
-                            st.session_state["learning_job_id"] = None
-                        elif job_status == "error":
-                            st.error(f"❌ Learning cycle failed: {job_data.get('error', 'Unknown error')}")
-                            st.session_state["learning_job_started"] = False
-                            st.session_state["learning_job_id"] = None
+                    recommended = get_json(f"/api/meta-learning/recommended-sources?days={days}&min_retention=0.20", {}, timeout=30)
+                    if recommended and "recommended_sources" in recommended:
+                        sources = recommended["recommended_sources"]
+                        if sources:
+                            for source_info in sources[:10]:  # Top 10
+                                source_name = source_info.get("source", "Unknown")
+                                retention = source_info.get("retention_rate", 0.0) * 100
+                                st.write(f"- **{source_name[:50]}**: {retention:.1f}% retention")
                         else:
-                            # Show detailed progress with percentage
-                            phase = progress.get("phase", "pending")
-                            
-                            # Phase display with progress percentage
-                            phase_info = {
-                                "pending": ("⏳ Waiting to start...", 0),
-                                "fetching": ("📥 Fetching from sources...", 20),
-                                "prefilter": ("🔍 Filtering content...", 40),
-                                "embedding": ("🧠 Generating embeddings...", 60),
-                                "adding_to_rag": ("💾 Adding to RAG...", 80)
-                            }.get(phase, (f"🔄 {phase}...", 0))
-                            
-                            phase_text, phase_percent = phase_info
-                            
-                            # Show progress bar
-                            st.progress(phase_percent / 100, text=f"{phase_text} ({phase_percent}%)")
-                            
-                            # Show detailed metrics
-                            entries_fetched = progress.get("entries_fetched", 0)
-                            entries_filtered = progress.get("entries_filtered", 0)
-                            entries_added = progress.get("entries_added", 0)
-                            entries_skipped = progress.get("entries_skipped_tiered", 0)
-                            current_item = progress.get("current_item", "")
-                            
-                            # Create columns for metrics
-                            col1, col2, col3, col4 = st.columns(4)
-                            
-                            with col1:
-                                st.metric("📥 Fetched", entries_fetched, 
-                                         help="Total entries fetched from all sources (RSS, arXiv, CrossRef, Wikipedia)")
-                            
-                            with col2:
-                                st.metric("🔍 Filtered", entries_filtered, 
-                                         delta=f"-{entries_filtered}" if entries_filtered > 0 else None,
-                                         delta_color="inverse",
-                                         help="Entries filtered out (low quality, too short, or duplicate)")
-                            
-                            with col3:
-                                total_processed = entries_added + entries_skipped
-                                st.metric("🧠 Processed", total_processed,
-                                         help="Total entries processed for embedding (added + skipped by Nested Learning)")
-                            
-                            with col4:
-                                st.metric("💾 Added to RAG", entries_added,
-                                         delta=f"+{entries_added}" if entries_added > 0 else None,
-                                         help="Entries successfully added to vector database")
-                            
-                            # Show current item being processed
-                            if current_item:
-                                st.caption(f"🔄 Currently processing: {current_item}")
-                            
-                            # Show filtered reasons if available (from result)
-                            result = job_data.get("result", {})
-                            if result and entries_filtered > 0:
-                                filter_reasons = result.get("filter_reasons", {})
-                                if filter_reasons:
-                                    with st.expander("🔍 Filter Details", expanded=False):
-                                        st.write("**Reasons for filtering:**")
-                                        for reason, count in filter_reasons.items():
-                                            st.write(f"- **{reason}**: {count} entries")
-                                else:
-                                    # Show general filter info
-                                    st.caption(f"💡 {entries_filtered} entries filtered (low quality, too short, or duplicate)")
-                            
-                            # Show Nested Learning info if enabled
-                            if entries_skipped > 0:
-                                st.info(f"🎯 **Nested Learning**: Skipped {entries_skipped} entries (tiered update isolation) - Cost saved!")
-                            
-                            # Show detailed breakdown from logs
-                            if logs:
-                                # Parse logs to extract source breakdown and filter details
-                                source_breakdown = {}
-                                filter_reasons_detail = {}
-                                
-                                for log in logs:
-                                    log_lower = log.lower()
-                                    # Extract source breakdown
-                                    if "source breakdown:" in log_lower:
-                                        breakdown_text = log.split("Source breakdown:")[-1].strip()
-                                        for part in breakdown_text.split(","):
-                                            if ":" in part:
-                                                source, count = part.strip().split(":", 1)
-                                                source_breakdown[source.strip()] = int(count.strip())
-                                    # Extract filter reasons
-                                    if "filter reasons:" in log_lower:
-                                        reasons_text = log.split("Filter reasons:")[-1].strip()
-                                        for part in reasons_text.split(","):
-                                            if ":" in part:
-                                                reason, count = part.strip().split(":", 1)
-                                                filter_reasons_detail[reason.strip()] = int(count.strip())
-                                
-                                # Show source breakdown if available
-                                if source_breakdown:
-                                    with st.expander("📊 Source Breakdown", expanded=True):
-                                        cols = st.columns(len(source_breakdown))
-                                        for idx, (source, count) in enumerate(source_breakdown.items()):
-                                            with cols[idx % len(cols)]:
-                                                st.metric(source, count)
-                                
-                                # Show filter reasons detail if available
-                                if filter_reasons_detail:
-                                    with st.expander("🔍 Filter Reasons Detail", expanded=False):
-                                        for reason, count in filter_reasons_detail.items():
-                                            st.write(f"- **{reason}**: {count} entries")
-                                
-                                # Show recent logs
-                                with st.expander("📋 Recent Activity Logs", expanded=True):
-                                    # Show last 15 logs (increased from 10)
-                                    for log in logs[-15:]:
-                                        # Highlight important logs
-                                        if any(keyword in log.lower() for keyword in ["fetched", "filter", "added", "completed", "error"]):
-                                            if "error" in log.lower() or "failed" in log.lower():
-                                                st.error(log)
-                                            elif "completed" in log.lower() or "added" in log.lower():
-                                                st.success(log)
-                                            elif "filter" in log.lower():
-                                                st.warning(log)
-                                            else:
-                                                st.info(log)
-                                        else:
-                                            st.text(log)
-                            
-                            # Show elapsed time
-                            if job_data.get("started_at"):
-                                from datetime import datetime
-                                try:
-                                    started_str = job_data["started_at"]
-                                    if started_str.endswith('Z'):
-                                        started_str = started_str[:-1] + '+00:00'
-                                    started = datetime.fromisoformat(started_str)
-                                    elapsed = (datetime.now(started.tzinfo) - started).total_seconds()
-                                    elapsed_min = int(elapsed // 60)
-                                    elapsed_sec = int(elapsed % 60)
-                                    st.caption(f"⏱️ Elapsed time: {elapsed_min}m {elapsed_sec}s | Estimated remaining: {max(0, 3 - elapsed_min)}m")
-                                except Exception as e:
-                                    pass
-                            
-                            # Auto-refresh every 2 seconds
-                            refresh_placeholder = st.empty()
-                            refresh_placeholder.info("🔄 Auto-refreshing in 2 seconds...")
-                            import time
-                            time.sleep(2)
-                            st.rerun()
-                    else:
-                        st.warning(f"⚠️ Could not fetch job status: {job_status_r.status_code}")
-                except requests.exceptions.Timeout:
-                    st.warning("⏱️ Job status check timed out (60s). Learning cycle may still be running.")
-                    st.info("💡 **Tip:** Backend is processing. This is normal - learning cycles take 2-5 minutes.")
-                    st.info("🔄 **Auto-refresh:** This page will auto-refresh every 3 seconds to show progress.")
-                    # Keep job tracking active so it continues polling
-                    refresh_placeholder = st.empty()
-                    refresh_placeholder.info("🔄 Auto-refreshing in 3 seconds...")
-                    import time
-                    time.sleep(3)
-                    st.rerun()
+                            st.info("No sources meet the minimum retention threshold (20%)")
                 except Exception as e:
-                    st.error(f"❌ Error checking job status: {e}")
-                    st.info("💡 **Tip:** Check backend logs to see if learning cycle is still running.")
-    else:
-        status_msg = scheduler_status.get("message", "Unknown error")
-        init_error = scheduler_status.get("initialization_error")
-        status_type = scheduler_status.get("status", "unknown")
-        
-        st.warning("⚠️ **Learning scheduler is not available**")
-        
-        # Show detailed error if available
-        if init_error:
-            with st.expander("🔍 View Initialization Error Details", expanded=True):
-                st.code(init_error, language="text")
-                st.caption("💡 This error occurred when the backend tried to initialize RAG components.")
+                    st.warning(f"Could not load recommended sources: {e}")
+            else:
+                st.info("No retention data available yet. Data will appear after StillMe processes some queries.")
         else:
-            # If no detailed error, show status message and full response for debugging
-            with st.expander("🔍 View Status Details", expanded=True):
-                st.json(scheduler_status)
-                st.caption(f"💡 Status type: {status_type}. If this is 'not_available' but backend logs show initialization succeeded, there may be a connection issue.")
+            st.warning("Could not fetch retention metrics. Make sure backend is running and Stage 2 is enabled.")
+    except Exception as e:
+        st.error(f"Error loading retention metrics: {e}")
+        import traceback
+        with st.expander("Error Details"):
+            st.code(traceback.format_exc())
+
+
+def _page_meta_learning_curriculum():
+    """Phase 2: Curriculum Learning visualization"""
+    st.markdown("#### Curriculum Learning")
+    st.caption("Analyze learning effectiveness and generate optimal learning order")
+    
+    # Days selector
+    days = st.slider("Analysis Period (days)", 1, 365, 30, key="curriculum_days")
+    top_n = st.slider("Top N Topics", 5, 50, 10, key="curriculum_top_n")
+    
+    # Learning Effectiveness
+    st.markdown("##### Learning Effectiveness")
+    try:
+        effectiveness_data = get_json(f"/api/meta-learning/learning-effectiveness?days={days}&top_n={top_n}", {}, timeout=30)
         
-        st.caption(f"**Reason:** {status_msg}")
-        
-        # Additional help for common cases
-        if status_type == "not_available":
-            st.info("💡 **Note:** Backend logs show scheduler initialized successfully. This may be a connection issue between dashboard and backend. Try refreshing the page.")
-        
-        # Provide actionable tips and reset button
-        col_tips, col_reset = st.columns([2, 1])
-        with col_tips:
-            st.info(
-                "💡 **Troubleshooting Tips:**\n"
-                "1. Check backend logs in Railway dashboard for detailed error messages\n"
-                "2. Verify all dependencies are installed (chromadb, sentence-transformers, etc.)\n"
-                "3. Check if data/vector_db directory has write permissions\n"
-                "4. Try restarting the backend service"
-            )
-        with col_reset:
-            st.warning("⚠️ **Quick Fix:**")
-            # Admin-only: Database reset
-            if not is_admin():
-                st.button("🔄 Reset Vector Database", width='stretch', type="secondary", disabled=True, help="Admin access required")
-            elif st.button("🔄 Reset Vector Database", width='stretch', type="secondary"):
-                try:
-                    with st.spinner("Resetting database (this may take a moment)..."):
-                        r = requests.post(
-                            f"{API_BASE}/api/rag/reset-database",
-                            headers=get_api_headers(),
-                            timeout=60
+        if effectiveness_data and "effectiveness" in effectiveness_data:
+            effectiveness_list = effectiveness_data["effectiveness"]
+            
+            if effectiveness_list:
+                # Prepare data for chart
+                topics = []
+                improvements = []
+                before_rates = []
+                after_rates = []
+                
+                for item in effectiveness_list:
+                    topics.append(item.get("topic", "Unknown")[:30])
+                    improvements.append(item.get("improvement", 0.0) * 100)
+                    before_rates.append(item.get("before_pass_rate", 0.0) * 100)
+                    after_rates.append(item.get("after_pass_rate", 0.0) * 100)
+                
+                if PANDAS_AVAILABLE:
+                    df_effectiveness = pd.DataFrame({
+                        "Topic": topics,
+                        "Improvement (%)": improvements,
+                        "Before Pass Rate (%)": before_rates,
+                        "After Pass Rate (%)": after_rates,
+                        "Source": [item.get("source", "Unknown")[:30] for item in effectiveness_list]
+                    })
+                    
+                    # Sort by improvement
+                    df_effectiveness = df_effectiveness.sort_values("Improvement (%)", ascending=False)
+                    
+                    # Bar chart
+                    fig = go.Figure()
+                    fig.add_trace(go.Bar(
+                        x=df_effectiveness["Topic"],
+                        y=df_effectiveness["Improvement (%)"],
+                        text=[f"+{i:.1f}%" for i in df_effectiveness["Improvement (%)"]],
+                        textposition="auto",
+                        marker_color=df_effectiveness["Improvement (%)"].apply(
+                            lambda x: "green" if x > 0 else "red"
                         )
-                        if r.status_code == 200:
-                            data = r.json()
-                            message = data.get("message", "Database reset successfully")
-                            if "restart" in message.lower():
-                                st.session_state["last_action"] = "✅ Database directory deleted! Please restart backend service on Railway, then refresh this page."
-                            else:
-                                st.session_state["last_action"] = "✅ Database reset successfully!"
-                            st.rerun()
-                        else:
-                            error_detail = r.json().get('detail', 'Unknown error') if r.status_code != 200 else 'Unknown error'
-                            st.session_state["last_error"] = f"❌ Failed to reset database: {error_detail}"
-                    st.rerun()
-                except requests.exceptions.RequestException as e:
-                    st.session_state["last_error"] = f"❌ Connection error: {e}. Check if backend is running."
-                    st.rerun()
-                except Exception as e:
-                    st.session_state["last_error"] = f"❌ Failed to reset database: {e}"
-                    st.rerun()
-            st.caption("⚠️ This will delete all vector data!")
-            st.caption("💡 If reset fails, restart backend service on Railway")
-    
-    # Display persistent messages from last action
-    if "last_action" in st.session_state:
-        st.success(st.session_state["last_action"])
-        # Keep message for one more rerun cycle
-        if "msg_displayed" not in st.session_state:
-            st.session_state["msg_displayed"] = True
-        else:
-            # Clear after showing once
-            del st.session_state["last_action"]
-            del st.session_state["msg_displayed"]
-    
-    if "last_error" in st.session_state:
-        st.error(st.session_state["last_error"])
-        # Keep error for one more rerun cycle
-        if "error_displayed" not in st.session_state:
-            st.session_state["error_displayed"] = True
-        else:
-            # Clear after showing once
-            del st.session_state["last_error"]
-            del st.session_state["error_displayed"]
-    
-    st.markdown("---")
-    st.subheader("Quick Actions")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🚀 Run Learning Session", width='stretch'):
-            try:
-                r = requests.post(
-                    f"{API_BASE}/api/learning/sessions/run",
-                    json={
-                        "prompt": "demo: quick session",
-                        "response": "demo response",
-                        "model_used": "deepseek-chat",
-                    },
-                    timeout=30,
-                )
-                if r.status_code == 200:
-                    status = r.json().get("status", "Recorded")
-                    st.session_state["last_action"] = f"✅ Learning session recorded successfully! Status: {status}"
-                    st.rerun()
+                    ))
+                    fig.update_layout(
+                        title="Learning Effectiveness (Validation Pass Rate Improvement)",
+                        xaxis_title="Topic",
+                        yaxis_title="Improvement (%)",
+                        height=400
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Table
+                    st.dataframe(df_effectiveness, use_container_width=True)
                 else:
-                    st.session_state["last_error"] = f"❌ Failed to record session: {r.json().get('detail', 'Unknown error')}"
-            except Exception as e:
-                st.session_state["last_error"] = f"❌ Learning session not recorded: {e}"
-                st.rerun()
-    
-    with col2:
-        if st.button("📊 Refresh Dashboard", use_container_width=True, help="Refresh all metrics and status (this will clear temporary messages)"):
-            # Clear any temporary messages before rerun
-            if "last_action" in st.session_state:
-                del st.session_state["last_action"]
-            if "last_error" in st.session_state:
-                del st.session_state["last_error"]
-            st.rerun()
-    
-    # Help text
-    st.caption("💡 **Tip:** 'Run Learning Session' records a manual learning interaction. 'Refresh Dashboard' updates all displayed metrics.")
-
-
-def page_rag():
-    st.markdown("## Retrieval-Augmented Generation (RAG)")
-    st.caption("Add knowledge and test retrieval context")
-
-    with st.expander("Add Knowledge", expanded=True):
-        st.markdown("**💡 Tip:** Add knowledge that StillMe can use to answer questions. Examples: definitions, FAQs, documentation, policies.")
-        
-        content = st.text_area(
-            "Content", 
-            height=120,
-            placeholder="Enter the knowledge content here. For example:\n\nStillMe is a self-evolving AI system that learns continuously from user interactions and external sources. It uses RAG (Retrieval-Augmented Generation) to provide accurate, context-aware responses.",
-            help="The actual text content you want StillMe to learn"
-        )
-        
-        col_source, col_type = st.columns(2)
-        with col_source:
-            source = st.text_input(
-                "Source", 
-                value="manual",
-                help="Source identifier (e.g., 'manual', 'CRITICAL_FOUNDATION', 'website', 'documentation')"
-            )
-        with col_type:
-            content_type = st.selectbox(
-                "Type", 
-                ["knowledge", "conversation", "foundational"], 
-                index=0,
-                help="'knowledge' for general information, 'conversation' for chat examples, 'foundational' for StillMe core knowledge"
-            )
-        
-        # Advanced metadata fields (collapsible)
-        with st.expander("Advanced Metadata (Optional)", expanded=False):
-            tags_input = st.text_input(
-                "Tags",
-                value="",
-                help="Comma-separated tags (e.g., 'foundational:stillme,CRITICAL_FOUNDATION,self-tracking')"
-            )
-            importance_score = st.slider(
-                "Importance Score",
-                min_value=0.0,
-                max_value=1.0,
-                value=0.5,
-                step=0.1,
-                help="Importance score (0.0-1.0). Higher = more important for knowledge alerts. Use 1.0 for foundational knowledge."
-            )
-            title_input = st.text_input(
-                "Title (Optional)",
-                value="",
-                help="Optional title for this knowledge (auto-extracted from first line if not provided)"
-            )
-        
-        col_add, col_info = st.columns([1, 2])
-        with col_add:
-            # Admin-only: RAG upload
-            if not is_admin():
-                st.warning("🔐 **Admin access required** to add knowledge to RAG.\n\nClick 'Login as Admin' in sidebar to enable this feature.")
-                st.button("Add to Vector DB", type="primary", use_container_width=True, disabled=True)
-            elif st.button("Add to Vector DB", type="primary", use_container_width=True):
-                if not content.strip():
-                    st.warning("⚠️ Please enter some content first!")
-                else:
-                    try:
-                        # Show progress message
-                        progress_msg = st.empty()
-                        progress_msg.info("⏳ Adding knowledge... This may take 30-90 seconds (creating embeddings and saving to vector DB)")
-                        
-                        # Build metadata from advanced fields
-                        metadata = {}
-                        if tags_input.strip():
-                            # Convert tags string to list, then back to comma-separated string (ChromaDB format)
-                            tags_list = [tag.strip() for tag in tags_input.split(",") if tag.strip()]
-                            if tags_list:
-                                metadata["tags"] = ",".join(tags_list)  # ChromaDB uses comma-separated string
-                        if importance_score != 0.5:  # Only include if different from default
-                            metadata["importance_score"] = importance_score
-                        if title_input.strip():
-                            metadata["title"] = title_input.strip()
-                        
-                        # Auto-set foundational metadata if type is "foundational"
-                        if content_type == "foundational":
-                            metadata["foundational"] = "stillme"
-                            metadata["type"] = "foundational"
-                            if source != "CRITICAL_FOUNDATION":
-                                # Auto-update source if not already set
-                                source = "CRITICAL_FOUNDATION"
-                            if "tags" not in metadata:
-                                metadata["tags"] = "foundational:stillme,CRITICAL_FOUNDATION"
-                            if "importance_score" not in metadata:
-                                metadata["importance_score"] = 1.0
-                        
-                        request_json = {
-                            "content": content,
-                            "source": source,
-                            "content_type": content_type,
-                        }
-                        if metadata:
-                            request_json["metadata"] = metadata
-                        
-                        r = requests.post(
-                            f"{API_BASE}/api/rag/add_knowledge",
-                            headers=get_api_headers(),
-                            json=request_json,
-                            timeout=180,  # Increased to 180s to handle embedding generation
-                        )
-                        r.raise_for_status()  # Raise exception for 4xx/5xx errors
-                        progress_msg.empty()
-                        
-                        if r.status_code == 200:
-                            result = r.json()
-                            st.success(f"✅ {result.get('status', 'Knowledge added successfully!')}")
-                            st.info(f"📊 Type: {result.get('content_type', content_type)} | Source: {source}")
-                            # Clear content after successful add (optional)
-                            st.rerun()
-                        else:
-                            error_detail = r.json().get('detail', 'Unknown error')
-                            st.error(f"❌ Failed: {error_detail}")
-                            st.caption("💡 Tip: If this persists, check backend logs on Railway. The embedding model may be loading.")
-                    except requests.exceptions.Timeout:
-                        st.error("❌ Request timed out after 3 minutes. The backend may be slow or the embedding model is still loading.")
-                        st.warning("💡 **Solutions:**\n1. Wait a moment and try again (model may be cached now)\n2. Check backend logs on Railway\n3. Try with shorter content")
-                    except requests.exceptions.ConnectionError:
-                        st.error("❌ Connection error. Backend may be down or restarting.")
-                        st.info("💡 Check Railway dashboard to ensure backend service is running.")
-                    except Exception as e:
-                        error_str = str(e)
-                        if "timeout" in error_str.lower() or "timed out" in error_str.lower():
-                            st.error(f"❌ Request timed out: {error_str}")
-                            st.warning("💡 The embedding process is taking longer than expected. Try again in a moment.")
-                        else:
-                            st.error(f"❌ Failed: {error_str}")
-        
-        with col_info:
-            # Show current stats
-            rag_stats = get_json("/api/rag/stats", {}).get("stats", {})
-            if rag_stats:
-                st.caption(f"📚 Current: {rag_stats.get('knowledge_documents', 0)} knowledge docs, {rag_stats.get('conversation_documents', 0)} conversation docs")
-
-    st.markdown("---")
-    st.subheader("Query RAG")
-    query = st.text_input("Your query", value="What is StillMe?")
-    k_limit, c_limit = st.columns(2)
-    with k_limit:
-        knowledge_limit = st.number_input("Knowledge limit", 1, 10, 3)
-    with c_limit:
-        conversation_limit = st.number_input("Conversation limit", 0, 10, 2)
-    if st.button("Retrieve Context"):
-        try:
-            r = requests.post(
-                f"{API_BASE}/api/rag/query",
-                json={
-                    "query": query,
-                    "knowledge_limit": int(knowledge_limit),
-                    "conversation_limit": int(conversation_limit),
-                },
-                timeout=60,
-            )
-            data = r.json()
-            st.success("Context retrieved")
-            st.text_area("Context", data.get("context", ""), height=160)
-        except Exception as e:
-            st.error(f"Failed: {e}")
-
-
-def page_learning():
-    st.markdown("## Learning Sessions")
-    st.caption("Record a learning session and score responses")
-
-    prompt = st.text_area("Prompt", "Hello StillMe")
-    response = st.text_area("Response", "This is a demo response")
-    model_used = st.selectbox("Model", ["deepseek-chat", "ollama", "openai"], index=0)
-    cols = st.columns(2)
-    with cols[0]:
-        if st.button("Record Session", type="primary"):
-            try:
-                r = requests.post(
-                    f"{API_BASE}/api/learning/sessions/run",
-                    json={
-                        "prompt": prompt,
-                        "response": response,
-                        "model_used": model_used,
-                    },
-                    timeout=10,
-                )
-                st.success(r.json().get("status", "Recorded"))
-            except Exception as e:
-                st.error(f"Failed: {e}")
-    with cols[1]:
-        if st.button("Score Response"):
-            try:
-                r = requests.post(
-                    f"{API_BASE}/api/learning/score_response",
-                    json={
-                        "prompt": prompt,
-                        "response": response,
-                        "model_used": model_used,
-                    },
-                    timeout=30,
-                )
-                data = r.json()
-                st.success(f"Accuracy: {data.get('accuracy_score', 0):.3f}")
-            except Exception as e:
-                st.error(f"Failed: {e}")
-
-    st.markdown("---")
-    st.subheader("Current Metrics")
-    metrics = get_json("/api/learning/accuracy_metrics", {}).get("metrics", {})
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Total Responses", metrics.get("total_responses", 0))
-    c2.metric("Average Accuracy", f"{metrics.get('average_accuracy', 0.0):.3f}")
-    c3.metric("Trend", metrics.get("trend", "N/A"))
-    
-    st.markdown("---")
-    st.subheader("📚 Raw Learning Feed (Fetched Data)")
-    st.caption("Display ALL items fetched from the latest successful run")
-    
-    # Get fetch history
-    try:
-        fetch_data = get_json("/api/learning/rss/fetch-history", {}).get("items", [])
-        
-        if not fetch_data:
-            st.info("ℹ️ No fetch data available. Run a learning cycle to view data.")
-        else:
-            # Status color mapping
-            def get_status_color(status: str) -> str:
-                if status == "Added to RAG":
-                    return "🟢"
-                elif status == "Filtered: Duplicate":
-                    return "🟡"
-                elif status == "Filtered: Low Score":
-                    return "⚪"
-                elif status == "Filtered: Ethical/Bias Flag":
-                    return "🔴"
-                else:
-                    return "⚪"
-            
-            # Create scrollable table
-            st.markdown(f"**Total items:** {len(fetch_data)}")
-            
-            # Display as table
-            table_data = []
-            for item in fetch_data:
-                status_icon = get_status_color(item.get("status", ""))
-                table_data.append({
-                    "Status": f"{status_icon} {item.get('status', 'Unknown')}",
-                    "Title/Headline": item.get("title", "N/A")[:80] + ("..." if len(item.get("title", "")) > 80 else ""),
-                    "Source URL": item.get("source_url", "N/A"),
-                    "Fetch Timestamp": _format_timestamp_gmt7(item.get("fetch_timestamp", "")) if item.get("fetch_timestamp") else "N/A"
-                })
-            
-            if table_data:
-                if PANDAS_AVAILABLE and pd is not None:
-                    try:
-                        df = pd.DataFrame(table_data)
-                        st.dataframe(df, use_container_width=True, height=400)
-                    except Exception as e:
-                        st.error(f"⚠️ Error creating DataFrame: {str(e)}")
-                        # Fallback: display as list
-                        for item in table_data:
-                            st.json(item)
-                else:
-                    st.warning("⚠️ pandas is not available. Displaying data as JSON:")
-                    for item in table_data:
-                        st.json(item)
-                
-                # Show details in expander
-                st.markdown("### Item Details")
-                for idx, item in enumerate(fetch_data[:20]):  # Show first 20
-                    with st.expander(f"{get_status_color(item.get('status', ''))} {item.get('title', 'No title')[:60]}..."):
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.write(f"**Source URL:** {item.get('source_url', 'N/A')}")
-                            st.write(f"**Link:** [{item.get('link', 'N/A')[:50]}...]({item.get('link', '#')})" if item.get('link') else "**Link:** N/A")
-                            st.write(f"**Status:** {item.get('status', 'Unknown')}")
-                        with col2:
-                            st.write(f"**Fetch Timestamp:** {_format_timestamp_gmt7(item.get('fetch_timestamp', '')) if item.get('fetch_timestamp') else 'N/A'}")
-                            if item.get('status_reason'):
-                                st.write(f"**Reason:** {item.get('status_reason')}")
-                            if item.get('vector_id'):
-                                # Note: This is a tracking ID, not the actual ChromaDB vector ID
-                                # The actual ChromaDB ID format is: knowledge_<uuid> (generated during embedding)
-                                st.write(f"**Tracking ID:** `{item.get('vector_id')}`")
-                                st.caption("ℹ️ This is a tracking ID for fetch history. The actual ChromaDB vector ID is generated during embedding.")
-                        st.write(f"**Summary:** {item.get('summary', 'N/A')[:200]}...")
-    except Exception as e:
-        st.error(f"Error fetching data: {e}")
-
-
-# Community page has been moved to standalone community.py
-# Access it via the floating Community button in bottom-left corner
-
-
-def page_validation():
-    """Validation metrics and monitoring page"""
-    st.markdown("## Validation Metrics")
-    st.caption("Monitor validator chain performance and reduce hallucinations")
-    
-    # Check if validators are enabled
-    try:
-        status_data = get_json("/api/status", {})
-        validators_enabled = status_data.get("validators_enabled", False)
-    except Exception:
-        validators_enabled = False
-    
-    # Get validation metrics
-    try:
-        metrics_data = get_json("/api/validators/metrics", {}).get("metrics", {})
-    except Exception:
-        metrics_data = {}
-    
-    total_validations = metrics_data.get("total_validations", 0)
-    
-    if total_validations == 0:
-        if validators_enabled:
-            st.info(
-                "✅ **Validators are enabled** (`ENABLE_VALIDATORS=true`)\n\n"
-                "📊 **No validation data yet.** Send a chat message via the floating widget to start collecting metrics.\n\n"
-                "💡 Validation metrics are recorded automatically when you chat with StillMe through any interface."
-            )
-        else:
-            st.warning(
-                "⚠️ **Validators are disabled** (`ENABLE_VALIDATORS=false`)\n\n"
-                "To enable validators:\n"
-                "1. Set `ENABLE_VALIDATORS=true` in your backend environment variables\n"
-                "2. Restart the backend service\n"
-                "3. Send a chat message to start collecting validation metrics"
-            )
-        return
-    
-    # Metrics overview
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Total Validations", metrics_data.get("total_validations", 0))
-    with col2:
-        pass_rate = metrics_data.get("pass_rate", 0.0)
-        st.metric("Pass Rate", f"{pass_rate:.1%}")
-    with col3:
-        st.metric("Passed", metrics_data.get("passed_count", 0))
-    with col4:
-        st.metric("Failed", metrics_data.get("failed_count", 0))
-    
-    st.markdown("---")
-    
-    # Per-validator metrics (NEW)
-    st.subheader("📊 Per-Validator Performance")
-    st.caption("Detailed breakdown of each validator's performance")
-    
-    # Get per-validator metrics from new endpoint
-    try:
-        # Time period selector
-        col_period1, col_period2 = st.columns([1, 4])
-        with col_period1:
-            time_period = st.selectbox("Time Period", [1, 7, 30], index=1, format_func=lambda x: f"Last {x} days")
-        
-        admin_metrics = get_json(f"/api/admin/validation-metrics?days={time_period}", {})
-        
-        if admin_metrics and "validators" in admin_metrics:
-            total_responses = admin_metrics.get("total_responses", 0)
-            total_fallbacks = admin_metrics.get("total_fallbacks", 0)
-            validators = admin_metrics.get("validators", [])
-            confidence_dist = admin_metrics.get("confidence_distribution", {})
-            
-            # Overall stats
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Total Responses", total_responses)
-            with col2:
-                st.metric("Total Fallbacks", total_fallbacks)
-            with col3:
-                fallback_rate = (total_fallbacks / total_responses * 100) if total_responses > 0 else 0.0
-                st.metric("Fallback Rate", f"{fallback_rate:.1f}%")
-            
-            # Confidence distribution
-            if confidence_dist.get("count", 0) > 0:
-                st.markdown("**Confidence Score Distribution:**")
-                col_conf1, col_conf2, col_conf3 = st.columns(3)
-                with col_conf1:
-                    st.metric("Average", f"{confidence_dist.get('avg', 0.0):.3f}")
-                with col_conf2:
-                    st.metric("Min", f"{confidence_dist.get('min', 0.0):.3f}")
-                with col_conf3:
-                    st.metric("Max", f"{confidence_dist.get('max', 0.0):.3f}")
-            
-            st.markdown("---")
-            
-            # Per-validator table
-            if validators:
-                st.markdown("**Per-Validator Breakdown:**")
-                
-                # Check if pandas is available
-                if not PANDAS_AVAILABLE or pd is None:
-                    st.error("⚠️ pandas is not available. Cannot display per-validator table.")
-                    # Fallback: display as markdown table
-                    st.markdown("| Validator | Total Checks | Passed | Failed | Pass Rate | Status |")
-                    st.markdown("|-----------|--------------|--------|--------|-----------|--------|")
-                    for v in validators:
-                        pass_rate = v.get('pass_rate', 0.0)
-                        status = "✅" if pass_rate >= 0.8 else "⚠️" if pass_rate >= 0.5 else "❌"
-                        st.markdown(f"| {v.get('name', 'Unknown')} | {v.get('total_checks', 0)} | {v.get('passed', 0)} | {v.get('failed', 0)} | {pass_rate:.1%} | {status} |")
-                else:
-                    try:
-                        # Create DataFrame for table display
-                        table_data = []
-                        for v in validators:
-                            table_data.append({
-                                "Validator": v.get("name", "Unknown"),
-                                "Total Checks": v.get("total_checks", 0),
-                                "Passed": v.get("passed", 0),
-                                "Failed": v.get("failed", 0),
-                                "Pass Rate": f"{v.get('pass_rate', 0.0):.1%}",
-                                "Status": "✅" if v.get("pass_rate", 0.0) >= 0.8 else "⚠️" if v.get("pass_rate", 0.0) >= 0.5 else "❌"
-                            })
-                        
-                        df_validators = pd.DataFrame(table_data)
-                        st.dataframe(df_validators, use_container_width=True, hide_index=True)
-                        
-                        # Bar chart for pass rates
-                        if len(validators) > 0:
-                            st.markdown("**Pass Rate by Validator:**")
-                            chart_data = pd.DataFrame({
-                                "Validator": [v.get("name", "Unknown") for v in validators],
-                                "Pass Rate": [v.get("pass_rate", 0.0) * 100 for v in validators]
-                            })
-                            st.bar_chart(chart_data.set_index("Validator"), height=300)
-                    except Exception as pd_error:
-                        st.error(f"⚠️ Error creating per-validator table: {str(pd_error)}")
-                        # Fallback: display as markdown table
-                        st.markdown("| Validator | Total Checks | Passed | Failed | Pass Rate | Status |")
-                        st.markdown("|-----------|--------------|--------|--------|-----------|--------|")
-                        for v in validators:
-                            pass_rate = v.get('pass_rate', 0.0)
-                            status = "✅" if pass_rate >= 0.8 else "⚠️" if pass_rate >= 0.5 else "❌"
-                            st.markdown(f"| {v.get('name', 'Unknown')} | {v.get('total_checks', 0)} | {v.get('passed', 0)} | {v.get('failed', 0)} | {pass_rate:.1%} | {status} |")
-                
-                # Failure reasons breakdown (expandable)
-                with st.expander("🔍 Detailed Failure Reasons"):
-                    for v in validators:
-                        failure_reasons = v.get("failure_reasons", {})
-                        if failure_reasons:
-                            st.markdown(f"**{v.get('name', 'Unknown')}:**")
-                            for reason, count in sorted(failure_reasons.items(), key=lambda x: x[1], reverse=True):
-                                st.write(f"- `{reason}`: {count} times")
+                    # Fallback
+                    for item in effectiveness_list:
+                        improvement = item.get("improvement", 0.0) * 100
+                        st.write(f"**{item.get('topic', 'Unknown')}**: {improvement:+.1f}% improvement")
             else:
-                st.info("No per-validator data available. Send some chat messages to start collecting metrics.")
+                st.info("No learning effectiveness data available yet. Data will appear after StillMe learns and validates responses.")
         else:
-            st.warning("⚠️ Could not load per-validator metrics. The endpoint may not be available yet.")
+            st.warning("Could not fetch learning effectiveness data.")
     except Exception as e:
-        st.warning(f"⚠️ Error loading per-validator metrics: {str(e)}")
-        st.info("💡 This feature requires validation data. Send some chat messages to start collecting metrics.")
+        st.error(f"Error loading learning effectiveness: {e}")
     
-    st.markdown("---")
-    
-    # Average overlap score
-    avg_overlap = metrics_data.get("avg_overlap_score", 0.0)
-    st.subheader("Evidence Overlap")
-    st.metric("Average Overlap Score", f"{avg_overlap:.3f}")
-    st.caption("Higher overlap indicates better grounding in RAG context")
-    
-    st.markdown("---")
-    
-    # Reasons histogram
-    reasons_hist = metrics_data.get("reasons_histogram", {})
-    if reasons_hist:
-        st.subheader("Failure Reasons")
-        st.bar_chart(reasons_hist)
-    else:
-        st.info("No validation failures recorded")
-    
-    st.markdown("---")
-    
-    # Recent logs
-    recent_logs = metrics_data.get("recent_logs", [])
-    if recent_logs:
-        st.subheader("Recent Validation Logs (Last 10)")
-        for log in recent_logs[-10:]:
-            status = "✅" if log.get("passed", False) else "❌"
-            timestamp = log.get("timestamp", "Unknown")
-            # Format timestamp if it's a valid ISO string
-            if timestamp and timestamp != "Unknown":
-                timestamp = _format_timestamp_gmt7(timestamp)
-            reasons = log.get("reasons", [])
-            overlap = log.get("overlap_score", 0.0)
-            
-            with st.expander(f"{status} {timestamp}"):
-                st.write(f"**Passed:** {log.get('passed', False)}")
-                if reasons:
-                    st.write(f"**Reasons:** {', '.join(reasons)}")
-                if overlap > 0:
-                    st.write(f"**Overlap Score:** {overlap:.3f}")
-    else:
-        st.info("No recent validation logs")
-    
-    st.markdown("---")
-    st.subheader("🛡️ Retained Knowledge Audit Log")
-    st.caption("Display knowledge items that have been retained, embedded and successfully added to ChromaDB")
-    
-    # Get retained knowledge
+    # Curriculum Recommendations
+    st.markdown("##### Curriculum Recommendations")
     try:
-        retained_data = get_json("/api/learning/retained?limit=100", {}).get("knowledge_items", [])
+        curriculum_data = get_json(f"/api/meta-learning/curriculum?days={days}&max_items=20", {}, timeout=30)
         
-        if not retained_data:
-            st.info("ℹ️ No retained knowledge data available. The system will automatically add after learning.")
-        else:
-            st.markdown(f"**Total retained items:** {len(retained_data)}")
+        if curriculum_data and "curriculum" in curriculum_data:
+            curriculum = curriculum_data["curriculum"]
             
-            # Filter options
-            col_filter1, col_filter2 = st.columns(2)
-            with col_filter1:
-                min_retention = st.slider("Minimum Retention Score", 0.0, 1.0, 0.7, 0.1)
-            with col_filter2:
-                search_term = st.text_input("🔍 Search (Source URL, Content)", "")
-            
-            # Filter data
-            filtered_data = retained_data
-            if min_retention > 0:
-                filtered_data = [item for item in filtered_data if item.get("retention_score", 0.0) >= min_retention]
-            if search_term:
-                search_lower = search_term.lower()
-                filtered_data = [
-                    item for item in filtered_data
-                    if search_lower in item.get("source_url", "").lower() or
-                       search_lower in item.get("retained_content_snippet", "").lower()
-                ]
-            
-            st.markdown(f"**Items after filtering:** {len(filtered_data)}")
-            
-            # Display as table
-            if filtered_data:
-                table_data = []
-                for item in filtered_data:
-                    table_data.append({
-                        "Timestamp Added": _format_timestamp_gmt7(item.get("timestamp_added", "")) if item.get("timestamp_added") else "N/A",
-                        "Source URL (Link)": item.get("source_url", "N/A")[:60] + ("..." if len(item.get("source_url", "")) > 60 else ""),
-                        "Content Snippet": item.get("retained_content_snippet", "N/A")[:100] + ("..." if len(item.get("retained_content_snippet", "")) > 100 else ""),
-                        "Tracking ID": item.get("vector_id", "N/A"),
-                        "Retention Score": f"{item.get('retention_score', 0.0):.2f}"
-                    })
-                
-                if PANDAS_AVAILABLE and pd is not None:
-                    try:
-                        df = pd.DataFrame(table_data)
-                        st.dataframe(df, use_container_width=True, height=400)
-                    except Exception as e:
-                        st.error(f"⚠️ Error creating DataFrame: {str(e)}")
-                        # Fallback: display as list
-                        for item in table_data:
-                            st.json(item)
-                else:
-                    st.warning("⚠️ pandas is not available. Displaying data as JSON:")
-                    for item in table_data:
-                        st.json(item)
-                
-                # Show details in expander
-                st.markdown("### Item Details")
-                for idx, item in enumerate(filtered_data[:20]):  # Show first 20
-                    with st.expander(f"📄 {item.get('source_url', 'Unknown')[:50]}... (Score: {item.get('retention_score', 0.0):.2f})"):
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            st.write(f"**Timestamp Added:** {_format_timestamp_gmt7(item.get('timestamp_added', '')) if item.get('timestamp_added') else 'N/A'}")
-                            st.write(f"**Source URL:** [{item.get('source_url', 'N/A')}]({item.get('source_url', '#')})")
-                            st.write(f"**Tracking ID:** `{item.get('vector_id', 'N/A')}`")
-                            st.caption("ℹ️ Tracking ID for fetch history. Actual ChromaDB vector ID is generated during embedding.")
-                        with col2:
-                            st.write(f"**Retention Score:** {item.get('retention_score', 0.0):.2f}")
-                            st.write(f"**Access Count:** {item.get('access_count', 0)}")
-                        st.markdown("**Retained Content Snippet (5-10 sentences):**")
-                        st.text_area("", item.get("retained_content_snippet", "N/A"), height=150, key=f"snippet_{idx}", disabled=True)
-                        if st.checkbox("View full content", key=f"full_{idx}"):
-                            st.text_area("Full Content", item.get("full_content", "N/A"), height=200, key=f"full_content_{idx}", disabled=True)
+            if curriculum:
+                # Display curriculum items
+                for i, item in enumerate(curriculum[:20], 1):
+                    priority = item.get("priority", 0.0)
+                    topic = item.get("topic", "Unknown")
+                    source = item.get("source", "Unknown")
+                    reason = item.get("reason", "")
+                    
+                    with st.expander(f"#{i} {topic} (Priority: {priority:.2f})"):
+                        st.write(f"**Source**: {source}")
+                        st.write(f"**Reason**: {reason}")
+                        st.write(f"**Estimated Improvement**: {item.get('estimated_improvement', 0.0):.1%}")
+                        st.write(f"**Knowledge Gap Urgency**: {item.get('knowledge_gap_urgency', 0.0):.2f}")
             else:
-                st.info("No items match the filter.")
+                st.info("No curriculum recommendations available yet.")
+        else:
+            st.warning("Could not fetch curriculum data.")
     except Exception as e:
-        st.error(f"Error fetching retained knowledge data: {e}")
+        st.error(f"Error loading curriculum: {e}")
 
 
-def page_nested_learning():
-    """Nested Learning metrics and visualization page"""
-    st.header("🔬 Nested Learning Metrics")
-    st.caption("Tiered update frequency system - reduces embedding costs by updating knowledge at different frequencies")
+def _page_meta_learning_strategy():
+    """Phase 3: Strategy Optimization visualization"""
+    st.markdown("#### Strategy Optimization")
+    st.caption("Track and optimize strategies (similarity thresholds, keywords, etc.)")
     
-    # Fetch metrics
-    metrics = get_json("/api/learning/nested-learning/metrics", {}, timeout=30)
+    # Days selector
+    days = st.slider("Analysis Period (days)", 1, 365, 30, key="strategy_days")
     
-    if not metrics:
-        st.error("❌ **Failed to fetch metrics from backend**")
-        st.info("Please check backend logs and ensure backend is running.")
-        return
-    
-    if metrics.get("enabled") is False:
-        st.warning("⚠️ **Nested Learning is disabled**")
-        message = metrics.get("message", "Nested Learning is disabled")
-        st.info(f"{message}\n\n**To enable:** Set `ENABLE_CONTINUUM_MEMORY=true` in backend environment variables, then restart/redeploy backend.")
+    # Strategy Effectiveness
+    st.markdown("##### Strategy Effectiveness")
+    try:
+        strategy_data = get_json(f"/api/meta-learning/strategy-effectiveness?days={days}", {}, timeout=30)
         
-        # Show current API response for debugging
-        with st.expander("🔍 Debug: API Response"):
-            st.json(metrics)
-        return
-    
-    # Overview metrics
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Current Cycle", metrics.get("cycle_count", 0))
-    with col2:
-        cost_reduction = metrics.get("cost_reduction", {})
-        st.metric("Cost Reduction", f"{cost_reduction.get('reduction_percentage', 0):.1f}%")
-    with col3:
-        total_ops = cost_reduction.get("total_operations", 0)
-        st.metric("Total Operations", total_ops)
-    with col4:
-        skipped_ops = cost_reduction.get("skipped_operations", 0)
-        st.metric("Skipped Operations", skipped_ops)
-    
-    st.markdown("---")
-    
-    # Tier Distribution
-    st.subheader("📊 Tier Distribution")
-    tier_dist = metrics.get("tier_distribution", {})
-    if tier_dist:
-        col1, col2 = st.columns(2)
-        with col1:
-            # Bar chart
-            tiers = ["L0", "L1", "L2", "L3"]
-            counts = [tier_dist.get(tier, 0) for tier in tiers]
-            fig = go.Figure(data=[
-                go.Bar(x=tiers, y=counts, marker_color=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728'])
-            ])
-            fig.update_layout(
-                title="Knowledge Items per Tier",
-                xaxis_title="Tier",
-                yaxis_title="Count",
-                height=300
-            )
-            st.plotly_chart(fig, width='stretch')
-        
-        with col2:
-            # Pie chart
-            if sum(counts) > 0:
-                fig = go.Figure(data=[go.Pie(
-                    labels=tiers,
-                    values=counts,
-                    hole=0.3,
-                    marker_colors=['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
-                )])
-                fig.update_layout(
-                    title="Tier Distribution (%)",
-                    height=300
-                )
-                st.plotly_chart(fig, width='stretch')
-            else:
-                st.info("No knowledge items in tiers yet. Run a learning cycle to populate tiers.")
-    else:
-        st.info("No tier distribution data available yet.")
-    
-    st.markdown("---")
-    
-    # Update Frequency & Operations
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("🔄 Update Frequency")
-        update_freq = metrics.get("tier_update_frequency", {})
-        update_counts = metrics.get("tier_update_counts", {})
-        skipped_counts = metrics.get("tier_skipped_counts", {})
-        
-        for tier in ["L0", "L1", "L2", "L3"]:
-            freq = update_freq.get(tier, 0)
-            updated = update_counts.get(tier, 0)
-            skipped = skipped_counts.get(tier, 0)
-            st.write(f"**{tier}**: Every {freq} cycles | Updated: {updated} | Skipped: {skipped}")
-    
-    with col2:
-        st.subheader("💾 Embedding Operations")
-        emb_ops = metrics.get("embedding_operations", {})
-        total = emb_ops.get("total", 0)
-        by_tier = emb_ops.get("by_tier", {})
-        
-        st.metric("Total Embeddings", total)
-        for tier in ["L0", "L1", "L2", "L3"]:
-            count = by_tier.get(tier, 0)
-            if total > 0:
-                pct = (count / total) * 100
-                st.write(f"**{tier}**: {count} ({pct:.1f}%)")
-    
-    st.markdown("---")
-    
-    # Surprise Score Statistics
-    st.subheader("🎯 Surprise Score Statistics")
-    surprise_stats = metrics.get("surprise_score_stats", {})
-    if surprise_stats and surprise_stats.get("count", 0) > 0:
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric("Count", surprise_stats.get("count", 0))
-        with col2:
-            st.metric("Min", f"{surprise_stats.get('min', 0):.3f}")
-        with col3:
-            st.metric("Max", f"{surprise_stats.get('max', 0):.3f}")
-        with col4:
-            st.metric("Average", f"{surprise_stats.get('avg', 0):.3f}")
-        
-        st.caption("Surprise score determines tier routing: L0 (<0.4), L1 (0.4-0.6), L2 (0.6-0.8), L3 (≥0.8)")
-    else:
-        st.info("No surprise score data yet. Run a learning cycle to collect statistics.")
-    
-    st.markdown("---")
-    
-    # Cost Reduction Details
-    st.subheader("💰 Cost Reduction Analysis")
-    cost_reduction = metrics.get("cost_reduction", {})
-    total_ops = cost_reduction.get("total_operations", 0)
-    skipped_ops = cost_reduction.get("skipped_operations", 0)
-    reduction_pct = cost_reduction.get("reduction_percentage", 0)
-    
-    if total_ops > 0:
-        st.info(f"**{reduction_pct}% cost reduction** by skipping {skipped_ops} out of {total_ops} embedding operations")
-        
-        # Visualize cost reduction
-        fig = go.Figure(data=[
-            go.Bar(name="Performed", x=["Embedding Operations"], y=[total_ops], marker_color='#2ca02c'),
-            go.Bar(name="Skipped", x=["Embedding Operations"], y=[skipped_ops], marker_color='#ff7f0e')
-        ])
-        fig.update_layout(
-            title="Embedding Operations: Performed vs Skipped",
-            barmode='stack',
-            height=300
-        )
-        st.plotly_chart(fig, width='stretch')
-    else:
-        st.info("No embedding operations recorded yet. Run a learning cycle to see cost reduction metrics.")
-
-
-def sidebar(page_for_chat: str | None = None):
-    st.sidebar.header("Dashboard")
-    
-    # Initialize session state for page selector if not exists
-    if "page_selector" not in st.session_state:
-        st.session_state["page_selector"] = "Overview"
-    
-    page = st.sidebar.selectbox(
-        "Select Page",
-        ["Overview", "RAG", "Learning", "Validation", "Memory Health", "Nested Learning"],
-        key="page_selector",
-        index=0 if st.session_state["page_selector"] not in ["Overview", "RAG", "Learning", "Validation", "Memory Health", "Nested Learning"] else ["Overview", "RAG", "Learning", "Validation", "Memory Health", "Nested Learning"].index(st.session_state["page_selector"])
-    )
-
-    st.sidebar.success("Backend Connected")
-
-    st.sidebar.markdown("---")
-    
-    # Initialize chat history service (for floating widget)
-    if CHAT_HISTORY_AVAILABLE:
-        if "chat_history_service" not in st.session_state:
-            try:
-                st.session_state.chat_history_service = ChatHistory()
-            except Exception as e:
-                st.session_state.chat_history_service = None
-    else:
-        st.session_state.chat_history_service = None
-    
-    # Generate session ID from Streamlit session state
-    if "chat_session_id" not in st.session_state:
-        # Generate a stable session ID based on Streamlit session state
-        session_id_str = str(st.session_state.get("_session_id", id(st.session_state)))
-        st.session_state.chat_session_id = hashlib.md5(session_id_str.encode()).hexdigest()[:16]
-    
-    # Initialize chat history in session state
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
-        
-        # Load chat history from SQLite if available
-        if st.session_state.chat_history_service:
-            try:
-                db_history = st.session_state.chat_history_service.get_history(
-                    session_id=st.session_state.chat_session_id,
-                    limit=100
-                )
-                # Convert database format to session state format
-                for msg in db_history:
-                    st.session_state.chat_history.append({
-                        "role": "user",
-                        "content": msg["user_message"]
-                    })
-                    st.session_state.chat_history.append({
-                        "role": "assistant",
-                        "content": msg["assistant_response"],
-                        "confidence_score": msg.get("confidence_score"),
-                        "validation_info": {
-                            "passed": msg.get("validation_passed"),
-                            "context_docs_count": msg.get("context_docs_count")
-                        } if msg.get("validation_passed") is not None else None,
-                        "latency_metrics": f"Latency: {msg.get('latency', 0):.2f}s" if msg.get("latency") else None
-                    })
-            except Exception as e:
-                pass  # Silent fail - history loading is optional
-    
-    # Render floating chat widget (always enabled, no mode selector)
-    if FLOATING_CHAT_AVAILABLE:
-        # Render floating chat widget
-        render_floating_chat(
-            chat_history=st.session_state.chat_history,
-            api_base=API_BASE,
-            is_open=True
-        )
-        
-        # Note: Floating widget handles its own chat logic via JavaScript
-        st.sidebar.success("✅ **Floating Chat Widget Active!**")
-        st.sidebar.info("💡 Look for the **💬 chat button** in the **bottom-right corner** of your screen. Click it to open the resizable chat panel!")
-        
-        # CRITICAL: Cost warning for public chat
-        st.sidebar.markdown("---")
-        st.sidebar.warning("""
-        **💰 Cost Notice:**
-        
-        Public chat requires your own API key to prevent server cost exhaustion.
-        
-        **Get API keys:**
-        - DeepSeek: https://platform.deepseek.com
-        - OpenAI: https://platform.openai.com
-        
-        **Rate Limit:** 15 requests/day per IP (to protect API costs)
-        
-        **Admin:** Unlimited chat (uses server API key)
-        """)
-        
-        st.sidebar.markdown("---")
-        st.sidebar.caption("**Features:** Resize, Drag, Fullscreen, Overlay")
-    else:
-        st.sidebar.warning("⚠️ Floating chat widget is not available. Please check frontend components.")
-    
-    # Sidebar chat removed - using floating widget only
-    # (Old sidebar chat code removed for cleaner UX)
-    
-    return page
-
-
-def is_admin() -> bool:
-    """
-    Check if current user has admin privileges.
-    
-    Returns:
-        True if user is authenticated as admin, False otherwise
-    """
-    return st.session_state.get("is_admin", False)
-
-
-def check_authentication():
-    """
-    Role-Based Access Control (RBAC):
-    - Viewer (Public): No password required, read-only access (view metrics, chat)
-    - Admin: Password required, full control (RAG upload, scheduler control, database reset)
-    
-    This balances transparency (public can view/chat) with security (only admin can modify).
-    """
-    # Check if user is already authenticated as admin
-    if is_admin():
-        return
-    
-    # Get password from environment variable
-    dashboard_password = os.getenv("DASHBOARD_PASSWORD", "")
-    
-    # If no password is set, everyone is viewer (public access)
-    if not dashboard_password:
-        st.session_state["is_admin"] = False  # Viewer mode
-        return  # Allow public access (viewer mode)
-    
-    # Password is set - check if user wants admin access
-    # Show admin login option in sidebar (optional, doesn't block access)
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown("### 🔐 Admin Access")
-        
-        if st.session_state.get("show_admin_login", False):
-            password_input = st.text_input("Admin Password", type="password", key="admin_password_input")
+        if strategy_data and "strategies" in strategy_data:
+            strategies = strategy_data["strategies"]
             
-            if st.button("Login as Admin", type="primary", use_container_width=True):
-                if password_input == dashboard_password:
-                    st.session_state["is_admin"] = True
-                    st.session_state["show_admin_login"] = False
-                    st.success("✅ Admin access granted!")
-                    time.sleep(0.5)
-                    st.rerun()
+            if strategies:
+                # Prepare data
+                strategy_names = []
+                pass_rates = []
+                retention_rates = []
+                confidences = []
+                
+                for name, stats in strategies.items():
+                    strategy_names.append(name[:40] + "..." if len(name) > 40 else name)
+                    pass_rates.append(stats.get("validation_pass_rate", 0.0) * 100)
+                    retention_rates.append(stats.get("retention_rate", 0.0) * 100)
+                    confidences.append(stats.get("avg_confidence", 0.0) * 100)
+                
+                if PANDAS_AVAILABLE:
+                    df_strategies = pd.DataFrame({
+                        "Strategy": strategy_names,
+                        "Pass Rate (%)": pass_rates,
+                        "Retention Rate (%)": retention_rates,
+                        "Avg Confidence (%)": confidences,
+                        "Total Uses": [stats.get("total_uses", 0) for stats in strategies.values()]
+                    })
+                    
+                    # Sort by pass rate
+                    df_strategies = df_strategies.sort_values("Pass Rate (%)", ascending=False)
+                    
+                    # Bar chart
+                    fig = go.Figure()
+                    fig.add_trace(go.Bar(
+                        x=df_strategies["Strategy"],
+                        y=df_strategies["Pass Rate (%)"],
+                        text=[f"{p:.1f}%" for p in df_strategies["Pass Rate (%)"]],
+                        textposition="auto"
+                    ))
+                    fig.update_layout(
+                        title="Strategy Effectiveness (Validation Pass Rate)",
+                        xaxis_title="Strategy",
+                        yaxis_title="Pass Rate (%)",
+                        height=400
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                    # Table
+                    st.dataframe(df_strategies, use_container_width=True)
                 else:
-                    st.error("❌ Invalid password")
-            
-            if st.button("Cancel", use_container_width=True):
-                st.session_state["show_admin_login"] = False
-                st.rerun()
+                    # Fallback
+                    for name, stats in sorted(strategies.items(), key=lambda x: x[1].get("validation_pass_rate", 0), reverse=True):
+                        pass_rate = stats.get("validation_pass_rate", 0.0) * 100
+                        st.write(f"**{name}**: {pass_rate:.1f}% pass rate, {stats.get('total_uses', 0)} uses")
+            else:
+                st.info("No strategy data available yet. Data will appear after StillMe processes queries with different strategies.")
         else:
-            if st.button("🔐 Login as Admin", use_container_width=True):
-                st.session_state["show_admin_login"] = True
-                st.rerun()
+            st.warning("Could not fetch strategy effectiveness data.")
+    except Exception as e:
+        st.error(f"Error loading strategy effectiveness: {e}")
+    
+    # Optimal Threshold
+    st.markdown("##### Optimal Similarity Threshold")
+    try:
+        threshold_data = get_json(f"/api/meta-learning/optimize-threshold?days={days}", {}, timeout=30)
         
-        # Show current access level
-        if is_admin():
-            st.success("✅ **Admin Mode**\nFull control enabled")
+        if threshold_data and "optimal_threshold" in threshold_data:
+            optimal = threshold_data["optimal_threshold"]
+            analysis = threshold_data.get("analysis", {})
+            
+            st.metric("Optimal Threshold", f"{optimal:.2f}")
+            st.caption(analysis.get("recommendation", ""))
+            
+            # Show effectiveness comparison if available
+            if "effectiveness" in analysis:
+                effectiveness = analysis["effectiveness"]
+                st.markdown("###### Threshold Comparison")
+                for threshold, stats in effectiveness.items():
+                    score = stats.get("score", 0.0)
+                    pass_rate = stats.get("pass_rate", 0.0)
+                    st.write(f"**{threshold}**: Score {score:.2f}, Pass Rate {pass_rate:.1%}")
         else:
-            st.info("👁️ **Viewer Mode**\nRead-only access")
-
-
-def main():
-    # CRITICAL: Set page config FIRST (must be before any Streamlit commands)
-    st.set_page_config(
-        page_title="StillMe",
-        page_icon="🧠",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
+            st.warning("Could not fetch optimal threshold data.")
+    except Exception as e:
+        st.error(f"Error loading optimal threshold: {e}")
     
-    # CRITICAL: Check authentication AFTER page config but BEFORE any UI rendering
-    check_authentication()
-    
-    page = sidebar()
-    
-    # Render floating community panel (always visible, after sidebar to ensure it's on top)
-    if FLOATING_COMMUNITY_AVAILABLE:
-        try:
-            render_floating_community_panel()
-        except Exception as e:
-            # Fallback: Show link in sidebar if floating panel fails
-            st.sidebar.error(f"⚠️ Community panel error: {e}")
-            st.sidebar.markdown("---")
-            st.sidebar.markdown("💬 [Join StillMe Community](https://discord.gg/stillme)")
-    
-    # Route to appropriate page
-    if page == "Overview":
-        page_overview()
-    elif page == "RAG":
-        page_rag()
-    elif page == "Learning":
-        page_learning()
-    elif page == "Validation":
-        page_validation()
-    elif page == "Memory Health":
-        from dashboard_memory_health import page_memory_health
-        page_memory_health()
-    elif page == "Nested Learning":
-        page_nested_learning()
-
-    # Tiny auto-refresh toggle for live demos
-    with st.sidebar.expander("Auto Refresh"):
-        enabled = st.checkbox("Always rerun", value=False)
-        interval = st.slider("Seconds", 5, 60, 15)
-        if enabled:
-            time.sleep(interval)
-            st.rerun()
-
-
-if __name__ == "__main__":
-    main()
-
-
+    # Recommended Strategy
+    st.markdown("##### Recommended Strategy")
+    try:
+        recommended = get_json(f"/api/meta-learning/recommended-strategy?days={days}", {}, timeout=30)
+        
+        if recommended and "strategy_name" in recommended:
+            st.write(f"**Strategy**: {recommended['strategy_name']}")
+            st.write(f"**Recommendation**: {recommended.get('recommendation', '')}")
+            
+            if "effectiveness" in recommended:
+                eff = recommended["effectiveness"]
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Pass Rate", f"{eff.get('pass_rate', 0.0):.1%}")
+                with col2:
+                    st.metric("Retention Rate", f"{eff.get('retention_rate', 0.0):.1%}")
+                with col3:
+                    st.metric("Avg Confidence", f"{eff.get('avg_confidence', 0.0):.1%}")
+        else:
+            st.info("No recommended strategy available yet.")
+    except Exception as e:
+        st.error(f"Error loading recommended strategy: {e}")
