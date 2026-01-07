@@ -122,6 +122,21 @@ class LearningScheduler:
         logger.info(f"🔄 Starting learning cycle #{cycle_number}...")
         
         try:
+            # Stage 2 Phase 2: Apply curriculum before learning cycle
+            # This ensures we prioritize topics that provide most improvement
+            try:
+                from backend.learning.curriculum_applier import get_curriculum_applier
+                if self.content_curator:
+                    applier = get_curriculum_applier(curator=self.content_curator)
+                    applier.apply_curriculum(
+                        days=30,
+                        update_curator=True,
+                        update_scheduler=False  # Don't update scheduler during cycle
+                    )
+                    logger.debug("✅ Applied curriculum to learning cycle")
+            except Exception as curriculum_error:
+                logger.debug(f"Could not apply curriculum: {curriculum_error}")
+            
             # Step 1: Fetch from all sources
             all_entries = self.source_integration.fetch_all_sources(
                 max_items_per_source=5,

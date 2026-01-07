@@ -14,6 +14,9 @@ from datetime import datetime
 
 from backend.learning.document_usage_tracker import get_document_usage_tracker
 from backend.learning.source_trust_calculator import get_source_trust_calculator
+from backend.learning.learning_pattern_analyzer import get_learning_pattern_analyzer
+from backend.learning.curriculum_generator import get_curriculum_generator
+from backend.learning.curriculum_applier import get_curriculum_applier
 
 logger = logging.getLogger(__name__)
 
@@ -137,5 +140,137 @@ async def get_recommended_sources(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to get recommended sources: {str(e)}"
+        )
+
+
+# Phase 2: Curriculum Learning Endpoints
+
+@router.get("/learning-effectiveness")
+async def get_learning_effectiveness(
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    top_n: int = Query(10, ge=1, le=50, description="Number of top topics to return")
+):
+    """
+    Get learning effectiveness analysis
+    
+    Shows which topics provide the most validation improvement after learning.
+    
+    Returns:
+        List of LearningEffectiveness objects, sorted by improvement (descending)
+    """
+    try:
+        analyzer = get_learning_pattern_analyzer()
+        effectiveness_list = analyzer.get_top_effective_topics(days=days, top_n=top_n)
+        
+        return {
+            "analysis_period_days": days,
+            "top_n": top_n,
+            "timestamp": datetime.utcnow().isoformat(),
+            "effectiveness": [
+                {
+                    "topic": e.topic,
+                    "source": e.source,
+                    "before_pass_rate": e.before_learning_pass_rate,
+                    "after_pass_rate": e.after_learning_pass_rate,
+                    "improvement": e.improvement,
+                    "questions_affected": e.questions_affected,
+                    "learned_timestamp": e.learned_timestamp
+                }
+                for e in effectiveness_list
+            ],
+            "count": len(effectiveness_list)
+        }
+    except Exception as e:
+        logger.error(f"Error getting learning effectiveness: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get learning effectiveness: {str(e)}"
+        )
+
+
+@router.get("/curriculum")
+async def get_curriculum(
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    max_items: int = Query(20, ge=1, le=100, description="Maximum number of curriculum items")
+):
+    """
+    Get optimal learning curriculum
+    
+    Returns prioritized list of topics to learn, based on:
+    - Learning effectiveness (which topics provide most improvement)
+    - Knowledge gaps (topics with high failure rates)
+    - Source quality (retention-based trust scores)
+    
+    Returns:
+        List of CurriculumItem objects, sorted by priority (descending)
+    """
+    try:
+        generator = get_curriculum_generator()
+        curriculum = generator.generate_curriculum(days=days, max_items=max_items)
+        
+        return {
+            "analysis_period_days": days,
+            "max_items": max_items,
+            "timestamp": datetime.utcnow().isoformat(),
+            "curriculum": [
+                {
+                    "topic": item.topic,
+                    "source": item.source,
+                    "priority": item.priority,
+                    "reason": item.reason,
+                    "estimated_improvement": item.estimated_improvement,
+                    "knowledge_gap_urgency": item.knowledge_gap_urgency
+                }
+                for item in curriculum
+            ],
+            "summary": generator.get_curriculum_summary(days=days),
+            "count": len(curriculum)
+        }
+    except Exception as e:
+        logger.error(f"Error getting curriculum: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get curriculum: {str(e)}"
+        )
+
+
+@router.post("/apply-curriculum")
+async def apply_curriculum(
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    update_curator: bool = Query(True, description="Update ContentCurator priorities"),
+    update_scheduler: bool = Query(True, description="Update LearningScheduler source priorities")
+):
+    """
+    Apply curriculum to learning system
+    
+    This will:
+    1. Update ContentCurator priorities based on curriculum
+    2. Update LearningScheduler source priorities
+    3. Adjust search keyword priorities
+    
+    Returns:
+        Dictionary with application results
+    """
+    try:
+        # Get curator instance
+        try:
+            import backend.api.main as main_module
+            curator = main_module.content_curator
+        except Exception:
+            curator = None
+        
+        applier = get_curriculum_applier(curator=curator)
+        results = applier.apply_curriculum(
+            days=days,
+            update_curator=update_curator,
+            update_scheduler=update_scheduler
+        )
+        
+        return results
+    except Exception as e:
+        logger.error(f"Error applying curriculum: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to apply curriculum: {str(e)}"
         )
 
