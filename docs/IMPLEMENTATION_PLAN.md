@@ -29,24 +29,57 @@ Create a Streamlit dashboard page to visualize Meta-Learning metrics and feature
 
 ### Detailed Tasks
 
-#### 1.1: Create Dashboard Page Structure
-**File:** `pages/MetaLearning.py`
+#### 1.1: Modify Learning Page to Add Meta-Learning Tab
+**File:** `dashboard.py` - function `page_learning()`
 
 **Requirements:**
-- Streamlit page with title "Meta-Learning Dashboard"
-- Tabs for: Retention, Curriculum, Strategy Optimization
+- Add tabs to existing Learning page: `["Learning Sessions", "Meta-Learning"]`
+- Keep existing "Learning Sessions" tab unchanged
+- Add new "Meta-Learning" tab with 3 sub-tabs: Retention, Curriculum, Strategy Optimization
 - Use existing dashboard styling
 
 **Implementation:**
 ```python
-import streamlit as st
-import requests
-
-st.set_page_config(page_title="Meta-Learning", layout="wide")
-st.title("🧠 Meta-Learning Dashboard")
-
-tab1, tab2, tab3 = st.tabs(["Retention Tracking", "Curriculum Learning", "Strategy Optimization"])
+def page_learning():
+    st.markdown("## Learning")
+    
+    # Main tabs
+    tab_sessions, tab_meta = st.tabs(["Learning Sessions", "Meta-Learning"])
+    
+    with tab_sessions:
+        # Existing code (unchanged)
+        st.markdown("## Learning Sessions")
+        # ... existing code ...
+    
+    with tab_meta:
+        st.markdown("### 🧠 Meta-Learning Dashboard")
+        st.caption("Stage 2: AI improves HOW it learns")
+        
+        # Sub-tabs for 3 phases
+        phase1, phase2, phase3 = st.tabs([
+            "Retention Tracking", 
+            "Curriculum Learning", 
+            "Strategy Optimization"
+        ])
+        
+        with phase1:
+            # Retention metrics (Task 1.2)
+            ...
+        
+        with phase2:
+            # Curriculum learning (Task 1.3)
+            ...
+        
+        with phase3:
+            # Strategy optimization (Task 1.4)
+            ...
 ```
+
+**Why this approach:**
+- ✅ Tận dụng dashboard cũ (không cần tạo page mới)
+- ✅ Learning và Meta-Learning đều về "learning", nên ở cùng page hợp lý
+- ✅ Better UX (all learning features in one place)
+- ✅ Faster implementation (12h thay vì 14.5h)
 
 **Dependencies:**
 - Streamlit
@@ -128,24 +161,24 @@ tab1, tab2, tab3 = st.tabs(["Retention Tracking", "Curriculum Learning", "Strate
 
 ---
 
-#### 1.5: Add Navigation Link
-**File:** `dashboard.py`
+#### 1.5: Add Navigation Link (REMOVED - Not Needed)
+**Status:** ✅ Not needed - Meta-Learning is now a tab within Learning page
 
-**Requirements:**
-- Add "Meta-Learning" to sidebar navigation
-- Link to `pages/MetaLearning.py`
+**Reason:** 
+- Meta-Learning is integrated into existing Learning page as a tab
+- No separate navigation needed
+- Users access via: Learning page → Meta-Learning tab
 
-**Implementation:**
-```python
-if st.sidebar.button("🧠 Meta-Learning"):
-    st.switch_page("pages/MetaLearning.py")
-```
-
-**Estimated Time:** 30 minutes
+**Estimated Time:** 0 hours (removed from plan)
 
 ---
 
-### Total Estimated Time: 14.5 hours (~2 days)
+### Total Estimated Time: 12 hours (~1.5 days)
+
+**Note:** Reduced from 14.5 hours because:
+- No need to create new page file
+- No need to add separate navigation
+- Integration into existing Learning page is simpler
 
 ### Testing Checklist
 - [ ] All API endpoints accessible
@@ -594,7 +627,7 @@ class ChatResponse(BaseModel):
 ## 📊 Overall Summary
 
 ### Total Estimated Time
-- **Task 1 (Dashboard):** 14.5 hours (~2 days)
+- **Task 1 (Dashboard):** 12 hours (~1.5 days) - Updated: integrated into Learning page
 - **Task 2 (Caching):** 12 hours (~1.5 days)
 - **Task 3 (Tracing):** 16.5 hours (~2 days) + 4 hours optional
 
