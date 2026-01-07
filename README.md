@@ -459,6 +459,28 @@ GET /api/learning/sources/fetch?max_items_per_source=5&auto_add=false
 POST /api/learning/rss/fetch?max_items=5&auto_add=false
 ```
 
+### Meta-Learning Endpoints (Stage 2)
+
+**Phase 1: Retention Tracking**
+- `GET /api/meta-learning/retention` - Get retention metrics per source
+- `GET /api/meta-learning/source-trust` - Get source trust scores based on retention
+- `POST /api/meta-learning/update-source-trust` - Update source trust scores
+- `GET /api/meta-learning/recommended-sources` - Get recommended sources
+
+**Phase 2: Curriculum Learning**
+- `GET /api/meta-learning/learning-effectiveness` - Analyze learning effectiveness
+- `GET /api/meta-learning/curriculum` - Get optimal learning curriculum
+- `POST /api/meta-learning/apply-curriculum` - Apply curriculum to learning system
+
+**Phase 3: Strategy Optimization**
+- `GET /api/meta-learning/strategy-effectiveness` - Get strategy effectiveness
+- `GET /api/meta-learning/optimize-threshold` - Find optimal similarity threshold
+- `GET /api/meta-learning/recommended-strategy` - Get recommended strategy
+- `POST /api/meta-learning/ab-test/start` - Start A/B test
+- `GET /api/meta-learning/ab-test/evaluate` - Evaluate A/B test
+
+📚 **Full Documentation**: [`docs/STAGE2_META_LEARNING_SUMMARY.md`](docs/STAGE2_META_LEARNING_SUMMARY.md)
+
 ### RAG Endpoints
 
 **POST `/api/rag/add_knowledge`** - Add knowledge to vector DB
