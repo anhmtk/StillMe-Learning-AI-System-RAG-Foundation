@@ -2698,19 +2698,53 @@ async def _handle_validation_with_fallback(
     context_quality = context.get("context_quality", None)
     avg_similarity = context.get("avg_similarity_score", None)
     
-    # Run validation with context quality info
-    # Tier 3.5: Pass context quality, is_philosophical, and is_religion_roleplay to ValidatorChain
-    # CRITICAL: Pass context dict to enable foundational knowledge detection in CitationRequired
-    validation_result = chain.run(
-        raw_response, 
-        ctx_docs,
-        context_quality=context_quality,
-        avg_similarity=avg_similarity,
-        is_philosophical=is_philosophical,
-        is_religion_roleplay=is_religion_roleplay,
-        user_question=chat_request.message,  # Pass user question for FactualHallucinationValidator
-        context=context  # Pass context dict for foundational knowledge detection
-    )
+    # Task 2: Response Caching Enhancement - Cache validation results
+    # Check cache before running expensive validation chain
+    try:
+        from backend.utils.cache_utils import get_cache_key, get_from_cache, set_to_cache
+        
+        # Generate cache key from query and context
+        cache_key = get_cache_key("validation", chat_request.message, context)
+        
+        # Check cache
+        cached_validation = get_from_cache(cache_key)
+        if cached_validation is not None:
+            logger.info(f"✅ Validation cache HIT for query: {chat_request.message[:50]}...")
+            validation_result = cached_validation
+        else:
+            # Cache miss - run validation
+            logger.debug(f"⏳ Validation cache MISS, running validation for: {chat_request.message[:50]}...")
+            
+            # Run validation with context quality info
+            # Tier 3.5: Pass context quality, is_philosophical, and is_religion_roleplay to ValidatorChain
+            # CRITICAL: Pass context dict to enable foundational knowledge detection in CitationRequired
+            validation_result = chain.run(
+                raw_response, 
+                ctx_docs,
+                context_quality=context_quality,
+                avg_similarity=avg_similarity,
+                is_philosophical=is_philosophical,
+                is_religion_roleplay=is_religion_roleplay,
+                user_question=chat_request.message,  # Pass user question for FactualHallucinationValidator
+                context=context  # Pass context dict for foundational knowledge detection
+            )
+            
+            # Cache result (TTL: 1 hour)
+            set_to_cache(cache_key, validation_result, ttl=3600)
+            logger.debug(f"💾 Cached validation result (TTL: 3600s)")
+    except Exception as cache_error:
+        # If caching fails, just run validation normally
+        logger.warning(f"⚠️ Cache error, running validation without cache: {cache_error}")
+        validation_result = chain.run(
+            raw_response, 
+            ctx_docs,
+            context_quality=context_quality,
+            avg_similarity=avg_similarity,
+            is_philosophical=is_philosophical,
+            is_religion_roleplay=is_religion_roleplay,
+            user_question=chat_request.message,
+            context=context
+        )
     
     # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
     # For now, we'll handle this in the prompt building phase
