@@ -707,7 +707,31 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     )
     
     # Format citation with document titles if available
+    # CRITICAL: For self-knowledge questions, skip ALL external citations (only use foundational knowledge)
     if document_titles:
+        # CRITICAL: For self-knowledge questions, filter out external sources (only keep foundational knowledge)
+        if is_self_knowledge_question:
+            filtered_titles = []
+            filtered_types = []
+            for i, doc_type in enumerate(document_types):
+                if "CRITICAL_FOUNDATION" in doc_type or "foundational" in doc_type.lower():
+                    filtered_titles.append(document_titles[i])
+                    filtered_types.append(doc_type)
+            
+            # Only use filtered titles (foundational knowledge only)
+            document_titles = filtered_titles
+            document_types = filtered_types
+            
+            # If no foundational knowledge, skip citation entirely for self-knowledge questions
+            if not document_titles:
+                logger.debug("Self-knowledge question: No foundational knowledge found, skipping citation")
+                # Still add timestamp but no citation
+                if detected_lang == "vi":
+                    timestamp_attr = f"\n\n[Thời gian: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
+                else:
+                    timestamp_attr = f"\n\n[Time: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
+                return response.rstrip() + timestamp_attr
+        
         # CRITICAL: Skip CRITICAL_FOUNDATION citations for system architecture queries
         if should_suppress_critical_foundation:
             # Filter out CRITICAL_FOUNDATION documents, keep only non-foundational sources
@@ -756,7 +780,8 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
             citation_parts.append(f"Source: {citation_text_clean}")
     
     # Add source links if available
-    if source_links:
+    # CRITICAL: For self-knowledge questions, skip external source links (only foundational knowledge)
+    if source_links and not is_self_knowledge_question:
         if detected_lang == "vi":
             links_text = " | ".join([f"Liên kết {i+1}: {link}" for i, link in enumerate(source_links)])
         else:

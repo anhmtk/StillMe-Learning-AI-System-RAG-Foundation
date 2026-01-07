@@ -232,6 +232,20 @@ class ConfidenceValidator:
                     r'validator.*(trong|in).*codebase.*of.*you',
                     r'codebase.*của.*bạn.*validator',
                     r'codebase.*of.*you.*validator',
+                    # CRITICAL: Wish/desire/dream questions about StillMe
+                    r'\b(bạn|you)\s+(sẽ|would|will)\s+(ước|wish)',
+                    r'\b(bạn|you)\s+(muốn|want|desire)',
+                    r'\b(bạn|you)\s+(thích|like|prefer)',
+                    r'\b(bạn|you)\s+(hy\s+vọng|hope)',
+                    r'\b(bạn|you)\s+(mong\s+muốn|aspire)',
+                    r'\b(bạn|you)\s+(có\s+ước\s+mơ|have\s+dream)',  # "bạn có ước mơ"
+                    r'\b(bạn|you)\s+có\s+ước\s+mơ',  # "bạn có ước mơ gì ko?" - match "có ước mơ" (with or without space after)
+                    r'\b(bạn|you)\s+have\s+dream',  # "you have dream ..."
+                    r'\bước\s+mơ',  # "ước mơ" (anywhere in question about StillMe)
+                    r'\bdream.*(of\s+)?(you|bạn)',  # "dream of you"
+                    r'\bif\s+(you|bạn)\s+could\s+(wish|ước)',
+                    r'\bnếu\s+(bạn|you)\s+(có\s+thể\s+ước|could\s+wish)',
+                    r'\bwhat\s+(do|would|will)\s+(you|bạn)\s+(wish|want|desire|like|prefer)',
                 ]
                 is_stillme_self_query = any(
                     re.search(pattern, question_lower, re.IGNORECASE)

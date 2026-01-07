@@ -438,6 +438,10 @@ def detect_stillme_query(query: str, conversation_history: Optional[List[dict]] 
         r'\bnếu\s+(bạn|you)\s+(có\s+thể\s+ước|could\s+wish)',
         r'\bwhat\s+(do|would|will)\s+(you|bạn)\s+(wish|want|desire|like|prefer)',
         r'\b(bạn|you)\s+(có\s+ước\s+muốn|have\s+wish|have\s+desire)',
+        r'\b(bạn|you)\s+(có\s+ước\s+mơ|have\s+dream)',  # "bạn có ước mơ"
+        r'\b(bạn|you)\s+(có\s+ước\s+mơ\s+.*|have\s+dream\s+.*)',  # "bạn có ước mơ gì ko?"
+        r'\bước\s+mơ.*(của\s+)?(bạn|you)',  # "ước mơ của bạn"
+        r'\bdream.*(of\s+)?(you|bạn)',  # "dream of you"
     ]
     if any(re.search(pattern, query_lower, re.IGNORECASE) for pattern in wish_desire_patterns):
         matched_keywords.append("wish_desire_preference")
