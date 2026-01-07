@@ -778,20 +778,23 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
                     citation_parts.append(f"Source: {doc_type_str} - {titles_str}")
         else:
             # Normal citation formatting (non-system architecture queries)
-            if detected_lang == "vi":
-                # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
-                doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
-                titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
-                if len(document_titles) > 3:
-                    titles_str += f" (+{len(document_titles) - 3} documents khác)"
-                citation_parts.append(f"Nguồn: {doc_type_str} - {titles_str}")
-            else:
-                # Format: "Source: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
-                doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
-                titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
-                if len(document_titles) > 3:
-                    titles_str += f" (+{len(document_titles) - 3} more documents)"
-                citation_parts.append(f"Source: {doc_type_str} - {titles_str}")
+            # CRITICAL: For self-knowledge questions, document_titles and document_types have already been filtered
+            # to only include foundational knowledge, so we can safely format them
+            if document_titles:  # Only format if we have titles (after filtering for self-knowledge questions)
+                if detected_lang == "vi":
+                    # Format: "Nguồn: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
+                    doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
+                    titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
+                    if len(document_titles) > 3:
+                        titles_str += f" (+{len(document_titles) - 3} documents khác)"
+                    citation_parts.append(f"Nguồn: {doc_type_str} - {titles_str}")
+                else:
+                    # Format: "Source: CRITICAL_FOUNDATION - 'doc_title1', 'doc_title2'"
+                    doc_type_str = document_types[0] if document_types and document_types[0] else "CRITICAL_FOUNDATION"
+                    titles_str = ", ".join([f"'{title}'" for title in document_titles[:3]])  # Limit to 3 titles
+                    if len(document_titles) > 3:
+                        titles_str += f" (+{len(document_titles) - 3} more documents)"
+                    citation_parts.append(f"Source: {doc_type_str} - {titles_str}")
     elif citation_text_clean:
         # Fallback to generic citation if no document titles available
         if detected_lang == "vi":
@@ -817,7 +820,15 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         citation_parts.append(f"Timestamp: {timestamp_iso}Z")
     
     # Format final attribution
-    timestamp_attr = f"\n\n[{' | '.join(citation_parts)}]"
+    # CRITICAL: For self-knowledge questions, if no citation_parts (after filtering), only add timestamp
+    if is_self_knowledge_question and not citation_parts:
+        # Only timestamp, no citation
+        if detected_lang == "vi":
+            timestamp_attr = f"\n\n[Thời gian: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
+        else:
+            timestamp_attr = f"\n\n[Time: {timestamp_display} | Timestamp: {timestamp_iso}Z]"
+    else:
+        timestamp_attr = f"\n\n[{' | '.join(citation_parts)}]"
     
     # CRITICAL: Ensure response is not empty before appending timestamp
     # This prevents empty string from being returned
@@ -6363,6 +6374,18 @@ This is MANDATORY when provenance context is available and user asks about origi
                             is_philosophical = any(keyword in query_lower for keyword in philosophical_keywords)
                             
                             # Check if query is relevant to system status, errors, or sources
+                            # CRITICAL: Exclude wish/desire/dream questions - they don't need system error info
+                            is_wish_desire_for_error_check = any(
+                                pattern in query_lower 
+                                for pattern in [
+                                    "ước", "wish", "muốn", "want", "desire", "thích", "like", "prefer",
+                                    "hy vọng", "hope", "mong muốn", "aspire", "dream"
+                                ]
+                            ) and any(
+                                pattern in query_lower
+                                for pattern in ["bạn", "you", "your"]
+                            )
+                            
                             is_relevant = (
                                 any(keyword in query_lower for keyword in [
                                     "wikipedia", "rss", "arxiv", "crossref", "source", "fetcher",
@@ -6370,11 +6393,11 @@ This is MANDATORY when provenance context is available and user asks about origi
                                     "system", "technical", "working", "functioning", "learn", "learning",
                                     "knowledge base", "database", "vector", "embedding", "rag"
                                 ]) or
-                                is_stillme_query  # StillMe queries often relate to system status
+                                (is_stillme_query and not is_wish_desire_for_error_check)  # StillMe queries often relate to system status, BUT NOT wish/desire questions
                             )
                             
-                            # Only inject if relevant AND not philosophical
-                            if is_relevant and not is_philosophical:
+                            # Only inject if relevant AND not philosophical AND not wish/desire question
+                            if is_relevant and not is_philosophical and not is_wish_desire_for_error_check:
                                 error_status_message = f"\n\n⚠️ CRITICAL TRANSPARENCY REQUIREMENT - SYSTEM ERROR STATUS:\nStillMe is currently experiencing technical errors:\n" + "\n".join(f"- {detail}" for detail in error_details) + "\n\nYou MUST acknowledge these errors truthfully when asked about StillMe's features or status. Do NOT deny or minimize these errors. StillMe's core value is transparency - hiding errors contradicts this principle. If the user asks about a specific feature (e.g., Wikipedia), and that feature has errors, you MUST say: 'I acknowledge that [feature] is currently experiencing [error type]. This is a technical issue that needs to be fixed.'"
                             # If philosophical or not relevant, don't inject error message to maintain conversational elegance
                     
