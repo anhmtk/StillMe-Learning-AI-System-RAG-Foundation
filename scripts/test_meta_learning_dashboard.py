@@ -210,10 +210,34 @@ def test_dashboard_imports():
         return False
 
 
+def test_dashboard_ui_access():
+    """Test that dashboard can be accessed (if Streamlit is running)"""
+    print("\n=== Test 9: Dashboard UI Access ===")
+    
+    dashboard_url = os.getenv("STILLME_DASHBOARD_URL", "http://localhost:8501")
+    
+    try:
+        response = requests.get(dashboard_url, timeout=5)
+        if response.status_code == 200:
+            print(f"[PASS] Dashboard accessible at {dashboard_url}")
+            return True
+        else:
+            print(f"[SKIP] Dashboard returned {response.status_code} (may not be running)")
+            return None
+    except requests.exceptions.ConnectionError:
+        print(f"[SKIP] Dashboard not running at {dashboard_url}")
+        return None
+    except Exception as e:
+        print(f"[SKIP] Dashboard check failed: {e}")
+        return None
+
+
 def run_all_tests():
     """Run all tests"""
     print("=" * 60)
-    print("META-LEARNING DASHBOARD TEST SUITE")
+    print("META-LEARNING DASHBOARD TEST SUITE (Task 1)")
+    print("=" * 60)
+    print(f"Testing against: {API_BASE}")
     print("=" * 60)
     
     tests = [
@@ -224,7 +248,8 @@ def run_all_tests():
         test_strategy_effectiveness_endpoint,
         test_optimize_threshold_endpoint,
         test_recommended_strategy_endpoint,
-        test_dashboard_imports
+        test_dashboard_imports,
+        test_dashboard_ui_access
     ]
     
     passed = 0
@@ -250,11 +275,15 @@ def run_all_tests():
     print(f"TEST RESULTS: {passed} passed, {failed} failed, {skipped} skipped")
     print("=" * 60)
     
-    if failed == 0:
+    if failed == 0 and passed > 0:
         print("[SUCCESS] ALL TESTS PASSED - Task 1 dashboard is ready!")
         return True
+    elif passed > 0:
+        print("[PARTIAL] Some tests passed - check failures above")
+        return False
     else:
-        print("[FAIL] SOME TESTS FAILED - Please check issues")
+        print("[SKIP] All tests skipped - backend may not be running")
+        print("💡 Start backend and run tests again")
         return False
 
 
