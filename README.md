@@ -395,6 +395,12 @@ See `env.example` for full list.
   - Transparent uncertainty communication
   - Learning from actual vs estimated time
 
+**Meta-Learning (Stage 2):**
+- ✅ **Phase 1: Retention Tracking** - Track document usage and calculate source trust scores
+- ✅ **Phase 2: Curriculum Learning** - Analyze learning effectiveness and generate optimal learning order
+- ✅ **Phase 3: Strategy Optimization** - Auto-tune similarity thresholds and A/B test strategies
+- 📚 **Full Documentation**: [`docs/STAGE2_META_LEARNING_SUMMARY.md`](docs/STAGE2_META_LEARNING_SUMMARY.md)
+
 **Dashboard:**
 - ✅ Streamlit UI - Real-time metrics, chat interface, RAG interface
 - ✅ Validation Panel - Monitor validator performance
