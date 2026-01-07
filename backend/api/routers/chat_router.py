@@ -42,6 +42,11 @@ from typing import Optional, List, Dict, Any, Tuple
 import json
 import unicodedata
 
+# Trace utilities
+from backend.utils.trace_utils import RequestTrace, generate_correlation_id
+from backend.utils.trace_storage import get_trace_storage
+from backend.api.request_tracking_middleware import get_correlation_id
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
@@ -3585,8 +3590,17 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
     start_time = time.time()
     timing_logs = {}
     
+    # Initialize trace for request traceability
+    trace_id = get_correlation_id() or generate_correlation_id()
+    trace_storage = get_trace_storage()
+    trace = RequestTrace(
+        trace_id=trace_id,
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        query=chat_request.message[:500]  # Limit query length in trace
+    )
+    
     # DEBUG: Log request received (very early)
-    logger.info(f"📥 Received chat request: message_length={len(chat_request.message)}, use_option_b={getattr(chat_request, 'use_option_b', 'NOT_SET')}")
+    logger.info(f"📥 Received chat request: message_length={len(chat_request.message)}, use_option_b={getattr(chat_request, 'use_option_b', 'NOT_SET')}, trace_id={trace_id}")
     
     # Initialize latency variables (will be set during processing)
     rag_retrieval_latency = 0.0
@@ -10489,9 +10503,29 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         except Exception as e:
             logger.warning(f"⚠️ Failed to record strategy usage for Meta-Learning: {e}")
         
+        # Finalize trace before returning
+        total_duration = (time.time() - start_time) * 1000
+        trace.duration_ms = total_duration
+        if trace.final_response is None:
+            trace.final_response = {}
+        trace.final_response.update({
+            "response_length": len(response) if response else 0,
+            "confidence_score": confidence_score,
+            "validation_passed": validation_info.get("passed", False) if validation_info else None,
+            "epistemic_state": epistemic_state.value if epistemic_state else None
+        })
+        
+        # Store trace
+        try:
+            trace_storage.store(trace)
+            logger.debug(f"📊 Stored trace: {trace_id}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to store trace {trace_id}: {e}")
+        
         return ChatResponse(
             response=response,
             message_id=message_id,
+            trace_id=trace_id,  # NEW: Include trace ID in response
             context_used=context,
             accuracy_score=accuracy_score,
             confidence_score=confidence_score,
