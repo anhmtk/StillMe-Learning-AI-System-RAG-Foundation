@@ -8,7 +8,7 @@ Part of Stage 2: Meta-Learning - "AI improves HOW it learns"
 """
 
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 
 from backend.learning.curriculum_generator import get_curriculum_generator, CurriculumItem
