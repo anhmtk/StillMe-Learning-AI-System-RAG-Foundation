@@ -559,11 +559,13 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         logger.warning(f"Could not convert timestamp to local timezone: {e}")
         timestamp_display = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
     
-    # CRITICAL: Check if this is a self-knowledge question about StillMe's codebase
+    # CRITICAL: Check if this is a self-knowledge question about StillMe
+    # Includes: codebase questions, wish/desire/dream questions, self-reflection questions
     # If so, skip external citations (only use foundational knowledge or skip citation entirely)
     is_self_knowledge_question = False
     if user_question:
         question_lower = user_question.lower()
+        # Pattern 1: Codebase questions
         codebase_self_patterns = [
             r"codebase.*của.*bạn",
             r"codebase.*of.*you",
@@ -580,8 +582,31 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         for pattern in codebase_self_patterns:
             if re.search(pattern, question_lower, re.IGNORECASE):
                 is_self_knowledge_question = True
-                logger.info(f"✅ Self-knowledge question detected in _add_timestamp_to_response - will skip external citations")
+                logger.info(f"✅ Self-knowledge question (codebase) detected - will skip external citations")
                 break
+        
+        # Pattern 2: Wish/desire/dream questions about StillMe
+        if not is_self_knowledge_question:
+            wish_desire_patterns = [
+                r'\b(bạn|you)\s+(sẽ|would|will)\s+(ước|wish)',
+                r'\b(bạn|you)\s+(muốn|want|desire)',
+                r'\b(bạn|you)\s+(thích|like|prefer)',
+                r'\b(bạn|you)\s+(hy\s+vọng|hope)',
+                r'\b(bạn|you)\s+(mong\s+muốn|aspire)',
+                r'\b(bạn|you)\s+(có\s+ước\s+mơ|have\s+dream|have\s+wish)',
+                r'\b(bạn|you)\s+(có\s+ước\s+muốn|have\s+wish|have\s+desire)',
+                r'\bif\s+(you|bạn)\s+could\s+(wish|ước)',
+                r'\bnếu\s+(bạn|you)\s+(có\s+thể\s+ước|could\s+wish)',
+                r'\bwhat\s+(do|would|will)\s+(you|bạn)\s+(wish|want|desire|like|prefer)',
+                r'\bước\s+mơ.*của.*bạn',
+                r'\bdream.*of.*you',
+                r'\bwish.*of.*you',
+            ]
+            for pattern in wish_desire_patterns:
+                if re.search(pattern, question_lower, re.IGNORECASE):
+                    is_self_knowledge_question = True
+                    logger.info(f"✅ Self-knowledge question (wish/desire/dream) detected - will skip external citations")
+                    break
     
     # Extract document titles and source links from context if available
     source_links = []
@@ -10121,11 +10146,13 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         is_fallback = is_fallback_message(response) if response else False
         has_external_data_timestamp = "[Source:" in response or "[Nguồn:" in response
         
-        # CRITICAL: Check if this is a self-knowledge question about StillMe's codebase
+        # CRITICAL: Check if this is a self-knowledge question about StillMe
+        # Includes: codebase questions, wish/desire/dream questions
         # If so, skip timestamp addition (or only add foundational knowledge citation)
         is_self_knowledge_question = False
         if chat_request.message:
             question_lower = chat_request.message.lower()
+            # Pattern 1: Codebase questions
             codebase_self_patterns = [
                 r"codebase.*của.*bạn",
                 r"codebase.*of.*you",
@@ -10144,8 +10171,31 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             for pattern in codebase_self_patterns:
                 if re.search(pattern, question_lower, re.IGNORECASE):
                     is_self_knowledge_question = True
-                    logger.info(f"✅ Self-knowledge question detected - will skip external citations in timestamp")
+                    logger.info(f"✅ Self-knowledge question (codebase) detected - will skip external citations in timestamp")
                     break
+            
+            # Pattern 2: Wish/desire/dream questions about StillMe
+            if not is_self_knowledge_question:
+                wish_desire_patterns = [
+                    r'\b(bạn|you)\s+(sẽ|would|will)\s+(ước|wish)',
+                    r'\b(bạn|you)\s+(muốn|want|desire)',
+                    r'\b(bạn|you)\s+(thích|like|prefer)',
+                    r'\b(bạn|you)\s+(hy\s+vọng|hope)',
+                    r'\b(bạn|you)\s+(mong\s+muốn|aspire)',
+                    r'\b(bạn|you)\s+(có\s+ước\s+mơ|have\s+dream|have\s+wish)',
+                    r'\b(bạn|you)\s+(có\s+ước\s+muốn|have\s+wish|have\s+desire)',
+                    r'\bif\s+(you|bạn)\s+could\s+(wish|ước)',
+                    r'\bnếu\s+(bạn|you)\s+(có\s+thể\s+ước|could\s+wish)',
+                    r'\bwhat\s+(do|would|will)\s+(you|bạn)\s+(wish|want|desire|like|prefer)',
+                    r'\bước\s+mơ.*của.*bạn',
+                    r'\bdream.*of.*you',
+                    r'\bwish.*of.*you',
+                ]
+                for pattern in wish_desire_patterns:
+                    if re.search(pattern, question_lower, re.IGNORECASE):
+                        is_self_knowledge_question = True
+                        logger.info(f"✅ Self-knowledge question (wish/desire/dream) detected - will skip external citations in timestamp")
+                        break
         
         # CRITICAL: Skip timestamp addition for philosophical questions (they don't need citations/timestamps)
         # For self-knowledge questions, we still add timestamp but will filter out external citations in _add_timestamp_to_response
