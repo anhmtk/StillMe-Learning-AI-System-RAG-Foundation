@@ -499,7 +499,7 @@ def _is_codebase_meta_question(message: str) -> bool:
     return has_code_intent
 
 
-def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None, user_question: Optional[str] = None, is_system_architecture_query: bool = False) -> str:
+def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None, user_question: Optional[str] = None, is_system_architecture_query: bool = False, is_self_knowledge_question: bool = False) -> str:
     """
     Add timestamp attribution to normal RAG responses for transparency.
     This ensures consistency with external data responses which already include timestamps.
@@ -562,8 +562,8 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     # CRITICAL: Check if this is a self-knowledge question about StillMe
     # Includes: codebase questions, wish/desire/dream questions, self-reflection questions
     # If so, skip external citations (only use foundational knowledge or skip citation entirely)
-    is_self_knowledge_question = False
-    if user_question:
+    # If is_self_knowledge_question is already passed as parameter, use it; otherwise detect from user_question
+    if not is_self_knowledge_question and user_question:
         question_lower = user_question.lower()
         # Pattern 1: Codebase questions
         codebase_self_patterns = [
@@ -643,6 +643,26 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
                     link = metadata.get("link", "") or metadata.get("source_url", "")
                     if link and link.startswith(("http://", "https://")):
                         source_links.append(link)
+    
+    # CRITICAL: For self-knowledge questions, remove ALL numeric citations [1], [2], [3] from LLM response
+    # These citations are from external sources (URLs converted by CitationRequired validator)
+    # and should NOT appear in self-knowledge question responses
+    if is_self_knowledge_question:
+        # Remove numeric citations [1], [2], [3], etc.
+        numeric_citation_pattern = r'\[\d+\]'
+        response = re.sub(numeric_citation_pattern, '', response)
+        # Also remove any citation patterns that might reference external sources
+        external_citation_patterns = [
+            r'\[source:\s*\d+\]',
+            r'\[nguồn:\s*\d+\]',
+            r'\[research:\s*[^\]]+\]',
+            r'\[nghiên cứu:\s*[^\]]+\]',
+        ]
+        for pattern in external_citation_patterns:
+            response = re.sub(pattern, '', response, flags=re.IGNORECASE)
+        # Clean up extra spaces
+        response = re.sub(r'\s+', ' ', response).strip()
+        logger.debug("Removed external citations from self-knowledge question response")
     
     # Try to extract existing citation from response
     # Look for patterns like [general knowledge], [research: Wikipedia], [source: 1], etc.
@@ -10249,7 +10269,8 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                     detected_lang or "en", 
                     context, 
                     user_question=chat_request.message,
-                    is_system_architecture_query=is_system_architecture_query
+                    is_system_architecture_query=is_system_architecture_query,
+                    is_self_knowledge_question=is_self_knowledge_question
                 )
                 
                 # CRITICAL: Validate response after adding timestamp
