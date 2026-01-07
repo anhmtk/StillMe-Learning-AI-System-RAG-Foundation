@@ -10407,6 +10407,25 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             final_outcome = f"Response generated with confidence={confidence_score:.2f}, epistemic_state={epistemic_state.value if epistemic_state else 'UNKNOWN'}"
             decision_logger.end_session(final_outcome)
         
+        # Stage 2: Meta-Learning - Document Usage Tracking
+        # Track which documents were used in this response for retention analysis
+        try:
+            from backend.learning.document_usage_tracker import get_document_usage_tracker
+            
+            if context and isinstance(context, dict):
+                knowledge_docs = context.get("knowledge_docs", [])
+                if knowledge_docs:
+                    usage_tracker = get_document_usage_tracker()
+                    usage_tracker.record_batch_usage(
+                        query=chat_request.message,
+                        documents=knowledge_docs,
+                        response_confidence=confidence_score,
+                        validation_passed=validation_info.get("passed", False) if validation_info else None
+                    )
+                    logger.debug(f"📊 Recorded usage for {len(knowledge_docs)} documents (Meta-Learning tracking)")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to record document usage for Meta-Learning: {e}")
+        
         return ChatResponse(
             response=response,
             message_id=message_id,

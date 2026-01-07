@@ -39,6 +39,7 @@ from backend.api.request_tracking_middleware import RequestTrackingMiddleware
 from backend.api.routers import chat_router, rag_router, tiers_router, spice_router, learning_router, system_router
 from backend.api.routers import debug_router, learning_permission_router, community_router
 from backend.api.routers import feedback_router, codebase_router
+from backend.api.routers.meta_learning_router import router as meta_learning_router
 from backend.config.security import validate_api_key_config
 
 # Configure logging
@@ -859,6 +860,7 @@ app.include_router(tiers_router, prefix="/api/v1/tiers", tags=["tiers"])
 app.include_router(spice_router, prefix="/api/spice", tags=["spice"])
 app.include_router(learning_router, prefix="/api/learning", tags=["learning"])
 app.include_router(learning_permission_router.router, prefix="/api/learning", tags=["learning"])
+app.include_router(meta_learning_router)  # Stage 2: Meta-Learning endpoints
 app.include_router(community_router.router, prefix="/api/community", tags=["community"])
 app.include_router(feedback_router.router, prefix="/api/feedback", tags=["feedback"])
 app.include_router(codebase_router.router, prefix="/api", tags=["codebase"])
