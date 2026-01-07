@@ -17,7 +17,13 @@ import time
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
+# Get API base from environment, with smart defaults
+_raw_api_base = os.getenv("STILLME_API_BASE", "http://localhost:8000")
+# Auto-add https:// if missing protocol
+if _raw_api_base and not _raw_api_base.startswith(("http://", "https://")):
+    API_BASE = f"https://{_raw_api_base}"
+else:
+    API_BASE = _raw_api_base
 
 
 def test_retention_endpoint():
@@ -238,6 +244,7 @@ def run_all_tests():
     print("META-LEARNING DASHBOARD TEST SUITE (Task 1)")
     print("=" * 60)
     print(f"Testing against: {API_BASE}")
+    print(f"Environment: STILLME_API_BASE = {os.getenv('STILLME_API_BASE', 'NOT SET')}")
     print("=" * 60)
     
     tests = [
