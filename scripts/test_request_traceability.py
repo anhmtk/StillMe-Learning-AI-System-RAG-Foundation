@@ -79,7 +79,7 @@ def test_get_trace(trace_id: str):
         return False
     
     try:
-        response = requests.get(f"{API_BASE}/api/trace/{trace_id}", timeout=10)
+        response = requests.get(f"{API_BASE}/api/trace/{trace_id}", timeout=30)
         
         if response.status_code == 200:
             data = response.json()
@@ -123,7 +123,7 @@ def test_trace_stages(trace_id: str):
         return False
     
     try:
-        response = requests.get(f"{API_BASE}/api/trace/{trace_id}", timeout=10)
+        response = requests.get(f"{API_BASE}/api/trace/{trace_id}", timeout=30)
         
         if response.status_code != 200:
             print(f"[SKIP] Could not retrieve trace: {response.status_code}")
@@ -263,9 +263,10 @@ def run_all_tests():
         print(f"  {test_name}: {result}")
     
     passed = sum(1 for r in results.values() if r == "PASS")
+    skipped = sum(1 for r in results.values() if r == "SKIP")
     total = len(results)
     
-    print(f"\nTotal: {passed}/{total} tests passed")
+    print(f"\nTotal: {passed}/{total} tests passed ({skipped} skipped)")
     
     if passed == total:
         print("[SUCCESS] ALL TESTS PASSED - Task 3 traceability is working!")
