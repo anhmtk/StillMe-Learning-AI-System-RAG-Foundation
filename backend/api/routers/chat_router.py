@@ -10407,7 +10407,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             final_outcome = f"Response generated with confidence={confidence_score:.2f}, epistemic_state={epistemic_state.value if epistemic_state else 'UNKNOWN'}"
             decision_logger.end_session(final_outcome)
         
-        # Stage 2: Meta-Learning - Document Usage Tracking
+        # Stage 2: Meta-Learning - Document Usage Tracking & Strategy Tracking
         # Track which documents were used in this response for retention analysis
         try:
             from backend.learning.document_usage_tracker import get_document_usage_tracker
@@ -10425,6 +10425,35 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                     logger.debug(f"📊 Recorded usage for {len(knowledge_docs)} documents (Meta-Learning tracking)")
         except Exception as e:
             logger.warning(f"⚠️ Failed to record document usage for Meta-Learning: {e}")
+        
+        # Stage 2 Phase 3: Strategy Tracking
+        # Track strategy effectiveness (similarity threshold, keywords, etc.)
+        try:
+            from backend.learning.strategy_tracker import get_strategy_tracker
+            
+            if context and isinstance(context, dict):
+                strategy_tracker = get_strategy_tracker()
+                
+                # Extract strategy parameters from context
+                similarity_threshold = context.get("similarity_threshold", 0.1)
+                strategy_params = {
+                    "similarity_threshold": similarity_threshold,
+                    "knowledge_limit": context.get("knowledge_limit", 3),
+                    "use_mmr": context.get("use_mmr", True)
+                }
+                
+                # Record strategy usage
+                strategy_tracker.record_strategy_usage(
+                    strategy_name=f"similarity_threshold_{similarity_threshold:.2f}",
+                    strategy_params=strategy_params,
+                    query=chat_request.message,
+                    validation_passed=validation_info.get("passed", False) if validation_info else False,
+                    confidence_score=confidence_score or 0.0,
+                    retention_used=len(knowledge_docs) > 0 if knowledge_docs else False
+                )
+                logger.debug(f"📊 Recorded strategy usage: similarity_threshold={similarity_threshold:.2f}")
+        except Exception as e:
+            logger.warning(f"⚠️ Failed to record strategy usage for Meta-Learning: {e}")
         
         return ChatResponse(
             response=response,

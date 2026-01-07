@@ -17,6 +17,9 @@ from backend.learning.source_trust_calculator import get_source_trust_calculator
 from backend.learning.learning_pattern_analyzer import get_learning_pattern_analyzer
 from backend.learning.curriculum_generator import get_curriculum_generator
 from backend.learning.curriculum_applier import get_curriculum_applier
+from backend.learning.strategy_tracker import get_strategy_tracker
+from backend.learning.auto_tuner import get_auto_tuner
+from backend.learning.strategy_ab_tester import get_strategy_ab_tester, ABTestConfig
 
 logger = logging.getLogger(__name__)
 
@@ -272,5 +275,216 @@ async def apply_curriculum(
         raise HTTPException(
             status_code=500,
             detail=f"Failed to apply curriculum: {str(e)}"
+        )
+
+
+# Phase 3: Strategy Optimization Endpoints
+
+@router.get("/strategy-effectiveness")
+async def get_strategy_effectiveness(
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    baseline_strategy: Optional[str] = Query(None, description="Baseline strategy to compare against")
+):
+    """
+    Get strategy effectiveness analysis
+    
+    Shows which strategies (similarity thresholds, keywords, etc.) are most effective.
+    
+    Returns:
+        Dictionary mapping strategy_name to effectiveness metrics
+    """
+    try:
+        tracker = get_strategy_tracker()
+        effectiveness_dict = tracker.calculate_strategy_effectiveness(
+            days=days,
+            baseline_strategy=baseline_strategy
+        )
+        
+        return {
+            "analysis_period_days": days,
+            "baseline_strategy": baseline_strategy,
+            "timestamp": datetime.utcnow().isoformat(),
+            "strategies": {
+                name: {
+                    "total_uses": eff.total_uses,
+                    "validation_pass_rate": eff.validation_pass_rate,
+                    "avg_confidence": eff.avg_confidence,
+                    "retention_rate": eff.retention_rate,
+                    "avg_execution_time_ms": eff.avg_execution_time_ms,
+                    "improvement_over_baseline": eff.improvement_over_baseline
+                }
+                for name, eff in effectiveness_dict.items()
+            },
+            "count": len(effectiveness_dict)
+        }
+    except Exception as e:
+        logger.error(f"Error getting strategy effectiveness: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get strategy effectiveness: {str(e)}"
+        )
+
+
+@router.get("/optimize-threshold")
+async def optimize_similarity_threshold(
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    candidates: Optional[str] = Query(None, description="Comma-separated list of candidate thresholds (e.g., '0.05,0.1,0.15,0.2')")
+):
+    """
+    Find optimal similarity threshold based on strategy effectiveness
+    
+    Returns:
+        Optimal threshold and analysis results
+    """
+    try:
+        tuner = get_auto_tuner()
+        
+        candidate_list = None
+        if candidates:
+            candidate_list = [float(t.strip()) for t in candidates.split(",")]
+        
+        optimal_threshold, analysis = tuner.optimize_similarity_threshold(
+            days=days,
+            candidate_thresholds=candidate_list
+        )
+        
+        return {
+            "optimal_threshold": optimal_threshold,
+            "analysis": analysis,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error optimizing threshold: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to optimize threshold: {str(e)}"
+        )
+
+
+@router.get("/recommended-strategy")
+async def get_recommended_strategy(
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    strategy_type: str = Query("similarity_threshold", description="Type of strategy")
+):
+    """
+    Get recommended strategy based on effectiveness
+    
+    Returns:
+        Recommended strategy configuration
+    """
+    try:
+        tuner = get_auto_tuner()
+        recommendation = tuner.get_recommended_strategy(
+            days=days,
+            strategy_type=strategy_type
+        )
+        
+        if not recommendation:
+            return {
+                "status": "no_data",
+                "message": "No strategy data available",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        
+        return recommendation
+    except Exception as e:
+        logger.error(f"Error getting recommended strategy: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get recommended strategy: {str(e)}"
+        )
+
+
+@router.post("/ab-test/start")
+async def start_ab_test(
+    test_name: str = Query(..., description="Name of A/B test"),
+    strategy_a: str = Query(..., description="JSON string of strategy A config"),
+    strategy_b: str = Query(..., description="JSON string of strategy B config"),
+    traffic_split: float = Query(0.5, ge=0.0, le=1.0, description="Traffic split (0.5 = 50/50)"),
+    min_samples: int = Query(100, ge=10, description="Minimum samples before declaring winner"),
+    metric: str = Query("validation_pass_rate", description="Metric to optimize")
+):
+    """
+    Start an A/B test for strategies
+    
+    Returns:
+        A/B test configuration
+    """
+    try:
+        import json
+        
+        tester = get_strategy_ab_tester()
+        
+        config = ABTestConfig(
+            test_name=test_name,
+            strategy_a=json.loads(strategy_a),
+            strategy_b=json.loads(strategy_b),
+            traffic_split=traffic_split,
+            min_samples=min_samples,
+            metric=metric
+        )
+        
+        tester.start_ab_test(config)
+        
+        return {
+            "status": "started",
+            "test_name": test_name,
+            "config": {
+                "strategy_a": config.strategy_a,
+                "strategy_b": config.strategy_b,
+                "traffic_split": traffic_split,
+                "min_samples": min_samples,
+                "metric": metric
+            },
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error starting A/B test: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to start A/B test: {str(e)}"
+        )
+
+
+@router.get("/ab-test/evaluate")
+async def evaluate_ab_test(
+    test_name: str = Query(..., description="Name of A/B test"),
+    days: int = Query(7, ge=1, le=365, description="Number of days to analyze")
+):
+    """
+    Evaluate an A/B test and determine winner
+    
+    Returns:
+        A/B test result with winner and confidence
+    """
+    try:
+        tester = get_strategy_ab_tester()
+        result = tester.evaluate_ab_test(test_name=test_name, days=days)
+        
+        if not result:
+            raise HTTPException(status_code=404, detail=f"A/B test '{test_name}' not found")
+        
+        return {
+            "test_name": result.test_name,
+            "strategy_a": {
+                "name": result.strategy_a_name,
+                "effectiveness": result.strategy_a_effectiveness
+            },
+            "strategy_b": {
+                "name": result.strategy_b_name,
+                "effectiveness": result.strategy_b_effectiveness
+            },
+            "winner": result.winner,
+            "confidence": result.confidence,
+            "recommendation": result.recommendation,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error evaluating A/B test: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to evaluate A/B test: {str(e)}"
         )
 
