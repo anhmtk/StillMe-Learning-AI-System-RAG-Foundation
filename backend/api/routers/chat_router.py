@@ -10270,6 +10270,29 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                         is_self_knowledge_question = True
                         logger.info(f"✅ Self-knowledge question (wish/desire/dream) detected - will skip external citations in timestamp")
                         break
+            
+            # Pattern 3: Questions about StillMe's differences/strengths/weaknesses compared to other AIs
+            if not is_self_knowledge_question:
+                comparison_patterns = [
+                    r'\b(bạn|you)\s+(có\s+)?(điểm|điều)\s+(gì\s+)?(khác\s+biệt|khac\s+biet|different)',
+                    r'\b(bạn|you)\s+(khác\s+biệt|khac\s+biet|different)\s+(như\s+thế\s+nào|how)',
+                    r'\b(bạn|you)\s+(so\s+với|so\s+voi|compared\s+to|compare\s+with)\s+(các\s+)?(ai|AI)',
+                    r'\b(bạn|you)\s+(so\s+với|so\s+voi|compared\s+to|compare\s+with)\s+(.*ai|.*AI)',
+                    r'\b(bạn|you)\s+(có\s+)?(ưu\s+điểm|uu\s+diem|strength|strengths|advantage|advantages)',
+                    r'\b(bạn|you)\s+(có\s+)?(nhược\s+điểm|nhuoc\s+diem|weakness|weaknesses)',
+                    r'\b(bạn|you)\s+(có\s+)?(điểm\s+mạnh|diem\s+manh|strong\s+point|strong\s+points)',
+                    r'\b(bạn|you)\s+(có\s+)?(điểm\s+yếu|diem\s+yeu|weak\s+point|weak\s+points)',
+                    r'\bwhat\s+(makes|make)\s+(you|bạn)\s+(different|unique|special)',
+                    r'\bwhat\s+(are|is)\s+(your|bạn)\s+(strength|strengths|advantage|advantages)',
+                    r'\bwhat\s+(are|is)\s+(your|bạn)\s+(weakness|weaknesses)',
+                    r'\b(bạn|you)\s+(đặc\s+biệt|dac\s+biet|special|unique)\s+(như\s+thế\s+nào|how)',
+                    r'\b(bạn|you)\s+(nổi\s+bật|noi\s+bat|stand\s+out)\s+(như\s+thế\s+nào|how)',
+                ]
+                for pattern in comparison_patterns:
+                    if re.search(pattern, question_lower, re.IGNORECASE):
+                        is_self_knowledge_question = True
+                        logger.info(f"✅ Self-knowledge question (comparison/differences) detected - will skip external citations in timestamp")
+                        break
         
         # CRITICAL: Skip timestamp addition for philosophical questions (they don't need citations/timestamps)
         # For self-knowledge questions, we still add timestamp but will filter out external citations in _add_timestamp_to_response

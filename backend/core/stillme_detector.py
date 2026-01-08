@@ -427,6 +427,7 @@ def detect_stillme_query(query: str, conversation_history: Optional[List[dict]] 
     # Pattern 3f: CRITICAL - Questions about StillMe's wishes, desires, preferences
     # "Nếu có thể ước thì bạn sẽ ước điều gì?" / "If you could wish, what would you wish for?"
     # "Bạn muốn gì?" / "What do you want?"
+    # "bạn có ước mơ gì ko?" / "do you have a dream?"
     # These are about StillMe's nature (it cannot have wishes/desires)
     wish_desire_patterns = [
         r'\b(bạn|you)\s+(sẽ|would|will)\s+(ước|wish)',
@@ -442,9 +443,32 @@ def detect_stillme_query(query: str, conversation_history: Optional[List[dict]] 
         r'\b(bạn|you)\s+(có\s+ước\s+mơ\s+.*|have\s+dream\s+.*)',  # "bạn có ước mơ gì ko?"
         r'\bước\s+mơ.*(của\s+)?(bạn|you)',  # "ước mơ của bạn"
         r'\bdream.*(of\s+)?(you|bạn)',  # "dream of you"
+        r'\b(bạn|you)\s+(có\s+)?(ước\s+mơ|dream|wish)\s+(gì|what|.*ko|.*không)',  # "bạn có ước mơ gì ko?"
     ]
     if any(re.search(pattern, query_lower, re.IGNORECASE) for pattern in wish_desire_patterns):
         matched_keywords.append("wish_desire_preference")
+        return (True, matched_keywords)
+    
+    # Pattern 3g: CRITICAL - Questions about StillMe's differences/strengths/weaknesses compared to other AIs
+    # "bạn có điểm gì khác biệt so với các AI khác?" / "what makes you different from other AIs?"
+    # "bạn có ưu điểm gì?" / "what are your strengths?"
+    comparison_patterns = [
+        r'\b(bạn|you)\s+(có\s+)?(điểm|điều)\s+(gì\s+)?(khác\s+biệt|khac\s+biet|different)',
+        r'\b(bạn|you)\s+(khác\s+biệt|khac\s+biet|different)\s+(như\s+thế\s+nào|how)',
+        r'\b(bạn|you)\s+(so\s+với|so\s+voi|compared\s+to|compare\s+with)\s+(các\s+)?(ai|AI)',
+        r'\b(bạn|you)\s+(so\s+với|so\s+voi|compared\s+to|compare\s+with)\s+(.*ai|.*AI)',
+        r'\b(bạn|you)\s+(có\s+)?(ưu\s+điểm|uu\s+diem|strength|strengths|advantage|advantages)',
+        r'\b(bạn|you)\s+(có\s+)?(nhược\s+điểm|nhuoc\s+diem|weakness|weaknesses)',
+        r'\b(bạn|you)\s+(có\s+)?(điểm\s+mạnh|diem\s+manh|strong\s+point|strong\s+points)',
+        r'\b(bạn|you)\s+(có\s+)?(điểm\s+yếu|diem\s+yeu|weak\s+point|weak\s+points)',
+        r'\bwhat\s+(makes|make)\s+(you|bạn)\s+(different|unique|special)',
+        r'\bwhat\s+(are|is)\s+(your|bạn)\s+(strength|strengths|advantage|advantages)',
+        r'\bwhat\s+(are|is)\s+(your|bạn)\s+(weakness|weaknesses)',
+        r'\b(bạn|you)\s+(đặc\s+biệt|dac\s+biet|special|unique)\s+(như\s+thế\s+nào|how)',
+        r'\b(bạn|you)\s+(nổi\s+bật|noi\s+bat|stand\s+out)\s+(như\s+thế\s+nào|how)',
+    ]
+    if any(re.search(pattern, query_lower, re.IGNORECASE) for pattern in comparison_patterns):
+        matched_keywords.append("comparison_differences")
         return (True, matched_keywords)
     
     # Pattern 3c: Technical questions about StillMe (embedding, model, database)
