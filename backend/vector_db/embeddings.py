@@ -110,20 +110,25 @@ class EmbeddingService:
             
             # CRITICAL: Fix cache path mismatch (HuggingFace format -> sentence-transformers format)
             # This fixes the issue where model is downloaded in HuggingFace format but SentenceTransformer looks for sentence-transformers format
+            # MUST run BEFORE loading SentenceTransformer model
             try:
                 from backend.utils.fix_embedding_cache import fix_embedding_model_cache
-                logger.info("🔧 Attempting to fix embedding cache path mismatch...")
+                logger.info("🔧 🔧 🔧 EMERGENCY: Attempting to fix embedding cache path mismatch BEFORE model load...")
                 fix_success = fix_embedding_model_cache(model_name)
                 if fix_success:
-                    logger.info("✅ Embedding cache path fix completed")
+                    logger.info("✅ ✅ ✅ Embedding cache path fix completed successfully")
                     # Re-verify cache after fix
                     cache_status = self.model_manager.verify_cache_exists()
+                    if cache_status.model_files_found:
+                        logger.info(f"✅ Cache verified after fix: {cache_status.path}")
+                    else:
+                        logger.warning("⚠️ Cache fix reported success but verification failed")
                 else:
-                    logger.warning("⚠️ Embedding cache path fix failed - will continue with normal flow")
-            except ImportError:
-                logger.debug("fix_embedding_cache module not available, skipping cache fix")
+                    logger.error("❌ ❌ ❌ Embedding cache path fix FAILED - model may load incorrectly")
+            except ImportError as import_error:
+                logger.error(f"❌ Cannot import fix_embedding_cache: {import_error}")
             except Exception as fix_error:
-                logger.warning(f"⚠️ Cache fix error (non-critical): {fix_error}")
+                logger.error(f"❌ ❌ ❌ CRITICAL: Cache fix error: {fix_error}", exc_info=True)
             
             # Try to copy model from image cache to persistent volume if needed
             if not cache_status.model_files_found:
