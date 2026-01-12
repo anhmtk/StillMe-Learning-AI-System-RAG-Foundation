@@ -2620,7 +2620,8 @@ async def _handle_validation_with_fallback(
     # CRITICAL FIX: Add transparency disclaimer BEFORE validation if no context
     # This prevents missing_uncertainty_no_context failures for responses without RAG context
     # Only add if response doesn't already have transparency and not philosophical
-    if len(ctx_docs) == 0 and not is_philosophical and raw_response:
+    # CRITICAL: Skip disclaimer for StillMe self-knowledge queries and origin queries - StillMe MUST know about itself
+    if len(ctx_docs) == 0 and not is_philosophical and not is_stillme_query and not is_origin_query and raw_response:
         response_lower = raw_response.lower()
         # Check if response already has transparency disclaimer
         transparency_indicators = [
@@ -2650,6 +2651,10 @@ async def _handle_validation_with_fallback(
             
             raw_response = disclaimer + raw_response
             logger.info("ℹ️ Added transparency disclaimer BEFORE validation for response without context")
+        else:
+            logger.info("ℹ️ Skipped transparency disclaimer BEFORE validation: response already has transparency indicator")
+    elif is_stillme_query or is_origin_query:
+        logger.info("ℹ️ Skipped transparency disclaimer BEFORE validation: StillMe self-knowledge/origin query")
     
     # Enable Identity Check Validator (can be toggled via env var)
     enable_identity_check = os.getenv("ENABLE_IDENTITY_VALIDATOR", "true").lower() == "true"
@@ -9482,11 +9487,28 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                         is_fallback_meta_answer_non_rag = True
                         is_fallback_for_learning = True  # Skip learning extraction for fallback meta-answers
             
+            # CRITICAL: Detect StillMe query BEFORE adding disclaimer (non-RAG path)
+            # This ensures StillMe self-knowledge queries don't get inappropriate disclaimers
+            is_stillme_query_non_rag = False
+            is_origin_query_non_rag = False
+            try:
+                from backend.core.stillme_detector import detect_stillme_query, detect_origin_query
+                is_stillme_query_non_rag, _ = detect_stillme_query(chat_request.message)
+                is_origin_query_non_rag, _ = detect_origin_query(chat_request.message)
+                if is_stillme_query_non_rag:
+                    logger.info(f"✅ StillMe query detected (non-RAG path) - will skip disclaimer")
+                if is_origin_query_non_rag:
+                    logger.info(f"✅ Origin query detected (non-RAG path) - will skip disclaimer")
+            except Exception as detector_error:
+                logger.debug(f"Could not detect StillMe/Origin query in non-RAG path: {detector_error}")
+            
             # CRITICAL: Add transparency warning for low confidence responses without context (non-RAG path)
             # BUT: Skip disclaimer for system status queries - StillMe has real-time data access to its own system
-            # CRITICAL: StillMe MUST be confident when reporting about itself with real-time data
+            # CRITICAL: StillMe MUST be confident when reporting about itself - skip disclaimer for StillMe self-knowledge queries
+            # CRITICAL: Also skip for origin queries - StillMe MUST know about its own origin
             if (confidence_score < 0.5 and not is_fallback_meta_answer_non_rag and not is_philosophical_non_rag and 
-                not is_system_status_query and not system_status_context_override and response):
+                not is_system_status_query and not system_status_context_override and 
+                not is_stillme_query_non_rag and not is_origin_query_non_rag and response):
                 response_lower = response.lower()
                 has_transparency = any(
                     phrase in response_lower for phrase in [
@@ -9501,7 +9523,9 @@ Remember: RESPOND IN {retry_lang_name.upper()} ONLY. TRANSLATE IF NECESSARY."""
                     response = disclaimer + response
                     logger.info("ℹ️ Added transparency disclaimer for low confidence response without context (non-RAG path)")
                 else:
-                    logger.info("ℹ️ Skipped transparency disclaimer: system status query with real-time data (non-RAG path)")
+                    logger.info("ℹ️ Skipped transparency disclaimer: response already has transparency indicator (non-RAG path)")
+            elif is_stillme_query_non_rag or is_origin_query_non_rag:
+                logger.info("ℹ️ Skipped transparency disclaimer: StillMe self-knowledge/origin query (non-RAG path)")
         
         # Score the response
         accuracy_score = None
