@@ -499,7 +499,7 @@ def _is_codebase_meta_question(message: str) -> bool:
     return has_code_intent
 
 
-def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None, user_question: Optional[str] = None, is_system_architecture_query: bool = False, is_self_knowledge_question: bool = False) -> str:
+def _add_timestamp_to_response(response: str, detected_lang: str = "en", context: Optional[dict] = None, user_question: Optional[str] = None, is_system_architecture_query: bool = False, is_self_knowledge_question: bool = False, max_similarity: Optional[float] = None, has_relevant_context: bool = True) -> str:
     """
     Add timestamp attribution to normal RAG responses for transparency.
     This ensures consistency with external data responses which already include timestamps.
@@ -608,11 +608,21 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
                     logger.info(f"✅ Self-knowledge question (wish/desire/dream) detected - will skip external citations")
                     break
     
+    # CRITICAL: Skip external citations if context is not relevant (max_similarity < 0.5)
+    # For real-time questions (time, weather, etc.), we should not cite irrelevant RAG sources
+    should_skip_external_citations = False
+    if max_similarity is not None and max_similarity < 0.5:
+        should_skip_external_citations = True
+        logger.debug(f"⚠️ Skipping external citations: max_similarity={max_similarity:.3f} < 0.5 (not relevant)")
+    elif not has_relevant_context:
+        should_skip_external_citations = True
+        logger.debug("⚠️ Skipping external citations: has_relevant_context=False")
+    
     # Extract document titles and source links from context if available
     source_links = []
     document_titles = []
     document_types = []
-    if context and isinstance(context, dict):
+    if context and isinstance(context, dict) and not should_skip_external_citations:
         knowledge_docs = context.get("knowledge_docs", [])
         seen_titles = set()  # Track unique document titles to avoid duplicates
         for doc in knowledge_docs[:5]:  # Limit to 5 sources to avoid clutter
@@ -728,7 +738,8 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     
     # Format citation with document titles if available
     # CRITICAL: For self-knowledge questions, skip ALL external citations (only use foundational knowledge)
-    if document_titles:
+    # CRITICAL: Also skip if context is not relevant (max_similarity < 0.5) - for real-time questions like time
+    if document_titles and not should_skip_external_citations:
         # CRITICAL: For self-knowledge questions, filter out external sources (only keep foundational knowledge)
         if is_self_knowledge_question:
             filtered_titles = []
@@ -804,7 +815,8 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
     
     # Add source links if available
     # CRITICAL: For self-knowledge questions, skip external source links (only foundational knowledge)
-    if source_links and not is_self_knowledge_question:
+    # CRITICAL: Also skip if context is not relevant (max_similarity < 0.5) - for real-time questions like time
+    if source_links and not is_self_knowledge_question and not should_skip_external_citations:
         if detected_lang == "vi":
             links_text = " | ".join([f"Liên kết {i+1}: {link}" for i, link in enumerate(source_links)])
         else:
@@ -10413,14 +10425,23 @@ Total_Response_Latency: {total_response_latency:.2f} giây
                 
                 # Pass context and user_question to extract source links if available
                 # CRITICAL: Pass user_question so _add_timestamp_to_response can filter out external citations for self-knowledge questions
+                # CRITICAL: Pass max_similarity and has_relevant_context to skip irrelevant citations (e.g., for real-time questions like time)
                 response_before_timestamp = response
+                # Get max_similarity from context if available
+                max_similarity_for_citation = None
+                has_relevant_context_for_citation = True
+                if context and isinstance(context, dict):
+                    max_similarity_for_citation = context.get("max_similarity")
+                    has_relevant_context_for_citation = context.get("has_relevant_context", True)
                 response_after_timestamp = _add_timestamp_to_response(
                     response, 
                     detected_lang or "en", 
                     context, 
                     user_question=chat_request.message,
                     is_system_architecture_query=is_system_architecture_query,
-                    is_self_knowledge_question=is_self_knowledge_question
+                    is_self_knowledge_question=is_self_knowledge_question,
+                    max_similarity=max_similarity_for_citation,
+                    has_relevant_context=has_relevant_context_for_citation
                 )
                 
                 # CRITICAL: Validate response after adding timestamp
