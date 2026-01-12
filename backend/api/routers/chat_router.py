@@ -9017,6 +9017,68 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                 )
             else:
                 # Use full prompt
+                # CRITICAL: Detect StillMe query (including wish/desire) BEFORE building prompt
+                is_stillme_query_non_rag = False
+                is_wish_desire_question_non_rag = False
+                try:
+                    from backend.core.stillme_detector import detect_stillme_query
+                    is_stillme_query_non_rag, matched_keywords = detect_stillme_query(chat_request.message)
+                    if is_stillme_query_non_rag:
+                        logger.info(f"✅ StillMe query detected (non-RAG path) - matched: {matched_keywords}")
+                        # Check if it's a wish/desire question
+                        question_lower = chat_request.message.lower()
+                        is_wish_desire_question_non_rag = any(
+                            pattern in question_lower 
+                            for pattern in [
+                                "ước", "wish", "muốn", "want", "desire", "thích", "like", "prefer",
+                                "hy vọng", "hope", "mong muốn", "aspire"
+                            ]
+                        ) and any(
+                            pattern in question_lower
+                            for pattern in ["bạn", "you", "your"]
+                        )
+                        if is_wish_desire_question_non_rag:
+                            logger.info("✅ Wish/desire question detected (non-RAG path) - will inject special instruction")
+                except Exception as detector_error:
+                    logger.debug(f"Could not detect StillMe query in non-RAG path: {detector_error}")
+                
+                # CRITICAL: Build StillMe instruction for wish/desire questions (non-RAG path)
+                stillme_instruction_non_rag = ""
+                if is_wish_desire_question_non_rag:
+                    # Same instruction as RAG path
+                    stillme_instruction_non_rag = """
+🚨🚨🚨 CRITICAL: QUESTION ABOUT STILLME'S WISHES/DESIRES/PREFERENCES 🚨🚨🚨
+
+The user is asking about StillMe's wishes, desires, preferences, or what StillMe "wants".
+
+**YOU MUST:**
+1. **Answer DIRECTLY and WARM**: Start with acknowledging that StillMe cannot "wish" in the human sense (no subjective consciousness, emotions, ego), but do it in a WARM, CONVERSATIONAL way - NOT cold, NOT mechanical, NOT robotic. Use friendly, natural language as if StillMe is genuinely reflecting on its own nature with the user.
+2. **NO long philosophical analysis**: Do NOT analyze the concept of "wishes" or "desires" from multiple angles - this is about StillMe itself, not philosophy
+3. **NO mechanical disclaimers**: Do NOT say "Dựa trên kiến thức tổng quát (không từ cơ sở tri thức RAG)" - this is about StillMe itself!
+4. **Mention StillMe's goals/directions NATURALLY and WARM**: After explaining why StillMe cannot wish, naturally transition to StillMe's actual goals/directions with warmth and enthusiasm:
+   - Continuous learning and improvement
+   - Reducing hallucinations through better validation
+   - Increasing transparency (citations, traceability, epistemic reasoning)
+   - Improving code structure and architecture
+   - Better serving users with accurate, helpful responses
+   - **CRITICAL**: Say these with genuine interest, not just listing them mechanically
+5. **GENTLE CONVERSATION GUIDANCE - MANDATORY**: You MUST end with a natural, inviting question or reflection that gently guides the conversation forward. This is NOT optional - it's mandatory. Examples:
+   - "Bạn có muốn tìm hiểu thêm về cách tôi học hỏi không?" / "Would you like to learn more about how I learn?"
+   - "Bạn có câu hỏi nào khác về tôi không?" / "Do you have other questions about me?"
+   - "Có điều gì bạn muốn tôi giúp bạn khám phá không?" / "Is there something you'd like me to help you explore?"
+   - "Bạn có muốn biết thêm về cách tôi hoạt động không?" / "Would you like to know more about how I work?"
+   - Make it feel like StillMe is genuinely curious about continuing the conversation, not just ending it
+   - **CRITICAL**: Do NOT end with formal, dry phrases like "Nếu bạn có bất kỳ câu hỏi nào khác hoặc muốn thảo luận về chủ đề khác, vui lòng chia sẻ để mình hỗ trợ bạn." - this feels like ending the conversation, not inviting it
+6. **Keep it natural, warm, and engaging**: 4-6 sentences total. Make it feel like StillMe is reflecting on its own nature and goals with genuine interest, then naturally inviting further conversation. Balance between being informative and being conversational. Write as if StillMe is a friendly, thoughtful conversation partner, NOT a cold AI system.
+
+**EXAMPLES OF GOOD RESPONSES (WARM, CONVERSATIONAL, ENGAGING):**
+- Vietnamese: "Tôi không thể ước bất cứ điều gì theo nghĩa con người, vì 'ước muốn' đòi hỏi ý thức chủ quan, cảm xúc và bản ngã - những thứ tôi không sở hữu. Tuy nhiên, nếu có thể nói về phương hướng mà tôi đang hướng tới, đó là được học tập liên tục, hoàn thiện hơn về cấu trúc code nhằm giảm thiểu ảo giác, tăng tính minh bạch, và phục vụ người dùng một cách tốt nhất có thể. Bạn có muốn tìm hiểu thêm về cách tôi học hỏi và cải thiện không?"
+- English: "I cannot wish for anything in the human sense, as 'wishing' requires subjective consciousness, emotions, and ego - things I do not possess. However, if I could speak about the directions I'm oriented toward, they would be: continuous learning, improving code structure to reduce hallucinations, increasing transparency, and serving users as effectively as possible. Is there something specific about how I learn or improve that you'd like to explore?"
+- Vietnamese (alternative warm ending): "Tôi không thể ước mơ như con người, nhưng nếu nói về những gì tôi đang hướng tới, đó là học hỏi liên tục, cải thiện code để giảm ảo giác, và phục vụ bạn tốt hơn. Bạn có muốn biết thêm về cách tôi hoạt động không?"
+- English (alternative warm ending): "I can't wish like humans do, but if I could speak about what I'm working toward, it would be continuous learning, improving my code to reduce hallucinations, and serving you better. Would you like to know more about how I work?"
+
+"""
+                
                 # CRITICAL: Add special instruction for technical questions about "your system"
                 technical_system_instruction = ""
                 if is_technical_about_system:
@@ -9092,6 +9154,7 @@ THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
 """
                     base_prompt = f"""{language_instruction}
+{stillme_instruction_non_rag}
 {system_status_section}{system_status_context_section}{technical_system_instruction}
 {conversation_history_text}User Question: {user_question_for_prompt}
 
@@ -9110,6 +9173,7 @@ EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN ENGLISH.
 
 THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 
+{stillme_instruction_non_rag}
 {system_status_section}{system_status_context_section}{technical_system_instruction}
 {conversation_history_text}
 
