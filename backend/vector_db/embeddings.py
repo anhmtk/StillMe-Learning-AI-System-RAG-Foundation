@@ -108,6 +108,23 @@ class EmbeddingService:
                     except Exception as delete_error:
                         logger.warning(f"⚠️ Could not delete old model cache: {delete_error}")
             
+            # CRITICAL: Fix cache path mismatch (HuggingFace format -> sentence-transformers format)
+            # This fixes the issue where model is downloaded in HuggingFace format but SentenceTransformer looks for sentence-transformers format
+            try:
+                from backend.utils.fix_embedding_cache import fix_embedding_model_cache
+                logger.info("🔧 Attempting to fix embedding cache path mismatch...")
+                fix_success = fix_embedding_model_cache(model_name)
+                if fix_success:
+                    logger.info("✅ Embedding cache path fix completed")
+                    # Re-verify cache after fix
+                    cache_status = self.model_manager.verify_cache_exists()
+                else:
+                    logger.warning("⚠️ Embedding cache path fix failed - will continue with normal flow")
+            except ImportError:
+                logger.debug("fix_embedding_cache module not available, skipping cache fix")
+            except Exception as fix_error:
+                logger.warning(f"⚠️ Cache fix error (non-critical): {fix_error}")
+            
             # Try to copy model from image cache to persistent volume if needed
             if not cache_status.model_files_found:
                 logger.info("⚠️ Model not found in persistent cache, attempting to copy from image cache...")
