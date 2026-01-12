@@ -84,12 +84,15 @@ class EmbeddingService:
         
         # CRITICAL: Use global ModelManager for cache verification
         # ModelManager was already initialized at module level to setup environment
+        logger.info(f"🔍 DEBUG: _global_model_manager is {'NOT None' if _global_model_manager is not None else 'None'}")
         if _global_model_manager is not None:
             self.model_manager = _global_model_manager
+            logger.info("✅ Using global ModelManager for cache verification")
             
             # Get cache_path FIRST before using it
             cache_path = self.model_manager.cache_path
             cache_status = self.model_manager.cache_status
+            logger.info(f"🔍 DEBUG: cache_path={cache_path}, cache_status.model_files_found={cache_status.model_files_found}")
             
             # CRITICAL: Check if OLD model cache exists and delete it if found
             # This ensures we use the new multilingual model, not the old English-only model
@@ -111,10 +114,13 @@ class EmbeddingService:
             # CRITICAL: Fix cache path mismatch (HuggingFace format -> sentence-transformers format)
             # This fixes the issue where model is downloaded in HuggingFace format but SentenceTransformer looks for sentence-transformers format
             # MUST run BEFORE loading SentenceTransformer model
+            logger.info("🔍 DEBUG: About to call fix_embedding_model_cache...")
             try:
                 from backend.utils.fix_embedding_cache import fix_embedding_model_cache
                 logger.info("🔧 🔧 🔧 EMERGENCY: Attempting to fix embedding cache path mismatch BEFORE model load...")
+                logger.info(f"🔍 DEBUG: Calling fix_embedding_model_cache with model_name={model_name}")
                 fix_success = fix_embedding_model_cache(model_name)
+                logger.info(f"🔍 DEBUG: fix_embedding_model_cache returned: {fix_success}")
                 if fix_success:
                     logger.info("✅ ✅ ✅ Embedding cache path fix completed successfully")
                     # Re-verify cache after fix
@@ -126,9 +132,11 @@ class EmbeddingService:
                 else:
                     logger.error("❌ ❌ ❌ Embedding cache path fix FAILED - model may load incorrectly")
             except ImportError as import_error:
-                logger.error(f"❌ Cannot import fix_embedding_cache: {import_error}")
+                logger.error(f"❌ Cannot import fix_embedding_cache: {import_error}", exc_info=True)
             except Exception as fix_error:
                 logger.error(f"❌ ❌ ❌ CRITICAL: Cache fix error: {fix_error}", exc_info=True)
+        else:
+            logger.warning("⚠️ _global_model_manager is None - cache fix will NOT run")
             
             # Try to copy model from image cache to persistent volume if needed
             if not cache_status.model_files_found:
