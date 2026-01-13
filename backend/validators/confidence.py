@@ -199,6 +199,9 @@ class ConfidenceValidator:
         # BUT: Skip for philosophical questions (theoretical reasoning doesn't need context)
         # AND: Skip for religion/roleplay questions (they should answer from identity prompt, not RAG context)
         # AND: Skip for real-time questions (time, weather, etc.) - these are factual, not knowledge-base questions
+        # CRITICAL: Real-time questions should NEVER have disclaimer - they are factual system queries, not knowledge-base questions
+        if is_real_time_question:
+            logger.info(f"✅ Real-time question detected in ConfidenceValidator - skipping forced uncertainty (is_real_time_question=True)")
         if not is_philosophical and not is_religion_roleplay and not is_real_time_question and (context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
             # CRITICAL: Exception for StillMe self-knowledge queries
             # StillMe should always be able to answer questions about its own features/capabilities
