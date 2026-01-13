@@ -135,17 +135,9 @@ class EmbeddingService:
                 logger.error(f"❌ Cannot import fix_embedding_cache: {import_error}", exc_info=True)
             except Exception as fix_error:
                 logger.error(f"❌ ❌ ❌ CRITICAL: Cache fix error: {fix_error}", exc_info=True)
-        else:
-            logger.warning("⚠️ _global_model_manager is None - cache fix will NOT run")
             
-            # Try to copy model from image cache to persistent volume if needed
-            if not cache_status.model_files_found:
-                logger.info("⚠️ Model not found in persistent cache, attempting to copy from image cache...")
-                self.model_manager.copy_model_from_image_cache()
-                # Re-verify cache after copy attempt
-                cache_status = self.model_manager.cache_status
-            
-            # Log cache status
+            # Log cache status after fix attempt
+            cache_status = self.model_manager.verify_cache_exists()
             if cache_status.model_files_found:
                 logger.info(f"✅ Model cache verified: {cache_status.path}")
                 logger.info(f"   Size: {cache_status.size_mb:.2f} MB")
@@ -154,8 +146,8 @@ class EmbeddingService:
                 logger.warning(f"⚠️ Model cache NOT found. Will download on first use.")
                 logger.warning(f"   Expected location: {cache_path}")
         else:
-            # Fallback to old method
-            logger.warning("⚠️ Using fallback cache method (ModelManager not available)")
+            # Fallback to old method (ModelManager not available)
+            logger.warning("⚠️ _global_model_manager is None - using fallback cache method")
             cache_path = self._get_cache_path()
             self.model_manager = None
         
