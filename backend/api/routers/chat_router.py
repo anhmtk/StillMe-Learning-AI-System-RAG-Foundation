@@ -2585,7 +2585,8 @@ async def _handle_validation_with_fallback(
     timing_logs: dict,
     is_origin_query: bool = False,
     is_stillme_query: bool = False,
-    is_system_status_query: bool = False
+    is_system_status_query: bool = False,
+    is_real_time_question: bool = False
 ) -> tuple:
     """
     Handle validation logic with fallback mechanisms.
@@ -2846,7 +2847,8 @@ async def _handle_validation_with_fallback(
             is_philosophical=is_philosophical,
             is_religion_roleplay=is_religion_roleplay,
             user_question=chat_request.message,
-            context=context
+            context=context,
+            is_real_time_question=is_real_time_question  # Pass flag to skip disclaimer for real-time questions
         )
     
     # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
@@ -4325,12 +4327,18 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         
         # EXTERNAL DATA LAYER: Check for external data queries (weather, news, etc.)
         # This bypasses RAG and fetches real-time data from external APIs
+        # CRITICAL: Detect real-time questions to skip ConfidenceValidator disclaimer
+        is_real_time_question = False
         try:
             from backend.external_data import ExternalDataOrchestrator, detect_external_data_intent
             
             external_data_intent = detect_external_data_intent(chat_request.message)
             if external_data_intent and external_data_intent.confidence >= 0.7:
                 logger.info(f"🌐 External data intent detected: type={external_data_intent.type}, confidence={external_data_intent.confidence}")
+                # Mark as real-time question to skip ConfidenceValidator disclaimer
+                if external_data_intent.type in ['time', 'weather', 'news']:
+                    is_real_time_question = True
+                    logger.info(f"✅ Real-time question detected: type={external_data_intent.type} - will skip ConfidenceValidator disclaimer")
                 
                 # Detect language for response formatting
                 detected_lang = detect_language(chat_request.message)
@@ -4586,7 +4594,8 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         timing_logs={},
                         is_origin_query=is_origin_query,
                         is_stillme_query=is_stillme_query,
-                        is_system_status_query=is_system_status_query
+                        is_system_status_query=is_system_status_query,
+                        is_real_time_question=is_real_time_question  # Pass flag to skip disclaimer for real-time questions
                     )
                     
                     # Use validated response
@@ -8297,7 +8306,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
                                 timing_logs=timing_logs,
                                 is_origin_query=is_origin_query,
                                 is_stillme_query=is_stillme_query,
-                                is_system_status_query=is_system_status_query
+                                is_system_status_query=is_system_status_query,
+                                is_real_time_question=is_real_time_question  # Pass flag to skip disclaimer for real-time questions
                             )
                             
                             # CRITICAL: Log response after validation (especially for philosophical questions)

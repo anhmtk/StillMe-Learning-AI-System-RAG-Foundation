@@ -76,7 +76,7 @@ class ValidatorChain:
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None,
             avg_similarity: Optional[float] = None, is_philosophical: bool = False,
             is_religion_roleplay: bool = False, user_question: Optional[str] = None,
-            context: Optional[Dict[str, Any]] = None) -> ValidationResult:
+            context: Optional[Dict[str, Any]] = None, is_real_time_question: bool = False) -> ValidationResult:
         """
         Run all validators with parallel execution for independent validators
         
@@ -126,7 +126,8 @@ class ValidatorChain:
                 if validator_name == "ConfidenceValidator":
                     # Pass previous reasons and user_question to ConfidenceValidator so it can detect source_contradiction
                     # and use human-readable citations in uncertainty templates
-                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical, is_religion_roleplay=is_religion_roleplay, previous_reasons=reasons, user_question=user_question)
+                    # CRITICAL: Pass is_real_time_question to skip disclaimer for real-time questions (time, weather, etc.)
+                    result = validator.run(patched, ctx_docs, context_quality=context_quality, avg_similarity=avg_similarity, is_philosophical=is_philosophical, is_religion_roleplay=is_religion_roleplay, previous_reasons=reasons, user_question=user_question, context=context, is_real_time_question=is_real_time_question)
                 elif validator_name == "CitationRequired":
                     # Pass is_philosophical, user_question, and context to CitationRequired
                     # user_question is needed to detect real factual questions (even with philosophical elements)

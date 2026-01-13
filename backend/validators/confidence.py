@@ -125,7 +125,8 @@ class ConfidenceValidator:
     def run(self, answer: str, ctx_docs: List[str], context_quality: Optional[str] = None, 
             avg_similarity: Optional[float] = None, is_philosophical: bool = False,
             is_religion_roleplay: bool = False, previous_reasons: Optional[List[str]] = None,
-            user_question: Optional[str] = None, context: Optional[Dict[str, Any]] = None) -> ValidationResult:
+            user_question: Optional[str] = None, context: Optional[Dict[str, Any]] = None,
+            is_real_time_question: bool = False) -> ValidationResult:
         """
         Check if answer appropriately expresses uncertainty
         
@@ -197,7 +198,8 @@ class ConfidenceValidator:
         # Tier 3.5: Force uncertainty when context quality is low
         # BUT: Skip for philosophical questions (theoretical reasoning doesn't need context)
         # AND: Skip for religion/roleplay questions (they should answer from identity prompt, not RAG context)
-        if not is_philosophical and not is_religion_roleplay and (context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
+        # AND: Skip for real-time questions (time, weather, etc.) - these are factual, not knowledge-base questions
+        if not is_philosophical and not is_religion_roleplay and not is_real_time_question and (context_quality == "low" or (avg_similarity is not None and avg_similarity < 0.1)):
             # CRITICAL: Exception for StillMe self-knowledge queries
             # StillMe should always be able to answer questions about its own features/capabilities
             # even if RAG retrieval fails (it has foundational knowledge about itself)
