@@ -400,6 +400,98 @@ def _build_system_status_context(system_monitor, current_learning_sources: Optio
         return None, None
 
 
+def _build_learning_sources_response(
+    current_learning_sources: Dict[str, Any],
+    detected_lang: str,
+    include_proposals: bool,
+    user_question: str
+) -> str:
+    """Build a deterministic response for learning sources queries (avoid LLM drift)."""
+    sources = current_learning_sources.get("current_sources", {}) if current_learning_sources else {}
+    summary = current_learning_sources.get("summary", {}) if current_learning_sources else {}
+
+    enabled_sources = [name for name, info in sources.items() if info.get("enabled")]
+    active_sources = summary.get("active_sources", [])
+    inactive_sources = summary.get("inactive_sources", [])
+
+    rss_info = sources.get("rss", {})
+    feeds_count = rss_info.get("feeds_count", 0)
+    failed_info = rss_info.get("failed_feeds") or {}
+    failed_count = failed_info.get("failed_count", 0) if isinstance(failed_info, dict) else 0
+    successful_count = failed_info.get("successful_count", 0) if isinstance(failed_info, dict) else 0
+    failure_rate = failed_info.get("failure_rate", 0.0) if isinstance(failed_info, dict) else 0.0
+    last_error = failed_info.get("last_error") if isinstance(failed_info, dict) else None
+
+    if detected_lang == "vi":
+        lines = [
+            "## Nguồn học hiện tại",
+            f"- **Tổng nguồn bật**: {summary.get('total_enabled', len(enabled_sources))}",
+            f"- **Nguồn đang hoạt động**: {', '.join(active_sources) if active_sources else 'không rõ'}",
+            f"- **Nguồn gặp sự cố**: {', '.join(inactive_sources) if inactive_sources else 'không có'}",
+            f"- **RSS feeds**: tổng {feeds_count}, thành công {successful_count}, lỗi {failed_count} (tỷ lệ lỗi {failure_rate}%)",
+        ]
+        if last_error:
+            lines.append(f"- **Lỗi RSS gần nhất**: {last_error}")
+
+        lines.append("")
+        lines.append("## Điểm chưa ổn")
+        if failed_count > 0:
+            lines.append(f"- Có **{failed_count} RSS feed lỗi** → cần thay thế hoặc thêm fallback.")
+        else:
+            lines.append("- Chưa thấy feed lỗi đáng kể trong lần lấy gần nhất.")
+
+        lines.append("")
+        lines.append("## Đề xuất cải thiện nguồn học")
+        if include_proposals:
+            lines.extend([
+                "- **Bổ sung nguồn tiếng Việt về công nghệ** (tăng độ phủ nội địa):",
+                "  - VNExpress Số Hóa (RSS) – lợi ích: tin nhanh, phổ biến; thách thức: chất lượng không đồng đều.",
+                "  - Tuổi Trẻ Công Nghệ (RSS) – lợi ích: cập nhật sản phẩm & xu hướng; thách thức: nội dung đôi khi ngắn.",
+                "- **Bổ sung nguồn policy/AI governance**:",
+                "  - OECD AI (RSS/API) – lợi ích: chính sách và tiêu chuẩn; thách thức: nội dung dài, cần lọc.",
+                "- **Cải thiện độ bền RSS**:",
+                "  - Thêm fallback cho feed lỗi, tự động thay thế khi 3 lần lỗi liên tiếp.",
+            ])
+        else:
+            lines.append("- Nếu bạn muốn, mình có thể đề xuất thêm nguồn cụ thể theo lĩnh vực bạn quan tâm.")
+
+        lines.append("")
+        lines.append("Bạn muốn mình ưu tiên **nguồn tiếng Việt**, **nguồn học thuật**, hay **nguồn tin nhanh**?")
+        return "\n".join(lines)
+
+    lines = [
+        "## Current learning sources",
+        f"- **Total enabled**: {summary.get('total_enabled', len(enabled_sources))}",
+        f"- **Active sources**: {', '.join(active_sources) if active_sources else 'unknown'}",
+        f"- **Sources with issues**: {', '.join(inactive_sources) if inactive_sources else 'none'}",
+        f"- **RSS feeds**: total {feeds_count}, success {successful_count}, failed {failed_count} (failure rate {failure_rate}%)",
+    ]
+    if last_error:
+        lines.append(f"- **Last RSS error**: {last_error}")
+
+    lines.append("")
+    lines.append("## Issues")
+    if failed_count > 0:
+        lines.append(f"- **{failed_count} RSS feeds failed** → replace or add fallbacks.")
+    else:
+        lines.append("- No significant feed failures in the latest fetch.")
+
+    lines.append("")
+    lines.append("## Suggestions")
+    if include_proposals:
+        lines.extend([
+            "- Add regional tech sources to improve local coverage.",
+            "- Add AI policy/governance sources (e.g., OECD AI).",
+            "- Improve RSS resilience with automatic fallbacks after repeated failures.",
+        ])
+    else:
+        lines.append("- I can propose specific sources if you share your preferred domain.")
+
+    lines.append("")
+    lines.append("Do you want me to prioritize **local sources**, **academic sources**, or **fast news**?")
+    return "\n".join(lines)
+
+
 def _is_codebase_meta_question(message: str) -> bool:
     """
     Detect meta-questions that explicitly ask about StillMe's implementation
@@ -3945,6 +4037,17 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         if any(keyword in message_lower for keyword in learning_proposal_keywords):
             is_learning_proposal_query = True
             logger.info("Learning proposal query detected - will analyze actual knowledge gaps")
+
+        # Detect dissatisfaction/feedback about current sources
+        has_learning_sources_feedback = False
+        learning_sources_feedback_keywords = [
+            "không hài lòng", "khong hai long", "không ổn", "khong on",
+            "có vấn đề", "co van de", "phàn nàn", "than phiền",
+            "not satisfied", "issue", "problem", "concern"
+        ]
+        if any(keyword in message_lower for keyword in learning_sources_feedback_keywords):
+            has_learning_sources_feedback = True
+            logger.info("Learning sources feedback detected - will provide actionable improvements")
         
         # CRITICAL: Detect Knowledge Gap questions (not learning proposal, but asking to identify gaps)
         is_knowledge_gap_query = False
@@ -4073,6 +4176,42 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     processing_steps.append("📡 Injected live system status context (RSS feeds)")
             except Exception as status_ctx_error:
                 logger.warning(f"Failed to build system status context: {status_ctx_error}")
+
+        # CRITICAL: For learning sources queries with proposals/feedback, return deterministic response (no LLM)
+        if is_learning_sources_query and current_learning_sources and (is_learning_proposal_query or has_learning_sources_feedback):
+            response_text = _build_learning_sources_response(
+                current_learning_sources=current_learning_sources,
+                detected_lang=detected_lang or "vi",
+                include_proposals=True,
+                user_question=chat_request.message
+            )
+            response_text = _add_timestamp_to_response(
+                response_text,
+                detected_lang=detected_lang or "vi",
+                context=None,
+                user_question=chat_request.message,
+                is_self_knowledge_question=True
+            )
+            processing_steps.append("✅ Returned deterministic learning sources response (no LLM)")
+            from backend.core.epistemic_state import EpistemicState
+            return ChatResponse(
+                response=response_text,
+                confidence_score=0.9,
+                has_citation=False,
+                validation_info={
+                    "passed": True,
+                    "learning_sources_response": True,
+                    "context_docs_count": 0
+                },
+                processing_steps=processing_steps,
+                timing_logs={
+                    "total_time": time.time() - start_time,
+                    "rag_retrieval_latency": 0.0,
+                    "llm_inference_latency": 0.0
+                },
+                epistemic_state=EpistemicState.KNOWN.value,
+                used_fallback=False
+            )
         
         # Detect philosophical questions - filter technical RAG documents
         is_philosophical = False
@@ -10305,7 +10444,13 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         # CONVERSATIONAL INTELLIGENCE: Add disclaimer for MEDIUM ambiguity
         # Philosophy: Answer with assumptions acknowledged, not just answer blindly
         # Based on StillMe Manifesto Principle 5: "EMBRACE 'I DON'T KNOW' AS INTELLECTUAL HONESTY"
-        if 'ambiguity_level' in locals() and ambiguity_level == "MEDIUM" and ambiguity_score >= 0.4:
+        if (
+            'ambiguity_level' in locals()
+            and ambiguity_level == "MEDIUM"
+            and ambiguity_score >= 0.4
+            and not is_learning_sources_query
+            and not is_system_status_query
+        ):
             try:
                 detected_lang_for_disclaimer = detected_lang if 'detected_lang' in locals() and detected_lang else detect_language(response or chat_request.message)
                 if detected_lang_for_disclaimer == "vi":
