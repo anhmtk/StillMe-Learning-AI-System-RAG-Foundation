@@ -41,35 +41,45 @@ class PapersWithCodeFetcher:
                 # Try to fetch from API
                 response = await client.get(
                     f"{self.api_url}",
-                    params={"ordering": "-added", "page_size": max_results}
+                    params={"ordering": "-added", "page_size": max_results},
+                    headers={
+                        "Accept": "application/json",
+                        "User-Agent": "StillMe/1.0 (+https://stillme.ai)"
+                    }
                 )
                 
                 if response.status_code == 200:
-                    data = response.json()
-                    if "results" in data:
-                        for paper in data["results"][:max_results]:
-                            entry = {
-                                "title": paper.get("title", ""),
-                                "summary": paper.get("abstract", ""),
-                                "link": f"{self.base_url}/paper/{paper.get('id', '')}",
-                                "published": paper.get("published", datetime.now().isoformat()),
-                                "source": "papers_with_code",
-                                "content_type": "knowledge",
-                                "metadata": {
-                                    "paper_id": paper.get("id"),
-                                    "authors": paper.get("authors", []),
-                                    "categories": paper.get("categories", []),
-                                    "has_code": paper.get("repository", {}).get("url") is not None if isinstance(paper.get("repository"), dict) else False
+                    content_type = response.headers.get("content-type", "").lower()
+                    try:
+                        if "application/json" not in content_type:
+                            raise ValueError(f"Non-JSON content-type: {content_type}")
+                        data = response.json()
+                        if "results" in data:
+                            for paper in data["results"][:max_results]:
+                                entry = {
+                                    "title": paper.get("title", ""),
+                                    "summary": paper.get("abstract", ""),
+                                    "link": f"{self.base_url}/paper/{paper.get('id', '')}",
+                                    "published": paper.get("published", datetime.now().isoformat()),
+                                    "source": "papers_with_code",
+                                    "content_type": "knowledge",
+                                    "metadata": {
+                                        "paper_id": paper.get("id"),
+                                        "authors": paper.get("authors", []),
+                                        "categories": paper.get("categories", []),
+                                        "has_code": paper.get("repository", {}).get("url") is not None if isinstance(paper.get("repository"), dict) else False
+                                    }
                                 }
-                            }
-                            entries.append(entry)
-                        self.successful_fetches += 1
-                        self.last_success_time = datetime.now()
-                        logger.info(f"Fetched {len(entries)} papers from Papers with Code API")
-                        return entries
+                                entries.append(entry)
+                            self.successful_fetches += 1
+                            self.last_success_time = datetime.now()
+                            logger.info(f"Fetched {len(entries)} papers from Papers with Code API")
+                            return entries
+                    except Exception as json_error:
+                        logger.warning(f"Papers with Code API JSON parse failed: {json_error}")
                 
                 # Fallback: Try RSS feed if API fails
-                rss_url = f"{self.base_url}/latest"
+                rss_url = f"{self.base_url}/rss"
                 try:
                     rss_response = await client.get(rss_url, follow_redirects=True)
                     if rss_response.status_code == 200:

@@ -48,6 +48,14 @@ FALLBACK_FEEDS = {
     "https://tricycle.org/feed/": [
         # No reliable fallback - feed removed from main list
     ],
+    "https://www.psychologicalscience.org/rss": [
+        "https://www.psychologicalscience.org/feed/",
+        "https://www.psychologicalscience.org/feed"
+    ],
+    "https://www.ncronline.org/feed/": [
+        "https://www.ncronline.org/feed",
+        "https://www.ncronline.org/rss.xml"
+    ],
     # Removed fallback feeds for permanently broken feeds (all variants failed XML validation):
     # - https://www.sciencedaily.com/rss/matter_energy.xml (all variants failed)
     # - https://aeon.co/feed.rss (all variants failed)

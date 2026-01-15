@@ -96,7 +96,9 @@ def detect_language(text: str, is_user_query: bool = True) -> str:
     try:
         from langdetect import detect
         from langdetect import LangDetectException
-        detected = detect(text)
+        # Avoid heavy langdetect on very long inputs (use head slice for speed)
+        sample_text = text[:2000] if len(text) > 2000 else text
+        detected = detect(sample_text)
         
         # Map langdetect codes to our internal codes
         lang_map = {

@@ -478,6 +478,8 @@ class EmbeddingService:
                     
                     model_found = False
                     found_location = None
+                    found_hf_location = None
+                    st_expected_path = cache_dir / "sentence_transformers" / model_name_safe
                     logger.debug(f"🔍 Checking {len(possible_locations)} possible cache locations for model: {self.model_name}")
                     for loc in possible_locations:
                         logger.debug(f"  Checking: {loc} (exists: {loc.exists()})")
@@ -525,11 +527,26 @@ class EmbeddingService:
                                     elif has_subdirs or has_model_files:
                                         model_found = True
                                         found_location = loc
+                                        # Track HF cache location to fix ST mismatch after first use
+                                        if "models--" in str(loc) and "sentence_transformers" not in str(loc):
+                                            found_hf_location = loc
                                         logger.info(f"✅ Found model directory: {loc} (has_subdirs: {has_subdirs}, has_model_files: {has_model_files})")
                                         break
                     
                     if model_found:
                         logger.info(f"✅ After first use: Model files cached in persistent volume: {found_location}")
+                        if found_hf_location and not st_expected_path.exists():
+                            # CRITICAL: Fix cache path mismatch AFTER first use (model now downloaded)
+                            try:
+                                from backend.utils.fix_embedding_cache import fix_embedding_model_cache
+                                logger.info("🔧 Detected HF cache without ST path - fixing mismatch after first use...")
+                                fix_success = fix_embedding_model_cache(self.model_name)
+                                if fix_success:
+                                    logger.info("✅ Cache path mismatch fixed after first use")
+                                else:
+                                    logger.warning("⚠️ Cache path fix attempted after first use but did not complete")
+                            except Exception as fix_error:
+                                logger.warning(f"⚠️ Post-download cache fix failed: {fix_error}")
                     else:
                         logger.warning(f"⚠️ After first use: Model files NOT in persistent volume. Expected: {possible_locations[0]}")
                         # Check HuggingFace default cache

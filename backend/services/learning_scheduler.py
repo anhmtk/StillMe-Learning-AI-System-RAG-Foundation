@@ -201,7 +201,21 @@ class LearningScheduler:
                                 # Try parsing with dateutil if available, otherwise use simple parsing
                                 try:
                                     from dateutil.parser import parse as parse_date
-                                    pub_date = parse_date(published)
+                                    from datetime import timezone, timedelta
+                                    tzinfos = {
+                                        "UTC": timezone.utc,
+                                        "GMT": timezone.utc,
+                                        "UT": timezone.utc,
+                                        "EST": timezone(timedelta(hours=-5)),
+                                        "EDT": timezone(timedelta(hours=-4)),
+                                        "CST": timezone(timedelta(hours=-6)),
+                                        "CDT": timezone(timedelta(hours=-5)),
+                                        "MST": timezone(timedelta(hours=-7)),
+                                        "MDT": timezone(timedelta(hours=-6)),
+                                        "PST": timezone(timedelta(hours=-8)),
+                                        "PDT": timezone(timedelta(hours=-7)),
+                                    }
+                                    pub_date = parse_date(published, tzinfos=tzinfos)
                                     # Handle timezone-aware dates
                                     if pub_date.tzinfo:
                                         from datetime import timezone

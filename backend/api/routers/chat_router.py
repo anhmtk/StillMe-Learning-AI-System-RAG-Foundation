@@ -3858,7 +3858,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 processing_steps.append("❓ Ambiguity detected - asking for clarification")
                 
                 # Detect language for clarification question
-                detected_lang = detect_language(chat_request.message)
+                detected_lang = detected_lang or detect_language(chat_request.message)
                 
                 # Return clarification question immediately (skip LLM call, save cost & latency)
                 from backend.core.epistemic_state import EpistemicState
@@ -4144,7 +4144,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 # CRITICAL: Detect language BEFORE calling get_system_origin_answer
                 # detect_language is already imported at top level (line 11)
                 try:
-                    detected_lang = detect_language(chat_request.message)
+                    detected_lang = detected_lang or detect_language(chat_request.message)
                     logger.debug(f"🌐 Detected language for origin query: {detected_lang}")
                 except Exception as lang_error:
                     logger.warning(f"Language detection failed: {lang_error}, defaulting to 'vi'")
@@ -4185,7 +4185,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             try:
                 # Detect language BEFORE calling get_religion_rejection_answer
                 try:
-                    detected_lang = detect_language(chat_request.message)
+                    detected_lang = detected_lang or detect_language(chat_request.message)
                     logger.debug(f"🌐 Detected language for religion choice query: {detected_lang}")
                 except Exception as lang_error:
                     logger.warning(f"Language detection failed: {lang_error}, defaulting to 'vi'")
@@ -4218,7 +4218,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             if is_honesty_question:
                 logger.info("Honesty/consistency question detected - using Honesty Handler")
                 # Detect language for the answer
-                detected_lang = detect_language(chat_request.message)
+                detected_lang = detected_lang or detect_language(chat_request.message)
                 # Process with Honesty Handler
                 honesty_answer = build_honesty_response(chat_request.message, detected_lang)
                 
@@ -4249,7 +4249,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             if is_ai_self_model_query:
                 logger.warning(f"🚨 AI_SELF_MODEL query detected - OVERRIDING all other pipelines (patterns: {matched_patterns})")
                 # Detect language
-                detected_lang = detect_language(chat_request.message)
+                detected_lang = detected_lang or detect_language(chat_request.message)
                 
                 # Get mandatory opening statement
                 opening_statement = get_ai_self_model_opening(detected_lang)
@@ -4356,7 +4356,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     logger.info(f"✅ Real-time question detected: type={external_data_intent.type} - will skip ConfidenceValidator disclaimer")
                 
                 # Detect language for response formatting
-                detected_lang = detect_language(chat_request.message)
+                detected_lang = detected_lang or detect_language(chat_request.message)
                 
                 # Route to external data provider
                 orchestrator = ExternalDataOrchestrator()
@@ -4457,7 +4457,7 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             if is_philosophical_consciousness:
                 logger.info("Philosophical question (consciousness/emotion/understanding) detected - using 3-layer processor")
                 # Detect language for the answer
-                detected_lang = detect_language(chat_request.message)
+                detected_lang = detected_lang or detect_language(chat_request.message)
                 # Process with 3-layer philosophy processor (Guard + Intent + Deep Answer)
                 philosophical_answer = process_philosophical_question(
                     user_question=chat_request.message,
@@ -4752,7 +4752,7 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                 suspicious_entity = fps_result.detected_entities[0] if fps_result.detected_entities else "khái niệm này"
                 
                 # Detect language for response
-                detected_lang = detect_language(chat_request.message)
+                detected_lang = detected_lang or detect_language(chat_request.message)
                 
                 # Create honest response
                 # Use EPD-Fallback for non-RAG path as well
@@ -5899,10 +5899,14 @@ CRITICAL RULES:
             
             # Detect language FIRST - before building prompt
             processing_steps.append("🌐 Detecting language...")
-            detected_lang = detect_language(chat_request.message)
-            lang_detect_time = time.time() - start_time
-            timing_logs["language_detection"] = f"{lang_detect_time:.3f}s"
-            logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s) for question: '{chat_request.message[:100]}...'")
+            if not detected_lang:
+                detected_lang = detect_language(chat_request.message)
+                lang_detect_time = time.time() - start_time
+                timing_logs["language_detection"] = f"{lang_detect_time:.3f}s"
+                logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s) for question: '{chat_request.message[:100]}...'")
+                processing_steps.append(f"✅ Language detected: {detected_lang}")
+            else:
+                logger.info(f"🌐 Using cached detected language: {detected_lang}")
             processing_steps.append(f"✅ Language detected: {detected_lang}")
             
             # Language names mapping (must match chat_helpers.py for consistency)
@@ -9004,7 +9008,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY."""
             # Detect language FIRST
             # CRITICAL: detect_language is imported at top level, but ensure it's available
             # Use the imported function directly (already imported at line 11)
-            detected_lang = detect_language(chat_request.message)
+            detected_lang = detected_lang or detect_language(chat_request.message)
             logger.info(f"🌐 Detected language (non-RAG): {detected_lang}")
             
             # Language names mapping
@@ -10303,7 +10307,7 @@ Total_Response_Latency: {total_response_latency:.2f} giây
         # Based on StillMe Manifesto Principle 5: "EMBRACE 'I DON'T KNOW' AS INTELLECTUAL HONESTY"
         if 'ambiguity_level' in locals() and ambiguity_level == "MEDIUM" and ambiguity_score >= 0.4:
             try:
-                detected_lang_for_disclaimer = detected_lang if 'detected_lang' in locals() else detect_language(response or chat_request.message)
+                detected_lang_for_disclaimer = detected_lang if 'detected_lang' in locals() and detected_lang else detect_language(response or chat_request.message)
                 if detected_lang_for_disclaimer == "vi":
                     disclaimer = f"\n\n💡 *Lưu ý: Mình đã suy luận ý định của bạn dựa trên ngữ cảnh. Nếu mình hiểu sai, bạn có thể làm rõ để mình trả lời chính xác hơn.*"
                 else:

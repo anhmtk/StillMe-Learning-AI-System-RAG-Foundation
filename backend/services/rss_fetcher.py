@@ -83,7 +83,7 @@ class RSSFetcher:
             # Note: Ethics sources complement philosophy sources for practical ethical reasoning
             
             # Social Sciences
-            "https://www.psychologicalscience.org/feed",  # APS Main Feed - Replaced APA feed (404), replaced APS news/feed (403)
+            "https://www.psychologicalscience.org/rss",  # APS Main Feed - updated URL (feed returned 403)
             # Removed: "https://www.apa.org/rss/topics/psychology" - 404 Not Found (URL no longer exists)
             # Removed: "https://www.psychologytoday.com/us/rss" - 404 Not Found
             # Removed: "https://www.scientificamerican.com/psychology/feed/" - 404 Not Found
@@ -94,7 +94,7 @@ class RSSFetcher:
             "https://www.theguardian.com/world/religion/rss",  # The Guardian - Religion
             "https://tricycle.org/feed/",  # Tricycle - Buddhist Magazine (reliable)
             "https://iep.utm.edu/feed/",  # Internet Encyclopedia of Philosophy - Academic philosophy reference
-            "https://www.ncronline.org/feed",  # National Catholic Reporter - Replaced America Magazine (XML validation failed), replaced Commonweal, replaced Christianity Today
+            "https://www.ncronline.org/feed/",  # National Catholic Reporter - updated URL (no trailing slash returned 404)
             # Removed: "https://www.philosophynow.org/rss" - SSL certificate verify failed (unable to get local issuer certificate)
             # Removed: "https://www.firstthings.com/rss" - XML validation failed (not well-formed, all fallbacks exhausted)
             # Removed: "https://philpapers.org/rss/recent.xml" - 403 Forbidden (bot protection)
