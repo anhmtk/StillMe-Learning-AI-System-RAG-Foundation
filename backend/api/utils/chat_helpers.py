@@ -36,6 +36,7 @@ def detect_language(text: str, is_user_query: bool = True) -> str:
         return 'en'
     
     text_lower = text.lower()
+    text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
     
     # CRITICAL: Check Vietnamese keywords ONLY for user queries (not responses)
     # This prevents false Vietnamese detection when response contains Vietnamese keywords from context
@@ -71,9 +72,18 @@ def detect_language(text: str, is_user_query: bool = True) -> str:
     if is_user_query and has_vietnamese_keywords:
         logger.debug("🌐 Vietnamese keywords detected - skipping langdetect (fast path)")
         return 'vi'
+
+    # TRUST-EFFICIENT: Fast path for Vietnamese diacritics (avoid langdetect latency spikes)
+    vietnamese_chars = set('àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ')
+    if any(char in vietnamese_chars for char in text_lower):
+        logger.debug("🌐 Vietnamese diacritics detected - skipping langdetect (fast path)")
+        _lang_cache[text_hash] = 'vi'
+        if len(_lang_cache) > 128:
+            oldest_key = next(iter(_lang_cache))
+            del _lang_cache[oldest_key]
+        return 'vi'
     
     # TRUST-EFFICIENT: Cache language detection results (hash-based)
-    text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
     if text_hash in _lang_cache:
         cached_lang = _lang_cache[text_hash]
         logger.debug(f"🌐 Language cache HIT: {cached_lang}")

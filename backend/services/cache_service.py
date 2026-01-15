@@ -149,9 +149,15 @@ class CacheService:
             self.cache_stats["errors"] += 1
             return None
     
-    def set(self, key: str, value: Any, ttl_seconds: int = 3600) -> bool:
-        """Set value in cache with TTL"""
+    def set(self, key: str, value: Any, ttl_seconds: int = 3600, **kwargs) -> bool:
+        """Set value in cache with TTL
+        
+        Accepts ttl_seconds or ttl (alias) for compatibility.
+        """
         try:
+            # Backward/compat: accept ttl as alias for ttl_seconds
+            if "ttl" in kwargs and kwargs["ttl"] is not None:
+                ttl_seconds = int(kwargs["ttl"])
             if self.redis_client:
                 # Try Redis first
                 try:
