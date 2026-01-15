@@ -4041,13 +4041,22 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # Detect dissatisfaction/feedback about current sources
         has_learning_sources_feedback = False
         learning_sources_feedback_keywords = [
-            "không hài lòng", "khong hai long", "không ổn", "khong on",
+            "không hài lòng", "khong hai long", "ko hài lòng", "ko hai long",
+            "không ổn", "khong on", "ko ổn", "ko on",
             "có vấn đề", "co van de", "phàn nàn", "than phiền",
             "not satisfied", "issue", "problem", "concern"
         ]
         if any(keyword in message_lower for keyword in learning_sources_feedback_keywords):
             has_learning_sources_feedback = True
             logger.info("Learning sources feedback detected - will provide actionable improvements")
+
+        # Additional heuristic: proposal intent even if exact keyword doesn't match
+        has_learning_sources_proposal_intent = False
+        if ("đề xuất" in message_lower or "suggest" in message_lower or "propose" in message_lower) and (
+            "nguồn" in message_lower or "source" in message_lower
+        ):
+            has_learning_sources_proposal_intent = True
+            logger.info("Learning sources proposal intent detected (heuristic)")
         
         # CRITICAL: Detect Knowledge Gap questions (not learning proposal, but asking to identify gaps)
         is_knowledge_gap_query = False
@@ -4178,7 +4187,9 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 logger.warning(f"Failed to build system status context: {status_ctx_error}")
 
         # CRITICAL: For learning sources queries with proposals/feedback, return deterministic response (no LLM)
-        if is_learning_sources_query and current_learning_sources and (is_learning_proposal_query or has_learning_sources_feedback):
+        if is_learning_sources_query and current_learning_sources and (
+            is_learning_proposal_query or has_learning_sources_feedback or has_learning_sources_proposal_intent
+        ):
             response_text = _build_learning_sources_response(
                 current_learning_sources=current_learning_sources,
                 detected_lang=detected_lang or "vi",
