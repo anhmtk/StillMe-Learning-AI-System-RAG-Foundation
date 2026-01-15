@@ -257,7 +257,7 @@ class ExternalDataOrchestrator:
             timestamp_display = result.timestamp.strftime("%Y-%m-%d %H:%M UTC")
         
         cache_status = " (đã cache)" if result.cached else "" if detected_lang == "vi" else " (cached)" if result.cached else ""
-        
+
         if detected_lang == "vi":
             response = f"Theo {result.source} API (lấy lúc {timestamp_display}){cache_status}:\n\n"
             response += f"**Thời tiết ở {location}:**\n"
@@ -280,6 +280,61 @@ class ExternalDataOrchestrator:
             response += " | Validated: Yes (data from API)]"
         
         return response
+
+    def _format_time_response(self, result: ExternalDataResult, detected_lang: str = "en") -> str:
+        """Format time data response"""
+        data = result.data or {}
+        local_time = data.get("local_time")
+        timezone_name = data.get("timezone", "UTC")
+        date_str = data.get("date")
+        time_str = data.get("time")
+
+        if PYTZ_AVAILABLE:
+            try:
+                local_tz = pytz.timezone(timezone_name)
+                local_timestamp = result.timestamp.replace(tzinfo=timezone.utc).astimezone(local_tz)
+                timestamp_local = local_timestamp.strftime("%Y-%m-%d %H:%M:%S %Z%z")
+            except Exception:
+                timestamp_local = result.timestamp.strftime("%Y-%m-%d %H:%M:%S UTC")
+        else:
+            timestamp_local = result.timestamp.strftime("%Y-%m-%d %H:%M:%S UTC")
+
+        cache_status = " (đã cache)" if result.cached else "" if detected_lang == "vi" else " (cached)" if result.cached else ""
+
+        if detected_lang == "vi":
+            if date_str and time_str:
+                return (
+                    f"**Thời gian hiện tại:** {date_str} {time_str} ({timezone_name}).\n"
+                    f"**Nguồn:** {result.source}{cache_status}\n"
+                    f"**Dấu thời gian hệ thống:** {timestamp_local}"
+                )
+            if local_time:
+                return (
+                    f"**Thời gian hiện tại:** {local_time} ({timezone_name}).\n"
+                    f"**Nguồn:** {result.source}{cache_status}\n"
+                    f"**Dấu thời gian hệ thống:** {timestamp_local}"
+                )
+            return (
+                f"**Thời gian hiện tại:** {timestamp_local}.\n"
+                f"**Nguồn:** {result.source}{cache_status}"
+            )
+        else:
+            if date_str and time_str:
+                return (
+                    f"**Current time:** {date_str} {time_str} ({timezone_name}).\n"
+                    f"**Source:** {result.source}{cache_status}\n"
+                    f"**System timestamp:** {timestamp_local}"
+                )
+            if local_time:
+                return (
+                    f"**Current time:** {local_time} ({timezone_name}).\n"
+                    f"**Source:** {result.source}{cache_status}\n"
+                    f"**System timestamp:** {timestamp_local}"
+                )
+            return (
+                f"**Current time:** {timestamp_local}.\n"
+                f"**Source:** {result.source}{cache_status}"
+            )
     
     def _init_metrics(self):
         """Initialize metrics tracking for external data"""
