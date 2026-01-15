@@ -2804,43 +2804,10 @@ async def _handle_validation_with_fallback(
     
     # Task 2: Response Caching Enhancement - Cache validation results
     # Check cache before running expensive validation chain
-    try:
-        from backend.utils.cache_utils import get_cache_key, get_from_cache, set_to_cache
-        
-        # Generate cache key from query and context
-        cache_key = get_cache_key("validation", chat_request.message, context)
-        
-        # Check cache
-        cached_validation = get_from_cache(cache_key)
-        if cached_validation is not None:
-            logger.info(f"✅ Validation cache HIT for query: {chat_request.message[:50]}...")
-            validation_result = cached_validation
-        else:
-            # Cache miss - run validation
-            logger.debug(f"⏳ Validation cache MISS, running validation for: {chat_request.message[:50]}...")
-            
-            # Run validation with context quality info
-            # Tier 3.5: Pass context quality, is_philosophical, and is_religion_roleplay to ValidatorChain
-            # CRITICAL: Pass context dict to enable foundational knowledge detection in CitationRequired
-            validation_result = chain.run(
-                raw_response, 
-                ctx_docs,
-                context_quality=context_quality,
-                avg_similarity=avg_similarity,
-                is_philosophical=is_philosophical,
-                is_religion_roleplay=is_religion_roleplay,
-                user_question=chat_request.message,  # Pass user question for FactualHallucinationValidator
-                context=context  # Pass context dict for foundational knowledge detection
-            )
-            
-            # Cache result (TTL: 1 hour)
-            set_to_cache(cache_key, validation_result, ttl=3600)
-            logger.debug(f"💾 Cached validation result (TTL: 3600s)")
-    except Exception as cache_error:
-        # If caching fails, just run validation normally
-        logger.warning(f"⚠️ Cache error, running validation without cache: {cache_error}")
+    if is_real_time_question:
+        logger.info("⏭️ Skipping validation cache for real-time question (time/weather/news)")
         validation_result = chain.run(
-            raw_response, 
+            raw_response,
             ctx_docs,
             context_quality=context_quality,
             avg_similarity=avg_similarity,
@@ -2848,8 +2815,56 @@ async def _handle_validation_with_fallback(
             is_religion_roleplay=is_religion_roleplay,
             user_question=chat_request.message,
             context=context,
-            is_real_time_question=is_real_time_question  # Pass flag to skip disclaimer for real-time questions
+            is_real_time_question=is_real_time_question
         )
+    else:
+        try:
+            from backend.utils.cache_utils import get_cache_key, get_from_cache, set_to_cache
+            
+            # Generate cache key from query and context
+            cache_key = get_cache_key("validation", chat_request.message, context)
+            
+            # Check cache
+            cached_validation = get_from_cache(cache_key)
+            if cached_validation is not None:
+                logger.info(f"✅ Validation cache HIT for query: {chat_request.message[:50]}...")
+                validation_result = cached_validation
+            else:
+                # Cache miss - run validation
+                logger.debug(f"⏳ Validation cache MISS, running validation for: {chat_request.message[:50]}...")
+                
+                # Run validation with context quality info
+                # Tier 3.5: Pass context quality, is_philosophical, and is_religion_roleplay to ValidatorChain
+                # CRITICAL: Pass context dict to enable foundational knowledge detection in CitationRequired
+                validation_result = chain.run(
+                    raw_response, 
+                    ctx_docs,
+                    context_quality=context_quality,
+                    avg_similarity=avg_similarity,
+                    is_philosophical=is_philosophical,
+                    is_religion_roleplay=is_religion_roleplay,
+                    user_question=chat_request.message,  # Pass user question for FactualHallucinationValidator
+                    context=context,  # Pass context dict for foundational knowledge detection
+                    is_real_time_question=is_real_time_question
+                )
+                
+                # Cache result (TTL: 1 hour)
+                set_to_cache(cache_key, validation_result, ttl=3600)
+                logger.debug(f"💾 Cached validation result (TTL: 3600s)")
+        except Exception as cache_error:
+            # If caching fails, just run validation normally
+            logger.warning(f"⚠️ Cache error, running validation without cache: {cache_error}")
+            validation_result = chain.run(
+                raw_response, 
+                ctx_docs,
+                context_quality=context_quality,
+                avg_similarity=avg_similarity,
+                is_philosophical=is_philosophical,
+                is_religion_roleplay=is_religion_roleplay,
+                user_question=chat_request.message,
+                context=context,
+                is_real_time_question=is_real_time_question  # Pass flag to skip disclaimer for real-time questions
+            )
     
     # Tier 3.5: If context quality is low, inject warning into prompt for next iteration
     # For now, we'll handle this in the prompt building phase
@@ -4382,6 +4397,39 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                         epistemic_state=EpistemicState.KNOWN.value,  # External API data is KNOWN
                         used_fallback=False
                     )
+                # CRITICAL: If time intent fails, return direct TimeProvider response (no LLM fallback)
+                if external_data_intent.type == "time":
+                    try:
+                        from backend.external_data.providers.time import TimeProvider
+                        time_provider = TimeProvider()
+                        time_result = await time_provider.fetch("time", external_data_intent.params)
+                        if time_result and time_result.success:
+                            response_text = orchestrator.format_response(time_result, chat_request.message, detected_lang)
+                            logger.info("✅ TimeProvider fallback used (system time) - skipping RAG/LLM")
+                            processing_steps.append("🕒 TimeProvider fallback (system time)")
+                            from backend.core.epistemic_state import EpistemicState
+                            return ChatResponse(
+                                response=response_text,
+                                confidence_score=0.9,
+                                has_citation=True,
+                                validation_info={
+                                    "passed": True,
+                                    "external_data_source": time_result.source,
+                                    "external_data_timestamp": time_result.timestamp.isoformat(),
+                                    "external_data_cached": time_result.cached,
+                                    "context_docs_count": 0
+                                },
+                                processing_steps=processing_steps,
+                                timing_logs={
+                                    "total_time": time.time() - start_time,
+                                    "rag_retrieval_latency": 0.0,
+                                    "llm_inference_latency": 0.0
+                                },
+                                epistemic_state=EpistemicState.KNOWN.value,
+                                used_fallback=True
+                            )
+                    except Exception as time_fallback_error:
+                        logger.warning(f"⚠️ TimeProvider fallback failed: {time_fallback_error}", exc_info=True)
                 elif result and not result.success:
                     # API failed - fallback to RAG with transparent error message
                     logger.warning(
