@@ -4196,6 +4196,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 include_proposals=True,
                 user_question=chat_request.message
             )
+            # Ensure markdown line breaks are preserved for deterministic responses
+            response_text = _fix_missing_line_breaks(response_text)
             response_text = _add_timestamp_to_response(
                 response_text,
                 detected_lang=detected_lang or "vi",
