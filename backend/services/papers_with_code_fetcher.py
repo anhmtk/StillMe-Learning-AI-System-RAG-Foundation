@@ -79,10 +79,33 @@ class PapersWithCodeFetcher:
                         logger.warning(f"Papers with Code API JSON parse failed: {json_error}")
                 
                 # Fallback: Try RSS feed if API fails
-                rss_url = f"{self.base_url}/rss"
-                try:
-                    rss_response = await client.get(rss_url, follow_redirects=True)
-                    if rss_response.status_code == 200:
+                rss_candidates = [
+                    f"{self.base_url}/rss",
+                    f"{self.base_url}/rss.xml",
+                    f"{self.base_url}/latest/rss",
+                    "https://huggingface.co/papers/rss",
+                    "https://huggingface.co/papers?format=atom"
+                ]
+                headers = {
+                    "Accept": "application/rss+xml, application/atom+xml, application/xml, text/xml, */*",
+                    "User-Agent": "StillMe/1.0 (+https://stillme.ai)"
+                }
+                def _is_xml_response(resp: httpx.Response) -> bool:
+                    content_type = resp.headers.get("content-type", "").lower()
+                    if any(token in content_type for token in ("rss", "xml", "atom")):
+                        return True
+                    text = resp.text[:1000].lower()
+                    return "<rss" in text or "<feed" in text or text.strip().startswith("<?xml")
+                
+                for rss_url in rss_candidates:
+                    try:
+                        rss_response = await client.get(rss_url, headers=headers, follow_redirects=True)
+                        if rss_response.status_code != 200:
+                            logger.warning(f"PapersWithCode RSS failed ({rss_url}): status={rss_response.status_code}")
+                            continue
+                        if not _is_xml_response(rss_response):
+                            logger.warning(f"PapersWithCode RSS not XML ({rss_url}) - content-type={rss_response.headers.get('content-type')}")
+                            continue
                         feed = feedparser.parse(rss_response.text)
                         for entry_data in feed.entries[:max_results]:
                             entry = {
@@ -97,12 +120,12 @@ class PapersWithCodeFetcher:
                         if entries:
                             self.successful_fetches += 1
                             self.last_success_time = datetime.now()
-                            logger.info(f"Fetched {len(entries)} papers from Papers with Code RSS")
+                            logger.info(f"Fetched {len(entries)} papers from RSS ({rss_url})")
                             return entries
-                except Exception as rss_error:
-                    logger.warning(f"RSS fallback failed: {rss_error}")
+                    except Exception as rss_error:
+                        logger.warning(f"RSS fallback failed ({rss_url}): {rss_error}")
                 
-                raise Exception(f"API returned status {response.status_code}")
+                raise Exception("PapersWithCode API returned non-JSON and RSS candidates failed")
                 
         except Exception as e:
             error_msg = f"Failed to fetch Papers with Code: {e}"

@@ -189,7 +189,37 @@ def sanitize_xml(xml_content: str) -> str:
         for entity, replacement in entity_replacements.items():
             sanitized = sanitized.replace(entity, replacement)
     
-    # STEP 2: Remove any remaining undefined entities (pattern: &word;)
+    # STEP 2: Normalize timezone abbreviations inside common date tags
+    # This avoids dateutil UnknownTimezoneWarning in feedparser
+    tz_map = {
+        "EST": "-0500",
+        "EDT": "-0400",
+        "CST": "-0600",
+        "CDT": "-0500",
+        "MST": "-0700",
+        "MDT": "-0600",
+        "PST": "-0800",
+        "PDT": "-0700",
+        "GMT": "+0000",
+        "UTC": "+0000",
+        "Z": "+0000"
+    }
+    date_tag_pattern = re.compile(
+        r"<(?P<tag>pubDate|updated|dc:date|published|lastBuildDate)>(?P<content>.*?)</(?P=tag)>",
+        flags=re.IGNORECASE | re.DOTALL
+    )
+    tz_pattern = re.compile(r"\b(EST|EDT|CST|CDT|MST|MDT|PST|PDT|GMT|UTC|Z)\b")
+    def _replace_tz_in_tag(match: re.Match) -> str:
+        tag = match.group("tag")
+        content = match.group("content")
+        def _replace_tz(m: re.Match) -> str:
+            tz = m.group(1)
+            return tz_map.get(tz, tz)
+        normalized_content = tz_pattern.sub(_replace_tz, content)
+        return f"<{tag}>{normalized_content}</{tag}>"
+    sanitized = date_tag_pattern.sub(_replace_tz_in_tag, sanitized)
+
+    # STEP 3: Remove any remaining undefined entities (pattern: &word;)
     # This catches entities that weren't in our replacement list
     undefined_entity_pattern = r'&([a-zA-Z][a-zA-Z0-9]{1,31});'
     def replace_undefined_entity(match):

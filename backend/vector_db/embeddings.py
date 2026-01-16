@@ -197,6 +197,17 @@ class EmbeddingService:
                         logger.info(f"✅ Model files found in persistent volume: {expected_model_dir}")
                     else:
                         logger.warning(f"⚠️ Model files NOT in persistent volume. Expected: {expected_model_dir}")
+                        # Attempt post-load cache fix to ensure sentence-transformers path exists
+                        try:
+                            from backend.utils.fix_embedding_cache import fix_embedding_model_cache
+                            logger.info("🔧 Attempting post-load cache fix for sentence-transformers path...")
+                            fix_success = fix_embedding_model_cache(model_name)
+                            if fix_success and expected_model_dir.exists():
+                                logger.info(f"✅ Post-load cache fix created ST path: {expected_model_dir}")
+                            else:
+                                logger.warning("⚠️ Post-load cache fix did not create expected ST path")
+                        except Exception as fix_error:
+                            logger.warning(f"⚠️ Post-load cache fix failed: {fix_error}")
                         # Check if model is in HuggingFace default cache instead
                         if hf_cache_dir.exists() and hf_cache_dir != Path(cache_path):
                             logger.warning(f"⚠️ Model may be cached in HuggingFace default location: {hf_cache_dir}")
