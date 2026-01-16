@@ -341,6 +341,7 @@
                 overflow-wrap: break-word !important;
                 line-height: 1.6 !important; /* Better line height for readability */
                 white-space: normal !important; /* CRITICAL: Allow line breaks */
+                font-size: 14px !important; /* Match input font size */
             }
             
             .stillme-chat-message.assistant {

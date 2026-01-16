@@ -287,6 +287,13 @@
                     html = html.replace(/\r\n/g, '\n');
                     html = html.replace(/\r/g, '\n');
                     
+                    // CRITICAL: Ensure headings and list items are on their own lines
+                    // This improves conversion to <h2>/<h3> and <li> blocks
+                    html = html.replace(/\n(#{2,3}\s+)/g, '\n\n$1');
+                    html = html.replace(/^(#{2,3}\s+)/g, '\n\n$1');
+                    html = html.replace(/\n-\s+/g, '\n\n- ');
+                    html = html.replace(/^- /g, '\n\n- ');
+                    
                     // Check if text has newlines (plain text with line breaks)
                     const hasNewlines = html.includes('\n');
                     const newlineCount = (html.match(/\n/g) || []).length;
@@ -716,6 +723,7 @@
                                                 overflow-wrap: break-word !important;
                                                 line-height: 1.5 !important;
                                                 white-space: normal !important; /* CRITICAL: Allow line breaks */
+                                                font-size: 14px !important; /* Match input font size */
                                             }
                                             #stillme-chat-panel-parent .stillme-chat-message.user {
                                                 background: #0e639c !important;
