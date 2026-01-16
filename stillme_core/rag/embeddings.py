@@ -115,6 +115,23 @@ class EmbeddingService:
                 # Re-verify cache after copy attempt
                 cache_status = self.model_manager.cache_status
             
+            # CRITICAL: Fix cache path mismatch (HuggingFace format -> sentence-transformers format)
+            # MUST run BEFORE loading SentenceTransformer model
+            logger.info("🔍 DEBUG: About to call fix_embedding_model_cache (stillme_core)...")
+            try:
+                from backend.utils.fix_embedding_cache import fix_embedding_model_cache
+                logger.info("🔧 🔧 🔧 EMERGENCY: Attempting to fix embedding cache path mismatch BEFORE model load...")
+                fix_success = fix_embedding_model_cache(model_name)
+                logger.info(f"🔍 DEBUG: fix_embedding_model_cache returned: {fix_success}")
+                if fix_success:
+                    logger.info("✅ ✅ ✅ Embedding cache path fix completed successfully")
+                    # Re-verify cache after fix
+                    cache_status = self.model_manager.verify_cache_exists()
+                else:
+                    logger.warning("⚠️ Cache fix failed - model may load incorrectly")
+            except Exception as fix_error:
+                logger.warning(f"⚠️ Cache fix error (stillme_core): {fix_error}")
+            
             # Log cache status
             if cache_status.model_files_found:
                 logger.info(f"✅ Model cache verified: {cache_status.path}")
@@ -175,6 +192,17 @@ class EmbeddingService:
                         logger.info(f"✅ Model files found in persistent volume: {expected_model_dir}")
                     else:
                         logger.warning(f"⚠️ Model files NOT in persistent volume. Expected: {expected_model_dir}")
+                        # Attempt post-load cache fix to ensure sentence-transformers path exists
+                        try:
+                            from backend.utils.fix_embedding_cache import fix_embedding_model_cache
+                            logger.info("🔧 Attempting post-load cache fix for sentence-transformers path...")
+                            fix_success = fix_embedding_model_cache(model_name)
+                            if fix_success and expected_model_dir.exists():
+                                logger.info(f"✅ Post-load cache fix created ST path: {expected_model_dir}")
+                            else:
+                                logger.warning("⚠️ Post-load cache fix did not create expected ST path")
+                        except Exception as fix_error:
+                            logger.warning(f"⚠️ Post-load cache fix failed: {fix_error}")
                         # Check if model is in HuggingFace default cache instead
                         if hf_cache_dir.exists() and hf_cache_dir != Path(cache_path):
                             logger.warning(f"⚠️ Model may be cached in HuggingFace default location: {hf_cache_dir}")

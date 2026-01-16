@@ -294,6 +294,13 @@
                     html = html.replace(/\n-\s+/g, '\n\n- ');
                     html = html.replace(/^- /g, '\n\n- ');
                     
+                    // CRITICAL: Split compact single-line sections into bullets when needed
+                    // Example: "## Title - **Item**: A - **Item**: B" -> lines
+                    if (newlineCount <= 3 && /##\s+/.test(html) && /\s+-\s+/.test(html)) {
+                        html = html.replace(/^(#{2,3}\s+[^-\n]+?)\s+-\s+/gm, '$1\n\n- ');
+                        html = html.replace(/\s+-\s+(?=\*\*|[A-ZÀ-Ý0-9])/g, '\n- ');
+                    }
+                    
                     // Check if text has newlines (plain text with line breaks)
                     const hasNewlines = html.includes('\n');
                     const newlineCount = (html.match(/\n/g) || []).length;

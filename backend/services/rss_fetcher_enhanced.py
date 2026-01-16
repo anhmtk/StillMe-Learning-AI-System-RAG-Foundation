@@ -315,6 +315,28 @@ def sanitize_xml(xml_content: str) -> str:
     return sanitized
 
 
+def _normalize_timezone_abbreviations(xml_content: str) -> str:
+    """Normalize common timezone abbreviations to numeric offsets to avoid dateutil warnings."""
+    tz_map = {
+        "EST": "-0500",
+        "EDT": "-0400",
+        "CST": "-0600",
+        "CDT": "-0500",
+        "MST": "-0700",
+        "MDT": "-0600",
+        "PST": "-0800",
+        "PDT": "-0700",
+        "GMT": "+0000",
+        "UTC": "+0000",
+        "Z": "+0000"
+    }
+    tz_pattern = re.compile(r"\b(EST|EDT|CST|CDT|MST|MDT|PST|PDT|GMT|UTC|Z)\b")
+    def _replace_tz(match: re.Match) -> str:
+        tz = match.group(1)
+        return tz_map.get(tz, tz)
+    return tz_pattern.sub(_replace_tz, xml_content)
+
+
 async def fetch_feed_with_retry(
     feed_url: str,
     max_retries: int = MAX_RETRIES,
@@ -349,10 +371,12 @@ async def fetch_feed_with_retry(
                 response = await client.get(feed_url)
                 response.raise_for_status()
                 
+                # CRITICAL FIX: Normalize timezones before parsing to avoid dateutil warnings
+                xml_content = _normalize_timezone_abbreviations(response.text)
+
                 # CRITICAL FIX: Try feedparser first (lenient), then validate if needed
                 # feedparser is more tolerant and can handle many malformed XML cases
-                xml_content = response.text
-                
+                # xml_content already normalized
                 # Try parsing directly with feedparser (most lenient)
                 feed = feedparser.parse(xml_content)
                 

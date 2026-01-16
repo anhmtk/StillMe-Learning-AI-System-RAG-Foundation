@@ -78,12 +78,42 @@ class PapersWithCodeFetcher:
                     except Exception as json_error:
                         logger.warning(f"Papers with Code API JSON parse failed: {json_error}")
                 
-                # Fallback: Try RSS feed if API fails
+                # Fallback: Try Hugging Face JSON API (public) if PWC API returns HTML
+                hf_token = os.getenv("HUGGINGFACE_API_TOKEN") or os.getenv("HF_TOKEN")
+                hf_headers = {
+                    "Accept": "application/json",
+                    "User-Agent": "StillMe/1.0 (+https://stillme.ai)"
+                }
+                if hf_token:
+                    hf_headers["Authorization"] = f"Bearer {hf_token}"
+                try:
+                    hf_response = await client.get("https://huggingface.co/api/papers", headers=hf_headers)
+                    if hf_response.status_code == 200:
+                        hf_data = hf_response.json()
+                        if isinstance(hf_data, list):
+                            for paper in hf_data[:max_results]:
+                                entry = {
+                                    "title": paper.get("title", ""),
+                                    "summary": paper.get("summary", "") or paper.get("abstract", ""),
+                                    "link": paper.get("url", "") or paper.get("link", ""),
+                                    "published": paper.get("published", datetime.now().isoformat()),
+                                    "source": "papers_with_code",
+                                    "content_type": "knowledge"
+                                }
+                                entries.append(entry)
+                            if entries:
+                                self.successful_fetches += 1
+                                self.last_success_time = datetime.now()
+                                logger.info(f"Fetched {len(entries)} papers from Hugging Face API")
+                                return entries
+                except Exception as hf_error:
+                    logger.warning(f"Hugging Face API fallback failed: {hf_error}")
+
+                # Fallback: Try RSS/Atom feeds if API fails
                 rss_candidates = [
                     f"{self.base_url}/rss",
                     f"{self.base_url}/rss.xml",
                     f"{self.base_url}/latest/rss",
-                    "https://huggingface.co/papers/rss",
                     "https://huggingface.co/papers?format=atom"
                 ]
                 headers = {
@@ -125,7 +155,7 @@ class PapersWithCodeFetcher:
                     except Exception as rss_error:
                         logger.warning(f"RSS fallback failed ({rss_url}): {rss_error}")
                 
-                raise Exception("PapersWithCode API returned non-JSON and RSS candidates failed")
+                raise Exception("PapersWithCode API returned non-JSON and all fallbacks failed")
                 
         except Exception as e:
             error_msg = f"Failed to fetch Papers with Code: {e}"
