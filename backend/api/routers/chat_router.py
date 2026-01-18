@@ -762,8 +762,10 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         ]
         for pattern in external_citation_patterns:
             response = re.sub(pattern, '', response, flags=re.IGNORECASE)
-        # Clean up extra spaces
-        response = re.sub(r'\s+', ' ', response).strip()
+        # Clean up extra spaces but preserve line breaks
+        response = re.sub(r'[ \t]+', ' ', response)
+        response = re.sub(r'\n{3,}', '\n\n', response)
+        response = response.strip()
         logger.debug("Removed external citations from self-knowledge question response")
     
     # Try to extract existing citation from response

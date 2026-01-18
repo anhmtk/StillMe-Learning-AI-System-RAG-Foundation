@@ -4,6 +4,7 @@ Fetches recent papers with code from paperswithcode.com
 """
 
 import httpx
+import os
 import feedparser  # type: ignore[import-untyped]
 from typing import List, Dict, Any, Optional
 from datetime import datetime
