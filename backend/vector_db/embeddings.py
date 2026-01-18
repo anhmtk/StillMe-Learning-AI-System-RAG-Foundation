@@ -440,7 +440,7 @@ class EmbeddingService:
                     return self._embedding_cache[cache_key].copy()  # Return copy to prevent mutation
             
             # Generate embeddings
-            embeddings = self.model.encode(text, convert_to_tensor=False)
+            embeddings = self.model.encode(text, convert_to_tensor=False, show_progress_bar=False)
             
             # OPTIMIZATION: Cache single text embeddings (both in-memory and Redis)
             if isinstance(text, str):

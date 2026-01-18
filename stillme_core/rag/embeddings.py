@@ -435,7 +435,7 @@ class EmbeddingService:
                     return self._embedding_cache[cache_key].copy()  # Return copy to prevent mutation
             
             # Generate embeddings
-            embeddings = self.model.encode(text, convert_to_tensor=False)
+            embeddings = self.model.encode(text, convert_to_tensor=False, show_progress_bar=False)
             
             # CRITICAL: Normalize embeddings to unit vectors for better cosine similarity
             # This improves retrieval accuracy, especially for ChromaDB

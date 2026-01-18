@@ -564,8 +564,8 @@ class CitationRequired:
         # CRITICAL: Clean answer from control characters and smart quotes
         import unicodedata
         if answer and isinstance(answer, str):
-            # Remove control characters and smart quotes
-            answer = re.sub(r'[\x00-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019]', '', answer)
+            # Remove control characters and smart quotes (preserve \n, \r, \t)
+            answer = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f\u201c\u201d\u2018\u2019]', '', answer)
             # Normalize Unicode to NFC form
             try:
                 answer = unicodedata.normalize('NFC', answer)

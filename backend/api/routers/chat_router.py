@@ -214,18 +214,29 @@ def _fix_missing_line_breaks(text: str) -> str:
     if not text or not isinstance(text, str):
         return text
     
-    # Fix: Add line break after markdown headings (## HeadingText -> ## HeadingText\n\n)
-    # Pattern: ## or ### followed by text, then immediately followed by non-newline character
-    text = re.sub(r'(^#{1,6}\s+[^\n]+)([^\n])', r'\1\n\n\2', text, flags=re.MULTILINE)
-    
-    # Fix: Add line break after heading-like text (if no markdown, check for patterns)
-    # Pattern: Text ending with ":" or "?" followed by text without newline
-    text = re.sub(r'([^:\n?]+[:\?])([^\n\s])', r'\1\n\2', text)
-    
-    # Fix: Add line break after bullet points (- Item -> - Item\n)
-    # Pattern: - or * at start of line, followed by text, then immediately followed by non-newline
-    text = re.sub(r'(^[\s]*[-*•]\s+[^\n]+)([^\n])', r'\1\n\2', text, flags=re.MULTILINE)
-    
+    fixed_lines = []
+    for line in text.split("\n"):
+        # Split compact heading lines like: "## Title - A - B"
+        if re.match(r'^\s*#{1,6}\s+', line) and " - " in line:
+            heading, rest = line.split(" - ", 1)
+            rest = "- " + rest.replace(" - ", "\n- ")
+            fixed_lines.append(heading)
+            fixed_lines.append("")
+            fixed_lines.extend(rest.split("\n"))
+            continue
+
+        # Split compact bullet lines like: "- A - B - C"
+        if re.match(r'^\s*[-*•]\s+', line) and " - " in line:
+            first, rest = line.split(" - ", 1)
+            rest = "- " + rest.replace(" - ", "\n- ")
+            fixed_lines.append(first)
+            fixed_lines.extend(rest.split("\n"))
+            continue
+
+        fixed_lines.append(line)
+
+    text = "\n".join(fixed_lines)
+
     # Normalize multiple consecutive newlines to max 2
     text = re.sub(r'\n{3,}', '\n\n', text)
     
