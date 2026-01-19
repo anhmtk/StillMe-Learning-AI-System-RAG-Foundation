@@ -69,6 +69,11 @@ class CitationRequired:
                 if re.search(pattern, question_lower, re.IGNORECASE):
                     logger.info(f"✅ Self-knowledge question about codebase detected - skipping citation requirement")
                     return ValidationResult(passed=True, reasons=["self_knowledge_codebase_question"])
+        # CRITICAL: Skip citation for StillMe self-knowledge questions (identity, differences, goals)
+        if context and isinstance(context, dict) and context.get("is_self_knowledge_question"):
+            logger.info("✅ Self-knowledge question detected - skipping citation requirement")
+            return ValidationResult(passed=True, reasons=["self_knowledge_question"])
+        
         if not self.required:
             return ValidationResult(passed=True)
         is_system_status_query = bool(context and isinstance(context, dict) and context.get("is_system_status_query"))

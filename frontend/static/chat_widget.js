@@ -289,15 +289,15 @@
                     html = html.replace(/\r\n/g, '\n');
                     html = html.replace(/\r/g, '\n');
                     
-                    // Check if text has newlines (plain text with line breaks)
-                    const newlineCount = (html.match(/\n/g) || []).length;
-                    const hasNewlines = newlineCount > 0;
+                    // CRITICAL: Split headings that are glued mid-line (no newline before "##"/"###")
+                    html = html.replace(/([^\n])(?=##\s)/g, '$1\n\n');
+                    html = html.replace(/([^\n])(?=###\s)/g, '$1\n\n');
                     
-                    // CRITICAL: If heading and paragraph are glued together on one line, split them
+                    // CRITICAL: If heading and paragraph are glued on one line, split them
                     // Example: "## Title...Điều ..." -> add newline before "Điều"/"This"/"However" etc
-                    if (!hasNewlines && /^#{2,3}\s+/.test(html)) {
+                    if (/^#{2,3}\s+/.test(html)) {
                         html = html.replace(
-                            /^(#{2,3}\s+[^\n]{20,160}?)(Điều|Những|Các|Mình|This|That|Here|In|Vì|Tuy|However|Therefore)/,
+                            /^(#{2,3}\s+[^\n]{12,220}?)(Điều|Những|Các|Mình|This|That|Here|In|Vì|Tuy|However|Therefore)/,
                             '$1\n\n$2'
                         );
                     }
@@ -308,6 +308,14 @@
                     html = html.replace(/^(#{2,3}\s+)/g, '\n\n$1');
                     html = html.replace(/\n-\s+/g, '\n\n- ');
                     html = html.replace(/^- /g, '\n\n- ');
+                    
+                    // CRITICAL: Split compact bullets on same line: "X: - A - B" -> new lines
+                    html = html.replace(/:\s*-\s+/g, ':\n- ');
+                    html = html.replace(/\s+-\s+(?=\*\*|[A-ZÀ-Ý0-9])/g, '\n- ');
+                    
+                    // Recompute newline stats after splitting
+                    const newlineCount = (html.match(/\n/g) || []).length;
+                    const hasNewlines = newlineCount > 0;
                     
                     // CRITICAL: Split compact single-line sections into bullets when needed
                     // Example: "## Title - **Item**: A - **Item**: B" -> lines

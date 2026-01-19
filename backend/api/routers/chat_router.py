@@ -2907,6 +2907,10 @@ async def _handle_validation_with_fallback(
     context_quality = context.get("context_quality", None)
     avg_similarity = context.get("avg_similarity_score", None)
     
+    # CRITICAL: Mark self-knowledge queries for validators (skip external citations)
+    if context and isinstance(context, dict):
+        context["is_self_knowledge_question"] = bool(is_stillme_query) and not bool(is_system_status_query)
+    
     # Task 2: Response Caching Enhancement - Cache validation results
     # Check cache before running expensive validation chain
     if is_real_time_question:
