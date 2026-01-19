@@ -1,6 +1,8 @@
 
             // Wrap everything in try-catch to prevent silent failures
             try {
+                const CHAT_WIDGET_VERSION = "2026-01-19-01";
+                console.log("StillMe Chat: Widget version:", CHAT_WIDGET_VERSION);
                 console.log('StillMe Chat: Script starting...');
                 
             const API_BASE = 'API_BASE';
