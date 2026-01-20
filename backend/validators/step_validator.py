@@ -141,8 +141,11 @@ class StepValidator:
             
             if not api_key:
                 logger.warning("No API key available for batch step validation, falling back to lightweight chain")
-                chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
-                return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold) for step in steps]
+                chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
+                return [
+                    self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
+                    for step in steps
+                ]
             
             # PHASE 2 FIX: Optimize batch validation prompt to reduce complexity and latency
             # Strategy: Simplify prompt, reduce context, use concise format
@@ -180,8 +183,11 @@ Return JSON only:
             # For large batches (>10 steps), skip batch validation entirely
             if len(steps) > 10:
                 logger.info(f"P1.1.b: Skipping batch validation for {len(steps)} steps (too many, using lightweight chain directly)")
-                chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold)
-                return [self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold) for step in steps]
+                chain = self._create_lightweight_chain(ctx_docs, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
+                return [
+                    self.validate_step(step, ctx_docs, chain, adaptive_citation_overlap, adaptive_evidence_threshold, context=context)
+                    for step in steps
+                ]
             
             with httpx.Client(timeout=2.0) as client:  # TRUST-EFFICIENT: 2s timeout instead of 5s
                 response = client.post(

@@ -768,11 +768,29 @@ def _add_timestamp_to_response(response: str, detected_lang: str = "en", context
         external_citation_patterns = [
             r'\[source:\s*\d+\]',
             r'\[nguồn:\s*\d+\]',
+            r'\[source:\s*[^\]]+\]',
+            r'\[nguồn:\s*[^\]]+\]',
             r'\[research:\s*[^\]]+\]',
             r'\[nghiên cứu:\s*[^\]]+\]',
         ]
         for pattern in external_citation_patterns:
             response = re.sub(pattern, '', response, flags=re.IGNORECASE)
+        # Remove explicit source sections (e.g., "Nguồn", "Sources", "Links") for self-knowledge answers
+        filtered_lines = []
+        in_source_block = False
+        source_header_pattern = re.compile(
+            r'^\s*(#+\s*)?(nguồn|source|sources|references|tham\s+khảo|liên\s+kết)\b',
+            re.IGNORECASE
+        )
+        for line in response.splitlines():
+            if source_header_pattern.search(line):
+                in_source_block = True
+                continue
+            if in_source_block:
+                # Skip all lines after source header (sources should not appear in self-knowledge answers)
+                continue
+            filtered_lines.append(line)
+        response = "\n".join(filtered_lines)
         # Clean up extra spaces but preserve line breaks
         response = re.sub(r'[ \t]+', ' ', response)
         response = re.sub(r'\n{3,}', '\n\n', response)
@@ -3971,6 +3989,21 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         # Philosophy: Ask for clarification when truly ambiguous, but not too often (balance UX)
         # NO frequency limit - tư duy phi tuyến tính, không áp dụng giới hạn tuyến tính
         try:
+            # Skip ambiguity clarification for StillMe self-knowledge queries
+            self_knowledge_ambiguity_patterns = [
+                r"\b(bạn|you)\s+(khác\s+biệt|khac\s+biet|different)\b",
+                r"\b(điểm\s+khác\s+biệt|điểm\s+gì\s+khác\s+biệt|khac\s+biet)\b",
+                r"\b(bạn|you)\s+(đặc\s+biệt|dac\s+biet|special|unique)\b",
+                r"\b(bạn|you)\s+(ưu\s+điểm|uu\s+diem|nhược\s+điểm|nhuoc\s+diem|điểm\s+mạnh|diem\s+manh|điểm\s+yếu|diem\s+yeu)\b",
+                r"\bwhat\s+(makes|make)\s+(you|bạn)\s+(different|unique|special)\b",
+                r"\b(your|bạn)\s+(strength|strengths|weakness|weaknesses|advantages|disadvantages)\b",
+                r"\b(stillme)\b",
+            ]
+            if chat_request.message:
+                question_lower = chat_request.message.lower()
+                if any(re.search(p, question_lower, re.IGNORECASE) for p in self_knowledge_ambiguity_patterns):
+                    logger.info("🧭 Self-knowledge query detected - skipping ambiguity clarification")
+                    raise StopIteration
             from backend.core.ambiguity_detector import get_ambiguity_detector
             ambiguity_detector = get_ambiguity_detector()
             should_ask, clarification_question = ambiguity_detector.should_ask_clarification(
@@ -4017,6 +4050,8 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     epistemic_state=EpistemicState.UNKNOWN.value,  # Unknown because we need clarification
                     transparency_scorecard=None
                 )
+        except StopIteration:
+            pass
         except Exception as ambiguity_error:
             # Non-critical - if ambiguity detection fails, continue with normal flow
             logger.warning(f"⚠️ Ambiguity detection failed: {ambiguity_error}, continuing with normal flow")
