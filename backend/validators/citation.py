@@ -74,6 +74,24 @@ class CitationRequired:
             logger.info("✅ Self-knowledge question detected - skipping citation requirement")
             return ValidationResult(passed=True, reasons=["self_knowledge_question"])
         
+        # Fallback: detect self-knowledge directly from the user question
+        if user_question:
+            question_lower = user_question.lower()
+            self_knowledge_patterns = [
+                r"\b(bạn|you)\s+(là|là\s+ai|who\s+are|who\s+is)\b",
+                r"\b(bạn|you)\s+(khác\s+biệt|khac\s+biet|different)\b",
+                r"\b(điểm\s+khác\s+biệt|điểm\s+gì\s+khác\s+biệt|khac\s+biet)\b",
+                r"\b(bạn|you)\s+(đặc\s+biệt|dac\s+biet|special|unique)\b",
+                r"\b(bạn|you)\s+(ưu\s+điểm|uu\s+diem|nhược\s+điểm|nhuoc\s+diem|điểm\s+mạnh|diem\s+manh|điểm\s+yếu|diem\s+yeu)\b",
+                r"\bwhat\s+(makes|make)\s+(you|bạn)\s+(different|unique|special)\b",
+                r"\b(your|bạn)\s+(strength|strengths|weakness|weaknesses|advantages|disadvantages)\b",
+                r"\b(stillme)\b",
+            ]
+            for pattern in self_knowledge_patterns:
+                if re.search(pattern, question_lower, re.IGNORECASE):
+                    logger.info("✅ Self-knowledge question detected (pattern) - skipping citation requirement")
+                    return ValidationResult(passed=True, reasons=["self_knowledge_question_pattern"])
+        
         if not self.required:
             return ValidationResult(passed=True)
         is_system_status_query = bool(context and isinstance(context, dict) and context.get("is_system_status_query"))

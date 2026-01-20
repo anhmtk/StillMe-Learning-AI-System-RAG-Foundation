@@ -2909,7 +2909,24 @@ async def _handle_validation_with_fallback(
     
     # CRITICAL: Mark self-knowledge queries for validators (skip external citations)
     if context and isinstance(context, dict):
-        context["is_self_knowledge_question"] = bool(is_stillme_query) and not bool(is_system_status_query)
+        self_knowledge_patterns = [
+            r"\b(bạn|you)\s+(là|là\s+ai|who\s+are|who\s+is)\b",
+            r"\b(bạn|you)\s+(khác\s+biệt|khac\s+biet|different)\b",
+            r"\b(điểm\s+khác\s+biệt|điểm\s+gì\s+khác\s+biệt|khac\s+biet)\b",
+            r"\b(bạn|you)\s+(đặc\s+biệt|dac\s+biet|special|unique)\b",
+            r"\b(bạn|you)\s+(ưu\s+điểm|uu\s+diem|nhược\s+điểm|nhuoc\s+diem|điểm\s+mạnh|diem\s+manh|điểm\s+yếu|diem\s+yeu)\b",
+            r"\bwhat\s+(makes|make)\s+(you|bạn)\s+(different|unique|special)\b",
+            r"\b(your|bạn)\s+(strength|strengths|weakness|weaknesses|advantages|disadvantages)\b",
+            r"\b(stillme)\b",
+        ]
+        is_self_knowledge_question = bool(is_stillme_query) and not bool(is_system_status_query)
+        if not is_self_knowledge_question and chat_request.message:
+            question_lower = chat_request.message.lower()
+            is_self_knowledge_question = any(
+                re.search(pattern, question_lower, re.IGNORECASE)
+                for pattern in self_knowledge_patterns
+            )
+        context["is_self_knowledge_question"] = is_self_knowledge_question
     
     # Task 2: Response Caching Enhancement - Cache validation results
     # Check cache before running expensive validation chain
