@@ -54,6 +54,49 @@ def detect_external_data_intent(query: str) -> Optional[ExternalDataIntent]:
     return None
 
 
+def _is_research_query(query_lower: str) -> bool:
+    """Detect research/paper-style queries that should stay in RAG."""
+    research_patterns = [
+        # Vietnamese
+        r"\bnghiên\s+cứu\b",
+        r"\bbài\s+nghiên\s+cứu\b",
+        r"\bbài\s+báo\b",
+        r"\bbài\s+viết\s+học\s+thuật\b",
+        r"\btạp\s+chí\b",
+        r"\bcông\s+bố\b",
+        r"\bhội\s+nghị\b",
+        r"\bkỷ\s+yếu\b",
+        r"\btiền\s+ấn\s+phẩm\b",
+        r"\bpreprint\b",
+        r"\bdoi\b",
+        # English
+        r"\bresearch\b",
+        r"\bstudy\b",
+        r"\bpaper\b",
+        r"\bjournal\b",
+        r"\bpublication\b",
+        r"\bconference\b",
+        r"\bproceedings\b",
+        r"\bpreprint\b",
+        r"\bdoi\b",
+        # Source-specific signals
+        r"\barxiv\b",
+        r"\bcrossref\b",
+        r"\bpapers\s*with\s*code\b",
+        r"\bpaperswithcode\b",
+    ]
+
+    for pattern in research_patterns:
+        if re.search(pattern, query_lower, re.IGNORECASE):
+            logger.info(
+                "🧪 Research-style query detected - will skip news routing "
+                f"(pattern='{pattern}', text='{query_lower[:80]}...')"
+            )
+            return True
+
+    return False
+
+
 def _detect_weather_intent(query: str, query_lower: str) -> Optional[ExternalDataIntent]:
     """Detect weather-related queries"""
     
@@ -116,6 +159,10 @@ def _detect_weather_intent(query: str, query_lower: str) -> Optional[ExternalDat
 def _detect_news_intent(query: str, query_lower: str) -> Optional[ExternalDataIntent]:
     """Detect news-related queries"""
     
+    # Guardrail: research/paper queries should stay in RAG, not external news
+    if _is_research_query(query_lower):
+        return None
+
     # First, check for simple Vietnamese patterns that are very common
     # "mới nhất về" or "thông tin mới nhất" are strong indicators
     simple_indicators = [
