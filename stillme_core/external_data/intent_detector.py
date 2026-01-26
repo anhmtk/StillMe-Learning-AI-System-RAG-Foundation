@@ -54,6 +54,100 @@ def detect_external_data_intent(query: str) -> Optional[ExternalDataIntent]:
     return None
 
 
+def _is_research_query(query_lower: str) -> bool:
+    """Detect research/paper-style queries that should stay in RAG."""
+    # Fast substring checks (robust for Vietnamese diacritics / word boundaries)
+    research_indicators = [
+        # Vietnamese (with and without diacritics)
+        "nghiên cứu",
+        "nghien cuu",
+        "bài nghiên cứu",
+        "bai nghien cuu",
+        "bài báo",
+        "bai bao",
+        "bài viết học thuật",
+        "bai viet hoc thuat",
+        "tạp chí",
+        "tap chi",
+        "công bố",
+        "cong bo",
+        "hội nghị",
+        "hoi nghi",
+        "kỷ yếu",
+        "ky yeu",
+        "tiền ấn phẩm",
+        "tien an pham",
+        # English
+        "research",
+        "study",
+        "paper",
+        "journal",
+        "publication",
+        "conference",
+        "proceedings",
+        "preprint",
+        "doi",
+        # Source-specific signals
+        "arxiv",
+        "crossref",
+        "papers with code",
+        "paperswithcode",
+    ]
+
+    for indicator in research_indicators:
+        if indicator in query_lower:
+            logger.info(
+                "🧪 Research-style query detected - will skip news routing "
+                f"(indicator='{indicator}', text='{query_lower[:80]}...')"
+            )
+            return True
+
+    # Regex fallback for flexible matching
+    research_patterns = [
+        r"nghiên\s+cứu",
+        r"nghien\s+cuu",
+        r"bài\s+nghiên\s+cứu",
+        r"bai\s+nghien\s+cuu",
+        r"bài\s+báo",
+        r"bai\s+bao",
+        r"bài\s+viết\s+học\s+thuật",
+        r"bai\s+viet\s+hoc\s+thuat",
+        r"tạp\s+chí",
+        r"tap\s+chi",
+        r"công\s+bố",
+        r"cong\s+bo",
+        r"hội\s+nghị",
+        r"hoi\s+nghi",
+        r"kỷ\s+yếu",
+        r"ky\s+yeu",
+        r"tiền\s+ấn\s+phẩm",
+        r"tien\s+an\s+pham",
+        r"research",
+        r"study",
+        r"paper",
+        r"journal",
+        r"publication",
+        r"conference",
+        r"proceedings",
+        r"preprint",
+        r"doi",
+        r"arxiv",
+        r"crossref",
+        r"papers\s*with\s*code",
+        r"paperswithcode",
+    ]
+
+    for pattern in research_patterns:
+        if re.search(pattern, query_lower, re.IGNORECASE):
+            logger.info(
+                "🧪 Research-style query detected - will skip news routing "
+                f"(pattern='{pattern}', text='{query_lower[:80]}...')"
+            )
+            return True
+
+    return False
+
+
 def _detect_weather_intent(query: str, query_lower: str) -> Optional[ExternalDataIntent]:
     """Detect weather-related queries"""
     
@@ -115,6 +209,10 @@ def _detect_weather_intent(query: str, query_lower: str) -> Optional[ExternalDat
 
 def _detect_news_intent(query: str, query_lower: str) -> Optional[ExternalDataIntent]:
     """Detect news-related queries"""
+
+    # Guardrail: research/paper queries should stay in RAG, not external news
+    if _is_research_query(query_lower):
+        return None
     
     # First, check for simple Vietnamese patterns that are very common
     # "mới nhất về" or "thông tin mới nhất" are strong indicators
