@@ -15,7 +15,7 @@ httpx==0.28.1
 requests==2.32.5
 
 # Data Processing
-pandas==2.3.3
+pandas==3.0.0
 # numpy==1.25.2  # Not compatible with Python 3.12, pandas will install compatible numpy automatically
 # Note: Using Python 3.11 for onnxruntime compatibility
 
