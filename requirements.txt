@@ -1,13 +1,13 @@
 # StillMe - Self-Evolving AI System Requirements
 
 # Core Framework
-fastapi==0.127.0
+fastapi==0.128.0
 uvicorn[standard]==0.40.0
 streamlit==1.52.2
 
 # Database
 sqlalchemy==2.0.45
-alembic==1.17.1
+alembic==1.18.1
 # Note: sqlite3 is built-in Python module, no need to install
 
 # HTTP Requests
@@ -15,12 +15,12 @@ httpx==0.28.1
 requests==2.32.5
 
 # Data Processing
-pandas==2.3.3
+pandas==3.0.0
 # numpy==1.25.2  # Not compatible with Python 3.12, pandas will install compatible numpy automatically
 # Note: Using Python 3.11 for onnxruntime compatibility
 
 # Visualization
-plotly==6.5.0
+plotly==6.5.2
 
 # RSS & XML Processing
 feedparser==6.0.12
@@ -50,7 +50,7 @@ orjson==3.11.5
 # CRITICAL: ChromaDB 1.3.4 requires onnxruntime>=1.14.1
 # Using Python 3.11 for compatibility (Python 3.12 doesn't have onnxruntime wheels on Linux yet)
 onnxruntime>=1.14.1  # Required by chromadb, compatible with Python 3.11
-chromadb==1.3.7
+chromadb==1.4.1
 sentence-transformers>=2.7.0  # Updated to support newer huggingface_hub
 
 # Security & Rate Limiting
