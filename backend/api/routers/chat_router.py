@@ -198,6 +198,84 @@ def _clean_response_text(text: str) -> str:
     return cleaned
 
 
+def _is_research_query_for_external_data(question: str) -> bool:
+    """Guardrail to keep research/paper queries in RAG (skip News intent)."""
+    if not question:
+        return False
+
+    question_lower = question.lower().strip()
+
+    research_indicators = [
+        # Vietnamese
+        "nghiên cứu",
+        "nghien cuu",
+        "bài nghiên cứu",
+        "bai nghien cuu",
+        "bài báo",
+        "bai bao",
+        "tạp chí",
+        "tap chi",
+        "công bố",
+        "cong bo",
+        "hội nghị",
+        "hoi nghi",
+        "kỷ yếu",
+        "ky yeu",
+        "tiền ấn phẩm",
+        "tien an pham",
+        # English
+        "research",
+        "study",
+        "paper",
+        "journal",
+        "publication",
+        "conference",
+        "proceedings",
+        "preprint",
+        "doi",
+        # Source-specific signals
+        "arxiv",
+        "crossref",
+        "papers with code",
+        "paperswithcode",
+    ]
+
+    for indicator in research_indicators:
+        if indicator in question_lower:
+            logger.info(
+                "🚫 Research query detected in chat_router - skip external data routing "
+                f"(indicator='{indicator}', text='{question_lower[:80]}...')"
+            )
+            return True
+
+    research_patterns = [
+        r"(tóm\s+tắt|tom\s+tat).*(bài|bai|paper|nghiên\s+cứu|nghien\s+cuu)",
+        r"(so\s+sánh|so\s+sanh).*(bài|bai|paper|nghiên\s+cứu|nghien\s+cuu)",
+        r"bài\s+nghiên\s+cứu",
+        r"bai\s+nghien\s+cuu",
+        r"nghiên\s+cứu",
+        r"nghien\s+cuu",
+        r"paper",
+        r"research",
+        r"journal",
+        r"doi",
+        r"arxiv",
+        r"crossref",
+        r"papers\s*with\s*code",
+        r"paperswithcode",
+    ]
+
+    for pattern in research_patterns:
+        if re.search(pattern, question_lower, re.IGNORECASE):
+            logger.info(
+                "🚫 Research query detected in chat_router - skip external data routing "
+                f"(pattern='{pattern}', text='{question_lower[:80]}...')"
+            )
+            return True
+
+    return False
+
+
 def _fix_missing_line_breaks(text: str) -> str:
     """
     Auto-fix missing line breaks after headings and bullets.
@@ -4568,7 +4646,11 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
         try:
             from backend.external_data import ExternalDataOrchestrator, detect_external_data_intent
             
-            external_data_intent = detect_external_data_intent(chat_request.message)
+            external_data_intent = None
+            if _is_research_query_for_external_data(chat_request.message):
+                logger.info("🚫 Research query guard active - forcing RAG pipeline")
+            else:
+                external_data_intent = detect_external_data_intent(chat_request.message)
             if external_data_intent and external_data_intent.confidence >= 0.7:
                 logger.info(f"🌐 External data intent detected: type={external_data_intent.type}, confidence={external_data_intent.confidence}")
                 # Mark as real-time question to skip ConfidenceValidator disclaimer
