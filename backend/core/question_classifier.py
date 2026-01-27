@@ -26,6 +26,42 @@ def is_philosophical_question(text: str, use_semantic: bool = True) -> bool:
     if not text:
         logger.info("Philosophical question detected: False (empty text)")
         return False
+
+    lower = text.lower()
+
+    # PRIORITY CHECK - Citation/Research/summary requests are NOT philosophical
+    # These are factual requests and should stay in RAG.
+    citation_patterns = [
+        r"dẫn\s+nguồn",
+        r"nguồn\s+.*(đâu|nào|chính\s+xác)",
+        r"timestamp",
+        r"thời\s+gian\s+chính\s+xác",
+        r"link|liên\s+kết|url",
+        r"citation|reference|source",
+        r"doi",
+    ]
+    research_patterns = [
+        r"bài\s+nghiên\s+cứu",
+        r"nghiên\s+cứu",
+        r"paper|study|journal|publication",
+        r"arxiv|preprint|conference|proceedings",
+        r"tóm\s+tắt|tom\s+tat",
+        r"so\s+sánh|so\s+sanh",
+        r"phân\s+tích|phan\s+tich",
+        r"review|summary|compare|analysis",
+    ]
+    for pattern in citation_patterns:
+        if re.search(pattern, lower, re.IGNORECASE):
+            logger.info(
+                f"Philosophical question detected: False (citation/source request: text='{text[:80]}...')"
+            )
+            return False
+    for pattern in research_patterns:
+        if re.search(pattern, lower, re.IGNORECASE):
+            logger.info(
+                f"Philosophical question detected: False (research/summary request: text='{text[:80]}...')"
+            )
+            return False
     
     # PRIORITY: Try semantic detection first (language-agnostic, scalable)
     if use_semantic:
@@ -51,7 +87,6 @@ def is_philosophical_question(text: str, use_semantic: bool = True) -> bool:
             logger.debug(f"Semantic detection unavailable ({e}), using keyword fallback")
     
     # FALLBACK: Keyword-based detection (for edge cases or when semantic unavailable)
-    lower = text.lower()
     
     # PRIORITY CHECK 0: List/enumeration questions are NOT philosophical (factual)
     list_patterns = [
