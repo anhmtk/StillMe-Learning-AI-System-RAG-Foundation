@@ -4922,7 +4922,6 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                     
                     # Build minimal prompt for OpenAI fallback (if needed)
                     # CRITICAL: OpenAI fallback needs a prompt to answer, not empty string
-                    from backend.identity.philosophy_lite import PHILOSOPHY_LITE_SYSTEM_PROMPT
                     from backend.api.utils.chat_helpers import build_system_prompt_with_language
                     # FIX: get_language_name doesn't exist, use simple mapping
                     def get_language_name(lang_code: str) -> str:
