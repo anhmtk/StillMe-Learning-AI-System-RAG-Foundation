@@ -205,6 +205,43 @@ def _is_research_query_for_external_data(question: str) -> bool:
 
     question_lower = question.lower().strip()
 
+    # If the user asks for analysis/summary/compare and does NOT explicitly ask for news,
+    # keep it in RAG (these are not real-time news requests).
+    analysis_indicators = [
+        "tóm tắt",
+        "tom tat",
+        "so sánh",
+        "so sanh",
+        "phân tích",
+        "phan tich",
+        "đánh giá",
+        "danh gia",
+        "compare",
+        "summarize",
+        "analysis",
+        "review",
+    ]
+    explicit_news_indicators = [
+        "tin tức",
+        "tin tuc",
+        "thời sự",
+        "thoi su",
+        "bản tin",
+        "ban tin",
+        "headline",
+        "headlines",
+        "breaking news",
+        "news",
+    ]
+    if any(ind in question_lower for ind in analysis_indicators) and not any(
+        ind in question_lower for ind in explicit_news_indicators
+    ):
+        logger.info(
+            "🚫 Analysis-style query detected in chat_router - skip external data routing "
+            f"(text='{question_lower[:80]}...')"
+        )
+        return True
+
     research_indicators = [
         # Vietnamese
         "nghiên cứu",
