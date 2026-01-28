@@ -581,7 +581,7 @@ class CitationRequired:
             # If max_similarity < 0.5, documents are not relevant enough - use [general knowledge] instead
             # NOTE: is_philosophical_factual is already included in is_any_factual_question above
             # So if we reach here, it means it's not a factual question OR it was already handled
-        if ctx_docs and len(ctx_docs) > 0:
+            if ctx_docs and len(ctx_docs) > 0:
                 # Extract max_similarity from context
                 max_similarity = 0.0
                 if context and isinstance(context, dict):
@@ -598,14 +598,14 @@ class CitationRequired:
                 
                 # If max_similarity is too low (< 0.5), documents are not relevant enough
                 # Use [general knowledge] citation instead of citing irrelevant sources
-            if max_similarity < 0.5:
-                if is_source_required and not is_philosophical:
-                    logger.warning("🚨 Source-required question but low similarity context - refusing to answer without sources")
-                    return ValidationResult(
-                        passed=False,
-                        reasons=["source_required_low_similarity"],
-                        patched_answer=_build_no_source_response(user_question)
-                    )
+                if max_similarity < 0.5:
+                    if is_source_required and not is_philosophical:
+                        logger.warning("🚨 Source-required question but low similarity context - refusing to answer without sources")
+                        return ValidationResult(
+                            passed=False,
+                            reasons=["source_required_low_similarity"],
+                            patched_answer=_build_no_source_response(user_question)
+                        )
                     logger.warning(f"Context available but max_similarity={max_similarity:.3f} < 0.5 (not relevant) - using [general knowledge] citation instead of irrelevant sources")
                     patched_answer = self._add_citation_for_base_knowledge(answer)
                     return ValidationResult(
