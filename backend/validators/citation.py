@@ -91,10 +91,50 @@ class CitationRequired:
                 if re.search(pattern, question_lower, re.IGNORECASE):
                     logger.info("✅ Self-knowledge question detected (pattern) - skipping citation requirement")
                     return ValidationResult(passed=True, reasons=["self_knowledge_question_pattern"])
+
+        def _is_source_required_question(question: str) -> bool:
+            if not question:
+                return False
+            q_lower = question.lower()
+            source_patterns = [
+                r"dẫn\s+nguồn",
+                r"nguồn\s+.*(đâu|nào|chính\s+xác)",
+                r"có\s+nguồn\s+không",
+                r"cho\s+mình\s+nguồn",
+                r"timestamp",
+                r"thời\s+gian\s+chính\s+xác",
+                r"link|liên\s+kết|url",
+                r"citation|reference|source",
+                r"doi",
+            ]
+            for pattern in source_patterns:
+                if re.search(pattern, q_lower, re.IGNORECASE):
+                    return True
+            return False
+
+        def _build_no_source_response(question: str) -> str:
+            if not question:
+                return "Mình không có nguồn để dẫn nên không thể trả lời chính xác."
+            # Simple language check
+            vi_markers = ["bạn", "nguồn", "dẫn", "thời gian", "liên kết", "mình", "không"]
+            is_vi = any(marker in question.lower() for marker in vi_markers)
+            if is_vi:
+                return (
+                    "Mình không có nguồn đáng tin cậy trong RAG cho câu hỏi này, "
+                    "nên mình không thể dẫn nguồn hoặc timestamp chính xác. "
+                    "Nếu bạn muốn, mình có thể nói rõ mình thiếu nguồn gì để bạn bổ sung."
+                )
+            return (
+                "I don't have reliable sources in RAG for this question, "
+                "so I can't provide accurate sources or timestamps. "
+                "If you'd like, I can specify what sources are missing."
+            )
         
         if not self.required:
             return ValidationResult(passed=True)
         is_system_status_query = bool(context and isinstance(context, dict) and context.get("is_system_status_query"))
+
+        is_source_required = _is_source_required_question(user_question)
         
         # CRITICAL FIX: Real factual questions (history, science, events) ALWAYS need citations
         # Even if they have philosophical elements, they are still factual questions
@@ -364,6 +404,13 @@ class CitationRequired:
                     passed=False,
                     reasons=["system_status_missing_context"]
                 )
+            if is_source_required and not is_philosophical:
+                logger.warning("🚨 Source-required question but no context docs - refusing to answer without sources")
+                return ValidationResult(
+                    passed=False,
+                    reasons=["source_required_no_context"],
+                    patched_answer=_build_no_source_response(user_question)
+                )
             # For ANY factual questions, we should still add citation for transparency
             # Even if no RAG context, the answer is based on base knowledge and should be cited
             # BUT: Skip for pure philosophical questions (already handled above)
@@ -534,7 +581,7 @@ class CitationRequired:
             # If max_similarity < 0.5, documents are not relevant enough - use [general knowledge] instead
             # NOTE: is_philosophical_factual is already included in is_any_factual_question above
             # So if we reach here, it means it's not a factual question OR it was already handled
-            if ctx_docs and len(ctx_docs) > 0:
+        if ctx_docs and len(ctx_docs) > 0:
                 # Extract max_similarity from context
                 max_similarity = 0.0
                 if context and isinstance(context, dict):
@@ -551,7 +598,14 @@ class CitationRequired:
                 
                 # If max_similarity is too low (< 0.5), documents are not relevant enough
                 # Use [general knowledge] citation instead of citing irrelevant sources
-                if max_similarity < 0.5:
+            if max_similarity < 0.5:
+                if is_source_required and not is_philosophical:
+                    logger.warning("🚨 Source-required question but low similarity context - refusing to answer without sources")
+                    return ValidationResult(
+                        passed=False,
+                        reasons=["source_required_low_similarity"],
+                        patched_answer=_build_no_source_response(user_question)
+                    )
                     logger.warning(f"Context available but max_similarity={max_similarity:.3f} < 0.5 (not relevant) - using [general knowledge] citation instead of irrelevant sources")
                     patched_answer = self._add_citation_for_base_knowledge(answer)
                     return ValidationResult(
