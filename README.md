@@ -13,6 +13,32 @@
 [![Self-Comprehension](https://img.shields.io/badge/Self--Comprehension-100%25-brightgreen.svg)](docs/MILESTONES.md)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## 🚀 StillMe in 60 seconds
+
+**StillMe is a validation‑first, transparent RAG system that knows when it doesn’t know.**  
+It continuously learns, cites sources, and refuses to fabricate when evidence is missing.
+
+**Why devs & researchers care:**
+- **Transparent by default**: citations, traceability, and validator decisions are visible
+- **Validation chain**: multi‑layer checks reduce hallucinations and enforce honesty
+- **Continuous learning**: updates from RSS/arXiv/CrossRef/Wikipedia every 4 hours
+
+**Quick links:**
+- ▶️ **Start here**: [`docs/SUMMARY.md`](docs/SUMMARY.md)
+- 🧭 **Constitution**: [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md)
+- 🧱 **Architecture**: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- 🧪 **API Docs**: `http://localhost:8000/docs`
+- 🤝 **Contribute**: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+
+**Quick start (3 lines):**
+```bash
+git clone https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation.git
+cd StillMe-Learning-AI-System-RAG-Foundation
+docker compose up -d
+```
+
+---
+
 ## 📑 Table of Contents
 
 - [What is StillMe?](#-what-is-stillme)
@@ -26,6 +52,8 @@
 - [Architecture](#-architecture)
 - [Contributing](#-contributing)
 - [Documentation](#-documentation)
+
+---
 
 ## 🌟 What is StillMe?
 
