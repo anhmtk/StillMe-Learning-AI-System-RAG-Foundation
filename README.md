@@ -30,6 +30,11 @@ It continuously learns, cites sources, and refuses to fabricate when evidence is
 - 🧪 **API Docs**: `http://localhost:8000/docs`
 - 🤝 **Contribute**: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
+**Demo / Screenshot (replace with GIF when ready):**
+<div align="center">
+  <img src="assets/logo.png" alt="StillMe Demo (placeholder)" width="640">
+</div>
+
 **Quick start (3 lines):**
 ```bash
 git clone https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation.git
