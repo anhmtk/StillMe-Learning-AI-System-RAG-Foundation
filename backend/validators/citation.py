@@ -118,11 +118,29 @@ class CitationRequired:
             # Simple language check
             vi_markers = ["bạn", "nguồn", "dẫn", "thời gian", "liên kết", "mình", "không"]
             is_vi = any(marker in question.lower() for marker in vi_markers)
+            latest_markers = [
+                "mới nhất", "mới nhấ", "hôm nay", "gần đây", "vừa mới", "latest", "recent", "today"
+            ]
+            is_latest = any(marker in question.lower() for marker in latest_markers)
             if is_vi:
-                return (
+                base = (
                     "Mình không có nguồn đáng tin cậy trong RAG cho câu hỏi này, "
-                    "nên mình không thể dẫn nguồn hoặc timestamp chính xác. "
-                    "Nếu bạn muốn, mình có thể nói rõ mình thiếu nguồn gì để bạn bổ sung."
+                    "nên mình không thể dẫn nguồn hoặc timestamp chính xác."
+                )
+                if is_latest:
+                    return (
+                        f"{base}\n\n"
+                        "Lưu ý: câu hỏi của bạn yêu cầu thông tin rất mới, "
+                        "trong khi KB được cập nhật theo chu kỳ nên có thể chưa kịp.\n\n"
+                        "Gợi ý thay thế:\n"
+                        "- Bạn có muốn mình tóm tắt 3 nghiên cứu *nổi bật* về AGI trong KB hiện có không?\n"
+                        "- Bạn có thể tra arXiv/Google Scholar với từ khóa “AGI” và lọc theo ngày gần đây."
+                    )
+                return (
+                    f"{base}\n\n"
+                    "Gợi ý:\n"
+                    "- Bạn có muốn mình tóm tắt các nghiên cứu liên quan hiện có trong KB không?\n"
+                    "- Nếu cần nguồn mới nhất, bạn có thể tra arXiv/Google Scholar theo từ khóa phù hợp."
                 )
             return (
                 "I don't have reliable sources in RAG for this question, "
