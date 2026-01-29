@@ -313,6 +313,88 @@ def _is_research_query_for_external_data(question: str) -> bool:
     return False
 
 
+def _is_source_request_question(question: str) -> bool:
+    """Detect if user explicitly asks for sources/citations/timestamps."""
+    if not question:
+        return False
+    q = question.lower()
+    source_indicators = [
+        "dẫn nguồn",
+        "nguồn",
+        "trích dẫn",
+        "citation",
+        "reference",
+        "source",
+        "timestamp",
+        "thời gian chính xác",
+        "link",
+        "liên kết",
+        "url",
+        "doi",
+    ]
+    return any(indicator in q for indicator in source_indicators)
+
+
+def _extract_topic_keywords(question: str) -> list[str]:
+    """Extract rough topic keywords to validate context relevance."""
+    if not question:
+        return []
+    q = question.lower()
+    keywords: list[str] = []
+
+    # Explicit topic hints
+    if "agi" in q:
+        keywords.extend([
+            "agi",
+            "artificial general intelligence",
+            "trí tuệ nhân tạo tổng hợp",
+        ])
+
+    # Tokenize and filter stopwords
+    tokens = re.findall(r"[a-zA-Z0-9À-ỹ]+", q)
+    stopwords = {
+        "bạn", "có", "thể", "cho", "mình", "giúp", "và", "làm", "gì", "không", "ko",
+        "được", "đó", "nào", "nhé", "không?", "khong",
+        "tóm", "tắt", "so", "sánh", "phân", "tích", "đánh", "giá",
+        "bài", "nghiên", "cứu", "paper", "study", "journal", "publication",
+        "nguồn", "trích", "dẫn", "citation", "reference", "source", "timestamp",
+        "link", "liên", "kết", "url", "doi", "mới", "nhất",
+    }
+    for token in tokens:
+        if len(token) < 3:
+            continue
+        if token in stopwords:
+            continue
+        keywords.append(token)
+
+    # Deduplicate while preserving order
+    seen = set()
+    deduped = []
+    for token in keywords:
+        if token not in seen:
+            seen.add(token)
+            deduped.append(token)
+    return deduped
+
+
+def _context_has_topic_match(knowledge_docs: list, keywords: list[str]) -> bool:
+    """Check if any retrieved doc contains topic keywords in title/content."""
+    if not knowledge_docs or not keywords:
+        return False
+    for doc in knowledge_docs:
+        if isinstance(doc, dict):
+            metadata = doc.get("metadata", {}) if isinstance(doc.get("metadata", {}), dict) else {}
+            title = str(metadata.get("title", "")).lower()
+            content = str(doc.get("content", "")).lower()
+        else:
+            title = ""
+            content = str(getattr(doc, "content", "")).lower()
+        haystack = f"{title}\n{content}"
+        if any(keyword in haystack for keyword in keywords):
+            return True
+    return False
+
+
 def _fix_missing_line_breaks(text: str) -> str:
     """
     Auto-fix missing line breaks after headings and bullets.
@@ -4133,6 +4215,10 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
                 
                 # Detect language for clarification question
                 detected_lang = detected_lang or detect_language(chat_request.message)
+                if detected_lang == "vi":
+                    clarification_question += "\n\nBạn muốn mình thử trả lời theo giả định phổ biến không? (Có/Không)"
+                else:
+                    clarification_question += "\n\nDo you want me to answer using common assumptions? (Yes/No)"
                 
                 # Return clarification question immediately (skip LLM call, save cost & latency)
                 from backend.core.epistemic_state import EpistemicState
@@ -10654,9 +10740,17 @@ Total_Response_Latency: {total_response_latency:.2f} giây
             try:
                 detected_lang_for_disclaimer = detected_lang if 'detected_lang' in locals() and detected_lang else detect_language(response or chat_request.message)
                 if detected_lang_for_disclaimer == "vi":
-                    disclaimer = f"\n\n💡 *Lưu ý: Mình đã suy luận ý định của bạn dựa trên ngữ cảnh. Nếu mình hiểu sai, bạn có thể làm rõ để mình trả lời chính xác hơn.*"
+                    disclaimer = (
+                        "\n\n💡 *Lưu ý: Mình đã suy luận ý định của bạn dựa trên ngữ cảnh. "
+                        "Nếu mình hiểu sai, bạn có thể làm rõ để mình trả lời chính xác hơn.*\n\n"
+                        "Bạn muốn mình trả lời theo giả định mình đang dùng không? (Có/Không)"
+                    )
                 else:
-                    disclaimer = f"\n\n💡 *Note: I've inferred your intent based on context. If I misunderstood, please clarify so I can answer more accurately.*"
+                    disclaimer = (
+                        "\n\n💡 *Note: I've inferred your intent based on context. "
+                        "If I misunderstood, please clarify so I can answer more accurately.*\n\n"
+                        "Do you want me to answer using the assumptions I'm making? (Yes/No)"
+                    )
                 
                 # Add disclaimer at the end, but before citation
                 if response and "[general knowledge]" not in response[-100:]:  # Don't add if citation already at end

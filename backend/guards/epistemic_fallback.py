@@ -552,6 +552,8 @@ class EpistemicFallbackGenerator:
         ]
         import random
         answer += f"\n{random.choice(practical_notes)}\n"
+
+        answer += "\nBạn có muốn mình tóm tắt các khái niệm tương đồng có thật để bạn đối chiếu không? (Có/Không)\n"
         
         return answer
     
@@ -598,7 +600,9 @@ class EpistemicFallbackGenerator:
             f"Nếu bạn có nguồn cụ thể về \"{entity}\", bạn có thể gửi cho mình.\n\n"
         )
         
-        return part_a + part_b + part_c + part_d
+        answer = part_a + part_b + part_c + part_d
+        answer += "Bạn có muốn mình tóm tắt các khái niệm gần nhất mà mình biết không? (Có/Không)\n"
+        return answer
     
     def _generate_english_epd(
         self,
@@ -687,6 +691,8 @@ class EpistemicFallbackGenerator:
             "Honesty first: Better to say 'I don't know' than to fabricate.",
         ]
         answer += f"**{random.choice(notes)}**\n"
+
+        answer += "\nWould you like a short summary of the closest real concepts for comparison? (Yes/No)\n"
         
         return answer
     
@@ -728,7 +734,9 @@ class EpistemicFallbackGenerator:
             f"If you have specific sources about \"{entity}\", you can share them with me.\n\n"
         )
         
-        return part_a + part_b + part_c + part_d
+        answer = part_a + part_b + part_c + part_d
+        answer += "Would you like a short summary of the closest concepts I know? (Yes/No)\n"
+        return answer
 
 
 # Global instance
