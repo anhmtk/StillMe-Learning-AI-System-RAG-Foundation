@@ -134,13 +134,15 @@ class CitationRequired:
                         "trong khi KB được cập nhật theo chu kỳ nên có thể chưa kịp.\n\n"
                         "Gợi ý thay thế:\n"
                         "- Bạn có muốn mình tóm tắt 3 nghiên cứu *nổi bật* về AGI trong KB hiện có không?\n"
-                        "- Bạn có thể tra arXiv/Google Scholar với từ khóa “AGI” và lọc theo ngày gần đây."
+                        "- Bạn có thể tra arXiv/Google Scholar với từ khóa “AGI” và lọc theo ngày gần đây.\n\n"
+                        "Bạn muốn mình tóm tắt 3 nghiên cứu nổi bật trong KB hiện có không?"
                     )
                 return (
                     f"{base}\n\n"
                     "Gợi ý:\n"
                     "- Bạn có muốn mình tóm tắt các nghiên cứu liên quan hiện có trong KB không?\n"
-                    "- Nếu cần nguồn mới nhất, bạn có thể tra arXiv/Google Scholar theo từ khóa phù hợp."
+                    "- Nếu cần nguồn mới nhất, bạn có thể tra arXiv/Google Scholar theo từ khóa phù hợp.\n\n"
+                    "Bạn muốn mình tóm tắt các nghiên cứu hiện có trong KB không?"
                 )
             return (
                 "I don't have reliable sources in RAG for this question, "
