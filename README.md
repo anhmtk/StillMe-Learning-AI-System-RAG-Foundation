@@ -30,9 +30,9 @@ It continuously learns, cites sources, and refuses to fabricate when evidence is
 - 🧪 **API Docs**: `http://localhost:8000/docs`
 - 🤝 **Contribute**: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
-**Demo / Screenshot (replace with GIF when ready):**
+**Demo / Screenshot:**
 <div align="center">
-  <img src="assets/logo.png" alt="StillMe Demo (placeholder)" width="640">
+  <img src="assets/demo.gif" alt="StillMe Demo" width="640">
 </div>
 
 **Quick start (3 lines):**
