@@ -94,7 +94,6 @@ def is_philosophical_question(text: str, use_semantic: bool = True) -> bool:
         r'\d+\s*(ưu điểm|nhược điểm|điểm|point|bước|step|item|mục|lý do|reason)',
         r'\b(so sánh|compare|đối chiếu)\b',
     ]
-    import re
     for pattern in list_patterns:
         if re.search(pattern, lower):
             logger.info(f"Philosophical question detected: False (list/enumeration question: text='{text[:80]}...')")
@@ -155,7 +154,6 @@ def is_philosophical_question(text: str, use_semantic: bool = True) -> bool:
         "固定点", "递归学习"  # fixed point, recursive learning
     ]
     
-    import re
     for i, marker in enumerate(priority_markers):
         # Use regex for flexible matching (handles quotes, punctuation, etc.)
         # Check if marker is already a regex pattern (contains \s+ or .*)
@@ -256,7 +254,6 @@ def is_philosophical_question(text: str, use_semantic: bool = True) -> bool:
     ]
     
     # Check Chinese keywords (using regex for Chinese characters)
-    import re
     for keyword in zh_keywords:
         # For Chinese characters, use direct string search (no word boundaries)
         if keyword in text:

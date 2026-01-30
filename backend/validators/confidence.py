@@ -349,6 +349,10 @@ class ConfidenceValidator:
                     
                     # Use epistemic explanation as uncertainty template
                     uncertainty_template = epistemic_explanation + citation_text
+                    if detected_lang_from_answer == "vi":
+                        uncertainty_template += "\n\nBạn muốn mình thử trả lời theo giả định phổ biến không? (Có/Không)"
+                    else:
+                        uncertainty_template += "\n\nDo you want me to answer using common assumptions? (Yes/No)"
                     logger.debug(f"Using epistemic reasoning for uncertainty: {epistemic_explanation}")
                 except Exception as e:
                     logger.warning(f"Could not use epistemic reasoning, falling back to template: {e}")
@@ -368,8 +372,14 @@ class ConfidenceValidator:
                         'hi': "मेरे पास इस प्रश्न का सटीक उत्तर देने के लिए पर्याप्त जानकारी नहीं है। पुनर्प्राप्त संदर्भ का आपके प्रश्न से कम प्रासंगिकता है।" + citation_text,
                         'th': "ฉันไม่มีข้อมูลเพียงพอที่จะตอบคำถามนี้อย่างแม่นยำ บริบทที่ดึงมามีความเกี่ยวข้องต่ำกับคำถามของคุณ" + citation_text,
                     }
-                    uncertainty_template = uncertainty_templates.get(detected_lang_from_answer, 
-                        "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question." + citation_text)
+                    uncertainty_template = uncertainty_templates.get(
+                        detected_lang_from_answer,
+                        "I don't have sufficient information to answer this accurately. The retrieved context has low relevance to your question." + citation_text
+                    )
+                    if detected_lang_from_answer == "vi":
+                        uncertainty_template += "\n\nBạn muốn mình thử trả lời theo giả định phổ biến không? (Có/Không)"
+                    else:
+                        uncertainty_template += "\n\nDo you want me to answer using common assumptions? (Yes/No)"
                 # Prepend uncertainty to answer
                 patched_answer = f"{uncertainty_template}\n\n{answer}"
                 logger.warning("⚠️ Forced uncertainty expression due to low context quality")
