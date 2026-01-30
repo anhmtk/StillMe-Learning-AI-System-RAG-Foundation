@@ -4547,18 +4547,58 @@ async def chat_with_rag(request: Request, chat_request: ChatRequest):
             from backend.core.stillme_detector import (
                 detect_stillme_query, 
                 get_foundational_query_variants,
-                detect_origin_query
+                detect_origin_query,
+                detect_revenue_query
             )
             # CRITICAL: Detect origin queries FIRST, before any other processing
             # This ensures Identity Truth Override works even when RAG is disabled
             is_origin_query, origin_keywords = detect_origin_query(chat_request.message)
             if is_origin_query:
                 logger.debug(f"Origin query detected! Matched keywords: {origin_keywords}")
+            # Detect revenue/monetization questions to avoid origin template misuse
+            is_revenue_query = False
+            revenue_keywords = []
+            is_revenue_query, revenue_keywords = detect_revenue_query(chat_request.message)
+            if is_revenue_query:
+                logger.info(f"💰 Revenue query detected - will avoid origin template (matched: {revenue_keywords})")
         except ImportError:
             logger.warning("StillMe detector not available, skipping origin detection")
         except Exception as detector_error:
             logger.warning(f"StillMe detector error: {detector_error}")
         
+        # CRITICAL: Revenue query guard - return verified "no source" response (no origin template)
+        if 'is_revenue_query' in locals() and is_revenue_query:
+            try:
+                detected_lang = detected_lang or detect_language(chat_request.message)
+            except Exception as lang_error:
+                logger.warning(f"Language detection failed: {lang_error}, defaulting to 'vi'")
+                detected_lang = "vi"
+
+            if detected_lang == "vi":
+                revenue_response = (
+                    "Mình không có thông tin đã được xác minh về doanh thu hoặc kế hoạch doanh thu của StillMe "
+                    "trong Knowledge Base hiện tại, nên mình không thể khẳng định điều này.\n\n"
+                    "Nếu bạn có nguồn cụ thể, bạn có thể chia sẻ để mình kiểm tra hoặc cập nhật.\n\n"
+                    "Bạn có muốn chia sẻ nguồn hoặc mình trả lời theo giả định phổ biến không? (Có/Không)"
+                )
+            else:
+                revenue_response = (
+                    "I don't have verified information about StillMe's revenue or revenue plans in the current "
+                    "Knowledge Base, so I can't confirm this.\n\n"
+                    "If you have a specific source, you can share it and I'll verify or update it.\n\n"
+                    "Do you want to share a source or have me answer using common assumptions? (Yes/No)"
+                )
+
+            from backend.core.epistemic_state import EpistemicState
+            return ChatResponse(
+                response=revenue_response,
+                confidence_score=0.2,
+                processing_steps=["💰 Revenue query - no verified sources in KB"],
+                validation_info={},
+                timing={},
+                epistemic_state=EpistemicState.UNKNOWN.value
+            )
+
         # CRITICAL: Identity Truth Override - If origin query, return SYSTEM_ORIGIN answer directly
         # This MUST happen BEFORE any other early returns (honesty, AI_SELF_MODEL, philosophy, FPS)
         if is_origin_query:

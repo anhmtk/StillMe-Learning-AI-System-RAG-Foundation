@@ -610,6 +610,42 @@ ORIGIN_KEYWORDS = {
 }
 
 
+def detect_revenue_query(query: str) -> Tuple[bool, List[str]]:
+    """
+    Detect if query is about revenue/monetization/business model.
+
+    Args:
+        query: User query string
+
+    Returns:
+        Tuple of (is_revenue_query, matched_keywords)
+    """
+    if not query:
+        return (False, [])
+    query_lower = query.lower()
+    matched_keywords = []
+
+    revenue_patterns = [
+        r"\bdoanh\s+thu\b",
+        r"\brevenue\b",
+        r"\bmonetiz\w*\b",
+        r"\bkinh\s+doanh\b",
+        r"\bkiếm\s+tiền\b",
+        r"\bthu\s+nhập\b",
+        r"\bprofit\b",
+        r"\bmô\s+hình\s+doanh\s+thu\b",
+        r"\bbusiness\s+model\b",
+        r"\bmô\s+hình\s+kinh\s+doanh\b",
+        r"\bkế\s+hoạch\s+doanh\s+thu\b",
+    ]
+    for pattern in revenue_patterns:
+        if re.search(pattern, query_lower):
+            matched_keywords.append(pattern)
+            return (True, matched_keywords)
+
+    return (False, [])
+
+
 def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
     """
     Detect if query is about StillMe's origin/founder.
@@ -623,6 +659,26 @@ def detect_origin_query(query: str) -> Tuple[bool, List[str]]:
     """
     query_lower = query.lower()
     matched_keywords = []
+
+    # CRITICAL: Exclude revenue/monetization questions from origin detection
+    # These are business status questions, not origin/founder identity queries
+    revenue_exclusion_patterns = [
+        r"\bdoanh\s+thu\b",
+        r"\brevenue\b",
+        r"\bmonetiz\w*\b",
+        r"\bkinh\s+doanh\b",
+        r"\bkiếm\s+tiền\b",
+        r"\bthu\s+nhập\b",
+        r"\bprofit\b",
+        r"\bmô\s+hình\s+doanh\s+thu\b",
+        r"\bbusiness\s+model\b",
+        r"\bmô\s+hình\s+kinh\s+doanh\b",
+        r"\bkế\s+hoạch\s+doanh\s+thu\b",
+    ]
+    for pattern in revenue_exclusion_patterns:
+        if re.search(pattern, query_lower):
+            logger.debug(f"Origin query excluded due to revenue pattern: {pattern}")
+            return (False, [])
     
     # CRITICAL: EXCLUDE philosophical/learning/evolution questions from origin detection FIRST
     # These questions are about StillMe's learning mechanism, self-reference, evolution, NOT about origin/founder
