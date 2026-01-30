@@ -129,7 +129,7 @@ StillMe consists of four main components:
 \begin{enumerate}
 \item \textbf{Continuous Learning System}: Automated scheduler fetches content from RSS feeds, arXiv, CrossRef, and Wikipedia every 4 hours (6 cycles per day).
 
-\item \textbf{RAG Retrieval}: Semantic search using ChromaDB with sentence-transformers embeddings (all-MiniLM-L6-v2, 384 dimensions).
+\item \textbf{RAG Retrieval}: Semantic search using ChromaDB with sentence-transformers embeddings (paraphrase-multilingual-MiniLM-L12-v2, 384 dimensions).
 
 \item \textbf{Validation Chain}: Multi-layer validation (citation, evidence overlap, confidence, ethics) that ensures response quality and reduces hallucinations.
 
@@ -173,7 +173,7 @@ Conference Proceedings & NeurIPS, ICML, ACL, ICLR & Via RSS (when available) & C
 \begin{enumerate}
 \item Content fetched from sources every 4 hours
 \item Pre-filtered for quality (minimum 150 characters, keyword relevance) -- reduces embedding costs by 30--50\%
-\item Embedded using sentence-transformers model (all-MiniLM-L6-v2, 384 dimensions)
+\item Embedded using sentence-transformers model (paraphrase-multilingual-MiniLM-L12-v2, 384 dimensions)
 \item Stored in ChromaDB vector database for semantic search
 \end{enumerate}
 
@@ -184,7 +184,7 @@ Conference Proceedings & NeurIPS, ICML, ACL, ICLR & Via RSS (when available) & C
 When a user asks a question:
 
 \begin{enumerate}
-\item \textbf{Query Embedding}: User query is embedded using the same sentence-transformers model (all-MiniLM-L6-v2).
+\item \textbf{Query Embedding}: User query is embedded using the same sentence-transformers model (paraphrase-multilingual-MiniLM-L12-v2).
 
 \item \textbf{Semantic Search}: ChromaDB performs semantic similarity search using cosine distance to retrieve relevant context documents.
 

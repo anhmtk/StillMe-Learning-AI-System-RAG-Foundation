@@ -555,6 +555,10 @@ pytest tests/test_voice_consistency.py::test_cross_provider -v
 - **Run voice consistency tests** if modifying Identity Layer or response style
 - **Test with different input languages** (English, Vietnamese, etc.)
 - **Aim for 80%+ coverage** for new code
+- **Audit guides**:
+  - `docs/AUDIT_GUIDE.md` (audit checklist)
+  - `docs/VALIDATION_CHAIN_SPEC.md` (must-pass vs warning validators)
+  - `docs/NO_SOURCE_POLICY.md` (no-source refusal rules)
 
 ### Test Structure
 

@@ -72,7 +72,7 @@ StillMe consists of four main components:
 
 1. **Continuous Learning System**: Automated scheduler fetches content from RSS feeds, arXiv, CrossRef, and Wikipedia every 4 hours (6 cycles per day).
 
-2. **RAG Retrieval**: Semantic search using ChromaDB with sentence-transformers embeddings (all-MiniLM-L6-v2, 384 dimensions).
+2. **RAG Retrieval**: Semantic search using ChromaDB with sentence-transformers embeddings (paraphrase-multilingual-MiniLM-L12-v2, 384 dimensions).
 
 3. **Validation Chain**: Multi-layer validation (citation, evidence overlap, confidence, ethics) that ensures response quality and reduces hallucinations.
 
@@ -132,7 +132,7 @@ External Sources          Learning Pipeline          Vector DB
 **Learning Process:**
 1. Content fetched from sources every 4 hours
 2. Pre-filtered for quality (minimum 150 characters, keyword relevance) - reduces embedding costs by 30-50%
-3. Embedded using sentence-transformers model (all-MiniLM-L6-v2, 384 dimensions)
+3. Embedded using sentence-transformers model (paraphrase-multilingual-MiniLM-L12-v2, 384 dimensions)
 4. Stored in ChromaDB vector database for semantic search
 
 **Key Innovation**: StillMe overcomes knowledge cutoff limitations by continuously updating its knowledge base through automated learning cycles, unlike traditional LLMs that are frozen at their training date. This allows StillMe to access and learn from information published after the base LLM's training cutoff.
@@ -141,7 +141,7 @@ External Sources          Learning Pipeline          Vector DB
 
 When a user asks a question:
 
-1. **Query Embedding**: User query is embedded using the same sentence-transformers model (all-MiniLM-L6-v2).
+1. **Query Embedding**: User query is embedded using the same sentence-transformers model (paraphrase-multilingual-MiniLM-L12-v2).
 
 2. **Semantic Search**: ChromaDB performs semantic similarity search using cosine distance to retrieve relevant context documents.
 
@@ -150,7 +150,7 @@ When a user asks a question:
 4. **Response Generation**: LLM (DeepSeek or OpenAI) generates response based on retrieved context.
 
 **Technical Details:**
-- **Embedding Model**: all-MiniLM-L6-v2 (sentence-transformers, 384 dimensions)
+- **Embedding Model**: paraphrase-multilingual-MiniLM-L12-v2 (sentence-transformers, 384 dimensions)
 - **Vector Database**: ChromaDB with collections `stillme_knowledge` (learned content) and `stillme_conversations` (conversation history)
 - **Search Method**: Cosine similarity search
 

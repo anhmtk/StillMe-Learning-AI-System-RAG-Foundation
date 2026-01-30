@@ -661,6 +661,9 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 - [`docs/PAPER.md`](docs/PAPER.md) - **Research Paper: StillMe Framework for Transparent, Validated RAG Systems**
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) - System architecture details
 - [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) - Philosophy and vision
+- [`docs/VALIDATION_CHAIN_SPEC.md`](docs/VALIDATION_CHAIN_SPEC.md) - Must-pass vs warning validators
+- [`docs/NO_SOURCE_POLICY.md`](docs/NO_SOURCE_POLICY.md) - Refusal rules when sources are missing
+- [`docs/AUDIT_GUIDE.md`](docs/AUDIT_GUIDE.md) - Contributor audit checklist
 - [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md) - Complete API reference
 - [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) - Deployment instructions
 - [`docs/PAPER_TABLES_FIGURES.md`](docs/PAPER_TABLES_FIGURES.md) - Tables and figures for the paper

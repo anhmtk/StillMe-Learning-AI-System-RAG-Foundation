@@ -371,7 +371,7 @@ StillMe consists of:
 ### Vector Database
 
 - **Technology**: ChromaDB
-- **Embedding Model**: `all-MiniLM-L6-v2` (384-dimensional embeddings)
+- **Embedding Model**: `paraphrase-multilingual-MiniLM-L12-v2` (384-dimensional embeddings, multilingual)
 - **Collections**: 
   - `stillme_knowledge`: Learned content from RSS, arXiv, CrossRef, Wikipedia
   - `stillme_conversations`: Conversation history for context retrieval
