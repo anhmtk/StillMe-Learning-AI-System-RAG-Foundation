@@ -9,6 +9,16 @@ Handles text embedding generation using sentence-transformers
 import os
 from pathlib import Path
 
+
+def _configure_hf_token() -> None:
+    """Configure HuggingFace token from environment without logging secrets."""
+    hf_token = os.getenv("HF_TOKEN")
+    if hf_token and not os.getenv("HUGGINGFACE_HUB_TOKEN"):
+        os.environ["HUGGINGFACE_HUB_TOKEN"] = hf_token
+
+
+_configure_hf_token()
+
 # CRITICAL: Initialize ModelManager FIRST to setup environment and verify cache
 # This MUST happen before any SentenceTransformer imports
 try:

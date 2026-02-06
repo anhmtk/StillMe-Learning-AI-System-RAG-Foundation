@@ -10,6 +10,8 @@ from typing import Optional, Any, Dict, List
 from datetime import timedelta
 import os
 
+from backend.utils.redis_url import mask_redis_url, mask_redis_url_in_text
+
 logger = logging.getLogger(__name__)
 
 # Try to import redis, fallback to None if not available
@@ -57,10 +59,13 @@ class RedisCacheService:
             # Test connection
             self.redis_client.ping()
             self.enabled = True
-            logger.info(f"✅ Redis cache enabled: {redis_url}")
+            logger.info(f"✅ Redis cache enabled: {mask_redis_url(redis_url)}")
             
         except Exception as e:
-            logger.warning(f"⚠️ Redis connection failed - caching disabled: {e}")
+            logger.warning(
+                "⚠️ Redis connection failed - caching disabled: "
+                f"{mask_redis_url_in_text(str(e))}"
+            )
             logger.warning("   Caching will be disabled. System will work without cache.")
             self.redis_client = None
             self.enabled = False
@@ -122,7 +127,9 @@ class RedisCacheService:
                 return value
                 
         except Exception as e:
-            logger.warning(f"Redis get error for key {key}: {e}")
+            logger.warning(
+                f"Redis get error for key {key}: {mask_redis_url_in_text(str(e))}"
+            )
             return None
     
     def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
@@ -152,7 +159,9 @@ class RedisCacheService:
             return True
             
         except Exception as e:
-            logger.warning(f"Redis set error for key {key}: {e}")
+            logger.warning(
+                f"Redis set error for key {key}: {mask_redis_url_in_text(str(e))}"
+            )
             return False
     
     def delete(self, key: str) -> bool:
@@ -171,7 +180,9 @@ class RedisCacheService:
             self.redis_client.delete(key)
             return True
         except Exception as e:
-            logger.warning(f"Redis delete error for key {key}: {e}")
+            logger.warning(
+                f"Redis delete error for key {key}: {mask_redis_url_in_text(str(e))}"
+            )
             return False
     
     def cache_embedding(self, text: str, embedding: List[float], ttl: Optional[int] = None) -> bool:
@@ -275,7 +286,9 @@ class RedisCacheService:
                 return self.redis_client.delete(*keys)
             return 0
         except Exception as e:
-            logger.warning(f"Redis invalidate_pattern error for {pattern}: {e}")
+            logger.warning(
+                f"Redis invalidate_pattern error for {pattern}: {mask_redis_url_in_text(str(e))}"
+            )
             return 0
     
     def get_stats(self) -> Dict[str, Any]:
@@ -308,7 +321,7 @@ class RedisCacheService:
                 ) * 100 if (info.get("keyspace_hits", 0) + info.get("keyspace_misses", 0)) > 0 else 0
             }
         except Exception as e:
-            logger.warning(f"Redis stats error: {e}")
+            logger.warning(f"Redis stats error: {mask_redis_url_in_text(str(e))}")
             return {
                 "enabled": True,
                 "error": str(e)

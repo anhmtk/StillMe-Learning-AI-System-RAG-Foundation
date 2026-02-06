@@ -12,6 +12,8 @@ from typing import Any, Optional, Dict, Union
 from datetime import datetime, timedelta
 import os
 
+from backend.utils.redis_url import mask_redis_url, mask_redis_url_in_text
+
 logger = logging.getLogger(__name__)
 
 # Try to import Redis
@@ -57,7 +59,9 @@ class CacheService:
                         retry_on_timeout=True,
                         health_check_interval=30
                     )
-                    logger.info(f"✅ Connecting to Redis using REDIS_URL")
+                    logger.info(
+                        f"✅ Connecting to Redis using REDIS_URL: {mask_redis_url(redis_url)}"
+                    )
                 else:
                     # Fallback to individual variables if REDIS_URL not set
                     redis_host = os.getenv("REDIS_HOST", "localhost")
@@ -78,8 +82,13 @@ class CacheService:
                 self.redis_client.ping()
                 logger.info("✅ Redis cache connected successfully")
             except Exception as e:
-                logger.warning(f"⚠️ Redis not available, using in-memory cache: {e}")
-                logger.warning(f"   REDIS_URL: {os.getenv('REDIS_URL', 'NOT SET')}")
+                logger.warning(
+                    "⚠️ Redis not available, using in-memory cache: "
+                    f"{mask_redis_url_in_text(str(e))}"
+                )
+                logger.warning(
+                    f"   REDIS_URL: {mask_redis_url(os.getenv('REDIS_URL'))}"
+                )
                 logger.warning(f"   REDIS_HOST: {os.getenv('REDIS_HOST', 'NOT SET')}")
                 logger.warning(f"   REDIS_PORT: {os.getenv('REDIS_PORT', 'NOT SET')}")
                 self.redis_client = None
@@ -124,7 +133,10 @@ class CacheService:
                         self.cache_stats["misses"] += 1
                         return None
                 except Exception as redis_error:
-                    logger.warning(f"Redis get error, falling back to in-memory: {redis_error}")
+                    logger.warning(
+                        "Redis get error, falling back to in-memory: "
+                        f"{mask_redis_url_in_text(str(redis_error))}"
+                    )
                     # Fallback to in-memory
                     self.redis_client = None
             
@@ -166,7 +178,10 @@ class CacheService:
                     self.cache_stats["sets"] += 1
                     return True
                 except Exception as redis_error:
-                    logger.warning(f"Redis set error, falling back to in-memory: {redis_error}")
+                    logger.warning(
+                        "Redis set error, falling back to in-memory: "
+                        f"{mask_redis_url_in_text(str(redis_error))}"
+                    )
                     # Fallback to in-memory
                     self.redis_client = None
             
