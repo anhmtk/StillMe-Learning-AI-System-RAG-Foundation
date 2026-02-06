@@ -1135,8 +1135,8 @@ async def re_embed_foundational_knowledge_endpoint(
         if not chroma_client:
             raise HTTPException(status_code=503, detail="ChromaDB client not available")
         
-        from stillme_core.rag.embeddings import EmbeddingService
-        embedding_service = EmbeddingService()
+        from backend.vector_db.embeddings import get_embedding_service
+        embedding_service = get_embedding_service()
         
         # Get collection
         collection = chroma_client.knowledge_collection
@@ -1352,8 +1352,8 @@ async def migrate_collection_to_cosine_endpoint(
         if not chroma_client:
             raise HTTPException(status_code=503, detail="ChromaDB client not available")
         
-        from stillme_core.rag.embeddings import EmbeddingService
-        embedding_service = EmbeddingService()
+        from backend.vector_db.embeddings import get_embedding_service
+        embedding_service = get_embedding_service()
         
         # Check if collection exists
         try:

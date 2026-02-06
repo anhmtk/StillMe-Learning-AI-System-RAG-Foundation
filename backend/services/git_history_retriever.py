@@ -472,8 +472,8 @@ def get_git_history_retriever(
         
         # If still None, initialize directly (standalone mode)
         if embedding_service is None:
-            from backend.vector_db import EmbeddingService
-            embedding_service = EmbeddingService()
+            from backend.vector_db.embeddings import get_embedding_service
+            embedding_service = get_embedding_service()
             logger.info("📦 Initializing EmbeddingService directly (standalone mode)")
     
     return GitHistoryRetriever(

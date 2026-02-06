@@ -81,8 +81,8 @@ class SemanticPhilosophicalDetector:
         try:
             # Lazy import to avoid circular dependencies
             if self.embedding_service is None:
-                from stillme_core.rag.embeddings import EmbeddingService
-                self.embedding_service = EmbeddingService()
+                from backend.vector_db.embeddings import get_embedding_service
+                self.embedding_service = get_embedding_service()
             
             # Embed all philosophical examples
             logger.info(f"Initializing semantic philosophical detector with {len(PHILOSOPHICAL_EXAMPLES)} examples")

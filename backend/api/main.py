@@ -10,7 +10,8 @@ import os
 import logging
 
 # Import RAG components
-from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
+from backend.vector_db import ChromaClient, RAGRetrieval
+from backend.vector_db.embeddings import get_embedding_service
 from backend.learning import KnowledgeRetention, AccuracyScorer
 from backend.learning.continuum_memory import ContinuumMemory
 from backend.services.rss_fetcher import RSSFetcher
@@ -281,7 +282,7 @@ def _initialize_rag_components():
         
         # CRITICAL: Initialize EmbeddingService FIRST so we can pass it to ChromaClient
         # This prevents ChromaDB from using default ONNX model (all-MiniLM-L6-v2)
-        embedding_service = EmbeddingService()
+        embedding_service = get_embedding_service()
         logger.info("✓ Embedding service initialized")
         
         # CRITICAL FIX: Only use reset_on_error=True if explicitly requested (force_reset or dashboard_reset)

@@ -643,3 +643,15 @@ class EmbeddingService:
         except Exception as e:
             logger.error(f"Failed to batch encode texts: {e}")
             raise
+
+
+# Global embedding service instance (singleton)
+_embedding_service: Optional["EmbeddingService"] = None
+
+
+def get_embedding_service(model_name: str = "paraphrase-multilingual-MiniLM-L12-v2") -> "EmbeddingService":
+    """Get global embedding service instance (singleton)."""
+    global _embedding_service
+    if _embedding_service is None:
+        _embedding_service = EmbeddingService(model_name=model_name)
+    return _embedding_service

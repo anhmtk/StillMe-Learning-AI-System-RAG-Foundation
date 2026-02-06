@@ -491,10 +491,10 @@ def get_codebase_indexer():
         # Fallback: Initialize directly (for scripts/testing)
         try:
             from backend.vector_db.chroma_client import ChromaClient
-            from backend.vector_db.embeddings import EmbeddingService
+            from backend.vector_db.embeddings import get_embedding_service
             
             logger.info("📦 Initializing ChromaDB client and EmbeddingService directly...")
-            embedding_service = EmbeddingService()
+            embedding_service = get_embedding_service()
             chroma_client = ChromaClient(embedding_service=embedding_service)
             
             _codebase_indexer_instance = CodebaseIndexer(
