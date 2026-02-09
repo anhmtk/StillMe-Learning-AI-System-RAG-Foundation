@@ -16,7 +16,7 @@ requests==2.32.5
 
 # Data Processing
 # NOTE: streamlit requires pandas<3; pandas 3.x not available on current env
-pandas==2.2.3
+pandas==3.0.0
 # numpy==1.25.2  # Not compatible with Python 3.12, pandas will install compatible numpy automatically
 # Note: Using Python 3.11 for onnxruntime compatibility
 
