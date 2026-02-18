@@ -98,7 +98,7 @@ StillMe is built on **StillMe Core** - a modular framework for building transpar
 **Framework Structure:**
 ```
 stillme_core/
-├── validation/          # 27+ validators for response quality
+├── validation/          # Validation framework (19 validators, 7 layers)
 ├── rag/                 # RAG system (ChromaDB, embeddings)
 ├── external_data/       # External data providers
 ├── learning/            # Continuous learning pipeline
@@ -118,6 +118,10 @@ stillme_core/
 > "We're building a framework, not just an app. Everything we build for StillMe today must be usable by other AI systems tomorrow."
 
 📚 **Framework Documentation**: [docs/framework/](docs/framework/)
+
+**Validation Source of Truth:**
+- Validator count and layer structure are read from `data/stillme_manifest.json` via `backend/core/manifest_loader.py`
+- Current structure: **19 validators total**, organized into **7 layers**
 
 ## 🤔 Why StillMe?
 
@@ -547,7 +551,7 @@ graph LR
     B -->|Normal Query| D[RAG Retrieval]
     D --> E[ChromaDB<br/>Vector Search]
     E --> F[LLM Generation]
-    F --> G[Validator Chain<br/>12+ Validators]
+    F --> G[Validator Chain<br/>19 Validators (7 Layers)]
     G --> H{Validation Pass?}
     H -->|Yes| I[Post-Processing]
     H -->|No| J[Fallback Handler]
@@ -583,7 +587,7 @@ StillMe follows a **two-layer architecture**:
 - **External Sources**: RSS, arXiv, CrossRef, Wikipedia, Stanford Encyclopedia
 - **Learning Pipeline**: Scheduler → Source Integration → Pre-Filter → Content Curator → Embedding → ChromaDB
 - **RAG System**: ChromaDB (vector search) + LLM (response generation)
-- **Validator Chain**: Multi-layer validation (11 validators) ensuring quality and reducing hallucinations
+- **Validator Chain**: Multi-layer validation framework with **19 validators total** organized into **7 layers** (runtime executes a context-dependent subset per request) ensuring quality and reducing hallucinations
 - **Post-Processing**: Quality evaluation → Rewrite engine (with retry) → Style sanitization
 - **Philosophical Processor**: Specialized 3-layer system for consciousness/emotion questions
 - **Dashboard**: Streamlit UI for monitoring and interaction
@@ -602,7 +606,7 @@ StillMe follows a **two-layer architecture**:
 2. If external data → Direct API call (weather/news/time)
 3. If normal query → RAG retrieval from ChromaDB
 4. LLM generates response with context
-5. Validator Chain (12+ validators) checks quality
+5. Validator Chain checks quality using a context-dependent subset from the 19-validator, 7-layer framework
 6. Post-processing (quality eval + rewrite if needed)
 7. Final response with citations and transparency metadata
 
