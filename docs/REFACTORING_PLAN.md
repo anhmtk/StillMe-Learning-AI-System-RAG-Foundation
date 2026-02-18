@@ -17,7 +17,7 @@
 ### 1. Components Chính Đã Có
 
 #### ✅ **Validation System** (`backend/validators/`)
-- **27 validators** đã được implement
+- Validation framework đã được implement (current manifest: **19 validators** organized into 7 layers)
 - **ValidatorChain** với parallel execution support
 - **ValidationMetrics** tracking (in-memory)
 - **ValidationMetricsTracker** với persistent storage (JSONL)
@@ -99,7 +99,7 @@
 
 ```
 backend/
-├── validators/          # ✅ 27 validators - có thể tách thành core
+├── validators/          # ✅ validation framework modules (current manifest: 19 validators) - có thể tách thành core
 ├── vector_db/           # ✅ RAG system - có thể tách thành core
 ├── learning/            # ⚠️ Learning logic - cần abstraction
 ├── postprocessing/      # ⚠️ Post-processing - cần abstraction
@@ -138,7 +138,7 @@ stillme-framework/                    # ROOT
 │   │   │   ├── citation.py
 │   │   │   ├── evidence.py
 │   │   │   ├── confidence.py
-│   │   │   └── ... (27 validators)
+│   │   │   └── ... (validator modules; current manifest: 19 validators)
 │   │   └── metrics.py                # ValidationMetrics + ValidationMetricsTracker
 │   │
 │   ├── rag/                          # ✅ Tách từ backend/vector_db/

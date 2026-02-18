@@ -48,7 +48,7 @@
    - Code: `backend/validators/citation.py`, `backend/vector_db/rag_retrieval.py`
 
 3. **Anti-Hallucination** (`backend/validators/`)
-   - 11 validators trong ValidatorChain:
+   - Validation framework hiện tại: 19 validators (7 layers), chạy subset theo ngữ cảnh:
      - CitationRequired, CitationRelevance
      - EvidenceOverlap (n-gram overlap check)
      - ConfidenceValidator (force uncertainty khi không có context)
@@ -73,7 +73,7 @@ User Query
   → Intent Detection (philosophical/factual) 
   → RAG Retrieval (ChromaDB semantic search) 
   → LLM Generation (DeepSeek/OpenAI với RAG context) 
-  → Validator Chain (11 validators) 
+  → Validator Chain (context-dependent subset từ framework 19 validators/7 layers) 
   → Post-Processing (quality eval + rewrite) 
   → Response (với citations, confidence score, validation info)
 ```

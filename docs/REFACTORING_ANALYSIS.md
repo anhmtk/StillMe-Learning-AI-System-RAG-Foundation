@@ -4,12 +4,12 @@
 
 ### 1. Codebase hiện tại có những components chính nào?
 
-#### ✅ **Validation System** (27 validators)
+#### ✅ **Validation System** (current manifest: 19 validators)
 - **Location**: `backend/validators/`
 - **Components**:
   - `chain.py`: `ValidatorChain` - orchestrates validators với parallel execution
   - `base.py`: `Validator` protocol, `ValidationResult`
-  - 27 validators: `citation.py`, `evidence_overlap.py`, `confidence.py`, `language.py`, etc.
+  - Validator modules: `citation.py`, `evidence_overlap.py`, `confidence.py`, `language.py`, etc. (current manifest total: 19)
   - `metrics.py`: `ValidationMetrics` (in-memory)
   - `validation_metrics_tracker.py`: `ValidationMetricsTracker` (persistent JSONL)
   - `self_improvement.py`: `SelfImprovementAnalyzer` - phân tích patterns và đề xuất improvements

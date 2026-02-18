@@ -10,7 +10,7 @@
 
 ### Step 1.2: Validation System Migrated
 - ✅ Copied all files from `backend/validators/` → `stillme_core/validation/`
-- ✅ All 27 validators migrated successfully
+- ✅ Validation modules migrated successfully (current manifest: 19 validators, 7 layers)
 - ✅ Base classes (`base.py`) migrated
 - ✅ Metrics files (`metrics.py`, `validation_metrics_tracker.py`) migrated
 
@@ -65,7 +65,7 @@
 ### New Files Created:
 - `stillme_core/__init__.py`
 - `stillme_core/validation/__init__.py`
-- `stillme_core/validation/*.py` (27 validators + base + chain + metrics)
+- `stillme_core/validation/*.py` (validation modules + base + chain + metrics; current manifest: 19 validators)
 - `stillme_app/__init__.py`
 - `backend/validators/_adapter.py` (adapter for backward compatibility)
 

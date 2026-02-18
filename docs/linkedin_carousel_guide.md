@@ -228,7 +228,7 @@ pandoc docs/linkedin_carousel_template.md -o linkedin_carousel.pdf --pdf-engine=
    StillMe: Building the Most Transparent RAG Validation Chain
    
    Unlike black-box chatbots, StillMe shows you:
-   ✅ How it validates responses (27+ validators)
+   ✅ How it validates responses (19 validators, 7 layers)
    ✅ What sources it uses (with citations)
    ✅ When it's uncertain (epistemic humility)
    ✅ Why it made decisions (full transparency)

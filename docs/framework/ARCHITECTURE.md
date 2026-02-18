@@ -17,7 +17,7 @@ StillMe Core is a modular framework for building transparent, validation-first A
 
 ```
 stillme_core/
-├── validation/          # Validation engine with 27+ validators
+├── validation/          # Validation engine (19 validators, 7 layers)
 ├── rag/                 # RAG (Retrieval-Augmented Generation) system
 ├── external_data/       # External data providers (weather, news, time)
 ├── learning/            # Continuous learning pipeline
@@ -36,7 +36,7 @@ stillme_core/
 **Key Components**:
 - `ValidationEngine`: Orchestrates multiple validators
 - `Validator`: Base class for all validators
-- 27+ specialized validators (citation, confidence, evidence_overlap, etc.)
+- 19 specialized validators organized into 7 layers (citation, confidence, evidence_overlap, etc.)
 
 **Design Principles**:
 - Modular: Each validator is independent

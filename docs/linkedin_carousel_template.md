@@ -24,7 +24,7 @@
 **Mermaid Diagram**:
 ```mermaid
 flowchart TD
-    Start[RAG Response Generated] --> Chain[StillMe Validation Chain<br/>27+ Validators]
+    Start[RAG Response Generated] --> Chain[StillMe Validation Chain<br/>19 Validators / 7 Layers]
     
     Chain --> Sequential[Sequential Validators<br/>Must Run in Order]
     Chain --> Parallel[Parallel Validators<br/>Run Concurrently]
@@ -60,7 +60,7 @@ flowchart TD
 ```
 
 **Key Stats to Include**:
-- 27+ Validators
+- 19 Validators (7 Layers)
 - Parallel Execution (5 validators concurrently)
 - Auto-Patching (fixes issues automatically)
 - 93.9% Pass Rate
@@ -151,7 +151,7 @@ class SourceConsensusValidator:
 
 ### **SLIDE 4: THE LOGIC - Parallel Execution Code**
 
-**Title**: `Performance: 27+ Validators, Still Fast (Parallel Execution)`
+**Title**: `Performance: 19 Validators, Still Fast (Parallel Execution)`
 
 **Content**: Code snippet showing ThreadPoolExecutor for parallel validation
 
@@ -195,7 +195,7 @@ if parallel_validators:
 - Show file path: `stillme_core/validation/chain.py:305-330`
 - Highlight: `ThreadPoolExecutor`, `max_workers=5`, `as_completed`
 
-**Key Message**: "27+ validators don't mean slow. Parallel execution keeps latency low."
+**Key Message**: "19 validators don't mean slow. Parallel execution keeps latency low."
 
 ---
 
@@ -350,7 +350,7 @@ if not result.passed:
 🔗 GitHub: github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation
 
 📊 StillMe Core Framework:
-   - 27+ Validators
+   - 19 Validators (7 Layers)
    - RAG System (ChromaDB)
    - Continuous Learning Pipeline
    - Full Transparency

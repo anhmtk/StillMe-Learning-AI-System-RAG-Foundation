@@ -2,7 +2,7 @@
 
 ## Overview
 
-The StillMe Core validation system ensures response quality, reduces hallucinations, and enforces transparency. It consists of a `ValidationEngine` that orchestrates 27+ specialized validators.
+The StillMe Core validation system ensures response quality, reduces hallucinations, and enforces transparency. It consists of a `ValidationEngine` that orchestrates a 19-validator framework organized into 7 layers.
 
 ## Philosophy
 

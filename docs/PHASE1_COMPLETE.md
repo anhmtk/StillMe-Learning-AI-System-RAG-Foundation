@@ -7,7 +7,7 @@
 - Created `__init__.py` files with proper exports
 
 ### Step 1.2: Validation System Migration ✅
-- Migrated all 27 validators from `backend/validators/` → `stillme_core/validation/`
+- Migrated validation modules from `backend/validators/` → `stillme_core/validation/` (current manifest: 19 validators, 7 layers)
 - All files copied successfully
 
 ### Step 1.3: Renamed ValidatorChain → ValidationEngine ✅
@@ -49,12 +49,12 @@
 ## 📊 Migration Summary
 
 ### Components Migrated:
-1. ✅ **Validation System** (27 validators + base + chain + metrics)
+1. ✅ **Validation System** (current manifest: 19 validators + base + chain + metrics)
 2. ✅ **RAG System** (ChromaClient, EmbeddingService, RAGRetrieval)
 3. ✅ **External Data** (Orchestrator + 4 providers)
 
 ### Files Created:
-- `stillme_core/validation/` - 27 validators + supporting files
+- `stillme_core/validation/` - validation modules + supporting files (current manifest: 19 validators)
 - `stillme_core/rag/` - 4 RAG-related files
 - `stillme_core/external_data/` - 6 files + providers directory
 - `stillme_app/` - App structure (ready for future migration)

@@ -65,7 +65,7 @@ StillMe is built on **StillMe Core** - a modular framework for building transpar
 **Framework Structure:**
 ```
 stillme_core/
-├── validation/          # 27+ validators for response quality
+├── validation/          # 19 validators in 7 layers for response quality
 ├── rag/                 # RAG system (ChromaDB, embeddings)
 ├── external_data/       # External data providers
 ├── learning/            # Continuous learning pipeline
@@ -141,7 +141,7 @@ This demonstrates StillMe's self-awareness and builds trust through calibrated c
 StillMe is built on a **modular framework** that can be used by other AI systems.
 
 **Core Components:**
-- **Validation System**: 27+ validators ensuring response quality
+- **Validation System**: 19 validators (7 layers) ensuring response quality
 - **RAG System**: Retrieval-Augmented Generation with ChromaDB
 - **Learning System**: Continuous knowledge acquisition
 - **Monitoring System**: Unified metrics and self-tracking

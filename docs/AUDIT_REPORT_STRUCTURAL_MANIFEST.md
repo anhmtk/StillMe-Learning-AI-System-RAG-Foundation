@@ -74,9 +74,9 @@ StillMe queries automatically:
 ### Conflict Audit (19 vs 15)
 
 **Found References**:
-- ✅ `backend/api/routers/chat_router.py`: Updated to "15-19 validators"
+- ✅ `backend/api/routers/chat_router.py`: Updated to manifest-aligned counts (19 validators, 7 layers)
 - ❌ `docs/PAPER.md`: Still mentions "7 validators" (outdated, but not critical)
-- ❌ `docs/framework/ARCHITECTURE.md`: Mentions "27+ validators" (may include other validators)
+- ✅ `docs/framework/ARCHITECTURE.md`: Updated to align with manifest (19 validators, 7 layers)
 
 **Resolution**: All critical references updated. Non-critical documentation can be updated separately.
 
@@ -182,7 +182,7 @@ StillMe queries automatically:
 
 **Status**: ✅ Updated
 
-- Prompts now say "15-19 validators" or "19 validators total" instead of "15-layer"
+- Prompts now use manifest-aligned counts ("19 validators total, 7 layers") instead of "15-layer"
 - Explicit instruction: "DO NOT say '15-layer' or '13+ validators'"
 - All hardcoded numbers removed from documentation - StillMe must read from manifest
 - References manifest information
@@ -245,7 +245,7 @@ fi
 
 **Files to Update**:
 - `docs/PAPER.md` - Update "7 validators" to "19 validators"
-- `docs/framework/ARCHITECTURE.md` - Clarify "27+ validators" (may include other validators)
+- `docs/framework/ARCHITECTURE.md` - Keep aligned with manifest count (19 validators, 7 layers)
 
 ### 3. Monitoring
 
@@ -265,14 +265,14 @@ fi
 6. `docs/AUDIT_REPORT_STRUCTURAL_MANIFEST.md` - This report
 
 ### Modified
-1. `backend/api/routers/chat_router.py` - Updated prompts to reference 15-19 validators
+1. `backend/api/routers/chat_router.py` - Updated prompts to reference manifest-aligned counts (19 validators, 7 layers)
 
 ## Success Metrics
 
 ✅ **Manifest Generated**: 19 validators detected  
 ✅ **Manifest Injected**: Available in ChromaDB  
 ✅ **RAG Integration**: `prioritize_foundational=True` already configured  
-✅ **Prompt Updates**: All references updated to "15-19 validators"  
+✅ **Prompt Updates**: All references updated to manifest-aligned counts ("19 validators", "7 layers")  
 ✅ **Documentation**: Complete documentation created  
 
 ## Next Steps
