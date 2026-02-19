@@ -1,0 +1,20 @@
+mode: monitor
+
+thresholds:
+  min_similarity_for_factual: 0.45
+  min_similarity_for_source_required: 0.50
+
+behavior:
+  enforce_no_source_refusal: true
+  enforce_anti_anthropomorphism: true
+  allow_soft_answer_with_warning: false
+
+output:
+  include_validator_trace: true
+  include_reason_codes: true
+  include_confidence_band: true
+
+logging:
+  jsonl_enabled: true
+  log_decisions_only: false
+  sample_rate: 1.0

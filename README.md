@@ -27,6 +27,8 @@ It continuously learns, cites sources, and refuses to fabricate when evidence is
 - ▶️ **Start here**: [`docs/SUMMARY.md`](docs/SUMMARY.md)
 - 🧭 **Constitution**: [`docs/CONSTITUTION.md`](docs/CONSTITUTION.md)
 - 🧱 **Architecture**: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+- 🧩 **Lite Integration Spec**: [`docs/STILLME_LITE_SPEC.md`](docs/STILLME_LITE_SPEC.md)
+- 📈 **Case Study Template**: [`docs/CASE_STUDY_TEMPLATE.md`](docs/CASE_STUDY_TEMPLATE.md)
 - 🧪 **API Docs**: `http://localhost:8000/docs`
 - 🤝 **Contribute**: [`CONTRIBUTING.md`](CONTRIBUTING.md)
 
@@ -668,6 +670,8 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed se
 - [`docs/VALIDATION_CHAIN_SPEC.md`](docs/VALIDATION_CHAIN_SPEC.md) - Must-pass vs warning validators
 - [`docs/NO_SOURCE_POLICY.md`](docs/NO_SOURCE_POLICY.md) - Refusal rules when sources are missing
 - [`docs/AUDIT_GUIDE.md`](docs/AUDIT_GUIDE.md) - Contributor audit checklist
+- [`docs/STILLME_LITE_SPEC.md`](docs/STILLME_LITE_SPEC.md) - Lightweight integration contract (monitor/warn/enforce)
+- [`docs/CASE_STUDY_TEMPLATE.md`](docs/CASE_STUDY_TEMPLATE.md) - Before/after validation report template and metrics
 - [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md) - Complete API reference
 - [`docs/DEPLOYMENT_GUIDE.md`](docs/DEPLOYMENT_GUIDE.md) - Deployment instructions
 - [`docs/PAPER_TABLES_FIGURES.md`](docs/PAPER_TABLES_FIGURES.md) - Tables and figures for the paper
