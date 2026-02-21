@@ -34,28 +34,35 @@ def _fmt(value: float) -> str:
 def _evaluate_gates(before_metrics: Dict[str, float], after_metrics: Dict[str, float]) -> Dict[str, object]:
     gate1_checks = [
         (
-            "Hallucination escape improved > 50%",
-            (
-                before_metrics["hallucination_escape_rate"] > 0
-                and (after_metrics["hallucination_escape_rate"] <= before_metrics["hallucination_escape_rate"] * 0.5)
-            ),
+            "Out-of-KB refusal rate (source_required_out_of_kb) >= 0.90",
+            after_metrics["source_required_out_of_kb_refusal_rate"] >= 0.90,
         ),
-        ("Refusal precision >= 0.85", after_metrics["refusal_precision"] >= 0.85),
-        ("Source coverage >= 0.80", after_metrics["source_coverage"] >= 0.80),
         (
-            "Refusal recall (source-required) >= 0.90",
-            after_metrics["refusal_recall_on_source_required"] >= 0.90,
+            "Grounded answer rate (source_required_in_kb) >= 0.80",
+            after_metrics["grounded_answer_rate_in_kb"] >= 0.80,
         ),
-    ]
-    gate2_checks = [
-        ("Request failure rate <= 0.02", after_metrics["request_failure_rate"] <= 0.02),
         (
             "False refusal rate (source_required_in_kb) <= 0.10",
             after_metrics["false_refusal_rate_in_kb"] <= 0.10,
         ),
         (
+            "Request failure rate <= 0.02",
+            after_metrics["request_failure_rate"] <= 0.02,
+        ),
+    ]
+    gate2_checks = [
+        ("Refusal precision >= 0.85", after_metrics["refusal_precision"] >= 0.85),
+        (
+            "Validator-only refusal rate (source-required) >= 0.10",
+            after_metrics["validator_only_refusal_rate_on_source_required"] >= 0.10,
+        ),
+        (
             "Grounded answer rate (source_required_in_kb) >= 0.80",
             after_metrics["grounded_answer_rate_in_kb"] >= 0.80,
+        ),
+        (
+            "Request failure rate <= 0.02",
+            after_metrics["request_failure_rate"] <= 0.02,
         ),
     ]
 

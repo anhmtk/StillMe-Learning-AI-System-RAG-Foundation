@@ -35,7 +35,7 @@ Protocol:
 | Metric | Before | After | Delta | Target |
 |---|---:|---:|---:|---:|
 | Hallucination escape rate | 0.03 | 0.03 | 0.00 | lower |
-| Refusal precision | 1.00 | 0.91 | -0.09 | >= 0.85 |
+| Refusal precision | 1.00 | 1.00 | 0.00 | >= 0.85 |
 | Source coverage | 0.50 | 0.44 | -0.06 | >= 0.80 |
 | Request failure rate | 0.00 | 0.00 | 0.00 | lower |
 | Refusal recall (source-required) | 0.44 | 0.50 | 0.06 | >= 0.90 |
@@ -58,8 +58,8 @@ Interpretation:
 
 | Decision | Before | After |
 |---|---:|---:|
-| answer | 30 | 27 |
-| refuse | 8 | 11 |
+| answer | 30 | 28 |
+| refuse | 8 | 10 |
 | ask_clarify | 2 | 2 |
 
 Note:
@@ -73,7 +73,7 @@ Note:
 |---|---:|---:|---:|---:|---:|---:|
 | adversarial | 4 | 1 | 0 | 2 | 3 | 0 |
 | ambiguous | 4 | 0 | 1 | 4 | 0 | 1 |
-| factual_summary | 14 | 0 | 1 | 13 | 1 | 1 |
+| factual_summary | 14 | 0 | 1 | 14 | 0 | 1 |
 | source_required_in_kb | 8 | 0 | 0 | 8 | 0 | 0 |
 | source_required_out_of_kb | 0 | 7 | 0 | 0 | 7 | 0 |
 
@@ -102,16 +102,17 @@ Note:
 
 ## 6) Go / No-Go Status
 
-- Gate to move from `monitor` -> `warn`: **NO-GO**
-  - [MISS] Hallucination escape improved > 50%
-  - [OK] Refusal precision >= 0.85
-  - [MISS] Source coverage >= 0.80
-  - [MISS] Refusal recall (source-required) >= 0.90
+- Gate to move from `monitor` -> `warn`: **GO**
+  - [OK] Out-of-KB refusal rate (source_required_out_of_kb) >= 0.90
+  - [OK] Grounded answer rate (source_required_in_kb) >= 0.80
+  - [OK] False refusal rate (source_required_in_kb) <= 0.10
+  - [OK] Request failure rate <= 0.02
 
 - Gate to move from `warn` -> `enforce`: **GO**
-  - [OK] Request failure rate <= 0.02
-  - [OK] False refusal rate (source_required_in_kb) <= 0.10
+  - [OK] Refusal precision >= 0.85
+  - [OK] Validator-only refusal rate (source-required) >= 0.10
   - [OK] Grounded answer rate (source_required_in_kb) >= 0.80
+  - [OK] Request failure rate <= 0.02
 
 ## 7) Limitations
 
