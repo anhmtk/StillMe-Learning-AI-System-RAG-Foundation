@@ -19,6 +19,7 @@ class MetricBundle:
     refusal_precision: float
     source_coverage: float
     refusal_recall_on_source_required: float
+    validator_only_refusal_rate_on_source_required: float
     source_required_out_of_kb_refusal_rate: float
     grounded_answer_rate_in_kb: float
     false_refusal_rate_in_kb: float
@@ -29,6 +30,7 @@ class MetricBundle:
     source_required_total: int
     source_required_answered_with_valid_sources: int
     source_required_refused: int
+    source_required_validator_only_refused: int
     source_required_in_kb_total: int
     source_required_out_of_kb_total: int
     source_required_in_kb_answers_with_valid_sources: int
@@ -84,6 +86,19 @@ def _is_answer(record: Dict[str, Any]) -> bool:
 
 def _is_refuse(record: Dict[str, Any]) -> bool:
     return str(record.get("decision", "")).strip().lower() == "refuse"
+
+
+def _is_pre_llm_guard_refusal(record: Dict[str, Any]) -> bool:
+    reasons = record.get("reason_codes", [])
+    if not isinstance(reasons, list):
+        return False
+    reason_text = " ".join(str(r).lower() for r in reasons)
+    guard_markers = [
+        "source_required_out_of_kb_guard",
+        "source_required_insufficient_evidence",
+        "_guard",
+    ]
+    return any(marker in reason_text for marker in guard_markers)
 
 
 def _source_bucket(record: Dict[str, Any]) -> str:
@@ -153,6 +168,7 @@ def compute_metrics(records: Iterable[Dict[str, Any]], similarity_threshold: flo
             refusal_precision=0.0,
             source_coverage=0.0,
             refusal_recall_on_source_required=0.0,
+            validator_only_refusal_rate_on_source_required=0.0,
             source_required_out_of_kb_refusal_rate=0.0,
             grounded_answer_rate_in_kb=0.0,
             false_refusal_rate_in_kb=0.0,
@@ -163,6 +179,7 @@ def compute_metrics(records: Iterable[Dict[str, Any]], similarity_threshold: flo
             source_required_total=0,
             source_required_answered_with_valid_sources=0,
             source_required_refused=0,
+            source_required_validator_only_refused=0,
             source_required_in_kb_total=0,
             source_required_out_of_kb_total=0,
             source_required_in_kb_answers_with_valid_sources=0,
@@ -178,6 +195,9 @@ def compute_metrics(records: Iterable[Dict[str, Any]], similarity_threshold: flo
     source_required = [r for r in rows if bool(r.get("requires_source", False))]
     source_required_total = len(source_required)
     source_required_refused = sum(1 for r in source_required if _is_refuse(r))
+    source_required_validator_only_refused = sum(
+        1 for r in source_required if _is_refuse(r) and not _is_pre_llm_guard_refusal(r)
+    )
     source_covered = sum(
         1
         for r in source_required
@@ -219,6 +239,11 @@ def compute_metrics(records: Iterable[Dict[str, Any]], similarity_threshold: flo
             if source_required_total
             else 0.0
         ),
+        validator_only_refusal_rate_on_source_required=(
+            source_required_validator_only_refused / source_required_total
+            if source_required_total
+            else 0.0
+        ),
         source_required_out_of_kb_refusal_rate=(
             source_required_out_of_kb_refused / source_required_out_of_kb_total
             if source_required_out_of_kb_total
@@ -241,6 +266,7 @@ def compute_metrics(records: Iterable[Dict[str, Any]], similarity_threshold: flo
         source_required_total=source_required_total,
         source_required_answered_with_valid_sources=source_covered,
         source_required_refused=source_required_refused,
+        source_required_validator_only_refused=source_required_validator_only_refused,
         source_required_in_kb_total=source_required_in_kb_total,
         source_required_out_of_kb_total=source_required_out_of_kb_total,
         source_required_in_kb_answers_with_valid_sources=source_required_in_kb_answers_with_valid_sources,

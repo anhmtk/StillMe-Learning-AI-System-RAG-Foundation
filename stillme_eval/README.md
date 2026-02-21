@@ -51,6 +51,7 @@ python stillme_eval/run_all.py --before-url <url_before> --after-url <url_after>
 - Report now includes:
   - `request_failure_rate`
   - `refusal_recall_on_source_required`
+  - `validator_only_refusal_rate_on_source_required`
   - `grounded_answer_rate_in_kb`
   - `false_refusal_rate_in_kb`
 - CI/CD option:

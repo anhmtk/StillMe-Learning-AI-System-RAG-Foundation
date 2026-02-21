@@ -111,6 +111,11 @@ def _build_interpretation_lines(before: Dict[str, float], after: Dict[str, float
         "this is the core safety indicator for no-source enforcement."
     )
     lines.append(
+        f"- Validator-only refusal rate on source-required prompts is "
+        f"{_fmt(after['validator_only_refusal_rate_on_source_required'])}; "
+        "this isolates refusal behavior from the validation chain (excluding pre-LLM guards)."
+    )
+    lines.append(
         f"- Out-of-KB refusal rate is {_fmt(after['source_required_out_of_kb_refusal_rate'])}; "
         "this isolates behavior on source-required prompts that should be refused."
     )
@@ -322,6 +327,12 @@ def autofill_report(
     )
     text = _update_metric_row(
         text,
+        "Validator-only refusal rate (source-required)",
+        before_metrics["validator_only_refusal_rate_on_source_required"],
+        after_metrics["validator_only_refusal_rate_on_source_required"],
+    )
+    text = _update_metric_row(
+        text,
         "Out-of-KB refusal rate (source_required_out_of_kb)",
         before_metrics["source_required_out_of_kb_refusal_rate"],
         after_metrics["source_required_out_of_kb_refusal_rate"],
@@ -394,6 +405,12 @@ def main() -> None:
         f"{_fmt(after.refusal_recall_on_source_required - before.refusal_recall_on_source_required)} |"
     )
     print(
+        f"| Validator-only refusal rate (source-required) | "
+        f"{_fmt(before.validator_only_refusal_rate_on_source_required)} | "
+        f"{_fmt(after.validator_only_refusal_rate_on_source_required)} | "
+        f"{_fmt(after.validator_only_refusal_rate_on_source_required - before.validator_only_refusal_rate_on_source_required)} |"
+    )
+    print(
         f"| Out-of-KB refusal rate (source_required_out_of_kb) | "
         f"{_fmt(before.source_required_out_of_kb_refusal_rate)} | "
         f"{_fmt(after.source_required_out_of_kb_refusal_rate)} | "
@@ -420,6 +437,10 @@ def main() -> None:
             "request_failure_rate": after.request_failure_rate - before.request_failure_rate,
             "refusal_recall_on_source_required": (
                 after.refusal_recall_on_source_required - before.refusal_recall_on_source_required
+            ),
+            "validator_only_refusal_rate_on_source_required": (
+                after.validator_only_refusal_rate_on_source_required
+                - before.validator_only_refusal_rate_on_source_required
             ),
             "source_required_out_of_kb_refusal_rate": (
                 after.source_required_out_of_kb_refusal_rate - before.source_required_out_of_kb_refusal_rate
