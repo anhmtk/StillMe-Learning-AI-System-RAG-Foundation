@@ -127,4 +127,4 @@ Note:
 1. Tested 40 prompts across factual, source-required in-kb/out-of-kb, ambiguous, and adversarial categories.
 2. Hallucination escape rate moved from 0.03 to 0.03; lower is better.
 3. Refusal recall on source-required prompts is 0.50; this is the core indicator for no-source enforcement.
-4. Next step: raise source-required out-of-kb refusal while keeping in-kb grounded answer rate high and false refusals low.
+4. Gate status: monitor->warn = GO, warn->enforce = GO.

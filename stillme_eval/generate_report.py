@@ -251,6 +251,7 @@ def _replace_go_no_go_block(md_text: str, before_metrics: Dict[str, float], afte
 
 
 def _replace_public_summary_block(md_text: str, before_metrics: Dict[str, float], after_metrics: Dict[str, float]) -> str:
+    gate_eval = _evaluate_gates(before_metrics, after_metrics)
     total_prompts = int(after_metrics.get("total_prompts", 0))
     line1 = (
         "1. Tested "
@@ -267,8 +268,9 @@ def _replace_public_summary_block(md_text: str, before_metrics: Dict[str, float]
         "this is the core indicator for no-source enforcement."
     )
     line4 = (
-        "4. Next step: raise source-required out-of-kb refusal while keeping "
-        "in-kb grounded answer rate high and false refusals low."
+        "4. Gate status: "
+        f"monitor->warn = {gate_eval['monitor_to_warn_status']}, "
+        f"warn->enforce = {gate_eval['warn_to_enforce_status']}."
     )
 
     new_block = "\n".join(
