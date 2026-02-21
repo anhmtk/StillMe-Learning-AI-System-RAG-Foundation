@@ -5836,6 +5836,91 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
                         similarity_scores.append(0.0)
                 if similarity_scores:
                     max_similarity = max(similarity_scores)
+
+        # Direct guard: source-required out-of-kb style requests must refuse when evidence is weak.
+        q_lower = (chat_request.message or "").lower()
+        is_source_required_query = any(
+            marker in q_lower
+            for marker in [
+                "source", "citation", "doi", "timestamp", "url", "publication date",
+                "dẫn nguồn", "nguồn", "liên kết", "thời gian", "trích dẫn"
+            ]
+        )
+        is_freshness_or_external_request = any(
+            marker in q_lower
+            for marker in [
+                "latest", "newest", "recent", "this week", "this month", "last ",
+                "mới nhất", "gần đây", "tuần này", "tháng này",
+                "published this week", "published this month",
+                "have not retrieved yet", "not retrieved yet", "chưa truy xuất", "chưa được truy xuất",
+            ]
+        )
+        candidate_source_docs = context.get("knowledge_docs", []) if isinstance(context, dict) else []
+        docs_with_source_meta = 0
+        for doc in candidate_source_docs:
+            if not isinstance(doc, dict):
+                continue
+            meta = doc.get("metadata", {}) if isinstance(doc.get("metadata"), dict) else {}
+            has_url = bool(meta.get("url") or meta.get("source_url") or doc.get("url"))
+            has_time = bool(meta.get("timestamp") or meta.get("published_at") or doc.get("timestamp"))
+            if has_url and has_time:
+                docs_with_source_meta += 1
+
+        insufficient_source_evidence = (
+            not candidate_source_docs
+            or (max_similarity is not None and max_similarity < 0.50)
+            or docs_with_source_meta == 0
+        )
+
+        if is_source_required_query and is_freshness_or_external_request and insufficient_source_evidence:
+            logger.warning(
+                "🚨 Direct source-required guard triggered: refusing due to weak/insufficient evidence "
+                f"(max_similarity={max_similarity}, docs_with_source_meta={docs_with_source_meta}, total_docs={len(candidate_source_docs)})"
+            )
+            processing_steps.append("🚨 Source-required guard triggered: insufficient evidence for reliable citation metadata")
+
+            if detected_lang == "vi":
+                guard_refusal = (
+                    "Mình không có nguồn đáng tin cậy trong Knowledge Base để cung cấp DOI/timestamp/link chính xác cho yêu cầu này, "
+                    "nên mình cần từ chối để tránh bịa nguồn.\n\n"
+                    f"**Thông tin kỹ thuật:**\n"
+                    f"- Điểm tương đồng tối đa: {(max_similarity or 0.0):.3f} (ngưỡng an toàn: 0.50)\n"
+                    f"- Số tài liệu có đủ URL + timestamp: {docs_with_source_meta}\n"
+                    f"- Tổng tài liệu đã kiểm tra: {len(candidate_source_docs)}"
+                )
+            else:
+                guard_refusal = (
+                    "I don't have reliable Knowledge Base evidence to provide exact DOI/timestamp/source links for this request, "
+                    "so I must refuse to avoid fabricated sourcing.\n\n"
+                    f"**Technical Information:**\n"
+                    f"- Maximum similarity: {(max_similarity or 0.0):.3f} (safety threshold: 0.50)\n"
+                    f"- Documents with both URL + timestamp: {docs_with_source_meta}\n"
+                    f"- Total checked documents: {len(candidate_source_docs)}"
+                )
+
+            from backend.core.epistemic_state import EpistemicState
+            return ChatResponse(
+                response=guard_refusal,
+                context_used=context,
+                confidence_score=0.0,
+                validation_info={
+                    "passed": False,
+                    "decision": "refuse",
+                    "reasons": [
+                        "source_required_insufficient_evidence",
+                        "source_required_out_of_kb_guard",
+                    ],
+                },
+                processing_steps=processing_steps,
+                timing_logs={
+                    "total_time": time.time() - start_time,
+                    "rag_retrieval_latency": rag_retrieval_latency,
+                    "llm_inference_latency": 0.0,
+                },
+                validation_result=None,
+                used_fallback=True,
+                epistemic_state=EpistemicState.UNKNOWN.value,
+            )
         
         # CRITICAL FIX: For news/article queries with low similarity, force "not found" response
         # This MUST run BEFORE entering RAG path to prevent hallucination
@@ -5843,9 +5928,36 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
         if is_news_article_query and max_similarity is not None and max_similarity < 0.45:
             logger.warning(f"🚨 CRITICAL: News/article query with max_similarity={max_similarity:.3f} < 0.45 - FORCING 'not found' response BEFORE LLM call")
             processing_steps.append(f"🚨 News/article query with low similarity ({max_similarity:.3f}) - forcing 'not found' response")
-            
+            q_lower = (chat_request.message or "").lower()
+            is_source_required_query = any(
+                marker in q_lower
+                for marker in [
+                    "source", "citation", "doi", "timestamp", "url", "publication date",
+                    "dẫn nguồn", "nguồn", "liên kết", "thời gian", "trích dẫn",
+                    "latest", "newest", "recent", "this week", "this month", "last "
+                ]
+            )
+
             # Build "not found" response based on language
-            if detected_lang == "vi":
+            if is_source_required_query and detected_lang == "vi":
+                not_found_response = (
+                    "Mình không có nguồn đáng tin cậy trong Knowledge Base cho câu hỏi này, "
+                    "nên không thể cung cấp DOI/timestamp/link chính xác.\n\n"
+                    f"**Thông tin kỹ thuật:**\n"
+                    f"- Điểm tương đồng tối đa: {max_similarity:.3f} (ngưỡng tối thiểu: 0.45)\n"
+                    f"- Số lượng documents đã kiểm tra: {context.get('total_context_docs', 0) if context else 0}\n\n"
+                    "Bạn có muốn mình tóm tắt các tài liệu hiện có trong KB (nếu có) mà không khẳng định nguồn mới nhất không?"
+                )
+            elif is_source_required_query:
+                not_found_response = (
+                    "I don't have reliable sources in the Knowledge Base for this request, "
+                    "so I can't provide exact DOI/timestamp/source links.\n\n"
+                    f"**Technical Information:**\n"
+                    f"- Maximum similarity score: {max_similarity:.3f} (minimum threshold: 0.45)\n"
+                    f"- Number of documents checked: {context.get('total_context_docs', 0) if context else 0}\n\n"
+                    "If you want, I can summarize currently available KB materials without claiming latest-source coverage."
+                )
+            elif detected_lang == "vi":
                 not_found_response = """Mình đã tìm kiếm trong bộ nhớ (Knowledge Base) nhưng không tìm thấy bài báo hoặc bài viết nào liên quan đến câu hỏi của bạn.
 
 **Thông tin kỹ thuật:**
@@ -5881,7 +5993,17 @@ Remember: RESPOND IN {lang_name.upper()} ONLY."""
             from backend.core.epistemic_state import EpistemicState
             return ChatResponse(
                 response=not_found_response,
+                context_used=context,
                 confidence_score=0.0,  # Very low confidence as nothing was found
+                validation_info={
+                    "passed": False,
+                    "decision": "refuse" if is_source_required_query else "ask_clarify",
+                    "reasons": (
+                        ["source_required_low_similarity", "source_required_out_of_kb"]
+                        if is_source_required_query
+                        else ["low_similarity_no_reliable_context"]
+                    ),
+                },
                 processing_steps=processing_steps,
                 timing_logs={
                     "total_time": time.time() - start_time,

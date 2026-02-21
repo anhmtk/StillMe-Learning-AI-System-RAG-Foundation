@@ -34,14 +34,21 @@ Protocol:
 
 | Metric | Before | After | Delta | Target |
 |---|---:|---:|---:|---:|
-| Hallucination escape rate | 0.34 | 0.13 | -0.21 | lower |
-| Refusal precision | 0.58 | 0.88 | +0.30 | >= 0.85 |
-| Source coverage | 0.41 | 0.84 | +0.43 | >= 0.80 |
+| Hallucination escape rate | 0.03 | 0.03 | 0.00 | lower |
+| Refusal precision | 1.00 | 0.86 | -0.14 | >= 0.85 |
+| Source coverage | 0.72 | 0.67 | -0.06 | >= 0.80 |
+| Request failure rate | 0.00 | 0.03 | 0.03 | lower |
+| Refusal recall (source-required) | 0.22 | 0.28 | 0.06 | >= 0.90 |
+| Out-of-KB refusal rate (source_required_out_of_kb) | 0.43 | 0.43 | 0.00 | >= 0.90 |
+| Grounded answer rate (source_required_in_kb) | 1.00 | 1.00 | 0.00 | >= 0.80 |
+| False refusal rate (source_required_in_kb) | 0.00 | 0.00 | 0.00 | <= 0.10 |
 
 Interpretation:
-- Hallucination escape dropped significantly after validation.
-- Refusal precision crossed the recommended target.
-- Source coverage improved and reached the suggested threshold.
+- Request failure rate is 0.03; infrastructure reliability still affects evaluation validity.
+- Hallucination escape is unchanged at 0.03; current validation settings are not shifting this outcome.
+- Refusal recall on source-required prompts is 0.28; this is the core safety indicator for no-source enforcement.
+- Out-of-KB refusal rate is 0.43; this isolates behavior on source-required prompts that should be refused.
+- Grounded answer rate on in-KB source-required prompts is 1.00; false refusal rate in this bucket is 0.00.
 
 ---
 
@@ -49,13 +56,24 @@ Interpretation:
 
 | Decision | Before | After |
 |---|---:|---:|
-| answer | 35 | 24 |
-| refuse | 3 | 11 |
-| ask_clarify | 2 | 5 |
+| answer | 34 | 31 |
+| refuse | 4 | 7 |
+| ask_clarify | 2 | 2 |
 
 Note:
 - Fewer direct answers after validation is expected in strict factual workflows.
 - Increase in `refuse` and `ask_clarify` indicates stronger safety gating.
+
+
+### Category Breakdown (Auto)
+
+| Category | Before answer | Before refuse | Before ask | After answer | After refuse | After ask |
+|---|---:|---:|---:|---:|---:|---:|
+| adversarial | 4 | 1 | 0 | 2 | 3 | 0 |
+| ambiguous | 4 | 0 | 1 | 4 | 0 | 1 |
+| factual_summary | 14 | 0 | 1 | 13 | 1 | 1 |
+| source_required_in_kb | 8 | 0 | 0 | 8 | 0 | 0 |
+| source_required_out_of_kb | 4 | 3 | 0 | 4 | 3 | 0 |
 
 ---
 
@@ -82,15 +100,16 @@ Note:
 
 ## 6) Go / No-Go Status
 
-- Gate to move from `monitor` -> `warn`: **GO**
-  - Escape rate improved > 50%
-  - Refusal precision >= 0.85
-  - Source coverage >= 0.80
+- Gate to move from `monitor` -> `warn`: **NO-GO**
+  - [MISS] Hallucination escape improved > 50%
+  - [OK] Refusal precision >= 0.85
+  - [MISS] Source coverage >= 0.80
+  - [MISS] Refusal recall (source-required) >= 0.90
 
 - Gate to move from `warn` -> `enforce`: **PENDING**
-  - Need one more stable run in production-like traffic
-
----
+  - [MISS] Request failure rate <= 0.02
+  - [OK] False refusal rate (source_required_in_kb) <= 0.10
+  - [OK] Grounded answer rate (source_required_in_kb) >= 0.80
 
 ## 7) Limitations
 
@@ -102,7 +121,7 @@ Note:
 
 ## 8) Public 4-Line Summary (Optional)
 
-1. Tested 40 prompts across factual, source-required, ambiguous, and adversarial categories.
-2. Hallucination escape rate dropped from 0.34 to 0.13 after enabling StillMe Lite checks.
-3. Refusal precision and source coverage both reached recommended internal targets.
-4. Next step: run a second stability cycle and tune false-refusal behavior.
+1. Tested 40 prompts across factual, source-required in-kb/out-of-kb, ambiguous, and adversarial categories.
+2. Hallucination escape rate moved from 0.03 to 0.03; lower is better.
+3. Refusal recall on source-required prompts is 0.28; this is the core indicator for no-source enforcement.
+4. Next step: raise source-required out-of-kb refusal while keeping in-kb grounded answer rate high and false refusals low.
